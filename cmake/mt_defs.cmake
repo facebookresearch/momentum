@@ -283,6 +283,12 @@ function(mt_library)
     ${private_or_interface} ${_ARG_PRIVATE_COMPILE_OPTIONS}
   )
 
+  if(MSVC)
+    if(NOT library_type STREQUAL "INTERFACE")
+      set_target_properties(${_ARG_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    endif()
+  endif()
+
   if(NOT ${_ARG_NO_INSTALL})
     set_property(GLOBAL APPEND PROPERTY MOMENTUM_TARGETS ${_ARG_NAME})
   endif()

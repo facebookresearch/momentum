@@ -14,17 +14,15 @@ if(NOT DEFINED ENV{CONDA_PREFIX})
   )
 endif()
 
-set(ENV{NVTOOLSEXT_PATH} "$ENV{CONDA_PREFIX}/include")
-
 if(WIN32)
-  set(libtorch_base_path $ENV{CONDA_PREFIX}/Lib/site-packages/torch)
+  set(libtorch_base_path ${Python3_SITELIB}/torch)
 else()
   set(libtorch_base_path $ENV{CONDA_PREFIX})
 endif()
 
 if(NOT EXISTS "${libtorch_base_path}")
   message(FATAL_ERROR
-    "PyTorch not found in the expected location: ${libtorch_base_path}"
+    "PyTorch not found in the expected location: ${libtorch_base_path}.\n"
     "Please ensure PyTorch is installed in your Conda/Pixi environment."
   )
 endif()

@@ -65,6 +65,7 @@ config = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+        -DBUILD_SHARED_LIBS=ON \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
@@ -84,6 +85,7 @@ config_dev = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+        -DBUILD_SHARED_LIBS=ON \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
@@ -188,6 +190,7 @@ config = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+        -DBUILD_SHARED_LIBS=ON \
         -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
@@ -209,6 +212,7 @@ config_dev = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+        -DBUILD_SHARED_LIBS=ON \
         -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
@@ -228,7 +232,8 @@ build_py = { cmd = "pip install . -vv", env = { FBXSDK_PATH = ".deps/fbxsdk", CM
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
-    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" }, depends-on = [
     "install_deps",
 ] }
@@ -256,11 +261,12 @@ build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
-    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py",
+    "build_py", "install",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
@@ -283,11 +289,12 @@ build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
-    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py",
+    "build_py", "install",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
@@ -309,7 +316,7 @@ config = { cmd = """
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
         -G 'Visual Studio 17 2022' \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -325,16 +332,16 @@ config = { cmd = """
 open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
     "config",
 ] }
-build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp -j --config Release", depends-on = [
+build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel", depends-on = [
     "config",
 ] }
-build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp -j --config Debug", depends-on = [
+build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Debug --parallel", depends-on = [
     "config",
 ] }
-test = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release", depends-on = [
+test = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Release;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release\"", depends-on = [
     "build",
 ] }
-test_dev = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug", depends-on = [
+test_dev = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Debug;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug\"", depends-on = [
     "build_dev",
 ] }
 hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/hello_world.exe", depends-on = [
@@ -361,7 +368,7 @@ process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/process_mark
 refine_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/refine_motion.exe", depends-on = [
     "build",
 ] }
-install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp -j --target install --config Release", depends-on = [
+install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --target install --config Release --parallel", depends-on = [
     "build",
 ] }
 tracy = { cmd = "tracy-profiler.exe" }
@@ -370,11 +377,12 @@ build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
-    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py",
+    "build_py", "install",
 ] }
 
 #==============

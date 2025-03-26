@@ -75,6 +75,10 @@ target_link_libraries(${target_name}
     drjit
 )
 
+if(MSVC)
+  set_target_properties(${target_name} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 if(MOMENTUM_ENABLE_PROFILING)
   target_link_libraries(${target_name} PUBLIC Tracy::TracyClient)
   target_compile_definitions(${target_name} PUBLIC -DAXEL_WITH_TRACY_PROFILER=1)
