@@ -11,6 +11,7 @@ on:
       - "**"
     paths-ignore:
       - "**/website/**"
+  workflow_dispatch:
 
 jobs:
   momentum:
