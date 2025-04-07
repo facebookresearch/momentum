@@ -47,10 +47,12 @@ CharacterT<T>::CharacterT(
       faceExpressionBlendShape(faceExpressionBlendShapes),
       inverseBindPose(inverseBindPose_in),
       name(nameIn) {
-  // create mesh and skinweights copy if both exist
-  if (m && sw) {
+  if (m) {
     mesh = std::make_unique<Mesh>(*m);
-    skinWeights = std::make_unique<SkinWeights>(*sw);
+    // create skinweights copy only if both mesh and skinweights exist
+    if (sw) {
+      skinWeights = std::make_unique<SkinWeights>(*sw);
+    }
   }
 
   // copy pose blendshapes if present
@@ -82,10 +84,12 @@ CharacterT<T>::CharacterT(const CharacterT& c)
       inverseBindPose(c.inverseBindPose),
       jointMap(c.jointMap),
       name(c.name) {
-  // create mesh and skinweights copy if both exist
-  if (c.mesh && c.skinWeights) {
+  if (c.mesh) {
     mesh = std::make_unique<Mesh>(*c.mesh);
-    skinWeights = std::make_unique<SkinWeights>(*c.skinWeights);
+    // create skinweights copy only if both mesh and skinweights exist
+    if (c.skinWeights) {
+      skinWeights = std::make_unique<SkinWeights>(*c.skinWeights);
+    }
   }
 
   // copy pose blendshapes if present

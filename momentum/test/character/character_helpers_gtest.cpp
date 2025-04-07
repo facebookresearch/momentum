@@ -91,7 +91,8 @@ void sortSkinWeightsRows(
 } // namespace
 
 void compareMeshes(const Mesh_u& refMesh, const Mesh_u& mesh) {
-  ASSERT_TRUE((refMesh && mesh));
+  ASSERT_TRUE((refMesh && mesh)) << "Mesh A (" << refMesh.get() << ") or Mesh B (" << mesh.get()
+                                 << ") is null";
   EXPECT_THAT(refMesh->vertices, testing::Pointwise(FloatNearPointwise(0.0001), mesh->vertices));
   EXPECT_THAT(refMesh->normals, testing::Pointwise(FloatNearPointwise(0.01), mesh->normals));
   EXPECT_THAT(refMesh->faces, testing::Pointwise(IntExactPointwise(), mesh->faces));
