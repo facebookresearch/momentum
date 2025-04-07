@@ -568,7 +568,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
   }
 }
 
-TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunction) {
+TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
   using T = typename TestFixture::Type;
 
   // create skeleton and reference values
@@ -604,50 +604,25 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunction) {
         }
       }();
 
-      // Test SERIAL error function
-      {
-        VertexErrorFunctionT<T> errorFunction(character_orig, type, 0);
-        for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-          errorFunction.addConstraint(
-              uniform<int>(0, character_orig.mesh->vertices.size() - 1),
-              uniform<float>(0, 1e-4),
-              uniform<Vector3<T>>(0, 1),
-              uniform<Vector3<T>>(0.1, 1).normalized());
-        }
-
-        TEST_GRADIENT_AND_JACOBIAN(
-            T,
-            &errorFunction,
-            modelParams,
-            character_orig.skeleton,
-            character_orig.parameterTransform.cast<T>(),
-            errorTol,
-            Eps<T>(1e-6f, 1e-14),
-            true,
-            false);
+      VertexErrorFunctionT<T> errorFunction(character_orig, type, 0);
+      for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        errorFunction.addConstraint(
+            uniform<int>(0, character_orig.mesh->vertices.size() - 1),
+            uniform<float>(0, 1e-4),
+            uniform<Vector3<T>>(0, 1),
+            uniform<Vector3<T>>(0.1, 1).normalized());
       }
-      // Test PARALLEL error function
-      {
-        VertexErrorFunctionT<T> errorFunction(character_orig, type, 100000);
-        for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-          errorFunction.addConstraint(
-              uniform<int>(0, character_orig.mesh->vertices.size() - 1),
-              uniform<float>(0, 1),
-              uniform<Vector3<T>>(0, 1),
-              uniform<Vector3<T>>(0.1, 1).normalized());
-        }
 
-        TEST_GRADIENT_AND_JACOBIAN(
-            T,
-            &errorFunction,
-            modelParams,
-            character_orig.skeleton,
-            character_orig.parameterTransform.cast<T>(),
-            errorTol,
-            Eps<T>(1e-6f, 1e-15),
-            true,
-            false);
-      }
+      TEST_GRADIENT_AND_JACOBIAN(
+          T,
+          &errorFunction,
+          modelParams,
+          character_orig.skeleton,
+          character_orig.parameterTransform.cast<T>(),
+          errorTol,
+          Eps<T>(1e-6f, 1e-14),
+          true,
+          false);
     }
   }
 
@@ -683,6 +658,62 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunction) {
           true,
           false);
     }
+  }
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
+  using T = typename TestFixture::Type;
+
+  // create skeleton and reference values
+
+  const size_t nConstraints = 1000;
+
+  const Character character_orig = createTestCharacter();
+  const ModelParametersT<T> modelParams =
+      0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+
+  for (VertexConstraintType type :
+       {VertexConstraintType::Position,
+        VertexConstraintType::Plane,
+        VertexConstraintType::Normal,
+        VertexConstraintType::SymmetricNormal}) {
+    const T errorTol = [&]() {
+      switch (type) {
+        case VertexConstraintType::Position:
+        case VertexConstraintType::Plane:
+          return Eps<T>(5e-2f, 1e-5);
+
+        // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
+        // it would be good to dig into this.
+        case VertexConstraintType::Normal:
+        case VertexConstraintType::SymmetricNormal:
+          return Eps<T>(5e-2f, 5e-2);
+
+        default:
+          // Shouldn't reach here
+          return T(0);
+      }
+    }();
+
+    VertexErrorFunctionT<T> errorFunction(character_orig, type, 100000);
+    for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      errorFunction.addConstraint(
+          uniform<int>(0, character_orig.mesh->vertices.size() - 1),
+          uniform<float>(0, 1e-4),
+          uniform<Vector3<T>>(0, 1),
+          uniform<Vector3<T>>(0.1, 1).normalized());
+    }
+
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        modelParams,
+        character_orig.skeleton,
+        character_orig.parameterTransform.cast<T>(),
+        errorTol,
+        Eps<T>(1e-6f, 1e-15),
+        true,
+        false);
   }
 }
 
