@@ -82,7 +82,7 @@ namespace {
       toFbx(coordSystemInfo.coordSystem)};
 }
 
-Character loadFbxCommon(::fbxsdk::FbxScene* scene) {
+Character loadFbxCommon(::fbxsdk::FbxScene* scene, bool permissive) {
   Character result;
 
   // make sure we're y up
@@ -195,8 +195,9 @@ Character loadFbxCommon(::fbxsdk::FbxScene* scene) {
       ::fbxsdk::FbxMesh* lMesh = (::fbxsdk::FbxMesh*)node->GetNodeAttribute();
 
       // found mesh, need to parse it
-      if (!result.mesh)
+      if (!result.mesh) {
         result.mesh = std::make_unique<Mesh>();
+      }
 
       // get vertices
       const int numVertices = lMesh->GetControlPointsCount();
@@ -291,11 +292,11 @@ Character loadFbxCommon(::fbxsdk::FbxScene* scene) {
       // also load skinning data if present
       ::fbxsdk::FbxSkin* fbxskin =
           (::fbxsdk::FbxSkin*)lMesh->GetDeformer(0, ::fbxsdk::FbxDeformer::eSkin);
+      // Create skin weights unconditionally, or only when FbxSkin is present in permissive mode.
+      if (!result.skinWeights && (!permissive || fbxskin != nullptr)) {
+        result.skinWeights = std::make_unique<SkinWeights>();
+      }
       if (fbxskin != nullptr) {
-        if (!result.skinWeights) {
-          result.skinWeights = std::make_unique<SkinWeights>();
-        }
-
         int clusterCount = fbxskin->GetClusterCount();
         // resize arrays
         result.skinWeights->index.conservativeResize(voffset + numVertices, Eigen::NoChange);
@@ -370,7 +371,9 @@ Character loadFbxCommon(::fbxsdk::FbxScene* scene) {
 }
 
 // Loads fbx scene either from a filepath or from an input buffer
-Character loadFbxScene(const std::variant<filesystem::path, gsl::span<const std::byte>>& input) {
+Character loadFbxScene(
+    const std::variant<filesystem::path, gsl::span<const std::byte>>& input,
+    bool permissive) {
   // ---------------------------------------------
   // initialize FBX SDK and load data
   // ---------------------------------------------
@@ -406,7 +409,7 @@ Character loadFbxScene(const std::variant<filesystem::path, gsl::span<const std:
   importer->Import(scene);
   importer->Destroy();
 
-  Character result = loadFbxCommon(scene);
+  Character result = loadFbxCommon(scene, permissive);
 
   if (scene != nullptr)
     scene->Destroy();
@@ -629,7 +632,8 @@ void saveFbxCommon(
     const double framerate,
     const bool saveMesh,
     const bool skipActiveJointParamCheck,
-    const FBXCoordSystemInfo& coordSystemInfo) {
+    const FBXCoordSystemInfo& coordSystemInfo,
+    bool permissive) {
   // ---------------------------------------------
   // initialize FBX SDK and prepare for export
   // ---------------------------------------------
@@ -797,6 +801,13 @@ void saveFbxCommon(
     // Momentum skinning is saved in two matrices: index and weight (size numvertices x
     // not-ordered-joints). The index contains the joint index and the weight is the normalized
     // weight the vertex for that joint.
+
+    MT_THROW_IF(
+        !permissive && !character.skinWeights,
+        " Failed to save the character '{}' to {}. The character has no skinning weights and permissive mode is not enabled. Only mesh-only characters are allowed in permissive mode.",
+        character.name,
+        filename.string());
+
     if (character.skinWeights != nullptr) {
       ::fbxsdk::FbxSkin* fbxskin = ::fbxsdk::FbxSkin::Create(scene, "meshskinning");
       fbxskin->SetSkinningType(::fbxsdk::FbxSkin::eLinear);
@@ -877,12 +888,12 @@ void saveFbxCommon(
 
 } // namespace
 
-Character loadFbxCharacter(const filesystem::path& inputPath) {
-  return loadFbxScene(inputPath);
+Character loadFbxCharacter(const filesystem::path& inputPath, bool permissive) {
+  return loadFbxScene(inputPath, permissive);
 }
 
-Character loadFbxCharacter(gsl::span<const std::byte> inputSpan) {
-  return loadFbxScene(inputSpan);
+Character loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool permissive) {
+  return loadFbxScene(inputSpan, permissive);
 }
 
 void saveFbx(
@@ -892,7 +903,8 @@ void saveFbx(
     const VectorXf& identity,
     const double framerate,
     const bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo) {
+    const FBXCoordSystemInfo& coordSystemInfo,
+    bool permissive) {
   CharacterParameters params;
   if (identity.size() == character.parameterTransform.numJointParameters()) {
     params.offsets = identity;
@@ -924,7 +936,8 @@ void saveFbx(
   }
 
   // Call the helper function to save FBX file with joint values
-  saveFbxCommon(filename, character, jointValues, framerate, saveMesh, false, coordSystemInfo);
+  saveFbxCommon(
+      filename, character, jointValues, framerate, saveMesh, false, coordSystemInfo, permissive);
 }
 
 void saveFbxWithJointParams(
@@ -933,18 +946,21 @@ void saveFbxWithJointParams(
     const MatrixXf& jointParams,
     const double framerate,
     const bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo) {
+    const FBXCoordSystemInfo& coordSystemInfo,
+    bool permissive) {
   // Call the helper function to save FBX file with joint values.
   // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
   // passed in directly from user.
-  saveFbxCommon(filename, character, jointParams, framerate, saveMesh, true, coordSystemInfo);
+  saveFbxCommon(
+      filename, character, jointParams, framerate, saveMesh, true, coordSystemInfo, permissive);
 }
 
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
-    const FBXCoordSystemInfo& coordSystemInfo) {
-  saveFbx(filename, character, MatrixXf(), VectorXf(), 120.0, true, coordSystemInfo);
+    const FBXCoordSystemInfo& coordSystemInfo,
+    bool permissive) {
+  saveFbx(filename, character, MatrixXf(), VectorXf(), 120.0, true, coordSystemInfo, permissive);
 }
 
 } // namespace momentum

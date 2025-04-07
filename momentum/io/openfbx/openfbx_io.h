@@ -17,21 +17,25 @@ namespace momentum {
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
+// Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
     const filesystem::path& inputPath,
     bool keepLocators = false,
     bool permissive = false);
 
+// Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
     gsl::span<const std::byte> inputSpan,
     bool keepLocators = false,
     bool permissive = false);
 
+// Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     bool keepLocators = false,
     bool permissive = false);
 
+// Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
     bool keepLocators = false,
