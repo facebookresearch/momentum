@@ -380,6 +380,7 @@ mt_library(
   SOURCES_VARS
     ${io_fbx_sources_var}
   PRIVATE_LINK_LIBRARIES
+    io_openfbx
     io_skeleton
     ${io_fbx_private_link_libraries}
 )
