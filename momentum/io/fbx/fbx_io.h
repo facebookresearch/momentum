@@ -39,10 +39,13 @@ struct FBXCoordSystemInfo {
   FBXCoordSystem coordSystem = FBXCoordSystem::RightHanded;
 };
 
-Character loadFbxCharacter(const filesystem::path& inputPath);
+// Permissive mode allows loading  mesh-only characters (without skin weights).
+Character loadFbxCharacter(const filesystem::path& inputPath, bool permissive = false);
 
-Character loadFbxCharacter(gsl::span<const std::byte> inputSpan);
+// Permissive mode allows loading  mesh-only characters (without skin weights).
+Character loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool permissive = false);
 
+// Permissive mode allows saving mesh-only characters (without skin weights).
 void saveFbx(
     const filesystem::path& filename,
     const Character& character,
@@ -50,20 +53,25 @@ void saveFbx(
     const VectorXf& identity = VectorXf(),
     double framerate = 120.0,
     bool saveMesh = false,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo());
+    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    bool permissive = false);
 
+// Permissive mode allows saving mesh-only characters (without skin weights).
 void saveFbxWithJointParams(
     const filesystem::path& filename,
     const Character& character,
     const MatrixXf& jointParams = MatrixXf(),
     double framerate = 120.0,
     bool saveMesh = false,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo());
+    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    bool permissive = false);
 
 // A shorthand of saveFbx() to save both the skeleton and mesh as a model but without any animation
+// Permissive mode allows saving mesh-only characters (without skin weights).
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo());
+    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    bool permissive = false);
 
 } // namespace momentum

@@ -471,8 +471,9 @@ void parseSkinnedModel(
     const ofbx::Mesh* meshRoot,
     const std::vector<const ofbx::Object*>& boneFbxNodes,
     Mesh& mesh,
-    SkinWeights& skinWeights,
-    TransformationList& inverseBindPoseTransforms) {
+    std::unique_ptr<SkinWeights>& skinWeights,
+    TransformationList& inverseBindPoseTransforms,
+    bool permissive) {
   enum EMapping {
     MappingUnknown,
     MappingByPolyVertex,
@@ -609,8 +610,11 @@ void parseSkinnedModel(
   }
 
   const auto* fbxskin = geometry->getSkin();
-  if (fbxskin == nullptr) {
-    return;
+  if (!fbxskin) {
+    MT_THROW_IF(
+        !permissive,
+        "No skin found for geometry. Enable permissive mode to allow saving as a mesh-only character.");
+    return; // Just return a mesh-only character.
   }
 
   // Need a fast map from an FbxNode to the bone index in our representation:
@@ -689,10 +693,11 @@ void parseSkinnedModel(
     }
   }
 
-  skinWeights.index.conservativeResize(vertexOffset + nVerts, Eigen::NoChange);
-  skinWeights.weight.conservativeResize(vertexOffset + nVerts, Eigen::NoChange);
-  skinWeights.index.bottomRows(nVerts).setZero();
-  skinWeights.weight.bottomRows(nVerts).setZero();
+  skinWeights = std::make_unique<SkinWeights>();
+  skinWeights->index.conservativeResize(vertexOffset + nVerts, Eigen::NoChange);
+  skinWeights->weight.conservativeResize(vertexOffset + nVerts, Eigen::NoChange);
+  skinWeights->index.bottomRows(nVerts).setZero();
+  skinWeights->weight.bottomRows(nVerts).setZero();
 
   std::stable_sort(
       weights.begin(),
@@ -740,8 +745,8 @@ void parseSkinnedModel(
 
     for (int iPr = 0; iPr < curBoneWeights.size() && iPr < kMaxSkinJoints; ++iPr) {
       const auto [boneIdx, weight] = curBoneWeights[iPr];
-      skinWeights.index(vertexOffset + iVertex, iPr) = boneIdx;
-      skinWeights.weight(vertexOffset + iVertex, iPr) = weight / weightSum;
+      skinWeights->index(vertexOffset + iVertex, iPr) = boneIdx;
+      skinWeights->weight(vertexOffset + iVertex, iPr) = weight / weightSum;
     }
   }
 }
@@ -953,11 +958,16 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   }
 
   Mesh mesh;
-  SkinWeights skinWeights;
+  std::unique_ptr<SkinWeights> skinWeights;
 
   for (int iMesh = 0; iMesh < scene->getMeshCount(); ++iMesh) {
     parseSkinnedModel(
-        scene->getMesh(iMesh), jointFbxNodes, mesh, skinWeights, inverseBindPoseTransforms);
+        scene->getMesh(iMesh),
+        jointFbxNodes,
+        mesh,
+        skinWeights,
+        inverseBindPoseTransforms,
+        permissive);
   }
   mesh.updateNormals();
 
@@ -978,7 +988,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       ParameterLimits(),
       keepLocators ? locators : LocatorList(),
       &mesh,
-      &skinWeights,
+      skinWeights.get(),
       collision.empty() ? nullptr : &collision);
   result.resetJointMap();
   result.inverseBindPose = inverseBindPoseTransforms;
