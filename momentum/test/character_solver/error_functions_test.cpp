@@ -577,6 +577,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
   // Test WITHOUT blend shapes:
   {
+    SCOPED_TRACE("Without blend shapes");
+
     const Character character_orig = createTestCharacter();
     const ModelParametersT<T> modelParams =
         0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
@@ -586,6 +588,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
           VertexConstraintType::Plane,
           VertexConstraintType::Normal,
           VertexConstraintType::SymmetricNormal}) {
+      SCOPED_TRACE(fmt::format("Constraint type: {}", toString(type)));
+
       const T errorTol = [&]() {
         switch (type) {
           case VertexConstraintType::Position:
@@ -628,6 +632,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
   // Test WITH blend shapes:
   {
+    SCOPED_TRACE("With blend shapes");
+
     const Character character_blend = withTestBlendShapes(createTestCharacter());
     const ModelParametersT<T> modelParams =
         0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
@@ -638,6 +644,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     // model.
     for (VertexConstraintType type :
          {VertexConstraintType::Position, VertexConstraintType::Plane}) {
+      SCOPED_TRACE(fmt::format("Constraint type: {}", toString(type)));
+
       VertexErrorFunctionT<T> errorFunction(character_blend, type);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
         errorFunction.addConstraint(
@@ -677,6 +685,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
         VertexConstraintType::Plane,
         VertexConstraintType::Normal,
         VertexConstraintType::SymmetricNormal}) {
+    SCOPED_TRACE(fmt::format("Constraint type: {}", toString(type)));
+
     const T errorTol = [&]() {
       switch (type) {
         case VertexConstraintType::Position:
