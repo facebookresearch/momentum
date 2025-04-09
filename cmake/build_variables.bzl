@@ -360,34 +360,27 @@ io_shape_sources = [
     "io/shape/pose_shape_io.cpp",
 ]
 
-io_openfbx_public_headers = [
-    "io/openfbx/openfbx_io.h",
-]
-
-io_openfbx_private_headers = [
-    "io/openfbx/polygon_data.h",
-]
-
-io_openfbx_sources = [
-    "io/openfbx/openfbx_io.cpp",
-    "io/openfbx/polygon_data.cpp",
-]
-
 io_fbx_public_headers = [
     "io/fbx/fbx_io.h",
 ]
 
 io_fbx_private_headers = [
     "io/fbx/fbx_memory_stream.h",
+    "io/fbx/openfbx_io.h",
+    "io/fbx/polygon_data.h",
 ]
 
 io_fbx_sources = [
     "io/fbx/fbx_io.cpp",
     "io/fbx/fbx_memory_stream.cpp",
+    "io/fbx/openfbx_io.cpp",
+    "io/fbx/polygon_data.cpp",
 ]
 
 io_fbx_sources_unsupported = [
     "io/fbx/fbx_io_unsupported.cpp",
+    "io/fbx/openfbx_io.cpp",
+    "io/fbx/polygon_data.cpp",
 ]
 
 io_fbx_test_sources = [
