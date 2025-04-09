@@ -547,12 +547,25 @@ void saveFbxCommon(
 
 } // namespace
 
-Character loadFbxCharacter(const filesystem::path& inputPath, bool permissive) {
-  return loadOpenFbxCharacter(inputPath, false, permissive);
+Character loadFbxCharacter(const filesystem::path& inputPath, bool keepLocators, bool permissive) {
+  return loadOpenFbxCharacter(inputPath, keepLocators, permissive);
 }
 
-Character loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool permissive) {
-  return loadOpenFbxCharacter(inputSpan, false, permissive);
+Character
+loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool keepLocators, bool permissive) {
+  return loadOpenFbxCharacter(inputSpan, keepLocators, permissive);
+}
+
+std::tuple<Character, std::vector<MatrixXf>, float>
+loadFbxCharacterWithMotion(const filesystem::path& inputPath, bool keepLocators, bool permissive) {
+  return loadOpenFbxCharacterWithMotion(inputPath, keepLocators, permissive);
+}
+
+std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
+    gsl::span<const std::byte> inputSpan,
+    bool keepLocators,
+    bool permissive) {
+  return loadOpenFbxCharacterWithMotion(inputSpan, keepLocators, permissive);
 }
 
 void saveFbx(

@@ -11,7 +11,7 @@
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
 #include <momentum/gui/rerun/logging_redirect.h>
-#include <momentum/io/openfbx/openfbx_io.h>
+#include <momentum/io/fbx/fbx_io.h>
 
 #include <CLI/CLI.hpp>
 #include <rerun.hpp>
@@ -70,8 +70,8 @@ int main(int argc, char* argv[]) {
 
     rec.log_static("world", ViewCoordinates::RUB); // Set an up-axis
 
-    const auto [character, motions, fps] = loadOpenFbxCharacterWithMotion(
-        options->fbxFile, true /*keepLocators*/, options->permissive);
+    const auto [character, motions, fps] =
+        loadFbxCharacterWithMotion(options->fbxFile, true /*keepLocators*/, options->permissive);
     // Validate the loaded motion
     if (motions.empty() || (motions.size() == 1 && motions.at(0).cols() == 0)) {
       MT_LOGW("No motion loaded from file");

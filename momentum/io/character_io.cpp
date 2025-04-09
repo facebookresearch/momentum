@@ -8,8 +8,8 @@
 #include "momentum/io/character_io.h"
 
 #include "momentum/character/character.h"
+#include "momentum/io/fbx/fbx_io.h"
 #include "momentum/io/gltf/gltf_io.h"
-#include "momentum/io/openfbx/openfbx_io.h"
 #include "momentum/io/shape/pose_shape_io.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/mppca_io.h"
@@ -50,7 +50,7 @@ namespace {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(filepath);
   } else if (format == CharacterFormat::Fbx) {
-    return loadOpenFbxCharacter(filepath, true);
+    return loadFbxCharacter(filepath, true);
   } else {
     return {};
   }
@@ -62,7 +62,7 @@ namespace {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(fileBuffer);
   } else if (format == CharacterFormat::Fbx) {
-    return loadOpenFbxCharacter(fileBuffer, true);
+    return loadFbxCharacter(fileBuffer, true);
   } else {
     return {};
   }

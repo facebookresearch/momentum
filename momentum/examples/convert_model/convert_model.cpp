@@ -14,7 +14,6 @@
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/motion/mmo_io.h>
-#include <momentum/io/openfbx/openfbx_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/skeleton/parameters_io.h>
@@ -146,7 +145,7 @@ int main(int argc, char** argv) {
       } else if (motionExt == ".fbx") {
         MT_LOGI("Loading motion from fbx...");
         int motionIndex = -1;
-        auto [c, motions, framerate] = loadOpenFbxCharacterWithMotion(motionPath, true, false);
+        auto [c, motions, framerate] = loadFbxCharacterWithMotion(motionPath, true, false);
         // Validate the motion
         if (motions.empty() || (motions.size() == 1 && motions.at(0).cols() == 0)) {
           MT_LOGW("No motion loaded from file");
