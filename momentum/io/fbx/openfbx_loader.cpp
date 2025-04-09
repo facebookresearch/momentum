@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/io/fbx/openfbx_io.h"
+#include "momentum/io/fbx/openfbx_loader.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/collision_geometry_state.h"
