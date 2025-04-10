@@ -43,6 +43,25 @@ TEST(Momentum_Mesh, UpdateNormals) {
   }
 }
 
+TEST(Momentum_Mesh, UpdateNormalsMt) {
+  // Construct simple mesh with 3 vertices and 1 face
+  Mesh m;
+  m.vertices = {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}};
+  m.faces = {{0, 1, 2}};
+
+  // Compute mesh normals
+  m.updateNormalsMt();
+  EXPECT_EQ(m.normals.size(), 3);
+
+  // Ensure all normals are (0, 0, 1)
+  const float eps = 1e-5;
+  for (int i = 0; i < m.normals.size(); ++i) {
+    EXPECT_NEAR(m.normals[i][0], 0.f, eps);
+    EXPECT_NEAR(m.normals[i][1], 0.f, eps);
+    EXPECT_NEAR(m.normals[i][2], 1.f, eps);
+  }
+}
+
 TEST(Momentum_Mesh, Reset) {
   // Construct non-empty mesh
   Mesh m = {

@@ -7,7 +7,10 @@
 
 #include "momentum/math/mesh.h"
 
+#include "momentum/common/profile.h"
 #include "momentum/math/utility.h"
+
+#include <dispenso/parallel_for.h>
 
 #include <algorithm>
 
@@ -35,13 +38,73 @@ void MeshT<T>::updateNormals() {
     }
   }
   // re-normalize normals
-  for (size_t i = 0; i < normals.size(); i++) {
-    const T len = normals[i].norm();
-    // avoid divide-by-zero:
-    if (len != 0) {
-      normals[i] /= len;
+  for (auto& normal : normals) {
+    normal.normalize(); // if the input vector is too small, the this is left unchanged
+  }
+}
+
+template <typename T>
+void MeshT<T>::updateNormalsMt(size_t maxThreads) {
+  // fill vector for faces per vertex
+  facePerVertex_.clear(); // need to clear previous data
+  facePerVertex_.resize(vertices.size());
+  for (size_t i = 0; i < faces.size(); i++) {
+    const auto& face = faces[i];
+    for (size_t j = 0; j < 3; j++) {
+      facePerVertex_[face[j]].push_back(i);
     }
   }
+
+  // resize face normals
+  faceNormals_.resize(faces.size());
+
+  // set options for parallel for
+  auto dispensoOptions = dispenso::ParForOptions();
+  dispensoOptions.maxThreads = maxThreads;
+
+  // compute normals per face
+  MT_PROFILE_PUSH("Compute face normals");
+  const auto verticesNum = static_cast<int>(vertices.size());
+  dispenso::parallel_for(
+      0,
+      faces.size(),
+      [&](const size_t i) {
+        // Skip faces with out-of-boundaries indexes
+        const auto& face = faces[i];
+        if (std::any_of(face.begin(), face.end(), [verticesNum](int idx) {
+              return idx < 0 || idx >= verticesNum;
+            })) {
+          faceNormals_[i].setZero();
+          return;
+        }
+
+        // calculate normal
+        faceNormals_[i].noalias() =
+            (vertices[face[1]] - vertices[face[0]]).cross(vertices[face[2]] - vertices[face[0]]);
+      },
+      dispensoOptions);
+  MT_PROFILE_POP();
+
+  // for each vertex, add the face normals
+  MT_PROFILE_PUSH("add face normals");
+  normals.resize(vertices.size());
+  std::fill(normals.begin(), normals.end(), Eigen::Vector3<T>::Zero());
+  dispenso::parallel_for(
+      0,
+      facePerVertex_.size(),
+      [&](const size_t i) {
+        for (const auto& faceIdx : facePerVertex_[i]) {
+          if (IsNanNoOpt(faceNormals_[faceIdx][0])) {
+            continue;
+          }
+
+          normals[i].noalias() += faceNormals_[faceIdx];
+        }
+
+        normals[i].normalize(); // if the input vector is too small, the this is left unchanged
+      },
+      dispensoOptions);
+  MT_PROFILE_POP();
 }
 
 template <typename T, typename T2, int N>
@@ -81,6 +144,8 @@ void MeshT<T>::reset() {
   texcoords.clear();
   texcoord_faces.clear();
   texcoord_lines.clear();
+  facePerVertex_.clear();
+  faceNormals_.clear();
 }
 
 template MeshT<float> MeshT<float>::cast<float>() const;
