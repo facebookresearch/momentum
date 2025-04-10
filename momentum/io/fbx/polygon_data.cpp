@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/io/openfbx/polygon_data.h"
+#include "momentum/io/fbx/polygon_data.h"
 
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"

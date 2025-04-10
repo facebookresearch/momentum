@@ -12,7 +12,6 @@
 #include <gsl/span>
 
 #include <string>
-#include <variant>
 #include <vector>
 
 namespace momentum {

@@ -349,19 +349,6 @@ mt_library(
     character
 )
 
-mt_library(
-  NAME io_openfbx
-  HEADERS_VARS
-    io_openfbx_public_headers
-  PRIVATE_HEADERS_VARS
-    io_openfbx_private_headers
-  SOURCES_VARS io_openfbx_sources
-  PRIVATE_LINK_LIBRARIES
-    io_common
-    io_skeleton
-    OpenFBX
-)
-
 if(MOMENTUM_BUILD_IO_FBX)
   set(io_fbx_sources_var io_fbx_sources)
   find_package(FbxSdk MODULE REQUIRED)
@@ -380,9 +367,10 @@ mt_library(
   SOURCES_VARS
     ${io_fbx_sources_var}
   PRIVATE_LINK_LIBRARIES
-    io_openfbx
+    io_common
     io_skeleton
     ${io_fbx_private_link_libraries}
+    OpenFBX
 )
 
 mt_library(
