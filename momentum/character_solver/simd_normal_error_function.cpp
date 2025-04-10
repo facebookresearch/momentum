@@ -154,7 +154,7 @@ double SimdNormalErrorFunction::getError(
       const FloatP dist = dot(pos_world - target, normal_world);
 
       const auto weight = drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-      error += weight * drjit::sqr(dist);
+      error += weight * drjit::square(dist);
     }
   }
 
@@ -200,7 +200,7 @@ double SimdNormalErrorFunction::getGradient(
       const auto weight = drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
       const FloatP wgt = weight * (2.0f * kPlaneWeight);
 
-      error += weight * drjit::sqr(dist);
+      error += weight * drjit::square(dist);
 
       // loop over all joints the constraint is attached to and calculate gradient
       size_t jointIndex = jointId;
@@ -337,7 +337,7 @@ double SimdNormalErrorFunction::getJacobian(
           const auto weight = drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
           const FloatP wgt = drjit::sqrt(weight * kPlaneWeight * this->weight_);
 
-          jointError += weight * drjit::sqr(dist);
+          jointError += weight * drjit::square(dist);
 
           drjit::store(residual.segment(jacobianOffsetCur, kSimdPacketSize).data(), dist * wgt);
 

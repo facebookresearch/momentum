@@ -61,19 +61,11 @@ void testSimdGeneralizedLoss(T alpha, T c, T absTol, T relTol) {
       << "\n - absTol   : " << absTol
       << "\n - relTol   : " << relTol
       << "\n - stepSize : " << stepSize
-#if DRJIT_VERSION_GE(1,0,0)
       << "\n - sqrError : " << drjit::string(sqrError).c_str()
       << "\n - val1     : " << drjit::string(val1).c_str()
       << "\n - val2     : " << drjit::string(val2).c_str()
       << "\n - refDeriv : " << drjit::string(refDeriv).c_str()
       << "\n - testDeriv: " << drjit::string(testDeriv).c_str()
-#else
-      << "\n - sqrError : " << sqrError
-      << "\n - val1     : " << val1
-      << "\n - val2     : " << val2
-      << "\n - refDeriv : " << refDeriv
-      << "\n - testDeriv: " << testDeriv
-#endif
       << std::endl;
       // clang-format off
 }
