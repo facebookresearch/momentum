@@ -9,7 +9,7 @@
 
 #include "momentum/character/character.h"
 #include "momentum/common/exception.h"
-#include "momentum/io/fbx/openfbx_io.h"
+#include "momentum/io/fbx/openfbx_loader.h"
 
 namespace momentum {
 

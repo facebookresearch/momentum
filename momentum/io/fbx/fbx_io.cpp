@@ -15,7 +15,7 @@
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/fbx/fbx_memory_stream.h"
-#include "momentum/io/fbx/openfbx_io.h"
+#include "momentum/io/fbx/openfbx_loader.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
 #include "momentum/io/skeleton/parameter_transform_io.h"
