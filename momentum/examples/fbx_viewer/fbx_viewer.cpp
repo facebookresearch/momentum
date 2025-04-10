@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
     redirectLogsToRerun(rec);
 
-    rec.log_static("world", ViewCoordinates::RUB); // Set an up-axis
+    rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
     const auto [character, motions, fps] =
         loadFbxCharacterWithMotion(options->fbxFile, true /*keepLocators*/, options->permissive);

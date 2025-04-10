@@ -51,17 +51,15 @@ void logMesh(
     const std::string& streamName,
     const Mesh& mesh,
     std::optional<rerun::Color> color) {
-  rerun::Mesh3D rerunMesh;
-  rerunMesh.vertex_positions = mesh.vertices;
-  rerunMesh.triangle_indices = mesh.faces;
+  auto rerunMesh = rerun::Mesh3D(mesh.vertices).with_triangle_indices(mesh.faces);
   if (color.has_value()) {
-    rerunMesh.vertex_colors = color.value();
+    rerunMesh = std::move(rerunMesh).with_vertex_colors(color.value());
   } else if (mesh.colors.size() == mesh.vertices.size()) {
-    rerunMesh.vertex_colors = mesh.colors;
+    rerunMesh = std::move(rerunMesh).with_vertex_colors(mesh.colors);
   }
 
   if (mesh.normals.size() == mesh.vertices.size()) {
-    rerunMesh.vertex_normals = mesh.normals;
+    rerunMesh = std::move(rerunMesh).with_vertex_normals(mesh.normals);
   }
 
   rec.log(streamName, rerunMesh);

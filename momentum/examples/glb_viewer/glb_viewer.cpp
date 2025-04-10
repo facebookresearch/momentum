@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 
     redirectLogsToRerun(rec);
 
-    rec.log_static("world", ViewCoordinates::RUB); // Set an up-axis
+    rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
     const auto [character, motion, offsets, cFps] = loadCharacterWithMotion(options->glbFile);
     const size_t nFrames = motion.cols();

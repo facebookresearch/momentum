@@ -91,7 +91,8 @@ int main(int argc, char* argv[]) {
 
     redirectLogsToRerun(rec);
 
-    rec.log_static("world", ViewCoordinates::RIGHT_HAND_Z_UP); // Set an up-axis
+    rec.log_static(
+        "world", ViewCoordinates(components::ViewCoordinates::RIGHT_HAND_Z_UP)); // Set an up-axis
 
     CharacterState charState;
     CharacterParameters charParams;

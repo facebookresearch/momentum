@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     rec.spawn().exit_on_failure();
     redirectLogsToRerun(rec);
 
-    rec.log_static("world", ViewCoordinates::RUB); // Set an up-axis
+    rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
     for (const auto& actor : sequences) {
       if (actor.frames.empty()) {
