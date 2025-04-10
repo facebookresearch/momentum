@@ -114,22 +114,22 @@ The FBX SDK will be automatically installed when you run `pixi run config`, so n
 
 #### macOS and Windows
 
-You can download it from Autodesk's [website](https://aps.autodesk.com/developer/overview/fbx-sdk) or use direct links ([macOS](https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_clang_mac.pkg.tgz), [Windows](https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_vs2019_win.exe)). After installing the SDK, build Momentum from source with `MOMENTUM_BUILD_IO_FBX=ON` option as:
+You can download it from Autodesk's [website](https://aps.autodesk.com/developer/overview/fbx-sdk) or use direct links ([macOS](https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_clang_mac.pkg.tgz), [Windows](https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_vs2019_win.exe)). After installing the SDK, build Momentum from source with `MOMENTUM_BUILD_WITH_FBXSDK=ON` option as:
 
 ```
 # macOS
-MOMENTUM_BUILD_IO_FBX=ON pixi run <target>
+MOMENTUM_BUILD_WITH_FBXSDK=ON pixi run <target>
 
 # Windows (Powershell)
-$env:MOMENTUM_BUILD_IO_FBX = "ON"; pixi run <target>
+$env:MOMENTUM_BUILD_WITH_FBXSDK = "ON"; pixi run <target>
 
 # Windows (cmd)
-set MOMENTUM_BUILD_IO_FBX=ON && pixi run <target>
+set MOMENTUM_BUILD_WITH_FBXSDK=ON && pixi run <target>
 ```
 
 For example, file conversion can be run as follows:
 
 ```
 # Windows (Powershell)
-$env:MOMENTUM_BUILD_IO_FBX = "ON"; pixi run convert_model -d <input.glb> -o <out.fbx>
+$env:MOMENTUM_BUILD_WITH_FBXSDK = "ON"; pixi run convert_model -d <input.glb> -o <out.fbx>
 ```

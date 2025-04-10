@@ -59,7 +59,7 @@ include(GNUInstallDirs)
 #===============================================================================
 
 mt_option(BUILD_SHARED_LIBS "Build as shared libraries" ON)
-mt_option(MOMENTUM_BUILD_IO_FBX "Build with IO FBX" OFF)
+mt_option(MOMENTUM_BUILD_WITH_FBXSDK "Build with IO FBX" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
@@ -349,7 +349,7 @@ mt_library(
     character
 )
 
-if(MOMENTUM_BUILD_IO_FBX)
+if(MOMENTUM_BUILD_WITH_FBXSDK)
   set(io_fbx_sources_var io_fbx_sources)
   find_package(FbxSdk MODULE REQUIRED)
   set(io_fbx_private_link_libraries fbxsdk::fbxsdk)

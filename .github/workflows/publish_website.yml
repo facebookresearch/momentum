@@ -57,7 +57,7 @@ jobs:
 
     - name: Build Python API Documentation
       run: |
-        MOMENTUM_BUILD_IO_FBX=ON \
+        MOMENTUM_BUILD_WITH_FBXSDK=ON \
           pixi run doc_py
 
     # 4) Copy Python API Documentation to Docusaurus

@@ -107,5 +107,5 @@ jobs:
 
       - name: Build Python API Doc
         run: |
-          MOMENTUM_BUILD_IO_FBX=ON \
+          MOMENTUM_BUILD_WITH_FBXSDK=ON \
             pixi run -e ${{ matrix.pixi_env }} doc_py

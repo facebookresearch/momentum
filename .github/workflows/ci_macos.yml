@@ -39,7 +39,7 @@ jobs:
 
       - name: Build and test Momentum
         run: |
-          MOMENTUM_BUILD_IO_FBX=ON \
+          MOMENTUM_BUILD_WITH_FBXSDK=ON \
             pixi run test${{ matrix.mode }}
 
       - name: Install Momentum and Build hello_world
@@ -75,10 +75,10 @@ jobs:
 
       - name: Build and test PyMomentum
         run: |
-          MOMENTUM_BUILD_IO_FBX=ON \
+          MOMENTUM_BUILD_WITH_FBXSDK=ON \
             pixi run test_py
 
       - name: Build Python API Doc
         run: |
-          MOMENTUM_BUILD_IO_FBX=ON \
+          MOMENTUM_BUILD_WITH_FBXSDK=ON \
             pixi run doc_py

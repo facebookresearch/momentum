@@ -62,7 +62,7 @@ config = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-        -DMOMENTUM_BUILD_IO_FBX=$MOMENTUM_BUILD_IO_FBX \
+        -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -73,7 +73,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_IO_FBX = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" } }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" } }
 config_dev = { cmd = """
     cmake \
         -S . \
@@ -81,7 +81,7 @@ config_dev = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-        -DMOMENTUM_BUILD_IO_FBX=$MOMENTUM_BUILD_IO_FBX \
+        -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -92,7 +92,7 @@ config_dev = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_IO_FBX = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" } }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" } }
 build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target all", depends-on = [
     "config",
 ] }
@@ -176,7 +176,7 @@ config = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-        -DMOMENTUM_BUILD_IO_FBX=ON \
+        -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -197,7 +197,7 @@ config_dev = { cmd = """
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-        -DMOMENTUM_BUILD_IO_FBX=ON \
+        -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -212,7 +212,7 @@ config_dev = { cmd = """
     "install_deps",
 ] }
 build_py = { cmd = "pip install . -vv", env = { FBXSDK_PATH = ".deps/fbxsdk", CMAKE_ARGS = """
-    -DMOMENTUM_BUILD_IO_FBX=ON \
+    -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
@@ -240,12 +240,12 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 
 [target.osx.tasks]
 build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
-    -DMOMENTUM_BUILD_IO_FBX=$MOMENTUM_BUILD_IO_FBX \
+    -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
-""", MOMENTUM_BUILD_IO_FBX = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+""", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
@@ -267,12 +267,12 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 
 [target.osx-arm64.tasks]
 build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
-    -DMOMENTUM_BUILD_IO_FBX=$MOMENTUM_BUILD_IO_FBX \
+    -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
-""", MOMENTUM_BUILD_IO_FBX = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+""", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
@@ -299,7 +299,7 @@ config = { cmd = """
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DBUILD_SHARED_LIBS=OFF \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
-        -DMOMENTUM_BUILD_IO_FBX=$MOMENTUM_BUILD_IO_FBX \
+        -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_ENABLE_PROFILING=ON \
@@ -309,7 +309,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_IO_FBX = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
     "config",
 ] }
@@ -354,9 +354,9 @@ install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp -j --target in
 ] }
 tracy = { cmd = "tracy-profiler.exe" }
 build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
-    -DMOMENTUM_BUILD_IO_FBX=$MOMENTUM_BUILD_IO_FBX \
+    -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD
-""", MOMENTUM_BUILD_IO_FBX = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+""", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
