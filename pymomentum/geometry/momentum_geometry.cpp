@@ -19,8 +19,8 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/common/checks.h>
+#include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
-#include <momentum/io/openfbx/openfbx_io.h>
 #include <momentum/io/shape/blend_shape_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/mppca_io.h>
@@ -192,7 +192,7 @@ momentum::Character loadFBXCharacterFromFile(
     const std::optional<std::string>& configPath,
     const std::optional<std::string>& locatorsPath,
     bool permissive) {
-  momentum::Character result = momentum::loadOpenFbxCharacter(
+  momentum::Character result = momentum::loadFbxCharacter(
       filesystem::path(fbxPath), keepLocators, permissive);
   if (configPath && !configPath->empty()) {
     result = loadConfigFromFile(result, *configPath);
@@ -219,7 +219,7 @@ std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
 loadFBXCharacterWithMotionFromFile(
     const std::string& fbxPath,
     bool permissive) {
-  auto [character, motion, fps] = momentum::loadOpenFbxCharacterWithMotion(
+  auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
       filesystem::path(fbxPath), keepLocators, permissive);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
@@ -229,7 +229,7 @@ std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
 loadFBXCharacterWithMotionFromBytes(
     const py::bytes& fbxBytes,
     bool permissive) {
-  auto [character, motion, fps] = momentum::loadOpenFbxCharacterWithMotion(
+  auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
       toSpan<std::byte>(fbxBytes), keepLocators, permissive);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
@@ -276,7 +276,7 @@ momentum::Character loadConfigFromFile(
 momentum::Character loadFBXCharacterFromBytes(
     const pybind11::bytes& bytes,
     bool permissive) {
-  return momentum::loadOpenFbxCharacter(
+  return momentum::loadFbxCharacter(
       toSpan<std::byte>(bytes), keepLocators, permissive);
 }
 

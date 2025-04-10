@@ -445,7 +445,6 @@ mt_library(
     io_gltf
     io_motion
     io_marker
-    io_openfbx
     io_shape
     io_skeleton
 )
@@ -740,7 +739,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
     NAME fbx_viewer
     SOURCES_VARS fbx_viewer_sources
     LINK_LIBRARIES
-      io_openfbx
+      io_fbx
       rerun
       CLI11::CLI11
       rerun_sdk

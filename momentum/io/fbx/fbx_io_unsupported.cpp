@@ -9,17 +9,29 @@
 
 #include "momentum/character/character.h"
 #include "momentum/common/exception.h"
+#include "momentum/io/openfbx/openfbx_io.h"
 
 namespace momentum {
 
-Character loadFbxCharacter(const filesystem::path& inputPath, bool permissive) {
-  MT_THROW("FbxSDK is not supported on your platform. Please use loadOpenFbxCharacter instead.");
-  return Character();
+Character loadFbxCharacter(const filesystem::path& inputPath, bool keepLocators, bool permissive) {
+  return loadOpenFbxCharacter(inputPath, keepLocators, permissive);
 }
 
-Character loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool permissive) {
-  MT_THROW("FbxSDK is not supported on your platform. Please use loadOpenFbxCharacter instead.");
-  return Character();
+Character
+loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool keepLocators, bool permissive) {
+  return loadOpenFbxCharacter(inputSpan, keepLocators, permissive);
+}
+
+std::tuple<Character, std::vector<MatrixXf>, float>
+loadFbxCharacterWithMotion(const filesystem::path& inputPath, bool keepLocators, bool permissive) {
+  return loadOpenFbxCharacterWithMotion(inputPath, keepLocators, permissive);
+}
+
+std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
+    gsl::span<const std::byte> inputSpan,
+    bool keepLocators,
+    bool permissive) {
+  return loadOpenFbxCharacterWithMotion(inputSpan, keepLocators, permissive);
 }
 
 void saveFbx(

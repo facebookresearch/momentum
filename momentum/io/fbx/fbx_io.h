@@ -39,11 +39,33 @@ struct FBXCoordSystemInfo {
   FBXCoordSystem coordSystem = FBXCoordSystem::RightHanded;
 };
 
+// Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
+// This is different from historical momentum behavior so it's off by default.
 // Permissive mode allows loading  mesh-only characters (without skin weights).
-Character loadFbxCharacter(const filesystem::path& inputPath, bool permissive = false);
+Character loadFbxCharacter(
+    const filesystem::path& inputPath,
+    bool keepLocators = false,
+    bool permissive = false);
 
+// Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
+// This is different from historical momentum behavior so it's off by default.
 // Permissive mode allows loading  mesh-only characters (without skin weights).
-Character loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool permissive = false);
+Character loadFbxCharacter(
+    gsl::span<const std::byte> inputSpan,
+    bool keepLocators = false,
+    bool permissive = false);
+
+// Permissive mode allows loading mesh-only characters (without skin weights).
+std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
+    const filesystem::path& inputPath,
+    bool keepLocators = false,
+    bool permissive = false);
+
+// Permissive mode allows loading mesh-only characters (without skin weights).
+std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
+    gsl::span<const std::byte> inputSpan,
+    bool keepLocators = false,
+    bool permissive = false);
 
 // Permissive mode allows saving mesh-only characters (without skin weights).
 void saveFbx(

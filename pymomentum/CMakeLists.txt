@@ -155,7 +155,6 @@ mt_python_binding(
     io_fbx
     io_gltf
     io_marker
-    io_openfbx
     io_shape
     io_skeleton
     io_urdf
