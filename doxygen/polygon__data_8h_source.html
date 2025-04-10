@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Momentum: io/openfbx/polygon_data.h Source File</title>
+<title>Momentum: io/fbx/polygon_data.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -75,7 +75,7 @@ $(document).ready(function() { init_codefold(0); });
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_e61d42d11b7905bb2da6ba63368975ad.html">openfbx</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -96,67 +96,66 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;gsl/span&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;variant&gt;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemomentum.html">momentum</a> {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// Structure for holding arbitrary polygon data.  We will read the data as-is from the</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// FBX file and then triangulate at the end for momentum.  Doing it this way allows us</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// to split up the functionality (triangulating while you read complicates handling</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// texture coordinates for example).</span></div>
-<div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html">   24</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmomentum_1_1PolygonData.html">PolygonData</a> {</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="comment">// We will pack polygons in an array like this:</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="comment">// The indices array will contain all the polygons indices packed back-to-back.</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <span class="comment">//   1 2 3 4   2 3 4 6   ...</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="comment">// The offsets array will include an offset for the start and end of each polygon.</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="comment">//   0 4 8 ...</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="comment">// The advantage of doing it this way is that we have random access into the</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="comment">// polygons.  The disadvantage (compared to just providing an array of vertex counts)</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <span class="comment">// is that the offset array should always have one more than the number of polygons,</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="comment">// which is a little confusing.</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d">   34</a></span>  std::vector&lt;uint32_t&gt; <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d">indices</a>;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">   35</a></span>  std::vector&lt;uint32_t&gt; <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">offsets</a>;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="comment">// The texture coordinate indices for each face.</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="comment">// Uses the same offsets array as the indices array.</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="comment">// Note that this is allowed to be empty, but if not empty it</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="comment">// must be the same size as the indices array.</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#aa6e70f09e6d7c54d64045a49f2649625">   41</a></span>  std::vector&lt;uint32_t&gt; <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#aa6e70f09e6d7c54d64045a49f2649625">textureIndices</a>;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#ac60d8b1125f2c2df32ae396fac934c7f">   43</a></span>  <a class="code hl_function" href="structmomentum_1_1PolygonData.html#ac60d8b1125f2c2df32ae396fac934c7f">PolygonData</a>() : <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">offsets</a>{0} {}</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="comment">// If there&#39;s a problem with the mesh, returns an error message.</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="comment">// If everything is kosher, returns an empty string.</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="comment">// This function is used in a few places when reading the mesh from</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="comment">// disk to make sure it&#39;s valid.</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] std::string <a class="code hl_function" href="structmomentum_1_1PolygonData.html#a2f93dfb7fbae4e7435ad1e8e92335c05">errorMessage</a>(<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numVertices</a>) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="comment">// Similar to errorMessage, but the issue is not severe enough to terminate.</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] std::string <a class="code hl_function" href="structmomentum_1_1PolygonData.html#ab6465b26dd734418b70439f0a5ed6860">warnMessage</a>(<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numTexVertices</a>) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordtype">size_t</span> <a class="code hl_function" href="structmomentum_1_1PolygonData.html#ab8470c2b6c8bf87f88c6ebbb2af59091">numPolygons</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemomentum.html">momentum</a> {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// Structure for holding arbitrary polygon data.  We will read the data as-is from the</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// FBX file and then triangulate at the end for momentum.  Doing it this way allows us</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// to split up the functionality (triangulating while you read complicates handling</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// texture coordinates for example).</span></div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html">   23</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmomentum_1_1PolygonData.html">PolygonData</a> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <span class="comment">// We will pack polygons in an array like this:</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="comment">// The indices array will contain all the polygons indices packed back-to-back.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="comment">//   1 2 3 4   2 3 4 6   ...</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <span class="comment">// The offsets array will include an offset for the start and end of each polygon.</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="comment">//   0 4 8 ...</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="comment">// The advantage of doing it this way is that we have random access into the</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="comment">// polygons.  The disadvantage (compared to just providing an array of vertex counts)</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="comment">// is that the offset array should always have one more than the number of polygons,</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <span class="comment">// which is a little confusing.</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d">   33</a></span>  std::vector&lt;uint32_t&gt; <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d">indices</a>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">   34</a></span>  std::vector&lt;uint32_t&gt; <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">offsets</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="comment">// The texture coordinate indices for each face.</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="comment">// Uses the same offsets array as the indices array.</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="comment">// Note that this is allowed to be empty, but if not empty it</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="comment">// must be the same size as the indices array.</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#aa6e70f09e6d7c54d64045a49f2649625">   40</a></span>  std::vector&lt;uint32_t&gt; <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#aa6e70f09e6d7c54d64045a49f2649625">textureIndices</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structmomentum_1_1PolygonData.html#ac60d8b1125f2c2df32ae396fac934c7f">   42</a></span>  <a class="code hl_function" href="structmomentum_1_1PolygonData.html#ac60d8b1125f2c2df32ae396fac934c7f">PolygonData</a>() : <a class="code hl_variable" href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">offsets</a>{0} {}</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="comment">// If there&#39;s a problem with the mesh, returns an error message.</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="comment">// If everything is kosher, returns an empty string.</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="comment">// This function is used in a few places when reading the mesh from</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="comment">// disk to make sure it&#39;s valid.</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] std::string <a class="code hl_function" href="structmomentum_1_1PolygonData.html#a2f93dfb7fbae4e7435ad1e8e92335c05">errorMessage</a>(<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numVertices</a>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="comment">// Similar to errorMessage, but the issue is not severe enough to terminate.</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] std::string <a class="code hl_function" href="structmomentum_1_1PolygonData.html#ab6465b26dd734418b70439f0a5ed6860">warnMessage</a>(<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numTexVertices</a>) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordtype">size_t</span> <a class="code hl_function" href="structmomentum_1_1PolygonData.html#ab8470c2b6c8bf87f88c6ebbb2af59091">numPolygons</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
 </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>std::vector&lt;Eigen::Vector3i&gt; <a class="code hl_function" href="namespacemomentum.html#a0c7058ccedb98f23f526927835ac3d5d">triangulate</a>(</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    gsl::span&lt;const uint32_t&gt; indices,</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    gsl::span&lt;const uint32_t&gt; offsets);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>std::vector&lt;Eigen::Vector3i&gt; <a class="code hl_function" href="namespacemomentum.html#a0c7058ccedb98f23f526927835ac3d5d">triangulate</a>(</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    gsl::span&lt;const uint32_t&gt; indices,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    gsl::span&lt;const uint32_t&gt; offsets);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
 <div class="ttc" id="anamespacemomentum_html_a0c7058ccedb98f23f526927835ac3d5d"><div class="ttname"><a href="namespacemomentum.html#a0c7058ccedb98f23f526927835ac3d5d">momentum::triangulate</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; triangulate(gsl::span&lt; const uint32_t &gt; indices, gsl::span&lt; const uint32_t &gt; offsets)</div><div class="ttdef"><b>Definition</b> polygon_data.cpp:17</div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="astructmomentum_1_1PolygonData_html"><div class="ttname"><a href="structmomentum_1_1PolygonData.html">momentum::PolygonData</a></div><div class="ttdef"><b>Definition</b> polygon_data.h:24</div></div>
+<div class="ttc" id="astructmomentum_1_1PolygonData_html"><div class="ttname"><a href="structmomentum_1_1PolygonData.html">momentum::PolygonData</a></div><div class="ttdef"><b>Definition</b> polygon_data.h:23</div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html_a2f93dfb7fbae4e7435ad1e8e92335c05"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a2f93dfb7fbae4e7435ad1e8e92335c05">momentum::PolygonData::errorMessage</a></div><div class="ttdeci">std::string errorMessage(size_t numVertices) const</div><div class="ttdef"><b>Definition</b> polygon_data.cpp:48</div></div>
-<div class="ttc" id="astructmomentum_1_1PolygonData_html_a56ed40b35d3af3d2e5ae3501f9b12ae1"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">momentum::PolygonData::offsets</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; offsets</div><div class="ttdef"><b>Definition</b> polygon_data.h:35</div></div>
-<div class="ttc" id="astructmomentum_1_1PolygonData_html_a64328858ee62e50164904312d208298d"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d">momentum::PolygonData::indices</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; indices</div><div class="ttdef"><b>Definition</b> polygon_data.h:34</div></div>
-<div class="ttc" id="astructmomentum_1_1PolygonData_html_aa6e70f09e6d7c54d64045a49f2649625"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#aa6e70f09e6d7c54d64045a49f2649625">momentum::PolygonData::textureIndices</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; textureIndices</div><div class="ttdef"><b>Definition</b> polygon_data.h:41</div></div>
+<div class="ttc" id="astructmomentum_1_1PolygonData_html_a56ed40b35d3af3d2e5ae3501f9b12ae1"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">momentum::PolygonData::offsets</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; offsets</div><div class="ttdef"><b>Definition</b> polygon_data.h:34</div></div>
+<div class="ttc" id="astructmomentum_1_1PolygonData_html_a64328858ee62e50164904312d208298d"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d">momentum::PolygonData::indices</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; indices</div><div class="ttdef"><b>Definition</b> polygon_data.h:33</div></div>
+<div class="ttc" id="astructmomentum_1_1PolygonData_html_aa6e70f09e6d7c54d64045a49f2649625"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#aa6e70f09e6d7c54d64045a49f2649625">momentum::PolygonData::textureIndices</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; textureIndices</div><div class="ttdef"><b>Definition</b> polygon_data.h:40</div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html_ab6465b26dd734418b70439f0a5ed6860"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#ab6465b26dd734418b70439f0a5ed6860">momentum::PolygonData::warnMessage</a></div><div class="ttdeci">std::string warnMessage(size_t numTexVertices) const</div><div class="ttdef"><b>Definition</b> polygon_data.cpp:86</div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html_ab8470c2b6c8bf87f88c6ebbb2af59091"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#ab8470c2b6c8bf87f88c6ebbb2af59091">momentum::PolygonData::numPolygons</a></div><div class="ttdeci">size_t numPolygons() const</div><div class="ttdef"><b>Definition</b> polygon_data.cpp:43</div></div>
-<div class="ttc" id="astructmomentum_1_1PolygonData_html_ac60d8b1125f2c2df32ae396fac934c7f"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#ac60d8b1125f2c2df32ae396fac934c7f">momentum::PolygonData::PolygonData</a></div><div class="ttdeci">PolygonData()</div><div class="ttdef"><b>Definition</b> polygon_data.h:43</div></div>
+<div class="ttc" id="astructmomentum_1_1PolygonData_html_ac60d8b1125f2c2df32ae396fac934c7f"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#ac60d8b1125f2c2df32ae396fac934c7f">momentum::PolygonData::PolygonData</a></div><div class="ttdeci">PolygonData()</div><div class="ttdef"><b>Definition</b> polygon_data.h:42</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

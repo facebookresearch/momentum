@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Momentum: io/openfbx/openfbx_io.cpp File Reference</title>
+<title>Momentum: io/fbx/openfbx_loader.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -70,40 +70,23 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_e61d42d11b7905bb2da6ba63368975ad.html">openfbx</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
-  <div class="headertitle"><div class="title">openfbx_io.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">openfbx_loader.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="openfbx__io_8h_source.html">momentum/io/openfbx/openfbx_io.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="collision__geometry__state_8h_source.html">momentum/character/collision_geometry_state.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="skin__weights_8h_source.html">momentum/character/skin_weights.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="character_2types_8h_source.html">momentum/character/types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="log_8h_source.html">momentum/common/log.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="gsl__utils_8h_source.html">momentum/io/common/gsl_utils.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="polygon__data_8h_source.html">momentum/io/openfbx/polygon_data.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="locator__io_8h_source.html">momentum/io/skeleton/locator_io.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="parameter__limits__io_8h_source.html">momentum/io/skeleton/parameter_limits_io.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="parameter__transform__io_8h_source.html">momentum/io/skeleton/parameter_transform_io.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="parameters__io_8h_source.html">momentum/io/skeleton/parameters_io.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="constants_8h_source.html">momentum/math/constants.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="utility_8h_source.html">momentum/math/utility.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="character_2fwd_8h_source.html">momentum/character/fwd.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="filesystem_8h_source.html">momentum/common/filesystem.h</a>&gt;</code><br />
-<code>#include &lt;ofbx.h&gt;</code><br />
-<code>#include &lt;gsl/span_ext&gt;</code><br />
-<code>#include &lt;cmath&gt;</code><br />
-<code>#include &lt;fstream&gt;</code><br />
-<code>#include &lt;numeric&gt;</code><br />
-<code>#include &lt;unordered_map&gt;</code><br />
-<code>#include &lt;variant&gt;</code><br />
-</div><table class="memberdecls">
+<code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
+<code>#include &lt;gsl/span&gt;</code><br />
+</div>
+<p><a href="openfbx__loader_8h_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
@@ -111,14 +94,14 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac79ef5ca6a940ce4f884bb1ad52f1b78" id="r_ac79ef5ca6a940ce4f884bb1ad52f1b78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ac79ef5ca6a940ce4f884bb1ad52f1b78">momentum::loadOpenFbxCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">fbxDataRaw</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a>)</td></tr>
-<tr class="separator:ac79ef5ca6a940ce4f884bb1ad52f1b78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7518988532ace423229e4db08f04abb9" id="r_a7518988532ace423229e4db08f04abb9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7518988532ace423229e4db08f04abb9">momentum::loadOpenFbxCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">path</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a>)</td></tr>
 <tr class="separator:a7518988532ace423229e4db08f04abb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d3dd013f797bdec2950fedd84061b99" id="r_a9d3dd013f797bdec2950fedd84061b99"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>, std::vector&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &gt;, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a9d3dd013f797bdec2950fedd84061b99">momentum::loadOpenFbxCharacterWithMotion</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a>)</td></tr>
-<tr class="separator:a9d3dd013f797bdec2950fedd84061b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac79ef5ca6a940ce4f884bb1ad52f1b78" id="r_ac79ef5ca6a940ce4f884bb1ad52f1b78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ac79ef5ca6a940ce4f884bb1ad52f1b78">momentum::loadOpenFbxCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">fbxDataRaw</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a>)</td></tr>
+<tr class="separator:ac79ef5ca6a940ce4f884bb1ad52f1b78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42ca040359060dbe0e53da86ffadfc1c" id="r_a42ca040359060dbe0e53da86ffadfc1c"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>, std::vector&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &gt;, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a42ca040359060dbe0e53da86ffadfc1c">momentum::loadOpenFbxCharacterWithMotion</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputPath</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a>)</td></tr>
 <tr class="separator:a42ca040359060dbe0e53da86ffadfc1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d3dd013f797bdec2950fedd84061b99" id="r_a9d3dd013f797bdec2950fedd84061b99"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>, std::vector&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &gt;, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a9d3dd013f797bdec2950fedd84061b99">momentum::loadOpenFbxCharacterWithMotion</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a>)</td></tr>
+<tr class="separator:a9d3dd013f797bdec2950fedd84061b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 <!-- start footer part -->

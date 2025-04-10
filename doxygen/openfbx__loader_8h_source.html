@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Momentum: io/openfbx/openfbx_io.h Source File</title>
+<title>Momentum: io/fbx/openfbx_loader.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -75,14 +75,14 @@ $(document).ready(function() { init_codefold(0); });
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_e61d42d11b7905bb2da6ba63368975ad.html">openfbx</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
-  <div class="headertitle"><div class="title">openfbx_io.h</div></div>
+  <div class="headertitle"><div class="title">openfbx_loader.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="openfbx__io_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="openfbx__loader_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) Meta Platforms, Inc. and affiliates.</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * This source code is licensed under the MIT license found in the</span></div>
@@ -131,9 +131,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a9d3dd013f797bdec2950fedd84061b99"><div class="ttname"><a href="namespacemomentum.html#a9d3dd013f797bdec2950fedd84061b99">momentum::loadOpenFbxCharacterWithMotion</a></div><div class="ttdeci">std::tuple&lt; Character, std::vector&lt; MatrixXf &gt;, float &gt; loadOpenFbxCharacterWithMotion(gsl::span&lt; const std::byte &gt; inputSpan, bool keepLocators, bool permissive)</div><div class="ttdef"><b>Definition</b> openfbx_io.cpp:1015</div></div>
+<div class="ttc" id="anamespacemomentum_html_a9d3dd013f797bdec2950fedd84061b99"><div class="ttname"><a href="namespacemomentum.html#a9d3dd013f797bdec2950fedd84061b99">momentum::loadOpenFbxCharacterWithMotion</a></div><div class="ttdeci">std::tuple&lt; Character, std::vector&lt; MatrixXf &gt;, float &gt; loadOpenFbxCharacterWithMotion(gsl::span&lt; const std::byte &gt; inputSpan, bool keepLocators, bool permissive)</div><div class="ttdef"><b>Definition</b> openfbx_loader.cpp:1015</div></div>
 <div class="ttc" id="anamespacemomentum_html_a9f4c67a24d6c5afccf7ec31801df8e6e"><div class="ttname"><a href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a></div><div class="ttdeci">CharacterT&lt; float &gt; Character</div><div class="ttdef"><b>Definition</b> fwd.h:56</div></div>
-<div class="ttc" id="anamespacemomentum_html_ac79ef5ca6a940ce4f884bb1ad52f1b78"><div class="ttname"><a href="namespacemomentum.html#ac79ef5ca6a940ce4f884bb1ad52f1b78">momentum::loadOpenFbxCharacter</a></div><div class="ttdeci">Character loadOpenFbxCharacter(const gsl::span&lt; const std::byte &gt; fbxDataRaw, bool keepLocators, bool permissive)</div><div class="ttdef"><b>Definition</b> openfbx_io.cpp:1001</div></div>
+<div class="ttc" id="anamespacemomentum_html_ac79ef5ca6a940ce4f884bb1ad52f1b78"><div class="ttname"><a href="namespacemomentum.html#ac79ef5ca6a940ce4f884bb1ad52f1b78">momentum::loadOpenFbxCharacter</a></div><div class="ttdeci">Character loadOpenFbxCharacter(const gsl::span&lt; const std::byte &gt; fbxDataRaw, bool keepLocators, bool permissive)</div><div class="ttdef"><b>Definition</b> openfbx_loader.cpp:1001</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
