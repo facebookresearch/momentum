@@ -25,7 +25,7 @@ class TriBvh {
  public:
   using Scalar = S;
   using QueryBuffer = typename BvhBase<S>::QueryBuffer;
-  using ClosestSurfacePointResult = ClosestSurfacePointResult<S>;
+  using ClosestSurfacePointResult = ::axel::ClosestSurfacePointResult<S>;
 
   TriBvh() = default;
 
