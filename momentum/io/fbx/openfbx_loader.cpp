@@ -504,15 +504,15 @@ void parseSkinnedModel(
       "No polygons found in mesh element.");
   const auto indices = extractPropertyArray<int>(polys_element, "PolygonVertexIndex");
 
-  PolygonData faces;
-  faces.indices.reserve(indices.size());
+  PolygonData vertices;
+  vertices.indices.reserve(indices.size());
   for (const auto& i : indices) {
     if (i < 0) {
       // end of polygon is indicated by a negative index:
-      faces.indices.push_back(-(i + 1));
-      faces.offsets.push_back((uint32_t)faces.indices.size());
+      vertices.indices.push_back(-(i + 1));
+      vertices.offsets.push_back((uint32_t)vertices.indices.size());
     } else {
-      faces.indices.push_back(i);
+      vertices.indices.push_back(i);
     }
   }
 
@@ -565,17 +565,23 @@ void parseSkinnedModel(
             extractPropertyArray<int>(indices_element, "PolygonVertexIndex");
 
         MT_THROW_IF(
-            textureIndices.size() != faces.indices.size(),
-            "Mismatch between texture indices size and indices size.");
+            textureIndices.size() != vertices.indices.size(),
+            "Mismatch between texture indices size {} and vertex indices size {}.",
+            textureIndices.size(),
+            vertices.indices.size());
         std::copy(
-            textureIndices.begin(), textureIndices.end(), std::back_inserter(faces.textureIndices));
+            textureIndices.begin(),
+            textureIndices.end(),
+            std::back_inserter(vertices.textureIndices));
       } else if (reference == RefDirect) {
         // Direct means the UV array is already in order.
         MT_THROW_IF(
-            textureCoords.size() != faces.indices.size(),
-            "Mismatch between 'Direct' texture coord array size and vertex indices size.");
-        faces.textureIndices.resize(faces.indices.size());
-        std::iota(faces.textureIndices.begin(), faces.textureIndices.end(), 0);
+            textureCoords.size() != vertices.indices.size(),
+            "Mismatch between 'Direct' texture coord array size {} and vertex indices size {}.",
+            textureCoords.size(),
+            vertices.indices.size());
+        vertices.textureIndices.resize(vertices.indices.size());
+        std::iota(vertices.textureIndices.begin(), vertices.textureIndices.end(), 0);
       } else {
         MT_THROW("UV reading code failed to handle a valid reference type. This is a bug.");
       }
@@ -587,15 +593,15 @@ void parseSkinnedModel(
     tc.y() = 1.0f - tc.y();
   }
 
-  auto errMsg = faces.errorMessage(nVerts);
+  auto errMsg = vertices.errorMessage(nVerts);
   MT_THROW_IF(!errMsg.empty(), "Error reading polygons from FBX file: {}", errMsg);
-  errMsg = faces.warnMessage(textureCoords.size());
+  errMsg = vertices.warnMessage(textureCoords.size());
   MT_LOGW_IF(!errMsg.empty(), "Error reading polygon data from FBX file: {}", errMsg);
 
   const size_t vertexOffset = mesh.vertices.size();
   std::copy(
       std::begin(vertexPositions), std::end(vertexPositions), std::back_inserter(mesh.vertices));
-  for (const auto& t : triangulate(faces.indices, faces.offsets)) {
+  for (const auto& t : triangulate(vertices.indices, vertices.offsets)) {
     mesh.faces.emplace_back(t + Eigen::Vector3i::Constant(vertexOffset));
   }
 
@@ -605,7 +611,7 @@ void parseSkinnedModel(
 
   const size_t textureCoordOffset = mesh.texcoords.size();
   std::copy(std::begin(textureCoords), std::end(textureCoords), std::back_inserter(mesh.texcoords));
-  for (const auto& t : triangulate(faces.textureIndices, faces.offsets)) {
+  for (const auto& t : triangulate(vertices.textureIndices, vertices.offsets)) {
     mesh.texcoord_faces.emplace_back(t + Eigen::Vector3i::Constant(textureCoordOffset));
   }
 
