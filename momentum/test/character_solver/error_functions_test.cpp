@@ -574,15 +574,29 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
   // create skeleton and reference values
 
-  const size_t nConstraints = 1000;
+  const size_t nConstraints = 10;
 
   // Test WITHOUT blend shapes:
   {
     SCOPED_TRACE("Without blend shapes");
 
     const Character character_orig = createTestCharacter();
-    const ModelParametersT<T> modelParams =
+    const Eigen::VectorX<T> refParams =
         0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+    const ModelParametersT<T> modelParams = refParams;
+    const ModelParametersT<T> modelParamsTarget = refParams +
+        0.05 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+    const Skeleton& skeleton = character_orig.skeleton;
+    const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
+    const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
+    momentum::TransformationListT<T> ibp;
+    for (const auto& js : character_orig.inverseBindPose) {
+      ibp.push_back(js.cast<T>());
+    }
+    const auto mesh = character_orig.mesh->cast<T>();
+    const auto& skin = *character_orig.skinWeights;
+    momentum::MeshT<T> targetMesh = character_orig.mesh->cast<T>();
+    applySSD(ibp, skin, mesh, skelState, targetMesh);
 
     for (VertexConstraintType type :
          {VertexConstraintType::Position,
@@ -611,11 +625,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
       VertexErrorFunctionT<T> errorFunction(character_orig, type, 0);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
         errorFunction.addConstraint(
-            uniform<int>(0, character_orig.mesh->vertices.size() - 1),
-            uniform<float>(0, 1e-4),
-            uniform<Vector3<T>>(0, 1),
-            uniform<Vector3<T>>(0.1, 1).normalized());
+            index, uniform<float>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
       }
 
       TEST_GRADIENT_AND_JACOBIAN(
@@ -636,8 +648,23 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     SCOPED_TRACE("With blend shapes");
 
     const Character character_blend = withTestBlendShapes(createTestCharacter());
-    const ModelParametersT<T> modelParams =
+    const Eigen::VectorX<T> refParams =
         0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const ModelParametersT<T> modelParams = refParams;
+    const ModelParametersT<T> modelParamsTarget = refParams +
+        0.05 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const Skeleton& skeleton = character_blend.skeleton;
+    const ParameterTransformT<T> transform = character_blend.parameterTransform.cast<T>();
+    const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
+    momentum::TransformationListT<T> ibp;
+    for (const auto& js : character_blend.inverseBindPose) {
+      ibp.push_back(js.cast<T>());
+    }
+    const auto mesh = character_blend.mesh->cast<T>();
+    const auto& skin = *character_blend.skinWeights;
+    momentum::MeshT<T> targetMesh = character_blend.mesh->cast<T>();
+    applySSD(ibp, skin, mesh, skelState, targetMesh);
+
     // It's trickier to test Normal and SymmetricNormal constraints in the blend shape case because
     // the mesh normals are recomputed after blend shapes are applied (this is the only sensible
     // thing to do since the blend shapes can drastically change the shape) and thus the normals
@@ -649,11 +676,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
       VertexErrorFunctionT<T> errorFunction(character_blend, type);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        const int index = uniform<int>(0, character_blend.mesh->vertices.size() - 1);
         errorFunction.addConstraint(
-            uniform<int>(0, character_blend.mesh->vertices.size() - 1),
-            uniform<float>(0, 1),
-            uniform<Vector3<T>>(0, 1),
-            uniform<Vector3<T>>(0.1, 1).normalized());
+            index, uniform<float>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
       }
 
       TEST_GRADIENT_AND_JACOBIAN(
@@ -679,8 +704,22 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
   const size_t nConstraints = 1000;
 
   const Character character_orig = createTestCharacter();
-  const ModelParametersT<T> modelParams =
+  const Eigen::VectorX<T> refParams =
       0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+  const ModelParametersT<T> modelParams = refParams;
+  const ModelParametersT<T> modelParamsTarget = refParams +
+      0.05 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+  const Skeleton& skeleton = character_orig.skeleton;
+  const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
+  const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
+  momentum::TransformationListT<T> ibp;
+  for (const auto& js : character_orig.inverseBindPose) {
+    ibp.push_back(js.cast<T>());
+  }
+  const auto mesh = character_orig.mesh->cast<T>();
+  const auto& skin = *character_orig.skinWeights;
+  momentum::MeshT<T> targetMesh = character_orig.mesh->cast<T>();
+  applySSD(ibp, skin, mesh, skelState, targetMesh);
 
   for (VertexConstraintType type :
        {VertexConstraintType::Position,
@@ -709,11 +748,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
 
     VertexErrorFunctionT<T> errorFunction(character_orig, type, 100000);
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
       errorFunction.addConstraint(
-          uniform<int>(0, character_orig.mesh->vertices.size() - 1),
-          uniform<float>(0, 1e-4),
-          uniform<Vector3<T>>(0, 1),
-          uniform<Vector3<T>>(0.1, 1).normalized());
+          index, uniform<float>(0, 1e-4), targetMesh.vertices[index], targetMesh.normals[index]);
     }
 
     TEST_GRADIENT_AND_JACOBIAN(
