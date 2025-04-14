@@ -402,6 +402,7 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
     nml = copyAccessorBuffer<Vector3f>(model, normId->second);
   }
   MT_CHECK(nml.empty() || nml.size() == pos.size(), "nml: {}, pos: {}", nml.size(), pos.size());
+  MT_LOGI_IF(nml.empty(), "no vertex normal found");
 
   // load optional color buffer
   std::vector<Vector3b> col;
@@ -410,6 +411,7 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
     col = copyAccessorBuffer<Vector3b>(model, colorId->second);
   }
   MT_CHECK(col.empty() || col.size() == pos.size(), "col: {}, pos: {}", col.size(), pos.size());
+  MT_LOGI_IF(col.empty(), "no vertex color found");
 
   // load optional texcoord buffer
   std::vector<Vector2f> texcoord;
@@ -422,6 +424,7 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
       "texcoord: {}, pos: {}",
       texcoord.size(),
       pos.size());
+  MT_LOGI_IF(texcoord.empty(), "no texture coords found");
 
   const auto kVertexOffset = mesh->vertices.size();
   // Update vertex indices of the faces!!!

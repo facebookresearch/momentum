@@ -30,7 +30,8 @@ struct Options {
   std::string input_locator_file;
   std::string input_motion_file;
   std::string output_model_file;
-  std::string output_locator_file;
+  std::string output_locator_local;
+  std::string output_locator_global;
   bool save_markers = false;
   bool character_mesh_save = false;
 };
@@ -54,7 +55,14 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
 
   app.add_option("-o,--out", opt->output_model_file, "Output file (.fbx/.glb)")->required();
 
-  app.add_option("--out-locator", opt->output_locator_file, "Output a locator file (.locators)");
+  app.add_option(
+      "--out-locator-local",
+      opt->output_locator_local,
+      "Output a locator file (.locators) in local space for transfering between identities");
+  app.add_option(
+      "--out-locator-global",
+      opt->output_locator_global,
+      "Output a locator file (.locators) in global space for authoring a template");
 
   app.add_flag(
       "--save-markers",
@@ -92,7 +100,7 @@ int main(int argc, char** argv) {
       character = loadFullCharacter(
           options->input_model_file, options->input_params_file, options->input_locator_file);
     }
-  } catch (std::runtime_error& e) {
+  } catch (std::exception& e) {
     MT_LOGE("Failed to load character from: {}. Error: {}", options->input_model_file, e.what());
     return EXIT_FAILURE;
   } catch (...) {
@@ -231,12 +239,19 @@ int main(int argc, char** argv) {
         saveCharacter(options->output_model_file, character);
       }
     }
-    if (!options->output_locator_file.empty()) {
+    if (!options->output_locator_local.empty()) {
       saveLocators(
-          options->output_locator_file,
+          options->output_locator_local,
           character.locators,
           character.skeleton,
           LocatorSpace::Local);
+    }
+    if (!options->output_locator_global.empty()) {
+      saveLocators(
+          options->output_locator_global,
+          character.locators,
+          character.skeleton,
+          LocatorSpace::Global);
     }
   } catch (std::exception& e) {
     MT_LOGE("Failed to convert model. Error: {}", e.what());
