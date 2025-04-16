@@ -281,7 +281,7 @@ Eigen::MatrixXf trackPosesPerframe(
   }
 
   { // scope the ProgressBar so it returns
-    ProgressBar progress("", numFrames, true);
+    ProgressBar progress("", numFrames);
     for (size_t iFrame = 0; iFrame < numFrames; iFrame += frameStride) {
       // reinitialize if not continuous
       if (!continuous) {

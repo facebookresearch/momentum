@@ -100,6 +100,7 @@ find_package(ezc3d CONFIG REQUIRED)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(fx-gltf CONFIG REQUIRED)
+find_package(indicators 2.3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(openfbx CONFIG REQUIRED)
 find_package(re2 MODULE REQUIRED)
@@ -163,6 +164,7 @@ mt_library(
   SOURCES_VARS common_sources
   PUBLIC_LINK_LIBRARIES
     fmt::fmt
+    indicators::indicators
     spdlog::spdlog
   PUBLIC_COMPILE_DEFINITIONS
     MOMENTUM_WITH_SPDLOG=1

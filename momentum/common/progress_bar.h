@@ -7,28 +7,28 @@
 
 #pragma once
 
+// clang-format off
+#include <cstdint>  // Must come first. See https://github.com/p-ranav/indicators/pull/124
+#include <indicators/progress_bar.hpp>
+// clang-format on
+
 #include <string>
 
 namespace momentum {
 
-// A simple progress bar that prints hash marks, e.g.
-//   Reticulating splines #####################################
+// A simple progress bar that prints hash marks (e.g., "[===>  ] 60% Name")
 class ProgressBar {
-  const int64_t maxWidth = 80;
+  static constexpr int64_t kMaxWidth = 80;
 
  public:
-  ProgressBar(const std::string& name, int64_t numOperations, bool visible = false);
+  /// @param name Displayed prefix (visible=true only)
+  /// @param numOperations Total operations (determines hash ratio)
+  ProgressBar(const std::string& name, int64_t numOperations);
   void increment(int64_t count = 1);
   void set(int64_t count);
-  ~ProgressBar();
 
  private:
-  const int64_t numHashes_;
-  const int64_t numOperations_;
-  const bool visible_;
-
-  int64_t numHashesPrinted_ = 0;
-  int64_t curOp_ = 0;
+  indicators::ProgressBar bar_;
 };
 
 } // namespace momentum

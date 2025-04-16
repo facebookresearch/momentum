@@ -80,16 +80,16 @@ class SequenceSolverT : public SolverT<T> {
   static double processPerFrameErrors_parallel(
       SequenceSolverFunctionT<T>* fn,
       OnlineBandedHouseholderQR<T>& qrSolver,
-      ProgressBar& progress);
+      ProgressBar* progress);
   static double processPerFrameErrors_serial(
       SequenceSolverFunctionT<T>* fn,
       OnlineBandedHouseholderQR<T>& qrSolver,
-      ProgressBar& progress);
+      ProgressBar* progress);
 
   static double processSequenceErrors_serial(
       SequenceSolverFunctionT<T>* fn,
       OnlineBandedHouseholderQR<T>& qrSolver,
-      ProgressBar& progress);
+      ProgressBar* progress);
 
   struct UniversalJacobianResid {
     size_t frameIndex = SIZE_MAX;
@@ -116,7 +116,7 @@ class SequenceSolverT : public SolverT<T> {
           OnlineBandedHouseholderQR<T>&)>& processJac,
       SequenceSolverFunctionT<T>* fn,
       OnlineBandedHouseholderQR<T>& qrSolver,
-      ProgressBar& progress);
+      ProgressBar* progress);
 
   // Returns the [Jacobian, residual, error] for all the error functions applying to a single frame:
   static std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> computePerFrameJacobian(

@@ -207,7 +207,7 @@ template <typename T>
 double SequenceSolverT<T>::processPerFrameErrors_serial(
     SequenceSolverFunctionT<T>* fn,
     OnlineBandedHouseholderQR<T>& qrSolver,
-    ProgressBar& progress) {
+    ProgressBar* progress) {
   double errorSum = 0;
   for (size_t iFrame = 0; iFrame < fn->getNumFrames(); ++iFrame) {
     auto [jacobian, residual, errorCur, nFunctions] = computePerFrameJacobian(fn, iFrame);
@@ -221,7 +221,9 @@ double SequenceSolverT<T>::processPerFrameErrors_serial(
           residual);
     }
 
-    progress.increment(nFunctions);
+    if (progress) {
+      progress->increment(nFunctions);
+    }
   }
   return errorSum;
 }
@@ -259,7 +261,7 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
         OnlineBandedHouseholderQR<T>& qrSolver)>& processJac,
     SequenceSolverFunctionT<T>* fn,
     OnlineBandedHouseholderQR<T>& qrSolver,
-    ProgressBar& progress) {
+    ProgressBar* progress) {
   const size_t end = fn->getNumFrames();
 
   // We will buffer at the end of the pipeline to ensure the universal parts of the matrices are
@@ -323,7 +325,9 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
             } else {
               qrSolver.addMutating(toProcess.jacobian, toProcess.residual);
               errorSum += toProcess.error;
-              progress.increment(toProcess.nFunctions);
+              if (progress) {
+                progress->increment(toProcess.nFunctions);
+              }
             }
           }
         }
@@ -338,7 +342,9 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
       while (!readyJacobians.empty()) {
         qrSolver.addMutating(readyJacobians.front().jacobian, readyJacobians.front().residual);
         errorSum += readyJacobians.front().error;
-        progress.increment(readyJacobians.front().nFunctions);
+        if (progress) {
+          progress->increment(readyJacobians.front().nFunctions);
+        }
         readyJacobians.pop_front();
       }
     }
@@ -348,7 +354,9 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
       while (!reorderBuffer.empty()) {
         qrSolver.addMutating(reorderBuffer.top().jacobian, reorderBuffer.top().residual);
         errorSum += reorderBuffer.top().error;
-        progress.increment(reorderBuffer.top().nFunctions);
+        if (progress) {
+          progress->increment(reorderBuffer.top().nFunctions);
+        }
         reorderBuffer.pop();
       }
     }
@@ -362,7 +370,7 @@ template <typename T>
 double SequenceSolverT<T>::processPerFrameErrors_parallel(
     SequenceSolverFunctionT<T>* fn,
     OnlineBandedHouseholderQR<T>& qrSolver,
-    ProgressBar& progress) {
+    ProgressBar* progress) {
   return processErrorFunctions_parallel(
       [](size_t iFrame,
          SequenceSolverFunctionT<T>* fn,
@@ -403,7 +411,7 @@ template <typename T>
 double SequenceSolverT<T>::processSequenceErrors_serial(
     SequenceSolverFunctionT<T>* fn,
     OnlineBandedHouseholderQR<T>& qrSolver,
-    ProgressBar& progress) {
+    ProgressBar* progress) {
   if (fn->numTotalSequenceErrorFunctions_ == 0) {
     return 0;
   }
@@ -434,7 +442,9 @@ double SequenceSolverT<T>::processSequenceErrors_serial(
           residual);
     }
 
-    progress.increment(nFunctions);
+    if (progress) {
+      progress->increment(nFunctions);
+    }
   }
   return errorSum;
 }
@@ -454,20 +464,22 @@ void SequenceSolverT<T>::doIteration() {
 
   fn->setFrameParametersFromJoinedParameterVector(this->parameters_);
 
-  ProgressBar progress(
-      "Solving sequence",
-      fn->numTotalPerFrameErrorFunctions_ + fn->numTotalSequenceErrorFunctions_,
-      progressBar_);
+  std::unique_ptr<ProgressBar> progress;
+  if (progressBar_) {
+    progress = std::make_unique<ProgressBar>(
+        "Solving sequence",
+        fn->numTotalPerFrameErrorFunctions_ + fn->numTotalSequenceErrorFunctions_);
+  }
 
   this->error_ = 0;
   if (this->multithreaded_) {
-    this->error_ += processPerFrameErrors_parallel(fn, qrSolver, progress);
+    this->error_ += processPerFrameErrors_parallel(fn, qrSolver, progress.get());
 
     // Sequence errors still have to be be processed serially, at least for now.
-    this->error_ += processSequenceErrors_serial(fn, qrSolver, progress);
+    this->error_ += processSequenceErrors_serial(fn, qrSolver, progress.get());
   } else {
-    this->error_ += processPerFrameErrors_serial(fn, qrSolver, progress);
-    this->error_ += processSequenceErrors_serial(fn, qrSolver, progress);
+    this->error_ += processPerFrameErrors_serial(fn, qrSolver, progress.get());
+    this->error_ += processSequenceErrors_serial(fn, qrSolver, progress.get());
   }
 
   // Now, extract the delta:
