@@ -395,8 +395,6 @@ mt_library(
   NAME io_urdf
   HEADERS_VARS
     io_urdf_public_headers
-  PRIVATE_HEADERS_VARS
-    io_urdf_private_headers
   SOURCES_VARS io_urdf_sources
   PUBLIC_LINK_LIBRARIES
     character
@@ -539,7 +537,6 @@ if(MOMENTUM_BUILD_TESTING)
   mt_library(
     NAME solver_test_helper
     HEADERS_VARS solver_test_helper_public_headers
-    SOURCES_VARS solver_test_helper_sources
     PUBLIC_LINK_LIBRARIES
       solver
     NO_INSTALL

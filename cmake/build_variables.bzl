@@ -116,9 +116,6 @@ solver_sources = [
     "solver/gradient_descent_solver.cpp",
 ]
 
-solver_test_sources = [
-]
-
 skeleton_public_headers = [
     "character/fwd.h",
     "character/joint_state.h",
@@ -413,9 +410,6 @@ io_urdf_public_headers = [
     "io/urdf/urdf_io.h",
 ]
 
-io_urdf_private_headers = [
-]
-
 io_urdf_sources = [
     "io/urdf/urdf_io.cpp",
 ]
@@ -490,9 +484,6 @@ character_test_helpers_gtest_sources = [
 
 solver_test_helper_public_headers = [
     "test/solver/solver_test_helpers.h",
-]
-
-solver_test_helper_sources = [
 ]
 
 error_function_helper_public_headers = [
