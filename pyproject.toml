@@ -24,7 +24,6 @@ cmake.args = [
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
-    "-DUSE_SYSTEM_NVTX=ON",
 ]
 minimum-version = "0.10"
 sdist.exclude = [
@@ -46,5 +45,4 @@ cmake.args = [
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
-    "-DUSE_SYSTEM_NVTX=ON",
 ]

@@ -7,10 +7,7 @@
 
 #pragma once
 
-// clang-format off
-#include <cstdint>  // Must come first. See https://github.com/p-ranav/indicators/pull/124
 #include <indicators/progress_bar.hpp>
-// clang-format on
 
 #include <string>
 
