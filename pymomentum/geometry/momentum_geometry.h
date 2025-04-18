@@ -107,6 +107,11 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromBytes(
     const pybind11::bytes& bytes,
     int nExpectedShapes = -1,
     int nExpectedVertices = -1);
+pybind11::bytes saveBlendShapeToBytes(const momentum::BlendShape& blendShape);
+void saveBlendShapeToFile(
+    const momentum::BlendShape& blendShape,
+    const std::string& path);
+
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
     pybind11::array_t<float> baseShape,
     pybind11::array_t<float> shapeVectors);
