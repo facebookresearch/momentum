@@ -29,7 +29,7 @@ def _build_blend_shape_basis(
 
 
 class TestBlendShape(unittest.TestCase):
-    def test_diffApplyBlendCoeffs(self) -> None:
+    def test_diff_apply_blend_coeffs(self) -> None:
         np.random.seed(0)
 
         n_pts = 10
@@ -60,7 +60,7 @@ class TestBlendShape(unittest.TestCase):
             raise_exception=True,
         )
 
-    def test_blendShapeCharacter(self) -> None:
+    def test_blend_shape_character(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
         np.random.seed(0)
 
@@ -74,6 +74,23 @@ class TestBlendShape(unittest.TestCase):
         bp1 = params[c2.parameter_transform.blend_shape_parameters]
         bp2 = pym_geometry.model_parameters_to_blend_shape_coefficients(c2, params)
         self.assertTrue(bp1.allclose(bp2))
+
+    def test_save_and_load(self) -> None:
+        torch.manual_seed(0)  # ensure repeatability
+        np.random.seed(0)
+
+        c = pym_geometry.create_test_character()
+
+        # Build a blend shape basis:
+        blend_shape = _build_blend_shape_basis(c)
+
+        bs_bytes = blend_shape.to_bytes()
+        blend_shape2 = pym_geometry.BlendShape.from_bytes(bs_bytes)
+
+        self.assertTrue(np.allclose(blend_shape.base_shape, blend_shape2.base_shape))
+        self.assertTrue(
+            np.allclose(blend_shape.shape_vectors, blend_shape2.shape_vectors)
+        )
 
     def test_skinning_compare_momentum(self) -> None:
         """Compare the pymomentum skinning against the native momentum skinning."""

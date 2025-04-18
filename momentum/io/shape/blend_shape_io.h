@@ -57,4 +57,6 @@ void ReadShapeVectors(
 
 void saveBlendShape(const filesystem::path& filename, const BlendShape& blendShape);
 
+void saveBlendShape(std::ostream& os, const BlendShape& blendShape);
+
 } // namespace momentum

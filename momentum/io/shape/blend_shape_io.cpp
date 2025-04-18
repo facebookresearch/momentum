@@ -121,7 +121,10 @@ void saveBlendShape(const filesystem::path& filename, const BlendShape& blendSha
   std::ofstream data(filename, std::ios::out | std::ios::binary);
   if (!data.is_open())
     return;
+  saveBlendShape(data, blendShape);
+}
 
+void saveBlendShape(std::ostream& os, const BlendShape& blendShape) {
   // write dimensions
   const uint64_t numRows = blendShape.getShapeVectors().rows();
   const uint64_t numCols = blendShape.getShapeVectors().cols();
@@ -131,14 +134,14 @@ void saveBlendShape(const filesystem::path& filename, const BlendShape& blendSha
       numRows,
       blendShape.getBaseShape().size() * 3);
 
-  data.write((char*)&numRows, sizeof(numRows));
-  data.write((char*)&numCols, sizeof(numCols));
+  os.write((char const*)&numRows, sizeof(numRows));
+  os.write((char const*)&numCols, sizeof(numCols));
 
   // write mean shape
-  data.write((char*)blendShape.getBaseShape().data(), sizeof(float) * numRows);
+  os.write((char const*)blendShape.getBaseShape().data(), sizeof(float) * numRows);
 
   // write coefficient matrix
-  data.write((char*)blendShape.getShapeVectors().data(), sizeof(float) * numRows * numCols);
+  os.write((char const*)blendShape.getShapeVectors().data(), sizeof(float) * numRows * numCols);
 }
 
 } // namespace momentum
