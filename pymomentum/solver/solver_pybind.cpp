@@ -74,14 +74,16 @@ PYBIND11_MODULE(solver, m) {
                         size_t minIter,
                         size_t maxIter,
                         float threshold,
-                        bool lineSearch) {
+                        bool lineSearch,
+                        float sequenceSmoothingWeight) {
             return SolverOptions{
                 linearSolverType,
                 levmar_lambda,
                 minIter,
                 maxIter,
                 threshold,
-                lineSearch
+                lineSearch,
+                sequenceSmoothingWeight
 
             };
           }),
@@ -90,7 +92,8 @@ PYBIND11_MODULE(solver, m) {
           py::arg("min_iter") = 4,
           py::arg("max_iter") = 50,
           py::arg("threshold") = 10.0f,
-          py::arg("line_search") = true)
+          py::arg("line_search") = true,
+          py::arg("sequence_smoothing_weight") = 0.0f)
       .def_readwrite(
           "linear_solver",
           &SolverOptions::linearSolverType,
