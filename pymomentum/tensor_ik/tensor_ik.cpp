@@ -13,6 +13,7 @@
 
 #include <dispenso/parallel_for.h> // @manual
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character_sequence_solver/model_parameters_sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/sequence_solver_function.h>
 #include <momentum/character_solver/gauss_newton_solver_qr.h>
@@ -426,6 +427,15 @@ at::Tensor solveTensorSequenceIKProblem(
               errorFunctionWeights.select(0, iBatch),
               weightsMap,
               iBatch);
+
+      if (solverOptions.sequenceSmoothingWeight > 0.f) {
+        auto modelParamsSequenceSmoothingErrFunc = std::make_shared<
+            momentum::ModelParametersSequenceErrorFunctionT<T>>(character);
+        modelParamsSequenceSmoothingErrFunc->setWeight(
+            solverOptions.sequenceSmoothingWeight);
+        solverFunction->addSequenceErrorFunction(
+            momentum::kAllFrames, modelParamsSequenceSmoothingErrFunc);
+      }
 
       momentum::SequenceSolverT<T> solver(
           momentumSolverOptions, solverFunction.get());
