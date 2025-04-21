@@ -366,6 +366,18 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromBytes(
   return std::make_shared<momentum::BlendShape>(std::move(result));
 }
 
+py::bytes saveBlendShapeToBytes(const momentum::BlendShape& blendShape) {
+  std::ostringstream oss;
+  momentum::saveBlendShape(oss, blendShape);
+  return py::bytes(oss.str());
+}
+
+void saveBlendShapeToFile(
+    const momentum::BlendShape& blendShape,
+    const std::string& path) {
+  momentum::saveBlendShape(filesystem::path(path), blendShape);
+}
+
 std::string formatDimensions(const py::array& array) {
   std::ostringstream oss;
   oss << "[";

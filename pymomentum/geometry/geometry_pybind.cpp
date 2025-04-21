@@ -1171,6 +1171,15 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           py::arg("blend_shape_bytes"),
           py::arg("num_expected_shapes") = -1,
           py::arg("num_expected_vertices") = -1)
+      .def(
+          "to_bytes",
+          &saveBlendShapeToBytes,
+          R"(Save a blend shape basis to bytes in memory.)")
+      .def(
+          "save",
+          &saveBlendShapeToFile,
+          R"(Save a blend shape basis to a file.)",
+          py::arg("path"))
       .def_static(
           "from_tensors",
           &loadBlendShapeFromTensors,
