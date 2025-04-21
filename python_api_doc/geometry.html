@@ -53,7 +53,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.load"><code class="docutils literal notranslate"><span class="pre">BlendShape.load()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.n_shapes"><code class="docutils literal notranslate"><span class="pre">BlendShape.n_shapes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.n_vertices"><code class="docutils literal notranslate"><span class="pre">BlendShape.n_vertices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.save"><code class="docutils literal notranslate"><span class="pre">BlendShape.save()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.shape_vectors"><code class="docutils literal notranslate"><span class="pre">BlendShape.shape_vectors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.to_bytes"><code class="docutils literal notranslate"><span class="pre">BlendShape.to_bytes()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Character"><code class="docutils literal notranslate"><span class="pre">Character</span></code></a><ul>
@@ -473,6 +475,12 @@
 <dd><p>Number of vertices in the mesh.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.BlendShape" title="pymomentum.geometry.BlendShape"><span class="pre">pymomentum.geometry.BlendShape</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.save" title="Link to this definition"></a></dt>
+<dd><p>Save a blend shape basis to a file.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.shape_vectors">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape_vectors</span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.shape_vectors" title="Link to this definition"></a></dt>
@@ -481,6 +489,12 @@
 <dd class="field-odd"><p>The base shape of the blend shape solver.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.to_bytes">
+<span class="sig-name descname"><span class="pre">to_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.BlendShape" title="pymomentum.geometry.BlendShape"><span class="pre">pymomentum.geometry.BlendShape</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytes</span></span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.to_bytes" title="Link to this definition"></a></dt>
+<dd><p>Save a blend shape basis to bytes in memory.</p>
 </dd></dl>
 
 </dd></dl>
