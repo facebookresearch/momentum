@@ -193,6 +193,25 @@ using VertexConstraintd_const_p = ::std::shared_ptr<const VertexConstraintd>;
 using VertexConstraintd_const_u = ::std::unique_ptr<const VertexConstraintd>;
 using VertexConstraintd_const_w = ::std::weak_ptr<const VertexConstraintd>;
 
+template <typename T>
+struct VertexProjectionConstraintT;
+using VertexProjectionConstraint = VertexProjectionConstraintT<float>;
+using VertexProjectionConstraintd = VertexProjectionConstraintT<double>;
+
+using VertexProjectionConstraint_p = ::std::shared_ptr<VertexProjectionConstraint>;
+using VertexProjectionConstraint_u = ::std::unique_ptr<VertexProjectionConstraint>;
+using VertexProjectionConstraint_w = ::std::weak_ptr<VertexProjectionConstraint>;
+using VertexProjectionConstraint_const_p = ::std::shared_ptr<const VertexProjectionConstraint>;
+using VertexProjectionConstraint_const_u = ::std::unique_ptr<const VertexProjectionConstraint>;
+using VertexProjectionConstraint_const_w = ::std::weak_ptr<const VertexProjectionConstraint>;
+
+using VertexProjectionConstraintd_p = ::std::shared_ptr<VertexProjectionConstraintd>;
+using VertexProjectionConstraintd_u = ::std::unique_ptr<VertexProjectionConstraintd>;
+using VertexProjectionConstraintd_w = ::std::weak_ptr<VertexProjectionConstraintd>;
+using VertexProjectionConstraintd_const_p = ::std::shared_ptr<const VertexProjectionConstraintd>;
+using VertexProjectionConstraintd_const_u = ::std::unique_ptr<const VertexProjectionConstraintd>;
+using VertexProjectionConstraintd_const_w = ::std::weak_ptr<const VertexProjectionConstraintd>;
+
 class SimdNormalErrorFunction;
 
 using SimdNormalErrorFunction_p = ::std::shared_ptr<SimdNormalErrorFunction>;

@@ -6,6 +6,7 @@
  */
 
 #include "momentum/character_solver/vertex_error_function.h"
+#include "momentum/character_solver/skinning_weight_iterator.h"
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/blend_shape_skinning.h"
@@ -112,139 +113,6 @@ double VertexErrorFunctionT<T>::getError(
   // return error
   return error * this->weight_;
 }
-
-template <typename T>
-struct BoneWeightT {
-  size_t parentBone;
-  float weight;
-  Eigen::Vector3<T> weightedWorldSpacePoint;
-
-  bool operator<(const BoneWeightT<T>& rhs) const {
-    return parentBone < rhs.parentBone;
-  }
-
-  bool operator>(const BoneWeightT<T>& rhs) const {
-    return parentBone > rhs.parentBone;
-  }
-
-  BoneWeightT<T>& operator+=(const BoneWeightT<T>& rhs) {
-    this->weight += rhs.weight;
-    this->weightedWorldSpacePoint += rhs.weightedWorldSpacePoint;
-    return *this;
-  }
-};
-
-// When we compute the derivatives of skinned points, we usually
-// end up with a loop like this:
-//   for each skinned point i
-//     for each skinning bone and weight B_ij, w_ij
-//       for each ancestor k
-//          compute the weighted change in the skinned point wrt the ancestor
-// The redundancy here is that most points are skinned to a set of bones in the
-// same hierarchy (for example, two parts of the arm) and so it's redundant to
-// walk up the whole hierarchy from scratch for each skinned bone.
-//
-// This class instead does a single pass up the tree from leaf-most to root-most
-// skinned bones, accumulating skinning weights along the way.  By packaging it
-// in this class we hide the complexity and simplify the jacobian/gradient
-// calculation.
-template <typename T>
-class SkinningWeightIteratorT {
- public:
-  SkinningWeightIteratorT(
-      const Character& character,
-      const MeshT<T>& restMesh,
-      const SkeletonStateT<T>& skelState,
-      int vertexIndex)
-      : character(character), restMesh(restMesh) {
-    const auto& skinWeights = *character.skinWeights;
-    nBoneWeights = 0;
-    {
-      for (uint32_t i = 0; i < kMaxSkinJoints; ++i) {
-        const auto w = skinWeights.weight(vertexIndex, i);
-        const auto parentBone = skinWeights.index(vertexIndex, i);
-        if (w > 0) {
-          boneWeights[nBoneWeights++] = {
-              parentBone,
-              w,
-              T(w) *
-                  (skelState.jointState[parentBone].transformation *
-                   (character.inverseBindPose[parentBone].template cast<T>() *
-                    restMesh.vertices[vertexIndex]))};
-        }
-      }
-      std::sort(
-          boneWeights.begin(), boneWeights.begin() + nBoneWeights, std::greater<BoneWeightT<T>>());
-    }
-    checkInvariants();
-  }
-
-  bool finished() const {
-    return nBoneWeights == 0;
-  }
-
-  // Returns the tuple <parent bone index, bone weight, vertex position in world space wrt the
-  // current bone>
-  std::tuple<size_t, T, Eigen::Vector3<T>> next() {
-    MT_CHECK(nBoneWeights != 0);
-    const BoneWeightT<T> result = boneWeights[0];
-
-    boneWeights[0].parentBone = this->character.skeleton.joints[result.parentBone].parent;
-    if (boneWeights[0].parentBone == kInvalidIndex) {
-      // Reached the root, so we're done with this one:
-      for (int i = 1; i < nBoneWeights; ++i) {
-        boneWeights[i - 1] = boneWeights[i];
-      }
-      --nBoneWeights;
-    } else {
-      // We decreased the bone index by moving up to its parent; now figure out
-      // where the bone weight should be relocated in the list.
-      int i = 1;
-      while (i < nBoneWeights && boneWeights[i - 1].parentBone < boneWeights[i].parentBone) {
-        std::swap(boneWeights[i - 1], boneWeights[i]);
-        ++i;
-      }
-
-      if (i < nBoneWeights && boneWeights[i - 1].parentBone == boneWeights[i].parentBone) {
-        // Merge them:
-        boneWeights[i - 1] += boneWeights[i];
-
-        // strip out the duplicate:
-        ++i;
-        while (i < nBoneWeights) {
-          boneWeights[i - 1] = boneWeights[i];
-          ++i;
-        }
-        --nBoneWeights;
-      }
-    }
-
-    checkInvariants();
-    return {result.parentBone, result.weight, result.weightedWorldSpacePoint / result.weight};
-  }
-
- private:
-  void checkInvariants() {
-#ifndef NDEBUG
-    if (nBoneWeights > 0) {
-      // Check the invariants:
-      float sum = 0;
-      for (int i = 0; i < nBoneWeights; ++i) {
-        MT_CHECK(boneWeights[i].parentBone < this->character.skeleton.joints.size());
-        MT_CHECK(boneWeights[i].weight > 0 && boneWeights[i].weight <= 1.001);
-        MT_CHECK(i == 0 || boneWeights[i - 1].parentBone > boneWeights[i].parentBone);
-        sum += boneWeights[i].weight;
-      }
-      MT_CHECK(sum > 0.99f && sum < 1.01f);
-    }
-#endif
-  }
-
-  std::array<BoneWeightT<T>, kMaxSkinJoints> boneWeights;
-  int nBoneWeights;
-  const Character& character;
-  const MeshT<T>& restMesh;
-};
 
 template <typename T>
 void gradient_jointParams_to_modelParams(

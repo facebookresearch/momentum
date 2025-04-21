@@ -198,10 +198,12 @@ character_solver_public_headers = [
     "character_solver/projection_error_function.h",
     "character_solver/skeleton_error_function.h",
     "character_solver/skeleton_solver_function.h",
+    "character_solver/skinning_weight_iterator.h",
     "character_solver/state_error_function.h",
     "character_solver/transform_pose.h",
     "character_solver/trust_region_qr.h",
     "character_solver/vertex_error_function.h",
+    "character_solver/vertex_projection_error_function.h",
 ]
 
 character_solver_sources = [
@@ -220,10 +222,12 @@ character_solver_sources = [
     "character_solver/position_error_function.cpp",
     "character_solver/projection_error_function.cpp",
     "character_solver/skeleton_solver_function.cpp",
+    "character_solver/skinning_weight_iterator.cpp",
     "character_solver/state_error_function.cpp",
     "character_solver/transform_pose.cpp",
     "character_solver/trust_region_qr.cpp",
     "character_solver/vertex_error_function.cpp",
+    "character_solver/vertex_projection_error_function.cpp",
 ]
 
 character_solver_test_sources = [

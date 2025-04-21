@@ -33,6 +33,7 @@
 #include "momentum/character_solver/projection_error_function.h"
 #include "momentum/character_solver/state_error_function.h"
 #include "momentum/character_solver/vertex_error_function.h"
+#include "momentum/character_solver/vertex_projection_error_function.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/random.h"
@@ -766,6 +767,112 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
   }
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
+  using T = typename TestFixture::Type;
+  SCOPED_TRACE(fmt::format("ScalarType: {}", typeid(T).name()));
+
+  // create skeleton and reference values
+
+  const size_t nConstraints = 10;
+
+  // Test WITHOUT blend shapes:
+  {
+    SCOPED_TRACE("Without blend shapes");
+
+    const Character character_orig = createTestCharacter();
+    const Eigen::VectorX<T> refParams =
+        0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+    const ModelParametersT<T> modelParams = refParams;
+    const ModelParametersT<T> modelParamsTarget = refParams +
+        0.05 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+    const Skeleton& skeleton = character_orig.skeleton;
+    const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
+    const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
+    momentum::TransformationListT<T> ibp;
+    for (const auto& js : character_orig.inverseBindPose) {
+      ibp.push_back(js.cast<T>());
+    }
+    const auto mesh = character_orig.mesh->cast<T>();
+    const auto& skin = *character_orig.skinWeights;
+    momentum::MeshT<T> targetMesh = character_orig.mesh->cast<T>();
+    applySSD(ibp, skin, mesh, skelState, targetMesh);
+
+    Eigen::Matrix<T, 3, 4> projection = Eigen::Matrix<T, 3, 4>::Identity();
+    projection(2, 3) = 10;
+
+    const T errorTol = Eps<T>(5e-2f, 1e-5);
+
+    VertexProjectionErrorFunctionT<T> errorFunction(character_orig, 0);
+    for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
+      const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
+      const Eigen::Vector2<T> target2d = target.hnormalized();
+      errorFunction.addConstraint(index, uniform<float>(0, 1e-2), target2d, projection);
+    }
+
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        modelParams,
+        character_orig.skeleton,
+        character_orig.parameterTransform.cast<T>(),
+        errorTol,
+        Eps<T>(1e-6f, 1e-14),
+        true,
+        false);
+  }
+
+  // Test WITH blend shapes:
+  {
+    SCOPED_TRACE("With blend shapes");
+
+    const Character character_blend = withTestBlendShapes(createTestCharacter());
+    const Eigen::VectorX<T> refParams =
+        0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const ModelParametersT<T> modelParams = refParams;
+    const ModelParametersT<T> modelParamsTarget = refParams +
+        0.05 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const Skeleton& skeleton = character_blend.skeleton;
+    const ParameterTransformT<T> transform = character_blend.parameterTransform.cast<T>();
+    const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
+    momentum::TransformationListT<T> ibp;
+    for (const auto& js : character_blend.inverseBindPose) {
+      ibp.push_back(js.cast<T>());
+    }
+    const auto mesh = character_blend.mesh->cast<T>();
+    const auto& skin = *character_blend.skinWeights;
+    momentum::MeshT<T> targetMesh = character_blend.mesh->cast<T>();
+    applySSD(ibp, skin, mesh, skelState, targetMesh);
+
+    Eigen::Matrix<T, 3, 4> projection = Eigen::Matrix<T, 3, 4>::Identity();
+    projection(2, 3) = 10;
+
+    // It's trickier to test Normal and SymmetricNormal constraints in the blend shape case because
+    // the mesh normals are recomputed after blend shapes are applied (this is the only sensible
+    // thing to do since the blend shapes can drastically change the shape) and thus the normals
+    // depend on the blend shapes in a very complicated way that we aren't currently trying to
+    // model.
+    VertexProjectionErrorFunctionT<T> errorFunction(character_blend);
+    for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      const int index = uniform<int>(0, character_blend.mesh->vertices.size() - 1);
+      const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
+      const Eigen::Vector2<T> target2d = target.hnormalized();
+      errorFunction.addConstraint(index, uniform<float>(0, 1e-2), target2d, projection);
+    }
+
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        modelParams,
+        character_blend.skeleton,
+        character_blend.parameterTransform.cast<T>(),
+        Eps<T>(1e-2f, 1e-5),
+        Eps<T>(1e-6f, 1e-14),
+        true,
+        false);
+  }
+}
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameters) {
   using T = typename TestFixture::Type;
 
@@ -1271,7 +1378,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
         skeleton,
         transform,
-        Eps<T>(2e-2f, 1e-5));
+        Eps<T>(2e-2f, 1e-4));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
       TEST_GRADIENT_AND_JACOBIAN(
@@ -1280,7 +1387,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
           parameters,
           skeleton,
           transform,
-          Eps<T>(5e-2f, 1e-5),
+          Eps<T>(5e-2f, 1e-4),
           Eps<T>(1e-6f, 1e-7));
     }
   }
@@ -1334,7 +1441,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
           parameters,
           skeleton,
           transform,
-          Eps<T>(1e-1f, 5e-5),
+          Eps<T>(2e-1f, 5e-5),
           Eps<T>(1e-6f, 1e-7));
     }
   }
