@@ -51,7 +51,7 @@ jobs:
 
     # 3) Build Python API docs
     - name: Set up pixi
-      uses: prefix-dev/setup-pixi@v0.8.7
+      uses: prefix-dev/setup-pixi@v0.8.8
       with:
         cache: true
 
