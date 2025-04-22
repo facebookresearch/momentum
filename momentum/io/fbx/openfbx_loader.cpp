@@ -699,7 +699,9 @@ void parseSkinnedModel(
     }
   }
 
-  skinWeights = std::make_unique<SkinWeights>();
+  if (!skinWeights) {
+    skinWeights = std::make_unique<SkinWeights>();
+  }
   skinWeights->index.conservativeResize(vertexOffset + nVerts, Eigen::NoChange);
   skinWeights->weight.conservativeResize(vertexOffset + nVerts, Eigen::NoChange);
   skinWeights->index.bottomRows(nVerts).setZero();
