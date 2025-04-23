@@ -51,6 +51,11 @@ class TestQuaternion(unittest.TestCase):
             "Expected rotation difference to be small.",
         )
 
+        # check corner case conversion
+        q_cornercase = torch.FloatTensor([0.4832, -0.5161, 0.4835, 0.5162])
+        euler_cornercase = quaternion.quaternion_to_xyz_euler(q_cornercase)
+        self.assertFalse(torch.isnan(euler_cornercase).any())
+
         # check the gradients:
         torch.autograd.gradcheck(
             quaternion.euler_xyz_to_quaternion,

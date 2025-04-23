@@ -98,7 +98,7 @@ def quaternion_to_xyz_euler(q: torch.Tensor) -> torch.Tensor:
     qz2 = torch.square(qz)
     ones = torch.ones_like(qw)
     rx = torch.atan2(2 * (qw * qx + qy * qz), ones - 2 * (qx2 + qy2))
-    ry = torch.asin(2 * (qw * qy - qz * qx))
+    ry = torch.asin(torch.clamp(2 * (qw * qy - qz * qx), -1, 1))
     rz = torch.atan2(2 * (qw * qz + qx * qy), ones - 2 * (qy2 + qz2))
     return torch.stack((rx, ry, rz), -1)
 
