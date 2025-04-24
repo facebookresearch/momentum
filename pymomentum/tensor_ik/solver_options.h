@@ -32,6 +32,8 @@ struct SolverOptions {
   size_t maxIter = 50;
   float threshold = 10.0f;
   bool lineSearch = true;
+  // Temporal smoothing of model parameters (only for the sequence solver)
+  float sequenceSmoothingWeight = 0.0f;
 
   bool operator==(const SolverOptions& rhs) const {
     return linearSolverType == rhs.linearSolverType &&
