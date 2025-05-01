@@ -31,6 +31,7 @@ arvr::logging::LogResult callback(
     size_t /* channelNameSizeInBytes */,
     const char* message,
     size_t /* messageSizeInBytes */,
+    bool /*isFatalLog*/,
     arvr::logging::CustomUserData userData) {
   const auto* rec = reinterpret_cast<const rerun::RecordingStream*>(userData);
 
