@@ -217,7 +217,8 @@ build_py = { cmd = "pip install . -vv", env = { FBXSDK_PATH = ".deps/fbxsdk", CM
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
-    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DTORCH_CUDA_ARCH_LIST="5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX"
 """, MOMENTUM_ENABLE_SIMD = "ON" }, depends-on = [
     "install_deps",
 ] }
@@ -359,7 +360,8 @@ build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
-    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DTORCH_CUDA_ARCH_LIST="5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX"
 """, MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once this tests are disabled programmatically if momentum is not built with FBX support
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
