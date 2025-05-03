@@ -146,7 +146,7 @@ double SimdPlaneErrorFunction::getError(
       // Calculate error as squared distance: err = constraintWeight * dist * dist
       const FloatP constraintWeight =
           drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-      error += constraintWeight * drjit::sqr(dist);
+      error += constraintWeight * drjit::square(dist);
     }
   }
 
@@ -201,7 +201,7 @@ double SimdPlaneErrorFunction::getGradient(
           // Calculate error as squared distance: err = constraintWeight * dist * dist
           const FloatP constraintWeight =
               drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-          jointError += constraintWeight * drjit::sqr(dist);
+          jointError += constraintWeight * drjit::square(dist);
 
           // Pre-calculate values for the gradient: wgt = 2.0 * kPlaneWeight * constraintWeight *
           // dist
@@ -353,7 +353,7 @@ double SimdPlaneErrorFunction::getJacobian(
           // Calculate error as squared distance: err = constraintWeight * dist * dist
           const FloatP constraintWeight =
               drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-          jointError += constraintWeight * drjit::sqr(dist);
+          jointError += constraintWeight * drjit::square(dist);
 
           // Calculate square-root of weight: wgt = sqrt(kPlaneWeight * weight * constraintWeight)
           const FloatP wgt = drjit::sqrt(kPlaneWeight * weight_ * constraintWeight);

@@ -71,9 +71,9 @@ closestPointOnTwoSegments(
   // Note that the actual returned values are inherently unstable
   // if the lines are near parallel, but the distance from
   // (p0 + t0*d0) to (p1 + t1*d1) will be stable.
-  t0 = drjit::clamp(drjit::select(div > 0.0f, (pd0 * d11 - pd1 * d01) / div, t0), 0.0f, 1.0f);
-  t1 = drjit::clamp(drjit::select(d11 > 0.0f, (t0 * d01 - pd1) / d11, t1), 0.0f, 1.0f);
-  t0 = drjit::clamp(drjit::select(d00 > 0.0f, (t1 * d01 + pd0) / d00, t0), 0.0f, 1.0f);
+  t0 = drjit::clip(drjit::select(div > 0.0f, (pd0 * d11 - pd1 * d01) / div, t0), 0.0f, 1.0f);
+  t1 = drjit::clip(drjit::select(d11 > 0.0f, (t0 * d01 - pd1) / d11, t1), 0.0f, 1.0f);
+  t0 = drjit::clip(drjit::select(d00 > 0.0f, (t1 * d01 + pd0) / d00, t0), 0.0f, 1.0f);
 
   return {t0, t1};
 }
@@ -273,7 +273,7 @@ double SimdCollisionErrorFunctionT<T>::getError(
       const Packet<T> radius = (radius_i.x() * (1.0f - t_i) + radius_i.y() * t_i) +
           (radius_j.x() * (1.0f - t_j) + radius_j.y() * t_j);
 
-      drjit::masked(error, mask) += drjit::sqr(drjit::maximum(radius - distance, 0));
+      drjit::masked(error, mask) += drjit::square(drjit::maximum(radius - distance, 0));
     }
   }
 
@@ -331,7 +331,7 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
       const Packet<T> wgt = -2.0f * kCollisionWeight * this->weight_ * overlapFraction;
 
       drjit::masked(error, finalMask) +=
-          kCollisionWeight * this->weight_ * drjit::sqr(radius - distance);
+          kCollisionWeight * this->weight_ * drjit::square(radius - distance);
 
       const size_t iJoint = collisionGeometry_[iCol].parent;
       for (uint32_t k = 0; k < kSimdPacketSize; ++k) {
@@ -519,7 +519,7 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
       }
 
       drjit::masked(error, finalMask) +=
-          kCollisionWeight * this->weight_ * drjit::sqr(radius - distance);
+          kCollisionWeight * this->weight_ * drjit::square(radius - distance);
 
       // calculate collision resolve direction. this is what we need to push joint parent i in.
       // the direction for joint parent j is the inverse
