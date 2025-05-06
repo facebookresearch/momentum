@@ -135,10 +135,10 @@ void parseParameter(
 
     // check if the first token is actually a joint name as well
     const size_t refJointIndex =
-        skeleton.getJointIdByName(parameterName.substr(0, parameterName.find_first_of(".")));
+        skeleton.getJointIdByName(parameterName.substr(0, parameterName.find_first_of('.')));
     size_t refJointParameter = kInvalidIndex;
     if (refJointIndex != kInvalidIndex) {
-      const std::string jpString = parameterName.substr(parameterName.find_first_of(".") + 1);
+      const std::string jpString = parameterName.substr(parameterName.find_first_of('.') + 1);
       for (size_t l = 0; l < kParametersPerJoint; l++) {
         if (jpString == kJointParameterNames[l]) {
           refJointParameter = l;
