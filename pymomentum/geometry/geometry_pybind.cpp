@@ -335,6 +335,25 @@ It can be used to solve for shapes and pose simultaneously.
           py::arg("blend_shape"),
           py::arg("n_shapes") = -1)
       .def(
+          "with_collision_geometry",
+          [](const mm::Character& c,
+             const std::vector<mm::TaperedCapsule>& collision_geometry) {
+            return mm::Character(
+                c.skeleton,
+                c.parameterTransform,
+                c.parameterLimits,
+                c.locators,
+                c.mesh.get(),
+                c.skinWeights.get(),
+                &collision_geometry,
+                c.poseShapes.get(),
+                c.blendShape,
+                c.faceExpressionBlendShape,
+                c.name,
+                c.inverseBindPose);
+          },
+          "Returns a new :class:`Character` with the collision geometry replaced.")
+      .def(
           "pose_mesh",
           &pymomentum::getPosedMesh,
           R"(Poses the mesh
@@ -1839,21 +1858,47 @@ The resulting tensors are as follows:
   //    parent
   //    length
   capsuleClass
+      .def(
+          py::init<>([](int parent,
+                        const std::optional<Eigen::Matrix4f>& transformation,
+                        const std::optional<Eigen::Vector2f>& radius,
+                        float length) {
+            mm::TaperedCapsule capsule;
+            capsule.transformation =
+                transformation.value_or(Eigen::Matrix4f::Identity());
+            capsule.radius = radius.value_or(Eigen::Vector2f::Ones());
+            capsule.parent = parent;
+            capsule.length = length;
+            return capsule;
+          }),
+          R"(Create a capsule using its transformation, radius, parent and length.
+        
+:param transformation: Transformation defining the orientation and starting point relative to the parent coordinate system.
+:param radius: Start and end radius for the capsule.
+:param parent: Parent joint to which the capsule is attached.
+:param length: Length of the capsule in local space.)",
+          py::arg("parent"),
+          py::arg("transformation") = std::optional<Eigen::Matrix4f>{},
+          py::arg("radius") = std::optional<Eigen::Vector2f>{},
+          py::arg("length") = 1.0f)
       .def_property_readonly(
           "transformation",
           [](const mm::TaperedCapsule& capsule) -> Eigen::Matrix4f {
             return capsule.transformation.matrix();
-          })
+          },
+          "Transformation defining the orientation and starting point relative to the parent coordinate system")
       .def_property_readonly(
           "radius",
           [](const mm::TaperedCapsule& capsule) -> Eigen::Vector2f {
             return capsule.radius;
-          })
+          },
+          "Start and end radius for the capsule.")
       .def_property_readonly(
           "parent",
           [](const mm::TaperedCapsule& capsule) -> int {
             return capsule.parent;
-          })
+          },
+          "Parent joint to which the capsule is attached.")
       .def_property_readonly(
           "length", [](const mm::TaperedCapsule& capsule) -> float {
             return capsule.length;
