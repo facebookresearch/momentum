@@ -43,8 +43,8 @@ CharacterT<T>::CharacterT(
       parameterTransform(pt),
       parameterLimits(pl),
       locators(l),
-      blendShape(blendShapes),
-      faceExpressionBlendShape(faceExpressionBlendShapes),
+      blendShape(std::move(blendShapes)),
+      faceExpressionBlendShape(std::move(faceExpressionBlendShapes)),
       inverseBindPose(inverseBindPose_in),
       name(nameIn) {
   if (m) {
@@ -594,7 +594,7 @@ CharacterT<T> CharacterT<T>::withBlendShape(
 
 template <typename T>
 void CharacterT<T>::addBlendShape(
-    BlendShape_p blendShape_in,
+    const BlendShape_p& blendShape_in,
     Eigen::Index maxBlendShapes,
     const bool overwriteBaseShape) {
   MT_CHECK(this->mesh);
@@ -634,7 +634,7 @@ CharacterT<T> CharacterT<T>::withFaceExpressionBlendShape(
 
 template <typename T>
 void CharacterT<T>::addFaceExpressionBlendShape(
-    BlendShapeBase_const_p blendShape_in,
+    const BlendShapeBase_const_p& blendShape_in,
     Eigen::Index maxBlendShapes) {
   MT_CHECK(mesh);
   MT_CHECK(blendShape_in);

@@ -136,7 +136,7 @@ struct CharacterT {
   // param[in] overwriteBaseShape (optional)- if true, base shape of blendShape_in will be set to
   // this character's mesh
   void addBlendShape(
-      BlendShape_p blendShape_in,
+      const BlendShape_p& blendShape_in,
       Eigen::Index maxBlendShapes,
       bool overwriteBaseShape = true);
 
@@ -145,7 +145,7 @@ struct CharacterT {
   // param[in] maxBlendShapes (optional) - number of blendshape params to add to paramTransform.
   // If it is <= 0,  all blendshapes from blendShape_in are added.
   void addFaceExpressionBlendShape(
-      BlendShapeBase_const_p blendShape_in,
+      const BlendShapeBase_const_p& blendShape_in,
       Eigen::Index maxBlendShapes = -1);
 
   // Bake the blend shapes from the passed-in model parameters into the mesh
