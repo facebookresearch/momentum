@@ -36,8 +36,33 @@ struct MeshT {
   std::vector<Eigen::Vector3i> texcoord_faces; // list of texture coordinate indices per face
   std::vector<std::vector<int32_t>> texcoord_lines; // list of texture coordinate indices per line
 
+  MeshT(
+      const std::vector<Eigen::Vector3<T>>& vertices = {},
+      const std::vector<Eigen::Vector3<T>>& normals = {},
+      const std::vector<Eigen::Vector3i>& faces = {},
+      const std::vector<std::vector<int32_t>>& lines = {},
+      const std::vector<Eigen::Vector3b>& colors = {},
+      const std::vector<T>& confidence = {},
+      const std::vector<Eigen::Vector2f>& texcoords = {},
+      const std::vector<Eigen::Vector3i>& texcoord_faces = {},
+      const std::vector<std::vector<int32_t>>& texcoord_lines = {})
+      : vertices(vertices),
+        normals(normals),
+        faces(faces),
+        lines(lines),
+        colors(colors),
+        confidence(confidence),
+        texcoords(texcoords),
+        texcoord_faces(texcoord_faces),
+        texcoord_lines(texcoord_lines) {
+    // Empty
+  }
+
   /// Compute vertex normals (by averaging connected face normals)
   void updateNormals();
+
+  /// Compute vertex normals (by averaging connected face normals) in multi-threaded fashion
+  void updateNormalsMt(size_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   /// Cast data type of mesh vertices, normals and confidence
   template <typename T2>
@@ -45,6 +70,11 @@ struct MeshT {
 
   /// Reset mesh
   void reset();
+
+ private:
+  // Cache for updateNormalsMt()
+  std::vector<std::vector<size_t>> facePerVertex_; // for each vertex, list of faces it belongs to
+  std::vector<Vector3<T>> faceNormals_;
 };
 
 } // namespace momentum
