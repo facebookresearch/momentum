@@ -3578,6 +3578,30 @@ Functions</h2></td></tr>
 <tr class="memitem:a696395c265b72a334cc61f3903c52c99"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a696395c265b72a334cc61f3903c52c99">toCm</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> x=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(1)) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">noexcept</a></td></tr>
 <tr class="memdesc:a696395c265b72a334cc61f3903c52c99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the given length x (in meters) to centimeters.  <br /></td></tr>
 <tr class="separator:a696395c265b72a334cc61f3903c52c99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ffbab3f46f0cf1b50bea3859f071f66" id="r_a4ffbab3f46f0cf1b50bea3859f071f66"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
+<tr class="memitem:a4ffbab3f46f0cf1b50bea3859f071f66"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a4ffbab3f46f0cf1b50bea3859f071f66">intersectFace</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;mesh, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">faceNormals</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">face0</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">face1</a>)</td></tr>
+<tr class="memdesc:a4ffbab3f46f0cf1b50bea3859f071f66"><td class="mdescLeft">&#160;</td><td class="mdescRight">test whether two given faces of a mesh intersect with each other  <br /></td></tr>
+<tr class="separator:a4ffbab3f46f0cf1b50bea3859f071f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f9571d79ca9ac8563e1be53f1018ecc" id="r_a9f9571d79ca9ac8563e1be53f1018ecc"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
+<tr class="memitem:a9f9571d79ca9ac8563e1be53f1018ecc"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a9f9571d79ca9ac8563e1be53f1018ecc">intersectMeshBruteForce</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;mesh)</td></tr>
+<tr class="memdesc:a9f9571d79ca9ac8563e1be53f1018ecc"><td class="mdescLeft">&#160;</td><td class="mdescRight">test if the mesh self intersects anywhere and return all intersecting face pairs using brute force  <br /></td></tr>
+<tr class="separator:a9f9571d79ca9ac8563e1be53f1018ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf208cc07ab951e3c81a2e79cce39ca1" id="r_abf208cc07ab951e3c81a2e79cce39ca1"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
+<tr class="memitem:abf208cc07ab951e3c81a2e79cce39ca1"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#abf208cc07ab951e3c81a2e79cce39ca1">intersectMesh</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;mesh)</td></tr>
+<tr class="memdesc:abf208cc07ab951e3c81a2e79cce39ca1"><td class="mdescLeft">&#160;</td><td class="mdescRight">test if the mesh self intersects anywhere and return all intersecting face pairs using a bvh tree  <br /></td></tr>
+<tr class="separator:abf208cc07ab951e3c81a2e79cce39ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0d1e4844b14b93a9778d6378b364429" id="r_ad0d1e4844b14b93a9778d6378b364429"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ad0d1e4844b14b93a9778d6378b364429">intersectFace&lt; float &gt;</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &amp;mesh, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">faceNormals</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">face0</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">face1</a>)</td></tr>
+<tr class="separator:ad0d1e4844b14b93a9778d6378b364429"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a929822eb17fc1de936b36490314a3c74" id="r_a929822eb17fc1de936b36490314a3c74"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a929822eb17fc1de936b36490314a3c74">intersectFace&lt; double &gt;</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &amp;mesh, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">faceNormals</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">face0</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">face1</a>)</td></tr>
+<tr class="separator:a929822eb17fc1de936b36490314a3c74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44525eec15dd24e86e4775c1f26912a0" id="r_a44525eec15dd24e86e4775c1f26912a0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a44525eec15dd24e86e4775c1f26912a0">intersectMeshBruteForce&lt; float &gt;</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &amp;mesh)</td></tr>
+<tr class="separator:a44525eec15dd24e86e4775c1f26912a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac97c94097135208143c24713ee08199d" id="r_ac97c94097135208143c24713ee08199d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ac97c94097135208143c24713ee08199d">intersectMeshBruteForce&lt; double &gt;</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &amp;mesh)</td></tr>
+<tr class="separator:ac97c94097135208143c24713ee08199d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96eaeffc1dbd8d1021bf856fe93b0f76" id="r_a96eaeffc1dbd8d1021bf856fe93b0f76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a96eaeffc1dbd8d1021bf856fe93b0f76">intersectMesh&lt; float &gt;</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &amp;mesh)</td></tr>
+<tr class="separator:a96eaeffc1dbd8d1021bf856fe93b0f76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2225530ac698f533a743ae362b07864" id="r_ad2225530ac698f533a743ae362b07864"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ad2225530ac698f533a743ae362b07864">intersectMesh&lt; double &gt;</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &amp;mesh)</td></tr>
+<tr class="separator:ad2225530ac698f533a743ae362b07864"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd7cd967f0ae72e2436fabee57ab8d61" id="r_abd7cd967f0ae72e2436fabee57ab8d61"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> N&gt; </td></tr>
 <tr class="memitem:abd7cd967f0ae72e2436fabee57ab8d61"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">N</a> &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#abd7cd967f0ae72e2436fabee57ab8d61">castVectors</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; Eigen::Vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">N</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec_in</a>)</td></tr>
 <tr class="separator:abd7cd967f0ae72e2436fabee57ab8d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -28078,6 +28102,246 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td></td>
           <td>)</td>
           <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4ffbab3f46f0cf1b50bea3859f071f66" name="a4ffbab3f46f0cf1b50bea3859f071f66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ffbab3f46f0cf1b50bea3859f071f66">&#9670;&#160;</a></span>intersectFace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> momentum::intersectFace </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>faceNormals</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>&#160;</td>
+          <td class="paramname"><em>face0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>&#160;</td>
+          <td class="paramname"><em>face1</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>test whether two given faces of a mesh intersect with each other </p>
+
+</div>
+</div>
+<a id="a929822eb17fc1de936b36490314a3c74" name="a929822eb17fc1de936b36490314a3c74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a929822eb17fc1de936b36490314a3c74">&#9670;&#160;</a></span>intersectFace&lt; double &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a4ffbab3f46f0cf1b50bea3859f071f66">momentum::intersectFace</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>faceNormals</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>&#160;</td>
+          <td class="paramname"><em>face0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>&#160;</td>
+          <td class="paramname"><em>face1</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad0d1e4844b14b93a9778d6378b364429" name="ad0d1e4844b14b93a9778d6378b364429"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0d1e4844b14b93a9778d6378b364429">&#9670;&#160;</a></span>intersectFace&lt; float &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a4ffbab3f46f0cf1b50bea3859f071f66">momentum::intersectFace</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>faceNormals</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>&#160;</td>
+          <td class="paramname"><em>face0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>&#160;</td>
+          <td class="paramname"><em>face1</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abf208cc07ab951e3c81a2e79cce39ca1" name="abf208cc07ab951e3c81a2e79cce39ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf208cc07ab951e3c81a2e79cce39ca1">&#9670;&#160;</a></span>intersectMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt; momentum::intersectMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>test if the mesh self intersects anywhere and return all intersecting face pairs using a bvh tree </p>
+
+</div>
+</div>
+<a id="ad2225530ac698f533a743ae362b07864" name="ad2225530ac698f533a743ae362b07864"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2225530ac698f533a743ae362b07864">&#9670;&#160;</a></span>intersectMesh&lt; double &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt; <a class="el" href="namespacemomentum.html#abf208cc07ab951e3c81a2e79cce39ca1">momentum::intersectMesh</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a96eaeffc1dbd8d1021bf856fe93b0f76" name="a96eaeffc1dbd8d1021bf856fe93b0f76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96eaeffc1dbd8d1021bf856fe93b0f76">&#9670;&#160;</a></span>intersectMesh&lt; float &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt; <a class="el" href="namespacemomentum.html#abf208cc07ab951e3c81a2e79cce39ca1">momentum::intersectMesh</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9f9571d79ca9ac8563e1be53f1018ecc" name="a9f9571d79ca9ac8563e1be53f1018ecc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f9571d79ca9ac8563e1be53f1018ecc">&#9670;&#160;</a></span>intersectMeshBruteForce()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt; momentum::intersectMeshBruteForce </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>test if the mesh self intersects anywhere and return all intersecting face pairs using brute force </p>
+
+</div>
+</div>
+<a id="ac97c94097135208143c24713ee08199d" name="ac97c94097135208143c24713ee08199d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac97c94097135208143c24713ee08199d">&#9670;&#160;</a></span>intersectMeshBruteForce&lt; double &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a9f9571d79ca9ac8563e1be53f1018ecc">momentum::intersectMeshBruteForce</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a44525eec15dd24e86e4775c1f26912a0" name="a44525eec15dd24e86e4775c1f26912a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44525eec15dd24e86e4775c1f26912a0">&#9670;&#160;</a></span>intersectMeshBruteForce&lt; float &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a9f9571d79ca9ac8563e1be53f1018ecc">momentum::intersectMeshBruteForce</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mesh</em></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
