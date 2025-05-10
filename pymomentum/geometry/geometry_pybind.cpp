@@ -27,12 +27,14 @@
 #include <momentum/character/skin_weights.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/shape/blend_shape_io.h>
+#include <momentum/math/intersection.h>
 #include <momentum/math/mesh.h>
 #include <momentum/math/mppca.h>
 #include <momentum/test/character/character_helpers.h>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <torch/csrc/utils/pybind.h>
 #include <torch/python.h>
 #include <Eigen/Core>
@@ -256,7 +258,7 @@ PYBIND11_MODULE(geometry, m) {
                 character.inverseBindPose);
           },
           R"(Returns a new character with the passed-in locators.  If 'replace' is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.
-          
+
           :parameter locators: The locators to add to the character.
           :parameter replace: If true, replace the existing locators with the passed-in ones.  Otherwise, append the new locators to the existing ones.  Defaults to false.
           )",
@@ -1139,6 +1141,13 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           "texcoord_lines",
           &mm::Mesh::texcoord_lines,
           "Texture coordinate indices for each line.  ")
+      .def(
+          "self_intersections",
+          [](const mm::Mesh& mesh) {
+            const auto intersections = mm::intersectMesh(mesh);
+            return py::array(py::cast(intersections));
+          },
+          "Test if the mesh self intersects anywhere and return all intersecting face pairs")
       .def("with_updated_normals", [](const mm::Mesh& mesh) {
         mm::Mesh result = mesh;
         result.updateNormals();
@@ -1872,7 +1881,7 @@ The resulting tensors are as follows:
             return capsule;
           }),
           R"(Create a capsule using its transformation, radius, parent and length.
-        
+
 :param transformation: Transformation defining the orientation and starting point relative to the parent coordinate system.
 :param radius: Start and end radius for the capsule.
 :param parent: Parent joint to which the capsule is attached.
