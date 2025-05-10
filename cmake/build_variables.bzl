@@ -60,6 +60,7 @@ math_public_headers = [
     "math/covariance_matrix.h",
     "math/fwd.h",
     "math/generalized_loss.h",
+    "math/intersection.h",
     "math/mesh.h",
     "math/mppca.h",
     "math/random-inl.h",
@@ -72,6 +73,7 @@ math_public_headers = [
 math_sources = [
     "math/covariance_matrix.cpp",
     "math/generalized_loss.cpp",
+    "math/intersection.cpp",
     "math/mesh.cpp",
     "math/mppca.cpp",
     "math/transform.cpp",
@@ -81,6 +83,7 @@ math_sources = [
 math_test_sources = [
     "test/math/covariance_matrix_test.cpp",
     "test/math/generalized_loss_test.cpp",
+    "test/math/intersection_test.cpp",
     "test/math/mesh_test.cpp",
     "test/math/random_test.cpp",
     "test/math/transform_test.cpp",

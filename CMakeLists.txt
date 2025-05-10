@@ -207,6 +207,8 @@ mt_library(
     online_qr
     Eigen3::Eigen
     Microsoft.GSL::GSL
+  PRIVATE_LINK_LIBRARIES
+    axel
 )
 
 mt_library(
