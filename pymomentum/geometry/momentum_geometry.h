@@ -27,8 +27,6 @@ using RowMatrixi =
 using RowMatrixb =
     Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes);
-
 at::Tensor mapModelParameters_names(
     at::Tensor motion_in,
     const std::vector<std::string>& srcParameterNames,

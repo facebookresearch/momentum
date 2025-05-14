@@ -30,6 +30,7 @@ using RowMatrixf =
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 momentum::Character loadGLTFCharacterFromFile(const std::string& path);
+momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes);
 
 void saveGLTFCharacterToFile(
     const std::string& path,
@@ -62,7 +63,10 @@ void saveFBXCharacterToFileWithJointParams(
     std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo);
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadCharacterWithMotion(const std::string& gltfFilename);
+loadGLTFCharacterWithMotion(const std::string& gltfFilename);
+
+std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
+loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& bytes);
 
 std::string toGLTF(const momentum::Character& character);
 

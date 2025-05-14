@@ -23,6 +23,17 @@ momentum::Character loadGLTFCharacterFromFile(const std::string& path) {
   return momentum::loadGltfCharacter(path);
 }
 
+momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
+  pybind11::buffer_info info(pybind11::buffer(bytes).request());
+  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
+  const size_t length = static_cast<size_t>(info.size);
+
+  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
+
+  return momentum::loadGltfCharacter(
+      gsl::make_span<const std::byte>(data, length));
+}
+
 momentum::MotionParameters transpose(
     const momentum::MotionParameters& motionParameters) {
   const auto& [parameters, poses] = motionParameters;
@@ -173,9 +184,23 @@ void saveFBXCharacterToFileWithJointParams(
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadCharacterWithMotion(const std::string& gltfFilename) {
+loadGLTFCharacterWithMotion(const std::string& gltfFilename) {
   const auto [character, motion, identity, fps] =
       momentum::loadCharacterWithMotion(gltfFilename);
+  return std::make_tuple(character, motion.transpose(), identity, fps);
+}
+
+std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
+loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes) {
+  pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
+  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
+  const size_t length = static_cast<size_t>(info.size);
+
+  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
+
+  const auto [character, motion, identity, fps] =
+      momentum::loadCharacterWithMotion(
+          gsl::make_span<const std::byte>(data, length));
   return std::make_tuple(character, motion.transpose(), identity, fps);
 }
 

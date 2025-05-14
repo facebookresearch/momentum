@@ -458,6 +458,16 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 :return: a valid Character.
       )",
           py::arg("gltf_bytes"))
+      .def_static(
+          "from_gltf_bytes_with_motion",
+          &loadGLTFCharacterWithMotionFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from a gltf byte array.
+  
+  :parameter gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+  :return: a valid Character.
+        )",
+          py::arg("gltf_bytes"))
       // toGLTF(character, fps, motion)
       .def_static(
           "to_gltf",
@@ -569,7 +579,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
       // loadCharacterWithMotion(gltfFilename)
       .def_static(
           "load_gltf_with_motion",
-          &loadCharacterWithMotion,
+          &loadGLTFCharacterWithMotion,
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and a motion sequence from a gltf file.
 

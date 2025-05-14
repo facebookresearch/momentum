@@ -52,17 +52,6 @@ gsl::span<const T> toSpan(const pybind11::bytes& bytes) {
   return gsl::make_span<const T>(data, length);
 }
 
-momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
-  py::buffer_info info(py::buffer(bytes).request());
-  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const size_t length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
-  return momentum::loadGltfCharacter(
-      gsl::make_span<const std::byte>(data, length));
-}
-
 // Use tensor.index_select() and tensor.index_copy() to copy data from srcTensor
 // to form a new tensor. The dimension the mapping is applied on is `dimension`.
 // The mapping is created by matching `srcNames` to `tgtNames`. The target slice
