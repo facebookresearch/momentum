@@ -678,6 +678,51 @@ CharacterT<T> CharacterT<T>::bakeBlendShape(const ModelParameters& modelParams) 
   return bakeBlendShape(extractBlendWeights(this->parameterTransform, modelParams));
 }
 
+template <typename T>
+CharacterT<T> CharacterT<T>::bake(
+    const ModelParameters& modelParams,
+    bool bakeBlendShapes,
+    bool bakeScales) const {
+  // 1. Clone the character so we don't mutate the original.
+  CharacterT<T> result = *this;
+  MT_CHECK(result.mesh);
+
+  // 2. Blend-shape baking (you already had this, just guarded).
+  if (bakeBlendShapes && this->blendShape) {
+    const BlendWeights blendWeights = extractBlendWeights(result.parameterTransform, modelParams);
+    result.mesh->vertices = this->blendShape->template computeShape<float>(blendWeights);
+  }
+
+  // 3. Scale (or any joint transform) baking
+  if (bakeScales && this->skinWeights) {
+    // Evaluate the posed skeleton with modelParams.
+    const SkeletonState posed(
+        result.parameterTransform.apply(modelParams),
+        result.skeleton,
+        /*computeDeriv =*/false);
+    Mesh restMesh = *result.mesh;
+    applySSD(result.inverseBindPose, *result.skinWeights, restMesh, posed, *result.mesh);
+  }
+
+  result.mesh->updateNormals();
+
+  // 4. Strip baked parameters from the rig
+  ParameterSet baked = ParameterSet();
+  if (bakeBlendShapes) {
+    baked |= result.parameterTransform.getBlendShapeParameters();
+  }
+  if (bakeScales) {
+    baked |= result.parameterTransform.getScalingParameters();
+  }
+
+  std::tie(result.parameterTransform, result.parameterLimits) = subsetParameterTransform(
+      result.parameterTransform,
+      result.parameterLimits,
+      ~baked); // keep unbaked params only
+
+  return result;
+}
+
 template struct CharacterT<float>;
 template struct CharacterT<double>;
 

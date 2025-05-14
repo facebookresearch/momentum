@@ -152,6 +152,21 @@ struct CharacterT {
   // and strip the blend shapes out of the parameter transform:
   CharacterT bakeBlendShape(const ModelParameters& modelParams) const;
   CharacterT bakeBlendShape(const BlendWeights& blendWeights) const;
+
+  /// Generic "bake-out" for turning a character into self-contained geometry.
+  ///
+  /// @param[in] modelParams Current pose/scale/blend-shape parameters.
+  /// @param[in] bakeBlendShapes Set true (default) to apply blend-shape deltas and remove their
+  /// parameters from the character.
+  /// @param[in] bakeScales Set true (default) to evaluate the posed skeleton, run
+  /// Linear-Blend-Skinning once, and remove all scaling parameters from the character.
+  ///
+  /// The returned character contains a static mesh with all requested deformations baked in, while
+  /// still supporting any parameters you elected to keep.
+  CharacterT bake(
+      const ModelParameters& modelParams,
+      bool bakeBlendShapes = true,
+      bool bakeScales = true) const;
 };
 
 } // namespace momentum

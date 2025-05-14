@@ -179,6 +179,7 @@ character_test_sources = [
     "test/character/parameter_transform_test.cpp",
     "test/character/simplify_test.cpp",
     "test/character/skeleton_test.cpp",
+    "test/character/skeleton_bake_test.cpp",
 ]
 
 character_solver_public_headers = [
