@@ -65,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.collision_geometry"><code class="docutils literal notranslate"><span class="pre">Character.collision_geometry</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.find_locators"><code class="docutils literal notranslate"><span class="pre">Character.find_locators()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.from_gltf_bytes"><code class="docutils literal notranslate"><span class="pre">Character.from_gltf_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.from_gltf_bytes_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.from_gltf_bytes_with_motion()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.has_mesh"><code class="docutils literal notranslate"><span class="pre">Character.has_mesh</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.inverse_bind_pose"><code class="docutils literal notranslate"><span class="pre">Character.inverse_bind_pose</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.joint_parameter_limits"><code class="docutils literal notranslate"><span class="pre">Character.joint_parameter_limits</span></code></a></li>
@@ -573,6 +574,22 @@
 <dd class="field-even"><p>a valid Character.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.from_gltf_bytes_with_motion">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_gltf_bytes_with_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.from_gltf_bytes_with_motion" title="Link to this definition"></a></dt>
+<dd><p>Load a character from a gltf byte array.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">parameter gltf_bytes<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
+</dd>
+<dt class="field-even">return<span class="colon">:</span></dt>
+<dd class="field-even"><p>a valid Character.</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py property">
