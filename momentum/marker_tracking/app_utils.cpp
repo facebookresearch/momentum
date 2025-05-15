@@ -77,6 +77,24 @@ void addCalibrationOptions(CLI::App& app, std::shared_ptr<CalibrationConfig> con
   auto* locatorsOnlyOption =
       app.add_option("--locators-only", config->locatorsOnly, "Calibrate only the locator offsets");
   locatorsOnlyOption->default_val(config->locatorsOnly);
+
+  auto* greedySamplingOption = app.add_option(
+      "--greedy-sampling",
+      config->greedySampling,
+      "Use greedy sampling to select calibration frames");
+  greedySamplingOption->default_val(config->greedySampling)->check(CLI::NonNegativeNumber);
+
+  auto* firstFrameFloorContactOption = app.add_flag(
+      "--init-floor-contact",
+      config->enforceFloorInFirstFrame,
+      "Enforce floor contact constraints in first frame");
+  firstFrameFloorContactOption->default_val(config->enforceFloorInFirstFrame);
+
+  auto* poseOption = app.add_option(
+      "--init-pose",
+      config->firstFramePoseConstraintSet,
+      "Enforce pose constraints from named pose constraint set in first frame");
+  poseOption->default_val(config->firstFramePoseConstraintSet);
 }
 
 void addTrackingOptions(CLI::App& app, std::shared_ptr<TrackingConfig> config) {

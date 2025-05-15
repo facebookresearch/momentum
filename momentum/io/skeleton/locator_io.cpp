@@ -12,6 +12,7 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/common/string.h"
 #include "momentum/math/utility.h"
 
@@ -184,8 +185,10 @@ LocatorList loadLocatorsFromBuffer(
     } while (line < lines.size() - 1 && (current != "}," || current != "}"));
 
     // do we have a valid locator
-    if (l.parent == kInvalidIndex)
+    if (l.parent == kInvalidIndex) {
+      MT_LOGW("Could not find parent for locator {}", l.name);
       continue;
+    }
 
     if (haveGlobal)
       l.offset = state.jointState[l.parent].transformation.inverse() * (global);

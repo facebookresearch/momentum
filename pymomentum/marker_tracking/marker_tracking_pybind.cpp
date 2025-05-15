@@ -64,7 +64,16 @@ PYBIND11_MODULE(marker_tracking, m) {
   // Default values are set from the configured values in marker_tracker.h
   calibrationConfig.def(py::init<>())
       .def(
-          py::init<float, float, size_t, bool, size_t, size_t, bool, bool>(),
+          py::init<
+              float,
+              float,
+              size_t,
+              bool,
+              size_t,
+              size_t,
+              size_t,
+              bool,
+              bool>(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -72,11 +81,16 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("calib_frames") = 100,
           py::arg("major_iter") = 3,
           py::arg("global_scale_only") = false,
-          py::arg("locators_only") = false)
+          py::arg("locators_only") = false,
+          py::arg("greedy_sampling") = 0)
       .def_readwrite(
           "calib_frames",
           &marker_tracking::CalibrationConfig::calibFrames,
           "Number of frames used for model calibration")
+      .def_readwrite(
+          "greedy_sampling",
+          &marker_tracking::CalibrationConfig::greedySampling,
+          "Enable greedy frame sampling with the given stride")
       .def_readwrite(
           "major_iter",
           &marker_tracking::CalibrationConfig::majorIter,
@@ -88,7 +102,15 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "locators_only",
           &marker_tracking::CalibrationConfig::locatorsOnly,
-          "Calibrate only the locator offsets");
+          "Calibrate only the locator offsets")
+      .def_readwrite(
+          "enforce_floor_in_first_frame",
+          &marker_tracking::CalibrationConfig::enforceFloorInFirstFrame,
+          "Force floor contact in first frame")
+      .def_readwrite(
+          "first_frame_pose_constraint_set",
+          &marker_tracking::CalibrationConfig::firstFramePoseConstraintSet,
+          "Name of pose constraint set to use in first frame");
 
   auto trackingConfig =
       py::class_<marker_tracking::TrackingConfig, marker_tracking::BaseConfig>(
