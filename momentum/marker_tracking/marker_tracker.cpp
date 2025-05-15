@@ -8,6 +8,7 @@
 #include "momentum/marker_tracking/marker_tracker.h"
 
 #include "momentum/character/character.h"
+#include "momentum/character/parameter_limits.h"
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
@@ -149,153 +150,26 @@ Eigen::MatrixXf trackSequence(
     const MatrixXf& initialMotion,
     const TrackingConfig& config,
     float regularizer,
-    const size_t frameStride) {
+    const size_t frameStride,
+    bool enforceFloorInFirstFrame,
+    const std::string& firstFramePoseConstraintSet) {
   // sanity checks
   const size_t numFrames = markerData.size();
-  MT_CHECK(numFrames > 0, "Input data is empty.");
-  MT_CHECK(
-      initialMotion.cols() >= numFrames,
-      "Number of frames in data {} doesn't match that of input motion {}",
-      numFrames,
-      initialMotion.cols());
-  MT_CHECK(
-      initialMotion.rows() == character.parameterTransform.numAllModelParameters(),
-      "Input motion parameters {} do not match character model parameters {}",
-      initialMotion.rows(),
-      character.parameterTransform.numAllModelParameters());
-
-  const ParameterTransform& pt = character.parameterTransform;
-  const size_t numMarkers = markerData[0].size();
-
-  // universal parameters include "scaling" and "locators" (if exists); pose parameters need to
-  // exclude "locators". universalParams is to indicate to the solver which parameters are "global"
-  // (ie. not time varying). The input globalParams indicate which parameters within universalParams
-  // we want to solve for. globalParams is either a subset or all of universalParams.
-  ParameterSet poseParams = pt.getPoseParameters();
-  ParameterSet universalParams = pt.getScalingParameters();
-  const auto locatorSet = pt.parameterSets.find("locators");
-  if (locatorSet != pt.parameterSets.end()) {
-    poseParams &= ~locatorSet->second;
-    universalParams |= locatorSet->second;
+  std::vector<size_t> frames;
+  for (size_t fi = 0; fi < numFrames; fi += frameStride) {
+    frames.emplace_back(fi);
   }
 
-  // set up the solver function
-  size_t solvedFrames = (numFrames - 1) / frameStride + 1;
-  auto solverFunc = SequenceSolverFunction(
-      &character.skeleton, &character.parameterTransform, universalParams, solvedFrames);
-
-  // floor penetration constraints; we assume the world is y-up and floor is y=0 for mocap data.
-  const auto& floorConstraints = createFloorConstraints<float>(
-      "Floor_",
-      character.locators,
-      Vector3f::UnitY(),
-      /* y offset */ 0.0f,
-      /* weight */ 5.0f);
-
-  // marker constraints
-  const auto constrData = createConstraintData(markerData, character.locators);
-
-  // add per-frame constraint data to the solver
-  for (size_t iFrame = 0, solverFrame = 0; iFrame < numFrames;
-       iFrame += frameStride, ++solverFrame) {
-    if (iFrame >= initialMotion.cols()) {
-      break;
-    }
-    if (constrData.at(iFrame).size() > numMarkers * config.minVisPercent) {
-      // prepare positional constraints
-      auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
-      posConstrFunc->setConstraints(constrData.at(iFrame));
-      posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
-      solverFunc.addErrorFunction(solverFrame, posConstrFunc);
-
-      // prepare floor constraints
-      if (!floorConstraints.empty()) {
-        auto halfPlaneConstrFunc =
-            std::make_shared<PlaneErrorFunction>(character, /*half plane*/ true);
-        halfPlaneConstrFunc->setConstraints(floorConstraints);
-        halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight);
-        solverFunc.addErrorFunction(solverFrame, halfPlaneConstrFunc);
-      }
-    }
-    // Set per-frame initial value
-    solverFunc.setFrameParameters(solverFrame, initialMotion.col(iFrame));
-  }
-
-  // add parameter limits
-  auto limitConstrFunc = std::make_shared<LimitErrorFunction>(character);
-  limitConstrFunc->setWeight(0.1);
-  solverFunc.addErrorFunction(kAllFrames, limitConstrFunc);
-
-  // add collision error
-  if (config.collisionErrorWeight != 0 && character.collision != nullptr) {
-    auto collisionConstrFunc = std::make_shared<CollisionErrorFunctionStateless>(character);
-    collisionConstrFunc->setWeight(config.collisionErrorWeight);
-    solverFunc.addErrorFunction(kAllFrames, collisionConstrFunc);
-  }
-
-  // add a smoothness constraint in parameter space
-  if (config.smoothingWeights.size() > 0) {
-    // If per parameter weights are provided override the default weight
-    MT_CHECK(
-        config.smoothingWeights.size() == character.parameterTransform.numAllModelParameters(),
-        "Smoothing weights vector should be equal to the number of model parameters {} vs {}",
-        config.smoothingWeights.size(),
-        character.parameterTransform.numAllModelParameters());
-    auto smoothConstrFunc = std::make_shared<ModelParametersSequenceErrorFunction>(character);
-    smoothConstrFunc->setTargetWeights(config.smoothingWeights);
-    solverFunc.addSequenceErrorFunction(kAllFrames, smoothConstrFunc);
-  } else if (config.smoothing != 0) {
-    auto smoothConstrFunc = std::make_shared<ModelParametersSequenceErrorFunction>(character);
-    smoothConstrFunc->setWeight(config.smoothing);
-    solverFunc.addSequenceErrorFunction(kAllFrames, smoothConstrFunc);
-  }
-
-  // minimize the change to global params
-  if (globalParams.count() > 0 && regularizer != 0) {
-    auto regularizerFunc = std::make_shared<ModelParametersErrorFunction>(character);
-    Eigen::VectorXf universalMask(pt.numAllModelParameters());
-    for (size_t i = 0; i < universalMask.size(); ++i) {
-      if (globalParams.test(i)) {
-        universalMask[i] = regularizer;
-      } else {
-        universalMask[i] = 0.0;
-      }
-    }
-    regularizerFunc->setTargetParameters(initialMotion.col(0), universalMask);
-    // Sufficient to add to the first frame since it won't change.
-    solverFunc.addErrorFunction(0, regularizerFunc);
-  }
-
-  // solver configration
-  SequenceSolverOptions solverOptions;
-  solverOptions.maxIterations = config.maxIter;
-  solverOptions.minIterations = 2;
-  solverOptions.progressBar = config.debug;
-  solverOptions.doLineSearch = false;
-  solverOptions.multithreaded = true;
-  solverOptions.verbose = config.debug;
-  solverOptions.threshold = 1.f;
-  solverOptions.regularization = 0.05f;
-
-  // solve the problem
-  SequenceSolver solver = SequenceSolver(solverOptions, &solverFunc);
-  solver.setEnabledParameters(poseParams | globalParams);
-  // returns all the dofs with initial values nicely packed into a vector
-  VectorXf dofs = solverFunc.getJoinedParameterVector();
-  solver.solve(dofs);
-  double error = solverFunc.getError(dofs);
-  MT_LOGI_IF(config.debug, "Solver residual: {}", error);
-
-  // set results to output
-  MatrixXf outMotion(pt.numAllModelParameters(), numFrames);
-  for (size_t iFrame = 0, solverFrame = 0; iFrame < numFrames;
-       iFrame += frameStride, ++solverFrame) {
-    // fill in all inbetween frames within the stride
-    for (size_t jDelta = 0; jDelta < frameStride && iFrame + jDelta < numFrames; ++jDelta) {
-      outMotion.col(iFrame + jDelta) = solverFunc.getFrameParameters(solverFrame).v;
-    }
-  }
-  return outMotion;
+  return trackSequence(
+      markerData,
+      character,
+      globalParams,
+      initialMotion,
+      config,
+      frames,
+      regularizer,
+      enforceFloorInFirstFrame,
+      firstFramePoseConstraintSet);
 }
 
 Eigen::MatrixXf trackSequence(
@@ -305,7 +179,9 @@ Eigen::MatrixXf trackSequence(
     const MatrixXf& initialMotion,
     const TrackingConfig& config,
     const std::vector<size_t>& frames,
-    float regularizer) {
+    float regularizer,
+    bool enforceFloorInFirstFrame,
+    const std::string& firstFramePoseConstraintSet) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
@@ -365,11 +241,28 @@ Eigen::MatrixXf trackSequence(
 
       // prepare floor constraints
       if (!floorConstraints.empty()) {
+        bool halfPlane = true;
+        if (enforceFloorInFirstFrame && solverFrame == 0) {
+          halfPlane = false;
+        }
         auto halfPlaneConstrFunc =
-            std::make_shared<PlaneErrorFunction>(character, /*half plane*/ true);
+            std::make_shared<PlaneErrorFunction>(character, /*half plane*/ halfPlane);
         halfPlaneConstrFunc->setConstraints(floorConstraints);
         halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight);
         solverFunc.addErrorFunction(solverFrame, halfPlaneConstrFunc);
+      }
+
+      // add pose constraint set if defined
+      if (!firstFramePoseConstraintSet.empty()) {
+        // check if the constraint set is defined
+        if (character.parameterTransform.poseConstraints.count(firstFramePoseConstraintSet) > 0) {
+          // add parameter limits
+          const auto poseLimits = getPoseConstraintParameterLimits(
+              firstFramePoseConstraintSet, character.parameterTransform);
+          auto limitConstrFunc = std::make_shared<LimitErrorFunction>(character, poseLimits);
+          limitConstrFunc->setWeight(solvedFrames / 2.0f);
+          solverFunc.addErrorFunction(solverFrame, limitConstrFunc);
+        }
       }
     }
     // Set per-frame initial value
@@ -807,7 +700,9 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           firstFrame,
-          0.0); // still solving a subset
+          0.0,
+          config.enforceFloorInFirstFrame,
+          config.firstFramePoseConstraintSet); // still solving a subset
       std::tie(identity.v, character.locators) =
           extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
@@ -838,8 +733,10 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           frameIndices,
-          0.0 /*regularizer*/ // allow large change at initialization without any regularization
-      );
+          0.0,
+          /*regularizer*/ // allow large change at initialization without any regularization
+          config.enforceFloorInFirstFrame,
+          config.firstFramePoseConstraintSet);
     } else {
       motion.topRows(transform.numAllModelParameters()) =
           trackPosesPerframe(markerData, character, identity, trackingConfig, frameStride);
@@ -854,7 +751,9 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           0.0 /*regularizer*/, // allow large change at initialization without any regularization
-          frameStride);
+          frameStride,
+          config.enforceFloorInFirstFrame,
+          config.firstFramePoseConstraintSet);
     }
   }
 
@@ -870,8 +769,9 @@ void calibrateModel(
           motion,
           trackingConfig,
           frameIndices,
-          0.0 // TODO: use a small regularization to prevent too large a change
-      ); // still solving a subset
+          0.0, // TODO: use a small regularization to prevent too large a change
+          config.enforceFloorInFirstFrame,
+          config.firstFramePoseConstraintSet); // still solving a subset
     } else {
       motion = trackSequence(
           markerData,
@@ -880,7 +780,9 @@ void calibrateModel(
           motion,
           trackingConfig,
           0.0, // TODO: use a small regularization to prevent too large a change
-          frameStride); // still solving a subset
+          frameStride,
+          config.enforceFloorInFirstFrame,
+          config.firstFramePoseConstraintSet); // still solving a subset
     }
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
@@ -910,10 +812,26 @@ void calibrateModel(
   // TODO: use a larger regularizer to prevent too large a change.
   if (config.greedySampling > 0) {
     motion = trackSequence(
-        markerData, solvingCharacter, locatorSet, motion, trackingConfig, frameIndices, 0.0);
+        markerData,
+        solvingCharacter,
+        locatorSet,
+        motion,
+        trackingConfig,
+        frameIndices,
+        0.0,
+        config.enforceFloorInFirstFrame,
+        config.firstFramePoseConstraintSet);
   } else {
     motion = trackSequence(
-        markerData, solvingCharacter, locatorSet, motion, trackingConfig, 0.0, frameStride);
+        markerData,
+        solvingCharacter,
+        locatorSet,
+        motion,
+        trackingConfig,
+        0.0,
+        frameStride,
+        config.enforceFloorInFirstFrame,
+        config.firstFramePoseConstraintSet);
   }
   std::tie(identity.v, character.locators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
@@ -969,7 +887,15 @@ void calibrateLocators(
     // Solve for both markers and poses.
     // TODO: add a small regularization to prevent too large a change
     motion = trackSequence(
-        markerData, solvingCharacter, locatorSet, motion, trackingConfig, 0.0, frameStride);
+        markerData,
+        solvingCharacter,
+        locatorSet,
+        motion,
+        trackingConfig,
+        0.0,
+        frameStride,
+        config.enforceFloorInFirstFrame,
+        config.firstFramePoseConstraintSet);
     // Extract solved locators
     fullParams.pose = motion.col(0);
     character.locators = extractLocatorsFromCharacter(solvingCharacter, fullParams);

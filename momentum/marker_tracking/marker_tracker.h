@@ -39,6 +39,10 @@ struct CalibrationConfig : public BaseConfig {
   bool locatorsOnly = false;
   /// Sample uniformly or do a greedy importance sampling
   size_t greedySampling = 0;
+  /// True to lock the floor constraints to the floor in the first frame
+  bool enforceFloorInFirstFrame = false;
+  /// Name of a pose constraint set to use for the first frame
+  std::string firstFramePoseConstraintSet = "";
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
@@ -77,6 +81,8 @@ struct RefineConfig : public TrackingConfig {
 /// Number of parameters should be the same as defined in character.
 /// @param[in] config Solving options.
 /// @param[in] frameStride Frame stride to select solver frames (ie. uniform sample).
+/// @param[in] enforceFloorInFirstFrame Flag to enforce the floor contact constraints in first frame
+/// @param[in] firstFramePoseConstraintSet Name of a pose constraint set to use for the first frame
 ///
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
@@ -87,7 +93,9 @@ Eigen::MatrixXf trackSequence(
     const Eigen::MatrixXf& initialMotion,
     const TrackingConfig& config,
     float regularizer = 0.0,
-    size_t frameStride = 1);
+    size_t frameStride = 1,
+    bool enforceFloorInFirstFrame = false,
+    const std::string& firstFramePoseConstraintSet = "");
 
 /// Use multiple frames to solve for global parameters such as body proportions and/or marker
 /// offsets together with the motion.
@@ -100,7 +108,9 @@ Eigen::MatrixXf trackSequence(
 /// markerData, but only frames used in solving are used. Values in unused frames do not matter.
 /// Number of parameters should be the same as defined in character.
 /// @param[in] config Solving options.
-/// @param[in] frameStride Frame stride to select solver frames (ie. uniform sample).
+/// @param[in] frames List of frames to solve for.
+/// @param[in] enforceFloorInFirstFrame Flag to enforce the floor contact constraints in first frame
+/// @param[in] firstFramePoseConstraintSet Name of a pose constraint set to use for the first frame
 ///
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
@@ -111,7 +121,9 @@ Eigen::MatrixXf trackSequence(
     const Eigen::MatrixXf& initialMotion,
     const TrackingConfig& config,
     const std::vector<size_t>& frames,
-    float regularizer = 0.0);
+    float regularizer = 0.0,
+    bool enforceFloorInFirstFrame = false,
+    const std::string& firstFramePoseConstraintSet = "");
 
 /// Track poses per-frame given a calibrated character.
 ///

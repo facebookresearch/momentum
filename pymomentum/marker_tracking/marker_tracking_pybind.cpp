@@ -102,7 +102,15 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "locators_only",
           &marker_tracking::CalibrationConfig::locatorsOnly,
-          "Calibrate only the locator offsets");
+          "Calibrate only the locator offsets")
+      .def_readwrite(
+          "enforce_floor_in_first_frame",
+          &marker_tracking::CalibrationConfig::enforceFloorInFirstFrame,
+          "Force floor contact in first frame")
+      .def_readwrite(
+          "first_frame_pose_constraint_set",
+          &marker_tracking::CalibrationConfig::firstFramePoseConstraintSet,
+          "Name of pose constraint set to use in first frame");
 
   auto trackingConfig =
       py::class_<marker_tracking::TrackingConfig, marker_tracking::BaseConfig>(
