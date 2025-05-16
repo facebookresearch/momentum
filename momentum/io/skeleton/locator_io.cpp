@@ -12,6 +12,7 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/common/string.h"
 #include "momentum/math/utility.h"
 
@@ -158,6 +159,10 @@ LocatorList loadLocatorsFromBuffer(
             break;
           }
         }
+        // invalid joint name
+        if (l.parent == kInvalidIndex) {
+          MT_LOGW("Invalid parent name: {}", parent);
+        }
       } else if (tokens[0] == "\"weight\"")
         l.weight = svtof(tokens[1]);
       else if (tokens[0] == "\"offsetX\"")
@@ -183,12 +188,14 @@ LocatorList loadLocatorsFromBuffer(
         l.limitWeight[2] = svtof(tokens[1]);
     } while (line < lines.size() - 1 && (current != "}," || current != "}"));
 
-    // do we have a valid locator
-    if (l.parent == kInvalidIndex)
+    // skip an invalid locator
+    if (l.parent == kInvalidIndex) {
       continue;
+    }
 
-    if (haveGlobal)
+    if (haveGlobal) {
       l.offset = state.jointState[l.parent].transformation.inverse() * (global);
+    }
     l.limitOrigin = l.offset;
     res.push_back(l);
   }
