@@ -77,6 +77,12 @@ void addCalibrationOptions(CLI::App& app, std::shared_ptr<CalibrationConfig> con
   auto* locatorsOnlyOption =
       app.add_option("--locators-only", config->locatorsOnly, "Calibrate only the locator offsets");
   locatorsOnlyOption->default_val(config->locatorsOnly);
+
+  auto* greedySamplingOption = app.add_option(
+      "--greedy-sampling",
+      config->greedySampling,
+      "Use greedy sampling to select calibration frames");
+  greedySamplingOption->default_val(config->greedySampling)->check(CLI::NonNegativeNumber);
 }
 
 void addTrackingOptions(CLI::App& app, std::shared_ptr<TrackingConfig> config) {
