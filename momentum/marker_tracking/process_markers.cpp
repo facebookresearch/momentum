@@ -56,6 +56,12 @@ Eigen::MatrixXf processMarkers(
 
   // track motion; identity parameters will be repeated for every frame in finalMotion.
   Eigen::MatrixXf finalMotion = trackPosesPerframe(inputData, character, identity, trackingConfig);
+
+  if (trackingConfig.debug) {
+    auto errors = getLocatorError(markerData, finalMotion, character);
+    MT_LOGI("Average marker error: {}", errors.first);
+    MT_LOGI("Max marker error: {}", errors.second);
+  }
   return finalMotion;
 }
 

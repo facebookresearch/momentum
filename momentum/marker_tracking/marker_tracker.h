@@ -37,6 +37,8 @@ struct CalibrationConfig : public BaseConfig {
   bool globalScaleOnly = false;
   /// True to calibrate only the locators and not the body.
   bool locatorsOnly = false;
+  /// Sample uniformly or do a greedy importance sampling
+  size_t greedySampling = 0;
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
@@ -87,6 +89,30 @@ Eigen::MatrixXf trackSequence(
     float regularizer = 0.0,
     size_t frameStride = 1);
 
+/// Use multiple frames to solve for global parameters such as body proportions and/or marker
+/// offsets together with the motion.
+///
+/// @param[in] markerData Marker data.
+/// @param[in] character Character definition.
+/// @param[in] globalParams Bitset to indicate global parameters to solve for; could be all zeros
+/// for post-process a motion.
+/// @param[in] initialMotion Initial values of all parameters. It should be the same length as
+/// markerData, but only frames used in solving are used. Values in unused frames do not matter.
+/// Number of parameters should be the same as defined in character.
+/// @param[in] config Solving options.
+/// @param[in] frameStride Frame stride to select solver frames (ie. uniform sample).
+///
+/// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
+/// within a frame stride.
+Eigen::MatrixXf trackSequence(
+    gsl::span<const std::vector<momentum::Marker>> markerData,
+    const momentum::Character& character,
+    const momentum::ParameterSet& globalParams,
+    const Eigen::MatrixXf& initialMotion,
+    const TrackingConfig& config,
+    const std::vector<size_t>& frames,
+    float regularizer = 0.0);
+
 /// Track poses per-frame given a calibrated character.
 ///
 /// @param[in] markerData Input marker data.
@@ -104,6 +130,24 @@ Eigen::MatrixXf trackPosesPerframe(
     const momentum::ModelParameters& globalParams,
     const TrackingConfig& config,
     size_t frameStride = 1);
+
+/// Track poses for given frames.
+///
+/// @param[in] markerData Input marker data.
+/// @param[in] character Character definition.
+/// @param[in] globalParams Calibrated identity info; could be repurposed to pass in an initial pose
+/// too.
+/// @param[in] config Solving options.
+/// @param[in] frameIndices Frame indices of the frames to be solved.
+///
+/// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
+/// within a frame stride.
+Eigen::MatrixXf trackPosesForFrames(
+    gsl::span<const std::vector<momentum::Marker>> markerData,
+    const momentum::Character& character,
+    const Eigen::MatrixXf& initialMotion,
+    const TrackingConfig& config,
+    const std::vector<size_t>& frameIndices);
 
 /// Calibrate body proportions and locator offsets of a character from input marker data.
 ///
@@ -137,6 +181,17 @@ Eigen::MatrixXf refineMotion(
     gsl::span<const std::vector<momentum::Marker>> markerData,
     const Eigen::MatrixXf& motion,
     const RefineConfig& config,
+    momentum::Character& character);
+
+/// Get the error of the locator motion vs the markers
+///
+/// @param[in] markerData Input marker data.
+/// @param[in] motion Motion to compare against.
+/// @param[in] character Character definition
+/// @return average per frame error and max marker error
+std::pair<float, float> getLocatorError(
+    gsl::span<const std::vector<momentum::Marker>> markerData,
+    const Eigen::MatrixXf& motion,
     momentum::Character& character);
 
 } // namespace marker_tracking
