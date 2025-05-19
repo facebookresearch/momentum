@@ -20,7 +20,7 @@ namespace {
 constexpr auto kTolerance = std::numeric_limits<double>::epsilon();
 constexpr auto kIntRealTolerance = 2e-4;
 
-void loadC3dFiles(filesystem::path subgroup, std::vector<filesystem::path>& pathsOut) {
+void loadC3dFiles(const filesystem::path& subgroup, std::vector<filesystem::path>& pathsOut) {
   auto envVar = GetEnvVar("TEST_RESOURCES_PATH");
   ASSERT_TRUE(envVar);
 
