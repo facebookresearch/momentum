@@ -486,7 +486,7 @@ void SequenceSolverT<T>::doIteration() {
   const Eigen::VectorX<T> searchDir = qrSolver.x_dense();
 
   const double error_orig = this->error_;
-  MT_LOGD("error {}", error_orig);
+  MT_LOGI_IF(this->verbose_, "Iteration: {}, error: {}", this->iteration_, error_orig);
   if (doLineSearch_) {
     const double innerProd = -qrSolver.At_times_b().dot(searchDir);
 
