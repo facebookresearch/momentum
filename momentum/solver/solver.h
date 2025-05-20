@@ -107,6 +107,7 @@ class SolverT {
   /// Iteration history data.
   std::unordered_map<std::string, Eigen::MatrixX<T>> iterationHistory_;
 
+  /// Flag to enable verbose logging during the solver's execution.
   bool verbose_;
 
  private:

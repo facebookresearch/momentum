@@ -73,7 +73,6 @@ class TrustRegionQRT : public SolverT<T> {
   T maxTrustRegionRadius_ = 10.0;
   T curTrustRegionRadius_ = 1.0;
   Eigen::MatrixX<T> Rmatrix_;
-  bool verbose_ = false;
 };
 
 } // namespace momentum

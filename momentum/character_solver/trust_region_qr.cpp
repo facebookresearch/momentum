@@ -236,7 +236,7 @@ void TrustRegionQRT<T>::doIteration() {
     const T quadraticModelEval = evalQuadraticModel(searchDir_sub);
     const T rho = (this->error_ - error_new) / (this->error_ - quadraticModelEval);
     MT_LOGI_IF(
-        verbose_,
+        this->verbose_,
         "Error orig: {}; error new: {}; quadratic model: {}; rho: {}",
         this->error_,
         error_new,
