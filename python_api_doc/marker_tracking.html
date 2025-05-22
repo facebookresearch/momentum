@@ -57,7 +57,10 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.calib_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.enforce_floor_in_first_frame</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.first_frame_pose_constraint_set</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.global_scale_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.global_scale_only</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.greedy_sampling"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.greedy_sampling</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.locators_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.locators_only</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.major_iter"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.major_iter</span></code></a></li>
 </ul>
@@ -158,9 +161,27 @@
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enforce_floor_in_first_frame</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame" title="Link to this definition"></a></dt>
+<dd><p>Force floor contact in first frame</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">first_frame_pose_constraint_set</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set" title="Link to this definition"></a></dt>
+<dd><p>Name of pose constraint set to use in first frame</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.global_scale_only">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_scale_only</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.global_scale_only" title="Link to this definition"></a></dt>
 <dd><p>Calibrate only the global scale and not all proportions</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.greedy_sampling">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">greedy_sampling</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.greedy_sampling" title="Link to this definition"></a></dt>
+<dd><p>Enable greedy frame sampling with the given stride</p>
 </dd></dl>
 
 <dl class="py property">

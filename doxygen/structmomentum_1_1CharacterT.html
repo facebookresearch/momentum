@@ -133,6 +133,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a16af7771edbf0fb004154393de449cfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e4f02c62ce45b489a0ac69df4d4dbdb" id="r_a2e4f02c62ce45b489a0ac69df4d4dbdb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a2e4f02c62ce45b489a0ac69df4d4dbdb">bakeBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aeffac3a480c7f1812820f239790ea7ab">BlendWeights</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendWeights</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:a2e4f02c62ce45b489a0ac69df4d4dbdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a667ccb9fbfff7d287b44f48fee26d391" id="r_a667ccb9fbfff7d287b44f48fee26d391"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a667ccb9fbfff7d287b44f48fee26d391">bake</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bakeBlendShapes</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bakeScales</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a667ccb9fbfff7d287b44f48fee26d391"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic "bake-out" for turning a character into self-contained geometry.  <br /></td></tr>
+<tr class="separator:a667ccb9fbfff7d287b44f48fee26d391"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -417,6 +420,53 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a667ccb9fbfff7d287b44f48fee26d391" name="a667ccb9fbfff7d287b44f48fee26d391"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a667ccb9fbfff7d287b44f48fee26d391">&#9670;&#160;</a></span>bake()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; <a class="el" href="structmomentum_1_1CharacterT.html">momentum::CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::bake </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;&#160;</td>
+          <td class="paramname"><em>modelParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td>
+          <td class="paramname"><em>bakeBlendShapes</em> = <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td>
+          <td class="paramname"><em>bakeScales</em> = <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Generic "bake-out" for turning a character into self-contained geometry. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">modelParams</td><td>Current pose/scale/blend-shape parameters. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bakeBlendShapes</td><td>Set true (default) to apply blend-shape deltas and remove their parameters from the character. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bakeScales</td><td>Set true (default) to evaluate the posed skeleton, run Linear-Blend-Skinning once, and remove all scaling parameters from the character.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>The returned character contains a static mesh with all requested deformations baked in, while still supporting any parameters you elected to keep. </p>
 
 </div>
 </div>

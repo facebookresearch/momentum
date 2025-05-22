@@ -116,11 +116,17 @@ Functions</h2></td></tr>
 <tr class="separator:afadbfd9992b332ac2fb77f0ca1e8e49e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd074ce7ce214dbc0e39ab63f92149cb" id="r_acd074ce7ce214dbc0e39ab63f92149cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#acd074ce7ce214dbc0e39ab63f92149cb">saveMotion</a> (const std::string &amp;outFile, const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;identity, Eigen::MatrixXf &amp;finalMotion, gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, double fps, bool saveMarkerMesh=true)</td></tr>
 <tr class="separator:acd074ce7ce214dbc0e39ab63f92149cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d4bc797f2585c13cd502bacda98124c" id="r_a4d4bc797f2585c13cd502bacda98124c"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a4d4bc797f2585c13cd502bacda98124c">trackSequence</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">globalParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> regularizer, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameStride</a>)</td></tr>
-<tr class="separator:a4d4bc797f2585c13cd502bacda98124c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54a8f67071a1ee9d86d5646ced55994d" id="r_a54a8f67071a1ee9d86d5646ced55994d"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a54a8f67071a1ee9d86d5646ced55994d">sampleFrames</a> (<a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameStride</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numSamples</a>)</td></tr>
+<tr class="separator:a54a8f67071a1ee9d86d5646ced55994d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae7efe15acaa5abaec743bf406f60376" id="r_aae7efe15acaa5abaec743bf406f60376"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#aae7efe15acaa5abaec743bf406f60376">trackSequence</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">globalParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> regularizer, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameStride</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> enforceFloorInFirstFrame, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;firstFramePoseConstraintSet)</td></tr>
+<tr class="separator:aae7efe15acaa5abaec743bf406f60376"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a312550b93230d7c70d5c4a50c81e6681" id="r_a312550b93230d7c70d5c4a50c81e6681"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a312550b93230d7c70d5c4a50c81e6681">trackSequence</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">globalParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; &amp;frames, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> regularizer, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> enforceFloorInFirstFrame, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;firstFramePoseConstraintSet)</td></tr>
+<tr class="separator:a312550b93230d7c70d5c4a50c81e6681"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aced3f1635b7a1f86b07debe541bcc2a9" id="r_aced3f1635b7a1f86b07debe541bcc2a9"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#aced3f1635b7a1f86b07debe541bcc2a9">trackPosesPerframe</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">globalParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameStride</a>=1)</td></tr>
 <tr class="memdesc:aced3f1635b7a1f86b07debe541bcc2a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Track poses per-frame given a calibrated character.  <br /></td></tr>
 <tr class="separator:aced3f1635b7a1f86b07debe541bcc2a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3281453b372b08f8ea006e689297b762" id="r_a3281453b372b08f8ea006e689297b762"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a3281453b372b08f8ea006e689297b762">trackPosesForFrames</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameIndices</a>)</td></tr>
+<tr class="separator:a3281453b372b08f8ea006e689297b762"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f0ddc74a81ab901d28d0774f238d4cd" id="r_a2f0ddc74a81ab901d28d0774f238d4cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a2f0ddc74a81ab901d28d0774f238d4cd">calibrateModel</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1CalibrationConfig.html">CalibrationConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;identity)</td></tr>
 <tr class="memdesc:a2f0ddc74a81ab901d28d0774f238d4cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calibrate body proportions and locator offsets of a character from input marker data.  <br /></td></tr>
 <tr class="separator:a2f0ddc74a81ab901d28d0774f238d4cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -129,11 +135,22 @@ Functions</h2></td></tr>
 <tr class="separator:a72d7b7b6b7206e378f1b21be72a39f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addca1ae2588d9df7d932127b059a8914" id="r_addca1ae2588d9df7d932127b059a8914"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#addca1ae2588d9df7d932127b059a8914">refineMotion</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">motion</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1RefineConfig.html">RefineConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character)</td></tr>
 <tr class="separator:addca1ae2588d9df7d932127b059a8914"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d8191a7ef9f351fdc111fa787f46671" id="r_a3d8191a7ef9f351fdc111fa787f46671"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a3d8191a7ef9f351fdc111fa787f46671">trackSequence</a> (gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a> &amp;globalParams, const Eigen::MatrixXf &amp;initialMotion, const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;config, float regularizer=0.0, size_t frameStride=1)</td></tr>
-<tr class="memdesc:a3d8191a7ef9f351fdc111fa787f46671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use multiple frames to solve for global parameters such as body proportions and/or marker offsets together with the motion.  <br /></td></tr>
-<tr class="separator:a3d8191a7ef9f351fdc111fa787f46671"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad51b291e2d28fc9ad570471753ce6aef" id="r_ad51b291e2d28fc9ad570471753ce6aef"><td class="memItemLeft" align="right" valign="top">std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#ad51b291e2d28fc9ad570471753ce6aef">getLocatorError</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">motion</a>, <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character)</td></tr>
+<tr class="separator:ad51b291e2d28fc9ad570471753ce6aef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad99a961269f1cf1bf26b10a1ca78d88b" id="r_ad99a961269f1cf1bf26b10a1ca78d88b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#ad99a961269f1cf1bf26b10a1ca78d88b">trackSequence</a> (gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a> &amp;globalParams, const Eigen::MatrixXf &amp;initialMotion, const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;config, float regularizer=0.0, size_t frameStride=1, bool enforceFloorInFirstFrame=false, const std::string &amp;firstFramePoseConstraintSet=&quot;&quot;)</td></tr>
+<tr class="memdesc:ad99a961269f1cf1bf26b10a1ca78d88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use multiple frames to solve for global parameters such as body proportions and/or marker offsets together with the motion.  <br /></td></tr>
+<tr class="separator:ad99a961269f1cf1bf26b10a1ca78d88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af673b972650483cfb8f10e6cb78c305b" id="r_af673b972650483cfb8f10e6cb78c305b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#af673b972650483cfb8f10e6cb78c305b">trackSequence</a> (gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a> &amp;globalParams, const Eigen::MatrixXf &amp;initialMotion, const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;config, const std::vector&lt; size_t &gt; &amp;frames, float regularizer=0.0, bool enforceFloorInFirstFrame=false, const std::string &amp;firstFramePoseConstraintSet=&quot;&quot;)</td></tr>
+<tr class="memdesc:af673b972650483cfb8f10e6cb78c305b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use multiple frames to solve for global parameters such as body proportions and/or marker offsets together with the motion.  <br /></td></tr>
+<tr class="separator:af673b972650483cfb8f10e6cb78c305b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6991c56888b2ef1d2e42b82c25fd8d4c" id="r_a6991c56888b2ef1d2e42b82c25fd8d4c"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a6991c56888b2ef1d2e42b82c25fd8d4c">trackPosesForFrames</a> (gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, const Eigen::MatrixXf &amp;initialMotion, const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;config, const std::vector&lt; size_t &gt; &amp;frameIndices)</td></tr>
+<tr class="memdesc:a6991c56888b2ef1d2e42b82c25fd8d4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Track poses for given frames.  <br /></td></tr>
+<tr class="separator:a6991c56888b2ef1d2e42b82c25fd8d4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8a221a934d60fbccdbe778b76bf6659" id="r_aa8a221a934d60fbccdbe778b76bf6659"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#aa8a221a934d60fbccdbe778b76bf6659">refineMotion</a> (gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, const Eigen::MatrixXf &amp;motion, const <a class="el" href="structmarker__tracking_1_1RefineConfig.html">RefineConfig</a> &amp;config, <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character)</td></tr>
 <tr class="separator:aa8a221a934d60fbccdbe778b76bf6659"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1d0ae73375441fa3590537e76c6dfdf" id="r_af1d0ae73375441fa3590537e76c6dfdf"><td class="memItemLeft" align="right" valign="top">std::pair&lt; float, float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#af1d0ae73375441fa3590537e76c6dfdf">getLocatorError</a> (gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerData, const Eigen::MatrixXf &amp;motion, <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character)</td></tr>
+<tr class="memdesc:af1d0ae73375441fa3590537e76c6dfdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the error of the locator motion vs the markers.  <br /></td></tr>
+<tr class="separator:af1d0ae73375441fa3590537e76c6dfdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c660b7234633a8032a5cf2e5ffb9a4b" id="r_a4c660b7234633a8032a5cf2e5ffb9a4b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemarker__tracking.html#a4c660b7234633a8032a5cf2e5ffb9a4b">processMarkers</a> (<a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;identity, const std::vector&lt; std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; &amp;markerData, const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;trackingConfig, const <a class="el" href="structmarker__tracking_1_1CalibrationConfig.html">CalibrationConfig</a> &amp;calibrationConfig, bool calibrate=true, size_t firstFrame=0, size_t maxFrames=0)</td></tr>
 <tr class="memdesc:a4c660b7234633a8032a5cf2e5ffb9a4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processes marker data for a character model.  <br /></td></tr>
 <tr class="separator:a4c660b7234633a8032a5cf2e5ffb9a4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -608,6 +625,85 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="af1d0ae73375441fa3590537e76c6dfdf" name="af1d0ae73375441fa3590537e76c6dfdf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1d0ae73375441fa3590537e76c6dfdf">&#9670;&#160;</a></span>getLocatorError() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; float, float &gt; marker_tracking::getLocatorError </td>
+          <td>(</td>
+          <td class="paramtype">gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXf &amp;&#160;</td>
+          <td class="paramname"><em>motion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the error of the locator motion vs the markers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">markerData</td><td>Input marker data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">motion</td><td>Motion to compare against. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">character</td><td>Character definition </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>average per frame error and max marker error </dd></dl>
+
+</div>
+</div>
+<a id="ad51b291e2d28fc9ad570471753ce6aef" name="ad51b291e2d28fc9ad570471753ce6aef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad51b291e2d28fc9ad570471753ce6aef">&#9670;&#160;</a></span>getLocatorError() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; marker_tracking::getLocatorError </td>
+          <td>(</td>
+          <td class="paramtype">gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
+          <td class="paramname"><em>motion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6344fa834f5be11d42e6cfc196a32c84" name="a6344fa834f5be11d42e6cfc196a32c84"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6344fa834f5be11d42e6cfc196a32c84">&#9670;&#160;</a></span>loadCalibratedModel()</h2>
 
@@ -906,6 +1002,58 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a54a8f67071a1ee9d86d5646ced55994d" name="a54a8f67071a1ee9d86d5646ced55994d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54a8f67071a1ee9d86d5646ced55994d">&#9670;&#160;</a></span>sampleFrames()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; marker_tracking::sampleFrames </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
+          <td class="paramname"><em>initialMotion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td>
+          <td class="paramname"><em>frameStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td>
+          <td class="paramname"><em>numSamples</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="afadbfd9992b332ac2fb77f0ca1e8e49e" name="afadbfd9992b332ac2fb77f0ca1e8e49e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afadbfd9992b332ac2fb77f0ca1e8e49e">&#9670;&#160;</a></span>saveMotion() <span class="overload">[1/2]</span></h2>
 
@@ -1022,6 +1170,111 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a3281453b372b08f8ea006e689297b762" name="a3281453b372b08f8ea006e689297b762"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3281453b372b08f8ea006e689297b762">&#9670;&#160;</a></span>trackPosesForFrames() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXf marker_tracking::trackPosesForFrames </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
+          <td class="paramname"><em>initialMotion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>frameIndices</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6991c56888b2ef1d2e42b82c25fd8d4c" name="a6991c56888b2ef1d2e42b82c25fd8d4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6991c56888b2ef1d2e42b82c25fd8d4c">&#9670;&#160;</a></span>trackPosesForFrames() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXf marker_tracking::trackPosesForFrames </td>
+          <td>(</td>
+          <td class="paramtype">gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXf &amp;&#160;</td>
+          <td class="paramname"><em>initialMotion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; size_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>frameIndices</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Track poses for given frames. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">markerData</td><td>Input marker data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">character</td><td>Character definition. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globalParams</td><td>Calibrated identity info; could be repurposed to pass in an initial pose too. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>Solving options. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameIndices</td><td>Frame indices of the frames to be solved.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The solved motion. It has the same length as markerData. It repeats the same solved pose within a frame stride. </dd></dl>
+
+</div>
+</div>
 <a id="aced3f1635b7a1f86b07debe541bcc2a9" name="aced3f1635b7a1f86b07debe541bcc2a9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aced3f1635b7a1f86b07debe541bcc2a9">&#9670;&#160;</a></span>trackPosesPerframe()</h2>
 
@@ -1081,8 +1334,78 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a4d4bc797f2585c13cd502bacda98124c" name="a4d4bc797f2585c13cd502bacda98124c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d4bc797f2585c13cd502bacda98124c">&#9670;&#160;</a></span>trackSequence() <span class="overload">[1/2]</span></h2>
+<a id="a312550b93230d7c70d5c4a50c81e6681" name="a312550b93230d7c70d5c4a50c81e6681"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a312550b93230d7c70d5c4a50c81e6681">&#9670;&#160;</a></span>trackSequence() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXf marker_tracking::trackSequence </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>globalParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
+          <td class="paramname"><em>initialMotion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>frames</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td>
+          <td class="paramname"><em>regularizer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td>
+          <td class="paramname"><em>enforceFloorInFirstFrame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>firstFramePoseConstraintSet</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aae7efe15acaa5abaec743bf406f60376" name="aae7efe15acaa5abaec743bf406f60376"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae7efe15acaa5abaec743bf406f60376">&#9670;&#160;</a></span>trackSequence() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1127,7 +1450,19 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td>
-          <td class="paramname"><em>frameStride</em>&#160;</td>
+          <td class="paramname"><em>frameStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td>
+          <td class="paramname"><em>enforceFloorInFirstFrame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>firstFramePoseConstraintSet</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1139,8 +1474,94 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a3d8191a7ef9f351fdc111fa787f46671" name="a3d8191a7ef9f351fdc111fa787f46671"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d8191a7ef9f351fdc111fa787f46671">&#9670;&#160;</a></span>trackSequence() <span class="overload">[2/2]</span></h2>
+<a id="af673b972650483cfb8f10e6cb78c305b" name="af673b972650483cfb8f10e6cb78c305b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af673b972650483cfb8f10e6cb78c305b">&#9670;&#160;</a></span>trackSequence() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXf marker_tracking::trackSequence </td>
+          <td>(</td>
+          <td class="paramtype">gsl::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>markerData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>globalParams</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXf &amp;&#160;</td>
+          <td class="paramname"><em>initialMotion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmarker__tracking_1_1TrackingConfig.html">TrackingConfig</a> &amp;&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; size_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>frames</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>regularizer</em> = <code>0.0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enforceFloorInFirstFrame</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>firstFramePoseConstraintSet</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Use multiple frames to solve for global parameters such as body proportions and/or marker offsets together with the motion. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">markerData</td><td>Marker data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">character</td><td>Character definition. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globalParams</td><td>Bitset to indicate global parameters to solve for; could be all zeros for post-process a motion. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">initialMotion</td><td>Initial values of all parameters. It should be the same length as markerData, but only frames used in solving are used. Values in unused frames do not matter. Number of parameters should be the same as defined in character. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>Solving options. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frames</td><td>List of frames to solve for. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">enforceFloorInFirstFrame</td><td>Flag to enforce the floor contact constraints in first frame </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">firstFramePoseConstraintSet</td><td>Name of a pose constraint set to use for the first frame</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The solved motion. It has the same length as markerData. It repeats the same solved pose within a frame stride. </dd></dl>
+
+</div>
+</div>
+<a id="ad99a961269f1cf1bf26b10a1ca78d88b" name="ad99a961269f1cf1bf26b10a1ca78d88b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad99a961269f1cf1bf26b10a1ca78d88b">&#9670;&#160;</a></span>trackSequence() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1185,7 +1606,19 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>frameStride</em> = <code>1</code>&#160;</td>
+          <td class="paramname"><em>frameStride</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enforceFloorInFirstFrame</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>firstFramePoseConstraintSet</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1204,7 +1637,9 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">globalParams</td><td>Bitset to indicate global parameters to solve for; could be all zeros for post-process a motion. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">initialMotion</td><td>Initial values of all parameters. It should be the same length as markerData, but only frames used in solving are used. Values in unused frames do not matter. Number of parameters should be the same as defined in character. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>Solving options. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameStride</td><td>Frame stride to select solver frames (ie. uniform sample).</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameStride</td><td>Frame stride to select solver frames (ie. uniform sample). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">enforceFloorInFirstFrame</td><td>Flag to enforce the floor contact constraints in first frame </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">firstFramePoseConstraintSet</td><td>Name of a pose constraint set to use for the first frame</td></tr>
   </table>
   </dd>
 </dl>

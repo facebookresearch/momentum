@@ -109,6 +109,15 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a7b0d82ffeae0c82faaa414d9ba0f858b" id="r_a7b0d82ffeae0c82faaa414d9ba0f858b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmarker__tracking_1_1CalibrationConfig.html#a7b0d82ffeae0c82faaa414d9ba0f858b">locatorsOnly</a> = false</td></tr>
 <tr class="memdesc:a7b0d82ffeae0c82faaa414d9ba0f858b"><td class="mdescLeft">&#160;</td><td class="mdescRight">True to calibrate only the locators and not the body.  <br /></td></tr>
 <tr class="separator:a7b0d82ffeae0c82faaa414d9ba0f858b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d5de2505a22572a669a230110af976b" id="r_a2d5de2505a22572a669a230110af976b"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmarker__tracking_1_1CalibrationConfig.html#a2d5de2505a22572a669a230110af976b">greedySampling</a> = 0</td></tr>
+<tr class="memdesc:a2d5de2505a22572a669a230110af976b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample uniformly or do a greedy importance sampling.  <br /></td></tr>
+<tr class="separator:a2d5de2505a22572a669a230110af976b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb26b7f5d30c3d5249e7a1c434b4f29d" id="r_adb26b7f5d30c3d5249e7a1c434b4f29d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmarker__tracking_1_1CalibrationConfig.html#adb26b7f5d30c3d5249e7a1c434b4f29d">enforceFloorInFirstFrame</a> = false</td></tr>
+<tr class="memdesc:adb26b7f5d30c3d5249e7a1c434b4f29d"><td class="mdescLeft">&#160;</td><td class="mdescRight">True to lock the floor constraints to the floor in the first frame.  <br /></td></tr>
+<tr class="separator:adb26b7f5d30c3d5249e7a1c434b4f29d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f482984b35c83464012e1cd9295208d" id="r_a2f482984b35c83464012e1cd9295208d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmarker__tracking_1_1CalibrationConfig.html#a2f482984b35c83464012e1cd9295208d">firstFramePoseConstraintSet</a></td></tr>
+<tr class="memdesc:a2f482984b35c83464012e1cd9295208d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of a pose constraint set to use for the first frame.  <br /></td></tr>
+<tr class="separator:a2f482984b35c83464012e1cd9295208d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_structmarker__tracking_1_1BaseConfig"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structmarker__tracking_1_1BaseConfig')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="structmarker__tracking_1_1BaseConfig.html">marker_tracking::BaseConfig</a></td></tr>
 <tr class="memitem:af38bea2a8084ae207bd0394c4e8d9243 inherit pub_attribs_structmarker__tracking_1_1BaseConfig" id="r_af38bea2a8084ae207bd0394c4e8d9243"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmarker__tracking_1_1BaseConfig.html#af38bea2a8084ae207bd0394c4e8d9243">minVisPercent</a> = 0.f</td></tr>
 <tr class="memdesc:af38bea2a8084ae207bd0394c4e8d9243 inherit pub_attribs_structmarker__tracking_1_1BaseConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum percentage of visible markers in a frame to consider for tracking.  <br /></td></tr>
@@ -142,6 +151,38 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="adb26b7f5d30c3d5249e7a1c434b4f29d" name="adb26b7f5d30c3d5249e7a1c434b4f29d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb26b7f5d30c3d5249e7a1c434b4f29d">&#9670;&#160;</a></span>enforceFloorInFirstFrame</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool marker_tracking::CalibrationConfig::enforceFloorInFirstFrame = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>True to lock the floor constraints to the floor in the first frame. </p>
+
+</div>
+</div>
+<a id="a2f482984b35c83464012e1cd9295208d" name="a2f482984b35c83464012e1cd9295208d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f482984b35c83464012e1cd9295208d">&#9670;&#160;</a></span>firstFramePoseConstraintSet</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string marker_tracking::CalibrationConfig::firstFramePoseConstraintSet</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Name of a pose constraint set to use for the first frame. </p>
+
+</div>
+</div>
 <a id="a02cf2a9449a5bd16940443d462ae3f7a" name="a02cf2a9449a5bd16940443d462ae3f7a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a02cf2a9449a5bd16940443d462ae3f7a">&#9670;&#160;</a></span>globalScaleOnly</h2>
 
@@ -155,6 +196,22 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>True to only solve for a global body scale without changing individual bone length. </p>
+
+</div>
+</div>
+<a id="a2d5de2505a22572a669a230110af976b" name="a2d5de2505a22572a669a230110af976b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d5de2505a22572a669a230110af976b">&#9670;&#160;</a></span>greedySampling</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t marker_tracking::CalibrationConfig::greedySampling = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sample uniformly or do a greedy importance sampling. </p>
 
 </div>
 </div>
