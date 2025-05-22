@@ -188,7 +188,7 @@ LocatorList loadLocatorsFromBuffer(
         l.limitWeight[2] = svtof(tokens[1]);
     } while (line < lines.size() - 1 && (current != "}," || current != "}"));
 
-    // skip an invalid locator
+    // skip locator if it has no parent
     if (l.parent == kInvalidIndex) {
       continue;
     }
