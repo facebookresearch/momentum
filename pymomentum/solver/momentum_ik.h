@@ -34,6 +34,7 @@ enum class ErrorFunctionType {
   Projection,
   Distance,
   Vertex,
+  VertexProjection,
   NumTypes
 };
 
@@ -69,7 +70,11 @@ at::Tensor solveBodyIKProblem(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type);
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections);
 
 at::Tensor computeGradient(
     pybind11::object characters,
@@ -101,7 +106,11 @@ at::Tensor computeGradient(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type);
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections);
 
 at::Tensor computeResidual(
     pybind11::object characters,
@@ -133,7 +142,11 @@ at::Tensor computeResidual(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type);
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections);
 
 std::tuple<at::Tensor, at::Tensor> computeJacobian(
     pybind11::object characters,
@@ -165,7 +178,11 @@ std::tuple<at::Tensor, at::Tensor> computeJacobian(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type);
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections);
 
 at::Tensor solveBodySequenceIKProblem(
     pybind11::object characters,
@@ -200,7 +217,11 @@ at::Tensor solveBodySequenceIKProblem(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type);
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections);
 
 at::Tensor transformPose(
     const momentum::Character& character,

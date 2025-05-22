@@ -666,6 +666,130 @@ class TestSolver(unittest.TestCase):
         )
         self.assertTrue(torch.allclose(matrices_final, expected_matrices_final))
 
+    def test_projection(self) -> None:
+        """Test solve_ik() with projection constraints."""
+
+        # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
+        # and a few dummy faces.
+        character = pym_geometry.create_test_character()
+
+        n_params = character.parameter_transform.size
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        model_params_init = torch.zeros((1, n_params), dtype=torch.float64)
+
+        # =============== constraints
+
+        vert_proj_cons_vertex = torch.LongTensor(
+            [
+                [
+                    20,
+                ]
+            ]
+        )
+        vert_proj_cons_weights = torch.FloatTensor(
+            [
+                [
+                    1.0,
+                ]
+            ]
+        )
+        vert_proj_cons_weights.requires_grad = True
+        vert_proj_cons_target_positions = torch.FloatTensor([[1.0, 1.0]])
+        vert_proj_cons_target_positions.requires_grad = True
+        vert_proj_cons_projection = torch.FloatTensor(
+            [
+                [
+                    [
+                        10.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                    ],
+                    [
+                        0.0,
+                        10.0,
+                        0.0,
+                        0.0,
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        10.0,
+                    ],
+                ]
+            ]
+        )
+        vert_proj_cons_projection.requires_grad = True
+
+        # =============== End building constraints
+
+        scaling_params = character.parameter_transform.scaling_parameters
+        active_params = ~scaling_params
+
+        active_error_functions = [
+            ErrorFunctionType.VertexProjection,
+        ]
+        error_function_weights = torch.ones(
+            1,
+            len(active_error_functions),
+            requires_grad=True,
+            dtype=torch.float64,
+        )
+
+        # Test whether ik works with proj constraint:
+        model_params_final = pym_solver.solve_ik(
+            character=character,
+            active_parameters=active_params,
+            model_parameters_init=model_params_init,
+            active_error_functions=active_error_functions,
+            error_function_weights=error_function_weights,
+            vertex_proj_cons_vertices=vert_proj_cons_vertex,
+            vertex_proj_cons_weights=vert_proj_cons_weights,
+            vertex_proj_cons_target_positions=vert_proj_cons_target_positions,
+            vertex_proj_cons_projections=vert_proj_cons_projection,
+        )
+
+        residual_optimized = pym_solver.residual(
+            character=character,
+            model_parameters=model_params_final,
+            active_error_functions=active_error_functions,
+            error_function_weights=error_function_weights,
+            vertex_proj_cons_vertices=vert_proj_cons_vertex,
+            vertex_proj_cons_weights=vert_proj_cons_weights,
+            vertex_proj_cons_target_positions=vert_proj_cons_target_positions,
+            vertex_proj_cons_projections=vert_proj_cons_projection,
+        )
+
+        self.assertTrue(residual_optimized[0, :2].norm() < 1e-6)
+
+        # check if the residual is as expected
+        residual = pym_solver.residual(
+            character=character,
+            model_parameters=model_params_init,
+            active_error_functions=active_error_functions,
+            error_function_weights=error_function_weights,
+            vertex_proj_cons_vertices=vert_proj_cons_vertex,
+            vertex_proj_cons_weights=vert_proj_cons_weights,
+            vertex_proj_cons_target_positions=vert_proj_cons_target_positions,
+            vertex_proj_cons_projections=vert_proj_cons_projection,
+        )
+
+        # we expect the residual to be the difference between the target position and the projected position
+        vertex_cam = (
+            vert_proj_cons_projection[0, :, :3]
+            @ torch.FloatTensor(character.mesh.vertices[20])
+            + vert_proj_cons_projection[0, :, 3]
+        )
+        vertex_screen = vertex_cam[:2] / vertex_cam[2]
+        vertex_residual = vertex_screen - vert_proj_cons_target_positions[0]
+
+        self.assertTrue(
+            torch.allclose(residual[0, :2], vertex_residual.to(torch.double))
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

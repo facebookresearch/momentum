@@ -44,6 +44,7 @@ PYBIND11_MODULE(solver, m) {
       .value("Projection", ErrorFunctionType::Projection)
       .value("Distance", ErrorFunctionType::Distance)
       .value("Vertex", ErrorFunctionType::Vertex)
+      .value("VertexProjection", ErrorFunctionType::VertexProjection)
       .export_values();
 
   py::enum_<LinearSolverType>(
@@ -215,6 +216,12 @@ All quaternion parameters use the quaternion order [x, y, z, w], where :math:`q 
 :param vertex_cons_target_positions: float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the target position.
 :param vertex_cons_target_normals: float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the target normal.  Not used if the vertex constraint type is POSITION.
 :param vertex_cons_type: Type of vertex constraint.  POSITION is a position constraint, while PLANE, NORMAL, and SYMMETRIC_NORMAL are variants on point-to-plane (PLANE uses the target normal, NORMAL uses the source normal, and SYMMETRIC_NORMAL uses a blend of the two normals).
+:param vertex_proj_cons_vertices: int-valued torch.Tensor of dimension (nBatch x nConstraints); contains the vertex index for each constraint.
+:param vertex_proj_cons_weights: float-valued torch.Tensor of dimension (nBatch x nConstraints); contains the per-constraint weight for each constraint.
+:param vertex_proj_cons_target_positions: float-valued torch.Tensor of dimension (nBatch x nConstraints x 2); contains the target position.
+:param vertex_proj_cons_target_projections: float-valued torch.Tensor of dimension (nBatch x nConstraints x 4 x 3); containing a 4x3 projection matrix for each constraint.  Note
+    that while you can use a standard pinhole model matrix as the projection matrix, we actually recommend constructing a separate local projection matrix
+    for each constraint centered around the camera ray, which is more robust for e.g. fisheye cameras.
 )",
       py::arg("character"),
       py::arg("active_parameters"),
@@ -247,7 +254,12 @@ All quaternion parameters use the quaternion order [x, y, z, w], where :math:`q 
       py::arg("vertex_cons_weights") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_normals") = std::optional<at::Tensor>{},
-      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position);
+      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
+      py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") =
+          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
       "gradient",
@@ -293,7 +305,12 @@ For details on the arguments, see :py:func:`solve_ik`.
       py::arg("vertex_cons_weights") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_normals") = std::optional<at::Tensor>{},
-      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position);
+      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
+      py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") =
+          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
       "residual",
@@ -336,7 +353,12 @@ For details on the arguments, see :py:func:`solve_ik`.
       py::arg("vertex_cons_weights") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_normals") = std::optional<at::Tensor>{},
-      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position);
+      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
+      py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") =
+          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
       "jacobian",
@@ -392,7 +414,12 @@ For details on the arguments, see :py:func:`solve_ik`.
       py::arg("vertex_cons_weights") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_normals") = std::optional<at::Tensor>{},
-      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position);
+      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
+      py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") =
+          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   // -------------------------------------------------------------
   //                    solveBodyIKProblem
@@ -448,7 +475,12 @@ This is to prevent confusing ambiguities in whether you meant sharing across the
       py::arg("vertex_cons_weights") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_cons_target_normals") = std::optional<at::Tensor>{},
-      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position);
+      py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
+      py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") =
+          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
       "get_solve_ik_statistics",
