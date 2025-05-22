@@ -73,7 +73,9 @@ PYBIND11_MODULE(marker_tracking, m) {
               size_t,
               bool,
               bool,
-              size_t>(),
+              size_t,
+              bool,
+              std::string>(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -82,7 +84,9 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("major_iter") = 3,
           py::arg("global_scale_only") = false,
           py::arg("locators_only") = false,
-          py::arg("greedy_sampling") = 0)
+          py::arg("greedy_sampling") = 0,
+          py::arg("enforce_floor_in_first_frame") = false,
+          py::arg("first_frame_pose_constraint_set") = "")
       .def_readwrite(
           "calib_frames",
           &marker_tracking::CalibrationConfig::calibFrames,
@@ -102,7 +106,15 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "locators_only",
           &marker_tracking::CalibrationConfig::locatorsOnly,
-          "Calibrate only the locator offsets");
+          "Calibrate only the locator offsets")
+      .def_readwrite(
+          "enforce_floor_in_first_frame",
+          &marker_tracking::CalibrationConfig::enforceFloorInFirstFrame,
+          "Force floor contact in first frame")
+      .def_readwrite(
+          "first_frame_pose_constraint_set",
+          &marker_tracking::CalibrationConfig::firstFramePoseConstraintSet,
+          "Name of pose constraint set to use in first frame");
 
   auto trackingConfig =
       py::class_<marker_tracking::TrackingConfig, marker_tracking::BaseConfig>(
