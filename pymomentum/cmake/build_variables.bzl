@@ -67,6 +67,7 @@ tensor_ik_public_headers = [
     "tensor_ik/tensor_projection_error_function.h",
     "tensor_ik/tensor_residual.h",
     "tensor_ik/tensor_vertex_error_function.h",
+    "tensor_ik/tensor_vertex_projection_error_function.h",
 ]
 
 tensor_ik_sources = [
@@ -84,6 +85,7 @@ tensor_ik_sources = [
     "tensor_ik/tensor_projection_error_function.cpp",
     "tensor_ik/tensor_residual.cpp",
     "tensor_ik/tensor_vertex_error_function.cpp",
+    "tensor_ik/tensor_vertex_projection_error_function.cpp",
 ]
 
 tensor_ik_test_sources = [

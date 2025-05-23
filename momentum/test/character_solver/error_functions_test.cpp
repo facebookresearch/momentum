@@ -798,7 +798,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     applySSD(ibp, skin, mesh, skelState, targetMesh);
 
     Eigen::Matrix<T, 3, 4> projection = Eigen::Matrix<T, 3, 4>::Identity();
-    projection(2, 3) = 10;
+    projection(0, 0) = 10.0;
+    projection(1, 1) = 10.0;
+    projection(2, 3) = 10.0;
 
     const T errorTol = Eps<T>(5e-2f, 1e-5);
 
@@ -806,7 +808,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
       const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
       const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
-      const Eigen::Vector2<T> target2d = target.hnormalized();
+      const Eigen::Vector2<T> target2d = target.hnormalized() + Eigen::Vector2<T>::Random() * 0.1;
       errorFunction.addConstraint(index, uniform<float>(0, 1e-2), target2d, projection);
     }
 

@@ -24,6 +24,7 @@
 #include "pymomentum/tensor_ik/tensor_projection_error_function.h"
 #include "pymomentum/tensor_ik/tensor_residual.h"
 #include "pymomentum/tensor_ik/tensor_vertex_error_function.h"
+#include "pymomentum/tensor_ik/tensor_vertex_projection_error_function.h"
 #include "pymomentum/tensor_momentum/tensor_momentum_utility.h"
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 #include "pymomentum/tensor_utility/autograd_utility.h"
@@ -127,7 +128,11 @@ struct IKProblemAutogradFunction
       at::Tensor vertexCons_weights,
       at::Tensor vertexCons_target_positions,
       at::Tensor vertexCons_target_normals,
-      momentum::VertexConstraintType vertexCons_type);
+      momentum::VertexConstraintType vertexCons_type,
+      at::Tensor vertexProjCons_vertices,
+      at::Tensor vertexProjCons_weights,
+      at::Tensor vertexProjCons_target_positions,
+      at::Tensor vertexProjCons_projections);
 
   static variable_list backward(
       AutogradContext* ctx,
@@ -174,7 +179,11 @@ std::
         at::Tensor vertexCons_weights,
         at::Tensor vertexCons_target_positions,
         at::Tensor vertexCons_target_normals,
-        momentum::VertexConstraintType vertexCons_type) {
+        momentum::VertexConstraintType vertexCons_type,
+        at::Tensor vertexProjCons_vertices,
+        at::Tensor vertexProjCons_weights,
+        at::Tensor vertexProjCons_target_positions,
+        at::Tensor vertexProjCons_projections) {
   MT_THROW_IF(
       characters.size() != nBatch,
       "Mismatch between size of Character list and nBatch.");
@@ -220,6 +229,11 @@ std::
       true);
   checkValidVertexIndex(
       vertexCons_vertices, *characters.front(), "vertex_cons_vertices", false);
+  checkValidVertexIndex(
+      vertexProjCons_vertices,
+      *characters.front(),
+      "vertex_cons_proj_vertices",
+      false);
 
   // Build each type of error function according to enum order:
   errorFunctions.push_back(createPositionErrorFunction<T>(
@@ -281,6 +295,13 @@ std::
       vertexCons_target_positions,
       vertexCons_target_normals,
       vertexCons_type));
+  errorFunctions.push_back(createVertexProjectionErrorFunction<T>(
+      nBatch,
+      nFrames,
+      vertexProjCons_vertices,
+      vertexProjCons_weights,
+      vertexProjCons_target_positions,
+      vertexProjCons_projections));
 
   return std::make_pair(std::move(errorFunctions), std::move(errorFunctionMap));
 }
@@ -326,7 +347,11 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
     at::Tensor vertexCons_weights,
     at::Tensor vertexCons_target_positions,
     at::Tensor vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type) {
+    momentum::VertexConstraintType vertexCons_type,
+    at::Tensor vertexProjCons_vertices,
+    at::Tensor vertexProjCons_weights,
+    at::Tensor vertexProjCons_target_positions,
+    at::Tensor vertexProjCons_projections) {
   // Input modelParameters_init can be batched or unbatched.
   // If unbatched, unsqueeze it by adding a batch dim of 1.
   // If input modelParameters_init is unbatched, remember this
@@ -400,7 +425,11 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
       vertexCons_weights,
       vertexCons_target_positions,
       vertexCons_target_normals,
-      vertexCons_type);
+      vertexCons_type,
+      vertexProjCons_vertices,
+      vertexProjCons_weights,
+      vertexProjCons_target_positions,
+      vertexProjCons_projections);
 
   // Do the actual IK/FK operation to get the solved model parameters:
   std::vector<at::Tensor> results = IKFunction<T>::forward(
@@ -499,7 +528,11 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
       vertexCons_vertices,
       vertexCons_weights,
       vertexCons_target_positions,
-      vertexCons_target_normals};
+      vertexCons_target_normals,
+      vertexProjCons_vertices,
+      vertexProjCons_weights,
+      vertexProjCons_target_positions,
+      vertexProjCons_projections};
   std::copy(
       std::begin(results), std::end(results), std::back_inserter(to_save));
   ctx->save_for_backward(to_save);
@@ -582,6 +615,10 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
   auto vertexCons_weights = checkAndIncrementSavedItr();
   auto vertexCons_target_positions = checkAndIncrementSavedItr();
   auto vertexCons_target_normals = checkAndIncrementSavedItr();
+  auto vertexProjCons_vertices = checkAndIncrementSavedItr();
+  auto vertexProjCons_weights = checkAndIncrementSavedItr();
+  auto vertexProjCons_target_positions = checkAndIncrementSavedItr();
+  auto vertexProjCons_projections = checkAndIncrementSavedItr();
 
   // Get stored results from the forward pass, which contains the solved body
   // model params of the IK problem.
@@ -659,7 +696,11 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
       vertexCons_weights,
       vertexCons_target_positions,
       vertexCons_target_normals,
-      vertexCons_type);
+      vertexCons_type,
+      vertexProjCons_vertices,
+      vertexProjCons_weights,
+      vertexProjCons_target_positions,
+      vertexProjCons_projections);
 
   // Compute the gradient of the IK problem:
   const auto [grad_modelParams, grad_errorFunctionWeights, grad_inputs] =
@@ -1030,7 +1071,11 @@ torch::Tensor solveBodyIKProblem(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type) {
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections) {
   TensorMppcaModel mppcaModel = extractMppcaModel(posePrior_model);
   return applyIKProblemAutogradFunction<IKSolveFunction>(
       characters.ptr(),
@@ -1071,7 +1116,11 @@ torch::Tensor solveBodyIKProblem(
       denullify(vertexCons_weights),
       denullify(vertexCons_target_positions),
       denullify(vertexCons_target_normals),
-      vertexCons_type)[0];
+      vertexCons_type,
+      denullify(vertexProjCons_vertices),
+      denullify(vertexProjCons_weights),
+      denullify(vertexProjCons_target_positions),
+      denullify(vertexProjCons_projections))[0];
 }
 
 torch::Tensor computeGradient(
@@ -1104,7 +1153,11 @@ torch::Tensor computeGradient(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type) {
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections) {
   auto activeParameters = at::empty({0});
   TensorMppcaModel mppcaModel = extractMppcaModel(posePrior_model);
   at::Tensor result = applyIKProblemAutogradFunction<GradientFunction>(
@@ -1146,7 +1199,11 @@ torch::Tensor computeGradient(
       denullify(vertexCons_weights),
       denullify(vertexCons_target_positions),
       denullify(vertexCons_target_normals),
-      vertexCons_type)[0];
+      vertexCons_type,
+      denullify(vertexProjCons_vertices),
+      denullify(vertexProjCons_weights),
+      denullify(vertexProjCons_target_positions),
+      denullify(vertexProjCons_projections))[0];
   return result;
 }
 
@@ -1180,7 +1237,11 @@ torch::Tensor computeResidual(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type) {
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections) {
   auto activeParameters = at::empty({0});
   TensorMppcaModel mppcaModel = extractMppcaModel(posePrior_model);
   auto res = applyIKProblemAutogradFunction<ResidualFunction>(
@@ -1222,7 +1283,11 @@ torch::Tensor computeResidual(
       denullify(vertexCons_weights),
       denullify(vertexCons_target_positions),
       denullify(vertexCons_target_normals),
-      vertexCons_type);
+      vertexCons_type,
+      denullify(vertexProjCons_vertices),
+      denullify(vertexProjCons_weights),
+      denullify(vertexProjCons_target_positions),
+      denullify(vertexProjCons_projections));
   assert(res.size() == 2);
   return res[0];
 }
@@ -1257,7 +1322,11 @@ std::tuple<torch::Tensor, torch::Tensor> computeJacobian(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type) {
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections) {
   auto activeParameters = at::empty({0});
   TensorMppcaModel mppcaModel = extractMppcaModel(posePrior_model);
   auto res = applyIKProblemAutogradFunction<ResidualFunction>(
@@ -1299,7 +1368,11 @@ std::tuple<torch::Tensor, torch::Tensor> computeJacobian(
       denullify(vertexCons_weights),
       denullify(vertexCons_target_positions),
       denullify(vertexCons_target_normals),
-      vertexCons_type);
+      vertexCons_type,
+      denullify(vertexProjCons_vertices),
+      denullify(vertexProjCons_weights),
+      denullify(vertexProjCons_target_positions),
+      denullify(vertexProjCons_projections));
   assert(res.size() == 2);
   return {res[0], res[1]};
 }
@@ -1337,7 +1410,11 @@ at::Tensor solveBodySequenceIKProblem(
     std::optional<at::Tensor> vertexCons_weights,
     std::optional<at::Tensor> vertexCons_target_positions,
     std::optional<at::Tensor> vertexCons_target_normals,
-    momentum::VertexConstraintType vertexCons_type) {
+    momentum::VertexConstraintType vertexCons_type,
+    std::optional<at::Tensor> vertexProjCons_vertices,
+    std::optional<at::Tensor> vertexProjCons_weights,
+    std::optional<at::Tensor> vertexProjCons_target_positions,
+    std::optional<at::Tensor> vertexProjCons_projections) {
   TensorMppcaModel mppcaModel = extractMppcaModel(posePrior_model);
   return applyIKProblemAutogradFunction<SequenceIKSolveFunction>(
       characters.ptr(),
@@ -1378,7 +1455,11 @@ at::Tensor solveBodySequenceIKProblem(
       denullify(vertexCons_weights),
       denullify(vertexCons_target_positions),
       denullify(vertexCons_target_normals),
-      vertexCons_type)[0];
+      vertexCons_type,
+      denullify(vertexProjCons_vertices),
+      denullify(vertexProjCons_weights),
+      denullify(vertexProjCons_target_positions),
+      denullify(vertexProjCons_projections))[0];
 }
 
 template <typename T>
