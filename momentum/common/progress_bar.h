@@ -15,16 +15,22 @@ namespace momentum {
 
 // A simple progress bar that prints hash marks (e.g., "Name [===>  ] 60%")
 class ProgressBar {
-  static constexpr int64_t kMaxWidth = 80;
-
  public:
-  /// @param name Displayed prefix (visible=true only)
+  /// @param prefix Displayed prefix
   /// @param numOperations Total operations (determines progress ratio)
-  ProgressBar(const std::string& name, int64_t numOperations);
-  void increment(int64_t count = 1);
-  void set(int64_t count);
+  ProgressBar(const std::string& prefix, size_t numOperations);
+
+  /// Increments the progress by the given count (default 1)
+  void increment(size_t count = 1);
+
+  /// Sets the progress to the given count
+  void set(size_t count);
+
+  /// Returns the current progress in the range [0, 100]
+  [[nodiscard]] size_t getCurrentProgress();
 
  private:
+  static constexpr size_t kMaxWidth = 80;
   indicators::ProgressBar bar_;
 };
 
