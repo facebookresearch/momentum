@@ -26,17 +26,23 @@
 #define MT_LOGW(...) XR_LOGW(__VA_ARGS__)
 #define MT_LOGE(...) XR_LOGE(__VA_ARGS__)
 
-#define MT_LOGT_ONCE(condition, ...) XR_LOGT_ONCE(condition, __VA_ARGS__)
-#define MT_LOGD_ONCE(condition, ...) XR_LOGD_ONCE(condition, __VA_ARGS__)
-#define MT_LOGI_ONCE(condition, ...) XR_LOGI_ONCE(condition, __VA_ARGS__)
-#define MT_LOGW_ONCE(condition, ...) XR_LOGW_ONCE(condition, __VA_ARGS__)
-#define MT_LOGE_ONCE(condition, ...) XR_LOGE_ONCE(condition, __VA_ARGS__)
-
 #define MT_LOGT_IF(condition, ...) XR_LOGT_IF(condition, __VA_ARGS__)
 #define MT_LOGD_IF(condition, ...) XR_LOGD_IF(condition, __VA_ARGS__)
 #define MT_LOGI_IF(condition, ...) XR_LOGI_IF(condition, __VA_ARGS__)
 #define MT_LOGW_IF(condition, ...) XR_LOGW_IF(condition, __VA_ARGS__)
 #define MT_LOGE_IF(condition, ...) XR_LOGE_IF(condition, __VA_ARGS__)
+
+#define MT_LOGT_ONCE(...) XR_LOGT_ONCE(__VA_ARGS__)
+#define MT_LOGD_ONCE(...) XR_LOGD_ONCE(__VA_ARGS__)
+#define MT_LOGI_ONCE(...) XR_LOGI_ONCE(__VA_ARGS__)
+#define MT_LOGW_ONCE(...) XR_LOGW_ONCE(__VA_ARGS__)
+#define MT_LOGE_ONCE(...) XR_LOGE_ONCE(__VA_ARGS__)
+
+#define MT_LOGT_ONCE_IF(condition, ...) XR_LOGT_ONCE_IF(condition, __VA_ARGS__)
+#define MT_LOGD_ONCE_IF(condition, ...) XR_LOGD_ONCE_IF(condition, __VA_ARGS__)
+#define MT_LOGI_ONCE_IF(condition, ...) XR_LOGI_ONCE_IF(condition, __VA_ARGS__)
+#define MT_LOGW_ONCE_IF(condition, ...) XR_LOGW_ONCE_IF(condition, __VA_ARGS__)
+#define MT_LOGE_ONCE_IF(condition, ...) XR_LOGE_ONCE_IF(condition, __VA_ARGS__)
 
 #elif defined(MOMENTUM_WITH_SPDLOG)
 
@@ -49,6 +55,27 @@
 #define MT_LOGI(...) ::spdlog::info(__VA_ARGS__)
 #define MT_LOGW(...) ::spdlog::warn(__VA_ARGS__)
 #define MT_LOGE(...) ::spdlog::error(__VA_ARGS__)
+
+#define MT_LOGT_IF(condition, ...) \
+  if (condition) {                 \
+    MT_LOGT(__VA_ARGS__);          \
+  }
+#define MT_LOGD_IF(condition, ...) \
+  if (condition) {                 \
+    MT_LOGD(__VA_ARGS__);          \
+  }
+#define MT_LOGI_IF(condition, ...) \
+  if (condition) {                 \
+    MT_LOGI(__VA_ARGS__);          \
+  }
+#define MT_LOGW_IF(condition, ...) \
+  if (condition) {                 \
+    MT_LOGW(__VA_ARGS__);          \
+  }
+#define MT_LOGE_IF(condition, ...) \
+  if (condition) {                 \
+    MT_LOGE(__VA_ARGS__);          \
+  }
 
 // This function is designed to limit the number of times an error is logged.
 // Please note that in a multi-threaded context, its behavior may not be guaranteed.
@@ -63,31 +90,31 @@
     }                                                        \
   }
 
-#define MT_LOGT_ONCE(condition, ...) _MT_RUN_ONCE(MT_LOGT(condition, __VA_ARGS__))
-#define MT_LOGD_ONCE(condition, ...) _MT_RUN_ONCE(MT_LOGD(condition, __VA_ARGS__))
-#define MT_LOGI_ONCE(condition, ...) _MT_RUN_ONCE(MT_LOGI(condition, __VA_ARGS__))
-#define MT_LOGW_ONCE(condition, ...) _MT_RUN_ONCE(MT_LOGW(condition, __VA_ARGS__))
-#define MT_LOGE_ONCE(condition, ...) _MT_RUN_ONCE(MT_LOGE(condition, __VA_ARGS__))
+#define MT_LOGT_ONCE(...) _MT_RUN_ONCE(MT_LOGT(__VA_ARGS__))
+#define MT_LOGD_ONCE(...) _MT_RUN_ONCE(MT_LOGD(__VA_ARGS__))
+#define MT_LOGI_ONCE(...) _MT_RUN_ONCE(MT_LOGI(__VA_ARGS__))
+#define MT_LOGW_ONCE(...) _MT_RUN_ONCE(MT_LOGW(__VA_ARGS__))
+#define MT_LOGE_ONCE(...) _MT_RUN_ONCE(MT_LOGE(__VA_ARGS__))
 
-#define MT_LOGT_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGT(__VA_ARGS__);          \
+#define MT_LOGT_ONCE_IF(condition, ...) \
+  if (condition) {                      \
+    MT_LOGT_ONCE(__VA_ARGS__);          \
   }
-#define MT_LOGD_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGT(__VA_ARGS__);          \
+#define MT_LOGD_ONCE_IF(condition, ...) \
+  if (condition) {                      \
+    MT_LOGD_ONCE(__VA_ARGS__);          \
   }
-#define MT_LOGI_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGT(__VA_ARGS__);          \
+#define MT_LOGI_ONCE_IF(condition, ...) \
+  if (condition) {                      \
+    MT_LOGI_ONCE(__VA_ARGS__);          \
   }
-#define MT_LOGW_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGT(__VA_ARGS__);          \
+#define MT_LOGW_ONCE_IF(condition, ...) \
+  if (condition) {                      \
+    MT_LOGW_ONCE(__VA_ARGS__);          \
   }
-#define MT_LOGE_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGT(__VA_ARGS__);          \
+#define MT_LOGE_ONCE_IF(condition, ...) \
+  if (condition) {                      \
+    MT_LOGE_ONCE(__VA_ARGS__);          \
   }
 
 #else
@@ -98,17 +125,23 @@
 #define MT_LOGW(...)
 #define MT_LOGE(...)
 
-#define MT_LOGT_ONCE(condition, ...)
-#define MT_LOGD_ONCE(condition, ...)
-#define MT_LOGI_ONCE(condition, ...)
-#define MT_LOGW_ONCE(condition, ...)
-#define MT_LOGE_ONCE(condition, ...)
-
 #define MT_LOGT_IF(condition, ...)
 #define MT_LOGD_IF(condition, ...)
 #define MT_LOGI_IF(condition, ...)
 #define MT_LOGW_IF(condition, ...)
 #define MT_LOGE_IF(condition, ...)
+
+#define MT_LOGT_ONCE(...)
+#define MT_LOGD_ONCE(...)
+#define MT_LOGI_ONCE(...)
+#define MT_LOGW_ONCE(...)
+#define MT_LOGE_ONCE(...)
+
+#define MT_LOGT_ONCE_IF(condition, ...)
+#define MT_LOGD_ONCE_IF(condition, ...)
+#define MT_LOGI_ONCE_IF(condition, ...)
+#define MT_LOGW_ONCE_IF(condition, ...)
+#define MT_LOGE_ONCE_IF(condition, ...)
 
 #endif
 
@@ -134,5 +167,7 @@ enum class LogLevel {
 void setLogLevel(LogLevel level);
 
 void setLogLevel(const std::string& levelStr);
+
+[[nodiscard]] LogLevel getLogLevel();
 
 } // namespace momentum
