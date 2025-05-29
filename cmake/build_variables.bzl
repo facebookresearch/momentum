@@ -31,6 +31,7 @@ common_test_sources = [
     "test/common/exception_test.cpp",
     "test/common/log_test.cpp",
     "test/common/progress_bar_test.cpp",
+    "test/common/string_test.cpp",
 ]
 
 simd_public_headers = [
