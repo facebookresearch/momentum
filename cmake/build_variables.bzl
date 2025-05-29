@@ -29,6 +29,7 @@ common_sources = [
 common_test_sources = [
     "test/common/aligned_allocator_test.cpp",
     "test/common/exception_test.cpp",
+    "test/common/progress_bar_test.cpp",
 ]
 
 simd_public_headers = [
