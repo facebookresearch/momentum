@@ -90,4 +90,35 @@ void setLogLevel(const std::string& levelStr) {
   setLogLevel(stringToLogLevel(levelStr));
 }
 
+LogLevel getLogLevel() {
+#if defined(MOMENTUM_WITH_XR_LOGGER)
+  // Get the current log level from the XR logger
+  int level = arvr::logging::getChannel(DEFAULT_LOG_CHANNEL).level();
+
+  // Convert from arvr::logging::Level to momentum::LogLevel
+  switch (static_cast<arvr::logging::Level>(level)) {
+    case arvr::logging::Level::Disabled:
+      return LogLevel::Disabled;
+    case arvr::logging::Level::Error:
+      return LogLevel::Error;
+    case arvr::logging::Level::Warning:
+      return LogLevel::Warning;
+    case arvr::logging::Level::Info:
+      return LogLevel::Info;
+    case arvr::logging::Level::Debug:
+      return LogLevel::Debug;
+    case arvr::logging::Level::Trace:
+      return LogLevel::Trace;
+    default:
+      // Default to Info level for unknown levels
+      return LogLevel::Info;
+  }
+#else
+  // Emit a warning similar to setLogLevel()
+  MT_LOGW("Getting log level is not fully supported. Returning default (Info).\n");
+  // Default to Info level when not using XR logger
+  return LogLevel::Info;
+#endif
+}
+
 } // namespace momentum
