@@ -11,33 +11,56 @@
 
 namespace momentum {
 
-// Implementation of Mixture of Probabilistic PCA (http://www.miketipping.com/papers/met-mppca.pdf)
+/// Mixture of Probabilistic Principal Component Analysis (MPPCA)
+/// Based on: http://www.miketipping.com/papers/met-mppca.pdf
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
 struct MppcaT {
-  // dimensions for convenience
+  /// Dimension of data space
   size_t d = 0;
+
+  /// Number of mixture components
   size_t p = 0;
 
-  // names of the parameters in the structure
+  /// Parameter names (should match dimension d)
   std::vector<std::string> names;
 
-  // we only need mu, Cinv, and Rpre for calculating the mppca efficiently
-  // the actual base values of pi, W, and sigma2 are not stored
+  /// Mean vectors (p×d matrix)
   Eigen::MatrixX<T> mu;
+
+  /// Inverse covariance matrices
   std::vector<Eigen::MatrixX<T>> Cinv;
+
+  /// Matrices for efficient computation
   std::vector<Eigen::MatrixX<T>> L;
+
+  /// Precomputed responsibility terms
   Eigen::VectorX<T> Rpre;
 
-  // set data from loaded values
+  /// Sets model parameters and precomputes matrices
+  ///
+  /// @param[in] pi Mixture weights
+  /// @param[in] mmu Mean vectors
+  /// @param[in] W Principal axes matrices
+  /// @param[in] sigma2 Noise variances
   void set(
       const VectorX<T>& pi,
       const MatrixX<T>& mmu,
       gsl::span<const MatrixX<T>> W,
       const VectorX<T>& sigma2);
 
+  /// Converts to a different scalar type
+  ///
+  /// @tparam T2 Target scalar type
+  /// @return Converted MPPCA model
   template <typename T2>
   MppcaT<T2> cast() const;
 
+  /// Checks approximate equality with another model
+  ///
+  /// @param[in] mppcaT Model to compare with
+  /// @return true if approximately equal
   bool isApprox(const MppcaT<T>& mppcaT) const;
 };
 
