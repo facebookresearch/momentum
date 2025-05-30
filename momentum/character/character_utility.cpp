@@ -5,13 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character/character_utility.h"
+#include <momentum/character/character_utility.h>
 
-#include "momentum/character/joint.h"
-#include "momentum/character/skin_weights.h"
-#include "momentum/common/exception.h"
-#include "momentum/common/log.h"
-#include "momentum/math/mesh.h"
+#include <momentum/character/joint.h>
+#include <momentum/character/skin_weights.h>
+#include <momentum/common/exception.h>
+#include <momentum/common/log.h>
+#include <momentum/math/mesh.h>
 
 #include <unordered_set>
 

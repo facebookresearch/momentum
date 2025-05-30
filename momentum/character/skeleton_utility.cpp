@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character/skeleton_utility.h"
-#include "momentum/common/profile.h"
+#include <momentum/character/skeleton_utility.h>
+#include <momentum/common/profile.h>
 
 namespace momentum {
 

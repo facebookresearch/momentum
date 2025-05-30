@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character/blend_shape_base.h"
+#include <momentum/character/blend_shape_base.h>
 
-#include "momentum/common/checks.h"
+#include <momentum/common/checks.h>
 
 namespace momentum {
 

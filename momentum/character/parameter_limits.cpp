@@ -5,12 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character/parameter_limits.h"
+#include <momentum/character/parameter_limits.h>
 
-#include "momentum/character/parameter_transform.h"
-#include "momentum/character/skeleton.h"
-#include "momentum/common/checks.h"
-#include "momentum/math/utility.h"
+#include <momentum/character/parameter_transform.h>
+#include <momentum/character/skeleton.h>
+#include <momentum/common/checks.h>
+#include <momentum/math/utility.h>
 
 namespace momentum {
 

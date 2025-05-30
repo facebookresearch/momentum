@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character/collision_geometry_state.h"
+#include <momentum/character/collision_geometry_state.h>
 
-#include "momentum/character/skeleton_state.h"
+#include <momentum/character/skeleton_state.h>
 
 namespace momentum {
 

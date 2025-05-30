@@ -5,17 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character/character_state.h"
+#include <momentum/character/character_state.h>
 
-#include "momentum/character/blend_shape_skinning.h"
-#include "momentum/character/character.h"
-#include "momentum/character/collision_geometry_state.h"
-#include "momentum/character/linear_skinning.h"
-#include "momentum/character/locator_state.h"
-#include "momentum/character/pose_shape.h"
-#include "momentum/character/skin_weights.h"
-#include "momentum/common/checks.h"
-#include "momentum/math/mesh.h"
+#include <momentum/character/blend_shape_skinning.h>
+#include <momentum/character/character.h>
+#include <momentum/character/collision_geometry_state.h>
+#include <momentum/character/linear_skinning.h>
+#include <momentum/character/locator_state.h>
+#include <momentum/character/pose_shape.h>
+#include <momentum/character/skin_weights.h>
+#include <momentum/common/checks.h>
+#include <momentum/math/mesh.h>
 
 namespace momentum {
 
