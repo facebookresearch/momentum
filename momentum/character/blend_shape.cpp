@@ -65,9 +65,9 @@ VectorXf BlendShape::estimateCoefficients(
     // if we have weights, we definitely have to compute a new factorization that incorporates the
     // weights
     VectorXf wts(weights.size() * 3);
-    Eigen::Map<VectorXf, 0, Eigen::Stride<Eigen::Dynamic, 3>>(&wts(0), weights.size()) = weights;
-    Eigen::Map<VectorXf, 0, Eigen::Stride<Eigen::Dynamic, 3>>(&wts(1), weights.size()) = weights;
-    Eigen::Map<VectorXf, 0, Eigen::Stride<Eigen::Dynamic, 3>>(&wts(2), weights.size()) = weights;
+    Eigen::Map<VectorXf, 0, Eigen::Stride<1, 3>>(&wts(0), weights.size()) = weights;
+    Eigen::Map<VectorXf, 0, Eigen::Stride<1, 3>>(&wts(1), weights.size()) = weights;
+    Eigen::Map<VectorXf, 0, Eigen::Stride<1, 3>>(&wts(2), weights.size()) = weights;
 
     // calculate weighted coefficient matrix and rhs
     const auto rows = shapeVectors_.rows();
