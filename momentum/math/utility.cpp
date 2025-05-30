@@ -31,6 +31,9 @@ constexpr T eulerTol() {
 template <typename T>
 Vector3<T> quaternionToRotVec(const Quaternion<T>& q) {
   T angle = T(2) * std::acos(q.w());
+  // Note: This branch is theoretically unreachable since std::acos() always returns
+  // a value in the range [0, pi], making angle always non-negative.
+  // It's kept as defensive programming.
   if (angle < -pi<T>())
     angle = T(2) * pi<T>() - angle;
   else if (angle > pi<T>())

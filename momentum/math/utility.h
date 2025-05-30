@@ -18,7 +18,10 @@
 
 namespace momentum {
 
-// isnan() function that isn't optimized away by fastmath, unlike std::isnan()
+/// NaN check function that isn't optimized away by fastmath
+///
+/// Unlike std::isnan(), this implementation is not affected by compiler optimizations
+/// when using fast math options
 [[nodiscard]] inline bool IsNanNoOpt(float f) {
   union {
     float f;
@@ -27,18 +30,19 @@ namespace momentum {
   return (u.x << 1) > 0xff000000u;
 }
 
-// -----------------------------------------------
-//  math utilities
-// -----------------------------------------------
+/// @name Math Utilities
+/// @{
 
-// A ParameterSet where all parameters are active.
+/// Creates a ParameterSet with all parameters set to active
 inline const ParameterSet allParams() {
   ParameterSet params;
   params.set();
   return params;
 }
 
-// simple square function because obviously c++ doesn't have one
+/// Computes the square of a value
+///
+/// Convenience function for x * x
 template <class T>
 inline T sqr(const T& x) {
   return x * x;
@@ -50,22 +54,33 @@ template <typename T = float>
   return (std::abs(l - r) < eps);
 };
 
-// -----------------------------------------------
-//  matrix utilities
-// -----------------------------------------------
+/// @}
 
-// Calculate matrix pseudo inverse
+/// @name Matrix Utilities
+/// @{
+
+/// Calculates the pseudo-inverse of a matrix
+///
+/// Uses singular value decomposition (SVD) to compute the Moore-Penrose pseudo-inverse
+/// @tparam T The scalar type
+/// @param mat Input matrix
+/// @return The pseudo-inverse of the input matrix
 template <typename T>
 MatrixX<T> pseudoInverse(const MatrixX<T>& mat);
 
-// Calculate sparse matrix pseudo inverse - warning, this involves converting the sparse matrix to a
-// dense matrix for now
+/// Calculates the pseudo-inverse of a sparse matrix
+///
+/// Converts the sparse matrix to a dense matrix before computing the pseudo-inverse
+/// @tparam T The scalar type
+/// @param mat Input sparse matrix
+/// @return The pseudo-inverse as a dense matrix
 template <typename T>
 MatrixX<T> pseudoInverse(const SparseMatrix<T>& mat);
 
-// -----------------------------------------------
-//  geometry utilities
-// -----------------------------------------------
+/// @}
+
+/// @name Geometry Utilities
+/// @{
 
 /// Converts a quaternion to a rotation vector.
 template <typename T>
@@ -172,11 +187,20 @@ template <typename T>
     const Vector3<T>& angles,
     EulerConvention convention = EulerConvention::Intrinsic);
 
-// convert quaternion to euler
+/// Converts a quaternion to Euler angles (intrinsic XYZ convention)
+///
+/// @tparam T The scalar type
+/// @param q Input quaternion
+/// @return Vector of Euler angles [x, y, z]
 template <typename T>
 Vector3<T> quaternionToEuler(const Quaternion<T>& q);
 
-// weighted average of quaternions
+/// Computes the weighted average of multiple quaternions
+///
+/// Uses the method described in Markley et al. "Averaging Quaternions"
+/// @param q Array of quaternions to average
+/// @param w Optional weights for each quaternion (defaults to equal weights)
+/// @return The average quaternion
 Quaternionf quaternionAverage(
     gsl::span<const Quaternionf> q,
     gsl::span<const float> w = std::vector<float>());
@@ -203,13 +227,19 @@ template <typename T>
     const Eigen::Vector3<T>& d2,
     T maxDist = std::numeric_limits<T>::max());
 
-// The skew-symmetric matrix that corresponds to the
-// cross product v x (something):
+/// Creates a skew-symmetric matrix for computing cross products
+///
+/// Returns a matrix M such that M*u = v×u for any vector u
+/// @tparam T The scalar type
+/// @param v Input vector
+/// @return 3×3 skew-symmetric matrix
 template <typename T>
 Eigen::Matrix<T, 3, 3> crossProductMatrix(const Eigen::Matrix<T, 3, 1>& v) {
   Eigen::Matrix<T, 3, 3> result;
   result << T(0), -v.z(), v.y(), v.z(), T(0), -v.x(), -v.y(), v.x(), T(0);
   return result;
 }
+
+/// @}
 
 } // namespace momentum
