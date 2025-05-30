@@ -14,37 +14,50 @@
 
 namespace momentum {
 
+/// Lightweight transform with separate rotation, translation, and uniform scaling
+///
+/// This class provides a more efficient alternative to Eigen's Affine3 for transformations
+/// that only involve rotation, translation, and uniform scaling. It stores these components
+/// separately, which allows for more efficient operations and memory usage.
+///
+/// @tparam T The scalar type (float or double)
 template <typename T>
 struct TransformT {
   Quaternion<T> rotation;
   Vector3<T> translation;
   T scale;
 
+  /// Creates a transform with only rotation
   [[nodiscard]] static TransformT<T> makeRotation(const Quaternion<T>& rotation_in);
+
+  /// Creates a transform with only translation
   [[nodiscard]] static TransformT<T> makeTranslation(const Vector3<T>& translation_in);
+
+  /// Creates a transform with only scaling
   [[nodiscard]] static TransformT<T> makeScale(const T& scale_in);
 
-  /// Creates a random affine transform.
+  /// Creates a random transform
   ///
-  /// @param[in] True to set translation to a random vector where each value is between -1 and 1.
-  /// Otherwise, the translation component will be zero.
-  /// @param[in] True to set rotation to a unit random quaternion. Otherwise, the rotation component
-  /// will be identity.
-  /// @param[in] True to set scale to a random value between 0.5 and 2.0. Otherwise, the scale
-  /// component will be 1.
+  /// @param[in] translation If true, use random translation (-1 to 1)
+  /// @param[in] rotation If true, use random rotation
+  /// @param[in] scale If true, use random scale (0.5 to 2.0)
   [[nodiscard]] static TransformT<T>
   makeRandom(bool translation = true, bool rotation = true, bool scale = true);
 
-  /// Creates a transform from Eigen's affine transform.
+  /// Converts from Eigen's Affine3
   [[nodiscard]] static TransformT<T> fromAffine3(const Affine3<T>& other);
 
-  /// Creates a transform from a affine transform that is represented as a 4x4 matrix.
+  /// Converts from 4x4 matrix
   [[nodiscard]] static TransformT<T> fromMatrix(const Matrix4<T>& other);
 
+  /// Creates identity transform
   TransformT() : rotation(Quaternion<T>::Identity()), translation(Vector3<T>::Zero()), scale(1) {
     // Empty
   }
 
+  /// Copy constructor with type conversion
+  ///
+  /// @tparam T2 Source scalar type
   template <typename T2>
   explicit TransformT(const TransformT<T2>& other)
       : rotation(other.rotation.template cast<T>()),
@@ -53,6 +66,7 @@ struct TransformT {
     // Empty
   }
 
+  /// Constructor with components
   explicit TransformT(
       const Vector3<T>& translation_in,
       const Quaternion<T>& rotation_in = Quaternion<T>::Identity(),
@@ -61,6 +75,7 @@ struct TransformT {
     // Empty
   }
 
+  /// Move constructor
   explicit TransformT(
       Vector3<T>&& translation_in,
       Quaternion<T>&& rotation_in = Quaternion<T>::Identity(),
@@ -71,24 +86,29 @@ struct TransformT {
     // Empty
   }
 
+  /// Constructor from Affine3
   explicit TransformT(const Affine3<T>& other) {
     *this = fromAffine3(other);
   }
 
+  /// Constructor from 4x4 matrix
   explicit TransformT(const Matrix4<T>& other) {
     *this = fromMatrix(other);
   }
 
+  /// Assignment from Affine3
   TransformT<T>& operator=(const Affine3<T>& other) {
     *this = fromAffine3(other);
     return *this;
   }
 
+  /// Assignment from 4x4 matrix
   TransformT<T>& operator=(const Matrix4<T>& other) {
     *this = fromMatrix(other);
     return *this;
   }
 
+  /// Combines transforms (applies other first, then this)
   [[nodiscard]] TransformT<T> operator*(const TransformT<T>& other) const {
     // [ s_1*R_1 t_1 ] * [ s_2*R_2 t_2 ] = [ s_1*s_2*R_1*R_2  s_1*R_1*t_2 + t_1 ]
     // [     0    1  ]   [     0    1  ]   [        0                     1     ]
@@ -98,6 +118,7 @@ struct TransformT {
     return TransformT<T>(std::move(trans), std::move(rot), std::move(newScale));
   }
 
+  /// Multiplies with Affine3
   [[nodiscard]] Affine3<T> operator*(const Affine3<T>& other) const {
     Affine3<T> out = Affine3<T>::Identity();
     out.linear().noalias() = toLinear() * other.linear();
@@ -105,17 +126,20 @@ struct TransformT {
     return out;
   }
 
+  /// Transforms a point
   [[nodiscard]] Vector3<T> operator*(const Vector3<T>& other) const {
     return transformPoint(other);
   }
 
+  /// Converts to Affine3
   explicit operator Affine3<T>() const {
     return toAffine3();
   }
 
+  /// Converts to Affine3
   [[nodiscard]] Affine3<T> toAffine3() const;
 
-  /// Returns 4x4 matrix representation of the transform.
+  /// Converts to 4x4 matrix
   [[nodiscard]] Matrix4<T> toMatrix() const {
     Matrix4<T> out = Matrix4<T>::Zero();
     out.template topLeftCorner<3, 3>().noalias() = rotation.toRotationMatrix() * scale;
@@ -124,21 +148,28 @@ struct TransformT {
     return out;
   }
 
-  /// Returns 3x3 rotation matrix representation of the transform.
+  /// Returns rotation as 3x3 matrix
   [[nodiscard]] Matrix3<T> toRotationMatrix() const {
     return rotation.toRotationMatrix();
   }
 
-  /// Returns the linear part (rotation * scale) of the transform.
+  /// Returns rotation*scale as 3x3 matrix
   [[nodiscard]] Matrix3<T> toLinear() const {
     return toRotationMatrix() * scale;
   }
 
+  /// Applies full transform to a point
   [[nodiscard]] Vector3<T> transformPoint(const Vector3<T>& pt) const;
+
+  /// Applies only rotation to a vector
   [[nodiscard]] Vector3<T> rotate(const Vector3<T>& vec) const;
 
+  /// Computes inverse transform
   [[nodiscard]] TransformT<T> inverse() const;
 
+  /// Converts to different scalar type
+  ///
+  /// @tparam T2 Target scalar type
   template <typename T2>
   [[nodiscard]] TransformT<T2> cast() const {
     return TransformT<T2>(
