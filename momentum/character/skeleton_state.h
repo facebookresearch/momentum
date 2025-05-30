@@ -13,56 +13,115 @@
 
 namespace momentum {
 
+/// Measures of similarity between two skeleton states
+///
+/// Contains both per-joint error metrics and aggregate statistics
 struct StateSimilarity {
+  /// Position error for each joint (in distance units)
   VectorXf positionError;
+
+  /// Orientation error for each joint (in radians)
   VectorXf orientationError;
+
+  /// Root mean square of position errors across all joints
   float positionRMSE;
+
+  /// Root mean square of orientation errors across all joints
   float orientationRMSE;
+
+  /// Maximum position error across all joints
   float positionMax;
+
+  /// Maximum orientation error across all joints
   float orientationMax;
 };
 
-// skeleton state class
+/// Represents the complete state of a skeleton
+///
+/// Stores joint parameters and computed joint states for an entire skeleton.
+/// Provides methods for updating the state based on new parameters and
+/// comparing different skeleton states.
 template <typename T>
 struct SkeletonStateT {
+  /// Joint parameters for all joints in the skeleton
   JointParametersT<T> jointParameters;
+
+  /// Computed joint states for all joints in the skeleton
   JointStateListT<T> jointState;
 
-  // create empty skeleton state
+  /// Creates an empty skeleton state
   SkeletonStateT() noexcept {}
 
-  // create skeleton state for the given parameters and skeleton
+  /// Creates a skeleton state from joint parameters and a reference skeleton
+  ///
+  /// @param parameters Joint parameters for all joints in the skeleton
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param computeDeriv Whether to compute derivative information for the joints
   SkeletonStateT(
       const JointParametersT<T>& parameters,
       const Skeleton& referenceSkeleton,
       bool computeDeriv = true);
+
+  /// Creates a skeleton state from rvalue joint parameters and a reference skeleton
+  ///
+  /// @param parameters Joint parameters for all joints in the skeleton (moved from)
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param computeDeriv Whether to compute derivative information for the joints
   SkeletonStateT(
       JointParametersT<T>&& parameters,
       const Skeleton& referenceSkeleton,
       bool computeDeriv = true);
 
+  /// Creates a skeleton state from another skeleton state with a different scalar type
+  ///
+  /// @tparam T2 Source scalar type
+  /// @param rhs Source skeleton state to copy from
   template <typename T2>
   explicit SkeletonStateT(const SkeletonStateT<T2>& rhs);
 
-  // update skeleton state for the given joint parameters and skeleton
+  /// Updates the skeleton state with new joint parameters
+  ///
+  /// @param jointParameters New joint parameters for all joints
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param computeDeriv Whether to compute derivative information for the joints
   void set(
       const JointParametersT<T>& jointParameters,
       const Skeleton& referenceSkeleton,
       bool computeDeriv = true);
 
+  /// Updates the skeleton state with new rvalue joint parameters
+  ///
+  /// @param jointParameters New joint parameters for all joints (moved from)
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param computeDeriv Whether to compute derivative information for the joints
   void set(
       JointParametersT<T>&& jointParameters,
       const Skeleton& referenceSkeleton,
       bool computeDeriv = true);
 
+  /// Updates the skeleton state from another skeleton state with a different scalar type
+  ///
+  /// @tparam T2 Source scalar type
+  /// @param rhs Source skeleton state to copy from
   template <typename T2>
   void set(const SkeletonStateT<T2>& rhs);
 
-  // compare to skeleton states with each other, returning all kinds of similarity measures
+  /// Compares two skeleton states and returns similarity metrics
+  ///
+  /// @param state1 First skeleton state to compare
+  /// @param state2 Second skeleton state to compare
+  /// @return Similarity metrics between the two states
   static StateSimilarity compare(const SkeletonStateT<T>& state1, const SkeletonStateT<T>& state2);
 
+  /// Extracts global transforms for all joints in the skeleton
+  ///
+  /// @return List of global transforms for all joints
   TransformListT<T> toTransforms() const;
 
+  /// Converts the skeleton state to a different scalar type
+  ///
+  /// @tparam T2 Target scalar type
+  /// @return Skeleton state with the target scalar type
   template <typename T2>
   SkeletonStateT<T2> cast() const {
     SkeletonStateT<T2> result;
@@ -71,18 +130,32 @@ struct SkeletonStateT {
   }
 
  private:
-  // update skeleton state for the given skeleton
+  /// Updates the joint states based on the current joint parameters
+  ///
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param computeDeriv Whether to compute derivative information for the joints
   void set(const Skeleton& referenceSkeleton, bool computeDeriv);
 
+  /// Copies joint states from another skeleton state with a different scalar type
+  ///
+  /// @tparam T2 Source scalar type
+  /// @param rhs Source skeleton state to copy from
   template <typename T2>
   void copy(const SkeletonStateT<T2>& rhs);
 };
 
-// The relative transform taking us from one local joint space to another.
-// This equivalent to
-//     (T_B)^{-1} T_A
-// but computed in a much more numerically stable manner as it doesn't
-// involve passing through world space on the way.
+/// Computes the relative transform between two joints in a skeleton
+///
+/// This transform maps points from joint A's local space to joint B's local space.
+/// It is computed by finding the common ancestor of both joints and combining
+/// the transforms along the path, which is more numerically stable than
+/// computing (T_B)^{-1} * T_A directly.
+///
+/// @param jointA Source joint index
+/// @param jointB Target joint index
+/// @param referenceSkeleton The skeleton structure defining joint hierarchy
+/// @param skelState Current state of the skeleton
+/// @return Transform from joint A's local space to joint B's local space
 template <typename T>
 TransformT<T> transformAtoB(
     size_t jointA,
