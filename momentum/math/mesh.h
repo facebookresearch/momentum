@@ -12,18 +12,33 @@
 
 namespace momentum {
 
-// base mesh class
+/// A generic mesh representation with support for vertices, faces, lines, and texture coordinates.
+///
+/// @tparam T The scalar type used for vertex coordinates and confidence values (typically float or
+/// double)
 template <typename T>
 struct MeshT {
-  std::vector<Eigen::Vector3<T>> vertices; // list of mesh vertices
-  std::vector<Eigen::Vector3<T>> normals; // list of normals
-  std::vector<Eigen::Vector3i> faces; // list of vertex indices per face
-  std::vector<std::vector<int32_t>> lines; // list of list of vertex indices per line
+  /// List of mesh vertices in 3D space
+  std::vector<Eigen::Vector3<T>> vertices;
 
-  std::vector<Eigen::Vector3b> colors; // list of per-vertex colors
-  std::vector<T> confidence; // list of per-vertex confidences
+  /// List of vertex normals (same size as vertices when computed)
+  std::vector<Eigen::Vector3<T>> normals;
 
-  /// List of texture coordinates.
+  /// List of triangular faces defined by vertex indices
+  std::vector<Eigen::Vector3i> faces;
+
+  /// List of polylines defined by vertex indices
+  /// Each inner vector represents a single polyline
+  std::vector<std::vector<int32_t>> lines;
+
+  /// List of per-vertex RGB colors (0-255 for each channel)
+  std::vector<Eigen::Vector3b> colors;
+
+  /// List of per-vertex confidence values
+  /// Higher values typically indicate higher confidence in the vertex position
+  std::vector<T> confidence;
+
+  /// List of texture coordinates (UV coordinates).
   ///
   /// The texture coordinates are format-agnostic, and it's the user's responsibility to ensure
   /// their consistent use.
@@ -33,17 +48,36 @@ struct MeshT {
   /// crucial to understand when working with different formats.
   std::vector<Eigen::Vector2f> texcoords;
 
-  std::vector<Eigen::Vector3i> texcoord_faces; // list of texture coordinate indices per face
-  std::vector<std::vector<int32_t>> texcoord_lines; // list of texture coordinate indices per line
+  /// List of texture coordinate indices per face
+  /// Maps each face to its corresponding texture coordinates
+  std::vector<Eigen::Vector3i> texcoord_faces;
 
-  /// Compute vertex normals (by averaging connected face normals)
+  /// List of texture coordinate indices per line
+  /// Maps each line to its corresponding texture coordinates
+  std::vector<std::vector<int32_t>> texcoord_lines;
+
+  /// Compute vertex normals by averaging connected face normals.
+  ///
+  /// This method calculates normals for each vertex by averaging the normals of all
+  /// connected faces. The resulting normals are normalized to unit length.
+  /// If a vertex is part of a degenerate face (e.g., colinear vertices), that face
+  /// will not contribute to the vertex normal.
   void updateNormals();
 
-  /// Cast data type of mesh vertices, normals and confidence
+  /// Cast the mesh to a different scalar type.
+  ///
+  /// This method creates a new mesh with all numeric data converted to the target type.
+  /// Vertex positions, normals, and confidence values are cast to the new type.
+  /// Non-numeric data like faces and lines remain unchanged.
+  ///
+  /// @tparam T2 The target scalar type
+  /// @return A new mesh with the target scalar type
   template <typename T2>
   MeshT<T2> cast() const;
 
-  /// Reset mesh
+  /// Reset the mesh by clearing all data.
+  ///
+  /// This method clears all vectors, effectively resetting the mesh to an empty state.
   void reset();
 };
 
