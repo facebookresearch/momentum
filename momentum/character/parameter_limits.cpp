@@ -24,8 +24,15 @@ std::string_view toString(const LimitType type) {
       return "MinMaxJointPassive";
     case Linear:
       return "Linear";
+    case LinearJoint:
+      return "LinearJoint";
     case Ellipsoid:
       return "Ellipsoid";
+    case HalfPlane:
+      return "HalfPlane";
+    case LimitTypeCount:
+      // This is not a real enum value, just a counter
+      return "LimitTypeCount";
     default:
       return "Unknown";
   }
