@@ -183,8 +183,9 @@ character_test_sources = [
     "test/character/joint_test.cpp",
     "test/character/parameter_transform_test.cpp",
     "test/character/simplify_test.cpp",
-    "test/character/skeleton_test.cpp",
     "test/character/skeleton_bake_test.cpp",
+    "test/character/skeleton_state_test.cpp",
+    "test/character/skeleton_test.cpp",
 ]
 
 character_solver_public_headers = [

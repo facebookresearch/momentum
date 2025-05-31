@@ -23,28 +23,39 @@ struct SkeletonT {
   /// The list of joints in this skeleton.
   JointList joints;
 
+  /// Constructor that validates joint hierarchy.
+  /// Ensures parent indices are valid (parent < child index or kInvalidIndex).
   explicit SkeletonT(JointList joints);
   SkeletonT() = default;
 
-  /// Look up the index of a joint from its name.
+  /// Returns the index of a joint with the given name, or kInvalidIndex if not found.
   [[nodiscard]] size_t getJointIdByName(std::string_view name) const;
 
-  /// Get the names of all the joints in this skeleton.
+  /// Returns a vector containing all joint names in the skeleton.
   [[nodiscard]] std::vector<std::string> getJointNames() const;
 
-  /// Get the list of indices of the direct children of a joint or all its descendants.
+  /// Returns indices of child joints for the specified joint.
+  ///
+  /// @param jointId Index of the joint to find children for
+  /// @param recursive If true, returns all descendants; if false, only direct children
+  /// @throws std::out_of_range if jointId is invalid
   [[nodiscard]] std::vector<size_t> getChildrenJoints(size_t jointId, bool recursive = true) const;
 
-  /// Check whether the two input joints lie on the same branch of the hierarchy.
-  /// Returns true if ancestorJointId is an ancestor of jointId; that is,
-  /// if jointId is in the tree rooted at ancestorJointId.
-  /// Note that a joint is considered to be its own ancestor; that is,
-  /// isAncestor(id, id) returns true.
+  /// Determines if one joint is an ancestor of another in the hierarchy.
+  ///
+  /// Returns true if ancestorJointId is an ancestor of jointId.
+  /// A joint is considered to be its own ancestor (isAncestor(id, id) returns true).
   [[nodiscard]] bool isAncestor(size_t jointId, size_t ancestorJointId) const;
 
+  /// Finds the closest common ancestor of two joints in the hierarchy.
+  ///
+  /// Returns the index of the joint that is the lowest common ancestor
+  /// in the hierarchy for the two specified joints.
   [[nodiscard]] size_t commonAncestor(size_t joint1, size_t joint2) const;
 
-  /// Casts the current skeleton to another scalar type.
+  /// Converts the skeleton to use a different scalar type.
+  ///
+  /// Returns a copy of this skeleton with all numeric values converted to type U.
   template <typename U>
   [[nodiscard]] SkeletonT<U> cast() const {
     if constexpr (std::is_same_v<T, U>) {
