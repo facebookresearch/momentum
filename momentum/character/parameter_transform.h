@@ -41,6 +41,10 @@ struct PoseConstraint {
         poseConstraint.parameterIdValue.end(),
         std::inserter(paramIdToValue2, paramIdToValue2.begin()));
 
+    if (paramIdToValue1.size() != paramIdToValue2.size()) {
+      return false;
+    }
+
     auto pred = [](const auto& l, const auto& r) {
       return ((l.first == r.first) && isApprox(l.second, r.second));
     };
