@@ -14,8 +14,9 @@
 
 namespace momentum {
 
-/// Represents a tapered capsule collision geometry, defined by a transformation, length, and two
-/// radii.
+/// Tapered capsule collision geometry.
+///
+/// Defined by a transformation, length, and two radii at the endpoints.
 template <typename S>
 struct TaperedCapsuleT {
   using Scalar = S;
