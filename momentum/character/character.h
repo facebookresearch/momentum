@@ -19,31 +19,76 @@
 
 namespace momentum {
 
+/// A character model with skeletal structure, mesh, and optional components.
 template <typename T>
 struct CharacterT {
-  // non-optional components of a character
+  /// @{ @name Required components
+
+  /// Skeletal structure defining the character's joints and hierarchy
   Skeleton skeleton;
+
+  /// Maps model parameters to joint parameters
   ParameterTransform parameterTransform;
 
-  // optional components
+  /// @}
+
+  /// @{ @name Optional components
+
+  /// Constraints on model parameters
   ParameterLimits parameterLimits;
+
+  /// Points of interest attached to joints
   LocatorList locators;
+
+  /// 3D mesh representing the character's surface
   Mesh_u mesh;
+
+  /// Defines how mesh vertices are influenced by joints
   SkinWeights_u skinWeights;
+
+  /// Pose-dependent shape corrections
   PoseShape_u poseShapes;
+
+  /// Collision volumes for the character
   CollisionGeometry_u collision;
+
+  /// Shape variations that can be blended
   BlendShape_const_p blendShape;
+
+  /// Facial expression blend shapes
   BlendShapeBase_const_p faceExpressionBlendShape;
 
+  /// Inverse of the bind pose transformations for each joint
   TransformationList inverseBindPose;
+
+  /// Maps from original joint indices to simplified joint indices
   std::vector<size_t> jointMap;
 
+  /// Character identifier
   std::string name;
 
-  // character constructor
+  /// @}
+
+  /// Default constructor
   CharacterT();
+
+  /// Destructor
   ~CharacterT();
 
+  /// Constructs a character with the specified components
+  ///
+  /// @param s Skeleton defining joint hierarchy
+  /// @param pt Parameter transform mapping model parameters to joint parameters
+  /// @param pl Optional parameter limits/constraints
+  /// @param l Optional locators attached to joints
+  /// @param m Optional mesh representing the character's surface
+  /// @param sw Optional skin weights defining how mesh vertices are influenced by joints
+  /// @param cg Optional collision geometry
+  /// @param bs Optional pose-dependent shape corrections
+  /// @param blendShapes Optional shape variations that can be blended
+  /// @param faceExpressionBlendShapes Optional facial expression blend shapes
+  /// @param nameIn Optional character identifier
+  /// @param inverseBindPose Optional inverse bind pose transformations
   CharacterT(
       const Skeleton& s,
       const ParameterTransform& pt,
@@ -58,99 +103,143 @@ struct CharacterT {
       const std::string& nameIn = "",
       const momentum::TransformationList& inverseBindPose = {});
 
+  /// Copy constructor
   CharacterT(const CharacterT& c);
+
+  /// Assignment operator
   CharacterT& operator=(const CharacterT& rhs);
 
-  // create a simplified character from the current one.  This simplified character will
-  // only have the joints that are actually affected by the passed-in parameters.
+  /// Creates a simplified character with only joints affected by the specified parameters
+  ///
+  /// @param enabledParameters Parameters to keep (defaults to all parameters)
+  /// @return A new character with simplified skeleton and parameter transform
   CharacterT simplify(const ParameterSet& enabledParameters = ParameterSet().flip()) const;
 
-  // Create a smaller character that just has the requested active joints.
+  /// Creates a simplified character with only the specified joints
+  ///
+  /// @param activeJoints Boolean vector indicating which joints to keep
+  /// @return A new character with only the requested joints
   CharacterT simplifySkeleton(const std::vector<bool>& activeJoints) const;
 
-  // Create a smaller character that just has the requested parameters.
+  /// Creates a simplified character with only the specified parameters
+  ///
+  /// @param parameterSet Set of parameters to keep
+  /// @return A new character with only the requested parameters
   CharacterT simplifyParameterTransform(const ParameterSet& parameterSet) const;
 
-  // remap SkinWeights from original character to simplified version
+  /// Remaps skin weights from original character to simplified version
+  ///
+  /// @param skinWeights Original skin weights
+  /// @param originalCharacter Original character containing the full joint hierarchy
+  /// @return Remapped skin weights for the simplified character
   SkinWeights remapSkinWeights(const SkinWeights& skinWeights, const CharacterT& originalCharacter)
       const;
 
-  // remap limits from original character to simplified version
+  /// Remaps parameter limits from original character to simplified version
+  ///
+  /// @param limits Original parameter limits
+  /// @param originalCharacter Original character containing the full joint hierarchy
+  /// @return Remapped parameter limits for the simplified character
   ParameterLimits remapParameterLimits(
       const ParameterLimits& limits,
       const CharacterT& originalCharacter) const;
 
-  // remap locators from original character to simplified version
+  /// Remaps locators from original character to simplified version
+  ///
+  /// @param locs Original locators
+  /// @param originalCharacter Original character containing the full joint hierarchy
+  /// @return Remapped locators for the simplified character
   LocatorList remapLocators(const LocatorList& locs, const CharacterT& originalCharacter) const;
 
-  // Go from a set of parameters to the set of joints that those parameters affect:
+  /// Determines which joints are affected by the specified parameters
+  ///
+  /// @param parameterSet Set of parameters to check
+  /// @return Boolean vector indicating which joints are affected by the parameters
   std::vector<bool> parametersToActiveJoints(const ParameterSet& parameterSet) const;
 
-  // Go from a set of joints to all the parameters that affect those joints:
+  /// Determines which parameters affect the specified joints
+  ///
+  /// @param activeJoints Boolean vector indicating which joints to check
+  /// @return Set of parameters that affect the specified joints
   ParameterSet activeJointsToParameters(const std::vector<bool>& activeJoints) const;
 
-  // Returns bindpose parameters for this character. "Bind pose" is the rest pose for a character
-  // model when all model parameters and joint offsets are zero. When a FK pass is done on the bind
-  // pose, it would result in a rest pose skeleton states
+  /// Returns parameters representing the character's bind pose
+  ///
+  /// The bind pose is the rest pose when all model parameters and joint offsets are zero.
+  /// When forward kinematics is applied to the bind pose, it results in the rest pose skeleton.
   CharacterParameters bindPose() const;
 
-  // Helpers to init parameterTransform, reset jointMap and initialize the inverse bind pose
+  /// Initializes the parameter transform with the correct dimensions for this character
   void initParameterTransform();
+
+  /// Resets the joint map to identity (each joint maps to itself)
   void resetJointMap();
-  // Initializes the inverse bind pose of this character. "Inverse bind pose" is a set of affine
-  // transformations for each joint that can map skeleton states (world pose of joints) to the
-  // joint parameters (local pose of joints in parent joint coordinate frame).
+
+  /// Initializes the inverse bind pose transformations
+  ///
+  /// The inverse bind pose is a set of affine transformations for each joint that
+  /// map from world space to local joint space in the bind pose configuration.
   void initInverseBindPose();
 
-  // make sure character parameters are split into parameters/offsets according to the parameterset
+  /// Splits character parameters into active and inactive components
+  ///
+  /// @param character Character to use for the parameter transform
+  /// @param parameters Input parameters to split
+  /// @param parameterSet Set indicating which parameters are active
+  /// @return Parameters with active parameters zeroed in pose and applied to offsets
   static CharacterParameters splitParameters(
       const CharacterT& character,
       const CharacterParameters& parameters,
       const ParameterSet& parameterSet);
 
-  // Create new CharacterT object that is a copy of this object, but with blendShape_in as
-  // blendShape and resized paramTransform.
-  // param[in] blendShape_in - BlendShape object to be set as blendShape.
-  // param[in] maxBlendShapes - number of blendshape params to add to paramTransform. If it is <= 0,
-  // all blendshapes from blendShape_in are added.
-  // param[in] overwriteBaseShape (optional) - if true, base shape of blendShape_in will be set to
-  // new character's mesh
+  /// Creates a new character with the specified blend shapes
+  ///
+  /// @param blendShape_in Blend shapes to add to the character
+  /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
+  /// @param overwriteBaseShape Whether to set the blend shape base to the character's mesh
+  /// @return A new character with the specified blend shapes
   CharacterT withBlendShape(
       BlendShape_p blendShape_in,
       Eigen::Index maxBlendShapes,
       bool overwriteBaseShape = true) const;
 
-  // Create new CharacterT object that is a copy of this object, but with blendShape_in as
-  // faceExpressionBlendShape and resized paramTransform.
-  // param[in] blendShape_in - BlendShapeBase object to set as faceExpressionBlendShape
-  // param[in] maxBlendShapes (optional) - number of blendshape params to add to paramTransform.
-  // If it is <= 0, all blendshapes from blendShape_in are added.
+  /// Creates a new character with the specified face expression blend shapes
+  ///
+  /// @param blendShape_in Face expression blend shapes to add to the character
+  /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
+  /// @return A new character with the specified face expression blend shapes
   CharacterT withFaceExpressionBlendShape(
       BlendShapeBase_const_p blendShape_in,
       Eigen::Index maxBlendShapes = -1) const;
 
-  // Set blendShape_in as blendShape and resize paramTransform accordingly.
-  // param[in] blendShape_in - BlendShape object to be set as blendShape.
-  // param[in] maxBlendShapes - number of blendshape params to add to paramTransform.
-  // If it is <= 0, all blendshapes from blendShape_in are added.
-  // param[in] overwriteBaseShape (optional)- if true, base shape of blendShape_in will be set to
-  // this character's mesh
+  /// Adds blend shapes to this character
+  ///
+  /// @param blendShape_in Blend shapes to add to the character
+  /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
+  /// @param overwriteBaseShape Whether to set the blend shape base to the character's mesh
   void addBlendShape(
       const BlendShape_p& blendShape_in,
       Eigen::Index maxBlendShapes,
       bool overwriteBaseShape = true);
 
-  // Set blendShape_in as faceExpressionBlendShape and resize paramTransform accordingly.
-  // param[in] blendShape_in - BlendShapeBase object to be set as faceExpressionBlendShape
-  // param[in] maxBlendShapes (optional) - number of blendshape params to add to paramTransform.
-  // If it is <= 0,  all blendshapes from blendShape_in are added.
+  /// Adds face expression blend shapes to this character
+  ///
+  /// @param blendShape_in Face expression blend shapes to add to the character
+  /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
   void addFaceExpressionBlendShape(
       const BlendShapeBase_const_p& blendShape_in,
       Eigen::Index maxBlendShapes = -1);
 
-  // Bake the blend shapes from the passed-in model parameters into the mesh
-  // and strip the blend shapes out of the parameter transform:
+  /// Creates a new character with blend shapes baked into the mesh
+  ///
+  /// @param modelParams Model parameters containing blend shape weights
+  /// @return A new character with blend shapes baked into the mesh
   CharacterT bakeBlendShape(const ModelParameters& modelParams) const;
+
+  /// Creates a new character with blend shapes baked into the mesh
+  ///
+  /// @param blendWeights Blend shape weights to apply
+  /// @return A new character with blend shapes baked into the mesh
   CharacterT bakeBlendShape(const BlendWeights& blendWeights) const;
 
   /// Generic "bake-out" for turning a character into self-contained geometry.
