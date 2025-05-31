@@ -12,15 +12,11 @@
 #include <momentum/common/memory.h>
 #include <momentum/math/utility.h>
 
+#include <array>
 #include <cstring>
 
 namespace momentum {
 
-// structure for applying limits to parameter sets
-// the simplest kind of limits could be just min/max limits on parameters, but we also have the
-// option of modeling more complicated limits that depend on each other
-
-// limit type
 enum LimitType {
   MinMax,
   MinMaxJoint,
@@ -28,34 +24,37 @@ enum LimitType {
   Linear,
   LinearJoint,
   Ellipsoid,
-  HalfPlane
+  HalfPlane,
+
+  // Keep this as the last entry to track the number of enum values
+  LimitTypeCount
 };
 
 [[nodiscard]] std::string_view toString(LimitType type);
 
 struct LimitMinMax {
-  size_t parameterIndex; // index of parameter influenced
-  Vector2f limits; // min and max values of the parameter
+  size_t parameterIndex;
+  Vector2f limits; ///< [min, max]
 };
 
 struct LimitMinMaxJoint {
-  size_t jointIndex; // index of joint influenced
-  size_t jointParameter; // parameter of joint influenced [ tx, ty, tz, rx, ry, rz, sc ]
-  Vector2f limits; // min and max values of the parameter
+  size_t jointIndex;
+  size_t jointParameter; ///< One of [tx, ty, tz, rx, ry, rz, sc]
+  Vector2f limits; ///< [min, max]
 };
 
-struct LimitLinear { // set joints to be similar by a linear relation i.e. p_0 = s * p_1 - o
-  size_t referenceIndex; // index of reference parameter (p_0)
-  size_t targetIndex; // index of target parameter (p_1)
-  float scale; // linear scale of parameter (x)
-  float offset; // offset (positive and negative) of acceptable parameter zone
+/// Linear relationship between parameters: p_0 = s * p_1 - o
+struct LimitLinear {
+  size_t referenceIndex; ///< p_0
+  size_t targetIndex; ///< p_1
+  float scale; ///< s
+  float offset; ///< o
 
-  // Range where limit is applied (in target parameter values p1).  This can be used to construct
-  // piecewise linear limits.  Note that the minimum value of the range is inclusive but the maximum
-  // value is noninclusive, this is to allow constructing overlapping limits without
-  // double-counting.
-  float rangeMin;
-  float rangeMax;
+  /// Range where limit applies (in target parameter values)
+  ///
+  /// For piecewise linear limits without double-counting
+  float rangeMin; ///< Inclusive
+  float rangeMax; ///< Non-inclusive
 };
 
 struct LimitLinearJoint {
@@ -66,8 +65,11 @@ struct LimitLinearJoint {
   float scale;
   float offset;
 
-  float rangeMin;
-  float rangeMax;
+  /// Range where limit applies (in target parameter values)
+  ///
+  /// For piecewise linear limits without double-counting
+  float rangeMin; ///< Inclusive
+  float rangeMax; ///< Non-inclusive
 };
 
 struct LimitEllipsoid {
@@ -78,9 +80,8 @@ struct LimitEllipsoid {
   size_t parent;
 };
 
+/// Constraint: (p1, p2) · (normal) - offset >= 0
 struct LimitHalfPlane {
-  // Constraint is defined by plane normal and offset as
-  //   (p1, p2) . (scale1, scale2) - offset >= 0
   size_t param1;
   size_t param2;
   Vector2f normal;
@@ -94,20 +95,24 @@ union LimitData {
   LimitLinearJoint linearJoint;
   LimitEllipsoid ellipsoid;
   LimitHalfPlane halfPlane;
-  unsigned char rawData[512];
+  std::array<unsigned char, 512> rawData; ///< For memory operations
 
-  // Need to explicitly write these constructors to just copy the raw memory
-  // since otherwise the compiler doesn't know which copy constructor to call.
-  LimitData(const LimitData& rhs);
+  /// Initializes all data to zero
   LimitData();
+
+  /// Raw memory copy (compiler can't determine which member's constructor to call)
+  LimitData(const LimitData& rhs);
+
   LimitData& operator=(const LimitData& rhs);
+
+  /// Compares raw memory
   bool operator==(const LimitData& limitData) const;
 };
 
 struct ParameterLimit {
-  LimitData data; // limit data depending on the type
-  LimitType type = LimitType::MinMax; // type of limit
-  float weight = 1.0f; // limit weight
+  LimitData data;
+  LimitType type = LimitType::MinMax;
+  float weight = 1.0f;
 
   inline bool operator==(const ParameterLimit& parameterLimit) const {
     return (
@@ -116,18 +121,23 @@ struct ParameterLimit {
   };
 };
 
-using ParameterLimits = std::vector<ParameterLimit>; // a list of limits
+using ParameterLimits = std::vector<ParameterLimit>;
 
+/// Only processes MinMaxJointPassive limits, clamping parameters to their ranges
 JointParameters applyPassiveJointParameterLimits(
     const ParameterLimits& limits,
     const JointParameters& jointParams);
 
+/// Creates MinMax limits from a pose constraint
 ParameterLimits getPoseConstraintParameterLimits(
     const std::string& name,
     const ParameterTransform& pt,
     float weight = 1.0f);
 
+/// If rangeMin and rangeMax are both 0, the limit applies to all values
 bool isInRange(const LimitLinear& limit, float value);
+
+/// If rangeMin and rangeMax are both 0, the limit applies to all values
 bool isInRange(const LimitLinearJoint& limit, float value);
 
 MOMENTUM_DEFINE_POINTERS(ParameterLimits)
