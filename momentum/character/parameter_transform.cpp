@@ -372,7 +372,8 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
       }
 
       case Ellipsoid:
-      case MinMaxJointPassive: {
+      case MinMaxJointPassive:
+      case LimitTypeCount: {
         // nothing to do here.
         break;
       }

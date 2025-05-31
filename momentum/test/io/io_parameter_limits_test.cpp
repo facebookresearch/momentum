@@ -299,6 +299,9 @@ void validateParameterLimitsSame(const ParameterLimits& limits1, const Parameter
         EXPECT_EQ(l1.data.halfPlane.param1, l2.data.halfPlane.param1);
         EXPECT_EQ(l1.data.halfPlane.param2, l2.data.halfPlane.param2);
         break;
+      case LimitType::LimitTypeCount:
+        // do nothing
+        break;
     }
   }
 }
