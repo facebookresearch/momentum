@@ -24,8 +24,15 @@ std::string_view toString(const LimitType type) {
       return "MinMaxJointPassive";
     case Linear:
       return "Linear";
+    case LinearJoint:
+      return "LinearJoint";
     case Ellipsoid:
       return "Ellipsoid";
+    case HalfPlane:
+      return "HalfPlane";
+    case LimitTypeCount:
+      // This is not a real enum value, just a counter
+      return "LimitTypeCount";
     default:
       return "Unknown";
   }
@@ -76,16 +83,17 @@ ParameterLimits getPoseConstraintParameterLimits(
 }
 
 LimitData::LimitData() {
-  std::fill_n(rawData, sizeof(rawData), 0);
+  std::fill_n(rawData.begin(), rawData.size(), 0);
 }
 
 LimitData::LimitData(const LimitData& rhs) {
-  std::copy_n(rhs.rawData, sizeof(rawData), rawData);
+  std::copy_n(rhs.rawData.begin(), rhs.rawData.size(), rawData.begin());
 }
 
 LimitData& LimitData::operator=(const LimitData& rhs) {
-  if (&rhs != this)
-    std::copy_n(rhs.rawData, sizeof(rawData), rawData);
+  if (&rhs != this) {
+    std::copy_n(rhs.rawData.begin(), rhs.rawData.size(), rawData.begin());
+  }
   return *this;
 }
 
