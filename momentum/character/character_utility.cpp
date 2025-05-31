@@ -159,6 +159,11 @@ ParameterLimits mapParameterLimits(
             l.data.ellipsoid.ellipsoidParent != kInvalidIndex) {
           result.push_back(l);
         }
+        break;
+      case LimitType::LimitTypeCount: {
+        // nothing to do here.
+        break;
+      }
     }
   }
   return result;

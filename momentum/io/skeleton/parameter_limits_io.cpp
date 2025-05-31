@@ -830,7 +830,11 @@ std::string writeParameterLimits(
             << skeleton.joints.at(itr->data.ellipsoid.ellipsoidParent).name << " "
             << vecToString(translation) << " " << vecToString(eulerZYXVecDeg) << " "
             << vecToString(scalingMat.diagonal());
+        break;
       }
+      case LimitType::LimitTypeCount:
+        // do nothing
+        break;
     }
 
     if (itr->weight != 1.0f) {
