@@ -12,7 +12,6 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
-#include "momentum/math/utility.h"
 
 namespace momentum {
 

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character/skeleton_state.h>
 #include <momentum/common/checks.h>
 #include <momentum/common/profile.h>
 

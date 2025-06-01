@@ -14,9 +14,6 @@
 #include "momentum/common/profile.h"
 #include "momentum/math/utility.h"
 
-#include <atomic>
-#include <tuple>
-
 namespace momentum {
 
 template <typename T>

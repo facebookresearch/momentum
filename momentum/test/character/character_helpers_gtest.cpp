@@ -10,14 +10,12 @@
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/collision_geometry.h"
-#include "momentum/character/linear_skinning.h"
 #include "momentum/character/locator.h"
 #include "momentum/character/parameter_transform.h"
+#include "momentum/character/pose_shape.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
-#include "momentum/common/checks.h"
 #include "momentum/math/mesh.h"
-#include "momentum/math/mppca.h"
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock.h>

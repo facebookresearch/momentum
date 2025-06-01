@@ -12,7 +12,6 @@
 #include <momentum/character/locator.h>
 #include <momentum/character/parameter_limits.h>
 #include <momentum/character/parameter_transform.h>
-#include <momentum/character/pose_shape.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
