@@ -13,7 +13,6 @@
 
 #include <gsl/span>
 
-#include <bitset>
 #include <string>
 #include <unordered_map>
 

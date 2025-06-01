@@ -15,7 +15,6 @@
 #include "momentum/character/linear_skinning.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/pose_shape.h"
-#include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
 #include "momentum/math/mesh.h"

@@ -9,7 +9,6 @@
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
-#include "momentum/character/linear_skinning.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
