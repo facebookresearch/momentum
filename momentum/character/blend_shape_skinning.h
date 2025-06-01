@@ -11,8 +11,6 @@
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
 
-#include <vector>
-
 namespace momentum {
 
 // calculate skinning

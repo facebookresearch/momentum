@@ -10,8 +10,6 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
 
-#include <fstream>
-
 namespace momentum {
 
 std::vector<Vector3f> PoseShape::compute(const SkeletonState& state) const {
