@@ -184,6 +184,7 @@ character_test_sources = [
     "test/character/joint_test.cpp",
     "test/character/parameter_limits_test.cpp",
     "test/character/parameter_transform_test.cpp",
+    "test/character/pose_shape_test.cpp",
     "test/character/simplify_test.cpp",
     "test/character/skeleton_bake_test.cpp",
     "test/character/skeleton_state_test.cpp",
