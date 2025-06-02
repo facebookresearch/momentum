@@ -22,14 +22,15 @@
         ExceptionType);                                                        \
   }
 
-// Define a macro to conditionally run death tests
-// iOS builds don't support death tests
-#if defined(__APPLE__) || defined(IPHONEOS)
-#define MOMENTUM_SKIP_DEATH_TESTS 1
-#define MOMENTUM_EXPECT_DEATH(statement, message)                                                \
-  do {                                                                                           \
-    GTEST_MESSAGE_("Death tests are not supported on iOS", ::testing::TestPartResult::kSuccess); \
+#if defined(MOMENTUM_WITH_XR_LOGGER)
+#define MOMENTUM_EXPECT_DEATH(statement, message) EXPECT_DEATH_IF_SUPPORTED(statement, message)
+#else
+#if defined(NDEBUG) // assert() is disabled
+#define MOMENTUM_EXPECT_DEATH(statement, message)                                 \
+  do {                                                                            \
+    GTEST_MESSAGE_("Death test is skipped", ::testing::TestPartResult::kSuccess); \
   } while (0)
 #else
-#define MOMENTUM_EXPECT_DEATH(statement, message) EXPECT_DEATH(statement, message)
-#endif
+#define MOMENTUM_EXPECT_DEATH(statement, message) EXPECT_DEATH_IF_SUPPORTED(statement, message)
+#endif // NDEBUG
+#endif // MOMENTUM_WITH_XR_LOGGER

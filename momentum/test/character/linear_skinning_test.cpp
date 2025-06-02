@@ -197,7 +197,7 @@ TEST_F(LinearSkinningTest, ApplySSDMeshFloat) {
 
   // Apply rotation to joint 0 (90 degrees around Y)
   Eigen::Affine3f rotation = Eigen::Affine3f::Identity();
-  rotation.rotate(Eigen::AngleAxisf(M_PI / 2, Vector3f::UnitY()));
+  rotation.rotate(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY()));
   skeletonState.jointState[0].transformation = rotation;
 
   applySSD(inverseBindPose, skin, mesh, skeletonState, outputMesh);
@@ -531,13 +531,13 @@ TEST_F(LinearSkinningTest, ComplexTransformations) {
   // Apply complex transformations to joints
   // Joint 0: Rotation + Translation
   Eigen::Affine3f transform0 = Eigen::Affine3f::Identity();
-  transform0.rotate(Eigen::AngleAxisf(M_PI / 4, Vector3f::UnitY())); // 45 degrees around Y
+  transform0.rotate(Eigen::AngleAxisf(pi() / 4, Vector3f::UnitY())); // 45 degrees around Y
   transform0.translate(Vector3f(1.0f, 2.0f, 3.0f));
   skeletonState.jointState[0].transformation = transform0;
 
   // Joint 1: Rotation + Translation + Scale
   Eigen::Affine3f transform1 = Eigen::Affine3f::Identity();
-  transform1.rotate(Eigen::AngleAxisf(M_PI / 6, Vector3f::UnitZ())); // 30 degrees around Z
+  transform1.rotate(Eigen::AngleAxisf(pi() / 6, Vector3f::UnitZ())); // 30 degrees around Z
   transform1.translate(Vector3f(2.0f, 1.0f, -1.0f));
   transform1.scale(1.5f);
   skeletonState.jointState[1].transformation = transform1;
@@ -564,7 +564,7 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
 
   // Set up non-identity inverse bind pose
   inverseBindPose[0].translate(Vector3f(-0.5f, -1.0f, -0.5f));
-  inverseBindPose[1].rotate(Eigen::AngleAxisf(M_PI / 3, Vector3f::UnitX())); // 60 degrees around X
+  inverseBindPose[1].rotate(Eigen::AngleAxisf(pi() / 3, Vector3f::UnitX())); // 60 degrees around X
 
   // Apply identity transforms to joints
   for (auto& jointState : skeletonState.jointState) {
@@ -585,7 +585,7 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
 
   // Apply joint transformations
   skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
-  skeletonState.jointState[1].transformation.rotate(Eigen::AngleAxisf(M_PI / 2, Vector3f::UnitY()));
+  skeletonState.jointState[1].transformation.rotate(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY()));
 
   // Apply SSD again
   result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
