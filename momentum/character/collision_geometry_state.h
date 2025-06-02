@@ -49,6 +49,20 @@ struct CollisionGeometryStateT {
   void update(const SkeletonStateT<T>& skeletonState, const CollisionGeometry& collisionGeometry);
 };
 
+/// Determines if two tapered capsules overlap.
+///
+/// @param originA Origin of the first capsule
+/// @param directionA Direction vector of the first capsule
+/// @param radiiA Radii at the endpoints of the first capsule
+/// @param deltaA Difference between radii of the first capsule
+/// @param originB Origin of the second capsule
+/// @param directionB Direction vector of the second capsule
+/// @param radiiB Radii at the endpoints of the second capsule
+/// @param deltaB Difference between radii of the second capsule
+/// @param outDistance Output parameter for the distance between the closest points
+/// (normalized). No modification on return false.
+/// @param outOverlap Output parameter for the overlap amount (positive if overlapping)
+/// @return True if the capsules overlap, false otherwise
 template <typename T>
 bool overlaps(
     const Vector3<T>& originA,
@@ -88,6 +102,12 @@ bool overlaps(
   return (outOverlap > T(0)) && (closestDist >= Eps<T>(1e-8, 1e-17));
 }
 
+/// Updates an axis-aligned bounding box to encompass a tapered capsule.
+///
+/// @param aabb The bounding box to update
+/// @param originA Origin of the capsule
+/// @param direction Direction vector of the capsule
+/// @param radii Radii at the endpoints of the capsule
 template <typename T>
 void updateAabb(
     axel::BoundingBox<T>& aabb,
