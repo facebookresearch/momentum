@@ -182,6 +182,8 @@ character_test_sources = [
     "test/character/character_test.cpp",
     "test/character/forward_kinematics_test.cpp",
     "test/character/joint_test.cpp",
+    "test/character/locator_test.cpp",
+    "test/character/locator_state_test.cpp",
     "test/character/parameter_limits_test.cpp",
     "test/character/parameter_transform_test.cpp",
     "test/character/pose_shape_test.cpp",
