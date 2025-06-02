@@ -377,8 +377,9 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
   }
 
   // finally do the division to get sc and tc
-  res[0] = (std::abs(sN) < 1e-7f ? 0.0f : sN / sD);
-  res[1] = (std::abs(tN) < 1e-7f ? 0.0f : tN / tD);
+  // Check for small denominators to avoid division by zero or very small numbers
+  res[0] = (std::abs(sN) < 1e-7f || std::abs(sD) < 1e-7f) ? 0.0f : sN / sD;
+  res[1] = (std::abs(tN) < 1e-7f || std::abs(tD) < 1e-7f) ? 0.0f : tN / tD;
 
   // get the difference of the two closest points
   const auto dP = w + (d1 * res[0]) - (d2 * res[1]);
