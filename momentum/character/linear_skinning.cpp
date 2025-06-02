@@ -62,6 +62,12 @@ std::vector<Vector3<T>> applySSD(
 
           // loop over the weights
           for (size_t j = 0; j < kMaxSkinJoints; j++) {
+            // get pointer to transformation and weight float
+            const auto& weight = skin.weight(i, j);
+            if (weight == 0.0f) {
+              break;
+            }
+
             MT_CHECK(
                 skin.index(i, j) < transformations.size(),
                 "skin.index({}, {}): {} vs {}",
@@ -69,12 +75,6 @@ std::vector<Vector3<T>> applySSD(
                 j,
                 skin.index(i, j),
                 transformations.size());
-
-            // get pointer to transformation and weight float
-            const auto& weight = skin.weight(i, j);
-            if (weight == 0.0f) {
-              break;
-            }
             const auto& transformation = transformations[skin.index(i, j)];
 
             // add up transforms: outputp += (transformation * (pos, 1)) * weight
@@ -160,6 +160,12 @@ void applySSD(
 
           // loop over the weights
           for (size_t j = 0; j < kMaxSkinJoints; j++) {
+            // get pointer to transformation and weight float
+            const auto& weight = skin.weight(i, j);
+            if (weight == 0.0f) {
+              break;
+            }
+
             MT_CHECK(
                 skin.index(i, j) < transformations.size(),
                 "skin.index({}, {}): {} vs {}",
@@ -167,11 +173,6 @@ void applySSD(
                 j,
                 skin.index(i, j),
                 transformations.size());
-
-            // get pointer to transformation and weight float
-            const auto& weight = skin.weight(i, j);
-            if (weight == 0.0f)
-              break;
             const auto& transformation = transformations[skin.index(i, j)];
 
             // add up transforms: outputp += (transformation * (pos, 1)) * weight
@@ -216,6 +217,13 @@ Affine3f getInverseSSDTransformation(
       break;
 
     auto jointIndex = skin.index(index, j);
+    MT_CHECK(
+        jointIndex < inverseBindPose.size(),
+        "skin.index({}, {}): {} vs {}",
+        index,
+        j,
+        jointIndex,
+        inverseBindPose.size());
     const auto transformation =
         state.jointState[jointIndex].transformation * inverseBindPose[jointIndex];
 
@@ -278,6 +286,12 @@ std::vector<Vector3f> applyInverseSSD(
 
     // loop over the weights
     for (size_t j = 0; j < kMaxSkinJoints; j++) {
+      // get pointer to transformation and weight float
+      const auto& weight = skin.weight(i, j);
+      if (weight == 0.0f) {
+        break;
+      }
+
       MT_CHECK(
           skin.index(i, j) < transformations.size(),
           "skin.index({}, {}): {} vs {}",
@@ -285,11 +299,6 @@ std::vector<Vector3f> applyInverseSSD(
           j,
           skin.index(i, j),
           transformations.size());
-
-      // get pointer to transformation and weight float
-      const auto& weight = skin.weight(i, j);
-      if (weight == 0.0f)
-        break;
       const auto& transformation = transformations[skin.index(i, j)];
 
       // add up transforms
