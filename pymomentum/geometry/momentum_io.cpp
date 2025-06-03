@@ -204,6 +204,74 @@ loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes) {
   return std::make_tuple(character, motion.transpose(), identity, fps);
 }
 
+pybind11::array_t<float> skelStatesToTensor(
+    gsl::span<const momentum::SkeletonState> states,
+    const momentum::Character& character) {
+  pybind11::array_t<float> result(
+      {(int)states.size(), (int)character.skeleton.joints.size(), 8});
+
+  auto r = result.mutable_unchecked<3>();
+
+  for (size_t iFrame = 0; iFrame < states.size(); ++iFrame) {
+    const auto& state = states[iFrame];
+    if (state.jointState.size() != r.shape(1)) {
+      throw std::runtime_error(
+          "Mismatch between number of joints in skeleton state and tensor");
+    }
+
+    for (size_t iJoint = 0; iJoint < state.jointState.size(); ++iJoint) {
+      const auto& jointState = state.jointState.at(iJoint);
+      r(iFrame, iJoint, 0) = jointState.transform.translation.x();
+      r(iFrame, iJoint, 1) = jointState.transform.translation.y();
+      r(iFrame, iJoint, 2) = jointState.transform.translation.z();
+      r(iFrame, iJoint, 3) = jointState.transform.rotation.x();
+      r(iFrame, iJoint, 4) = jointState.transform.rotation.y();
+      r(iFrame, iJoint, 5) = jointState.transform.rotation.z();
+      r(iFrame, iJoint, 6) = jointState.transform.rotation.w();
+      r(iFrame, iJoint, 7) = jointState.transform.scale;
+    }
+  }
+  return result;
+}
+
+std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
+loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes) {
+  pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
+  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
+  const size_t length = static_cast<size_t>(info.size);
+
+  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
+
+  momentum::Character character;
+  std::vector<momentum::SkeletonState> states;
+  std::vector<float> timestamps;
+
+  {
+    pybind11::gil_scoped_release release;
+    std::tie(character, states, timestamps) =
+        momentum::loadCharacterWithSkeletonStates(
+            gsl::make_span<const std::byte>(data, length));
+  }
+
+  return std::make_tuple(
+      character, skelStatesToTensor(states, character), timestamps);
+}
+
+std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
+loadGLTFCharacterWithSkelStates(const std::string& gltfFilename) {
+  momentum::Character character;
+  std::vector<momentum::SkeletonState> states;
+  std::vector<float> timestamps;
+  {
+    pybind11::gil_scoped_release release;
+    std::tie(character, states, timestamps) =
+        momentum::loadCharacterWithSkeletonStates(gltfFilename);
+  }
+
+  return std::make_tuple(
+      character, skelStatesToTensor(states, character), timestamps);
+}
+
 std::string toGLTF(const momentum::Character& character) {
   nlohmann::json j = momentum::makeCharacterDocument(character);
   return j.dump();

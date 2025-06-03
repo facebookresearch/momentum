@@ -21,7 +21,7 @@
 
 namespace momentum {
 
-Character loadGltfCharacter(fx::gltf::Document& model);
+Character loadGltfCharacter(const fx::gltf::Document& model);
 
 Character loadGltfCharacter(const filesystem::path& gltfFilename);
 
@@ -48,6 +48,17 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
 /// parameters, the identity vector represented as joint parameters, and the fps.
 std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
     gsl::span<const std::byte> byteSpan);
+
+/// Load a GLTF Character with motion in the form of skeleton states (transform matrices)
+///
+/// Unlike the other loadCharacterWithMotion functions, this function does not require the
+/// file to be saved using momentum's functionality that saves model parameters in a
+/// custom GTLF extension, however the resulting skeleton states may be harder to work with.
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadCharacterWithSkeletonStates(gsl::span<const std::byte> byteSpan);
+
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadCharacterWithSkeletonStates(const filesystem::path& gltfFilename);
 
 /// Maps the loaded motion onto the input character by matching joint names and parameter names.
 ///
