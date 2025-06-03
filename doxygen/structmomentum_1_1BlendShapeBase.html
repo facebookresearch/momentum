@@ -82,6 +82,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Skinning class that manages blend shape vectors/offsets.  
+ <a href="structmomentum_1_1BlendShapeBase.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for momentum::BlendShapeBase:</div>
@@ -89,7 +92,7 @@ Inheritance diagram for momentum::BlendShapeBase:</div>
  <div class="center">
   <img src="structmomentum_1_1BlendShapeBase.png" usemap="#momentum::BlendShapeBase_map" alt=""/>
   <map id="momentum::BlendShapeBase_map" name="momentum::BlendShapeBase_map">
-<area href="structmomentum_1_1BlendShape.html" alt="momentum::BlendShape" shape="rect" coords="0,56,172,80"/>
+<area href="structmomentum_1_1BlendShape.html" title="Skinning class that combines blend shape vectors with a base shape." alt="momentum::BlendShape" shape="rect" coords="0,56,172,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -105,15 +108,18 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a339f2293f1c4ba1dbc93f43ce7389513"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5daedb903806c0ee7f4681904e7e8e72" id="r_a5daedb903806c0ee7f4681904e7e8e72"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
 <tr class="memitem:a5daedb903806c0ee7f4681904e7e8e72"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BlendShapeBase.html#a5daedb903806c0ee7f4681904e7e8e72">computeDeltas</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1BlendWeightsT.html">BlendWeightsT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendWeights</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a5daedb903806c0ee7f4681904e7e8e72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates weighted combination of shape vectors.  <br /></td></tr>
 <tr class="separator:a5daedb903806c0ee7f4681904e7e8e72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6f687e6001b4a3a73d9ce8c0ff0dd5d" id="r_ad6f687e6001b4a3a73d9ce8c0ff0dd5d"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
 <tr class="memitem:ad6f687e6001b4a3a73d9ce8c0ff0dd5d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BlendShapeBase.html#ad6f687e6001b4a3a73d9ce8c0ff0dd5d">applyDeltas</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1BlendWeightsT.html">BlendWeightsT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendWeights</a>, std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;result) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ad6f687e6001b4a3a73d9ce8c0ff0dd5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds weighted shape vectors to existing vertices.  <br /></td></tr>
 <tr class="separator:ad6f687e6001b4a3a73d9ce8c0ff0dd5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd521c756499daf0b942e3db3b66003d" id="r_abd521c756499daf0b942e3db3b66003d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BlendShapeBase.html#abd521c756499daf0b942e3db3b66003d">setShapeVector</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> index, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shapeVector</a>)</td></tr>
 <tr class="separator:abd521c756499daf0b942e3db3b66003d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad68e00ff60adce38bed53e1dbe8cedd9" id="r_ad68e00ff60adce38bed53e1dbe8cedd9"><td class="memItemLeft" align="right" valign="top">Eigen::Index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BlendShapeBase.html#ad68e00ff60adce38bed53e1dbe8cedd9">shapeSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:ad68e00ff60adce38bed53e1dbe8cedd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab93ca7648b4d816389ac628494e57784" id="r_ab93ca7648b4d816389ac628494e57784"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BlendShapeBase.html#ab93ca7648b4d816389ac628494e57784">modelSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ab93ca7648b4d816389ac628494e57784"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns number of vertices (rows/3)  <br /></td></tr>
 <tr class="separator:ab93ca7648b4d816389ac628494e57784"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -121,7 +127,10 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a7052dbafe14fa7a04ff7583016f147a2" id="r_a7052dbafe14fa7a04ff7583016f147a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BlendShapeBase.html#a7052dbafe14fa7a04ff7583016f147a2">shapeVectors_</a></td></tr>
 <tr class="separator:a7052dbafe14fa7a04ff7583016f147a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Skinning class that manages blend shape vectors/offsets. </p>
+<p>Used to model facial expressions and potentially other deformations such as pose-dependent shape changes </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae682db07693f8f813b77d4ef8927bb9d" name="ae682db07693f8f813b77d4ef8927bb9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae682db07693f8f813b77d4ef8927bb9d">&#9670;&#160;</a></span>BlendShapeBase() <span class="overload">[1/2]</span></h2>
 
@@ -172,6 +181,13 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">modelSize</td><td>Number of vertices in the model </td></tr>
+    <tr><td class="paramname">numShapes</td><td>Number of blend shapes </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -204,6 +220,21 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Adds weighted shape vectors to existing vertices. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Scalar type (float or double) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendWeights</td><td>Weights for each shape vector </td></tr>
+    <tr><td class="paramname">result</td><td>[in,out] Vertices to modify </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a5daedb903806c0ee7f4681904e7e8e72" name="a5daedb903806c0ee7f4681904e7e8e72"></a>
@@ -223,6 +254,21 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Calculates weighted combination of shape vectors. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Scalar type (float or double) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendWeights</td><td>Weights for each shape vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Combined vertex offsets </dd></dl>
 
 </div>
 </div>
@@ -274,6 +320,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Returns number of vertices (rows/3) </p>
+
 </div>
 </div>
 <a id="abd521c756499daf0b942e3db3b66003d" name="abd521c756499daf0b942e3db3b66003d"></a>
@@ -301,6 +349,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">index</td><td>Index of the shape vector to set </td></tr>
+    <tr><td class="paramname">shapeVector</td><td>Vector of vertex offsets </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -327,6 +382,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">shapeVectors</td><td>Matrix where each column is a shape vector </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

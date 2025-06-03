@@ -82,44 +82,64 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>A generic mesh representation with support for vertices, faces, lines, and texture coordinates.  
+ <a href="structmomentum_1_1MeshT.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="mesh_8h_source.html">mesh.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a5ffcac1bc7d2ba548fde602e05c07c67" id="r_a5ffcac1bc7d2ba548fde602e05c07c67"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a5ffcac1bc7d2ba548fde602e05c07c67">updateNormals</a> ()</td></tr>
-<tr class="memdesc:a5ffcac1bc7d2ba548fde602e05c07c67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute vertex normals (by averaging connected face normals)  <br /></td></tr>
+<tr class="memdesc:a5ffcac1bc7d2ba548fde602e05c07c67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute vertex normals by averaging connected face normals.  <br /></td></tr>
 <tr class="separator:a5ffcac1bc7d2ba548fde602e05c07c67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af988c9e94391f69cf3ff4daf971b8e5a" id="r_af988c9e94391f69cf3ff4daf971b8e5a"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; </td></tr>
 <tr class="memitem:af988c9e94391f69cf3ff4daf971b8e5a"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#af988c9e94391f69cf3ff4daf971b8e5a">cast</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:af988c9e94391f69cf3ff4daf971b8e5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cast data type of mesh vertices, normals and confidence.  <br /></td></tr>
+<tr class="memdesc:af988c9e94391f69cf3ff4daf971b8e5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cast the mesh to a different scalar type.  <br /></td></tr>
 <tr class="separator:af988c9e94391f69cf3ff4daf971b8e5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab64f378ae3a6c1d656b92bce9d6c124c" id="r_ab64f378ae3a6c1d656b92bce9d6c124c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#ab64f378ae3a6c1d656b92bce9d6c124c">reset</a> ()</td></tr>
-<tr class="memdesc:ab64f378ae3a6c1d656b92bce9d6c124c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset mesh.  <br /></td></tr>
+<tr class="memdesc:ab64f378ae3a6c1d656b92bce9d6c124c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the mesh by clearing all data.  <br /></td></tr>
 <tr class="separator:ab64f378ae3a6c1d656b92bce9d6c124c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a73d406702a8b190efeb8cde984b01c88" id="r_a73d406702a8b190efeb8cde984b01c88"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a73d406702a8b190efeb8cde984b01c88">vertices</a></td></tr>
+<tr class="memdesc:a73d406702a8b190efeb8cde984b01c88"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of mesh vertices in 3D space.  <br /></td></tr>
 <tr class="separator:a73d406702a8b190efeb8cde984b01c88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9370e7b956ccb6eb93ff5c7cb285fb52" id="r_a9370e7b956ccb6eb93ff5c7cb285fb52"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a9370e7b956ccb6eb93ff5c7cb285fb52">normals</a></td></tr>
+<tr class="memdesc:a9370e7b956ccb6eb93ff5c7cb285fb52"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of vertex normals (same size as vertices when computed)  <br /></td></tr>
 <tr class="separator:a9370e7b956ccb6eb93ff5c7cb285fb52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf270a428de37b54d65a3c03d5e83524" id="r_acf270a428de37b54d65a3c03d5e83524"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector3i &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524">faces</a></td></tr>
+<tr class="memdesc:acf270a428de37b54d65a3c03d5e83524"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of triangular faces defined by vertex indices.  <br /></td></tr>
 <tr class="separator:acf270a428de37b54d65a3c03d5e83524"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa198a7be95aeca6c072129b0188114d7" id="r_aa198a7be95aeca6c072129b0188114d7"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#aa198a7be95aeca6c072129b0188114d7">lines</a></td></tr>
+<tr class="memdesc:aa198a7be95aeca6c072129b0188114d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of polylines defined by vertex indices Each inner vector represents a single polyline.  <br /></td></tr>
 <tr class="separator:aa198a7be95aeca6c072129b0188114d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad28cd022ebedc1d8a0877227a67eb0bf" id="r_ad28cd022ebedc1d8a0877227a67eb0bf"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespaceEigen.html#a41297f44d66f754d2859278f6d89cf9a">Eigen::Vector3b</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#ad28cd022ebedc1d8a0877227a67eb0bf">colors</a></td></tr>
+<tr class="memdesc:ad28cd022ebedc1d8a0877227a67eb0bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of per-vertex RGB colors (0-255 for each channel)  <br /></td></tr>
 <tr class="separator:ad28cd022ebedc1d8a0877227a67eb0bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69237a67fd0124f60fe21f7587322fae" id="r_a69237a67fd0124f60fe21f7587322fae"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a69237a67fd0124f60fe21f7587322fae">confidence</a></td></tr>
+<tr class="memdesc:a69237a67fd0124f60fe21f7587322fae"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of per-vertex confidence values Higher values typically indicate higher confidence in the vertex position.  <br /></td></tr>
 <tr class="separator:a69237a67fd0124f60fe21f7587322fae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5785a167dd2a949c45c462a7de893ef0" id="r_a5785a167dd2a949c45c462a7de893ef0"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector2f &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a5785a167dd2a949c45c462a7de893ef0">texcoords</a></td></tr>
-<tr class="memdesc:a5785a167dd2a949c45c462a7de893ef0"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of texture coordinates.  <br /></td></tr>
+<tr class="memdesc:a5785a167dd2a949c45c462a7de893ef0"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of texture coordinates (UV coordinates).  <br /></td></tr>
 <tr class="separator:a5785a167dd2a949c45c462a7de893ef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a067360df2b2d1f9a55c7c34c1a8f2390" id="r_a067360df2b2d1f9a55c7c34c1a8f2390"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector3i &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a067360df2b2d1f9a55c7c34c1a8f2390">texcoord_faces</a></td></tr>
+<tr class="memdesc:a067360df2b2d1f9a55c7c34c1a8f2390"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of texture coordinate indices per face Maps each face to its corresponding texture coordinates.  <br /></td></tr>
 <tr class="separator:a067360df2b2d1f9a55c7c34c1a8f2390"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a229f2cdf3a2c5de22c5280ea785642f9" id="r_a229f2cdf3a2c5de22c5280ea785642f9"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int32_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MeshT.html#a229f2cdf3a2c5de22c5280ea785642f9">texcoord_lines</a></td></tr>
+<tr class="memdesc:a229f2cdf3a2c5de22c5280ea785642f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of texture coordinate indices per line Maps each line to its corresponding texture coordinates.  <br /></td></tr>
 <tr class="separator:a229f2cdf3a2c5de22c5280ea785642f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
+struct momentum::MeshT&lt; T &gt;</div><p>A generic mesh representation with support for vertices, faces, lines, and texture coordinates. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The scalar type used for vertex coordinates and confidence values (typically float or double) </td></tr>
+  </table>
+  </dd>
+</dl>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="af988c9e94391f69cf3ff4daf971b8e5a" name="af988c9e94391f69cf3ff4daf971b8e5a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af988c9e94391f69cf3ff4daf971b8e5a">&#9670;&#160;</a></span>cast()</h2>
 
@@ -139,7 +159,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Cast data type of mesh vertices, normals and confidence. </p>
+<p>Cast the mesh to a different scalar type. </p>
+<p>This method creates a new mesh with all numeric data converted to the target type. Vertex positions, normals, and confidence values are cast to the new type. Non-numeric data like faces and lines remain unchanged.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T2</td><td>The target scalar type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new mesh with the target scalar type </dd></dl>
 
 </div>
 </div>
@@ -160,7 +188,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Reset mesh. </p>
+<p>Reset the mesh by clearing all data. </p>
+<p>This method clears all vectors, effectively resetting the mesh to an empty state. </p>
 
 </div>
 </div>
@@ -181,7 +210,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Compute vertex normals (by averaging connected face normals) </p>
+<p>Compute vertex normals by averaging connected face normals. </p>
+<p>This method calculates normals for each vertex by averaging the normals of all connected faces. The resulting normals are normalized to unit length. If a vertex is part of a degenerate face (e.g., colinear vertices), that face will not contribute to the vertex normal. </p>
 
 </div>
 </div>
@@ -200,6 +230,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>List of per-vertex RGB colors (0-255 for each channel) </p>
+
 </div>
 </div>
 <a id="a69237a67fd0124f60fe21f7587322fae" name="a69237a67fd0124f60fe21f7587322fae"></a>
@@ -215,6 +247,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>List of per-vertex confidence values Higher values typically indicate higher confidence in the vertex position. </p>
 
 </div>
 </div>
@@ -232,6 +266,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>List of triangular faces defined by vertex indices. </p>
+
 </div>
 </div>
 <a id="aa198a7be95aeca6c072129b0188114d7" name="aa198a7be95aeca6c072129b0188114d7"></a>
@@ -247,6 +283,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>List of polylines defined by vertex indices Each inner vector represents a single polyline. </p>
 
 </div>
 </div>
@@ -264,6 +302,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>List of vertex normals (same size as vertices when computed) </p>
+
 </div>
 </div>
 <a id="a067360df2b2d1f9a55c7c34c1a8f2390" name="a067360df2b2d1f9a55c7c34c1a8f2390"></a>
@@ -279,6 +319,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>List of texture coordinate indices per face Maps each face to its corresponding texture coordinates. </p>
 
 </div>
 </div>
@@ -296,6 +338,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>List of texture coordinate indices per line Maps each line to its corresponding texture coordinates. </p>
+
 </div>
 </div>
 <a id="a5785a167dd2a949c45c462a7de893ef0" name="a5785a167dd2a949c45c462a7de893ef0"></a>
@@ -312,7 +356,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>List of texture coordinates. </p>
+<p>List of texture coordinates (UV coordinates). </p>
 <p>The texture coordinates are format-agnostic, and it's the user's responsibility to ensure their consistent use.</p>
 <p>For GLTF, Momentum stores and saves the texture coordinates as they are represented by the underlying GLTF parser. When dealing with FBX, the Y-axis is flipped. This distinction is crucial to understand when working with different formats. </p>
 
@@ -331,6 +375,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>List of mesh vertices in 3D space. </p>
 
 </div>
 </div>

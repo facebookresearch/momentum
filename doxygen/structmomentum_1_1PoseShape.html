@@ -82,29 +82,42 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Computes shape deformations based on joint rotations.  
+ <a href="structmomentum_1_1PoseShape.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa8e741c23ae1e10b722aa291c37e4613" id="r_aa8e741c23ae1e10b722aa291c37e4613"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#aa8e741c23ae1e10b722aa291c37e4613">compute</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a800a78d5d2ea2fd86769021cc0692b63">SkeletonState</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:aa8e741c23ae1e10b722aa291c37e4613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the deformed shape based on the current skeleton state.  <br /></td></tr>
 <tr class="separator:aa8e741c23ae1e10b722aa291c37e4613"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af689d40828172b0eaabaa382e70a8b11" id="r_af689d40828172b0eaabaa382e70a8b11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#af689d40828172b0eaabaa382e70a8b11">isApprox</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1PoseShape.html">PoseShape</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poseShape</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:af689d40828172b0eaabaa382e70a8b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if this <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> is approximately equal to another.  <br /></td></tr>
 <tr class="separator:af689d40828172b0eaabaa382e70a8b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a4e9aa2702efe3263b5d4fa61d65a189d" id="r_a4e9aa2702efe3263b5d4fa61d65a189d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#a4e9aa2702efe3263b5d4fa61d65a189d">baseJoint</a></td></tr>
+<tr class="memdesc:a4e9aa2702efe3263b5d4fa61d65a189d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the joint used as reference for computing relative rotations.  <br /></td></tr>
 <tr class="separator:a4e9aa2702efe3263b5d4fa61d65a189d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee0f7e3c25aae653fff331532836b6bb" id="r_aee0f7e3c25aae653fff331532836b6bb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a0665c7e57c805965d6ca082c7ad7a1ee">Quaternionf</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#aee0f7e3c25aae653fff331532836b6bb">baseRot</a></td></tr>
+<tr class="memdesc:aee0f7e3c25aae653fff331532836b6bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base rotation used as reference for computing rotation differences.  <br /></td></tr>
 <tr class="separator:aee0f7e3c25aae653fff331532836b6bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad77da1f82b96f09c530ef56e4a59a581" id="r_ad77da1f82b96f09c530ef56e4a59a581"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#ad77da1f82b96f09c530ef56e4a59a581">jointMap</a></td></tr>
+<tr class="memdesc:ad77da1f82b96f09c530ef56e4a59a581"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indices of joints whose rotations drive the shape deformation.  <br /></td></tr>
 <tr class="separator:ad77da1f82b96f09c530ef56e4a59a581"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acab59200a5ebaa8798d77a0deae6f5b6" id="r_acab59200a5ebaa8798d77a0deae6f5b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#acab59200a5ebaa8798d77a0deae6f5b6">baseShape</a></td></tr>
+<tr class="memdesc:acab59200a5ebaa8798d77a0deae6f5b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base shape vertices stored as a flat vector [x1,y1,z1,x2,y2,z2,...].  <br /></td></tr>
 <tr class="separator:acab59200a5ebaa8798d77a0deae6f5b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a786d3a95b52d7a2714994f1517f1f6b8" id="r_a786d3a95b52d7a2714994f1517f1f6b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#a786d3a95b52d7a2714994f1517f1f6b8">shapeVectors</a></td></tr>
+<tr class="memdesc:a786d3a95b52d7a2714994f1517f1f6b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shape deformation vectors for each quaternion component of each joint.  <br /></td></tr>
 <tr class="separator:a786d3a95b52d7a2714994f1517f1f6b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Computes shape deformations based on joint rotations. </p>
+<p><a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> implements a linear blend shape system where shape deformations are driven by joint rotations. This is useful for modeling effects like muscle bulging or skin sliding that occur during animation. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa8e741c23ae1e10b722aa291c37e4613" name="aa8e741c23ae1e10b722aa291c37e4613"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa8e741c23ae1e10b722aa291c37e4613">&#9670;&#160;</a></span>compute()</h2>
 
@@ -120,6 +133,21 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Computes the deformed shape based on the current skeleton state. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>Current state of the skeleton containing joint rotations </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of 3D vertex positions representing the deformed shape </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">If</td><td>baseShape.size() != shapeVectors.rows() </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -147,6 +175,16 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Checks if this <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> is approximately equal to another. </p>
+<p>Two <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> objects are considered approximately equal if all their corresponding members are approximately equal.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">poseShape</td><td>The <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> to compare with </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> objects are approximately equal </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -162,6 +200,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Index of the joint used as reference for computing relative rotations. </p>
+
 </div>
 </div>
 <a id="aee0f7e3c25aae653fff331532836b6bb" name="aee0f7e3c25aae653fff331532836b6bb"></a>
@@ -175,6 +215,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Base rotation used as reference for computing rotation differences. </p>
+<p>The effective rotation used for deformation is baseRot * joint.rotation().inverse() </p>
 
 </div>
 </div>
@@ -190,6 +233,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Base shape vertices stored as a flat vector [x1,y1,z1,x2,y2,z2,...]. </p>
+<p>The size must be a multiple of 3 (3 coordinates per vertex). </p>
+
 </div>
 </div>
 <a id="ad77da1f82b96f09c530ef56e4a59a581" name="ad77da1f82b96f09c530ef56e4a59a581"></a>
@@ -204,6 +250,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Indices of joints whose rotations drive the shape deformation. </p>
+
 </div>
 </div>
 <a id="a786d3a95b52d7a2714994f1517f1f6b8" name="a786d3a95b52d7a2714994f1517f1f6b8"></a>
@@ -217,6 +265,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Shape deformation vectors for each quaternion component of each joint. </p>
+<p>Matrix dimensions are [baseShape.size() × (jointMap.size() * 4)]. Each column corresponds to a quaternion component (x,y,z,w) of a joint. </p>
 
 </div>
 </div>

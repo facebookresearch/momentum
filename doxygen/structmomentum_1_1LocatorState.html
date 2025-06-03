@@ -82,25 +82,35 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tracks the current world positions of locators in a skeleton.  
+ <a href="structmomentum_1_1LocatorState.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="locator__state_8h_source.html">locator_state.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a4286adfe7b2e70076a9d4b2a1d664108" id="r_a4286adfe7b2e70076a9d4b2a1d664108"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LocatorState.html#a4286adfe7b2e70076a9d4b2a1d664108">LocatorState</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">noexcept</a></td></tr>
-<tr class="separator:a4286adfe7b2e70076a9d4b2a1d664108"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26ccb81565da53ab1ecae210cf021a46" id="r_a26ccb81565da53ab1ecae210cf021a46"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LocatorState.html#a26ccb81565da53ab1ecae210cf021a46">LocatorState</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">noexcept</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
+<tr class="memdesc:a26ccb81565da53ab1ecae210cf021a46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an empty locator state with no positions.  <br /></td></tr>
+<tr class="separator:a26ccb81565da53ab1ecae210cf021a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61fdeabc577cd55c4668593aa153d212" id="r_a61fdeabc577cd55c4668593aa153d212"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LocatorState.html#a61fdeabc577cd55c4668593aa153d212">LocatorState</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a800a78d5d2ea2fd86769021cc0692b63">SkeletonState</a> &amp;skeletonState, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">referenceLocators</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">noexcept</a></td></tr>
+<tr class="memdesc:a61fdeabc577cd55c4668593aa153d212"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a locator state and immediately updates positions based on the given skeleton state.  <br /></td></tr>
 <tr class="separator:a61fdeabc577cd55c4668593aa153d212"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa42d1de94132ad1b0eeddd04bd3d9511" id="r_aa42d1de94132ad1b0eeddd04bd3d9511"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LocatorState.html#aa42d1de94132ad1b0eeddd04bd3d9511">update</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a800a78d5d2ea2fd86769021cc0692b63">SkeletonState</a> &amp;skeletonState, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">referenceLocators</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">noexcept</a></td></tr>
+<tr class="memdesc:aa42d1de94132ad1b0eeddd04bd3d9511"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the world positions of all locators based on the current skeleton pose.  <br /></td></tr>
 <tr class="separator:aa42d1de94132ad1b0eeddd04bd3d9511"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a9dfef56c03d4a7227a853cd80af5c57c" id="r_a9dfef56c03d4a7227a853cd80af5c57c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LocatorState.html#a9dfef56c03d4a7227a853cd80af5c57c">position</a></td></tr>
+<tr class="memdesc:a9dfef56c03d4a7227a853cd80af5c57c"><td class="mdescLeft">&#160;</td><td class="mdescRight">World-space positions of all locators, updated when the skeleton moves.  <br /></td></tr>
 <tr class="separator:a9dfef56c03d4a7227a853cd80af5c57c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a4286adfe7b2e70076a9d4b2a1d664108" name="a4286adfe7b2e70076a9d4b2a1d664108"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4286adfe7b2e70076a9d4b2a1d664108">&#9670;&#160;</a></span>LocatorState() <span class="overload">[1/2]</span></h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Tracks the current world positions of locators in a skeleton. </p>
+<p>This class maintains the transformed positions of locators based on the current state of the skeleton they're attached to. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a26ccb81565da53ab1ecae210cf021a46" name="a26ccb81565da53ab1ecae210cf021a46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26ccb81565da53ab1ecae210cf021a46">&#9670;&#160;</a></span>LocatorState() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -117,10 +127,12 @@ Public Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">default</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Creates an empty locator state with no positions. </p>
 
 </div>
 </div>
@@ -157,6 +169,15 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Creates a locator state and immediately updates positions based on the given skeleton state. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">skeletonState</td><td>Current pose of the skeleton </td></tr>
+    <tr><td class="paramname">referenceLocators</td><td>List of locators to track </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -195,6 +216,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Updates the world positions of all locators based on the current skeleton pose. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">skeletonState</td><td>Current pose of the skeleton </td></tr>
+    <tr><td class="paramname">referenceLocators</td><td>List of locators to update positions for </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -209,6 +239,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>World-space positions of all locators, updated when the skeleton moves. </p>
 
 </div>
 </div>

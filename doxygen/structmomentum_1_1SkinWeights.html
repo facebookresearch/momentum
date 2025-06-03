@@ -82,23 +82,32 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Stores skinning weights and joint indices for character mesh deformation.  
+ <a href="structmomentum_1_1SkinWeights.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac1a2078dd5e29bc7a3d8e7450e609d75" id="r_ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#ac1a2078dd5e29bc7a3d8e7450e609d75">set</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ind</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">wgt</a>)</td></tr>
+<tr class="memdesc:ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the skin weights from vectors of joint indices and weights.  <br /></td></tr>
 <tr class="separator:ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52e011da31571b4bda2c67af718f33ba" id="r_a52e011da31571b4bda2c67af718f33ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#a52e011da31571b4bda2c67af718f33ba">operator==</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a> &amp;skinWeights) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a52e011da31571b4bda2c67af718f33ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> objects for equality.  <br /></td></tr>
 <tr class="separator:a52e011da31571b4bda2c67af718f33ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a4203cd8ddc42da97d1e7aa66cae60da8" id="r_a4203cd8ddc42da97d1e7aa66cae60da8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a97256a0d253dcab1a5368348ca462c90">IndexMatrix</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#a4203cd8ddc42da97d1e7aa66cae60da8">index</a></td></tr>
+<tr class="memdesc:a4203cd8ddc42da97d1e7aa66cae60da8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint indices that influence each vertex.  <br /></td></tr>
 <tr class="separator:a4203cd8ddc42da97d1e7aa66cae60da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cf0ddf5cddae2665c4a66d5fd7a213a" id="r_a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a4ad4eae5ddde47975d87661b7ee5b769">WeightMatrix</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#a1cf0ddf5cddae2665c4a66d5fd7a213a">weight</a></td></tr>
+<tr class="memdesc:a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight of each joint's influence on each vertex.  <br /></td></tr>
 <tr class="separator:a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Stores skinning weights and joint indices for character mesh deformation. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a52e011da31571b4bda2c67af718f33ba" name="a52e011da31571b4bda2c67af718f33ba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a52e011da31571b4bda2c67af718f33ba">&#9670;&#160;</a></span>operator==()</h2>
 
@@ -114,6 +123,16 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Compares two <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> objects for equality. </p>
+<p>Two <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> objects are considered equal if their index and weight matrices are approximately equal (using <a class="el" href="namespaceEigen.html">Eigen</a>'s isApprox method).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">skinWeights</td><td>The <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> object to compare with </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the objects are equal, false otherwise </dd></dl>
 
 </div>
 </div>
@@ -143,6 +162,21 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets the skin weights from vectors of joint indices and weights. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ind</td><td>Vector of vectors containing joint indices for each vertex </td></tr>
+    <tr><td class="paramname">wgt</td><td>Vector of vectors containing weights for each vertex </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">If</td><td>ind.size() != wgt.size() (via MT_CHECK) </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -158,6 +192,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Joint indices that influence each vertex. </p>
+<p>Each row corresponds to a vertex, and each column contains the index of a joint that influences that vertex. Unused influences are set to 0. </p>
+
 </div>
 </div>
 <a id="a1cf0ddf5cddae2665c4a66d5fd7a213a" name="a1cf0ddf5cddae2665c4a66d5fd7a213a"></a>
@@ -171,6 +208,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Weight of each joint's influence on each vertex. </p>
+<p>Each row corresponds to a vertex, and each column contains the weight of a joint's influence on that vertex. Weights for a vertex typically sum to 1.0. Unused influences are set to 0.0. </p>
 
 </div>
 </div>

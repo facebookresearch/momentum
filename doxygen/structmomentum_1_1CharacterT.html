@@ -77,61 +77,86 @@ $(function() {
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structmomentum_1_1CharacterT-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">momentum::CharacterT&lt; T &gt; Struct Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>A character model with skeletal structure, mesh, and optional components.  
+ <a href="structmomentum_1_1CharacterT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="character_8h_source.html">character.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a7693c5d25dd84cfe1afe85d166ef87ae" id="r_a7693c5d25dd84cfe1afe85d166ef87ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a7693c5d25dd84cfe1afe85d166ef87ae">CharacterT</a> ()</td></tr>
+<tr class="memdesc:a7693c5d25dd84cfe1afe85d166ef87ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <br /></td></tr>
 <tr class="separator:a7693c5d25dd84cfe1afe85d166ef87ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38123d0ec98148d5f4f525e28b046ee3" id="r_a38123d0ec98148d5f4f525e28b046ee3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a38123d0ec98148d5f4f525e28b046ee3">~CharacterT</a> ()</td></tr>
+<tr class="memdesc:a38123d0ec98148d5f4f525e28b046ee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <br /></td></tr>
 <tr class="separator:a38123d0ec98148d5f4f525e28b046ee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d97290bc0ab6519b683e28f07ced892" id="r_a4d97290bc0ab6519b683e28f07ced892"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a4d97290bc0ab6519b683e28f07ced892">CharacterT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">s</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pt</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#af510f44c571cb8771263cbfbb1971367">ParameterLimits</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pl</a>=<a class="el" href="namespacemomentum.html#af510f44c571cb8771263cbfbb1971367">ParameterLimits</a>(), <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">l</a>=<a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a>(), <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a> *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">m</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nullptr</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a> *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sw</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nullptr</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">cg</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nullptr</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1PoseShape.html">PoseShape</a> *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bs</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nullptr</a>, <a class="el" href="namespacemomentum.html#a6472912b236f6061a827e78eb44659c4">BlendShape_const_p</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShapes</a>={}, <a class="el" href="namespacemomentum.html#a7872c3c8b09e5c336472ddb25c066285">BlendShapeBase_const_p</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">faceExpressionBlendShapes</a>={}, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nameIn</a>=&quot;&quot;, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a72995f508ccba8e3b0c5de349e57f94a">momentum::TransformationList</a> &amp;<a class="el" href="structmomentum_1_1CharacterT.html#a091594fb949f1e0c84a1beb07e8de2d4">inverseBindPose</a>={})</td></tr>
+<tr class="memdesc:a4d97290bc0ab6519b683e28f07ced892"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a character with the specified components.  <br /></td></tr>
 <tr class="separator:a4d97290bc0ab6519b683e28f07ced892"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f912a911ee342836fee22ad310eeb61" id="r_a6f912a911ee342836fee22ad310eeb61"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a6f912a911ee342836fee22ad310eeb61">CharacterT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a>)</td></tr>
+<tr class="memdesc:a6f912a911ee342836fee22ad310eeb61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <br /></td></tr>
 <tr class="separator:a6f912a911ee342836fee22ad310eeb61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0feb57ab964eb1864c6c9c5b48a2eb69" id="r_a0feb57ab964eb1864c6c9c5b48a2eb69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a0feb57ab964eb1864c6c9c5b48a2eb69">operator=</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>)</td></tr>
+<tr class="memdesc:a0feb57ab964eb1864c6c9c5b48a2eb69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <br /></td></tr>
 <tr class="separator:a0feb57ab964eb1864c6c9c5b48a2eb69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cd6a6c35bfbea2bc1bf7d46810db983" id="r_a7cd6a6c35bfbea2bc1bf7d46810db983"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a7cd6a6c35bfbea2bc1bf7d46810db983">simplify</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">enabledParameters</a>=<a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a>().<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">flip</a>()) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a7cd6a6c35bfbea2bc1bf7d46810db983"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a simplified character with only joints affected by the specified parameters.  <br /></td></tr>
 <tr class="separator:a7cd6a6c35bfbea2bc1bf7d46810db983"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad325cac8f9384f8688e409c8b3cc7e6f" id="r_ad325cac8f9384f8688e409c8b3cc7e6f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#ad325cac8f9384f8688e409c8b3cc7e6f">simplifySkeleton</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">activeJoints</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ad325cac8f9384f8688e409c8b3cc7e6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a simplified character with only the specified joints.  <br /></td></tr>
 <tr class="separator:ad325cac8f9384f8688e409c8b3cc7e6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e1b215bdaba8392de202c82b24b15e1" id="r_a0e1b215bdaba8392de202c82b24b15e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a0e1b215bdaba8392de202c82b24b15e1">simplifyParameterTransform</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a0e1b215bdaba8392de202c82b24b15e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a simplified character with only the specified parameters.  <br /></td></tr>
 <tr class="separator:a0e1b215bdaba8392de202c82b24b15e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a429c27512e75c934dd48ad165c305a8f" id="r_a429c27512e75c934dd48ad165c305a8f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a429c27512e75c934dd48ad165c305a8f">remapSkinWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a> &amp;<a class="el" href="structmomentum_1_1CharacterT.html#a729d4cf7474cfcf21a280816ba6b2f88">skinWeights</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">originalCharacter</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a429c27512e75c934dd48ad165c305a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remaps skin weights from original character to simplified version.  <br /></td></tr>
 <tr class="separator:a429c27512e75c934dd48ad165c305a8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d30b7900156f0efedbf3550e3116025" id="r_a0d30b7900156f0efedbf3550e3116025"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#af510f44c571cb8771263cbfbb1971367">ParameterLimits</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a0d30b7900156f0efedbf3550e3116025">remapParameterLimits</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#af510f44c571cb8771263cbfbb1971367">ParameterLimits</a> &amp;<a class="el" href="urdf__io_8cpp.html#a138cea75a91f412af90739ae8ffb336b">limits</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">originalCharacter</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a0d30b7900156f0efedbf3550e3116025"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remaps parameter limits from original character to simplified version.  <br /></td></tr>
 <tr class="separator:a0d30b7900156f0efedbf3550e3116025"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1254ee0194c6a0447389214fa94fc874" id="r_a1254ee0194c6a0447389214fa94fc874"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a1254ee0194c6a0447389214fa94fc874">remapLocators</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locs</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">originalCharacter</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a1254ee0194c6a0447389214fa94fc874"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remaps locators from original character to simplified version.  <br /></td></tr>
 <tr class="separator:a1254ee0194c6a0447389214fa94fc874"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab711b7f92412b6226a7986c1ee2358e7" id="r_ab711b7f92412b6226a7986c1ee2358e7"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#ab711b7f92412b6226a7986c1ee2358e7">parametersToActiveJoints</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ab711b7f92412b6226a7986c1ee2358e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines which joints are affected by the specified parameters.  <br /></td></tr>
 <tr class="separator:ab711b7f92412b6226a7986c1ee2358e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a230d456ed31edc291d3ac83eb15abb8f" id="r_a230d456ed31edc291d3ac83eb15abb8f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a230d456ed31edc291d3ac83eb15abb8f">activeJointsToParameters</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">activeJoints</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a230d456ed31edc291d3ac83eb15abb8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines which parameters affect the specified joints.  <br /></td></tr>
 <tr class="separator:a230d456ed31edc291d3ac83eb15abb8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d67d09dac93bd96c44b4e3f2a0d09e8" id="r_a6d67d09dac93bd96c44b4e3f2a0d09e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a89f3ca04015c09376898823c0b7f471f">CharacterParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a6d67d09dac93bd96c44b4e3f2a0d09e8">bindPose</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a6d67d09dac93bd96c44b4e3f2a0d09e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns parameters representing the character's bind pose.  <br /></td></tr>
 <tr class="separator:a6d67d09dac93bd96c44b4e3f2a0d09e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85b626d63651fc8935300af36f12226e" id="r_a85b626d63651fc8935300af36f12226e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a85b626d63651fc8935300af36f12226e">initParameterTransform</a> ()</td></tr>
+<tr class="memdesc:a85b626d63651fc8935300af36f12226e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the parameter transform with the correct dimensions for this character.  <br /></td></tr>
 <tr class="separator:a85b626d63651fc8935300af36f12226e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1267e01737efb84e2a2046baa2d72893" id="r_a1267e01737efb84e2a2046baa2d72893"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a1267e01737efb84e2a2046baa2d72893">resetJointMap</a> ()</td></tr>
+<tr class="memdesc:a1267e01737efb84e2a2046baa2d72893"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the joint map to identity (each joint maps to itself)  <br /></td></tr>
 <tr class="separator:a1267e01737efb84e2a2046baa2d72893"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acaa4f27d72a2d7b53f9e52fbb500e4de" id="r_acaa4f27d72a2d7b53f9e52fbb500e4de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#acaa4f27d72a2d7b53f9e52fbb500e4de">initInverseBindPose</a> ()</td></tr>
+<tr class="memdesc:acaa4f27d72a2d7b53f9e52fbb500e4de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the inverse bind pose transformations.  <br /></td></tr>
 <tr class="separator:acaa4f27d72a2d7b53f9e52fbb500e4de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9003846179b0dd474a181929de59f704" id="r_a9003846179b0dd474a181929de59f704"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a9003846179b0dd474a181929de59f704">withBlendShape</a> (<a class="el" href="namespacemomentum.html#aae330e8404b34616130e3138b98cce12">BlendShape_p</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShape_in</a>, Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxBlendShapes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">overwriteBaseShape</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a9003846179b0dd474a181929de59f704"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new character with the specified blend shapes.  <br /></td></tr>
 <tr class="separator:a9003846179b0dd474a181929de59f704"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0df78d39a2c33cdbdbd0e09628364194" id="r_a0df78d39a2c33cdbdbd0e09628364194"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a0df78d39a2c33cdbdbd0e09628364194">withFaceExpressionBlendShape</a> (<a class="el" href="namespacemomentum.html#a7872c3c8b09e5c336472ddb25c066285">BlendShapeBase_const_p</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShape_in</a>, Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxBlendShapes</a>=-1) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a0df78d39a2c33cdbdbd0e09628364194"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new character with the specified face expression blend shapes.  <br /></td></tr>
 <tr class="separator:a0df78d39a2c33cdbdbd0e09628364194"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a0ce32fa33be200a361e9164f8ea77a" id="r_a1a0ce32fa33be200a361e9164f8ea77a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a1a0ce32fa33be200a361e9164f8ea77a">addBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aae330e8404b34616130e3138b98cce12">BlendShape_p</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShape_in</a>, Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxBlendShapes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">overwriteBaseShape</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>)</td></tr>
+<tr class="memdesc:a1a0ce32fa33be200a361e9164f8ea77a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds blend shapes to this character.  <br /></td></tr>
 <tr class="separator:a1a0ce32fa33be200a361e9164f8ea77a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cac3c8ef7f87f4905f13098751e50d2" id="r_a3cac3c8ef7f87f4905f13098751e50d2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a3cac3c8ef7f87f4905f13098751e50d2">addFaceExpressionBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a7872c3c8b09e5c336472ddb25c066285">BlendShapeBase_const_p</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShape_in</a>, Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxBlendShapes</a>=-1)</td></tr>
+<tr class="memdesc:a3cac3c8ef7f87f4905f13098751e50d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds face expression blend shapes to this character.  <br /></td></tr>
 <tr class="separator:a3cac3c8ef7f87f4905f13098751e50d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16af7771edbf0fb004154393de449cfb" id="r_a16af7771edbf0fb004154393de449cfb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a16af7771edbf0fb004154393de449cfb">bakeBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParams</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a16af7771edbf0fb004154393de449cfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new character with blend shapes baked into the mesh.  <br /></td></tr>
 <tr class="separator:a16af7771edbf0fb004154393de449cfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e4f02c62ce45b489a0ac69df4d4dbdb" id="r_a2e4f02c62ce45b489a0ac69df4d4dbdb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a2e4f02c62ce45b489a0ac69df4d4dbdb">bakeBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aeffac3a480c7f1812820f239790ea7ab">BlendWeights</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendWeights</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a2e4f02c62ce45b489a0ac69df4d4dbdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new character with blend shapes baked into the mesh.  <br /></td></tr>
 <tr class="separator:a2e4f02c62ce45b489a0ac69df4d4dbdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a667ccb9fbfff7d287b44f48fee26d391" id="r_a667ccb9fbfff7d287b44f48fee26d391"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a667ccb9fbfff7d287b44f48fee26d391">bake</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bakeBlendShapes</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bakeScales</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="memdesc:a667ccb9fbfff7d287b44f48fee26d391"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic "bake-out" for turning a character into self-contained geometry.  <br /></td></tr>
@@ -140,38 +165,57 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:affd2755209645262de989c6799f26dee" id="r_affd2755209645262de989c6799f26dee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">static</a> <a class="el" href="namespacemomentum.html#a89f3ca04015c09376898823c0b7f471f">CharacterParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#affd2755209645262de989c6799f26dee">splitParameters</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a89f3ca04015c09376898823c0b7f471f">CharacterParameters</a> &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>)</td></tr>
+<tr class="memdesc:affd2755209645262de989c6799f26dee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Splits character parameters into active and inactive components.  <br /></td></tr>
 <tr class="separator:affd2755209645262de989c6799f26dee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr><td colspan="2"><div class="groupHeader">Required components</div></td></tr>
 <tr class="memitem:a6899cded4f8074538f1055a66c9b0f27" id="r_a6899cded4f8074538f1055a66c9b0f27"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a6899cded4f8074538f1055a66c9b0f27">skeleton</a></td></tr>
+<tr class="memdesc:a6899cded4f8074538f1055a66c9b0f27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Skeletal structure defining the character's joints and hierarchy.  <br /></td></tr>
 <tr class="separator:a6899cded4f8074538f1055a66c9b0f27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78603211539ffff34921f4a21990a6f7" id="r_a78603211539ffff34921f4a21990a6f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a78603211539ffff34921f4a21990a6f7">parameterTransform</a></td></tr>
+<tr class="memdesc:a78603211539ffff34921f4a21990a6f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps model parameters to joint parameters.  <br /></td></tr>
 <tr class="separator:a78603211539ffff34921f4a21990a6f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Optional components</div></td></tr>
 <tr class="memitem:aefa3941feb4c13fee35ab74c3046dd3a" id="r_aefa3941feb4c13fee35ab74c3046dd3a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#af510f44c571cb8771263cbfbb1971367">ParameterLimits</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#aefa3941feb4c13fee35ab74c3046dd3a">parameterLimits</a></td></tr>
+<tr class="memdesc:aefa3941feb4c13fee35ab74c3046dd3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constraints on model parameters.  <br /></td></tr>
 <tr class="separator:aefa3941feb4c13fee35ab74c3046dd3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d0c2d4bc6e1d750544076c1db705de8" id="r_a3d0c2d4bc6e1d750544076c1db705de8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a3d0c2d4bc6e1d750544076c1db705de8">locators</a></td></tr>
+<tr class="memdesc:a3d0c2d4bc6e1d750544076c1db705de8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Points of interest attached to joints.  <br /></td></tr>
 <tr class="separator:a3d0c2d4bc6e1d750544076c1db705de8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb93206998e7280dc14d8f8edc9b074e" id="r_aeb93206998e7280dc14d8f8edc9b074e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1dd3ccb3985dcd25de270120edd5702c">Mesh_u</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a></td></tr>
+<tr class="memdesc:aeb93206998e7280dc14d8f8edc9b074e"><td class="mdescLeft">&#160;</td><td class="mdescRight">3D mesh representing the character's surface  <br /></td></tr>
 <tr class="separator:aeb93206998e7280dc14d8f8edc9b074e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a729d4cf7474cfcf21a280816ba6b2f88" id="r_a729d4cf7474cfcf21a280816ba6b2f88"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a7d10cf9571c33762fffd12a60a66e838">SkinWeights_u</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a729d4cf7474cfcf21a280816ba6b2f88">skinWeights</a></td></tr>
+<tr class="memdesc:a729d4cf7474cfcf21a280816ba6b2f88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines how mesh vertices are influenced by joints.  <br /></td></tr>
 <tr class="separator:a729d4cf7474cfcf21a280816ba6b2f88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51943b9abc84768d898e800a2a436679" id="r_a51943b9abc84768d898e800a2a436679"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a61deb5676f5c6fe8b1655b8408975faa">PoseShape_u</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a51943b9abc84768d898e800a2a436679">poseShapes</a></td></tr>
+<tr class="memdesc:a51943b9abc84768d898e800a2a436679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pose-dependent shape corrections.  <br /></td></tr>
 <tr class="separator:a51943b9abc84768d898e800a2a436679"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac76728e3ec06055ea295ba450c2f92e9" id="r_ac76728e3ec06055ea295ba450c2f92e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CollisionGeometry_u</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#ac76728e3ec06055ea295ba450c2f92e9">collision</a></td></tr>
+<tr class="memdesc:ac76728e3ec06055ea295ba450c2f92e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collision volumes for the character.  <br /></td></tr>
 <tr class="separator:ac76728e3ec06055ea295ba450c2f92e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb8b1d6bdcd0515337eb14d84dc7c9a7" id="r_afb8b1d6bdcd0515337eb14d84dc7c9a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a6472912b236f6061a827e78eb44659c4">BlendShape_const_p</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#afb8b1d6bdcd0515337eb14d84dc7c9a7">blendShape</a></td></tr>
+<tr class="memdesc:afb8b1d6bdcd0515337eb14d84dc7c9a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shape variations that can be blended.  <br /></td></tr>
 <tr class="separator:afb8b1d6bdcd0515337eb14d84dc7c9a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d80a06e43dd7064ffec19f0776e4a02" id="r_a4d80a06e43dd7064ffec19f0776e4a02"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a7872c3c8b09e5c336472ddb25c066285">BlendShapeBase_const_p</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a4d80a06e43dd7064ffec19f0776e4a02">faceExpressionBlendShape</a></td></tr>
+<tr class="memdesc:a4d80a06e43dd7064ffec19f0776e4a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Facial expression blend shapes.  <br /></td></tr>
 <tr class="separator:a4d80a06e43dd7064ffec19f0776e4a02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a091594fb949f1e0c84a1beb07e8de2d4" id="r_a091594fb949f1e0c84a1beb07e8de2d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a72995f508ccba8e3b0c5de349e57f94a">TransformationList</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a091594fb949f1e0c84a1beb07e8de2d4">inverseBindPose</a></td></tr>
+<tr class="memdesc:a091594fb949f1e0c84a1beb07e8de2d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inverse of the bind pose transformations for each joint.  <br /></td></tr>
 <tr class="separator:a091594fb949f1e0c84a1beb07e8de2d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01de8e80724eb13efc8cb399b616b151" id="r_a01de8e80724eb13efc8cb399b616b151"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a01de8e80724eb13efc8cb399b616b151">jointMap</a></td></tr>
+<tr class="memdesc:a01de8e80724eb13efc8cb399b616b151"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps from original joint indices to simplified joint indices.  <br /></td></tr>
 <tr class="separator:a01de8e80724eb13efc8cb399b616b151"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5397c2a59176a09f5ac2ad84d2b4ec36" id="r_a5397c2a59176a09f5ac2ad84d2b4ec36"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterT.html#a5397c2a59176a09f5ac2ad84d2b4ec36">name</a></td></tr>
+<tr class="memdesc:a5397c2a59176a09f5ac2ad84d2b4ec36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Character identifier.  <br /></td></tr>
 <tr class="separator:a5397c2a59176a09f5ac2ad84d2b4ec36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
+struct momentum::CharacterT&lt; T &gt;</div><p>A character model with skeletal structure, mesh, and optional components. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7693c5d25dd84cfe1afe85d166ef87ae" name="a7693c5d25dd84cfe1afe85d166ef87ae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7693c5d25dd84cfe1afe85d166ef87ae">&#9670;&#160;</a></span>CharacterT() <span class="overload">[1/3]</span></h2>
 
@@ -196,6 +240,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Default constructor. </p>
 
 </div>
 </div>
@@ -223,6 +269,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Destructor. </p>
 
 </div>
 </div>
@@ -314,6 +362,25 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Constructs a character with the specified components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Skeleton defining joint hierarchy </td></tr>
+    <tr><td class="paramname">pt</td><td>Parameter transform mapping model parameters to joint parameters </td></tr>
+    <tr><td class="paramname">pl</td><td>Optional parameter limits/constraints </td></tr>
+    <tr><td class="paramname">l</td><td>Optional locators attached to joints </td></tr>
+    <tr><td class="paramname">m</td><td>Optional mesh representing the character's surface </td></tr>
+    <tr><td class="paramname">sw</td><td>Optional skin weights defining how mesh vertices are influenced by joints </td></tr>
+    <tr><td class="paramname">cg</td><td>Optional collision geometry </td></tr>
+    <tr><td class="paramname">bs</td><td>Optional pose-dependent shape corrections </td></tr>
+    <tr><td class="paramname">blendShapes</td><td>Optional shape variations that can be blended </td></tr>
+    <tr><td class="paramname">faceExpressionBlendShapes</td><td>Optional facial expression blend shapes </td></tr>
+    <tr><td class="paramname">nameIn</td><td>Optional character identifier </td></tr>
+    <tr><td class="paramname">inverseBindPose</td><td>Optional inverse bind pose transformations </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a6f912a911ee342836fee22ad310eeb61" name="a6f912a911ee342836fee22ad310eeb61"></a>
@@ -333,6 +400,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Copy constructor. </p>
 
 </div>
 </div>
@@ -354,6 +423,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Determines which parameters affect the specified joints. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">activeJoints</td><td>Boolean vector indicating which joints to check </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Set of parameters that affect the specified joints </dd></dl>
 
 </div>
 </div>
@@ -391,6 +469,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Adds blend shapes to this character. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendShape_in</td><td>Blend shapes to add to the character </td></tr>
+    <tr><td class="paramname">maxBlendShapes</td><td>Maximum number of blend shape parameters to add (use all if &lt;= 0) </td></tr>
+    <tr><td class="paramname">overwriteBaseShape</td><td>Whether to set the blend shape base to the character's mesh </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a3cac3c8ef7f87f4905f13098751e50d2" name="a3cac3c8ef7f87f4905f13098751e50d2"></a>
@@ -420,6 +508,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Adds face expression blend shapes to this character. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendShape_in</td><td>Face expression blend shapes to add to the character </td></tr>
+    <tr><td class="paramname">maxBlendShapes</td><td>Maximum number of blend shape parameters to add (use all if &lt;= 0) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -488,6 +585,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a new character with blend shapes baked into the mesh. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendWeights</td><td>Blend shape weights to apply </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with blend shapes baked into the mesh </dd></dl>
+
 </div>
 </div>
 <a id="a16af7771edbf0fb004154393de449cfb" name="a16af7771edbf0fb004154393de449cfb"></a>
@@ -508,6 +614,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a new character with blend shapes baked into the mesh. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">modelParams</td><td>Model parameters containing blend shape weights </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with blend shapes baked into the mesh </dd></dl>
+
 </div>
 </div>
 <a id="a6d67d09dac93bd96c44b4e3f2a0d09e8" name="a6d67d09dac93bd96c44b4e3f2a0d09e8"></a>
@@ -526,6 +641,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns parameters representing the character's bind pose. </p>
+<p>The bind pose is the rest pose when all model parameters and joint offsets are zero. When forward kinematics is applied to the bind pose, it results in the rest pose skeleton. </p>
 
 </div>
 </div>
@@ -546,6 +664,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Initializes the inverse bind pose transformations. </p>
+<p>The inverse bind pose is a set of affine transformations for each joint that map from world space to local joint space in the bind pose configuration. </p>
+
 </div>
 </div>
 <a id="a85b626d63651fc8935300af36f12226e" name="a85b626d63651fc8935300af36f12226e"></a>
@@ -564,6 +685,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Initializes the parameter transform with the correct dimensions for this character. </p>
 
 </div>
 </div>
@@ -585,6 +708,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Assignment operator. </p>
+
 </div>
 </div>
 <a id="ab711b7f92412b6226a7986c1ee2358e7" name="ab711b7f92412b6226a7986c1ee2358e7"></a>
@@ -604,6 +729,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Determines which joints are affected by the specified parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parameterSet</td><td>Set of parameters to check </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Boolean vector indicating which joints are affected by the parameters </dd></dl>
 
 </div>
 </div>
@@ -635,6 +769,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Remaps locators from original character to simplified version. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">locs</td><td>Original locators </td></tr>
+    <tr><td class="paramname">originalCharacter</td><td>Original character containing the full joint hierarchy </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Remapped locators for the simplified character </dd></dl>
+
 </div>
 </div>
 <a id="a0d30b7900156f0efedbf3550e3116025" name="a0d30b7900156f0efedbf3550e3116025"></a>
@@ -664,6 +808,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Remaps parameter limits from original character to simplified version. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">limits</td><td>Original parameter limits </td></tr>
+    <tr><td class="paramname">originalCharacter</td><td>Original character containing the full joint hierarchy </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Remapped parameter limits for the simplified character </dd></dl>
 
 </div>
 </div>
@@ -695,6 +849,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Remaps skin weights from original character to simplified version. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">skinWeights</td><td>Original skin weights </td></tr>
+    <tr><td class="paramname">originalCharacter</td><td>Original character containing the full joint hierarchy </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Remapped skin weights for the simplified character </dd></dl>
+
 </div>
 </div>
 <a id="a1267e01737efb84e2a2046baa2d72893" name="a1267e01737efb84e2a2046baa2d72893"></a>
@@ -713,6 +877,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Resets the joint map to identity (each joint maps to itself) </p>
 
 </div>
 </div>
@@ -734,6 +900,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a simplified character with only joints affected by the specified parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">enabledParameters</td><td>Parameters to keep (defaults to all parameters) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with simplified skeleton and parameter transform </dd></dl>
+
 </div>
 </div>
 <a id="a0e1b215bdaba8392de202c82b24b15e1" name="a0e1b215bdaba8392de202c82b24b15e1"></a>
@@ -754,6 +929,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a simplified character with only the specified parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parameterSet</td><td>Set of parameters to keep </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with only the requested parameters </dd></dl>
+
 </div>
 </div>
 <a id="ad325cac8f9384f8688e409c8b3cc7e6f" name="ad325cac8f9384f8688e409c8b3cc7e6f"></a>
@@ -773,6 +957,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Creates a simplified character with only the specified joints. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">activeJoints</td><td>Boolean vector indicating which joints to keep </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with only the requested joints </dd></dl>
 
 </div>
 </div>
@@ -818,6 +1011,17 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Splits character parameters into active and inactive components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">character</td><td>Character to use for the parameter transform </td></tr>
+    <tr><td class="paramname">parameters</td><td>Input parameters to split </td></tr>
+    <tr><td class="paramname">parameterSet</td><td>Set indicating which parameters are active </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Parameters with active parameters zeroed in pose and applied to offsets </dd></dl>
+
 </div>
 </div>
 <a id="a9003846179b0dd474a181929de59f704" name="a9003846179b0dd474a181929de59f704"></a>
@@ -854,6 +1058,17 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a new character with the specified blend shapes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendShape_in</td><td>Blend shapes to add to the character </td></tr>
+    <tr><td class="paramname">maxBlendShapes</td><td>Maximum number of blend shape parameters to add (use all if &lt;= 0) </td></tr>
+    <tr><td class="paramname">overwriteBaseShape</td><td>Whether to set the blend shape base to the character's mesh </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with the specified blend shapes </dd></dl>
+
 </div>
 </div>
 <a id="a0df78d39a2c33cdbdbd0e09628364194" name="a0df78d39a2c33cdbdbd0e09628364194"></a>
@@ -884,6 +1099,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a new character with the specified face expression blend shapes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blendShape_in</td><td>Face expression blend shapes to add to the character </td></tr>
+    <tr><td class="paramname">maxBlendShapes</td><td>Maximum number of blend shape parameters to add (use all if &lt;= 0) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new character with the specified face expression blend shapes </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -901,6 +1126,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Shape variations that can be blended. </p>
+
 </div>
 </div>
 <a id="ac76728e3ec06055ea295ba450c2f92e9" name="ac76728e3ec06055ea295ba450c2f92e9"></a>
@@ -916,6 +1143,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Collision volumes for the character. </p>
 
 </div>
 </div>
@@ -933,6 +1162,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Facial expression blend shapes. </p>
+
 </div>
 </div>
 <a id="a091594fb949f1e0c84a1beb07e8de2d4" name="a091594fb949f1e0c84a1beb07e8de2d4"></a>
@@ -948,6 +1179,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Inverse of the bind pose transformations for each joint. </p>
 
 </div>
 </div>
@@ -965,6 +1198,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Maps from original joint indices to simplified joint indices. </p>
+
 </div>
 </div>
 <a id="a3d0c2d4bc6e1d750544076c1db705de8" name="a3d0c2d4bc6e1d750544076c1db705de8"></a>
@@ -980,6 +1215,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Points of interest attached to joints. </p>
 
 </div>
 </div>
@@ -997,6 +1234,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>3D mesh representing the character's surface </p>
+
 </div>
 </div>
 <a id="a5397c2a59176a09f5ac2ad84d2b4ec36" name="a5397c2a59176a09f5ac2ad84d2b4ec36"></a>
@@ -1012,6 +1251,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Character identifier. </p>
 
 </div>
 </div>
@@ -1029,6 +1270,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Constraints on model parameters. </p>
+
 </div>
 </div>
 <a id="a78603211539ffff34921f4a21990a6f7" name="a78603211539ffff34921f4a21990a6f7"></a>
@@ -1044,6 +1287,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Maps model parameters to joint parameters. </p>
 
 </div>
 </div>
@@ -1061,6 +1306,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Pose-dependent shape corrections. </p>
+
 </div>
 </div>
 <a id="a6899cded4f8074538f1055a66c9b0f27" name="a6899cded4f8074538f1055a66c9b0f27"></a>
@@ -1077,6 +1324,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Skeletal structure defining the character's joints and hierarchy. </p>
+
 </div>
 </div>
 <a id="a729d4cf7474cfcf21a280816ba6b2f88" name="a729d4cf7474cfcf21a280816ba6b2f88"></a>
@@ -1092,6 +1341,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Defines how mesh vertices are influenced by joints. </p>
 
 </div>
 </div>

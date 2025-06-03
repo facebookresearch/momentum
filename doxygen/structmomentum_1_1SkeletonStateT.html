@@ -83,45 +83,64 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Represents the complete state of a skeleton.  
+ <a href="structmomentum_1_1SkeletonStateT.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="skeleton__state_8h_source.html">skeleton_state.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a0204ae0a4aebdc4b3b28210043fb8ec5" id="r_a0204ae0a4aebdc4b3b28210043fb8ec5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a0204ae0a4aebdc4b3b28210043fb8ec5">SkeletonStateT</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">noexcept</a></td></tr>
+<tr class="memdesc:a0204ae0a4aebdc4b3b28210043fb8ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an empty skeleton state.  <br /></td></tr>
 <tr class="separator:a0204ae0a4aebdc4b3b28210043fb8ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f3f8df4c6531c347cdec6cda5f3b07d" id="r_a8f3f8df4c6531c347cdec6cda5f3b07d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a8f3f8df4c6531c347cdec6cda5f3b07d">SkeletonStateT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1JointParametersT.html">JointParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">referenceSkeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">computeDeriv</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>)</td></tr>
+<tr class="memdesc:a8f3f8df4c6531c347cdec6cda5f3b07d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a skeleton state from joint parameters and a reference skeleton.  <br /></td></tr>
 <tr class="separator:a8f3f8df4c6531c347cdec6cda5f3b07d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b44625d3d982dfab336a3febedbc95c" id="r_a9b44625d3d982dfab336a3febedbc95c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a9b44625d3d982dfab336a3febedbc95c">SkeletonStateT</a> (<a class="el" href="structmomentum_1_1JointParametersT.html">JointParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">referenceSkeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">computeDeriv</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>)</td></tr>
+<tr class="memdesc:a9b44625d3d982dfab336a3febedbc95c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a skeleton state from rvalue joint parameters and a reference skeleton.  <br /></td></tr>
 <tr class="separator:a9b44625d3d982dfab336a3febedbc95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc2c7f888a73ad1b6c665c8c99e0f60a" id="r_acc2c7f888a73ad1b6c665c8c99e0f60a"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; </td></tr>
 <tr class="memitem:acc2c7f888a73ad1b6c665c8c99e0f60a"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#acc2c7f888a73ad1b6c665c8c99e0f60a">SkeletonStateT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>)</td></tr>
+<tr class="memdesc:acc2c7f888a73ad1b6c665c8c99e0f60a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a skeleton state from another skeleton state with a different scalar type.  <br /></td></tr>
 <tr class="separator:acc2c7f888a73ad1b6c665c8c99e0f60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5dbb5a099dcc3c5ad42ddcce612c9cc3" id="r_a5dbb5a099dcc3c5ad42ddcce612c9cc3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a5dbb5a099dcc3c5ad42ddcce612c9cc3">set</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1JointParametersT.html">JointParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2">jointParameters</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">referenceSkeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">computeDeriv</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>)</td></tr>
+<tr class="memdesc:a5dbb5a099dcc3c5ad42ddcce612c9cc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the skeleton state with new joint parameters.  <br /></td></tr>
 <tr class="separator:a5dbb5a099dcc3c5ad42ddcce612c9cc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3253ef3994b4bf5b8952906c430f8506" id="r_a3253ef3994b4bf5b8952906c430f8506"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a3253ef3994b4bf5b8952906c430f8506">set</a> (<a class="el" href="structmomentum_1_1JointParametersT.html">JointParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&amp;<a class="el" href="structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2">jointParameters</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">referenceSkeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">computeDeriv</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>)</td></tr>
+<tr class="memdesc:a3253ef3994b4bf5b8952906c430f8506"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the skeleton state with new rvalue joint parameters.  <br /></td></tr>
 <tr class="separator:a3253ef3994b4bf5b8952906c430f8506"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8628460a593ee810c0ed36e50d7d057" id="r_ad8628460a593ee810c0ed36e50d7d057"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; </td></tr>
 <tr class="memitem:ad8628460a593ee810c0ed36e50d7d057"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#ad8628460a593ee810c0ed36e50d7d057">set</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>)</td></tr>
+<tr class="memdesc:ad8628460a593ee810c0ed36e50d7d057"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the skeleton state from another skeleton state with a different scalar type.  <br /></td></tr>
 <tr class="separator:ad8628460a593ee810c0ed36e50d7d057"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87f3d964f6e997519d84985ae1d27b22" id="r_a87f3d964f6e997519d84985ae1d27b22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a4ae7e4e6c3d921a5197e36e87fea1c1b">TransformListT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a87f3d964f6e997519d84985ae1d27b22">toTransforms</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a87f3d964f6e997519d84985ae1d27b22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts global transforms for all joints in the skeleton.  <br /></td></tr>
 <tr class="separator:a87f3d964f6e997519d84985ae1d27b22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3009e2a2538a5320e8fd80f8f0a19459" id="r_a3009e2a2538a5320e8fd80f8f0a19459"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; </td></tr>
 <tr class="memitem:a3009e2a2538a5320e8fd80f8f0a19459"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a3009e2a2538a5320e8fd80f8f0a19459">cast</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a3009e2a2538a5320e8fd80f8f0a19459"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the skeleton state to a different scalar type.  <br /></td></tr>
 <tr class="separator:a3009e2a2538a5320e8fd80f8f0a19459"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:aa2e30bfc6eab4c79bc005591cd26aac6" id="r_aa2e30bfc6eab4c79bc005591cd26aac6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">static</a> <a class="el" href="structmomentum_1_1StateSimilarity.html">StateSimilarity</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#aa2e30bfc6eab4c79bc005591cd26aac6">compare</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state1</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state2</a>)</td></tr>
+<tr class="memdesc:aa2e30bfc6eab4c79bc005591cd26aac6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two skeleton states and returns similarity metrics.  <br /></td></tr>
 <tr class="separator:aa2e30bfc6eab4c79bc005591cd26aac6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a637a6efeab4a26312e8b81afa3ffc2a2" id="r_a637a6efeab4a26312e8b81afa3ffc2a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1JointParametersT.html">JointParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2">jointParameters</a></td></tr>
+<tr class="memdesc:a637a6efeab4a26312e8b81afa3ffc2a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint parameters for all joints in the skeleton.  <br /></td></tr>
 <tr class="separator:a637a6efeab4a26312e8b81afa3ffc2a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a946ea0259e7a1b272ef5afcac8ae5b37" id="r_a946ea0259e7a1b272ef5afcac8ae5b37"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#affeb9cb3eed14cf0194496fe7d9d29e1">JointStateListT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonStateT.html#a946ea0259e7a1b272ef5afcac8ae5b37">jointState</a></td></tr>
+<tr class="memdesc:a946ea0259e7a1b272ef5afcac8ae5b37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computed joint states for all joints in the skeleton.  <br /></td></tr>
 <tr class="separator:a946ea0259e7a1b272ef5afcac8ae5b37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
+struct momentum::SkeletonStateT&lt; T &gt;</div><p>Represents the complete state of a skeleton. </p>
+<p>Stores joint parameters and computed joint states for an entire skeleton. Provides methods for updating the state based on new parameters and comparing different skeleton states. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a0204ae0a4aebdc4b3b28210043fb8ec5" name="a0204ae0a4aebdc4b3b28210043fb8ec5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0204ae0a4aebdc4b3b28210043fb8ec5">&#9670;&#160;</a></span>SkeletonStateT() <span class="overload">[1/4]</span></h2>
 
@@ -146,6 +165,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Creates an empty skeleton state. </p>
 
 </div>
 </div>
@@ -183,6 +204,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a skeleton state from joint parameters and a reference skeleton. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parameters</td><td>Joint parameters for all joints in the skeleton </td></tr>
+    <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a9b44625d3d982dfab336a3febedbc95c" name="a9b44625d3d982dfab336a3febedbc95c"></a>
@@ -219,6 +250,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Creates a skeleton state from rvalue joint parameters and a reference skeleton. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parameters</td><td>Joint parameters for all joints in the skeleton (moved from) </td></tr>
+    <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="acc2c7f888a73ad1b6c665c8c99e0f60a" name="acc2c7f888a73ad1b6c665c8c99e0f60a"></a>
@@ -249,6 +290,20 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Creates a skeleton state from another skeleton state with a different scalar type. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T2</td><td>Source scalar type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rhs</td><td>Source skeleton state to copy from </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -278,6 +333,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Converts the skeleton state to a different scalar type. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T2</td><td>Target scalar type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Skeleton state with the target scalar type </dd></dl>
 
 </div>
 </div>
@@ -317,6 +381,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Compares two skeleton states and returns similarity metrics. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state1</td><td>First skeleton state to compare </td></tr>
+    <tr><td class="paramname">state2</td><td>Second skeleton state to compare </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Similarity metrics between the two states </dd></dl>
+
 </div>
 </div>
 <a id="a5dbb5a099dcc3c5ad42ddcce612c9cc3" name="a5dbb5a099dcc3c5ad42ddcce612c9cc3"></a>
@@ -353,6 +427,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Updates the skeleton state with new joint parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jointParameters</td><td>New joint parameters for all joints </td></tr>
+    <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ad8628460a593ee810c0ed36e50d7d057" name="ad8628460a593ee810c0ed36e50d7d057"></a>
@@ -374,6 +458,20 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Updates the skeleton state from another skeleton state with a different scalar type. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T2</td><td>Source scalar type </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rhs</td><td>Source skeleton state to copy from </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -411,6 +509,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Updates the skeleton state with new rvalue joint parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jointParameters</td><td>New joint parameters for all joints (moved from) </td></tr>
+    <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a87f3d964f6e997519d84985ae1d27b22" name="a87f3d964f6e997519d84985ae1d27b22"></a>
@@ -430,6 +538,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Extracts global transforms for all joints in the skeleton. </p>
+<dl class="section return"><dt>Returns</dt><dd>List of global transforms for all joints </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -447,6 +558,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Joint parameters for all joints in the skeleton. </p>
+
 </div>
 </div>
 <a id="a946ea0259e7a1b272ef5afcac8ae5b37" name="a946ea0259e7a1b272ef5afcac8ae5b37"></a>
@@ -462,6 +575,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Computed joint states for all joints in the skeleton. </p>
 
 </div>
 </div>

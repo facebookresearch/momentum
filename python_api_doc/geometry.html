@@ -76,6 +76,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_with_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_with_motion_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_skel_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_skel_states_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_locators"><code class="docutils literal notranslate"><span class="pre">Character.load_locators()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_locators_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_locators_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_model_definition"><code class="docutils literal notranslate"><span class="pre">Character.load_model_definition()</span></code></a></li>
@@ -691,13 +693,49 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_motion">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="Link to this definition"></a></dt>
-<dd><p>Load a character and a motion sequence from a gltf file.</p>
+<dd><p>Load a character and a motion sequence from a gltf file.  Note that motion can only be read from GLTF files
+saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use 
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_skel_states()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltfFilename</strong> – A .gltf file; e.g. character_s0.glb.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_skel_states">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_skel_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="Link to this definition"></a></dt>
+<dd><p>Load a character and a skel state sequence from a gltf file.  Unlike 
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, this function should work with any GLTF file since it reads the raw transforms from the file
+and doesn’t require that the Character have a valid parameter transform.  Unlike <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, it does not 
+support the proprietary momentum motion format for storing model parameters in GLB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_skel_states_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_skel_states_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_skel_states_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load a character and a skeleton state motion sequence from gltf bytes.  Unlike 
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, this function should work with any GLTF file since it reads the raw transforms from the file
+and doesn’t require that the Character have a valid parameter transform.  Unlike <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, it does not 
+support the proprietary momentum motion format for storing model parameters in GLB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_bytes</strong> – The bytes of a gltf file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].</p>
 </dd>
 </dl>
 </dd></dl>

@@ -82,33 +82,48 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Represents a point attached to a joint in a skeleton.  
+ <a href="structmomentum_1_1Locator.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="locator_8h_source.html">locator.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1654b6f081339d1b392ea42125772cd4" id="r_a1654b6f081339d1b392ea42125772cd4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#a1654b6f081339d1b392ea42125772cd4">Locator</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="structmomentum_1_1Locator.html#a88612decc1627d1d225de11cc29ef8c5">name</a>=&quot;uninitialized&quot;, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="structmomentum_1_1Locator.html#a3622c131f78231a6b4c4245fa0cbe704">parent</a>=<a class="el" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &amp;<a class="el" href="structmomentum_1_1Locator.html#aee2914ed383a3d8c5bf9fb8a109e2d21">offset</a>=Vector3f::Zero(), <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a4797d077ba3ca33fc5898a45077f4891">Vector3i</a> &amp;<a class="el" href="structmomentum_1_1Locator.html#ab59f69c9563f442b78564f0b7a71e14d">locked</a>=Vector3i::Zero(), <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="structmomentum_1_1Locator.html#a0e28d181febe80d174d7033327475da5">weight</a>=1.0f, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &amp;<a class="el" href="structmomentum_1_1Locator.html#afd6f71bf48d599fb72023b11b09106e4">limitOrigin</a>=Vector3f::Zero(), <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &amp;<a class="el" href="structmomentum_1_1Locator.html#ab10fe21e62bd5ff1232950c9888220ca">limitWeight</a>=Vector3f::Zero())</td></tr>
+<tr class="memdesc:a1654b6f081339d1b392ea42125772cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a locator with the specified properties.  <br /></td></tr>
 <tr class="separator:a1654b6f081339d1b392ea42125772cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58866818dbb60372b7c3354b9fc526ce" id="r_a58866818dbb60372b7c3354b9fc526ce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#a58866818dbb60372b7c3354b9fc526ce">operator==</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Locator.html">Locator</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a58866818dbb60372b7c3354b9fc526ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two locators for equality, using approximate comparison for floating-point values.  <br /></td></tr>
 <tr class="separator:a58866818dbb60372b7c3354b9fc526ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a88612decc1627d1d225de11cc29ef8c5" id="r_a88612decc1627d1d225de11cc29ef8c5"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#a88612decc1627d1d225de11cc29ef8c5">name</a></td></tr>
+<tr class="memdesc:a88612decc1627d1d225de11cc29ef8c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name identifier for the locator.  <br /></td></tr>
 <tr class="separator:a88612decc1627d1d225de11cc29ef8c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3622c131f78231a6b4c4245fa0cbe704" id="r_a3622c131f78231a6b4c4245fa0cbe704"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#a3622c131f78231a6b4c4245fa0cbe704">parent</a></td></tr>
+<tr class="memdesc:a3622c131f78231a6b4c4245fa0cbe704"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the parent joint in the skeleton.  <br /></td></tr>
 <tr class="separator:a3622c131f78231a6b4c4245fa0cbe704"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee2914ed383a3d8c5bf9fb8a109e2d21" id="r_aee2914ed383a3d8c5bf9fb8a109e2d21"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#aee2914ed383a3d8c5bf9fb8a109e2d21">offset</a></td></tr>
+<tr class="memdesc:aee2914ed383a3d8c5bf9fb8a109e2d21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Position relative to the parent joint's coordinate system.  <br /></td></tr>
 <tr class="separator:aee2914ed383a3d8c5bf9fb8a109e2d21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab59f69c9563f442b78564f0b7a71e14d" id="r_ab59f69c9563f442b78564f0b7a71e14d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a4797d077ba3ca33fc5898a45077f4891">Vector3i</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#ab59f69c9563f442b78564f0b7a71e14d">locked</a></td></tr>
+<tr class="memdesc:ab59f69c9563f442b78564f0b7a71e14d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies which axes (x,y,z) are locked (1) or free (0)  <br /></td></tr>
 <tr class="separator:ab59f69c9563f442b78564f0b7a71e14d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e28d181febe80d174d7033327475da5" id="r_a0e28d181febe80d174d7033327475da5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#a0e28d181febe80d174d7033327475da5">weight</a></td></tr>
+<tr class="memdesc:a0e28d181febe80d174d7033327475da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Influence weight of this locator when used in constraints.  <br /></td></tr>
 <tr class="separator:a0e28d181febe80d174d7033327475da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd6f71bf48d599fb72023b11b09106e4" id="r_afd6f71bf48d599fb72023b11b09106e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#afd6f71bf48d599fb72023b11b09106e4">limitOrigin</a></td></tr>
+<tr class="memdesc:afd6f71bf48d599fb72023b11b09106e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference position for limit constraints, typically equal to offset when loaded.  <br /></td></tr>
 <tr class="separator:afd6f71bf48d599fb72023b11b09106e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab10fe21e62bd5ff1232950c9888220ca" id="r_ab10fe21e62bd5ff1232950c9888220ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1Locator.html#ab10fe21e62bd5ff1232950c9888220ca">limitWeight</a></td></tr>
+<tr class="memdesc:ab10fe21e62bd5ff1232950c9888220ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls how strongly the locator should maintain its original position Higher values create stronger constraints, zero means completely free.  <br /></td></tr>
 <tr class="separator:ab10fe21e62bd5ff1232950c9888220ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a point attached to a joint in a skeleton. </p>
+<p>Locators can be used for various purposes such as tracking specific points on a character, defining constraints, or serving as targets for inverse kinematics. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1654b6f081339d1b392ea42125772cd4" name="a1654b6f081339d1b392ea42125772cd4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1654b6f081339d1b392ea42125772cd4">&#9670;&#160;</a></span>Locator()</h2>
 
@@ -173,6 +188,20 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Creates a locator with the specified properties. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>Identifier for the locator </td></tr>
+    <tr><td class="paramname">parent</td><td>Index of the parent joint </td></tr>
+    <tr><td class="paramname">offset</td><td>Position relative to the parent joint </td></tr>
+    <tr><td class="paramname">locked</td><td>Axes that are locked (1) or free (0) </td></tr>
+    <tr><td class="paramname">weight</td><td>Influence weight in constraints </td></tr>
+    <tr><td class="paramname">limitOrigin</td><td>Reference position for limit constraints </td></tr>
+    <tr><td class="paramname">limitWeight</td><td>Strength of position maintenance constraints </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -200,6 +229,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compares two locators for equality, using approximate comparison for floating-point values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">locator</td><td>The locator to compare with </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if all properties are equal (or approximately equal for floating-point values) </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -215,6 +253,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Reference position for limit constraints, typically equal to offset when loaded. </p>
+
 </div>
 </div>
 <a id="ab10fe21e62bd5ff1232950c9888220ca" name="ab10fe21e62bd5ff1232950c9888220ca"></a>
@@ -228,6 +268,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Controls how strongly the locator should maintain its original position Higher values create stronger constraints, zero means completely free. </p>
 
 </div>
 </div>
@@ -243,6 +285,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Specifies which axes (x,y,z) are locked (1) or free (0) </p>
+
 </div>
 </div>
 <a id="a88612decc1627d1d225de11cc29ef8c5" name="a88612decc1627d1d225de11cc29ef8c5"></a>
@@ -256,6 +300,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Name identifier for the locator. </p>
 
 </div>
 </div>
@@ -271,6 +317,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Position relative to the parent joint's coordinate system. </p>
+
 </div>
 </div>
 <a id="a3622c131f78231a6b4c4245fa0cbe704" name="a3622c131f78231a6b4c4245fa0cbe704"></a>
@@ -285,6 +333,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Index of the parent joint in the skeleton. </p>
+
 </div>
 </div>
 <a id="a0e28d181febe80d174d7033327475da5" name="a0e28d181febe80d174d7033327475da5"></a>
@@ -298,6 +348,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Influence weight of this locator when used in constraints. </p>
 
 </div>
 </div>

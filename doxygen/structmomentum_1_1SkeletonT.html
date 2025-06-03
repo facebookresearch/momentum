@@ -90,26 +90,28 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a6eb641fcf2e704fed84c1cc6a3aa953a" id="r_a6eb641fcf2e704fed84c1cc6a3aa953a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#a6eb641fcf2e704fed84c1cc6a3aa953a">SkeletonT</a> (<a class="el" href="namespacemomentum.html#ae7e9f4cd3def0c1d889f92f0035926e7">JointList</a> <a class="el" href="structmomentum_1_1SkeletonT.html#a88a0732a2701920900c3bf2b25650f56">joints</a>)</td></tr>
+<tr class="memdesc:a6eb641fcf2e704fed84c1cc6a3aa953a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor that validates joint hierarchy.  <br /></td></tr>
 <tr class="separator:a6eb641fcf2e704fed84c1cc6a3aa953a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f3fd0a1f5c50cae92c960dc27b7e6f3" id="r_a9f3fd0a1f5c50cae92c960dc27b7e6f3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#a9f3fd0a1f5c50cae92c960dc27b7e6f3">SkeletonT</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
 <tr class="separator:a9f3fd0a1f5c50cae92c960dc27b7e6f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4527772cd814be6f2bd6d742234f251f" id="r_a4527772cd814be6f2bd6d742234f251f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#a4527772cd814be6f2bd6d742234f251f">getJointIdByName</a> (std::string_view name) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a4527772cd814be6f2bd6d742234f251f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look up the index of a joint from its name.  <br /></td></tr>
+<tr class="memdesc:a4527772cd814be6f2bd6d742234f251f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the index of a joint with the given name, or kInvalidIndex if not found.  <br /></td></tr>
 <tr class="separator:a4527772cd814be6f2bd6d742234f251f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9aaec7e80183040d9916ea4d9e91910" id="r_ac9aaec7e80183040d9916ea4d9e91910"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#ac9aaec7e80183040d9916ea4d9e91910">getJointNames</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:ac9aaec7e80183040d9916ea4d9e91910"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of all the joints in this skeleton.  <br /></td></tr>
+<tr class="memdesc:ac9aaec7e80183040d9916ea4d9e91910"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector containing all joint names in the skeleton.  <br /></td></tr>
 <tr class="separator:ac9aaec7e80183040d9916ea4d9e91910"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5ce27fce9e8c2b8ea06534008613c7b" id="r_aa5ce27fce9e8c2b8ea06534008613c7b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#aa5ce27fce9e8c2b8ea06534008613c7b">getChildrenJoints</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointId</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">recursive</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:aa5ce27fce9e8c2b8ea06534008613c7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of indices of the direct children of a joint or all its descendants.  <br /></td></tr>
+<tr class="memdesc:aa5ce27fce9e8c2b8ea06534008613c7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns indices of child joints for the specified joint.  <br /></td></tr>
 <tr class="separator:aa5ce27fce9e8c2b8ea06534008613c7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae29d62356015fb5b600addfd37c0b454" id="r_ae29d62356015fb5b600addfd37c0b454"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#ae29d62356015fb5b600addfd37c0b454">isAncestor</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointId</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ancestorJointId</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:ae29d62356015fb5b600addfd37c0b454"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the two input joints lie on the same branch of the hierarchy.  <br /></td></tr>
+<tr class="memdesc:ae29d62356015fb5b600addfd37c0b454"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if one joint is an ancestor of another in the hierarchy.  <br /></td></tr>
 <tr class="separator:ae29d62356015fb5b600addfd37c0b454"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40a202cffa13ff0fc09ea8481c834d4a" id="r_a40a202cffa13ff0fc09ea8481c834d4a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#a40a202cffa13ff0fc09ea8481c834d4a">commonAncestor</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">joint1</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">joint2</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a40a202cffa13ff0fc09ea8481c834d4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the closest common ancestor of two joints in the hierarchy.  <br /></td></tr>
 <tr class="separator:a40a202cffa13ff0fc09ea8481c834d4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a303902379f4a32c423a6853806309e5d" id="r_a303902379f4a32c423a6853806309e5d"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">U</a> &gt; </td></tr>
 <tr class="memitem:a303902379f4a32c423a6853806309e5d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1SkeletonT.html">SkeletonT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">U</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkeletonT.html#a303902379f4a32c423a6853806309e5d">cast</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a303902379f4a32c423a6853806309e5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Casts the current skeleton to another scalar type.  <br /></td></tr>
+<tr class="memdesc:a303902379f4a32c423a6853806309e5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the skeleton to use a different scalar type.  <br /></td></tr>
 <tr class="separator:a303902379f4a32c423a6853806309e5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -147,6 +149,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Constructor that validates joint hierarchy. </p>
+<p>Ensures parent indices are valid (parent &lt; child index or kInvalidIndex). </p>
 
 </div>
 </div>
@@ -205,7 +210,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Casts the current skeleton to another scalar type. </p>
+<p>Converts the skeleton to use a different scalar type. </p>
+<p>Returns a copy of this skeleton with all numeric values converted to type U. </p>
 
 </div>
 </div>
@@ -237,6 +243,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Finds the closest common ancestor of two joints in the hierarchy. </p>
+<p>Returns the index of the joint that is the lowest common ancestor in the hierarchy for the two specified joints. </p>
+
 </div>
 </div>
 <a id="aa5ce27fce9e8c2b8ea06534008613c7b" name="aa5ce27fce9e8c2b8ea06534008613c7b"></a>
@@ -267,7 +276,20 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Get the list of indices of the direct children of a joint or all its descendants. </p>
+<p>Returns indices of child joints for the specified joint. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jointId</td><td>Index of the joint to find children for </td></tr>
+    <tr><td class="paramname">recursive</td><td>If true, returns all descendants; if false, only direct children </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::out_of_range</td><td>if jointId is invalid </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -289,7 +311,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Look up the index of a joint from its name. </p>
+<p>Returns the index of a joint with the given name, or kInvalidIndex if not found. </p>
 
 </div>
 </div>
@@ -310,7 +332,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Get the names of all the joints in this skeleton. </p>
+<p>Returns a vector containing all joint names in the skeleton. </p>
 
 </div>
 </div>
@@ -342,8 +364,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Check whether the two input joints lie on the same branch of the hierarchy. </p>
-<p>Returns true if ancestorJointId is an ancestor of jointId; that is, if jointId is in the tree rooted at ancestorJointId. Note that a joint is considered to be its own ancestor; that is, isAncestor(id, id) returns true. </p>
+<p>Determines if one joint is an ancestor of another in the hierarchy. </p>
+<p>Returns true if ancestorJointId is an ancestor of jointId. A joint is considered to be its own ancestor (isAncestor(id, id) returns true). </p>
 
 </div>
 </div>
