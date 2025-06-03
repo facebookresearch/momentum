@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <momentum/character_solver/projection_error_function.h>
+#include "momentum/character_solver/projection_error_function.h"
 
-#include <momentum/character/skeleton.h>
-#include <momentum/character/skeleton_state.h>
+#include "momentum/character/skeleton.h"
+#include "momentum/character/skeleton_state.h"
 
 namespace momentum {
 

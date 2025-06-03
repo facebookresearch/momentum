@@ -8,7 +8,7 @@
 #pragma once
 
 #include <momentum/character/character.h>
-#include <momentum/character/skeleton_state.h>
+#include <momentum/character/types.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/math/generalized_loss.h>
 #include <momentum/math/types.h>

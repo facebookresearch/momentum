@@ -20,9 +20,6 @@
 #include <dispenso/parallel_for.h>
 
 #include <mutex>
-#include <numeric>
-#include <optional>
-#include <queue>
 
 namespace momentum {
 

@@ -13,7 +13,6 @@
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
 #include "momentum/math/mesh.h"
-#include "momentum/math/utility.h"
 
 namespace momentum {
 

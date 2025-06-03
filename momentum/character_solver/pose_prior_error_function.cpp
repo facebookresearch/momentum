@@ -10,7 +10,6 @@
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/common/profile.h"
-#include "momentum/math/utility.h"
 
 namespace momentum {
 

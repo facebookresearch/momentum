@@ -19,7 +19,6 @@
 #include "momentum/solver/gauss_newton_solver.h"
 
 #include <numeric>
-#include <tuple>
 
 namespace momentum {
 

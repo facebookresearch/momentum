@@ -18,7 +18,6 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
-#include "momentum/math/utility.h"
 
 #include <dispenso/parallel_for.h>
 
