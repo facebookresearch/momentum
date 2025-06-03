@@ -68,6 +68,12 @@ loadGLTFCharacterWithMotion(const std::string& gltfFilename);
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& bytes);
 
+std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
+loadGLTFCharacterWithSkelStates(const std::string& gltfFilename);
+
+std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
+loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfFilename);
+
 std::string toGLTF(const momentum::Character& character);
 
 std::tuple<

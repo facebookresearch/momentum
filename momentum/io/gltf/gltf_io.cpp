@@ -643,14 +643,15 @@ void loadGlobalExtensions(const fx::gltf::Document& model, Character& character)
   }
 }
 
-Character populateCharacterFromModel(const fx::gltf::Document& model) {
+Character populateCharacterFromModel(
+    const fx::gltf::Document& model,
+    std::vector<size_t>& nodeToObjectMap) {
   // #TODO: set character name
   Character result;
 
   // ---------------------------------------------
   // load the joints, collision geometry and locators
   // ---------------------------------------------
-  std::vector<size_t> nodeToObjectMap;
   std::tie(result.skeleton.joints, result.collision, result.locators, nodeToObjectMap) =
       loadHierarchy(model);
   MT_CHECK(
@@ -869,22 +870,150 @@ fx::gltf::Document makeCharacterDocument(
   return fileBuilder.getDocument();
 }
 
-} // namespace
-
-namespace momentum {
-
-Character loadGltfCharacter(fx::gltf::Document& model) {
+Character loadGltfCharacterInternal(
+    const fx::gltf::Document& model,
+    std::vector<size_t>& nodeToObjectMap) {
   // ---------------------------------------------
   // load Skeleton and Mesh
   // ---------------------------------------------
   Character result;
   try {
-    result = populateCharacterFromModel(model);
+    result = populateCharacterFromModel(model, nodeToObjectMap);
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
 
   return result;
+}
+
+// Function to load a glTF file and extract motion data stored in the native GLTF format
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadCharacterWithSkeletonStatesCommon(
+    const std::variant<filesystem::path, gsl::span<const std::byte>>& input) {
+  const fx::gltf::Document model = loadModel(input);
+  std::vector<size_t> nodeToObjectMap;
+  Character character = loadGltfCharacterInternal(model, nodeToObjectMap);
+
+  // Iterate over each animation in the glTF document
+  std::vector<SkeletonState> skeletonStates;
+
+  if (model.animations.empty()) {
+    MT_LOGW("No animation found in gltf file");
+    return {character, skeletonStates, {}};
+  } else if (model.animations.size() > 1) {
+    MT_LOGW("Multiple animations found in gltf file. Only the first one will be used.");
+  }
+
+  const auto& animation = model.animations.front();
+  std::vector<float> timestamps;
+
+  std::vector<SkeletonState> states;
+
+  // Iterate over each channel in the animation
+  for (const auto& channel : animation.channels) {
+    // Get the target node for the channel
+    const auto& node = model.nodes[channel.target.node];
+    const auto& sampler = animation.samplers[channel.sampler];
+
+    if (channel.target.node >= nodeToObjectMap.size() ||
+        nodeToObjectMap.at(channel.target.node) == kInvalidIndex) {
+      continue;
+    }
+
+    const auto boneIdx = nodeToObjectMap[channel.target.node];
+    MT_THROW_IF(
+        boneIdx >= character.skeleton.joints.size(),
+        "Bone index {} is larger than the number of joints in the skeleton ({})",
+        boneIdx,
+        character.skeleton.joints.size());
+
+    MT_THROW_IF(
+        node.name != character.skeleton.joints[boneIdx].name,
+        "Bone mismatch between gltf and character; GLTF: {}, Character: {}",
+        node.name,
+        character.skeleton.joints[boneIdx].name);
+
+    // Check the type of transformation (translation, rotation, scale)
+    std::vector<Vector3f> translations_m;
+    std::vector<Quaternionf> rotations;
+    std::vector<Vector3f> scales;
+    if (channel.target.path == "translation") {
+      // Handle translation data
+      translations_m = copyAccessorBuffer<Vector3f>(model, sampler.output);
+      // Apply translations to the node or character skeleton
+    } else if (channel.target.path == "rotation") {
+      // Handle rotation data
+      rotations = copyAccessorBuffer<Quaternionf>(model, sampler.output);
+      // Apply rotations to the node or character skeleton
+    } else if (channel.target.path == "scale") {
+      // Handle scale data
+      scales = copyAccessorBuffer<Vector3f>(model, sampler.output);
+      // Apply scales to the node or character skeleton
+    } else {
+      continue;
+    }
+
+    auto timestampsCur = copyAccessorBuffer<float>(model, sampler.input);
+    if (timestamps.empty()) {
+      timestamps = timestampsCur;
+    } else {
+      if (timestamps.size() != timestampsCur.size()) {
+        MT_THROW(
+            "Timestamps do not match between channels, got {} and {}",
+            timestamps.size(),
+            timestampsCur.size());
+      }
+    }
+
+    if (states.empty()) {
+      states.resize(
+          timestamps.size(),
+          SkeletonState(
+              JointParameters::Zero(character.parameterTransform.numJointParameters()),
+              character.skeleton));
+    }
+
+    MT_THROW_IF(states.size() != timestamps.size(), "States and timestamps do not match in size");
+
+    if (translations_m.size() == states.size()) {
+      for (size_t i = 0; i < states.size(); ++i) {
+        states.at(i).jointState.at(boneIdx).localTransform.translation = toCm() * translations_m[i];
+      }
+    }
+    if (rotations.size() == states.size()) {
+      for (size_t i = 0; i < states.size(); ++i) {
+        states.at(i).jointState.at(boneIdx).localTransform.rotation = rotations[i];
+      }
+    }
+    if (scales.size() == states.size()) {
+      for (size_t i = 0; i < states.size(); ++i) {
+        states.at(i).jointState.at(boneIdx).localTransform.scale = scales[i].x();
+      }
+    }
+  }
+
+  for (auto& s : states) {
+    for (size_t iJoint = 0; iJoint < character.skeleton.joints.size(); ++iJoint) {
+      Transform parentTransform;
+      const auto parentJoint = character.skeleton.joints[iJoint].parent;
+      if (parentJoint != kInvalidIndex) {
+        parentTransform = s.jointState[parentJoint].transform;
+      }
+      s.jointState[iJoint].transform = parentTransform * s.jointState[iJoint].localTransform;
+      s.jointState[iJoint].transformation = s.jointState[iJoint].transform.toAffine3();
+    }
+  }
+
+  return {character, states, timestamps};
+}
+
+} // namespace
+
+namespace momentum {
+
+Character loadGltfCharacter(const fx::gltf::Document& model) {
+  std::vector<size_t> nodeToObjectMap;
+  return loadGltfCharacterInternal(model, nodeToObjectMap);
 }
 
 Character loadGltfCharacter(const filesystem::path& gltfFilename) {
@@ -918,6 +1047,16 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
 std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
     gsl::span<const std::byte> byteSpan) {
   return loadCharacterWithMotionCommon(byteSpan);
+}
+
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadCharacterWithSkeletonStates(gsl::span<const std::byte> byteSpan) {
+  return loadCharacterWithSkeletonStatesCommon(byteSpan);
+}
+
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadCharacterWithSkeletonStates(const filesystem::path& gltfFilename) {
+  return loadCharacterWithSkeletonStatesCommon(gltfFilename);
 }
 
 std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(

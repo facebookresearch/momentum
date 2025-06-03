@@ -581,12 +581,39 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           "load_gltf_with_motion",
           &loadGLTFCharacterWithMotion,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load a character and a motion sequence from a gltf file.
+          R"(Load a character and a motion sequence from a gltf file.  Note that motion can only be read from GLTF files
+saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use 
+:meth:`load_gltf_with_skel_states`.
 
 :parameter gltfFilename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.
       )",
           py::arg("gltf_filename"))
+      .def_static(
+          "load_gltf_with_skel_states_from_bytes",
+          &loadGLTFCharacterWithSkelStatesFromBytes,
+          R"(Load a character and a skeleton state motion sequence from gltf bytes.  Unlike 
+:meth:`load_gltf_with_motion`, this function should work with any GLTF file since it reads the raw transforms from the file
+and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not 
+support the proprietary momentum motion format for storing model parameters in GLB.
+  
+:parameter gltf_bytes: The bytes of a gltf file.
+:return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
+        )",
+          py::arg("gltf_bytes"))
+      .def_static(
+          "load_gltf_with_skel_states",
+          &loadGLTFCharacterWithSkelStates,
+          R"(Load a character and a skel state sequence from a gltf file.  Unlike 
+:meth:`load_gltf_with_motion`, this function should work with any GLTF file since it reads the raw transforms from the file
+and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not 
+support the proprietary momentum motion format for storing model parameters in GLB.
+    
+:parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
+:return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
+          )",
+          py::arg("gltf_filename"))
+
       // loadGLTFCharacterFromFile(filename)
       .def_static(
           "load_gltf",
