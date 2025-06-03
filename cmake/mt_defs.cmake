@@ -239,9 +239,14 @@ function(mt_library)
       $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> # TODO: Remove once momentum/pymomentum/pymomentum is moved to momentum/pymomentum
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-      ${_ARG_PUBLIC_INCLUDE_DIRECTORIES}
   )
-  target_include_directories(${_ARG_NAME} ${private_or_interface} ${_ARG_PRIVATE_INCLUDE_DIRECTORIES})
+  if(NOT "${_ARG_PUBLIC_INCLUDE_DIRECTORIES}" STREQUAL "")
+    target_include_directories(${_ARG_NAME} SYSTEM ${public_or_interface} ${_ARG_PUBLIC_INCLUDE_DIRECTORIES})
+  endif()
+  if(NOT "${_ARG_PRIVATE_INCLUDE_DIRECTORIES}" STREQUAL "")
+    target_include_directories(${_ARG_NAME} SYSTEM ${private_or_interface} ${_ARG_PRIVATE_INCLUDE_DIRECTORIES})
+  endif()
+
   target_compile_features(${_ARG_NAME} ${public_or_interface} cxx_std_17)
 
   target_link_libraries(${_ARG_NAME} ${public_or_interface} ${_ARG_PUBLIC_LINK_LIBRARIES})
@@ -486,8 +491,11 @@ function(mt_python_binding)
       $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> # TODO: Remove once momentum/pymomentum/pymomentum is moved to momentum/pymomentum
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-      ${_ARG_INCLUDE_DIRECTORIES}
   )
+  if(NOT "${_ARG_INCLUDE_DIRECTORIES}" STREQUAL "")
+    target_include_directories(${_ARG_NAME} SYSTEM PRIVATE ${_ARG_INCLUDE_DIRECTORIES})
+  endif()
+
   target_compile_features(${_ARG_NAME} PRIVATE cxx_std_17)
   target_link_libraries(${_ARG_NAME} PRIVATE ${_ARG_LINK_LIBRARIES})
   target_compile_options(${_ARG_NAME} PRIVATE ${_ARG_COMPILE_OPTIONS})

@@ -44,7 +44,7 @@ PositionErrorFunctionTensors toPositionTensors(
   result.weights = at::zeros({1, nCons}, at::kFloat);
   result.targets = at::zeros({1, nCons, 3}, at::kFloat);
 
-  for (size_t iCons = 0; iCons < nCons; ++iCons) {
+  for (int iCons = 0; iCons < nCons; ++iCons) {
     pymomentum::toEigenMap<int>(result.parents)(iCons) =
         constraints[iCons].parent;
     pymomentum::toEigenMap<float>(result.offsets).segment<3>(3 * iCons) =
@@ -70,7 +70,7 @@ at::Tensor concatBatch(std::vector<at::Tensor> tensors) {
 
   at::Tensor result = at::zeros(sizes_batch, tensors[0].scalar_type());
 
-  for (size_t iBatch = 0; iBatch < tensors.size(); ++iBatch) {
+  for (int iBatch = 0; iBatch < static_cast<int>(tensors.size()); ++iBatch) {
     assert(result.scalar_type() == tensors[iBatch].scalar_type());
     // ASSERT_EQ(sizes_orig, std::vector<long>{tensors[iBatch].sizes()});
     result.select(0, iBatch) = tensors[iBatch];
@@ -97,10 +97,12 @@ void addPositionConstraints(
 
   std::uniform_real_distribution<> unif(0, 1);
 
-  for (size_t iJoint = 0; iJoint < character.skeleton.joints.size(); ++iJoint) {
+  for (int iJoint = 0;
+       iJoint < static_cast<int>(character.skeleton.joints.size());
+       ++iJoint) {
     // three constraints per joint; if it isn't overdetermined, the solver
     // derivatives don't work as well.
-    for (size_t jCons = 0; jCons < 3; ++jCons) {
+    for (int jCons = 0; jCons < 3; ++jCons) {
       const auto parent = iJoint;
       const Eigen::Vector3<T> offset = 3.0f * randomVec3().template cast<T>();
       const Eigen::Vector3<T> target =
@@ -138,7 +140,7 @@ Eigen::VectorX<T> extractErrorFunctionWeights(
     const momentum::SkeletonSolverFunction& solverFunction) {
   const auto& errorFunctions = solverFunction.getErrorFunctions();
   Eigen::VectorX<T> result = Eigen::VectorX<T>::Zero(errorFunctions.size());
-  for (size_t i = 0; i < errorFunctions.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(errorFunctions.size()); ++i) {
     result(i) = errorFunctions[i]->getWeight();
   }
   return result;
@@ -156,7 +158,7 @@ TEST(TensorIK, TensorIK) {
   solverOptions.regularization = 1e-3f;
 
   // Construct a very basic IK problem:
-  const size_t nBatch = 3;
+  const int nBatch = 3;
   std::vector<IKProblem<T>> ikProblems(nBatch);
   std::vector<Eigen::VectorX<T>> ikSolutions;
 
@@ -173,7 +175,7 @@ TEST(TensorIK, TensorIK) {
     dLoss_dModelParams(i) = unif(rng);
   }
 
-  for (size_t iBatch = 0; iBatch < nBatch; ++iBatch) {
+  for (int iBatch = 0; iBatch < nBatch; ++iBatch) {
     ikProblems[iBatch].modelParameters_init = Eigen::VectorX<T>::Zero(
         character.parameterTransform.numAllModelParameters());
 
@@ -276,8 +278,8 @@ TEST(TensorIK, TensorIK) {
     ASSERT_EQ(
         character.parameterTransform.numAllModelParameters(),
         modelParameters_final_extract.size());
-    for (size_t iParam = 0;
-         iParam < character.parameterTransform.numAllModelParameters();
+    for (int iParam = 0; iParam <
+         static_cast<int>(character.parameterTransform.numAllModelParameters());
          ++iParam) {
       ASSERT_NEAR(
           ikProblems[iBatch].modelParameters_final(iParam),

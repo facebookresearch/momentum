@@ -78,9 +78,11 @@ std::tuple<at::Tensor, at::Tensor> computeResidual(
   const size_t maxRows =
       *std::max_element(actualRows.begin(), actualRows.end());
 
-  at::Tensor jacobian =
-      at::zeros({nBatch, (int)maxRows, (int)nParams}, toScalarType<T>());
-  at::Tensor residual = at::zeros({nBatch, (int)maxRows}, toScalarType<T>());
+  at::Tensor jacobian = at::zeros(
+      {nBatch, gsl::narrow_cast<int>(maxRows), gsl::narrow_cast<int>(nParams)},
+      toScalarType<T>());
+  at::Tensor residual =
+      at::zeros({nBatch, gsl::narrow_cast<int>(maxRows)}, toScalarType<T>());
 
   dispenso::parallel_for(0, nBatch, [&](size_t iBatch) {
     const size_t actualRows_cur = actualRows[iBatch];

@@ -7,9 +7,6 @@
 
 #include "pymomentum/solver/momentum_ik.h"
 
-#include "momentum/character/types.h"
-#include "momentum/character_solver/transform_pose.h"
-#include "momentum/math/types.h"
 #include "pymomentum/python_utility/python_utility.h"
 #include "pymomentum/tensor_ik/tensor_collision_error_function.h"
 #include "pymomentum/tensor_ik/tensor_diff_pose_prior_error_function.h"
@@ -30,6 +27,9 @@
 #include "pymomentum/tensor_utility/autograd_utility.h"
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
+#include <momentum/character/types.h>
+#include <momentum/character_solver/transform_pose.h>
+#include <momentum/math/types.h>
 #include <torch/csrc/jit/python/python_ivalue.h>
 
 // Details on how PyTorch works for building a custom differentiable module:
@@ -1523,7 +1523,8 @@ at::Tensor transformPoseImp(
       momentum::transformPose(
           character, modelParamsVec, transformsVec, ensureContinuousOutput);
 
-  at::Tensor result = at::zeros({nBatch, (int)nModelParam}, toScalarType<T>());
+  at::Tensor result = at::zeros(
+      {nBatch, gsl::narrow_cast<int>(nModelParam)}, toScalarType<T>());
   for (size_t iBatch = 0; iBatch < nBatch; ++iBatch) {
     toEigenMap<T>(result.select(0, iBatch)) = resultVec.at(iBatch).v;
   }
