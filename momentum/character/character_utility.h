@@ -27,9 +27,9 @@ namespace momentum {
 ///
 /// Note that this should primarily be used for transforming models between different coordinate
 /// spaces (e.g. y-up vs. z-up). If you want to move a character around the scene, you should
-/// preferentially use the model parameters.
+/// preferably use the model parameters.
 ///
-/// @param[in] character Character to be scaled
+/// @param[in] character Character to be transformed
 /// @param[in] xform Transformation to apply
 /// @return A new Character object that has been transformed
 [[nodiscard]] Character transformCharacter(const Character& character, const Affine3f& xform);
@@ -64,7 +64,7 @@ namespace momentum {
     const Character& character,
     gsl::span<const size_t> jointsToRemove);
 
-/// Map the input ModelParameter motion to a target character by matching model parameter names.
+/// Maps the input ModelParameter motion to a target character by matching model parameter names.
 /// Mismatched names will be discarded (source) or set to zero (target).
 ///
 /// @param[in] inputMotion Input ModelParameter motion with names.
@@ -74,7 +74,7 @@ MatrixXf mapMotionToCharacter(
     const MotionParameters& inputMotion,
     const Character& targetCharacter);
 
-/// Map the input JointParameter vector to a target character by matching joint names. Mismatched
+/// Maps the input JointParameter vector to a target character by matching joint names. Mismatched
 /// names will be discarded (source) or set to zero (target). For every matched joint, all 7
 /// parameters will be copied over.
 ///
