@@ -14,9 +14,10 @@
 
 namespace momentum {
 
-/// Tapered capsule collision geometry.
+/// Tapered capsule collision geometry for character collision detection.
 ///
-/// Defined by a transformation, length, and two radii at the endpoints.
+/// Defined by a transformation, length, and two radii at the endpoints, creating
+/// a capsule with potentially different radii at each end.
 template <typename S>
 struct TaperedCapsuleT {
   using Scalar = S;
@@ -25,7 +26,7 @@ struct TaperedCapsuleT {
   /// system.
   Affine3<S> transformation;
 
-  /// Radii at two endpoints of the capsule.
+  /// Radii at the two endpoints of the capsule.
   Vector2<S> radius;
 
   /// Parent joint to which the geometry is attached.
@@ -65,6 +66,7 @@ struct TaperedCapsuleT {
   }
 };
 
+/// Collection of tapered capsules representing a character's collision geometry.
 template <typename S>
 using CollisionGeometryT = std::vector<TaperedCapsuleT<S>>;
 
