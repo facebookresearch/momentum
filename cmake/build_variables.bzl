@@ -193,6 +193,7 @@ character_test_sources = [
     "test/character/skeleton_bake_test.cpp",
     "test/character/skeleton_state_test.cpp",
     "test/character/skeleton_test.cpp",
+    "test/character/skeleton_utility_test.cpp",
     "test/character/skin_weights_test.cpp",
 ]
 
