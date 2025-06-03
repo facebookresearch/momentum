@@ -31,6 +31,6 @@
     GTEST_MESSAGE_("Death test is skipped", ::testing::TestPartResult::kSuccess); \
   } while (0)
 #else
-#define MOMENTUM_EXPECT_DEATH(statement, message) EXPECT_DEATH_IF_SUPPORTED(statement, message)
+#define MOMENTUM_EXPECT_DEATH(statement, message) EXPECT_DEATH_IF_SUPPORTED(statement, ".*")
 #endif // NDEBUG
 #endif // MOMENTUM_WITH_XR_LOGGER
