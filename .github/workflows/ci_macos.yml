@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, macos-latest-large]
+        os: [macos-latest]
         mode: [""]
     steps:
       - name: Checkout
@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, macos-latest-large]
+        os: [macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
