@@ -127,6 +127,7 @@ solver_test_sources = [
     "test/solver/gauss_newton_solver_test.cpp",
     "test/solver/solver_function_test.cpp",
     "test/solver/solver_test.cpp",
+    "test/solver/subset_gauss_newton_solver_test.cpp",
 ]
 
 skeleton_public_headers = [
