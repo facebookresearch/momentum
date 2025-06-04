@@ -45,7 +45,7 @@ CharacterStateT<T>::~CharacterStateT() = default;
 
 template <typename T>
 CharacterStateT<T>::CharacterStateT(
-    const Character& referenceCharacter,
+    const CharacterT<T>& referenceCharacter,
     bool updateMesh,
     bool updateCollision) {
   setBindPose(referenceCharacter, updateMesh, updateCollision);
@@ -54,7 +54,7 @@ CharacterStateT<T>::CharacterStateT(
 template <typename T>
 CharacterStateT<T>::CharacterStateT(
     const CharacterParameters& parameters,
-    const Character& referenceCharacter,
+    const CharacterT<T>& referenceCharacter,
     bool updateMesh,
     bool updateCollision,
     bool applyLimits) {
@@ -63,7 +63,7 @@ CharacterStateT<T>::CharacterStateT(
 
 template <typename T>
 void CharacterStateT<T>::setBindPose(
-    const Character& referenceCharacter,
+    const CharacterT<T>& referenceCharacter,
     bool updateMesh,
     bool updateCollision) {
   set(referenceCharacter.bindPose(), referenceCharacter, updateMesh, updateCollision);
@@ -72,7 +72,7 @@ void CharacterStateT<T>::setBindPose(
 template <typename T>
 void CharacterStateT<T>::set(
     const CharacterParameters& inParameters,
-    const Character& referenceCharacter,
+    const CharacterT<T>& referenceCharacter,
     bool updateMesh,
     bool updateCollision,
     bool applyLimits) {
@@ -119,7 +119,33 @@ void CharacterStateT<T>::set(
       // update normals
       meshState->updateNormals();
     } else if (referenceCharacter.blendShape) {
-      skinWithBlendShapes(referenceCharacter, skeletonState, parameters.pose, *meshState);
+      // For CharacterT<float>, we can cast directly to Character
+      // For CharacterT<double>, we need to cast to Character (CharacterT<float>) first
+      if constexpr (std::is_same_v<T, float>) {
+        skinWithBlendShapes(
+            static_cast<const Character&>(referenceCharacter),
+            skeletonState,
+            parameters.pose,
+            *meshState);
+      } else {
+        // For double, create a temporary Character (CharacterT<float>) object
+        // This is a simplified conversion that may not preserve all properties
+        Character tempCharacter(
+            referenceCharacter.skeleton,
+            referenceCharacter.parameterTransform,
+            referenceCharacter.parameterLimits,
+            referenceCharacter.locators,
+            referenceCharacter.mesh.get(),
+            referenceCharacter.skinWeights.get(),
+            referenceCharacter.collision.get(),
+            referenceCharacter.poseShapes.get(),
+            referenceCharacter.blendShape,
+            nullptr, // No face expression blend shape
+            referenceCharacter.name,
+            referenceCharacter.inverseBindPose);
+
+        skinWithBlendShapes(tempCharacter, skeletonState, parameters.pose, *meshState);
+      }
     } else {
       // apply simple skinning
       applySSD(
