@@ -123,6 +123,10 @@ solver_sources = [
     "solver/gradient_descent_solver.cpp",
 ]
 
+solver_test_sources = [
+    "test/solver/solver_test.cpp",
+]
+
 skeleton_public_headers = [
     "character/fwd.h",
     "character/joint_state.h",
