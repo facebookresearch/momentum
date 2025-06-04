@@ -13,7 +13,7 @@
 
 namespace momentum {
 
-/// A simplified version of a Maya Joint with only a pre-rotation but no post-rotation.
+/// A simplified version of a Maya joint with pre-rotation only (no post-rotation).
 template <typename T>
 struct JointT {
   using Scalar = T;
@@ -26,11 +26,11 @@ struct JointT {
 
   // TODO: does it make sense to save its own index too?
 
-  /// Pre-rotation matrix from its parent's axes to its own axes
+  /// Pre-rotation matrix from its parent's axes to its own axes.
   /// @note: Braces initialization is avoided due to issues with CUDA 11.
   Quaternion<T> preRotation = Quaternion<T>::Identity();
 
-  /// The constant translation offset from the parent to its origin
+  /// The constant translation offset from the parent joint to this joint's origin.
   Vector3<T> translationOffset = Vector3<T>::Zero();
 
   /// Checks if the current joint is approximately equal to the provided joint.
@@ -73,7 +73,7 @@ struct JointT {
   }
 };
 
-/// A list of joints (eg. of a skeleton)
+/// A list of joints (e.g., of a skeleton).
 template <typename T>
 using JointListT = std::vector<JointT<T>>;
 using JointList = JointListT<float>;
