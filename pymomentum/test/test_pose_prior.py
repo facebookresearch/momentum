@@ -3,7 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# pyre-unsafe
+# pyre-strict
 import logging
 import unittest
 
@@ -109,7 +109,19 @@ class TestPosePrior(unittest.TestCase):
             pp_mu: torch.Tensor,
             pp_W: torch.Tensor,
             pp_sigma: torch.Tensor,
-        ):
+            character: pym_geometry.Character = character,
+            active_params: torch.Tensor = active_params,
+            active_error_functions: list[ErrorFunctionType] = active_error_functions,
+            orient_cons_parents: torch.Tensor = orient_cons_parents,
+            orient_cons_targets: torch.Tensor = orient_cons_targets,
+            orient_cons_weights: torch.Tensor = orient_cons_weights,
+            pos_cons_parents: torch.Tensor = pos_cons_parents,
+            pos_cons_offsets: torch.Tensor = pos_cons_offsets,
+            pos_cons_weights: torch.Tensor = pos_cons_weights,
+            pos_cons_targets: torch.Tensor = pos_cons_targets,
+            posePrior_parameterIndices: torch.Tensor = posePrior_parameterIndices,
+            model_params_init: torch.Tensor = model_params_init,
+        ) -> torch.Tensor:
             return pym_solver.solve_ik(
                 character=character,
                 active_parameters=active_params,

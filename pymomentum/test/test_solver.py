@@ -3,7 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# pyre-unsafe
+# pyre-strict
 
 import unittest
 from multiprocessing.dummy import Pool
@@ -639,7 +639,7 @@ class TestSolver(unittest.TestCase):
             character, model_params_init
         )
 
-        def remove_scale(skel_state: torch.Tensor):
+        def remove_scale(skel_state: torch.Tensor) -> torch.Tensor:
             return torch.cat(
                 tensors=[skel_state[..., :7], torch.ones_like(skel_state[..., 7:8])],
                 dim=-1,
