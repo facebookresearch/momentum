@@ -179,6 +179,7 @@ character_sources = [
 
 character_test_sources = [
     "test/character/blend_shape_test.cpp",
+    "test/character/character_state_test.cpp",
     "test/character/character_test.cpp",
     "test/character/collision_geometry_state_test.cpp",
     "test/character/forward_kinematics_test.cpp",
