@@ -124,6 +124,7 @@ solver_sources = [
 ]
 
 solver_test_sources = [
+    "test/solver/gauss_newton_solver_test.cpp",
     "test/solver/solver_test.cpp",
 ]
 
