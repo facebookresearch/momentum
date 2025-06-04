@@ -26,6 +26,7 @@ setuptools = ">=75.8.2,<79"
 sphinx = ">=8.1.3,<9"
 sphinx-rtd-theme = ">=3.0.1,<4"
 tracy-profiler-gui = ">=0.11.1,<0.12"
+pyyaml = ">=6.0.2,<7"
 
 [dependencies]
 blas = ">=2.131,<3"
