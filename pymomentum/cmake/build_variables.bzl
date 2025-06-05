@@ -12,6 +12,10 @@ tensor_utility_sources = [
     "tensor_utility/tensor_utility.cpp",
 ]
 
+python_utility_test_sources = [
+    "cpp_test/python_utility_test.cpp",
+]
+
 tensor_utility_test_sources = [
     "cpp_test/tensor_utility_test.cpp",
 ]
