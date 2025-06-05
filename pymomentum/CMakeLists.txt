@@ -59,8 +59,11 @@ endif()
 # Build PyMomentum
 #===============================================================================
 
+# Set Python dependencies for all platforms
 if(WIN32)
   set(python_deps ${Python3_LIBRARIES})
+else()
+  set(python_deps Python3::Python)
 endif()
 
 mt_library(
@@ -226,6 +229,16 @@ if(MOMENTUM_BUILD_TESTING)
     NAME tensor_utility_test
     PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
     LINK_LIBRARIES tensor_utility
+  )
+
+  mt_test(
+    NAME python_utility_test
+    PYMOMENTUM_SOURCES_VARS python_utility_test_sources
+    LINK_LIBRARIES
+      python_utility
+      pybind11::pybind11
+      ${python_deps}
+      Python3::Module
   )
 
   mt_test(

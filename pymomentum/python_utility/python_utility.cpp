@@ -27,8 +27,16 @@ std::vector<const momentum::Character*> toCharacterList(
   if (PyList_Check(obj)) {
     std::vector<const momentum::Character*> result;
     for (Py_ssize_t i = 0; i < PyList_Size(obj); ++i) {
-      result.push_back(
-          py::cast<const momentum::Character*>(PyList_GetItem(obj, i)));
+      try {
+        result.push_back(
+            py::cast<const momentum::Character*>(PyList_GetItem(obj, i)));
+      } catch (const std::exception& e) {
+        MT_THROW(
+            "Expected a valid pymomentum.Character at index {} in list in {}: {}",
+            i,
+            context,
+            e.what());
+      }
     }
 
     MT_THROW_IF(
@@ -72,8 +80,15 @@ std::vector<const momentum::Character*> toCharacterList(
 
     return result;
   } else {
-    return std::vector<const momentum::Character*>(
-        forceBatchSize ? nBatch : 1, py::cast<const momentum::Character*>(obj));
+    try {
+      const momentum::Character* character =
+          py::cast<const momentum::Character*>(obj);
+      return std::vector<const momentum::Character*>(
+          forceBatchSize ? nBatch : 1, character);
+    } catch (const std::exception& e) {
+      MT_THROW(
+          "Expected a valid pymomentum.Character in {}: {}", context, e.what());
+    }
   }
 }
 

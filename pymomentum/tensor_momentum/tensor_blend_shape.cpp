@@ -66,8 +66,8 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
       py::cast<const momentum::BlendShape*>(blendShape_in);
 
   MT_THROW_IF(
-      nCoeffs > blendShape->shapeSize(),
-      "In applyBlendShapeCoeffs, invalid blend shape count; expected at most {} coefficients but got {}.",
+      nCoeffs <= 0 || nCoeffs > blendShape->shapeSize(),
+      "In applyBlendShapeCoeffs, invalid blend shape count; expected between 1 and {} coefficients but got {}.",
       blendShape->shapeSize(),
       nCoeffs);
 
@@ -122,7 +122,14 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
   // The only thing we actually need the blend shape vector for here is to
   // know how many blend shapes the user passed in:
   at::Tensor blendShapes = saved[0];
+  MT_THROW_IF(
+      blendShapes.dim() == 0 || blendShapes.numel() == 0,
+      "Invalid blend shapes tensor in backward pass");
   const int64_t nBlendShapes = blendShapes.size(-1);
+  MT_THROW_IF(
+      nBlendShapes <= 0,
+      "Invalid number of blend shapes in backward pass: {}",
+      nBlendShapes);
 
   TensorChecker checker("applyBlendShapeCoefficients");
 
