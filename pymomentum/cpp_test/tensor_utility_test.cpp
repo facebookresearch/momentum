@@ -10,7 +10,7 @@
 #include <pymomentum/tensor_utility/tensor_utility.h>
 
 TEST(ValidateTensor, CheckBatchDim) {
-  const size_t nBatch = 3;
+  const int nBatch = 3;
 
   pymomentum::TensorChecker checker("testFun1");
   // Establish batch dimension:
@@ -59,12 +59,12 @@ TEST(ValidateTensor, CheckBatchDim) {
 }
 
 TEST(ValidateTensor, CheckBoundVariables) {
-  const size_t nBatch = 3;
+  const int nBatch = 3;
 
   const int v1_index = -1;
   const int v2_index = -2;
-  const size_t v1_value = 5;
-  const size_t v2_value = 3;
+  const int v1_value = 5;
+  const int v2_value = 3;
 
   pymomentum::TensorChecker checker("testFun1");
   // Establish v1:
