@@ -3,7 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# pyre-unsafe
+# pyre-strict
 
 import unittest
 
@@ -52,7 +52,12 @@ class TestSolver(unittest.TestCase):
             :, :, 3:7
         ]
 
-        def get_positions(model_params: torch.Tensor) -> torch.Tensor:
+        def get_positions(
+            model_params: torch.Tensor,
+            character: pym_geometry.Character = character,
+            pos_cons_parents: torch.Tensor = pos_cons_parents,
+            pos_cons_offsets: torch.Tensor = pos_cons_offsets,
+        ) -> torch.Tensor:
             return pym_geometry.model_parameters_to_positions(
                 character, model_params, pos_cons_parents, pos_cons_offsets
             ).detach()

@@ -3,7 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# pyre-unsafe
+# pyre-strict
 
 import unittest
 from typing import Optional
@@ -16,7 +16,7 @@ def _brute_force_closest_points(
     src_pts: torch.Tensor,
     tgt_pts: torch.Tensor,
     tgt_normals: torch.Tensor | None = None,
-):
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     n_batch = src_pts.size(0)
     n_src_pts = src_pts.size(1)
 
@@ -87,7 +87,7 @@ class TestClosestPoints(unittest.TestCase):
         src_pts = torch.rand(n_batch, n_src_pts, dim)
         tgt_pts = torch.rand(n_batch, n_tgt_pts, dim)
 
-        def normalized(t: torch.Tensor):
+        def normalized(t: torch.Tensor) -> torch.Tensor:
             return torch.nn.functional.normalize(t, dim=-1)
 
         src_normals = normalized(torch.abs(torch.rand(n_batch, n_src_pts, dim)))
