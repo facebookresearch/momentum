@@ -107,7 +107,9 @@ std::string formatExpectedDimensions(
   for (size_t i = 0; i < expectedSizes.size(); ++i) {
     oss << " x ";
     if (dimensionNames[i] == nullptr) {
-      assert(expectedSizes[i] >= 0);
+      MT_THROW_IF(
+          expectedSizes[i] < 0,
+          "Expected size must be non-negative when dimension name is null");
       oss << expectedSizes[i];
       continue;
     }
