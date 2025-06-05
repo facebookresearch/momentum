@@ -83,7 +83,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Base Solver class.  
+<p>Base class for numerical optimization solvers.  
  <a href="classmomentum_1_1SolverT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="solver_8h_source.html">solver.h</a>&gt;</code></p>
@@ -94,11 +94,11 @@ Inheritance diagram for momentum::SolverT&lt; T &gt;:</div>
   <img src="classmomentum_1_1SolverT.png" usemap="#momentum::SolverT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::SolverT_3C_20T_20_3E_map" name="momentum::SolverT_3C_20T_20_3E_map">
 <area href="classmomentum_1_1GaussNewtonSolverQRT.html" alt="momentum::GaussNewtonSolverQRT&lt; T &gt;" shape="rect" coords="0,56,266,80"/>
-<area href="classmomentum_1_1GaussNewtonSolverT.html" alt="momentum::GaussNewtonSolverT&lt; T &gt;" shape="rect" coords="276,56,542,80"/>
-<area href="classmomentum_1_1GradientDescentSolverT.html" alt="momentum::GradientDescentSolverT&lt; T &gt;" shape="rect" coords="552,56,818,80"/>
+<area href="classmomentum_1_1GaussNewtonSolverT.html" title="Implementation of the Gauss-Newton optimization algorithm." alt="momentum::GaussNewtonSolverT&lt; T &gt;" shape="rect" coords="276,56,542,80"/>
+<area href="classmomentum_1_1GradientDescentSolverT.html" title="First-order optimization algorithm that follows the negative gradient." alt="momentum::GradientDescentSolverT&lt; T &gt;" shape="rect" coords="552,56,818,80"/>
 <area href="classmomentum_1_1MultiposeSolverT.html" alt="momentum::MultiposeSolverT&lt; T &gt;" shape="rect" coords="828,56,1094,80"/>
 <area href="classmomentum_1_1SequenceSolverT.html" alt="momentum::SequenceSolverT&lt; T &gt;" shape="rect" coords="1104,56,1370,80"/>
-<area href="classmomentum_1_1SubsetGaussNewtonSolverT.html" alt="momentum::SubsetGaussNewtonSolverT&lt; T &gt;" shape="rect" coords="1380,56,1646,80"/>
+<area href="classmomentum_1_1SubsetGaussNewtonSolverT.html" title="Gauss-Newton solver that optimizes only a selected subset of parameters." alt="momentum::SubsetGaussNewtonSolverT&lt; T &gt;" shape="rect" coords="1380,56,1646,80"/>
 <area href="classmomentum_1_1TrustRegionQRT.html" alt="momentum::TrustRegionQRT&lt; T &gt;" shape="rect" coords="1656,56,1922,80"/>
   </map>
 </div></div>
@@ -106,83 +106,93 @@ Inheritance diagram for momentum::SolverT&lt; T &gt;:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af4f1df2bed49af36593851b752e3b1f1" id="r_af4f1df2bed49af36593851b752e3b1f1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#af4f1df2bed49af36593851b752e3b1f1">SolverT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SolverOptions.html">SolverOptions</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">options</a>, <a class="el" href="classmomentum_1_1SolverFunctionT.html">SolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">solver</a>)</td></tr>
+<tr class="memdesc:af4f1df2bed49af36593851b752e3b1f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor with solver options and function to optimize.  <br /></td></tr>
 <tr class="separator:af4f1df2bed49af36593851b752e3b1f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07c7deb3a850cfd2b12d1068cfadf88a" id="r_a07c7deb3a850cfd2b12d1068cfadf88a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a07c7deb3a850cfd2b12d1068cfadf88a">~SolverT</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
 <tr class="separator:a07c7deb3a850cfd2b12d1068cfadf88a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47f157512a85dc424e0f4fba0fb495ad" id="r_a47f157512a85dc424e0f4fba0fb495ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a47f157512a85dc424e0f4fba0fb495ad">getName</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> =0</td></tr>
+<tr class="memdesc:a47f157512a85dc424e0f4fba0fb495ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the name of the solver implementation.  <br /></td></tr>
 <tr class="separator:a47f157512a85dc424e0f4fba0fb495ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a199af677b34be0c2221ca6ad62698e62" id="r_a199af677b34be0c2221ca6ad62698e62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a199af677b34be0c2221ca6ad62698e62">setOptions</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SolverOptions.html">SolverOptions</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">options</a>)</td></tr>
+<tr class="memdesc:a199af677b34be0c2221ca6ad62698e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates solver configuration with new options.  <br /></td></tr>
 <tr class="separator:a199af677b34be0c2221ca6ad62698e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3a476813214e6279281e978218b6aaa" id="r_ad3a476813214e6279281e978218b6aaa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#ad3a476813214e6279281e978218b6aaa">solve</a> (Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>)</td></tr>
 <tr class="memdesc:ad3a476813214e6279281e978218b6aaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves the optimization problem.  <br /></td></tr>
 <tr class="separator:ad3a476813214e6279281e978218b6aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af302e18df3add51e302814e2779ee03f" id="r_af302e18df3add51e302814e2779ee03f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#af302e18df3add51e302814e2779ee03f">setEnabledParameters</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;parameters)</td></tr>
+<tr class="memdesc:af302e18df3add51e302814e2779ee03f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies which parameters should be optimized.  <br /></td></tr>
 <tr class="separator:af302e18df3add51e302814e2779ee03f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62e19619b248989efac5df6b33f183d0" id="r_a62e19619b248989efac5df6b33f183d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a62e19619b248989efac5df6b33f183d0">getActiveParameters</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a62e19619b248989efac5df6b33f183d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current set of enabled parameters.  <br /></td></tr>
 <tr class="separator:a62e19619b248989efac5df6b33f183d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5537f6c45a1103109a7b703c7d7eeb37" id="r_a5537f6c45a1103109a7b703c7d7eeb37"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a5537f6c45a1103109a7b703c7d7eeb37">setParameters</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>)</td></tr>
+<tr class="memdesc:a5537f6c45a1103109a7b703c7d7eeb37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the current parameter values without solving.  <br /></td></tr>
 <tr class="separator:a5537f6c45a1103109a7b703c7d7eeb37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac92423f2c8c9d626fa63e203a90cfadb" id="r_ac92423f2c8c9d626fa63e203a90cfadb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#ac92423f2c8c9d626fa63e203a90cfadb">setStoreHistory</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
-<tr class="memdesc:ac92423f2c8c9d626fa63e203a90cfadb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the flag whether to store iteration history.  <br /></td></tr>
+<tr class="memdesc:ac92423f2c8c9d626fa63e203a90cfadb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls whether to store iteration history for debugging and analysis.  <br /></td></tr>
 <tr class="separator:ac92423f2c8c9d626fa63e203a90cfadb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba0c451b4e334013083243405e993e78" id="r_aba0c451b4e334013083243405e993e78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::unordered_map&lt; std::string, Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#aba0c451b4e334013083243405e993e78">getHistory</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="memdesc:aba0c451b4e334013083243405e993e78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the history of the solver's iterations.  <br /></td></tr>
 <tr class="separator:aba0c451b4e334013083243405e993e78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa518cedfeba7708a75ade00abb4e2945" id="r_aa518cedfeba7708a75ade00abb4e2945"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#aa518cedfeba7708a75ade00abb4e2945">getMinIterations</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:aa518cedfeba7708a75ade00abb4e2945"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the minimum number of iterations before checking convergence.  <br /></td></tr>
 <tr class="separator:aa518cedfeba7708a75ade00abb4e2945"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61f7572131b9cdc76c64b1eaf481761b" id="r_a61f7572131b9cdc76c64b1eaf481761b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a61f7572131b9cdc76c64b1eaf481761b">getMaxIterations</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a61f7572131b9cdc76c64b1eaf481761b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the maximum number of iterations before terminating.  <br /></td></tr>
 <tr class="separator:a61f7572131b9cdc76c64b1eaf481761b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:aca3cea8b7d3df7da0ae68e7aeae55cfa" id="r_aca3cea8b7d3df7da0ae68e7aeae55cfa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#aca3cea8b7d3df7da0ae68e7aeae55cfa">initializeSolver</a> ()=0</td></tr>
-<tr class="memdesc:aca3cea8b7d3df7da0ae68e7aeae55cfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the solver.  <br /></td></tr>
+<tr class="memdesc:aca3cea8b7d3df7da0ae68e7aeae55cfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes solver state before optimization begins.  <br /></td></tr>
 <tr class="separator:aca3cea8b7d3df7da0ae68e7aeae55cfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32a0ad18ba9f9d3685c46d8d7817484c" id="r_a32a0ad18ba9f9d3685c46d8d7817484c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a32a0ad18ba9f9d3685c46d8d7817484c">doIteration</a> ()=0</td></tr>
-<tr class="memdesc:a32a0ad18ba9f9d3685c46d8d7817484c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a single iteration of the solver.  <br /></td></tr>
+<tr class="memdesc:a32a0ad18ba9f9d3685c46d8d7817484c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a single iteration of the optimization algorithm.  <br /></td></tr>
 <tr class="separator:a32a0ad18ba9f9d3685c46d8d7817484c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:ae83db1a172c236fe48bfaf8f8855bade" id="r_ae83db1a172c236fe48bfaf8f8855bade"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#ae83db1a172c236fe48bfaf8f8855bade">numParameters_</a></td></tr>
-<tr class="memdesc:ae83db1a172c236fe48bfaf8f8855bade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of parameters in the solver.  <br /></td></tr>
+<tr class="memdesc:ae83db1a172c236fe48bfaf8f8855bade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of parameters in the optimization problem.  <br /></td></tr>
 <tr class="separator:ae83db1a172c236fe48bfaf8f8855bade"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee49a4cfe460ce8b148c3f52e90caef2" id="r_aee49a4cfe460ce8b148c3f52e90caef2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1SolverFunctionT.html">SolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#aee49a4cfe460ce8b148c3f52e90caef2">solverFunction_</a></td></tr>
+<tr class="memdesc:aee49a4cfe460ce8b148c3f52e90caef2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to be optimized.  <br /></td></tr>
 <tr class="separator:aee49a4cfe460ce8b148c3f52e90caef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93f5c9bc1cd8817fb205e7b304c81256" id="r_a93f5c9bc1cd8817fb205e7b304c81256"><td class="memItemLeft" align="right" valign="top">Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a93f5c9bc1cd8817fb205e7b304c81256">parameters_</a></td></tr>
-<tr class="memdesc:a93f5c9bc1cd8817fb205e7b304c81256"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current parameter state.  <br /></td></tr>
+<tr class="memdesc:a93f5c9bc1cd8817fb205e7b304c81256"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current parameter values.  <br /></td></tr>
 <tr class="separator:a93f5c9bc1cd8817fb205e7b304c81256"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d57313b1e93e39b9af607f56a058ed7" id="r_a6d57313b1e93e39b9af607f56a058ed7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a6d57313b1e93e39b9af607f56a058ed7">activeParameters_</a></td></tr>
-<tr class="memdesc:a6d57313b1e93e39b9af607f56a058ed7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enabled parameters.  <br /></td></tr>
+<tr class="memdesc:a6d57313b1e93e39b9af607f56a058ed7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bitset indicating which parameters are enabled for optimization.  <br /></td></tr>
 <tr class="separator:a6d57313b1e93e39b9af607f56a058ed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af97017324ce715e76dd01f026c857768" id="r_af97017324ce715e76dd01f026c857768"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#af97017324ce715e76dd01f026c857768">actualParameters_</a></td></tr>
-<tr class="memdesc:af97017324ce715e76dd01f026c857768"><td class="mdescLeft">&#160;</td><td class="mdescRight">The first n parameters are enabled.  <br /></td></tr>
+<tr class="memdesc:af97017324ce715e76dd01f026c857768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of parameters currently enabled for optimization.  <br /></td></tr>
 <tr class="separator:af97017324ce715e76dd01f026c857768"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0349c34a3eaa9c23b3de51c9db6a76f0" id="r_a0349c34a3eaa9c23b3de51c9db6a76f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a0349c34a3eaa9c23b3de51c9db6a76f0">newParameterPattern_</a></td></tr>
-<tr class="memdesc:a0349c34a3eaa9c23b3de51c9db6a76f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The parameters have been changed.  <br /></td></tr>
+<tr class="memdesc:a0349c34a3eaa9c23b3de51c9db6a76f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag indicating parameter structure has changed.  <br /></td></tr>
 <tr class="separator:a0349c34a3eaa9c23b3de51c9db6a76f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76a50c26a8b442d695aa703244025be2" id="r_a76a50c26a8b442d695aa703244025be2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a76a50c26a8b442d695aa703244025be2">iteration_</a> {}</td></tr>
-<tr class="memdesc:a76a50c26a8b442d695aa703244025be2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current iteration.  <br /></td></tr>
+<tr class="memdesc:a76a50c26a8b442d695aa703244025be2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current iteration count.  <br /></td></tr>
 <tr class="separator:a76a50c26a8b442d695aa703244025be2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab397937a801ffe831f859e46bccf3d96" id="r_ab397937a801ffe831f859e46bccf3d96"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#ab397937a801ffe831f859e46bccf3d96">error_</a> {}</td></tr>
-<tr class="memdesc:ab397937a801ffe831f859e46bccf3d96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current iteration error.  <br /></td></tr>
+<tr class="memdesc:ab397937a801ffe831f859e46bccf3d96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current objective function value.  <br /></td></tr>
 <tr class="separator:ab397937a801ffe831f859e46bccf3d96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a52b6c0abfe8942a3b0dbdfdd5eb582" id="r_a6a52b6c0abfe8942a3b0dbdfdd5eb582"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a6a52b6c0abfe8942a3b0dbdfdd5eb582">lastError_</a> {}</td></tr>
-<tr class="memdesc:a6a52b6c0abfe8942a3b0dbdfdd5eb582"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last iteration error.  <br /></td></tr>
+<tr class="memdesc:a6a52b6c0abfe8942a3b0dbdfdd5eb582"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous iteration's objective function value.  <br /></td></tr>
 <tr class="separator:a6a52b6c0abfe8942a3b0dbdfdd5eb582"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab663158e18cceccff07c2f5a4218cd2" id="r_aab663158e18cceccff07c2f5a4218cd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#aab663158e18cceccff07c2f5a4218cd2">storeHistory</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
-<tr class="memdesc:aab663158e18cceccff07c2f5a4218cd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to store iteration history.  <br /></td></tr>
+<tr class="memdesc:aab663158e18cceccff07c2f5a4218cd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to record optimization progress for analysis.  <br /></td></tr>
 <tr class="separator:aab663158e18cceccff07c2f5a4218cd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59dfc4a6ab25eafda8624ad6bb053467" id="r_a59dfc4a6ab25eafda8624ad6bb053467"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; std::string, Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a59dfc4a6ab25eafda8624ad6bb053467">iterationHistory_</a></td></tr>
-<tr class="memdesc:a59dfc4a6ab25eafda8624ad6bb053467"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iteration history data.  <br /></td></tr>
+<tr class="memdesc:a59dfc4a6ab25eafda8624ad6bb053467"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recorded data from optimization process.  <br /></td></tr>
 <tr class="separator:a59dfc4a6ab25eafda8624ad6bb053467"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a7081025c8799075f3f0abb1be9a60b" id="r_a9a7081025c8799075f3f0abb1be9a60b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#a9a7081025c8799075f3f0abb1be9a60b">verbose_</a></td></tr>
-<tr class="memdesc:a9a7081025c8799075f3f0abb1be9a60b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to enable verbose logging during the solver's execution.  <br /></td></tr>
+<tr class="memdesc:a9a7081025c8799075f3f0abb1be9a60b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to output detailed progress information.  <br /></td></tr>
 <tr class="separator:a9a7081025c8799075f3f0abb1be9a60b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::SolverT&lt; T &gt;</div><p>Base Solver class. </p>
+class momentum::SolverT&lt; T &gt;</div><p>Base class for numerical optimization solvers. </p>
+<p>Provides common functionality for iterative optimization algorithms including parameter management, convergence checking, and history tracking. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af4f1df2bed49af36593851b752e3b1f1" name="af4f1df2bed49af36593851b752e3b1f1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af4f1df2bed49af36593851b752e3b1f1">&#9670;&#160;</a></span>SolverT()</h2>
@@ -211,6 +221,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Constructor with solver options and function to optimize. </p>
 
 </div>
 </div>
@@ -267,7 +279,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Perform a single iteration of the solver. </p>
+<p>Performs a single iteration of the optimization algorithm. </p>
 
 <p>Implemented in <a class="el" href="classmomentum_1_1MultiposeSolverT.html#a8f82839d48ad5183695a25d484e22533">momentum::MultiposeSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SequenceSolverT.html#a7e7a3c4f5421891975c9a8015d7238c2">momentum::SequenceSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverQRT.html#adcb89a5ee279b003a1f34795ce7dc74a">momentum::GaussNewtonSolverQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1TrustRegionQRT.html#ae32da4ba252599c6c5319c33405cc09b">momentum::TrustRegionQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#ad21d6534d4f14de82c845a748e287f25">momentum::GaussNewtonSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GradientDescentSolverT.html#a5ae89323373cf883bb7de4030f7a8953">momentum::GradientDescentSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#a1ba7f72c7dd6101ff70ea6963328e71a">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
@@ -290,6 +302,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Returns the current set of enabled parameters. </p>
+
 </div>
 </div>
 <a id="aba0c451b4e334013083243405e993e78" name="aba0c451b4e334013083243405e993e78"></a>
@@ -310,6 +324,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Returns the history of the solver's iterations. </p>
+<p>The history contains matrices for parameters, errors, and other solver-specific data </p>
 
 </div>
 </div>
@@ -330,6 +345,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Returns the maximum number of iterations before terminating. </p>
+
 </div>
 </div>
 <a id="aa518cedfeba7708a75ade00abb4e2945" name="aa518cedfeba7708a75ade00abb4e2945"></a>
@@ -348,6 +365,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Returns the minimum number of iterations before checking convergence. </p>
 
 </div>
 </div>
@@ -375,6 +394,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Returns the name of the solver implementation. </p>
 
 <p>Implemented in <a class="el" href="classmomentum_1_1MultiposeSolverT.html#a380fe2d3fa55cc212fdcd8c13043d251">momentum::MultiposeSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SequenceSolverT.html#a7a0c172aa04094eda0d801ab95f1846a">momentum::SequenceSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverQRT.html#ad09ab41fdf61762239e24e449fecf0cb">momentum::GaussNewtonSolverQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1TrustRegionQRT.html#a4993add84028d79013e04d60990a2481">momentum::TrustRegionQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#ad8819d3bbd92f233b0813a361a5923c2">momentum::GaussNewtonSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GradientDescentSolverT.html#aa9ea44138a9d54b16a8051061757ada7">momentum::GradientDescentSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
@@ -405,7 +426,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Initialize the solver. </p>
+<p>Initializes solver state before optimization begins. </p>
 
 <p>Implemented in <a class="el" href="classmomentum_1_1MultiposeSolverT.html#a01f2c9f49be15cc61d1ae8ababcb1a38">momentum::MultiposeSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SequenceSolverT.html#a5673644679b7328685450f77d2d28f63">momentum::SequenceSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverQRT.html#a2039eccec98c5b65e3103e92b2aff3c9">momentum::GaussNewtonSolverQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1TrustRegionQRT.html#afdcabd5201b20ab189f3c28ece74da7b">momentum::TrustRegionQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#ac7be52dd9e6c75422291e562f1bf7d6c">momentum::GaussNewtonSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GradientDescentSolverT.html#a315116d7548a1982937a42addc56c245">momentum::GradientDescentSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#a8201e42591b1aae799455930ba0be779">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
@@ -437,6 +458,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Specifies which parameters should be optimized. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parameters</td><td>Bitset where each bit indicates if the corresponding parameter is enabled </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p>Reimplemented in <a class="el" href="classmomentum_1_1SequenceSolverT.html#af92cb872ee0f894c95f05cd4ceee2440">momentum::SequenceSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
 </div>
@@ -467,6 +496,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Updates solver configuration with new options. </p>
+
 <p>Reimplemented in <a class="el" href="classmomentum_1_1MultiposeSolverT.html#aeffe5aa9e50f6d4269c2efc1bdb436a5">momentum::MultiposeSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SequenceSolverT.html#adef5075edc63b6f681cc7792a7b8ee6e">momentum::SequenceSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverQRT.html#af953c94b82d4929b015ee9096eb12c2f">momentum::GaussNewtonSolverQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1TrustRegionQRT.html#a07dd4361339362a615416a700928e229">momentum::TrustRegionQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#ab99172aa834f6dc7ab174cd7588750cf">momentum::GaussNewtonSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GradientDescentSolverT.html#a50a0ada2532cf6803233f3de4498f862">momentum::GradientDescentSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#a6993596c31cf66127d68c7f9d7f3e05a">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
 </div>
@@ -489,6 +520,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Sets the current parameter values without solving. </p>
+
 </div>
 </div>
 <a id="ac92423f2c8c9d626fa63e203a90cfadb" name="ac92423f2c8c9d626fa63e203a90cfadb"></a>
@@ -509,7 +542,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Sets the flag whether to store iteration history. </p>
+<p>Controls whether to store iteration history for debugging and analysis. </p>
 
 </div>
 </div>
@@ -534,11 +567,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Solves the optimization problem. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">params</td><td>Vector of initial guess, updated with the optimized solution. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">params</td><td>Vector of initial guess, updated with the optimized solution </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Final objective function value after optimization. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Final objective function value after optimization </dd></dl>
 
 </div>
 </div>
@@ -565,7 +598,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Enabled parameters. </p>
+<p>Bitset indicating which parameters are enabled for optimization. </p>
 
 </div>
 </div>
@@ -591,7 +624,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>The first n parameters are enabled. </p>
+<p>Number of parameters currently enabled for optimization. </p>
 
 </div>
 </div>
@@ -617,7 +650,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Current iteration error. </p>
+<p>Current objective function value. </p>
 
 </div>
 </div>
@@ -643,7 +676,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Current iteration. </p>
+<p>Current iteration count. </p>
 
 </div>
 </div>
@@ -669,7 +702,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Iteration history data. </p>
+<p>Recorded data from optimization process. </p>
+<p>Contains matrices for parameters, errors, and other solver-specific data </p>
 
 </div>
 </div>
@@ -695,7 +729,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Last iteration error. </p>
+<p>Previous iteration's objective function value. </p>
 
 </div>
 </div>
@@ -721,7 +755,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>The parameters have been changed. </p>
+<p>Flag indicating parameter structure has changed. </p>
+<p>Used to trigger reinitialization of solver data structures </p>
 
 </div>
 </div>
@@ -747,7 +782,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Number of parameters in the solver. </p>
+<p>Total number of parameters in the optimization problem. </p>
 
 </div>
 </div>
@@ -773,7 +808,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Current parameter state. </p>
+<p>Current parameter values. </p>
 
 </div>
 </div>
@@ -799,6 +834,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p>Function to be optimized. </p>
+
 </div>
 </div>
 <a id="aab663158e18cceccff07c2f5a4218cd2" name="aab663158e18cceccff07c2f5a4218cd2"></a>
@@ -823,7 +860,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Flag to store iteration history. </p>
+<p>Whether to record optimization progress for analysis. </p>
 
 </div>
 </div>
@@ -849,7 +886,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Flag to enable verbose logging during the solver's execution. </p>
+<p>Whether to output detailed progress information. </p>
 
 </div>
 </div>

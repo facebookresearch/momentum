@@ -82,7 +82,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Gradient descent solver specific options.  
+<p>Extended options for the Gradient Descent optimization algorithm.  
  <a href="structmomentum_1_1GradientDescentSolverOptions.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="gradient__descent__solver_8h_source.html">gradient_descent_solver.h</a>&gt;</code></p>
@@ -92,42 +92,45 @@ Inheritance diagram for momentum::GradientDescentSolverOptions:</div>
  <div class="center">
   <img src="structmomentum_1_1GradientDescentSolverOptions.png" usemap="#momentum::GradientDescentSolverOptions_map" alt=""/>
   <map id="momentum::GradientDescentSolverOptions_map" name="momentum::GradientDescentSolverOptions_map">
-<area href="structmomentum_1_1SolverOptions.html" title="Common options for solvers." alt="momentum::SolverOptions" shape="rect" coords="0,0,250,24"/>
+<area href="structmomentum_1_1SolverOptions.html" title="Common options for numerical optimization solvers." alt="momentum::SolverOptions" shape="rect" coords="0,0,250,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a7b717d5e87753b77ce360bab557ae737" id="r_a7b717d5e87753b77ce360bab557ae737"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GradientDescentSolverOptions.html#a7b717d5e87753b77ce360bab557ae737">GradientDescentSolverOptions</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
+<tr class="memdesc:a7b717d5e87753b77ce360bab557ae737"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <br /></td></tr>
 <tr class="separator:a7b717d5e87753b77ce360bab557ae737"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86af2be1f3576b5167db127a12b8f6f0" id="r_a86af2be1f3576b5167db127a12b8f6f0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GradientDescentSolverOptions.html#a86af2be1f3576b5167db127a12b8f6f0">GradientDescentSolverOptions</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SolverOptions.html">SolverOptions</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">baseOptions</a>)</td></tr>
+<tr class="memdesc:a86af2be1f3576b5167db127a12b8f6f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct from base solver options while preserving Gradient Descent defaults.  <br /></td></tr>
 <tr class="separator:a86af2be1f3576b5167db127a12b8f6f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_structmomentum_1_1SolverOptions"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_structmomentum_1_1SolverOptions')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="structmomentum_1_1SolverOptions.html">momentum::SolverOptions</a></td></tr>
 <tr class="memitem:a2b58d7c27bc6405fea82e50956aa9fe9 inherit pub_methods_structmomentum_1_1SolverOptions" id="r_a2b58d7c27bc6405fea82e50956aa9fe9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#a2b58d7c27bc6405fea82e50956aa9fe9">~SolverOptions</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
-<tr class="memdesc:a2b58d7c27bc6405fea82e50956aa9fe9 inherit pub_methods_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor to make this struct polymorphic.  <br /></td></tr>
+<tr class="memdesc:a2b58d7c27bc6405fea82e50956aa9fe9 inherit pub_methods_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor for polymorphic behavior.  <br /></td></tr>
 <tr class="separator:a2b58d7c27bc6405fea82e50956aa9fe9 inherit pub_methods_structmomentum_1_1SolverOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:aef318261d5a6897cf1347360dc1dc272" id="r_aef318261d5a6897cf1347360dc1dc272"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GradientDescentSolverOptions.html#aef318261d5a6897cf1347360dc1dc272">learningRate</a> = 0.01<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
-<tr class="memdesc:aef318261d5a6897cf1347360dc1dc272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Learning rate, fixed.  <br /></td></tr>
+<tr class="memdesc:aef318261d5a6897cf1347360dc1dc272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step size for parameter updates during optimization.  <br /></td></tr>
 <tr class="separator:aef318261d5a6897cf1347360dc1dc272"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_structmomentum_1_1SolverOptions"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structmomentum_1_1SolverOptions')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="structmomentum_1_1SolverOptions.html">momentum::SolverOptions</a></td></tr>
 <tr class="memitem:a0391e9638fea2cc4838c4c59876f4f4d inherit pub_attribs_structmomentum_1_1SolverOptions" id="r_a0391e9638fea2cc4838c4c59876f4f4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#a0391e9638fea2cc4838c4c59876f4f4d">minIterations</a> = 1</td></tr>
-<tr class="memdesc:a0391e9638fea2cc4838c4c59876f4f4d inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of iterations for the solver.  <br /></td></tr>
+<tr class="memdesc:a0391e9638fea2cc4838c4c59876f4f4d inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of iterations before checking convergence criteria.  <br /></td></tr>
 <tr class="separator:a0391e9638fea2cc4838c4c59876f4f4d inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac08f3f0b2d5333b1e23515a1b12714fa inherit pub_attribs_structmomentum_1_1SolverOptions" id="r_ac08f3f0b2d5333b1e23515a1b12714fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#ac08f3f0b2d5333b1e23515a1b12714fa">maxIterations</a> = 2</td></tr>
-<tr class="memdesc:ac08f3f0b2d5333b1e23515a1b12714fa inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of iterations for the solver.  <br /></td></tr>
+<tr class="memdesc:ac08f3f0b2d5333b1e23515a1b12714fa inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of iterations before terminating.  <br /></td></tr>
 <tr class="separator:ac08f3f0b2d5333b1e23515a1b12714fa inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada3316b2d8c78125eae8b34a7f0dee59 inherit pub_attribs_structmomentum_1_1SolverOptions" id="r_ada3316b2d8c78125eae8b34a7f0dee59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59">threshold</a> = 1.0f</td></tr>
-<tr class="memdesc:ada3316b2d8c78125eae8b34a7f0dee59 inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence threshold for the solver.  <br /></td></tr>
+<tr class="memdesc:ada3316b2d8c78125eae8b34a7f0dee59 inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence threshold for relative error change.  <br /></td></tr>
 <tr class="separator:ada3316b2d8c78125eae8b34a7f0dee59 inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abeb1bde3af97cde2b9dec1d18c0c97ab inherit pub_attribs_structmomentum_1_1SolverOptions" id="r_abeb1bde3af97cde2b9dec1d18c0c97ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#abeb1bde3af97cde2b9dec1d18c0c97ab">verbose</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a></td></tr>
-<tr class="memdesc:abeb1bde3af97cde2b9dec1d18c0c97ab inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to enable verbose logging during the solver's execution.  <br /></td></tr>
+<tr class="memdesc:abeb1bde3af97cde2b9dec1d18c0c97ab inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable detailed logging during optimization.  <br /></td></tr>
 <tr class="separator:abeb1bde3af97cde2b9dec1d18c0c97ab inherit pub_attribs_structmomentum_1_1SolverOptions"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Gradient descent solver specific options. </p>
+<div class="textblock"><p>Extended options for the Gradient Descent optimization algorithm. </p>
+<p>Provides configuration specific to the first-order gradient descent method </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7b717d5e87753b77ce360bab557ae737" name="a7b717d5e87753b77ce360bab557ae737"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7b717d5e87753b77ce360bab557ae737">&#9670;&#160;</a></span>GradientDescentSolverOptions() <span class="overload">[1/2]</span></h2>
@@ -151,6 +154,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Default constructor. </p>
 
 </div>
 </div>
@@ -178,6 +183,8 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct from base solver options while preserving Gradient Descent defaults. </p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -193,7 +200,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Learning rate, fixed. </p>
+<p>Step size for parameter updates during optimization. </p>
+<p>Controls how far to move in the direction of the negative gradient </p>
 
 </div>
 </div>

@@ -83,7 +83,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Tapered capsule collision geometry.  
+<p>Tapered capsule collision geometry for character collision detection.  
  <a href="structmomentum_1_1TaperedCapsuleT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="collision__geometry_8h_source.html">collision_geometry.h</a>&gt;</code></p>
@@ -107,7 +107,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a6cdaf83b8147469dbc01c15c517bee2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transformation defining the orientation and starting point relative to the parent coordinate system.  <br /></td></tr>
 <tr class="separator:a6cdaf83b8147469dbc01c15c517bee2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab51a0a55d8659485b031a70790ac20d1" id="r_ab51a0a55d8659485b031a70790ac20d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#aee224074a9b2b9755e2a2befa8c731bb">Vector2</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TaperedCapsuleT.html#ab51a0a55d8659485b031a70790ac20d1">radius</a></td></tr>
-<tr class="memdesc:ab51a0a55d8659485b031a70790ac20d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radii at two endpoints of the capsule.  <br /></td></tr>
+<tr class="memdesc:ab51a0a55d8659485b031a70790ac20d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radii at the two endpoints of the capsule.  <br /></td></tr>
 <tr class="separator:ab51a0a55d8659485b031a70790ac20d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2affa6610e43af73653634050288b4c6" id="r_a2affa6610e43af73653634050288b4c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TaperedCapsuleT.html#a2affa6610e43af73653634050288b4c6">parent</a></td></tr>
 <tr class="memdesc:a2affa6610e43af73653634050288b4c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parent joint to which the geometry is attached.  <br /></td></tr>
@@ -118,8 +118,8 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a>&gt;<br />
-struct momentum::TaperedCapsuleT&lt; S &gt;</div><p>Tapered capsule collision geometry. </p>
-<p>Defined by a transformation, length, and two radii at the endpoints. </p>
+struct momentum::TaperedCapsuleT&lt; S &gt;</div><p>Tapered capsule collision geometry for character collision detection. </p>
+<p>Defined by a transformation, length, and two radii at the endpoints, creating a capsule with potentially different radii at each end. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aeb39c342cbb43e594162c0a45024c3d2" name="aeb39c342cbb43e594162c0a45024c3d2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aeb39c342cbb43e594162c0a45024c3d2">&#9670;&#160;</a></span>Scalar</h2>
@@ -257,7 +257,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Radii at two endpoints of the capsule. </p>
+<p>Radii at the two endpoints of the capsule. </p>
 
 </div>
 </div>

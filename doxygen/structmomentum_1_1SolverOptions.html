@@ -82,7 +82,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Common options for solvers.  
+<p>Common options for numerical optimization solvers.  
  <a href="structmomentum_1_1SolverOptions.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="solver_8h_source.html">solver.h</a>&gt;</code></p>
@@ -92,12 +92,12 @@ Inheritance diagram for momentum::SolverOptions:</div>
  <div class="center">
   <img src="structmomentum_1_1SolverOptions.png" usemap="#momentum::SolverOptions_map" alt=""/>
   <map id="momentum::SolverOptions_map" name="momentum::SolverOptions_map">
-<area href="structmomentum_1_1GaussNewtonSolverOptions.html" title="Gauss-Newton solver specific options." alt="momentum::GaussNewtonSolverOptions" shape="rect" coords="0,56,271,80"/>
+<area href="structmomentum_1_1GaussNewtonSolverOptions.html" title="Extended options specific to the Gauss-Newton optimization algorithm." alt="momentum::GaussNewtonSolverOptions" shape="rect" coords="0,56,271,80"/>
 <area href="structmomentum_1_1GaussNewtonSolverQROptions.html" title="Gauss-Newton solver with QR decomposition specific options." alt="momentum::GaussNewtonSolverQROptions" shape="rect" coords="281,56,552,80"/>
-<area href="structmomentum_1_1GradientDescentSolverOptions.html" title="Gradient descent solver specific options." alt="momentum::GradientDescentSolverOptions" shape="rect" coords="562,56,833,80"/>
+<area href="structmomentum_1_1GradientDescentSolverOptions.html" title="Extended options for the Gradient Descent optimization algorithm." alt="momentum::GradientDescentSolverOptions" shape="rect" coords="562,56,833,80"/>
 <area href="structmomentum_1_1MultiposeSolverOptions.html" title="Multipose solver specific options." alt="momentum::MultiposeSolverOptions" shape="rect" coords="843,56,1114,80"/>
 <area href="structmomentum_1_1SequenceSolverOptions.html" title="Sequence solver specific options." alt="momentum::SequenceSolverOptions" shape="rect" coords="1124,56,1395,80"/>
-<area href="structmomentum_1_1SubsetGaussNewtonSolverOptions.html" title="Subset Gauss-Newton solver specific options." alt="momentum::SubsetGaussNewtonSolverOptions" shape="rect" coords="1405,56,1676,80"/>
+<area href="structmomentum_1_1SubsetGaussNewtonSolverOptions.html" title="Extended options for the Subset Gauss-Newton optimization algorithm." alt="momentum::SubsetGaussNewtonSolverOptions" shape="rect" coords="1405,56,1676,80"/>
 <area href="structmomentum_1_1TrustRegionQROptions.html" title="Trust Region with QR decomposition specific options." alt="momentum::TrustRegionQROptions" shape="rect" coords="1686,56,1957,80"/>
   </map>
 </div></div>
@@ -105,26 +105,26 @@ Inheritance diagram for momentum::SolverOptions:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a2b58d7c27bc6405fea82e50956aa9fe9" id="r_a2b58d7c27bc6405fea82e50956aa9fe9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#a2b58d7c27bc6405fea82e50956aa9fe9">~SolverOptions</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
-<tr class="memdesc:a2b58d7c27bc6405fea82e50956aa9fe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor to make this struct polymorphic.  <br /></td></tr>
+<tr class="memdesc:a2b58d7c27bc6405fea82e50956aa9fe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor for polymorphic behavior.  <br /></td></tr>
 <tr class="separator:a2b58d7c27bc6405fea82e50956aa9fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a0391e9638fea2cc4838c4c59876f4f4d" id="r_a0391e9638fea2cc4838c4c59876f4f4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#a0391e9638fea2cc4838c4c59876f4f4d">minIterations</a> = 1</td></tr>
-<tr class="memdesc:a0391e9638fea2cc4838c4c59876f4f4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of iterations for the solver.  <br /></td></tr>
+<tr class="memdesc:a0391e9638fea2cc4838c4c59876f4f4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of iterations before checking convergence criteria.  <br /></td></tr>
 <tr class="separator:a0391e9638fea2cc4838c4c59876f4f4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac08f3f0b2d5333b1e23515a1b12714fa" id="r_ac08f3f0b2d5333b1e23515a1b12714fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#ac08f3f0b2d5333b1e23515a1b12714fa">maxIterations</a> = 2</td></tr>
-<tr class="memdesc:ac08f3f0b2d5333b1e23515a1b12714fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of iterations for the solver.  <br /></td></tr>
+<tr class="memdesc:ac08f3f0b2d5333b1e23515a1b12714fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of iterations before terminating.  <br /></td></tr>
 <tr class="separator:ac08f3f0b2d5333b1e23515a1b12714fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada3316b2d8c78125eae8b34a7f0dee59" id="r_ada3316b2d8c78125eae8b34a7f0dee59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59">threshold</a> = 1.0f</td></tr>
-<tr class="memdesc:ada3316b2d8c78125eae8b34a7f0dee59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence threshold for the solver.  <br /></td></tr>
+<tr class="memdesc:ada3316b2d8c78125eae8b34a7f0dee59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence threshold for relative error change.  <br /></td></tr>
 <tr class="separator:ada3316b2d8c78125eae8b34a7f0dee59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abeb1bde3af97cde2b9dec1d18c0c97ab" id="r_abeb1bde3af97cde2b9dec1d18c0c97ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SolverOptions.html#abeb1bde3af97cde2b9dec1d18c0c97ab">verbose</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a></td></tr>
-<tr class="memdesc:abeb1bde3af97cde2b9dec1d18c0c97ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to enable verbose logging during the solver's execution.  <br /></td></tr>
+<tr class="memdesc:abeb1bde3af97cde2b9dec1d18c0c97ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable detailed logging during optimization.  <br /></td></tr>
 <tr class="separator:abeb1bde3af97cde2b9dec1d18c0c97ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Common options for solvers. </p>
+<div class="textblock"><p>Common options for numerical optimization solvers. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2b58d7c27bc6405fea82e50956aa9fe9" name="a2b58d7c27bc6405fea82e50956aa9fe9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2b58d7c27bc6405fea82e50956aa9fe9">&#9670;&#160;</a></span>~SolverOptions()</h2>
@@ -149,7 +149,7 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Virtual destructor to make this struct polymorphic. </p>
+<p>Virtual destructor for polymorphic behavior. </p>
 
 </div>
 </div>
@@ -166,7 +166,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Maximum number of iterations for the solver. </p>
+<p>Maximum number of iterations before terminating. </p>
 
 </div>
 </div>
@@ -182,7 +182,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Minimum number of iterations for the solver. </p>
+<p>Minimum number of iterations before checking convergence criteria. </p>
 
 </div>
 </div>
@@ -198,7 +198,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Convergence threshold for the solver. </p>
+<p>Convergence threshold for relative error change. </p>
 
 </div>
 </div>
@@ -214,7 +214,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Flag to enable verbose logging during the solver's execution. </p>
+<p>Enable detailed logging during optimization. </p>
 
 </div>
 </div>
