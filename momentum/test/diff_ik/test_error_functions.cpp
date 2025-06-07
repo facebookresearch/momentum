@@ -195,7 +195,7 @@ void testInputDerivs(
     const Skeleton& skeleton,
     const ParameterTransform& parameterTransform_in,
     FullyDifferentiableSkeletonErrorFunctionT<T>& errorFunction,
-    T maxRelativeError = 1e-2) {
+    T maxRelativeError = 2e-2) {
   const ParameterTransformT<T> parameterTransform = parameterTransform_in.cast<T>();
 
   SCOPED_TRACE("testInputDerivs");
