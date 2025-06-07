@@ -61,6 +61,10 @@ endif()
 
 if(WIN32)
   set(python_deps ${Python3_LIBRARIES})
+else()
+  # On Unix-like systems (Linux, macOS), we need to link with Python
+  # libraries for tests
+  set(python_deps Python3::Module)
 endif()
 
 mt_library(
@@ -226,6 +230,17 @@ if(MOMENTUM_BUILD_TESTING)
     NAME tensor_utility_test
     PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
     LINK_LIBRARIES tensor_utility
+  )
+
+  mt_test(
+    NAME tensor_momentum_test
+    PYMOMENTUM_SOURCES_VARS tensor_momentum_test_sources
+    LINK_LIBRARIES
+      character_test_helpers
+      tensor_momentum
+      tensor_utility
+      ${python_deps}
+      ${torch_python}
   )
 
   mt_test(
