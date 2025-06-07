@@ -283,7 +283,7 @@ class OnlineBlockHouseholderQR {
       ColumnIndexedMatrix<MatrixType> A_common,
       Eigen::Ref<VectorType> b);
 
-  // You have can retrieve the result x in one of two ways:
+  // You can retrieve the result x in one of two ways:
   //   1. As a single, dense vector, which solves everything simultaneously, or
   //   2. A block at a time.
   // The latter is a little bit slower because it re-does the back-substitution
@@ -439,7 +439,7 @@ class OnlineBandedHouseholderQR {
       ColumnIndexedMatrix<MatrixType> A_common,
       Eigen::Ref<VectorType> b);
 
-  // You have can retrieve the result x in one of two ways:
+  // You can retrieve the result x in one of two ways:
   //   1. As a single, dense vector, which solves everything simultaneously, or
   //   2. A block at a time.
   // The latter is a little bit slower because it re-does the back-substitution
