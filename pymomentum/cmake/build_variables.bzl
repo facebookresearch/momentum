@@ -16,6 +16,10 @@ tensor_utility_test_sources = [
     "cpp_test/tensor_utility_test.cpp",
 ]
 
+tensor_momentum_test_sources = [
+    "cpp_test/tensor_momentum_test.cpp",
+]
+
 python_utility_public_headers = [
     "python_utility/python_utility.h",
 ]

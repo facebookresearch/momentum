@@ -90,11 +90,15 @@ variable_list ApplyParameterTransformFunction<T>::forward(
       &squeeze);
 
   if (paramTransform) {
+    // Store the pointer directly as an integer to avoid Python object
+    // conversion issues
     ctx->saved_data["parameterTransform"] =
-        c10::ivalue::ConcretePyObjectHolder::create(py::cast(paramTransform));
+        c10::IValue(reinterpret_cast<int64_t>(paramTransform));
+    ctx->saved_data["hasParameterTransform"] = c10::IValue(true);
   } else {
     ctx->saved_data["character"] =
         c10::ivalue::ConcretePyObjectHolder::create(characters);
+    ctx->saved_data["hasParameterTransform"] = c10::IValue(false);
   }
 
   const int nBatch = checker.getBatchSize();
@@ -132,16 +136,23 @@ variable_list ApplyParameterTransformFunction<T>::backward(
   const momentum::ParameterTransform* paramTransform = nullptr;
 
   {
-    auto itr = ctx->saved_data.find("parameterTransform");
-    if (itr == ctx->saved_data.end()) {
-      itr = ctx->saved_data.find("character");
-      MT_THROW_IF(
-          itr == ctx->saved_data.end(),
-          "Missing both paramTransform and characters.");
-      characters = itr->second.toPyObject();
+    auto hasParamTransformItr = ctx->saved_data.find("hasParameterTransform");
+    MT_THROW_IF(
+        hasParamTransformItr == ctx->saved_data.end(),
+        "Missing hasParameterTransform flag.");
+
+    bool hasParameterTransform = hasParamTransformItr->second.toBool();
+
+    if (hasParameterTransform) {
+      auto itr = ctx->saved_data.find("parameterTransform");
+      MT_THROW_IF(itr == ctx->saved_data.end(), "Missing parameterTransform.");
+      // Restore the pointer from the stored integer
+      paramTransform = reinterpret_cast<const momentum::ParameterTransform*>(
+          itr->second.toInt());
     } else {
-      paramTransform = py::cast<const momentum::ParameterTransform*>(
-          itr->second.toPyObject());
+      auto itr = ctx->saved_data.find("character");
+      MT_THROW_IF(itr == ctx->saved_data.end(), "Missing character.");
+      characters = itr->second.toPyObject();
     }
   }
 
@@ -393,9 +404,10 @@ variable_list ApplyInverseParameterTransformFunction::forward(
 
   const auto nBatch = checker.getBatchSize();
 
+  // Store the pointer directly as an integer to avoid Python object conversion
+  // issues
   ctx->saved_data["inverseParameterTransform"] =
-      c10::ivalue::ConcretePyObjectHolder::create(
-          py::cast(inverseParamTransform));
+      c10::IValue(reinterpret_cast<int64_t>(inverseParamTransform));
 
   auto result = at::zeros(
       {nBatch, inverseParamTransform->numAllModelParameters()}, at::kFloat);
@@ -421,9 +433,13 @@ variable_list ApplyInverseParameterTransformFunction::backward(
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
 
   // Restore variables:
+  auto itr = ctx->saved_data.find("inverseParameterTransform");
+  MT_THROW_IF(
+      itr == ctx->saved_data.end(), "Missing inverseParameterTransform.");
+  // Restore the pointer from the stored integer
   const auto inverseParamTransform =
-      py::cast<const momentum::InverseParameterTransform*>(
-          ctx->saved_data["inverseParameterTransform"].toPyObject());
+      reinterpret_cast<const momentum::InverseParameterTransform*>(
+          itr->second.toInt());
 
   const auto input_device =
       grad_outputs[0].device(); // grad_outputs size is guarded already
