@@ -55,8 +55,9 @@ clean = { cmd = """
     rm -rf build \
     && rm -rf .pixi \
     && rm pixi.lock
-    """ }
-lint = { cmd = "clang-format -i axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp" }
+    """, description = "Clean all build artifacts and pixi cache" }
+lint = { cmd = "clang-format -i axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Format C++ code using clang-format" }
+check-format = { cmd = "clang-format --dry-run --Werror axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Check if code is properly formatted without modifying files" }
 config = { cmd = """
     cmake \
         -S . \
@@ -75,7 +76,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" } }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Release build" }
 config_dev = { cmd = """
     cmake \
         -S . \
@@ -94,56 +95,65 @@ config_dev = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" } }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Debug build" }
 build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target all", depends-on = [
     "config",
-] }
+], description = "Build Release version" }
 build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/debug -j --target all", depends-on = [
     "config_dev",
-] }
+], description = "Build Debug version" }
+build_fast = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j4 --target all", depends-on = [
+    "config",
+], description = "Build Release version with limited parallelism" }
 test = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp/release --output-on-failure", depends-on = [
     "build",
-] }
+], description = "Run C++ tests (Release)" }
 test_dev = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp/debug --output-on-failure", depends-on = [
     "build_dev",
-] }
+], description = "Run C++ tests (Debug)" }
+test_verbose = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp/release --output-on-failure --verbose", depends-on = [
+    "build",
+], description = "Run C++ tests with verbose output" }
 hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/hello_world", depends-on = [
     "build",
-] }
+], description = "Run hello world example" }
 convert_model = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/convert_model", depends-on = [
     "build",
-] }
+], description = "Run model conversion tool" }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/c3d_viewer", depends-on = [
     "build",
-] }
+], description = "Run C3D file viewer" }
 fbx_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/fbx_viewer", depends-on = [
     "build",
-] }
+], description = "Run FBX file viewer" }
 glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/glb_viewer", depends-on = [
     "build",
-] }
+], description = "Run GLB file viewer" }
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/urdf_viewer", depends-on = [
     "build",
-] }
+], description = "Run URDF file viewer" }
 process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/process_markers_app", depends-on = [
     "build",
-] }
+], description = "Run marker processing application" }
 refine_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/refine_motion", depends-on = [
     "build",
-] }
+], description = "Run motion refinement tool" }
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target install", depends-on = [
     "build",
-] }
-tracy = { cmd = "tracy-profiler" }
+], description = "Install built libraries and executables" }
+tracy = { cmd = "tracy-profiler", description = "Launch Tracy profiler GUI" }
 test_py = { cmd = "pytest pymomentum/test/*.py", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
-] }
+], description = "Run Python tests" }
+test_py_verbose = { cmd = "pytest pymomentum/test/*.py -v", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+    "build_py",
+], description = "Run Python tests with verbose output" }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
-] }
+], description = "Build Python API documentation" }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
     "doc_py",
-] }
+], description = "Open Python documentation in browser" }
 
 #===========
 # linux-64
