@@ -186,6 +186,7 @@ character_sources = [
 ]
 
 character_test_sources = [
+    "test/character/blend_shape_skinning_test.cpp",
     "test/character/blend_shape_test.cpp",
     "test/character/character_state_test.cpp",
     "test/character/character_test.cpp",
