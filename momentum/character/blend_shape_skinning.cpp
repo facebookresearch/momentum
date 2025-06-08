@@ -25,7 +25,7 @@ BlendWeightsT<T> extractBlendWeights(
   BlendWeightsT<T> result = Eigen::VectorX<T>::Zero(paramTransform.blendShapeParameters.size());
   for (Eigen::Index iBasis = 0; iBasis < result.size(); ++iBasis) {
     const auto paramIdx = paramTransform.blendShapeParameters[iBasis];
-    if (paramIdx >= 0) {
+    if (paramIdx >= 0 && paramIdx < modelParams.size()) {
       result(iBasis) = modelParams(paramIdx);
     }
   }
@@ -39,7 +39,7 @@ BlendWeightsT<T> extractFaceExpressionBlendWeights(
   BlendWeightsT<T> result = Eigen::VectorX<T>::Zero(paramTransform.faceExpressionParameters.size());
   for (Eigen::Index iBasis = 0; iBasis < result.size(); ++iBasis) {
     const auto paramIdx = paramTransform.faceExpressionParameters[iBasis];
-    if (paramIdx >= 0) {
+    if (paramIdx >= 0 && paramIdx < modelParams.size()) {
       result(iBasis) = modelParams(paramIdx);
     }
   }
@@ -108,17 +108,20 @@ void skinWithBlendShapes(
       [&blendWeights, &character, &transformations, &outputMesh](
           const size_t rangeBegin, const size_t rangeEnd) {
         const auto& skin = *character.skinWeights;
-        const auto& blendShape = *character.blendShape;
         for (size_t iVert = rangeBegin; iVert != rangeEnd; iVert++) {
           // Compute rest position from blend shape:
-          const Eigen::Vector3<T> p_rest = character.blendShape
-              ? (blendShape.getBaseShape()[iVert].cast<T>() +
-                 blendShape.getShapeVectors()
-                         .block(3 * iVert, 0, 3, blendWeights.size())
-                         .template cast<T>() *
-                     blendWeights.v)
-                    .eval()
-              : character.mesh->vertices[iVert].cast<T>().eval();
+          Eigen::Vector3<T> p_rest;
+          if (character.blendShape) {
+            const auto& blendShape = *character.blendShape;
+            p_rest = (blendShape.getBaseShape()[iVert].cast<T>() +
+                      blendShape.getShapeVectors()
+                              .block(3 * iVert, 0, 3, blendWeights.size())
+                              .template cast<T>() *
+                          blendWeights.v)
+                         .eval();
+          } else {
+            p_rest = character.mesh->vertices[iVert].cast<T>().eval();
+          }
 
           Eigen::Vector3<T> p_skinned = Eigen::Vector3<T>::Zero();
           for (uint32_t k = 0; k < kMaxSkinJoints; ++k) {
