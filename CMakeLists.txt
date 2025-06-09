@@ -686,6 +686,15 @@ if(MOMENTUM_BUILD_TESTING)
   )
 
   mt_test(
+    NAME io_shape_test
+    SOURCES_VARS io_shape_test_sources
+    LINK_LIBRARIES
+      character
+      io_shape
+      io_test_helper
+  )
+
+  mt_test(
     NAME io_skeleton_test
     SOURCES_VARS io_skeleton_test_sources
     LINK_LIBRARIES
