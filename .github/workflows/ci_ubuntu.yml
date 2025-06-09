@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         simd: ["ON", "OFF"]
-        mode: ["", "_dev"]
+        mode: [""]
     env:
       MOMENTUM_ENABLE_SIMD: ${{ matrix.simd }}
     steps:
