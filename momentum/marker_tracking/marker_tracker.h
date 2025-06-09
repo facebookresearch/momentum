@@ -10,7 +10,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
 
-namespace marker_tracking {
+namespace momentum {
 
 /// Common configuration for a tracking problem
 struct BaseConfig {
@@ -206,4 +206,4 @@ std::pair<float, float> getLocatorError(
     const Eigen::MatrixXf& motion,
     momentum::Character& character);
 
-} // namespace marker_tracking
+} // namespace momentum

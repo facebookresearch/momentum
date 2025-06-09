@@ -11,7 +11,6 @@
 
 #include <CLI/CLI.hpp>
 
-using namespace marker_tracking;
 using namespace momentum;
 
 int main(int argc, char* argv[]) {
@@ -53,7 +52,7 @@ int main(int argc, char* argv[]) {
     if (calibConfig->debug || trackingConfig->debug) {
       setLogLevel(LogLevel::Debug);
     }
-    marker_tracking::processMarkerFile(
+    processMarkerFile(
         ioOpt->inputFile,
         ioOpt->outputFile,
         *trackingConfig,

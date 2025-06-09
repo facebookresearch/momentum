@@ -12,7 +12,7 @@
 #include <momentum/character/marker.h>
 #include <momentum/character_solver/fwd.h>
 
-namespace marker_tracking {
+namespace momentum {
 
 std::vector<std::vector<momentum::PositionData>> createConstraintData(
     gsl::span<const std::vector<momentum::Marker>> markerData,
@@ -56,4 +56,4 @@ std::vector<std::vector<momentum::Marker>> extractMarkersFromMotion(
     const momentum::Character& character,
     const Eigen::MatrixXf& motion);
 
-} // namespace marker_tracking
+} // namespace momentum

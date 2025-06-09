@@ -15,7 +15,7 @@
 
 using namespace momentum;
 
-namespace marker_tracking {
+namespace momentum {
 
 std::vector<std::vector<PositionData>> createConstraintData(
     const gsl::span<const std::vector<Marker>> markerData,
@@ -261,4 +261,4 @@ std::vector<std::vector<Marker>> extractMarkersFromMotion(
   return result;
 }
 
-} // namespace marker_tracking
+} // namespace momentum

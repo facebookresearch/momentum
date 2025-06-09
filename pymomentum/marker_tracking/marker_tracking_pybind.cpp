@@ -32,7 +32,7 @@ PYBIND11_MODULE(marker_tracking, m) {
       "pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
 
   // Bindings for types defined in marker_tracking/marker_tracker.h
-  auto baseConfig = py::class_<marker_tracking::BaseConfig>(
+  auto baseConfig = py::class_<momentum::BaseConfig>(
       m, "BaseConfig", "Represents base config class");
 
   baseConfig.def(py::init<>())
@@ -44,21 +44,21 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("debug") = false)
       .def_readwrite(
           "min_vis_percent",
-          &marker_tracking::BaseConfig::minVisPercent,
+          &momentum::BaseConfig::minVisPercent,
           "Minimum percentage of visible markers to be used")
       .def_readwrite(
           "loss_alpha",
-          &marker_tracking::BaseConfig::lossAlpha,
+          &momentum::BaseConfig::lossAlpha,
           "Parameter to control the loss function")
       .def_readwrite(
-          "max_iter", &marker_tracking::BaseConfig::maxIter, "Max iterations")
+          "max_iter", &momentum::BaseConfig::maxIter, "Max iterations")
       .def_readwrite(
           "debug",
-          &marker_tracking::BaseConfig::debug,
+          &momentum::BaseConfig::debug,
           "Whether to output debugging info");
 
-  auto calibrationConfig = py::
-      class_<marker_tracking::CalibrationConfig, marker_tracking::BaseConfig>(
+  auto calibrationConfig =
+      py::class_<momentum::CalibrationConfig, momentum::BaseConfig>(
           m, "CalibrationConfig", "Config for the body scale calibration step");
 
   // Default values are set from the configured values in marker_tracker.h
@@ -89,35 +89,35 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("first_frame_pose_constraint_set") = "")
       .def_readwrite(
           "calib_frames",
-          &marker_tracking::CalibrationConfig::calibFrames,
+          &momentum::CalibrationConfig::calibFrames,
           "Number of frames used for model calibration")
       .def_readwrite(
           "greedy_sampling",
-          &marker_tracking::CalibrationConfig::greedySampling,
+          &momentum::CalibrationConfig::greedySampling,
           "Enable greedy frame sampling with the given stride")
       .def_readwrite(
           "major_iter",
-          &marker_tracking::CalibrationConfig::majorIter,
+          &momentum::CalibrationConfig::majorIter,
           "Number of calibration loops to run")
       .def_readwrite(
           "global_scale_only",
-          &marker_tracking::CalibrationConfig::globalScaleOnly,
+          &momentum::CalibrationConfig::globalScaleOnly,
           "Calibrate only the global scale and not all proportions")
       .def_readwrite(
           "locators_only",
-          &marker_tracking::CalibrationConfig::locatorsOnly,
+          &momentum::CalibrationConfig::locatorsOnly,
           "Calibrate only the locator offsets")
       .def_readwrite(
           "enforce_floor_in_first_frame",
-          &marker_tracking::CalibrationConfig::enforceFloorInFirstFrame,
+          &momentum::CalibrationConfig::enforceFloorInFirstFrame,
           "Force floor contact in first frame")
       .def_readwrite(
           "first_frame_pose_constraint_set",
-          &marker_tracking::CalibrationConfig::firstFramePoseConstraintSet,
+          &momentum::CalibrationConfig::firstFramePoseConstraintSet,
           "Name of pose constraint set to use in first frame");
 
   auto trackingConfig =
-      py::class_<marker_tracking::TrackingConfig, marker_tracking::BaseConfig>(
+      py::class_<momentum::TrackingConfig, momentum::BaseConfig>(
           m, "TrackingConfig", "Config for the tracking optimization step");
 
   trackingConfig.def(py::init<>())
@@ -132,20 +132,20 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("smoothing_weights") = Eigen::VectorXf())
       .def_readwrite(
           "smoothing",
-          &marker_tracking::TrackingConfig::smoothing,
+          &momentum::TrackingConfig::smoothing,
           "Smoothing weight; 0 to disable")
       .def_readwrite(
           "collision_error_weight",
-          &marker_tracking::TrackingConfig::collisionErrorWeight,
+          &momentum::TrackingConfig::collisionErrorWeight,
           "Collision error weight; 0 to disable")
       .def_readwrite(
           "smoothing_weights",
-          &marker_tracking::TrackingConfig::smoothingWeights,
+          &momentum::TrackingConfig::smoothingWeights,
           R"(Smoothing weights per model parameter. The size of this vector should be
             equal to number of model parameters and this overrides the value specific in smoothing)");
 
-  auto refineConfig = py::
-      class_<marker_tracking::RefineConfig, marker_tracking::TrackingConfig>(
+  auto refineConfig =
+      py::class_<momentum::RefineConfig, momentum::TrackingConfig>(
           m, "RefineConfig", "Config for refining a tracked motion.");
 
   refineConfig.def(py::init<>())
@@ -173,18 +173,18 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("calib_locators") = false)
       .def_readwrite(
           "regularizer",
-          &marker_tracking::RefineConfig::regularizer,
+          &momentum::RefineConfig::regularizer,
           "Regularize the time-invariant parameters to prevent large changes.")
       .def_readwrite(
           "calib_id",
-          &marker_tracking::RefineConfig::calibId,
+          &momentum::RefineConfig::calibId,
           "Calibrate identity parameters; default to False.")
       .def_readwrite(
           "calib_locators",
-          &marker_tracking::RefineConfig::calibLocators,
+          &momentum::RefineConfig::calibLocators,
           "Calibrate locator offsets; default to False.");
 
-  auto modelOptions = py::class_<marker_tracking::ModelOptions>(
+  auto modelOptions = py::class_<momentum::ModelOptions>(
       m,
       "ModelOptions",
       "Model options to specify the template model, parameter transform and locator mappings");
@@ -196,19 +196,19 @@ PYBIND11_MODULE(marker_tracking, m) {
            const std::string&>())
       .def_readwrite(
           "model",
-          &marker_tracking::ModelOptions::model,
+          &momentum::ModelOptions::model,
           "Path to template model file with locators e.g. character.glb")
       .def_readwrite(
           "parameters",
-          &marker_tracking::ModelOptions::parameters,
+          &momentum::ModelOptions::parameters,
           "Path of parameter transform model file e.g. character.model")
       .def_readwrite(
           "locators",
-          &marker_tracking::ModelOptions::locators,
+          &momentum::ModelOptions::locators,
           "Path to locator mapping file e.g. character.locators");
   m.def(
       "process_marker_file",
-      &marker_tracking::processMarkerFile,
+      &momentum::processMarkerFile,
       py::arg("input_marker_file"),
       py::arg("output_file"),
       py::arg("tracking_config"),
@@ -223,8 +223,8 @@ PYBIND11_MODULE(marker_tracking, m) {
       [](momentum::Character& character,
          const Eigen::VectorXf& identity,
          const std::vector<std::vector<momentum::Marker>>& markerData,
-         const marker_tracking::TrackingConfig& trackingConfig,
-         const marker_tracking::CalibrationConfig& calibrationConfig,
+         const momentum::TrackingConfig& trackingConfig,
+         const momentum::CalibrationConfig& calibrationConfig,
          bool calibrate = true,
          size_t firstFrame = 0,
          size_t maxFrames = 0) {
@@ -235,7 +235,7 @@ PYBIND11_MODULE(marker_tracking, m) {
               character.parameterTransform.name.size());
         }
 
-        Eigen::MatrixXf motion = marker_tracking::processMarkers(
+        Eigen::MatrixXf motion = momentum::processMarkers(
             character,
             params,
             markerData,
@@ -292,7 +292,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           // we need to transpose the matrix before passing it to the cpp
           Eigen::MatrixXf finalMotion(motion.transpose());
           // note: saveMotion removes identity from the motion matrix
-          marker_tracking::saveMotion(
+          momentum::saveMotion(
               outFile,
               character,
               params,
@@ -308,7 +308,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           // motion matrix is already in cpp format
           // keeping this branch for backward compatibility
           // note: saveMotion removes identity from the motion matrix
-          marker_tracking::saveMotion(
+          momentum::saveMotion(
               outFile,
               character,
               params,
@@ -335,7 +335,7 @@ PYBIND11_MODULE(marker_tracking, m) {
          const Eigen::VectorXf& identity,
          const Eigen::MatrixXf& motion,
          const std::vector<std::vector<momentum::Marker>>& markerData,
-         const marker_tracking::RefineConfig& refineConfig) {
+         const momentum::RefineConfig& refineConfig) {
         // python and cpp have the motion matrix transposed from each other.
         // Let's do that on the way in and out here so it's consistent for both
         // languages.
@@ -348,9 +348,9 @@ PYBIND11_MODULE(marker_tracking, m) {
         if (identity.size() > 0) {
           momentum::ParameterSet idParamSet =
               character.parameterTransform.getScalingParameters();
-          marker_tracking::fillIdentity(idParamSet, identity, inputMotion);
+          momentum::fillIdentity(idParamSet, identity, inputMotion);
         }
-        Eigen::MatrixXf finalMotion = marker_tracking::refineMotion(
+        Eigen::MatrixXf finalMotion = momentum::refineMotion(
             markerData, inputMotion, refineConfig, character);
         auto finalMotionTransposed = Eigen::MatrixXf(finalMotion.transpose());
         return finalMotionTransposed;

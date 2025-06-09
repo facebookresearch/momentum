@@ -21,7 +21,7 @@
 
 using namespace momentum;
 
-namespace marker_tracking {
+namespace momentum {
 
 void addIOOptions(CLI::App& app, std::shared_ptr<IOOptions> ioOptions) {
   auto* inputOption =
@@ -214,4 +214,4 @@ void saveMotion(
   }
 }
 
-} // namespace marker_tracking
+} // namespace momentum

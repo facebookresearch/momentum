@@ -27,7 +27,7 @@
 
 using namespace momentum;
 
-namespace marker_tracking {
+namespace momentum {
 
 std::vector<size_t> sampleFrames(
     momentum::Character& character,
@@ -1016,4 +1016,4 @@ std::pair<float, float> getLocatorError(
   return {error / numFrames, maxError};
 }
 
-} // namespace marker_tracking
+} // namespace momentum

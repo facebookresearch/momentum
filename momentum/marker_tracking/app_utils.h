@@ -13,7 +13,7 @@
 
 #include <CLI/CLI.hpp>
 
-namespace marker_tracking {
+namespace momentum {
 
 struct IOOptions {
   std::string inputFile;
@@ -47,4 +47,4 @@ void saveMotion(
     double fps,
     bool saveMarkerMesh = true);
 
-} // namespace marker_tracking
+} // namespace momentum
