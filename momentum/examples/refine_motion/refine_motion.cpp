@@ -20,7 +20,6 @@
 #define DEFAULT_LOG_CHANNEL "refine_motion"
 #include <momentum/common/log.h>
 
-using namespace marker_tracking;
 using namespace momentum;
 
 int main(int argc, char* argv[]) {

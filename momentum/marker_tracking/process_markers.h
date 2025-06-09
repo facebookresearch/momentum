@@ -13,7 +13,7 @@
 
 #include <string>
 
-namespace marker_tracking {
+namespace momentum {
 
 /// Processes marker data for a character model.
 ///
@@ -55,4 +55,4 @@ void processMarkerFile(
     size_t firstFrame = 0,
     size_t maxFrames = 0);
 
-} // namespace marker_tracking
+} // namespace momentum

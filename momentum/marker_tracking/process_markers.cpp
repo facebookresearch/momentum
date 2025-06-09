@@ -18,7 +18,7 @@
 
 #include <tuple>
 
-namespace marker_tracking {
+namespace momentum {
 
 Eigen::MatrixXf processMarkers(
     momentum::Character& character,
@@ -119,4 +119,4 @@ void processMarkerFile(
   }
 }
 
-} // namespace marker_tracking
+} // namespace momentum
