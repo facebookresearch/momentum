@@ -460,12 +460,10 @@ io_urdf_test_sources = [
 ]
 
 io_motion_public_headers = [
-    "io/motion/joint_params_binary_io.h",
     "io/motion/mmo_io.h",
 ]
 
 io_motion_sources = [
-    "io/motion/joint_params_binary_io.cpp",
     "io/motion/mmo_io.cpp",
 ]
 
