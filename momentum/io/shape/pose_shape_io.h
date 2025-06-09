@@ -11,6 +11,11 @@
 
 namespace momentum {
 
+/// Loads pose shape data from a binary file.
+///
+/// @param filename Path to the pose shape data file
+/// @param character Character containing skeleton and mesh for validation and joint mapping
+/// @return PoseShape with loaded data, or empty PoseShape if file cannot be opened
 PoseShape loadPoseShape(const std::string& filename, const Character& character);
 
 } // namespace momentum
