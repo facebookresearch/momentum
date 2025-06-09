@@ -14,49 +14,57 @@
 
 namespace momentum {
 
+/// Loads blend shape vectors from a file without base shape.
+///
+/// @param filename Path to the blend shape base data file
+/// @param expectedShapes Limits number of shape vectors loaded if > 0, otherwise loads all
+/// @param expectedVertices Limits number of vertices loaded if > 0, otherwise loads all
+/// @return BlendShapeBase object with loaded shape vectors
 BlendShapeBase loadBlendShapeBase(
     const filesystem::path& filename,
     int expectedShapes = -1,
     int expectedVertices = -1);
 
+/// Loads blend shape vectors from a stream without base shape.
+///
+/// @param data Input stream containing blend shape base data
+/// @param expectedShapes Limits number of shape vectors loaded if > 0, otherwise loads all
+/// @param expectedVertices Limits number of vertices loaded if > 0, otherwise loads all
+/// @return BlendShapeBase object with loaded shape vectors
 BlendShapeBase
 loadBlendShapeBase(std::istream& data, int expectedShapes = -1, int expectedVertices = -1);
 
-/// Loads a blend shape from a given filepath.
+/// Loads a blend shape from a file, including base shape and shape vectors.
 ///
-/// This function reads blend shape data from the provided file, including the mean shape and shape
-/// vectors. If `expectedShapes` or `expectedVertices` are provided, the function will attempt to
-/// limit the number of shape vectors or vertices read accordingly.
+/// @param filename Path to the blend shape data file
+/// @param expectedShapes Limits number of shape vectors loaded if > 0, otherwise loads all
+/// @param expectedVertices Limits number of vertices loaded if > 0, otherwise loads all
+/// @return BlendShape object with loaded data
 ///
-/// @param filename The file path containing the blend shape data.
-/// @param[in] expectedShapes The expected number of shape vectors to read. If this value is greater
-/// than 0, it will limit the number of shape vectors read. Defaults to 0, meaning all shape vectors
-/// will be read.
-/// @param[in] expectedVertices The expected number of vertices to read. If this value is greater
-/// than 0, it will limit the number of vertices read. Defaults to 0, meaning all vertices will be
-/// read.
-/// @return A BlendShape object containing the loaded data.
-///
-/// @note This function only supports parsing from a local file. If you want to parse from a
-/// non-local path, you may need to parse it using your favorite resource retriever into a stream
-/// buffer and use the buffer version of this function.
+/// @note Only supports local files. For non-local paths, use the stream version.
 BlendShape loadBlendShape(
     const filesystem::path& filename,
     int expectedShapes = -1,
     int expectedVertices = -1);
 
+/// Loads a blend shape from a stream, including base shape and shape vectors.
+///
+/// @param is Input stream containing blend shape data
+/// @param expectedShapes Limits number of shape vectors loaded if > 0, otherwise loads all
+/// @param expectedVertices Limits number of vertices loaded if > 0, otherwise loads all
+/// @return BlendShape object with loaded data
 BlendShape loadBlendShape(std::istream& is, int expectedShapes = -1, int expectedVertices = -1);
 
-void ReadShapeVectors(
-    std::istream& data,
-    MatrixXf& shapeVectors,
-    uint64_t numRows,
-    uint64_t numCols,
-    int expectedShapes,
-    int expectedVertices);
-
+/// Saves a blend shape to a file.
+///
+/// @param filename Output file path for the blend shape data
+/// @param blendShape BlendShape object to save
 void saveBlendShape(const filesystem::path& filename, const BlendShape& blendShape);
 
+/// Saves a blend shape to a stream.
+///
+/// @param os Output stream to write blend shape data
+/// @param blendShape BlendShape object to save
 void saveBlendShape(std::ostream& os, const BlendShape& blendShape);
 
 } // namespace momentum

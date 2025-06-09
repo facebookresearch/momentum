@@ -35,6 +35,31 @@ std::istringstream readOrThrow(const filesystem::path& filepath) {
   return std::istringstream(std::move(buffer));
 }
 
+void readShapeVectors(
+    std::istream& data,
+    MatrixXf& shapeVectors,
+    uint64_t numRows,
+    uint64_t numCols,
+    int expectedShapes,
+    int expectedVertices) {
+  // load shapeVectors
+  shapeVectors.resize(numRows, numCols);
+  data.read((char*)shapeVectors.data(), sizeof(float) * numRows * numCols);
+
+  // resize to few shapes
+  if (expectedShapes > 0) {
+    shapeVectors.conservativeResize(
+        shapeVectors.rows(),
+        std::min(gsl::narrow_cast<Eigen::Index>(expectedShapes), shapeVectors.cols()));
+  }
+  // resize vertices
+  if (expectedVertices > 0) {
+    shapeVectors.conservativeResize(
+        std::min(shapeVectors.rows(), gsl::narrow_cast<Eigen::Index>(expectedVertices * 3)),
+        shapeVectors.cols());
+  }
+}
+
 } // namespace
 
 BlendShapeBase
@@ -53,7 +78,7 @@ BlendShapeBase loadBlendShapeBase(std::istream& data, int expectedShapes, int ex
   data.read((char*)&numCols, sizeof(numCols));
 
   // read shape vectors
-  ReadShapeVectors(data, shapeVectors, numRows, numCols, expectedShapes, expectedVertices);
+  readShapeVectors(data, shapeVectors, numRows, numCols, expectedShapes, expectedVertices);
 
   BlendShapeBase res(shapeVectors.rows() / 3, shapeVectors.cols());
   res.setShapeVectors(shapeVectors);
@@ -85,36 +110,11 @@ BlendShape loadBlendShape(std::istream& data, int expectedShapes, int expectedVe
   }
 
   // read shape vectors
-  ReadShapeVectors(data, shapeVectors, numRows, numCols, expectedShapes, expectedVertices);
+  readShapeVectors(data, shapeVectors, numRows, numCols, expectedShapes, expectedVertices);
 
   BlendShape res(baseShape, shapeVectors.cols());
   res.setShapeVectors(shapeVectors);
   return res;
-}
-
-void ReadShapeVectors(
-    std::istream& data,
-    MatrixXf& shapeVectors,
-    uint64_t numRows,
-    uint64_t numCols,
-    int expectedShapes,
-    int expectedVertices) {
-  // load shapeVectors
-  shapeVectors.resize(numRows, numCols);
-  data.read((char*)shapeVectors.data(), sizeof(float) * numRows * numCols);
-
-  // resize to few shapes
-  if (expectedShapes > 0) {
-    shapeVectors.conservativeResize(
-        shapeVectors.rows(),
-        std::min(gsl::narrow_cast<Eigen::Index>(expectedShapes), shapeVectors.cols()));
-  }
-  // resize vertices
-  if (expectedVertices > 0) {
-    shapeVectors.conservativeResize(
-        std::min(shapeVectors.rows(), gsl::narrow_cast<Eigen::Index>(expectedVertices * 3)),
-        shapeVectors.cols());
-  }
 }
 
 void saveBlendShape(const filesystem::path& filename, const BlendShape& blendShape) {
