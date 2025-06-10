@@ -690,6 +690,7 @@ if(MOMENTUM_BUILD_TESTING)
     SOURCES_VARS io_shape_test_sources
     LINK_LIBRARIES
       character
+      character_test_helpers
       io_shape
       io_test_helper
   )

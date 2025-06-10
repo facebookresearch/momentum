@@ -395,6 +395,7 @@ io_shape_sources = [
 
 io_shape_test_sources = [
     "test/io/blend_shape_io_test.cpp",
+    "test/io/pose_shape_io_test.cpp",
 ]
 
 io_fbx_public_headers = [
