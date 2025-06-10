@@ -467,6 +467,10 @@ io_motion_sources = [
     "io/motion/mmo_io.cpp",
 ]
 
+io_motion_test_sources = [
+    "test/io/mmo_io_test.cpp",
+]
+
 io_marker_public_headers = [
     "io/marker/c3d_io.h",
     "io/marker/conversions.h",

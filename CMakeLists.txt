@@ -703,6 +703,16 @@ if(MOMENTUM_BUILD_TESTING)
       io_skeleton
       io_test_helper
   )
+
+  mt_test(
+    NAME io_motion_test
+    SOURCES_VARS io_motion_test_sources
+    LINK_LIBRARIES
+      character
+      character_test_helpers
+      io_motion
+      io_test_helper
+  )
 endif()
 
 #===============================================================================
