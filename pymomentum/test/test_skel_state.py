@@ -197,6 +197,99 @@ class TestSkelState(unittest.TestCase):
         t6, r6, s6 = pym_skel_state.split(skel_state5)
         self.assertTrue(torch.allclose(s5, s6))
 
+    def test_check_invalid_shape(self) -> None:
+        # Test case where skel_state.shape[-1] != 8 (triggers ValueError)
+        invalid_skel_state = torch.randn(2, 7)  # Wrong last dimension (7 instead of 8)
+
+        with self.assertRaises(ValueError) as context:
+            pym_skel_state.check(invalid_skel_state)
+
+        self.assertIn(
+            "Expected skeleton state to have last dimension 8", str(context.exception)
+        )
+
+    def test_match_leading_dimensions_error(self) -> None:
+        # Test case where t_right.dim() < t_left.dim() (triggers ValueError)
+        t_left = torch.randn(2, 3, 4)  # 3 dimensions
+        t_right = torch.randn(5)  # 1 dimension (less than t_left)
+
+        with self.assertRaises(ValueError) as context:
+            pym_skel_state.match_leading_dimensions(t_left, t_right)
+
+        self.assertIn(
+            "First tensor can't have larger dimensionality than the second",
+            str(context.exception),
+        )
+
+    def test_identity_no_size(self) -> None:
+        # Test case where size=None (triggers the else branch in identity function)
+        identity_state = pym_skel_state.identity()
+
+        # Should return a 1D tensor with 8 elements
+        self.assertEqual(identity_state.shape, (8,))
+        # Should have zeros for translation, identity quaternion, and ones for scale
+        expected = torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0])
+        self.assertTrue(torch.allclose(identity_state, expected))
+
+    def test_from_matrix_invalid_dimensions(self) -> None:
+        # Test case where matrices don't have correct dimensions
+        invalid_matrix = torch.randn(3, 3)  # Should be 4x4
+
+        with self.assertRaises(ValueError) as context:
+            pym_skel_state.from_matrix(invalid_matrix)
+
+        self.assertIn("Expected a tensor of 4x4 matrices", str(context.exception))
+
+    def test_from_matrix_2d_case(self) -> None:
+        # Test case where matrices.dim() == 2 (triggers unsqueeze)
+        # Create a single 4x4 matrix
+        matrix_2d = torch.eye(4)
+        matrix_2d[:3, 3] = torch.tensor([1.0, 2.0, 3.0])  # Add translation
+
+        skel_state = pym_skel_state.from_matrix(matrix_2d)
+
+        # Should return a 1D tensor with 8 elements
+        self.assertEqual(skel_state.shape, (8,))
+        # Translation should match what we set
+        self.assertTrue(torch.allclose(skel_state[:3], torch.tensor([1.0, 2.0, 3.0])))
+
+    def test_match_leading_dimensions_while_loop(self) -> None:
+        # Test case where t_left.dim() < t_right.dim() (triggers while loop)
+        t_left = torch.randn(4)  # 1 dimension
+        t_right = torch.randn(2, 3, 4)  # 3 dimensions
+
+        result = pym_skel_state.match_leading_dimensions(t_left, t_right)
+
+        # Should expand t_left to match t_right's leading dimensions
+        self.assertEqual(result.shape, (2, 3, 4))
+        # Should have expanded the original tensor
+        self.assertTrue(torch.allclose(result[0, 0], t_left))
+        self.assertTrue(torch.allclose(result[1, 2], t_left))
+
+    def test_transform_points_invalid_dimensions(self) -> None:
+        # Test case where points.dim() < 1 or points.shape[-1] != 3
+        skel_state = pym_skel_state.identity()
+
+        # Test points with wrong last dimension
+        invalid_points = torch.randn(5, 2)  # Should be (..., 3)
+
+        with self.assertRaises(ValueError) as context:
+            pym_skel_state.transform_points(skel_state, invalid_points)
+
+        self.assertIn(
+            "Points tensor should have last dimension 3", str(context.exception)
+        )
+
+        # Test points with dim() < 1 (scalar)
+        scalar_points = torch.tensor(1.0)  # 0 dimensions
+
+        with self.assertRaises(ValueError) as context:
+            pym_skel_state.transform_points(skel_state, scalar_points)
+
+        self.assertIn(
+            "Points tensor should have last dimension 3", str(context.exception)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
