@@ -104,8 +104,9 @@ void CharacterStateT<T>::set(
   // create skinning if we have a mesh
   if (updateMesh && referenceCharacter.mesh && referenceCharacter.skinWeights) {
     // check if we need to create a mesh
-    if (!meshState || meshState->vertices.size() != referenceCharacter.mesh->vertices.size())
+    if (!meshState || meshState->vertices.size() != referenceCharacter.mesh->vertices.size()) {
       meshState = std::make_unique<Mesh>(*referenceCharacter.mesh);
+    }
 
     // check if we have pose blendshapes and use them before skinning if there
     if (referenceCharacter.poseShapes) {
@@ -159,8 +160,9 @@ void CharacterStateT<T>::set(
 
   // update collision geometry if present
   if (updateCollision && referenceCharacter.collision) {
-    if (!collisionState || collisionState->origin.size() != referenceCharacter.collision->size())
+    if (!collisionState || collisionState->origin.size() != referenceCharacter.collision->size()) {
       collisionState = std::make_unique<CollisionGeometryState>();
+    }
     collisionState->update(skeletonState, *referenceCharacter.collision);
   }
 }

@@ -22,8 +22,9 @@ namespace momentum {
 namespace {
 
 std::unordered_map<std::string, std::string> loadMomentumModelCommon(std::istream& input) {
-  if (!input)
+  if (!input) {
     return {};
+  }
 
   std::unordered_map<std::string, std::string> result;
   std::string sectionName;
@@ -40,27 +41,31 @@ std::unordered_map<std::string, std::string> loadMomentumModelCommon(std::istrea
     line = trim(line.substr(0, line.find_first_of('#')));
 
     // skip empty lines or comment lines
-    if (line.empty())
+    if (line.empty()) {
       continue;
+    }
 
     // look for new section
     static const re2::RE2 reg("\\[(\\w+)\\]");
     std::string newSectionName;
     if (re2::RE2::FullMatch(line, reg, &newSectionName)) {
       // new section, store old section
-      if (!sectionName.empty())
+      if (!sectionName.empty()) {
         result[sectionName] = sectionContent;
+      }
 
       // start new section
       sectionName = newSectionName;
       sectionContent.clear();
-    } else if (!sectionName.empty())
+    } else if (!sectionName.empty()) {
       sectionContent += line + "\n";
+    }
   }
 
   // store last section
-  if (!sectionName.empty())
+  if (!sectionName.empty()) {
     result[sectionName] = sectionContent;
+  }
 
   return result;
 }
@@ -79,8 +84,9 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinitionFromStream(
     line = trim(line.substr(0, line.find_first_of('#')));
 
     // skip empty lines or comment lines
-    if (line.empty())
+    if (line.empty()) {
       continue;
+    }
 
     data += line + "\n";
   }
@@ -111,8 +117,9 @@ void parseParameter(
     const auto stokens = tokenize(dtoken, "*");
 
     if (stokens.size() != 2) {
-      if (stokens.size() != 1)
+      if (stokens.size() != 1) {
         continue;
+      }
 
       // additional weight
       const Eigen::Index pindex = jointIndex * kParametersPerJoint + attributeIndex;
@@ -187,8 +194,9 @@ void parseParameter(
 } // namespace
 
 std::unordered_map<std::string, std::string> loadMomentumModel(const filesystem::path& filename) {
-  if (filename.empty())
+  if (filename.empty()) {
     return {};
+  }
 
   std::ifstream infile(filename);
   MT_THROW_IF(!infile.is_open(), "Cannot find file {}", filename.string());
@@ -197,8 +205,9 @@ std::unordered_map<std::string, std::string> loadMomentumModel(const filesystem:
 
 std::unordered_map<std::string, std::string> loadMomentumModelFromBuffer(
     gsl::span<const std::byte> buffer) {
-  if (buffer.empty())
+  if (buffer.empty()) {
     return {};
+  }
 
   ispanstream inputStream(buffer);
   return loadMomentumModelCommon(inputStream);
@@ -219,23 +228,27 @@ ParameterTransform parseParameterTransform(const std::string& data, const Skelet
     line = line.substr(0, line.find_first_of('#'));
 
     // ignore limit lines
-    if (line.find("limit") == 0)
+    if (line.find("limit") == 0) {
       continue;
+    }
 
     // load parameterset definitions
-    if (line.find("parameterset") == 0)
+    if (line.find("parameterset") == 0) {
       continue;
+    }
 
     // load poseconstraints
-    if (line.find("poseconstraints") == 0)
+    if (line.find("poseconstraints") == 0) {
       continue;
+    }
 
     // ------------------------------------------------
     //  parse parameter vector
     // ------------------------------------------------
     const auto pTokens = tokenize(line, "=");
-    if (pTokens.size() != 2)
+    if (pTokens.size() != 2) {
       continue;
+    }
 
     // split pToken[0] into joint name and attribute name
     const auto aTokens = tokenize(pTokens[0], ".");
@@ -293,8 +306,9 @@ ParameterSets parseParameterSets(const std::string& data, const ParameterTransfo
     line = line.substr(0, line.find_first_of('#'));
 
     // Skip if not parameterset definitions
-    if (line.find("parameterset") != 0)
+    if (line.find("parameterset") != 0) {
       continue;
+    }
 
     // parse parameterset
     const auto pTokens = tokenize(line, " \t\r\n");
@@ -339,8 +353,9 @@ PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTra
     line = line.substr(0, line.find_first_of('#'));
 
     // load parameterset definitions
-    if (line.find("poseconstraints") != 0)
+    if (line.find("poseconstraints") != 0) {
       continue;
+    }
 
     // parse parameterset
     const auto pTokens = tokenize(line, " \t\r\n");
@@ -354,8 +369,9 @@ PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTra
       const std::string& item = trim(pTokens[i]);
 
       const auto cTokens = tokenize(item, "=");
-      if (cTokens.size() != 2)
+      if (cTokens.size() != 2) {
         continue;
+      }
 
       size_t parameterIndex = kInvalidIndex;
       for (size_t d = 0; d < pt.name.size(); d++) {
@@ -394,8 +410,9 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
 std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
     gsl::span<const std::byte> rawData,
     const Skeleton& skeleton) {
-  if (rawData.empty())
+  if (rawData.empty()) {
     return {};
+  }
 
   ispanstream inputStream(rawData);
 

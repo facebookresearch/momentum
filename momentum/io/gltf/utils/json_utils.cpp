@@ -37,8 +37,9 @@ ParameterSets parameterSetsFromJson(const Character& character, const nlohmann::
       const auto parameterIndex =
           character.parameterTransform.getParameterIdByName(parameter.value());
 
-      if (parameterIndex != kInvalidIndex)
+      if (parameterIndex != kInvalidIndex) {
         set.set(parameterIndex);
+      }
     }
   }
 
@@ -64,8 +65,9 @@ PoseConstraints poseConstraintsFromJson(const Character& character, const nlohma
           character.parameterTransform.getParameterIdByName(constraintPair.key());
 
       const float value = constraintPair.value();
-      if (parameterIndex != kInvalidIndex)
+      if (parameterIndex != kInvalidIndex) {
         pose.parameterIdValue.emplace_back(parameterIndex, value);
+      }
     }
   }
 
@@ -103,8 +105,9 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
     auto parameterItr = j.find("parameters");
     MT_THROW_IF(parameterItr == j.end(), "No 'parameters' found in parameter transform.");
 
-    for (const auto& p : *parameterItr)
+    for (const auto& p : *parameterItr) {
       pt.name.push_back(p.get<std::string>());
+    }
 
     // triplet list
     std::vector<Eigen::Triplet<float>> triplets;

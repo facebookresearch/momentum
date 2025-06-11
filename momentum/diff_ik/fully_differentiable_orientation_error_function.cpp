@@ -87,8 +87,9 @@ double FullyDifferentiableOrientationErrorFunctionT<T>::getGradient(
 
   for (size_t i = 0; i < constraints_.size(); ++i) {
     const OrientationConstraintT<T>& ct = constraints_[i];
-    if (ct.weight == 0)
+    if (ct.weight == 0) {
       continue;
+    }
 
     error += calculateOrientationGradient(state, constraints_[i], jointGrad_);
   }
@@ -113,8 +114,9 @@ double FullyDifferentiableOrientationErrorFunctionT<T>::getJacobian(
 
   for (size_t i = 0; i < constraints_.size(); ++i) {
     const OrientationConstraintT<T>& ct = constraints_[i];
-    if (ct.weight == 0)
+    if (ct.weight == 0) {
       continue;
+    }
 
     const auto currentOffset = offset.fetch_add(9, std::memory_order_relaxed);
     error += calculateOrientationJacobian(

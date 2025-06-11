@@ -79,8 +79,9 @@ void GaussNewtonSolverQRT<T>::doIteration() {
 
   double error_orig = 0.0;
   for (auto errorFunction : sf->getErrorFunctions()) {
-    if (errorFunction->getWeight() <= 0)
+    if (errorFunction->getWeight() <= 0) {
       continue;
+    }
 
     const auto rows = gsl::narrow<Eigen::Index>(errorFunction->getJacobianSize());
 
@@ -90,8 +91,9 @@ void GaussNewtonSolverQRT<T>::doIteration() {
     int usedRows = 0;
     error_orig += errorFunction->getJacobian(
         this->parameters_, *skeletonState_, jacobian_.mat(), residual_.mat(), usedRows);
-    if (usedRows == 0)
+    if (usedRows == 0) {
       continue;
+    }
 
     qrSolver_.addMutating(
         ColumnIndexedMatrix<Eigen::MatrixX<T>>(

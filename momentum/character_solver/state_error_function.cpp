@@ -89,8 +89,9 @@ double StateErrorFunctionT<T>::getError(
     const SkeletonStateT<T>& state) {
   MT_PROFILE_FUNCTION();
 
-  if (state.jointState.empty())
+  if (state.jointState.empty()) {
     return 0.0;
+  }
 
   // check all is valid
   MT_CHECK(
@@ -138,8 +139,9 @@ double StateErrorFunctionT<T>::getGradient(
     Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 
-  if (state.jointState.empty())
+  if (state.jointState.empty()) {
     return 0.0;
+  }
 
   // loop over all joints and check for smoothness
   double error = 0.0;

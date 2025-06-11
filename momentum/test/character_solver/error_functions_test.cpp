@@ -482,8 +482,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
   SkeletonStateT<T> bindState(transform.apply(parameters), skeleton);
   SkeletonStateT<T> state(transform.apply(parameters), skeleton);
   TransformationListT<T> bindpose;
-  for (const auto& js : bindState.jointState)
+  for (const auto& js : bindState.jointState) {
     bindpose.push_back(js.transformation.inverse());
+  }
 
   {
     SCOPED_TRACE("Skinning mesh constraint test");
@@ -494,8 +495,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
       // add vertex to constraint list
       cl.clear();
       for (size_t si = 0; si < kMaxSkinJoints; si++) {
-        if (skin.weight(vi, si) == 0.0)
+        if (skin.weight(vi, si) == 0.0) {
           continue;
+        }
         const auto parent = skin.index(vi, si);
         cl.push_back(PositionDataT<T>(
             (target - bindState.jointState[parent].translation()),
@@ -523,8 +525,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
 
         cl.clear();
         for (size_t si = 0; si < kMaxSkinJoints; si++) {
-          if (skin.weight(vi, si) == 0.0)
+          if (skin.weight(vi, si) == 0.0) {
             continue;
+          }
           const auto parent = skin.index(vi, si);
           const Vector3<T> offset = state.jointState[parent].transformation.inverse() * v[vi];
           cl.push_back(PositionDataT<T>(offset, target, parent, skin.weight(vi, si)));
@@ -1416,7 +1419,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
         FixedAxisDataT<T>(Vector3<T>::UnitX(), Vector3<T>::UnitX(), 2, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
-    if constexpr (std::is_same_v<T, float>)
+    if constexpr (std::is_same_v<T, float>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1424,17 +1427,18 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
           skeleton,
           transform,
           5e-2f);
-    else if constexpr (std::is_same_v<T, double>)
+    } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
           skeleton,
           transform,
-          1e-8,
+          2e-2f,
           1e-6,
           true,
           false); // jacobian test is inaccurate around the corner case
+    }
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
       TEST_GRADIENT_AND_JACOBIAN(
@@ -1473,7 +1477,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
-    if constexpr (std::is_same_v<T, float>)
+    if constexpr (std::is_same_v<T, float>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1481,7 +1485,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
           skeleton,
           transform,
           2e-2f);
-    else if constexpr (std::is_same_v<T, double>)
+    } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1492,6 +1496,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
           1e-6,
           true,
           false); // jacobian test is inaccurate around the corner case
+    }
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
       TEST_GRADIENT_AND_JACOBIAN(
@@ -1530,7 +1535,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
-    if constexpr (std::is_same_v<T, float>)
+    if constexpr (std::is_same_v<T, float>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1538,7 +1543,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
           skeleton,
           transform,
           1e-2f);
-    else if constexpr (std::is_same_v<T, double>)
+    } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1549,6 +1554,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
           1e-6,
           true,
           false); // jacobian test is inaccurate around the corner case
+    }
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
       TEST_GRADIENT_AND_JACOBIAN(

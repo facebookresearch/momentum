@@ -21,8 +21,9 @@ PoseShape loadPoseShape(const std::string& filename, const Character& character)
   MT_CHECK(character.mesh);
 
   std::ifstream data(filename, std::ios::in | std::ios::binary);
-  if (!data.is_open())
+  if (!data.is_open()) {
     return result;
+  }
 
   // read dimensions
   uint64_t numRows;

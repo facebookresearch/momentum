@@ -141,8 +141,9 @@ Eigen::Quaterniond fbxEulerRotationToQuat(
 const ofbx::IElement* findChild(const ofbx::IElement& element, const char* id) {
   auto* curChild = element.getFirstChild();
   while (curChild) {
-    if (curChild->getID() == id)
+    if (curChild->getID() == id) {
       return curChild;
+    }
     curChild = curChild->getSibling();
   }
   return nullptr;
@@ -152,8 +153,9 @@ bool equalsCaseInsensitive(const ofbx::DataView& data, const char* rhs) {
   const char* c = rhs;
   const char* c2 = (const char*)data.begin;
   while (*c && c2 != (const char*)data.end) {
-    if (tolower(*c) != tolower(*c2))
+    if (tolower(*c) != tolower(*c2)) {
       return 0;
+    }
     ++c;
     ++c2;
   }
@@ -165,8 +167,9 @@ ofbx::IElement* resolveProperty(const ofbx::Object& object, const char* name) {
   // This is black magic, but for some reason all the user properties are stored in an
   // element named Properties70.
   const ofbx::IElement* props = findChild(object.element, "Properties70");
-  if (!props)
+  if (!props) {
     return nullptr;
+  }
 
   ofbx::IElement* prop = props->getFirstChild();
   while (prop) {
@@ -191,8 +194,9 @@ ofbx::IElement* resolveProperty(const ofbx::Object& object, const char* name) {
 const ofbx::IElementProperty* getElementProperty(const ofbx::IElement* element, size_t iProp) {
   auto* prop = element->getFirstProperty();
   for (size_t j = 0; j < iProp; ++j) {
-    if (prop == nullptr)
+    if (prop == nullptr) {
       return nullptr;
+    }
     prop = prop->getNext();
   }
 

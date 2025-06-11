@@ -129,8 +129,7 @@ void GaussNewtonSolverT<T>::doIterationSparse() {
 
   Eigen::VectorX<T> delta;
 
-  if (!directSparseJtJ_) // make a dense matrix and sparsify later
-  {
+  if (!directSparseJtJ_) { // make a dense matrix and sparsify later
     if (useBlockJtJ_) {
       // get JtJ and JtR pre-computed
       {
@@ -161,8 +160,7 @@ void GaussNewtonSolverT<T>::doIterationSparse() {
 
       JtJ_ = sjac.transpose() * sjac;
     }
-  } else // directly sparse JtJ
-  {
+  } else { // directly sparse JtJ
     MT_PROFILE_EVENT("Get sparse JtJ and JtR");
     this->error_ = this->solverFunction_->getJtJR_Sparse(this->parameters_, JtJ_, JtR_);
   }

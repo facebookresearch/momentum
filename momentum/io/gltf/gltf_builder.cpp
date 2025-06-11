@@ -38,8 +38,9 @@ using namespace momentum;
 
 nlohmann::json& addMomentumExtension(nlohmann::json& extensionsAndExtras) {
   if (extensionsAndExtras.count("extensions") == 0 ||
-      extensionsAndExtras["extensions"].count("FB_momentum") == 0)
+      extensionsAndExtras["extensions"].count("FB_momentum") == 0) {
     extensionsAndExtras["extensions"]["FB_momentum"] = nlohmann::json::object();
+  }
   return extensionsAndExtras["extensions"]["FB_momentum"];
 }
 
@@ -293,8 +294,9 @@ void addActorAnimationToModel(
     gsl::span<const std::vector<momentum::Marker>> markerSequence,
     const GltfBuilder::MarkerMesh markerMesh,
     const std::string& animName) {
-  if (markerSequence.empty())
+  if (markerSequence.empty()) {
     return;
+  }
 
   // create arrays for data
   std::map<std::string, size_t> markerNameToIndex;
@@ -304,8 +306,9 @@ void addActorAnimationToModel(
   for (size_t i = 0; i < markerSequence.size(); i++) {
     const float timestamp = static_cast<float>(i) / fps;
     for (const auto& marker : markerSequence[i]) {
-      if (marker.occluded)
+      if (marker.occluded) {
         continue;
+      }
 
       // create new array if marker is unknown
       if (markerNameToIndex.count(marker.name) == 0) {
@@ -396,8 +399,9 @@ size_t addMeshToModel(
     auto& sk = model.skins.back();
 
     // add skin node
-    for (const auto& ji : jointToNodeMap)
+    for (const auto& ji : jointToNodeMap) {
       sk.joints.push_back(ji);
+    }
     sk.skeleton = sk.joints[0];
 
     node.name = "mesh";
@@ -669,8 +673,9 @@ const std::vector<size_t> addSkeletonToModel(
     }
 
     // add node as child to parent joint
-    if (joint.parent != kInvalidIndex)
+    if (joint.parent != kInvalidIndex) {
       model.nodes.at(jointToNodeMap.at(joint.parent)).children.push_back(nodeIndex);
+    }
 
     // add node to map
     jointToNodeMap.push_back(nodeIndex);
@@ -751,8 +756,9 @@ void addLocatorsToModel(
     }
 
     auto newMeshIdx = addMeshToModel(model, kUnitCubeGreen, true);
-    if (newMeshIdx < model.meshes.size())
+    if (newMeshIdx < model.meshes.size()) {
       node.mesh = newMeshIdx;
+    }
   }
 }
 
@@ -913,14 +919,16 @@ size_t GltfBuilder::getNumCharacters() {
 }
 
 size_t GltfBuilder::getCharacterRootIndex(const std::string& name) {
-  if (impl_->characterData.count(name) == 0)
+  if (impl_->characterData.count(name) == 0) {
     return kInvalidIndex;
+  }
   return impl_->characterData[name].rootIndex;
 }
 
 size_t GltfBuilder::getNumJoints(const std::string& name) {
-  if (impl_->characterData.count(name) == 0)
+  if (impl_->characterData.count(name) == 0) {
     return kInvalidIndex;
+  }
   return impl_->characterData[name].nodeMap.size();
 }
 
@@ -989,8 +997,9 @@ float GltfBuilder::getFps() {
 }
 
 std::vector<size_t> GltfBuilder::getCharacterMotions(const std::string& characterName) {
-  if (impl_->characterData.count(characterName) == 0)
+  if (impl_->characterData.count(characterName) == 0) {
     return {};
+  }
   return impl_->characterData[characterName].animationIndices;
 }
 

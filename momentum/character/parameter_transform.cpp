@@ -18,8 +18,9 @@ namespace momentum {
 template <typename T>
 size_t ParameterTransformT<T>::getParameterIdByName(const std::string& nm) const {
   for (size_t d = 0; d < name.size(); d++) {
-    if (name[d] == nm)
+    if (name[d] == nm) {
       return d;
+    }
   }
 
   return kInvalidIndex;
@@ -136,8 +137,9 @@ ParameterSet ParameterTransformT<T>::getScalingParameters() const {
   ParameterSet result;
 
   for (size_t i = 0; i < name.size(); i++) {
-    if (name[i].find("scale_") != std::string::npos)
+    if (name[i].find("scale_") != std::string::npos) {
       result.set(i);
+    }
   }
 
   return result;
@@ -149,8 +151,9 @@ ParameterSet ParameterTransformT<T>::getRigidParameters() const {
   ParameterSet result;
 
   for (size_t i = 0; i < name.size(); i++) {
-    if (name[i].find("root_") != std::string::npos || name[i].find("hips") != std::string::npos)
+    if (name[i].find("root_") != std::string::npos || name[i].find("hips") != std::string::npos) {
       result.set(i);
+    }
   }
 
   return result;
@@ -238,8 +241,9 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
   std::vector<size_t> newParamToOldParam;
 
   for (Eigen::Index iOldParam = 0; iOldParam < nOldParam; ++iOldParam) {
-    if (!paramSet.test(iOldParam))
+    if (!paramSet.test(iOldParam)) {
       continue;
+    }
 
     oldParamToNewParam[iOldParam] = newParamToOldParam.size();
     newParamToOldParam.push_back(iOldParam);
@@ -250,8 +254,9 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
   ParameterTransformT<T> paramTransformNew;
 
   paramTransformNew.name.reserve(nNewParam);
-  for (const auto iOldParam : newParamToOldParam)
+  for (const auto iOldParam : newParamToOldParam) {
     paramTransformNew.name.push_back(paramTransformOld.name[iOldParam]);
+  }
 
   // Offsets are unchanged because they are the size #joints, not #param.
   paramTransformNew.offsets = paramTransformOld.offsets;
@@ -266,8 +271,9 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
       const auto iOldParam = it.col();
       const auto iNewParam = oldParamToNewParam[iOldParam];
 
-      if (iNewParam == kInvalidIndex)
+      if (iNewParam == kInvalidIndex) {
         continue;
+      }
 
       tripletsNew.emplace_back((int)it.row(), (int)iNewParam, it.value());
       paramTransformNew.activeJointParams[it.row()] = true;

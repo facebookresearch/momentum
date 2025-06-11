@@ -58,8 +58,9 @@ TEST(RandomTest, DeterministicBySeed) {
     EXPECT_EQ(r1.getSeed(), seed);
 
     // Expects to draw the same random numbers in sequence
-    for (auto i = 0u; i < numTests; ++i)
+    for (auto i = 0u; i < numTests; ++i) {
       EXPECT_NEAR(r0.uniform(fmin, fmax), r1.uniform(fmin, fmax), kMaxAllowedAbsError);
+    }
   }
 }
 

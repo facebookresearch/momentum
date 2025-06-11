@@ -32,9 +32,10 @@ std::vector<Eigen::Vector3i> triangulate(
     const auto nv = faceEnd - faceStart;
     MT_THROW_IF(nv < 3, "Invalid face with {} indices; expected at least 3.", nv);
 
-    for (size_t j = 1; j < (nv - 1); ++j)
+    for (size_t j = 1; j < (nv - 1); ++j) {
       result.emplace_back(
           indices[faceStart + 0], indices[faceStart + j], indices[faceStart + j + 1]);
+    }
   }
 
   return result;
@@ -46,14 +47,17 @@ size_t PolygonData::numPolygons() const {
 }
 
 std::string PolygonData::errorMessage(const size_t numVertices) const {
-  if (offsets.empty())
+  if (offsets.empty()) {
     return "Empty offsets array";
+  }
 
-  if (offsets.front() != 0)
+  if (offsets.front() != 0) {
     return "Invalid first offset (expected 0)";
+  }
 
-  if (!textureIndices.empty() && textureIndices.size() != indices.size())
+  if (!textureIndices.empty() && textureIndices.size() != indices.size()) {
     return "Mismatch between indices and textureIndices";
+  }
 
   const auto nPoly = numPolygons();
 
@@ -61,24 +65,29 @@ std::string PolygonData::errorMessage(const size_t numVertices) const {
     const auto faceBegin = offsets[iFace];
     const auto faceEnd = offsets[iFace + 1];
 
-    if (faceBegin >= faceEnd)
+    if (faceBegin >= faceEnd) {
       return "Non-monotonic offsets array";
+    }
 
-    if (faceEnd > indices.size())
+    if (faceEnd > indices.size()) {
       return "Too-large offset";
+    }
 
     const auto nv = faceEnd - faceBegin;
-    if (nv < 3)
+    if (nv < 3) {
       return "Too few vertices in face";
+    }
   }
 
   for (const auto& i : indices) {
-    if (i >= numVertices)
+    if (i >= numVertices) {
       return "Invalid too-large vertex";
+    }
   }
 
-  if (offsets.back() != indices.size())
+  if (offsets.back() != indices.size()) {
     return "Unused trailing vertices";
+  }
 
   return {};
 }

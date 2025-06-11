@@ -75,8 +75,9 @@ std::string firstDuplicate(const LocatorList& locators) {
   std::unordered_set<std::string> locatorNames;
   for (const auto& l : locators) {
     auto itr = locatorNames.find(l.name);
-    if (itr != locatorNames.end())
+    if (itr != locatorNames.end()) {
       return l.name;
+    }
     locatorNames.insert(itr, l.name);
   }
   return "";
@@ -121,8 +122,9 @@ LocatorList loadLocatorsFromBuffer(
   }
   for (size_t line = 2; line < lines.size(); line++) {
     std::string_view current = trim(lines[line]);
-    if (current != "{")
+    if (current != "{") {
       continue;
+    }
 
     // start of locator
     Locator l;
@@ -130,26 +132,29 @@ LocatorList loadLocatorsFromBuffer(
     bool haveGlobal = false;
     do {
       current = trim(lines.at(++line));
-      if (current[0] == '}')
+      if (current[0] == '}') {
         break;
-      if (current[0] == '/')
+      }
+      if (current[0] == '/') {
         continue;
+      }
       const auto tokens = tokenize(current, ":");
-      if (tokens.size() != 2)
+      if (tokens.size() != 2) {
         continue;
-      if (tokens[0] == "\"lockX\"")
+      }
+      if (tokens[0] == "\"lockX\"") {
         l.locked.x() = svtoi(tokens[1]);
-      else if (tokens[0] == "\"lockY\"")
+      } else if (tokens[0] == "\"lockY\"") {
         l.locked.y() = svtoi(tokens[1]);
-      else if (tokens[0] == "\"lockZ\"")
+      } else if (tokens[0] == "\"lockZ\"") {
         l.locked.z() = svtoi(tokens[1]);
-      else if (tokens[0] == "\"name\"") {
+      } else if (tokens[0] == "\"name\"") {
         const auto first = tokens[1].find_first_of('"') + 1;
         const auto last = tokens[1].find_last_of('"') - 1;
         l.name = tokens[1].substr(first, last - first + 1);
-      } else if (tokens[0] == "\"parent\"")
+      } else if (tokens[0] == "\"parent\"") {
         l.parent = svtoi(tokens[1]);
-      else if (tokens[0] == "\"parentName\"") {
+      } else if (tokens[0] == "\"parentName\"") {
         const auto first = tokens[1].find_first_of('"') + 1;
         const auto last = tokens[1].find_last_of('"') - 1;
         const std::string_view parent = tokens[1].substr(first, last - first + 1);
@@ -163,15 +168,15 @@ LocatorList loadLocatorsFromBuffer(
         if (l.parent == kInvalidIndex) {
           MT_LOGW("Invalid parent name: {}", parent);
         }
-      } else if (tokens[0] == "\"weight\"")
+      } else if (tokens[0] == "\"weight\"") {
         l.weight = svtof(tokens[1]);
-      else if (tokens[0] == "\"offsetX\"")
+      } else if (tokens[0] == "\"offsetX\"") {
         l.offset.x() = svtof(tokens[1]);
-      else if (tokens[0] == "\"offsetY\"")
+      } else if (tokens[0] == "\"offsetY\"") {
         l.offset.y() = svtof(tokens[1]);
-      else if (tokens[0] == "\"offsetZ\"")
+      } else if (tokens[0] == "\"offsetZ\"") {
         l.offset.z() = svtof(tokens[1]);
-      else if (tokens[0] == "\"globalX\"") {
+      } else if (tokens[0] == "\"globalX\"") {
         global.x() = svtof(tokens[1]);
         haveGlobal = true;
       } else if (tokens[0] == "\"globalY\"") {
@@ -180,12 +185,13 @@ LocatorList loadLocatorsFromBuffer(
       } else if (tokens[0] == "\"globalZ\"") {
         global.z() = svtof(tokens[1]);
         haveGlobal = true;
-      } else if (tokens[0] == "\"limitWeightX\"")
+      } else if (tokens[0] == "\"limitWeightX\"") {
         l.limitWeight[0] = svtof(tokens[1]);
-      else if (tokens[0] == "\"limitWeightY\"")
+      } else if (tokens[0] == "\"limitWeightY\"") {
         l.limitWeight[1] = svtof(tokens[1]);
-      else if (tokens[0] == "\"limitWeightZ\"")
+      } else if (tokens[0] == "\"limitWeightZ\"") {
         l.limitWeight[2] = svtof(tokens[1]);
+      }
     } while (line < lines.size() - 1 && (current != "}," || current != "}"));
 
     // skip locator if it has no parent
@@ -232,20 +238,24 @@ void saveLocators(
     o << "\t\t\t\"lockY\":" << locators[i].locked.y() << ",\n";
     o << "\t\t\t\"lockZ\":" << locators[i].locked.z() << ",\n";
     o << "\t\t\t\"weight\":" << locators[i].weight << ",\n";
-    if (locators[i].limitWeight[0] != 0.0f)
+    if (locators[i].limitWeight[0] != 0.0f) {
       o << "\t\t\t\"limitWeightX\":" << locators[i].limitWeight.x() << ",\n";
-    if (locators[i].limitWeight[1] != 0.0f)
+    }
+    if (locators[i].limitWeight[1] != 0.0f) {
       o << "\t\t\t\"limitWeightY\":" << locators[i].limitWeight.y() << ",\n";
-    if (locators[i].limitWeight[2] != 0.0f)
+    }
+    if (locators[i].limitWeight[2] != 0.0f) {
       o << "\t\t\t\"limitWeightZ\":" << locators[i].limitWeight.z() << ",\n";
+    }
     MT_CHECK(
         0 <= locators[i].parent && locators[i].parent < skeleton.joints.size(),
         "Invalid joint index");
     o << "\t\t\t\"parentName\":\"" << skeleton.joints[locators[i].parent].name << "\"\n";
-    if (i < locators.size() - 1)
+    if (i < locators.size() - 1) {
       o << "\t\t},\n";
-    else
+    } else {
       o << "\t\t}\n";
+    }
   }
   o << "\t]\n}\n";
 }

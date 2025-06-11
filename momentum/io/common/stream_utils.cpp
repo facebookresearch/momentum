@@ -12,8 +12,9 @@
 namespace momentum {
 
 spanstreambuf::spanstreambuf(gsl::span<const std::byte> buffer) {
-  if (buffer.empty())
+  if (buffer.empty()) {
     return;
+  }
 
   // This is a bit awkward: the stream buffer won't change the data
   // but the interface still requires char* to be used
@@ -41,19 +42,23 @@ std::istream& GetLineCrossPlatform(std::istream& is, std::string& line) {
   line.clear();
   while (is.good()) {
     const int c = is.get();
-    if (!is.good())
+    if (!is.good()) {
       break;
+    }
 
-    if (c == '\n')
+    if (c == '\n') {
       break;
+    }
 
     if (c == '\r') {
       const auto next_c = is.peek();
-      if (!is.good())
+      if (!is.good()) {
         break;
+      }
 
-      if (next_c == '\n')
+      if (next_c == '\n') {
         is.get();
+      }
 
       break;
     }

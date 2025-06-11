@@ -213,8 +213,9 @@ Affine3f getInverseSSDTransformation(
   for (size_t j = 0; j < kMaxSkinJoints; j++) {
     // get pointer to transformation and weight float
     const auto& weight = skin.weight(index, j);
-    if (weight == 0.0f)
+    if (weight == 0.0f) {
       break;
+    }
 
     auto jointIndex = skin.index(index, j);
     MT_CHECK(

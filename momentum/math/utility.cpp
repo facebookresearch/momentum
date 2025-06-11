@@ -34,14 +34,15 @@ Vector3<T> quaternionToRotVec(const Quaternion<T>& q) {
   // Note: This branch is theoretically unreachable since std::acos() always returns
   // a value in the range [0, pi], making angle always non-negative.
   // It's kept as defensive programming.
-  if (angle < -pi<T>())
+  if (angle < -pi<T>()) {
     angle = T(2) * pi<T>() - angle;
-  else if (angle > pi<T>())
+  } else if (angle > pi<T>()) {
     angle = -(2) * pi<T>() + angle;
+  }
   const T ww = q.w() * q.w();
-  if (ww > 1.0f - 1e-7f)
+  if (ww > 1.0f - 1e-7f) {
     return Vector3<T>::Zero();
-  else {
+  } else {
     const T mul = T(1) / std::sqrt(T(1) - ww);
     return Vector3<T>(q.x(), q.y(), q.z()) * mul * angle;
   }
@@ -50,8 +51,9 @@ Vector3<T> quaternionToRotVec(const Quaternion<T>& q) {
 template <typename T>
 Quaternion<T> rotVecToQuaternion(const Vector3<T>& v) {
   const T angle = v.norm();
-  if (angle < 1e-5f)
+  if (angle < 1e-5f) {
     return Quaternion<T>::Identity();
+  }
   const Vector3<T> axis = v.normalized();
   return Quaternion<T>(Eigen::AngleAxis<T>(angle, axis));
 }
@@ -265,10 +267,11 @@ Quaternionf quaternionAverage(gsl::span<const Quaternionf> q, gsl::span<const fl
 
   // calculate the matrix
   for (size_t i = 0; i < q.size(); i++) {
-    if (i < w.size())
+    if (i < w.size()) {
       Q += (q[i].coeffs() * w[i]) * (q[i].coeffs() * w[i]).transpose();
-    else
+    } else {
       Q += q[i].coeffs() * q[i].coeffs().transpose();
+    }
   }
 
   // get the largest eigenvector of the matrix
@@ -327,15 +330,17 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
     tD = c;
 
     // early check if we are too far
-    if (w.squaredNorm() > maxSquareDist)
+    if (w.squaredNorm() > maxSquareDist) {
       return std::make_tuple(false, std::numeric_limits<T>::max(), Eigen::Vector2<T>::Zero());
+    }
   } else {
     sN = (b * e - c * d);
     tN = (a * e - b * d);
 
     // early check if the infinite line is too far
-    if ((w + (d1 * sN / D) - (d2 * tN / D)).squaredNorm() > maxSquareDist)
+    if ((w + (d1 * sN / D) - (d2 * tN / D)).squaredNorm() > maxSquareDist) {
       return std::make_tuple(false, std::numeric_limits<T>::max(), Eigen::Vector2<T>::Zero());
+    }
 
     if (sN < 0.0) {
       // sc < 0 => the s=0 edge is visible
@@ -354,11 +359,11 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
   if (tN < 0.0) {
     tN = 0.0;
     // recompute sc for this edge
-    if (-d < 0.0)
+    if (-d < 0.0) {
       sN = 0.0;
-    else if (-d > a)
+    } else if (-d > a) {
       sN = sD;
-    else {
+    } else {
       sN = -d;
       sD = a;
     }
@@ -366,11 +371,11 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
     // tc > 1  => the t=1 edge is visible
     tN = tD;
     // recompute sc for this edge
-    if ((-d + b) < 0.0)
+    if ((-d + b) < 0.0) {
       sN = 0;
-    else if ((-d + b) > a)
+    } else if ((-d + b) > a) {
       sN = sD;
-    else {
+    } else {
       sN = (-d + b);
       sD = a;
     }
@@ -386,8 +391,9 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
 
   // check if this is acceptable
   const T distance = dP.squaredNorm();
-  if (distance > maxSquareDist)
+  if (distance > maxSquareDist) {
     return std::make_tuple(false, std::numeric_limits<T>::max(), Eigen::Vector2<T>::Zero());
+  }
 
   return std::make_tuple(true, std::sqrt(distance), res);
 }

@@ -20,9 +20,11 @@ Eigen::VectorX<T> mapParameters(
     Eigen::Ref<const Eigen::VectorX<T>> in,
     const std::vector<size_t>& mp) {
   Eigen::VectorX<T> res = Eigen::VectorX<T>::Zero(mp.size());
-  for (size_t i = 0; i < mp.size(); i++)
-    if (mp[i] != kInvalidIndex)
+  for (size_t i = 0; i < mp.size(); i++) {
+    if (mp[i] != kInvalidIndex) {
       res[i] = in[mp[i]];
+    }
+  }
   return res;
 }
 

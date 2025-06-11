@@ -119,8 +119,9 @@ BlendShape loadBlendShape(std::istream& data, int expectedShapes, int expectedVe
 
 void saveBlendShape(const filesystem::path& filename, const BlendShape& blendShape) {
   std::ofstream data(filename, std::ios::out | std::ios::binary);
-  if (!data.is_open())
+  if (!data.is_open()) {
     return;
+  }
   saveBlendShape(data, blendShape);
 }
 
