@@ -224,6 +224,48 @@ class TestQuaternion(unittest.TestCase):
 
         self.assertTrue(torch.allclose(rotated_v1, v1))
 
+    def test_check_and_normalize_weights_squeeze(self) -> None:
+        # Test case where weights.dim() == quaternions.dim() (triggers squeeze)
+        quaternions = torch.randn(2, 3, 4)  # Shape: (2, 3, 4)
+        weights = torch.ones(2, 3, 1)  # Shape: (2, 3, 1) - same dim as quaternions
+
+        # This should trigger the squeeze operation
+        normalized_weights = quaternion.check_and_normalize_weights(
+            quaternions, weights
+        )
+
+        # Verify the weights were properly normalized
+        self.assertEqual(normalized_weights.shape, (2, 3))
+        self.assertTrue(torch.allclose(normalized_weights.sum(dim=-1), torch.ones(2)))
+
+    def test_check_and_normalize_weights_dim_mismatch(self) -> None:
+        # Test case where weights.dim() + 1 != quaternions.dim()
+        quaternions = torch.randn(2, 3, 4)  # Shape: (2, 3, 4) - 3 dimensions
+        weights = torch.ones(2)  # Shape: (2,) - 1 dimension, but 1 + 1 != 3
+
+        with self.assertRaises(ValueError) as context:
+            quaternion.check_and_normalize_weights(quaternions, weights)
+
+        self.assertIn(
+            "Expected weights vector to match quaternion vector", str(context.exception)
+        )
+        self.assertIn("weights=torch.Size([2])", str(context.exception))
+        self.assertIn("quaternions=torch.Size([2, 3, 4])", str(context.exception))
+
+    def test_check_and_normalize_weights_size_mismatch(self) -> None:
+        # Test case where weights.size(i) != quaternions.size(i) for some dimension i
+        quaternions = torch.randn(2, 3, 4)  # Shape: (2, 3, 4)
+        weights = torch.ones(2, 5)  # Shape: (2, 5) - first dim matches, second doesn't
+
+        with self.assertRaises(ValueError) as context:
+            quaternion.check_and_normalize_weights(quaternions, weights)
+
+        self.assertIn(
+            "Expected weights vector to match quaternion vector", str(context.exception)
+        )
+        self.assertIn("weights=torch.Size([2, 5])", str(context.exception))
+        self.assertIn("quaternions=torch.Size([2, 3, 4])", str(context.exception))
+
 
 if __name__ == "__main__":
     unittest.main()
