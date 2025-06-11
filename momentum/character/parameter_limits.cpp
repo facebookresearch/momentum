@@ -52,10 +52,12 @@ JointParameters applyPassiveJointParameterLimits(
         "{} vs {}",
         parameterIndex,
         jointParams.size());
-    if (res(parameterIndex) < data.limits[0])
+    if (res(parameterIndex) < data.limits[0]) {
       res(parameterIndex) = data.limits[0];
-    if (res(parameterIndex) > data.limits[1])
+    }
+    if (res(parameterIndex) > data.limits[1]) {
       res(parameterIndex) = data.limits[1];
+    }
   }
   return res;
 }

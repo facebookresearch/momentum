@@ -228,7 +228,7 @@ class Tokenizer {
   }
 
   void advance() {
-    // Eat all spaces:
+    // Skip whitespace
     while (_curPos != _str.end() && std::isspace(*_curPos)) {
       ++_curPos;
     }

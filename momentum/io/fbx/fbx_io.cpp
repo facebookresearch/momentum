@@ -99,8 +99,9 @@ void createLocatorNodes(
     locatorNode->LclTranslation.Set(FbxVector4(loc.offset[0], loc.offset[1], loc.offset[2]));
 
     // set parent if it has one
-    if (loc.parent != kInvalidIndex)
+    if (loc.parent != kInvalidIndex) {
       skeletonNodes[loc.parent]->AddChild(locatorNode);
+    }
   }
 }
 
@@ -256,8 +257,9 @@ void createAnimationCurves(
     const size_t jointOffset = ai % 9;
     const size_t parameterIndex =
         jointIndex * kParametersPerJoint + std::min(jointOffset, size_t(6));
-    if (!skipActiveJointParamCheck && aj[parameterIndex] == 0)
+    if (!skipActiveJointParamCheck && aj[parameterIndex] == 0) {
       continue;
+    }
 
     animCurves[ai]->KeyModifyBegin();
     for (size_t f = 0; f < jointValues.cols(); f++) {
@@ -268,14 +270,17 @@ void createAnimationCurves(
       float jointVal = jointValues(parameterIndex, f);
 
       // add translation offset for tx values
-      if (jointOffset < 3)
+      if (jointOffset < 3) {
         jointVal += character.skeleton.joints[jointIndex].translationOffset[jointOffset];
+      }
       // convert to degrees
-      else if (jointOffset >= 3 && jointOffset <= 5)
+      else if (jointOffset >= 3 && jointOffset <= 5) {
         jointVal = toDeg(jointVal);
+      }
       // convert to non-exponential scaling
-      else
+      else {
         jointVal = std::pow(2.0f, jointVal);
+      }
 
       const auto keyIndex = animCurves[ai]->KeyAdd(time);
       animCurves[ai]->KeySet(keyIndex, time, jointVal);
@@ -540,8 +545,9 @@ void saveFbxCommon(
   lExporter->Destroy();
 
   // destroy the scene and the manager
-  if (scene != nullptr)
+  if (scene != nullptr) {
     scene->Destroy();
+  }
   manager->Destroy();
 }
 

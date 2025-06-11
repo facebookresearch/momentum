@@ -55,8 +55,9 @@ CharacterT<T>::CharacterT(
   }
 
   // copy pose blendshapes if present
-  if (bs)
+  if (bs) {
     poseShapes = std::make_unique<PoseShape>(*bs);
+  }
 
   // initialize bindpose inverse list
   if (inverseBindPose.empty()) {
@@ -65,8 +66,9 @@ CharacterT<T>::CharacterT(
   MT_CHECK(this->inverseBindPose.size() == skeleton.joints.size());
 
   // copy collision geometry if it exists
-  if (cg)
+  if (cg) {
     collision = std::make_unique<CollisionGeometry>(*cg);
+  }
 
   // fill jointMap with identity
   resetJointMap();
@@ -92,12 +94,14 @@ CharacterT<T>::CharacterT(const CharacterT& c)
   }
 
   // copy pose blendshapes if present
-  if (c.poseShapes)
+  if (c.poseShapes) {
     poseShapes = std::make_unique<PoseShape>(*c.poseShapes);
+  }
 
   // copy collision geometry if it exists
-  if (c.collision)
+  if (c.collision) {
     collision = std::make_unique<CollisionGeometry>(*c.collision);
+  }
 }
 
 template <typename T>
@@ -141,8 +145,9 @@ std::vector<bool> CharacterT<T>::parametersToActiveJoints(const ParameterSet& pa
       const auto& col = it.col();
 
       // disable any joints that are not set
-      if (!parameterSet.test(col))
+      if (!parameterSet.test(col)) {
         continue;
+      }
 
       // set joint as enabled
       const auto jointIndex = row / kParametersPerJoint;
@@ -212,8 +217,9 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& enabledJo
   for (size_t jointIndex = 0; jointIndex < enabledJoints.size(); ++jointIndex) {
     // zero out all offsets related to joints that are enabled, keep the disabled ones set
     if (enabledJoints[jointIndex]) {
-      for (size_t o = 0; o < kParametersPerJoint; o++)
+      for (size_t o = 0; o < kParametersPerJoint; o++) {
         zeroTransform.offsets(jointIndex * kParametersPerJoint + o) = 0.0f;
+      }
     }
   }
 
@@ -558,11 +564,13 @@ template <typename T>
 void CharacterT<T>::initInverseBindPose() {
   // initialize bindpose inverse list
   const SkeletonState bindState(parameterTransform.bindPose(), skeleton, false);
-  if (!inverseBindPose.empty())
+  if (!inverseBindPose.empty()) {
     inverseBindPose.clear();
+  }
   inverseBindPose.reserve(bindState.jointState.size());
-  for (const auto& t : bindState.jointState)
+  for (const auto& t : bindState.jointState) {
     inverseBindPose.push_back(t.transformation.inverse());
+  }
 }
 
 template <typename T>
@@ -572,11 +580,13 @@ CharacterParameters CharacterT<T>::splitParameters(
     const ParameterSet& parameterSet) {
   auto parameterSplit = parameters;
   auto offsetSplit = parameters;
-  for (int j = 0; j < offsetSplit.pose.size(); j++)
-    if (parameterSet.test(j))
+  for (int j = 0; j < offsetSplit.pose.size(); j++) {
+    if (parameterSet.test(j)) {
       parameterSplit.pose[j] = 0.0f;
-    else
+    } else {
       offsetSplit.pose[j] = 0.0f;
+    }
+  }
   parameterSplit.offsets = character.parameterTransform.apply(offsetSplit);
   return parameterSplit;
 }

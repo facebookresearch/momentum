@@ -31,8 +31,9 @@ void loadC3dFiles(const filesystem::path& subgroup, std::vector<filesystem::path
   ASSERT_TRUE(filesystem::is_directory(folderPath));
   pathsOut.clear();
   for (const auto& entry : filesystem::recursive_directory_iterator(folderPath)) {
-    if (filesystem::is_regular_file(entry) && entry.path().extension() == kExt)
+    if (filesystem::is_regular_file(entry) && entry.path().extension() == kExt) {
       pathsOut.push_back(entry.path());
+    }
   }
 }
 

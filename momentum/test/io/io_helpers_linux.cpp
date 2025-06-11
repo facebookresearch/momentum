@@ -18,8 +18,9 @@ std::int64_t GetPID() {
 
 std::optional<std::string> GetEnvVar(std::string_view name) {
   std::string envvar_name{name};
-  if (const char* const result = getenv(envvar_name.c_str()))
+  if (const char* const result = getenv(envvar_name.c_str())) {
     return result;
+  }
   return {};
 }
 

@@ -68,8 +68,9 @@ void MultiposeSolverT<T>::doIteration() {
 
     skelState.set(fn->parameterTransform_->apply(frameParameters), *fn->skeleton_);
     for (auto&& solvable : fn->errorFunctions_[f]) {
-      if (solvable->getWeight() <= 0.0f)
+      if (solvable->getWeight() <= 0.0f) {
         continue;
+      }
 
       const size_t n = solvable->getJacobianSize();
       const size_t jacobianSize = n + 8 - (n % 8);

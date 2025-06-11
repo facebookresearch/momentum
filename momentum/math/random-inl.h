@@ -319,8 +319,9 @@ uint32_t Random<Generator>::getSeed() const {
 
 template <typename Generator>
 void Random<Generator>::setSeed(uint32_t seed) {
-  if (seed == seed_)
+  if (seed == seed_) {
     return;
+  }
   seed_ = seed;
   generator_.seed(seed_);
 }

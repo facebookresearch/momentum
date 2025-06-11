@@ -49,10 +49,11 @@ bool hasMomentumExtension(const fx::gltf::Document& model) {
 
 const nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
   if (extensionsAndExtras.count("extensions") != 0 &&
-      extensionsAndExtras["extensions"].count("FB_momentum") != 0)
+      extensionsAndExtras["extensions"].count("FB_momentum") != 0) {
     return extensionsAndExtras["extensions"]["FB_momentum"];
-  else
+  } else {
     return nlohmann::json::object();
+  }
 }
 
 TaperedCapsule createCollisionCapsule(const fx::gltf::Node& node, const nlohmann::json& extension) {
@@ -82,10 +83,11 @@ Locator createLocator(const fx::gltf::Node& node, const nlohmann::json& extensio
 
   try {
     loc.weight = extension["weight"];
-    if (extension.contains("limitOrigin"))
+    if (extension.contains("limitOrigin")) {
       loc.limitOrigin = fromJson<Vector3f>(extension["limitOrigin"]);
-    else
+    } else {
       loc.limitOrigin = loc.offset;
+    }
     loc.limitWeight = fromJson<Vector3f>(extension["limitWeight"]);
     loc.locked = fromJson<Vector3i>(extension["locked"]);
   } catch (const std::exception&) {
@@ -223,8 +225,9 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
             "id: {}, size: {}",
             checkId,
             skinSkeletonRoots[checkId].size());
-        if ((checkId == skinId) || skinSkeletonRoots[checkId].size() > 1)
+        if ((checkId == skinId) || skinSkeletonRoots[checkId].size() > 1) {
           continue;
+        }
         if (std::find(ancestors.begin(), ancestors.end(), skinSkeletonRoots[checkId][0]) !=
             ancestors.end()) {
           isIndependent = false;
@@ -270,8 +273,9 @@ void loadHierarchyRecursive(
       "Invalid node id found in the gltf hierarchy: {}",
       nodeId);
   const auto& node = model.nodes[nodeId];
-  if (!isHierarchyNode(node))
+  if (!isHierarchyNode(node)) {
     return;
+  }
 
   const auto& extension = getMomentumExtension(node.extensionsAndExtras);
   const std::string type = extension.value("type", "");
@@ -625,19 +629,23 @@ void loadGlobalExtensions(const fx::gltf::Document& model, Character& character)
     // load additional momentum data if present
     const auto& def = getMomentumExtension(model.extensionsAndExtras);
 
-    if (def.count("transform") > 0)
+    if (def.count("transform") > 0) {
       character.parameterTransform = parameterTransformFromJson(character, def["transform"]);
-    else
+    } else {
       character.parameterTransform =
           ParameterTransform::empty(character.skeleton.joints.size() * kParametersPerJoint);
-    if (def.count("parameterSet") > 0)
+    }
+    if (def.count("parameterSet") > 0) {
       character.parameterTransform.parameterSets =
           parameterSetsFromJson(character, def["parameterSet"]);
-    if (def.count("poseConstraints") > 0)
+    }
+    if (def.count("poseConstraints") > 0) {
       character.parameterTransform.poseConstraints =
           poseConstraintsFromJson(character, def["poseConstraints"]);
-    if (def.count("parameterLimits") > 0)
+    }
+    if (def.count("parameterLimits") > 0) {
       character.parameterLimits = parameterLimitsFromJson(character, def["parameterLimits"]);
+    }
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
@@ -700,8 +708,9 @@ std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Do
   const int32_t poseBuffer = motion.value("poses", int32_t(-1));
   const int32_t offsetBuffer = motion.value("offsets", int32_t(-1));
 
-  if (nframes == 0 || (poseBuffer < 0 && offsetBuffer < 0))
+  if (nframes == 0 || (poseBuffer < 0 && offsetBuffer < 0)) {
     return {};
+  }
 
   // get values from gltf binary buffers
   MatrixXf storedMotion;
@@ -712,8 +721,9 @@ std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Do
     const auto poseValues = copyAccessorBuffer<float>(model, poseBuffer);
     parameterNames = motion.value("parameterNames", std::vector<std::string>());
 
-    if (poseValues.size() != parameterNames.size() * nframes)
+    if (poseValues.size() != parameterNames.size() * nframes) {
       return {};
+    }
 
     storedMotion = Map<const MatrixXf>(poseValues.data(), parameterNames.size(), nframes);
   }
@@ -721,8 +731,9 @@ std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Do
     const auto offsetValues = copyAccessorBuffer<float>(model, offsetBuffer);
     jointNames = motion.value("jointNames", std::vector<std::string>());
 
-    if (offsetValues.size() != jointNames.size() * kParametersPerJoint)
+    if (offsetValues.size() != jointNames.size() * kParametersPerJoint) {
       return {};
+    }
 
     storedIdentity =
         Map<const VectorXf>(offsetValues.data(), jointNames.size() * kParametersPerJoint);
@@ -1114,8 +1125,9 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
   MarkerSequence result;
 
   fx::gltf::Document model = loadModel(filename);
-  if (model.animations.empty())
+  if (model.animations.empty()) {
     return result;
+  }
 
   const auto& def = getMomentumExtension(model.extensionsAndExtras);
   const float fps = def.value("fps", 120.0f);
@@ -1126,15 +1138,17 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
 
   for (const auto& channel : animation.channels) {
     // make sure we're on a translation channel
-    if (channel.target.path != "translation")
+    if (channel.target.path != "translation") {
       continue;
+    }
 
     // get the node for the channel
     const auto& node = model.nodes[channel.target.node];
 
     // ignore skins and cameras; don't ignore meshes because a marker node may have a mesh for viz
-    if (node.skin >= 0 || node.camera >= 0)
+    if (node.skin >= 0 || node.camera >= 0) {
       continue;
+    }
 
     const auto& extension = getMomentumExtension(node.extensionsAndExtras);
     const std::string type = extension.value("type", "");

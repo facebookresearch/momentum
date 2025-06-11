@@ -179,8 +179,9 @@ struct ParameterTransformT {
       isTransformEqual = (transform.cols() == parameterTransform.transform.cols()) &&
           (transform.rows() == parameterTransform.transform.rows());
     }
-    if (!isTransformEqual)
+    if (!isTransformEqual) {
       return false;
+    }
 
     return (
         (name == parameterTransform.name) &&

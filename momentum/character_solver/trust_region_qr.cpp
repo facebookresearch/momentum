@@ -81,8 +81,9 @@ void TrustRegionQRT<T>::doIteration() {
   // Compute the QR factorization of the Jacobian:
   double error_orig = 0.0;
   for (auto errorFunction : sf->getErrorFunctions()) {
-    if (errorFunction->getWeight() <= 0)
+    if (errorFunction->getWeight() <= 0) {
       continue;
+    }
 
     auto rows = errorFunction->getJacobianSize();
 
@@ -92,8 +93,9 @@ void TrustRegionQRT<T>::doIteration() {
     int usedRows = 0;
     error_orig += errorFunction->getJacobian(
         this->parameters_, skeletonState_, jacobian_.mat(), residual_.mat(), usedRows);
-    if (usedRows == 0)
+    if (usedRows == 0) {
       continue;
+    }
 
     this->qrSolver_.addMutating(
         ColumnIndexedMatrix<Eigen::MatrixX<T>>(

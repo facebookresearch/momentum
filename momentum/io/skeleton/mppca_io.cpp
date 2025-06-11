@@ -84,8 +84,9 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
 void saveMppca(const Mppca& mppca, const std::string& name) {
   // write output file
   std::ofstream data(name, std::ios::out | std::ios::binary);
-  if (!data.is_open())
+  if (!data.is_open()) {
     return;
+  }
 
   // write dimensions
   const uint64_t od = gsl::narrow<uint64_t>(mppca.d);

@@ -120,8 +120,9 @@ double FullyDifferentiablePositionErrorFunctionT<T>::getGradient(
   for (size_t i = 0; i < constraints_.size(); ++i) {
     const PositionConstraintT<T>& ct = constraints_[i];
     const Eigen::Vector3<T>& position = constraintsState_.position[i];
-    if (ct.weight == 0)
+    if (ct.weight == 0) {
       continue;
+    }
 
     error += calculatePositionGradient(state, constraints_[i], position, jointGrad_);
   }
@@ -150,8 +151,9 @@ double FullyDifferentiablePositionErrorFunctionT<T>::getJacobian(
   for (size_t i = 0; i < constraints_.size(); ++i) {
     const PositionConstraintT<T>& ct = constraints_[i];
     const Eigen::Vector3<T>& position = constraintsState_.position[i];
-    if (ct.weight == 0)
+    if (ct.weight == 0) {
       continue;
+    }
 
     const auto currentOffset = offset.fetch_add(3, std::memory_order_relaxed);
     error += calculatePositionJacobian(

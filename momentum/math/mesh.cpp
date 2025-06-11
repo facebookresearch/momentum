@@ -23,13 +23,15 @@ void MeshT<T>::updateNormals() {
     // Skip faces with out-of-boundaries indexes
     if (std::any_of(face.begin(), face.end(), [verticesNum](int idx) {
           return idx < 0 || idx >= verticesNum;
-        }))
+        })) {
       continue;
+    }
     // calculate normal and add for each vertex
     const Eigen::Vector3<T> normal =
         (vertices[face[1]] - vertices[face[0]]).cross(vertices[face[2]] - vertices[face[0]]);
-    if (IsNanNoOpt(normal[0]))
+    if (IsNanNoOpt(normal[0])) {
       continue;
+    }
     for (const auto& faceIdx : face) {
       normals[faceIdx] += normal;
     }

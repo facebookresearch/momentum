@@ -15,28 +15,34 @@ using namespace momentum;
 
 TEST(SimdTest, Setters) {
   FloatP f1 = 0.0f;
-  for (auto i = 0u; i < kSimdPacketSize; ++i)
+  for (auto i = 0u; i < kSimdPacketSize; ++i) {
     EXPECT_FLOAT_EQ(f1[i], 0);
+  }
 
   f1 = 4.56f;
-  for (auto i = 0u; i < kSimdPacketSize; ++i)
+  for (auto i = 0u; i < kSimdPacketSize; ++i) {
     EXPECT_FLOAT_EQ(f1[i], 4.56f);
+  }
 
   f1 = -1.23f;
-  for (auto i = 0u; i < kSimdPacketSize; ++i)
+  for (auto i = 0u; i < kSimdPacketSize; ++i) {
     EXPECT_FLOAT_EQ(f1[i], -1.23f);
+  }
 
   IntP i1 = 1;
-  for (auto i = 0u; i < kSimdPacketSize; ++i)
+  for (auto i = 0u; i < kSimdPacketSize; ++i) {
     EXPECT_EQ(i1[i], 1);
+  }
 
   i1 = 2;
-  for (auto i = 0u; i < kSimdPacketSize; ++i)
+  for (auto i = 0u; i < kSimdPacketSize; ++i) {
     EXPECT_EQ(i1[i], 2);
+  }
 
   i1 = -3;
-  for (auto i = 0u; i < kSimdPacketSize; ++i)
+  for (auto i = 0u; i < kSimdPacketSize; ++i) {
     EXPECT_EQ(i1[i], -3);
+  }
 }
 
 TEST(SimdTest, Utilities) {

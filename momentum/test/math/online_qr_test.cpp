@@ -100,9 +100,11 @@ Eigen::MatrixXd randomMatrix(
   // Generate a completely random matrix.
   Eigen::MatrixXd result(rows, cols);
   std::uniform_real_distribution<double> unif(-1, 1);
-  for (Eigen::Index i = 0; i < rows; ++i)
-    for (Eigen::Index j = 0; j < cols; ++j)
+  for (Eigen::Index i = 0; i < rows; ++i) {
+    for (Eigen::Index j = 0; j < cols; ++j) {
       result(i, j) = unif(rng);
+    }
+  }
 
   // Compute the SVD and rescale the singular values.
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(result, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -110,13 +112,15 @@ Eigen::MatrixXd randomMatrix(
   const auto nSVD = std::min(rows, cols);
 
   std::vector<double> singularValues;
-  for (Eigen::Index i = 0; i < nSVD; ++i)
+  for (Eigen::Index i = 0; i < nSVD; ++i) {
     singularValues.push_back(exp((double)i / (double)nSVD * log(conditionNumber)));
+  }
   std::shuffle(singularValues.begin(), singularValues.end(), rng);
 
   Eigen::VectorXd sv = svd.singularValues();
-  for (Eigen::Index i = 0; i < nSVD; ++i)
+  for (Eigen::Index i = 0; i < nSVD; ++i) {
     sv(i) = singularValues[i];
+  }
 
   const Eigen::MatrixXd U = svd.matrixU();
   const Eigen::MatrixXd V = svd.matrixV();
@@ -255,10 +259,12 @@ TEST(OnlineQR, LargeMatrix) {
 
   std::vector<Eigen::MatrixXf> A_mat_f;
   std::vector<Eigen::VectorXf> b_vec_f;
-  for (const auto& a : A_mat)
+  for (const auto& a : A_mat) {
     A_mat_f.push_back(a.cast<float>());
-  for (const auto& b : b_vec)
+  }
+  for (const auto& b : b_vec) {
     b_vec_f.push_back(b.cast<float>());
+  }
 
   const auto nMat = A_mat.size();
 

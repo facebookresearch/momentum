@@ -225,9 +225,10 @@ double LimitErrorFunctionT<T>::getGradient(
             const T jGrad = T(2) * val * tWeight * limit.weight;
             for (auto index = parameterTransform.transform.outerIndexPtr()[parameterIndex];
                  index < parameterTransform.transform.outerIndexPtr()[parameterIndex + 1];
-                 ++index)
+                 ++index) {
               gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
                   jGrad * parameterTransform.transform.valuePtr()[index];
+            }
           }
           if (state.jointParameters(parameterIndex) > data.limits[1]) {
             const T val = state.jointParameters[parameterIndex] - data.limits[1];
@@ -237,9 +238,10 @@ double LimitErrorFunctionT<T>::getGradient(
             const T jGrad = T(2) * val * tWeight * limit.weight;
             for (auto index = parameterTransform.transform.outerIndexPtr()[parameterIndex];
                  index < parameterTransform.transform.outerIndexPtr()[parameterIndex + 1];
-                 ++index)
+                 ++index) {
               gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
                   jGrad * parameterTransform.transform.valuePtr()[index];
+            }
           }
         }
         break;
@@ -368,9 +370,10 @@ double LimitErrorFunctionT<T>::getGradient(
               // gradients
               for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
                    index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index)
+                   ++index) {
                 gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
                     val * parameterTransform.transform.valuePtr()[index];
+              }
             }
             if (this->activeJointParams_[paramIndex + 3 + d]) {
               // calculate joint gradient
@@ -379,9 +382,10 @@ double LimitErrorFunctionT<T>::getGradient(
               // gradients
               for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d];
                    index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index)
+                   ++index) {
                 gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
                     val * parameterTransform.transform.valuePtr()[index];
+              }
             }
           }
           if (this->activeJointParams_[paramIndex + 6]) {
@@ -391,9 +395,10 @@ double LimitErrorFunctionT<T>::getGradient(
             // gradients
             for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
                  index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index)
+                 ++index) {
               gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
                   val * parameterTransform.transform.valuePtr()[index];
+            }
           }
 
           // go to the next joint

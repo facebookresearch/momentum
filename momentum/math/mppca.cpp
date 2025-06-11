@@ -83,11 +83,14 @@ MppcaT<T2> MppcaT<T>::cast() const {
 template <typename T>
 bool MppcaT<T>::isApprox(const MppcaT<T>& mppcaT) const {
   auto vecIsApprox = [](auto& vL, auto& vR) {
-    if (vL.size() != vR.size())
+    if (vL.size() != vR.size()) {
       return false;
-    for (size_t i = 0; i < vL.size(); i++)
-      if (!vL[i].isApprox(vR[i]))
+    }
+    for (size_t i = 0; i < vL.size(); i++) {
+      if (!vL[i].isApprox(vR[i])) {
         return false;
+      }
+    }
     return true;
   };
   return (

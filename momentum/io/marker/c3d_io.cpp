@@ -139,16 +139,18 @@ std::vector<MarkerSequence> loadC3d(const std::string& filename, UpVector up) {
       actorSequence.name = subjectName;
       for (const auto kPointIdx : namePointsPair.second) {
         auto pointLabel = pointLabels[kPointIdx];
-        if (subjectName != "")
+        if (!subjectName.empty()) {
           pointLabel = pointLabel.substr(subjectName.size() + 1);
+        }
 
         // there might be dangling markers with suffix, eg.
         // an official label "T10", but also "T10-1", "T10-2" for a few stray frames
         // We will just ignore these because they probably have been interpolated to the official
         // label #TODO: see if we still want to keep this
         if ((pointLabel.size() >= 2 && pointLabel[pointLabel.size() - 2] == '-') ||
-            (pointLabel.size() >= 3 && pointLabel[pointLabel.size() - 3] == '-'))
+            (pointLabel.size() >= 3 && pointLabel[pointLabel.size() - 3] == '-')) {
           continue;
+        }
 
         markerMap[kPointIdx] = std::make_pair(actorId, markerCount);
 
@@ -177,16 +179,19 @@ std::vector<MarkerSequence> loadC3d(const std::string& filename, UpVector up) {
         const auto kActorId = markerMapEntry.first;
         const auto kMarkerId = markerMapEntry.second;
         // not a marker of interest
-        if ((kActorId == -1) || (kMarkerId == -1))
+        if ((kActorId == -1) || (kMarkerId == -1)) {
           continue;
+        }
 
         auto& marker = templateActors[kActorId][kMarkerId];
         const auto& pointData = framePoints[pointId];
         Vector3d pos{pointData.x(), pointData.y(), pointData.z()};
-        if (std::isnan(pos[0]) || std::isnan(pos[1]) || std::isnan(pos[2]))
+        if (std::isnan(pos[0]) || std::isnan(pos[1]) || std::isnan(pos[2])) {
           continue;
-        if (pos == Eigen::Vector3d::Zero())
+        }
+        if (pos == Eigen::Vector3d::Zero()) {
           continue;
+        }
         pos = toMomentumVector3(pos, up, unitStr);
 
         const auto& residual = pointData.residual();
@@ -211,8 +216,9 @@ std::vector<MarkerSequence> loadC3d(const std::string& filename, UpVector up) {
     return {};
   }
 
-  if (!hasAnim)
+  if (!hasAnim) {
     resultAnim.clear();
+  }
 
   return resultAnim;
 }

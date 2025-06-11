@@ -103,8 +103,9 @@ void saveMmo(
   MatrixXf pc = MatrixXf(poses.rows() + additionalParameters.rows(), poses.cols());
   pc.topRows(poses.rows()) = poses;
 
-  if (additionalParameters.rows() > 0)
+  if (additionalParameters.rows() > 0) {
     pc.bottomRows(additionalParameters.rows()) = additionalParameters;
+  }
 
   saveMmo(filename, pc, scale, parameterNames, jointNames);
 }
@@ -182,8 +183,9 @@ std::tuple<MatrixXf, VectorXf> mapMotionToCharacter(
     auto iter = std::find(
         character.parameterTransform.name.begin(), character.parameterTransform.name.end(), name);
     size_t index = std::distance(character.parameterTransform.name.begin(), iter);
-    if (index >= character.parameterTransform.name.size())
+    if (index >= character.parameterTransform.name.size()) {
       index = kInvalidIndex;
+    }
     pMap.push_back(index);
   }
 
