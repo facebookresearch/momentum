@@ -4184,38 +4184,47 @@ Functions</h2></td></tr>
 <tr class="memitem:aff997e0d661bcb969f96f3375f5df612" id="r_aff997e0d661bcb969f96f3375f5df612"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aff997e0d661bcb969f96f3375f5df612">loadTrc</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cd">UpVector</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">up</a>=<a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda57cec4137b614c87cb4e24a3d003a3e0">UpVector::Y</a>)</td></tr>
 <tr class="memdesc:aff997e0d661bcb969f96f3375f5df612"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads marker data from a TRC file into a <a class="el" href="structmomentum_1_1MarkerSequence.html" title="MarkerSequence stores all the frames from a single capture sequence for one subject (motion capture a...">MarkerSequence</a>.  <br /></td></tr>
 <tr class="separator:aff997e0d661bcb969f96f3375f5df612"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaccd580aaffd16a4e5993228d15ff543" id="r_aaccd580aaffd16a4e5993228d15ff543"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a6cf8e7f472a97049d401906c944fe153">JointParameters</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aaccd580aaffd16a4e5993228d15ff543">loadJointParamsBinary</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>)</td></tr>
-<tr class="separator:aaccd580aaffd16a4e5993228d15ff543"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5901d092fccb819203b0b7ef265269e1" id="r_a5901d092fccb819203b0b7ef265269e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a5901d092fccb819203b0b7ef265269e1">saveMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poses</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &amp;scale, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
+<tr class="memdesc:a5901d092fccb819203b0b7ef265269e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save motion data using character parameter mapping.  <br /></td></tr>
 <tr class="separator:a5901d092fccb819203b0b7ef265269e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa7bcdb542f260a361996c859ff453f3" id="r_afa7bcdb542f260a361996c859ff453f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#afa7bcdb542f260a361996c859ff453f3">saveMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poses</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &amp;scale, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">additionalParameters</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">additionalParameterNames</a>)</td></tr>
-<tr class="separator:afa7bcdb542f260a361996c859ff453f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8fd4ff156abe26d302b72621c9249d7" id="r_ab8fd4ff156abe26d302b72621c9249d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ab8fd4ff156abe26d302b72621c9249d7">saveMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poses</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &amp;scale, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">additionalParameters</a>=<a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>(), gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">additionalParameterNames</a>=std::vector&lt; std::string &gt;())</td></tr>
+<tr class="memdesc:ab8fd4ff156abe26d302b72621c9249d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save motion data with optional additional parameters.  <br /></td></tr>
+<tr class="separator:ab8fd4ff156abe26d302b72621c9249d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d279bc7a08889d48782f236820b114c" id="r_a7d279bc7a08889d48782f236820b114c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7d279bc7a08889d48782f236820b114c">saveMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poses</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &amp;scale, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterNames</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointNames</a>)</td></tr>
+<tr class="memdesc:a7d279bc7a08889d48782f236820b114c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save motion data with explicit parameter and joint names.  <br /></td></tr>
 <tr class="separator:a7d279bc7a08889d48782f236820b114c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45b53f67fdfda74981dd0cdd85b17502" id="r_a45b53f67fdfda74981dd0cdd85b17502"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>, <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a45b53f67fdfda74981dd0cdd85b17502">mapMotionToCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poses</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &amp;offsets, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterNames</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointNames</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
+<tr class="memdesc:a45b53f67fdfda74981dd0cdd85b17502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map motion data from one parameter space to character parameter space.  <br /></td></tr>
 <tr class="separator:a45b53f67fdfda74981dd0cdd85b17502"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06859d72fe3c7c2272c5eda53f6bcd8a" id="r_a06859d72fe3c7c2272c5eda53f6bcd8a"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>, <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a06859d72fe3c7c2272c5eda53f6bcd8a">loadMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
+<tr class="memdesc:a06859d72fe3c7c2272c5eda53f6bcd8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load motion data and map to character parameter space.  <br /></td></tr>
 <tr class="separator:a06859d72fe3c7c2272c5eda53f6bcd8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad361c4ef0a0b2b58764291ee06a871f1" id="r_ad361c4ef0a0b2b58764291ee06a871f1"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>, std::vector&lt; std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ad361c4ef0a0b2b58764291ee06a871f1">getAuxilaryDataFromMotion</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poses</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterNames</a>)</td></tr>
+<tr class="memdesc:ad361c4ef0a0b2b58764291ee06a871f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract auxiliary data from motion parameters.  <br /></td></tr>
 <tr class="separator:ad361c4ef0a0b2b58764291ee06a871f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a024533134e914471260571ce2cdfff9c" id="r_a024533134e914471260571ce2cdfff9c"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>, <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a>, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a024533134e914471260571ce2cdfff9c">loadMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>)</td></tr>
+<tr class="memdesc:a024533134e914471260571ce2cdfff9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load motion data from file.  <br /></td></tr>
 <tr class="separator:a024533134e914471260571ce2cdfff9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a681143b9fcc046150dcf7e3ce0dac0f5" id="r_a681143b9fcc046150dcf7e3ce0dac0f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a681143b9fcc046150dcf7e3ce0dac0f5">loadBlendShapeBase</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>)</td></tr>
-<tr class="separator:a681143b9fcc046150dcf7e3ce0dac0f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa55f867c0bd68610b2685cf773065e45" id="r_aa55f867c0bd68610b2685cf773065e45"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aa55f867c0bd68610b2685cf773065e45">loadBlendShapeBase</a> (std::istream &amp;data, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>)</td></tr>
-<tr class="separator:aa55f867c0bd68610b2685cf773065e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b35444b18e26cbd1b6260f79e7016f1" id="r_a3b35444b18e26cbd1b6260f79e7016f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a3b35444b18e26cbd1b6260f79e7016f1">loadBlendShapeBase</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>=-1, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>=-1)</td></tr>
+<tr class="memdesc:a3b35444b18e26cbd1b6260f79e7016f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads blend shape vectors from a file without base shape.  <br /></td></tr>
+<tr class="separator:a3b35444b18e26cbd1b6260f79e7016f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac95df03dcec36940396af0f20b6e28e9" id="r_ac95df03dcec36940396af0f20b6e28e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ac95df03dcec36940396af0f20b6e28e9">loadBlendShapeBase</a> (std::istream &amp;data, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>=-1, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>=-1)</td></tr>
+<tr class="memdesc:ac95df03dcec36940396af0f20b6e28e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads blend shape vectors from a stream without base shape.  <br /></td></tr>
+<tr class="separator:ac95df03dcec36940396af0f20b6e28e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fdaa36b2e45269350a6dd3302fa4e98" id="r_a8fdaa36b2e45269350a6dd3302fa4e98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShape.html">BlendShape</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a8fdaa36b2e45269350a6dd3302fa4e98">loadBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>=-1, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>=-1)</td></tr>
-<tr class="memdesc:a8fdaa36b2e45269350a6dd3302fa4e98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a blend shape from a given filepath.  <br /></td></tr>
+<tr class="memdesc:a8fdaa36b2e45269350a6dd3302fa4e98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a blend shape from a file, including base shape and shape vectors.  <br /></td></tr>
 <tr class="separator:a8fdaa36b2e45269350a6dd3302fa4e98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10123f57cf421853ef6735758ac044d8" id="r_a10123f57cf421853ef6735758ac044d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShape.html">BlendShape</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a10123f57cf421853ef6735758ac044d8">loadBlendShape</a> (std::istream &amp;data, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>)</td></tr>
-<tr class="separator:a10123f57cf421853ef6735758ac044d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7c946e4fed93659d55eeeea7fdd697f" id="r_ac7c946e4fed93659d55eeeea7fdd697f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ac7c946e4fed93659d55eeeea7fdd697f">ReadShapeVectors</a> (std::istream &amp;data, <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;shapeVectors, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint64_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numRows</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint64_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numCols</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>)</td></tr>
-<tr class="separator:ac7c946e4fed93659d55eeeea7fdd697f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa087794c42fbcebb2d619dba85a305d4" id="r_aa087794c42fbcebb2d619dba85a305d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShape.html">BlendShape</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aa087794c42fbcebb2d619dba85a305d4">loadBlendShape</a> (std::istream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>=-1, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>=-1)</td></tr>
+<tr class="memdesc:aa087794c42fbcebb2d619dba85a305d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a blend shape from a stream, including base shape and shape vectors.  <br /></td></tr>
+<tr class="separator:aa087794c42fbcebb2d619dba85a305d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37308e851f1a6e12edb5bb972af3d5f1" id="r_a37308e851f1a6e12edb5bb972af3d5f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a37308e851f1a6e12edb5bb972af3d5f1">saveBlendShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1BlendShape.html">BlendShape</a> &amp;blendShape)</td></tr>
+<tr class="memdesc:a37308e851f1a6e12edb5bb972af3d5f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a blend shape to a file.  <br /></td></tr>
 <tr class="separator:a37308e851f1a6e12edb5bb972af3d5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fe964abd34f6aef0780777c0a9baba9" id="r_a1fe964abd34f6aef0780777c0a9baba9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a1fe964abd34f6aef0780777c0a9baba9">saveBlendShape</a> (std::ostream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">os</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1BlendShape.html">BlendShape</a> &amp;blendShape)</td></tr>
+<tr class="memdesc:a1fe964abd34f6aef0780777c0a9baba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a blend shape to a stream.  <br /></td></tr>
 <tr class="separator:a1fe964abd34f6aef0780777c0a9baba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa770b575d9341006d44955b70ec37b55" id="r_aa770b575d9341006d44955b70ec37b55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1PoseShape.html">PoseShape</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aa770b575d9341006d44955b70ec37b55">loadPoseShape</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
+<tr class="memdesc:aa770b575d9341006d44955b70ec37b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads pose shape data from a binary file.  <br /></td></tr>
 <tr class="separator:aa770b575d9341006d44955b70ec37b55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aafe99f99400a4b902c75a58ce76241eb" id="r_aafe99f99400a4b902c75a58ce76241eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aafe99f99400a4b902c75a58ce76241eb">loadLocators</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="parameter__limits__io_8cpp.html#ada778489ae2a13019d0156bc37013fbf">skeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>)</td></tr>
 <tr class="separator:aafe99f99400a4b902c75a58ce76241eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -28624,6 +28633,17 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Extract auxiliary data from motion parameters. </p>
+<p>Auxiliary parameters are identified by names wrapped with double underscores (e.g., "__param__")</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">poses</td><td>Motion poses matrix </td></tr>
+    <tr><td class="paramname">parameterNames</td><td>Names of all parameters </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Tuple of (auxiliary data matrix, auxiliary parameter names without underscores) </dd></dl>
+
 </div>
 </div>
 <a id="a73b2cf9a4e21b4bec44100ab3e5a80db" name="a73b2cf9a4e21b4bec44100ab3e5a80db"></a>
@@ -29693,23 +29713,22 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Loads a blend shape from a given filepath. </p>
-<p>This function reads blend shape data from the provided file, including the mean shape and shape vectors. If <code>expectedShapes</code> or <code>expectedVertices</code> are provided, the function will attempt to limit the number of shape vectors or vertices read accordingly.</p>
+<p>Loads a blend shape from a file, including base shape and shape vectors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">filename</td><td>The file path containing the blend shape data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">expectedShapes</td><td>The expected number of shape vectors to read. If this value is greater than 0, it will limit the number of shape vectors read. Defaults to 0, meaning all shape vectors will be read. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">expectedVertices</td><td>The expected number of vertices to read. If this value is greater than 0, it will limit the number of vertices read. Defaults to 0, meaning all vertices will be read. </td></tr>
+    <tr><td class="paramname">filename</td><td>Path to the blend shape data file </td></tr>
+    <tr><td class="paramname">expectedShapes</td><td>Limits number of shape vectors loaded if &gt; 0, otherwise loads all </td></tr>
+    <tr><td class="paramname">expectedVertices</td><td>Limits number of vertices loaded if &gt; 0, otherwise loads all </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="structmomentum_1_1BlendShape.html" title="Skinning class that combines blend shape vectors with a base shape.">BlendShape</a> object containing the loaded data.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>This function only supports parsing from a local file. If you want to parse from a non-local path, you may need to parse it using your favorite resource retriever into a stream buffer and use the buffer version of this function. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structmomentum_1_1BlendShape.html" title="Skinning class that combines blend shape vectors with a base shape.">BlendShape</a> object with loaded data</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Only supports local files. For non-local paths, use the stream version. </dd></dl>
 
 </div>
 </div>
-<a id="a10123f57cf421853ef6735758ac044d8" name="a10123f57cf421853ef6735758ac044d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a10123f57cf421853ef6735758ac044d8">&#9670;&#160;</a></span>loadBlendShape() <span class="overload">[2/2]</span></h2>
+<a id="aa087794c42fbcebb2d619dba85a305d4" name="aa087794c42fbcebb2d619dba85a305d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa087794c42fbcebb2d619dba85a305d4">&#9670;&#160;</a></span>loadBlendShape() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -29718,19 +29737,19 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td class="memname"><a class="el" href="structmomentum_1_1BlendShape.html">BlendShape</a> momentum::loadBlendShape </td>
           <td>(</td>
           <td class="paramtype">std::istream &amp;&#160;</td>
-          <td class="paramname"><em>data</em>, </td>
+          <td class="paramname"><em>is</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedShapes</em>, </td>
+          <td class="paramname"><em>expectedShapes</em> = <code>-1</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedVertices</em>&#160;</td>
+          <td class="paramname"><em>expectedVertices</em> = <code>-1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -29740,10 +29759,21 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Loads a blend shape from a stream, including base shape and shape vectors. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">is</td><td>Input stream containing blend shape data </td></tr>
+    <tr><td class="paramname">expectedShapes</td><td>Limits number of shape vectors loaded if &gt; 0, otherwise loads all </td></tr>
+    <tr><td class="paramname">expectedVertices</td><td>Limits number of vertices loaded if &gt; 0, otherwise loads all </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structmomentum_1_1BlendShape.html" title="Skinning class that combines blend shape vectors with a base shape.">BlendShape</a> object with loaded data </dd></dl>
+
 </div>
 </div>
-<a id="a681143b9fcc046150dcf7e3ce0dac0f5" name="a681143b9fcc046150dcf7e3ce0dac0f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a681143b9fcc046150dcf7e3ce0dac0f5">&#9670;&#160;</a></span>loadBlendShapeBase() <span class="overload">[1/2]</span></h2>
+<a id="a3b35444b18e26cbd1b6260f79e7016f1" name="a3b35444b18e26cbd1b6260f79e7016f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b35444b18e26cbd1b6260f79e7016f1">&#9670;&#160;</a></span>loadBlendShapeBase() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -29758,13 +29788,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedShapes</em>, </td>
+          <td class="paramname"><em>expectedShapes</em> = <code>-1</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedVertices</em>&#160;</td>
+          <td class="paramname"><em>expectedVertices</em> = <code>-1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -29774,10 +29804,21 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Loads blend shape vectors from a file without base shape. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Path to the blend shape base data file </td></tr>
+    <tr><td class="paramname">expectedShapes</td><td>Limits number of shape vectors loaded if &gt; 0, otherwise loads all </td></tr>
+    <tr><td class="paramname">expectedVertices</td><td>Limits number of vertices loaded if &gt; 0, otherwise loads all </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structmomentum_1_1BlendShapeBase.html" title="Skinning class that manages blend shape vectors/offsets.">BlendShapeBase</a> object with loaded shape vectors </dd></dl>
+
 </div>
 </div>
-<a id="aa55f867c0bd68610b2685cf773065e45" name="aa55f867c0bd68610b2685cf773065e45"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa55f867c0bd68610b2685cf773065e45">&#9670;&#160;</a></span>loadBlendShapeBase() <span class="overload">[2/2]</span></h2>
+<a id="ac95df03dcec36940396af0f20b6e28e9" name="ac95df03dcec36940396af0f20b6e28e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac95df03dcec36940396af0f20b6e28e9">&#9670;&#160;</a></span>loadBlendShapeBase() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -29792,13 +29833,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedShapes</em>, </td>
+          <td class="paramname"><em>expectedShapes</em> = <code>-1</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedVertices</em>&#160;</td>
+          <td class="paramname"><em>expectedVertices</em> = <code>-1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -29807,6 +29848,17 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Loads blend shape vectors from a stream without base shape. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>Input stream containing blend shape base data </td></tr>
+    <tr><td class="paramname">expectedShapes</td><td>Limits number of shape vectors loaded if &gt; 0, otherwise loads all </td></tr>
+    <tr><td class="paramname">expectedVertices</td><td>Limits number of vertices loaded if &gt; 0, otherwise loads all </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structmomentum_1_1BlendShapeBase.html" title="Skinning class that manages blend shape vectors/offsets.">BlendShapeBase</a> object with loaded shape vectors </dd></dl>
 
 </div>
 </div>
@@ -30267,24 +30319,6 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
-<a id="aaccd580aaffd16a4e5993228d15ff543" name="aaccd580aaffd16a4e5993228d15ff543"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaccd580aaffd16a4e5993228d15ff543">&#9670;&#160;</a></span>loadJointParamsBinary()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt; <a class="el" href="namespacemomentum.html#a6cf8e7f472a97049d401906c944fe153">JointParameters</a> &gt; momentum::loadJointParamsBinary </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;&#160;</td>
-          <td class="paramname"><em>filename</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="aafe99f99400a4b902c75a58ce76241eb" name="aafe99f99400a4b902c75a58ce76241eb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aafe99f99400a4b902c75a58ce76241eb">&#9670;&#160;</a></span>loadLocators()</h2>
 
@@ -30474,6 +30508,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Load motion data from file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Input file path </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Tuple of (poses, scale, parameter names, joint names) </dd></dl>
+
 </div>
 </div>
 <a id="a06859d72fe3c7c2272c5eda53f6bcd8a" name="a06859d72fe3c7c2272c5eda53f6bcd8a"></a>
@@ -30501,6 +30544,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Load motion data and map to character parameter space. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Input file path </td></tr>
+    <tr><td class="paramname">character</td><td>Target character for parameter mapping </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Tuple of (mapped poses, mapped scale) </dd></dl>
 
 </div>
 </div>
@@ -30934,6 +30987,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Loads pose shape data from a binary file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Path to the pose shape data file </td></tr>
+    <tr><td class="paramname">character</td><td>Character containing skeleton and mesh for validation and joint mapping </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> with loaded data, or empty <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> if file cannot be opened </dd></dl>
 
 </div>
 </div>
@@ -31781,6 +31844,19 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Map motion data from one parameter space to character parameter space. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">poses</td><td>Source motion poses </td></tr>
+    <tr><td class="paramname">offsets</td><td>Source joint offsets </td></tr>
+    <tr><td class="paramname">parameterNames</td><td>Source parameter names </td></tr>
+    <tr><td class="paramname">jointNames</td><td>Source joint names </td></tr>
+    <tr><td class="paramname">character</td><td>Target character definition </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Tuple of (mapped poses, mapped offsets) </dd></dl>
 
 </div>
 </div>
@@ -33473,58 +33549,6 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
-<a id="ac7c946e4fed93659d55eeeea7fdd697f" name="ac7c946e4fed93659d55eeeea7fdd697f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac7c946e4fed93659d55eeeea7fdd697f">&#9670;&#160;</a></span>ReadShapeVectors()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> momentum::ReadShapeVectors </td>
-          <td>(</td>
-          <td class="paramtype">std::istream &amp;&#160;</td>
-          <td class="paramname"><em>data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
-          <td class="paramname"><em>shapeVectors</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint64_t</a>&#160;</td>
-          <td class="paramname"><em>numRows</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint64_t</a>&#160;</td>
-          <td class="paramname"><em>numCols</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedShapes</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&#160;</td>
-          <td class="paramname"><em>expectedVertices</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="af06f93a2a4a610dba129595cf6804b02" name="af06f93a2a4a610dba129595cf6804b02"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af06f93a2a4a610dba129595cf6804b02">&#9670;&#160;</a></span>redirectLogsToRerun()</h2>
 
@@ -34265,6 +34289,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Saves a blend shape to a file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Output file path for the blend shape data </td></tr>
+    <tr><td class="paramname">blendShape</td><td><a class="el" href="structmomentum_1_1BlendShape.html" title="Skinning class that combines blend shape vectors with a base shape.">BlendShape</a> object to save </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a1fe964abd34f6aef0780777c0a9baba9" name="a1fe964abd34f6aef0780777c0a9baba9"></a>
@@ -34292,6 +34325,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Saves a blend shape to a stream. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">os</td><td>Output stream to write blend shape data </td></tr>
+    <tr><td class="paramname">blendShape</td><td><a class="el" href="structmomentum_1_1BlendShape.html" title="Skinning class that combines blend shape vectors with a base shape.">BlendShape</a> object to save </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -34670,8 +34712,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
-<a id="afa7bcdb542f260a361996c859ff453f3" name="afa7bcdb542f260a361996c859ff453f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa7bcdb542f260a361996c859ff453f3">&#9670;&#160;</a></span>saveMmo() <span class="overload">[1/3]</span></h2>
+<a id="ab8fd4ff156abe26d302b72621c9249d7" name="ab8fd4ff156abe26d302b72621c9249d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8fd4ff156abe26d302b72621c9249d7">&#9670;&#160;</a></span>saveMmo() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -34704,13 +34746,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
-          <td class="paramname"><em>additionalParameters</em>, </td>
+          <td class="paramname"><em>additionalParameters</em> = <code><a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>()</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &gt;&#160;</td>
-          <td class="paramname"><em>additionalParameterNames</em>&#160;</td>
+          <td class="paramname"><em>additionalParameterNames</em> = <code>std::vector&lt;&#160;std::string&#160;&gt;()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -34719,6 +34761,19 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Save motion data with optional additional parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Output file path </td></tr>
+    <tr><td class="paramname">poses</td><td>Motion poses matrix (parameters x frames) </td></tr>
+    <tr><td class="paramname">scale</td><td>Joint scale parameters </td></tr>
+    <tr><td class="paramname">character</td><td>Character definition for parameter mapping </td></tr>
+    <tr><td class="paramname">additionalParameters</td><td>Extra parameters to store alongside poses </td></tr>
+    <tr><td class="paramname">additionalParameterNames</td><td>Names for additional parameters </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -34766,6 +34821,18 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>Save motion data with explicit parameter and joint names. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Output file path </td></tr>
+    <tr><td class="paramname">poses</td><td>Motion poses matrix (parameters x frames) </td></tr>
+    <tr><td class="paramname">scale</td><td>Joint scale parameters </td></tr>
+    <tr><td class="paramname">parameterNames</td><td>Names of motion parameters </td></tr>
+    <tr><td class="paramname">jointNames</td><td>Names of skeleton joints </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a5901d092fccb819203b0b7ef265269e1" name="a5901d092fccb819203b0b7ef265269e1"></a>
@@ -34805,6 +34872,17 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Save motion data using character parameter mapping. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Output file path </td></tr>
+    <tr><td class="paramname">poses</td><td>Motion poses as span of vectors, each vector represents one frame </td></tr>
+    <tr><td class="paramname">scale</td><td>Joint scale parameters </td></tr>
+    <tr><td class="paramname">character</td><td>Character definition for parameter mapping </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
