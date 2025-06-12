@@ -579,12 +579,20 @@ void parseSkinnedModel(
             std::back_inserter(vertices.textureIndices));
       } else if (reference == RefDirect) {
         // Direct means the UV array is already in order.
-        MT_THROW_IF(
-            textureCoords.size() != vertices.indices.size(),
-            "Mismatch between 'Direct' texture coord array size {} and vertex indices size {}.",
-            textureCoords.size(),
-            vertices.indices.size());
-        vertices.textureIndices.resize(vertices.indices.size());
+        if (mapping == MappingByPolyVertex) {
+          MT_THROW_IF(
+              textureCoords.size() != vertices.indices.size(),
+              "Mismatch between 'Direct' texture coord array size {} and vertex indices size {}.",
+              textureCoords.size(),
+              vertices.indices.size());
+          vertices.textureIndices.resize(vertices.indices.size());
+        } else if (mapping == MappingByVertex) {
+          MT_THROW_IF(
+              textureCoords.size() != nVerts,
+              "Mismatch between 'Direct' texture coord array size {} and vertex count {}.",
+              textureCoords.size(),
+              nVerts);
+        }
         std::iota(vertices.textureIndices.begin(), vertices.textureIndices.end(), 0);
       } else {
         MT_THROW("UV reading code failed to handle a valid reference type. This is a bug.");
