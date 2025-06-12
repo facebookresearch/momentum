@@ -36,20 +36,20 @@ class FullyDifferentiableSkeletonErrorFunctionT {
  public:
   virtual ~FullyDifferentiableSkeletonErrorFunctionT() = default;
 
-  virtual const char* name() const = 0;
+  [[nodiscard]] virtual const char* name() const = 0;
 
   // Get a list of all the differentiable inputs for this error function
   // (excluding the modelParameters).
-  virtual std::vector<std::string> inputs() const = 0;
+  [[nodiscard]] virtual std::vector<std::string> inputs() const = 0;
 
   // Get the current input values.  A given input will be unrolled into a flat vector,
   // so, for example, if the input was an n x 3 vector of constraint targets, getInput
   // would return a (3n x 1) VectorXf with the targets packed (t1x t1y t1z t2x t2y t2z ...)
-  Eigen::VectorX<T> getInput(const std::string& name) const;
+  [[nodiscard]] Eigen::VectorX<T> getInput(const std::string& name) const;
   void getInput(const std::string& name, Eigen::Ref<Eigen::VectorX<T>> value) const;
 
   // Efficiently get the size of the input (e.g., getInput(name).size()).
-  virtual Eigen::Index getInputSize(const std::string& name) const = 0;
+  [[nodiscard]] virtual Eigen::Index getInputSize(const std::string& name) const = 0;
 
   // Set the current input values:
   void setInput(const std::string& name, Eigen::Ref<const Eigen::VectorX<T>> value);

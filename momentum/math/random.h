@@ -193,7 +193,7 @@ class Random final {
   /// @param[in] sigma The standard deviation of the Gaussian distribution
   template <typename DynamicVector>
   [[nodiscard]] DynamicVector
-  normal(int size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max);
+  normal(int size, typename DynamicVector::Scalar mean, typename DynamicVector::Scalar sigma);
 
   /// Generates a random value from the Gaussian distribution
   ///
@@ -206,11 +206,11 @@ class Random final {
   [[nodiscard]] DynamicMatrix normal(
       int rows,
       int cols,
-      typename DynamicMatrix::Scalar min,
-      typename DynamicMatrix::Scalar max);
+      typename DynamicMatrix::Scalar mean,
+      typename DynamicMatrix::Scalar sigma);
 
   /// Returns the seed.
-  uint32_t getSeed() const;
+  [[nodiscard]] uint32_t getSeed() const;
 
   /// Sets a new seed for the internal random number engine.
   void setSeed(uint32_t seed);

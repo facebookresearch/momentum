@@ -33,11 +33,11 @@ class GeneralizedLossT {
   // Calculations with log and exp usually require double precision.
   GeneralizedLossT(const T& a = kL2, const T& c = T(1));
 
-  T value(const T& sqrError) const;
+  [[nodiscard]] T value(const T& sqrError) const;
 
   /// Derivative of the loss with respective to the input squared error.
   /// This effectively scales the gradient of what's being squared.
-  T deriv(const T& sqrError) const;
+  [[nodiscard]] T deriv(const T& sqrError) const;
 
  protected:
   enum class LossType {
