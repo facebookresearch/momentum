@@ -877,6 +877,7 @@ MatrixXf parseAnimation(
     const size_t endIndex = startIndex + ((mode == 2) ? 1 : 3);
     for (size_t i = startIndex; i < endIndex; ++i) {
       if (writtenJoints.at(i)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
         char propertyName[128];
         property.toString(propertyName);
         MT_LOGW(
