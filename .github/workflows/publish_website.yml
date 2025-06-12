@@ -4,11 +4,13 @@ on:
   push:
     paths:
       - "momentum/website/**"
+      - "momentum/Doxyfile"
       - "pymomentum/**"
       - ".github/workflows/publish_website.yml"
   pull_request:
     paths:
       - "momentum/website/**"
+      - "momentum/Doxyfile"
       - "pymomentum/**"
       - ".github/workflows/publish_website.yml"
   workflow_dispatch:
