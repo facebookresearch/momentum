@@ -102,7 +102,7 @@ std::pair<size_t, std::vector<size_t>> getDimensions(
     }
   }
   jacobianSize += 8 - (jacobianSize % 8);
-  return std::make_pair(std::move(jacobianSize), std::move(offset));
+  return std::make_pair(jacobianSize, std::move(offset));
 }
 
 template <typename T>
