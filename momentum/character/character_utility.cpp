@@ -308,7 +308,7 @@ LocatorList removeDuplicateLocators(LocatorList locators, const LocatorList& toR
 } // namespace
 
 Character scaleCharacter(const Character& character, float s) {
-  return Character(
+  return {
       scale(character.skeleton, s),
       character.parameterTransform,
       scale(character.parameterLimits, s),
@@ -320,7 +320,7 @@ Character scaleCharacter(const Character& character, float s) {
       character.blendShape,
       character.faceExpressionBlendShape,
       character.name,
-      scaleInverseBindPose(character.inverseBindPose, s));
+      scaleInverseBindPose(character.inverseBindPose, s)};
 }
 
 namespace {
@@ -379,7 +379,7 @@ TransformationList transformInverseBindPose(
 } // namespace
 
 Character transformCharacter(const Character& character, const Affine3f& xform) {
-  return Character(
+  return {
       transformSkeleton(character.skeleton, xform),
       character.parameterTransform,
       character.parameterLimits,
@@ -391,7 +391,7 @@ Character transformCharacter(const Character& character, const Affine3f& xform) 
       character.blendShape,
       character.faceExpressionBlendShape,
       character.name,
-      transformInverseBindPose(character.inverseBindPose, xform));
+      transformInverseBindPose(character.inverseBindPose, xform)};
 }
 
 Character replaceSkeletonHierarchy(
@@ -543,7 +543,7 @@ Character replaceSkeletonHierarchy(
     }
   }
 
-  return Character(
+  return {
       combinedSkeleton,
       combinedParamTransform,
       combinedParameterLimits,
@@ -552,7 +552,7 @@ Character replaceSkeletonHierarchy(
       skinWeightsCombined.get(),
       combinedCollisionGeometry.empty() ? nullptr : &combinedCollisionGeometry,
       tgtCharacter.poseShapes.get(),
-      tgtCharacter.blendShape);
+      tgtCharacter.blendShape};
 }
 
 Character removeJoints(const Character& character, gsl::span<const size_t> jointsToRemove) {
@@ -634,7 +634,7 @@ Character removeJoints(const Character& character, gsl::span<const size_t> joint
   const ParameterLimits resultParameterLimits =
       mapParameterLimits(character.parameterLimits, srcToResultJoints, srcToResultParameters);
 
-  return Character(
+  return {
       resultSkeleton,
       resultParamTransform,
       resultParameterLimits,
@@ -643,7 +643,7 @@ Character removeJoints(const Character& character, gsl::span<const size_t> joint
       resultSkinWeights.get(),
       resultCollisionGeometry.empty() ? nullptr : &resultCollisionGeometry,
       character.poseShapes.get(),
-      character.blendShape);
+      character.blendShape};
 }
 
 MatrixXf mapMotionToCharacter(
