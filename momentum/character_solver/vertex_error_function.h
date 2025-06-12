@@ -50,16 +50,17 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
       size_t maxThreads = 0);
   virtual ~VertexErrorFunctionT() override;
 
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& modelParameters,
+      const SkeletonStateT<T>& state) final;
 
   double getGradient(
-      const ModelParametersT<T>& params,
+      const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
       Eigen::Ref<Eigen::VectorX<T>> gradient) final;
 
   double getJacobian(
-      const ModelParametersT<T>& params,
+      const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
@@ -102,7 +103,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
       const VertexConstraintT<T>& constr,
-      Eigen::Ref<Eigen::VectorX<T>> jointGrad) const;
+      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   double calculateNormalGradient(
       const ModelParametersT<T>& modelParameters,
@@ -110,7 +111,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const VertexConstraintT<T>& constr,
       T sourceNormalWeight,
       T targetNormalWeight,
-      Eigen::Ref<Eigen::VectorX<T>> jointGrad) const;
+      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   // Utility function used now in calculateNormalJacobian and calculatePositionGradient
   // to calculate derivatives with respect to position in world space (considering skinning)

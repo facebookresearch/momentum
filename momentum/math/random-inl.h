@@ -379,9 +379,9 @@ Affine3<T> uniformAffine3(T scaleMin, T scaleMax, const Vector3<T>& min, const V
 }
 
 template <typename T>
-T normal(const T& min, const T& max) {
+T normal(const T& mean, const T& sigma) {
   auto& rand = Random<>::GetSingleton();
-  return rand.normal(min, max);
+  return rand.normal(mean, sigma);
 }
 
 template <typename FixedSizeT>

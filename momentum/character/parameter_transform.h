@@ -200,7 +200,7 @@ using ParameterTransformd = ParameterTransformT<double>;
 template <typename T>
 [[nodiscard]] std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
     const ParameterTransformT<T>& paramTransform,
-    const ParameterLimits& parameterLimits,
+    const ParameterLimits& paramLimitsOld,
     const ParameterSet& paramSet);
 
 /// Construct a new parameter transform where the joints have been mapped to a
@@ -216,12 +216,12 @@ template <typename T>
 
 [[nodiscard]] std::tuple<ParameterTransform, ParameterLimits> addBlendShapeParameters(
     ParameterTransform paramTransform,
-    ParameterLimits parameterLimits,
+    ParameterLimits paramLimits,
     Eigen::Index nBlendShapes);
 
 [[nodiscard]] std::tuple<ParameterTransform, ParameterLimits> addFaceExpressionParameters(
     ParameterTransform paramTransform,
-    ParameterLimits parameterLimits,
+    ParameterLimits paramLimits,
     Eigen::Index nFaceExpressionBlendShapes);
 
 } // namespace momentum
