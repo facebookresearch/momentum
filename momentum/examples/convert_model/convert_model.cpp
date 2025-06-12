@@ -79,36 +79,28 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
 } // namespace
 
 int main(int argc, char** argv) {
-  const std::string appName(argv[0]);
-  CLI::App app(appName);
-  auto options = setupOptions(app);
-  CLI11_PARSE(app, argc, argv);
-
-  // Verify output file extension is supported
-  const filesystem::path output(options->output_model_file);
-  const auto oextension = output.extension();
-  if (oextension != ".fbx" && oextension != ".glb" && oextension != ".gltf") {
-    MT_LOGE("Unknown output file format: {}", options->output_model_file);
-    return EXIT_FAILURE;
-  }
-
-  // load character and markers
-  Character character;
-  const bool hasModel = !options->input_model_file.empty();
   try {
+    const std::string appName(argv[0]);
+    CLI::App app(appName);
+    auto options = setupOptions(app);
+    CLI11_PARSE(app, argc, argv);
+
+    // Verify output file extension is supported
+    const filesystem::path output(options->output_model_file);
+    const auto oextension = output.extension();
+    if (oextension != ".fbx" && oextension != ".glb" && oextension != ".gltf") {
+      MT_LOGE("Unknown output file format: {}", options->output_model_file);
+      return EXIT_FAILURE;
+    }
+
+    // load character and markers
+    Character character;
+    const bool hasModel = !options->input_model_file.empty();
     if (hasModel) {
       character = loadFullCharacter(
           options->input_model_file, options->input_params_file, options->input_locator_file);
     }
-  } catch (std::exception& e) {
-    MT_LOGE("Failed to load character from: {}. Error: {}", options->input_model_file, e.what());
-    return EXIT_FAILURE;
-  } catch (...) {
-    MT_LOGE("Unknown file reading error");
-    return EXIT_FAILURE;
-  }
 
-  try {
     // load motion file if it exists
     MatrixXf poses;
     VectorXf offsets;
