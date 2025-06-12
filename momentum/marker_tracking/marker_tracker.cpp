@@ -79,8 +79,13 @@ std::vector<size_t> sampleFrames(
         continue;
       }
       size_t locatorIdx = query->second;
-
+      if (locatorIdx >= character.locators.size()) {
+        continue;
+      }
       const auto& locator = character.locators[locatorIdx];
+      if (locator.parent >= state.jointState.size()) {
+        continue;
+      }
       const Vector3f locatorPos = state.jointState[locator.parent].transform * locator.offset;
       const Vector3f diff = locatorPos - jMarker.pos.cast<float>();
       const float markerError = diff.norm();
@@ -579,7 +584,7 @@ Eigen::MatrixXf trackPosesForFrames(
   // the identity fields will be used but untouched during optimization
   // globalParams could also be repurposed to pass in initial pose value
   std::vector<Eigen::VectorXf> poses(frameIndices.size());
-  Eigen::VectorXf dof = initialMotion.col(sortedFrames[0]);
+  Eigen::VectorXf dof = initialMotion.col(sortedFrames.empty() ? 0 : sortedFrames[0]);
   size_t solverFrame = 0;
   double priorError = 0.0;
   double error = 0.0;
@@ -999,8 +1004,13 @@ std::pair<float, float> getLocatorError(
         continue;
       }
       size_t locatorIdx = query->second;
-
+      if (locatorIdx >= character.locators.size()) {
+        continue;
+      }
       const auto& locator = character.locators[locatorIdx];
+      if (locator.parent >= state.jointState.size()) {
+        continue;
+      }
       const Vector3f locatorPos = state.jointState[locator.parent].transform * locator.offset;
       const Vector3f diff = locatorPos - jMarker.pos.cast<float>();
       const float markerError = diff.norm();

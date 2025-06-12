@@ -50,7 +50,10 @@ void poseConstraintsToJson(const Character& character, nlohmann::json& j) {
   j = nlohmann::json::object();
   for (const auto& csts : character.parameterTransform.poseConstraints) {
     for (const auto& pc : csts.second.parameterIdValue) {
-      j[csts.first][character.parameterTransform.name[pc.first]] = pc.second;
+      if (!character.parameterTransform.name.empty() &&
+          pc.first < character.parameterTransform.name.size()) {
+        j[csts.first][character.parameterTransform.name[pc.first]] = pc.second;
+      }
     }
   }
 }
@@ -87,8 +90,10 @@ void parameterTransformToJson(const Character& character, nlohmann::json& j) {
         const auto& parameterIndex = character.parameterTransform.transform.innerIndexPtr()[index];
         const auto& parameterValue = character.parameterTransform.transform.valuePtr()[index];
 
-        j["joints"][jointName][kJointParameterNames[d]]
-         [character.parameterTransform.name[parameterIndex]] = parameterValue;
+        if (parameterIndex < character.parameterTransform.name.size()) {
+          j["joints"][jointName][kJointParameterNames[d]]
+           [character.parameterTransform.name[parameterIndex]] = parameterValue;
+        }
       }
     }
   }
@@ -116,14 +121,14 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
     MT_THROW_IF(jointItr == j.end(), "No 'joints' found in parameter transform.");
 
     for (const auto& joint : jointItr->items()) {
-      const std::string jointName = joint.key();
+      const std::string& jointName = joint.key();
 
       // get the right joint to modify
       const size_t jointIndex = character.skeleton.getJointIdByName(jointName);
       MT_THROW_IF(jointIndex == kInvalidIndex, "Unknown joint name in expression : {}", jointName);
 
       for (const auto& jointParameter : joint.value().items()) {
-        const std::string jointParameterName = jointParameter.key();
+        const std::string& jointParameterName = jointParameter.key();
 
         // the first pToken is the name of the joint and it's attribute type
         size_t attributeIndex = kInvalidIndex;
@@ -157,10 +162,10 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
               parameterName);
 
           // add triplet
-          triplets.push_back(Eigen::Triplet<float>(
+          triplets.emplace_back(
               static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
               static_cast<int>(parameterIndex),
-              weight));
+              weight);
         }
       }
     }
@@ -195,13 +200,19 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
         break;
       case MinMaxJoint:
         li["type"] = "minmax_joint";
-        li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
+        if (!character.skeleton.joints.empty() &&
+            lim.data.minMaxJoint.jointIndex < character.skeleton.joints.size()) {
+          li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
+        }
         li["jointParameter"] = kJointParameterNames[lim.data.minMaxJoint.jointParameter];
         li["limits"] = lim.data.minMaxJoint.limits;
         break;
       case MinMaxJointPassive:
         li["type"] = "minmax_joint_passive";
-        li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
+        if (!character.skeleton.joints.empty() &&
+            lim.data.minMaxJoint.jointIndex < character.skeleton.joints.size()) {
+          li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
+        }
         li["jointParameter"] = kJointParameterNames[lim.data.minMaxJoint.jointParameter];
         li["limits"] = lim.data.minMaxJoint.limits;
         break;
@@ -221,10 +232,16 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
         break;
       case LinearJoint:
         li["type"] = "linear_joint";
-        li["referenceJoint"] =
-            character.skeleton.joints.at(lim.data.linearJoint.referenceJointIndex).name;
+        if (!character.skeleton.joints.empty() &&
+            lim.data.linearJoint.referenceJointIndex < character.skeleton.joints.size()) {
+          li["referenceJoint"] =
+              character.skeleton.joints[lim.data.linearJoint.referenceJointIndex].name;
+        }
         li["referenceJointParameter"] = lim.data.linearJoint.referenceJointParameter;
-        li["targetJoint"] = character.skeleton.joints[lim.data.linearJoint.targetJointIndex].name;
+        if (!character.skeleton.joints.empty() &&
+            lim.data.linearJoint.targetJointIndex < character.skeleton.joints.size()) {
+          li["targetJoint"] = character.skeleton.joints[lim.data.linearJoint.targetJointIndex].name;
+        }
         li["targetJointParameter"] = lim.data.linearJoint.targetJointParameter;
         li["scale"] = lim.data.linearJoint.scale;
         li["offset"] = lim.data.linearJoint.offset;
@@ -244,8 +261,15 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
         break;
       case Ellipsoid: {
         li["type"] = "ellipsoid";
-        li["parent"] = character.skeleton.joints[lim.data.ellipsoid.parent].name;
-        li["ellipsoidParent"] = character.skeleton.joints[lim.data.ellipsoid.ellipsoidParent].name;
+        if (!character.skeleton.joints.empty() &&
+            lim.data.ellipsoid.parent < character.skeleton.joints.size()) {
+          li["parent"] = character.skeleton.joints[lim.data.ellipsoid.parent].name;
+        }
+        if (!character.skeleton.joints.empty() &&
+            lim.data.ellipsoid.ellipsoidParent < character.skeleton.joints.size()) {
+          li["ellipsoidParent"] =
+              character.skeleton.joints[lim.data.ellipsoid.ellipsoidParent].name;
+        }
         li["offset"] = lim.data.ellipsoid.offset * toM();
         auto eli = lim.data.ellipsoid.ellipsoid;
         eli.translation() *= toM();

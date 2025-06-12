@@ -250,7 +250,9 @@ void saveLocators(
     MT_CHECK(
         0 <= locators[i].parent && locators[i].parent < skeleton.joints.size(),
         "Invalid joint index");
-    o << "\t\t\t\"parentName\":\"" << skeleton.joints[locators[i].parent].name << "\"\n";
+    if (!skeleton.joints.empty() && locators[i].parent < skeleton.joints.size()) {
+      o << "\t\t\t\"parentName\":\"" << skeleton.joints[locators[i].parent].name << "\"\n";
+    }
     if (i < locators.size() - 1) {
       o << "\t\t},\n";
     } else {
