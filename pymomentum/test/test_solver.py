@@ -7,7 +7,6 @@
 
 import unittest
 from multiprocessing.dummy import Pool
-from typing import List
 
 import pymomentum.geometry as pym_geometry
 import pymomentum.skel_state as pym_skel_state
