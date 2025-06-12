@@ -157,7 +157,7 @@ $env:MOMENTUM_BUILD_WITH_FBXSDK = "ON"; pixi run convert_model -d <input.glb> -o
 
 ## 📖 Documentation
 
-The full documentation for Momentum can be found on our [website](https://facebookresearch.github.io/momentum) and the C++ API documentation is available [here](https://facebookresearch.github.io/momentum/doxygen/index.html).
+The full documentation for Momentum can be found on our [website](https://facebookresearch.github.io/momentum/) and the C++ API documentation is available [here](https://facebookresearch.github.io/momentum/doxygen/index.html).
 
 ## Contributing
 
