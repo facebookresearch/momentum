@@ -764,9 +764,9 @@ class IKSolveFunction {
 
   static std::vector<at::Tensor> forward(
       const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
-      const SolverOptions options,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
       const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
           errorFunctions,
@@ -787,17 +787,18 @@ class IKSolveFunction {
   // Returns the tuple (grad_modelParams, grad_errorFunctionWeights,
   // [grad_input1, grad_input2, ...])
   static std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> backward(
-      const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
-      at::Tensor modelParams_init,
+      [[maybe_unused]] const std::vector<const momentum::Character*>&
+          characters,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const at::Tensor& modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
-      at::Tensor errorFunctionWeights,
-      size_t numActiveErrorFunctions,
-      const std::vector<int>& weightsMap) {
+      [[maybe_unused]] const std::vector<
+          std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
+      [[maybe_unused]] at::Tensor errorFunctionWeights,
+      [[maybe_unused]] size_t numActiveErrorFunctions,
+      [[maybe_unused]] const std::vector<int>& weightsMap) {
     MT_THROW_IF(
         results.size() != 1 || dLoss_dResults.size() != 1,
         "Mismatch in length of results list in IKSolveFunction::backward.");
@@ -826,8 +827,8 @@ class GradientFunction {
   static std::vector<at::Tensor> forward(
       const std::vector<const momentum::Character*>& characters,
       const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
-      const SolverOptions options,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
       const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
           errorFunctions,
@@ -879,9 +880,9 @@ class ResidualFunction {
 
   static std::vector<at::Tensor> forward(
       const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
-      const SolverOptions options,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
       const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
           errorFunctions,
@@ -965,17 +966,18 @@ class SequenceIKSolveFunction {
   // Returns the tuple (grad_modelParams, grad_errorFunctionWeights,
   // [grad_input1, grad_input2, ...])
   static std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> backward(
-      const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
-      at::Tensor modelParams_init,
+      [[maybe_unused]] const std::vector<const momentum::Character*>&
+          characters,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const at::Tensor& modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
-      at::Tensor errorFunctionWeights,
-      size_t numActiveErrorFunctions,
-      const std::vector<int>& weightsMap) {
+      [[maybe_unused]] const std::vector<
+          std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
+      [[maybe_unused]] const at::Tensor& errorFunctionWeights,
+      [[maybe_unused]] size_t numActiveErrorFunctions,
+      [[maybe_unused]] const std::vector<int>& weightsMap) {
     MT_THROW_IF(
         results.size() != 1 || dLoss_dResults.size() != 1,
         "Mismatch in length of results list in IKSolveFunction::backward.");
