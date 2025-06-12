@@ -52,7 +52,7 @@ VertexErrorFunctionT<T>::VertexErrorFunctionT(
 }
 
 template <typename T>
-VertexErrorFunctionT<T>::~VertexErrorFunctionT() {}
+VertexErrorFunctionT<T>::~VertexErrorFunctionT() = default;
 
 template <typename T>
 void VertexErrorFunctionT<T>::clearConstraints() {
