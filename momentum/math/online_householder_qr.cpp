@@ -35,7 +35,7 @@ void applyHouseholderTransformation(
     Eigen::Ref<Eigen::Matrix<T, Eigen::Dynamic, 1>> y_2m) {
   MT_CHECK(v_2m.size() == y_2m.size());
 
-  // Compute v^T * y.  Note that v_1 is assume to be 1 here.
+  // Compute v^T * y.  Note that v_1 is assumed to be 1 here.
   const T dotProd = y_1 + v_2m.dot(y_2m);
   const T scalar = dotProd * beta;
 

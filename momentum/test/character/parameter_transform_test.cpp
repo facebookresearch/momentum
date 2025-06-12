@@ -413,9 +413,9 @@ TEST(Momentum_ParameterTransform, IsApprox) {
   transform1.name = {"root_tx", "root_ty", "root_tz"};
   transform1.transform.resize(21, 3);
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0, 0, 1.0);
-  triplets.emplace_back(1, 1, 1.0);
-  triplets.emplace_back(2, 2, 1.0);
+  triplets.emplace_back(0, 0, 1.0f);
+  triplets.emplace_back(1, 1, 1.0f);
+  triplets.emplace_back(2, 2, 1.0f);
   transform1.transform.setFromTriplets(triplets.begin(), triplets.end());
   transform1.activeJointParams.setConstant(21, false);
   transform1.activeJointParams[0] = true;
@@ -434,9 +434,9 @@ TEST(Momentum_ParameterTransform, IsApprox) {
   // Test with different transform matrix
   ParameterTransform transform4 = transform1;
   std::vector<Eigen::Triplet<float>> triplets2;
-  triplets2.emplace_back(0, 0, 2.0); // Different value
-  triplets2.emplace_back(1, 1, 1.0);
-  triplets2.emplace_back(2, 2, 1.0);
+  triplets2.emplace_back(0, 0, 2.0f); // Different value
+  triplets2.emplace_back(1, 1, 1.0f);
+  triplets2.emplace_back(2, 2, 1.0f);
   transform4.transform.setFromTriplets(triplets2.begin(), triplets2.end());
   EXPECT_FALSE(transform1.isApprox(transform4));
 
@@ -797,9 +797,9 @@ TEST(Momentum_ParameterTransform, AddBlendShapeParameters) {
   transform.name = {"root_tx", "root_ty", "root_tz"};
   transform.transform.resize(21, 3);
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0, 0, 1.0);
-  triplets.emplace_back(1, 1, 1.0);
-  triplets.emplace_back(2, 2, 1.0);
+  triplets.emplace_back(0, 0, 1.0f);
+  triplets.emplace_back(1, 1, 1.0f);
+  triplets.emplace_back(2, 2, 1.0f);
   transform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
   // Create parameter limits
@@ -839,9 +839,9 @@ TEST(Momentum_ParameterTransform, AddFaceExpressionParameters) {
   transform.name = {"root_tx", "root_ty", "root_tz"};
   transform.transform.resize(21, 3);
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0, 0, 1.0);
-  triplets.emplace_back(1, 1, 1.0);
-  triplets.emplace_back(2, 2, 1.0);
+  triplets.emplace_back(0, 0, 1.0f);
+  triplets.emplace_back(1, 1, 1.0f);
+  triplets.emplace_back(2, 2, 1.0f);
   transform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
   // Create parameter limits
@@ -881,12 +881,12 @@ TEST(Momentum_InverseParameterTransform, Functionality) {
   transform.name = {"root_tx", "root_ty", "root_tz", "root_rx", "root_ry", "root_rz"};
   transform.transform.resize(21, 6);
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0, 0, 1.0);
-  triplets.emplace_back(1, 1, 1.0);
-  triplets.emplace_back(2, 2, 1.0);
-  triplets.emplace_back(3, 3, 1.0);
-  triplets.emplace_back(4, 4, 1.0);
-  triplets.emplace_back(5, 5, 1.0);
+  triplets.emplace_back(0, 0, 1.0f);
+  triplets.emplace_back(1, 1, 1.0f);
+  triplets.emplace_back(2, 2, 1.0f);
+  triplets.emplace_back(3, 3, 1.0f);
+  triplets.emplace_back(4, 4, 1.0f);
+  triplets.emplace_back(5, 5, 1.0f);
   transform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
   // Create an inverse parameter transform
