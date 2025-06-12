@@ -17,7 +17,7 @@ template <typename T>
 class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
   StateErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  StateErrorFunctionT(const Character& character);
+  explicit StateErrorFunctionT(const Character& character);
 
   [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
       final;

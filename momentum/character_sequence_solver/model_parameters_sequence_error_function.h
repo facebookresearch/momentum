@@ -17,7 +17,7 @@ template <typename T>
 class ModelParametersSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
  public:
   ModelParametersSequenceErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  ModelParametersSequenceErrorFunctionT(const Character& character);
+  explicit ModelParametersSequenceErrorFunctionT(const Character& character);
 
   [[nodiscard]] size_t numFrames() const final {
     return 2;
