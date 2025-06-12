@@ -153,7 +153,6 @@ std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> SequenceSolverT
     const auto nFrames = errf->numFrames();
     MT_CHECK(nFrames <= bandwidth_cur);
     const size_t n = errf->getJacobianSize();
-
     int rows = 0;
     errorCur += errf->getJacobian(
         gsl::make_span(fn->frameParameters_).subspan(iFrame, nFrames),

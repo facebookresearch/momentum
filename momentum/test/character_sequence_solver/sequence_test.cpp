@@ -143,7 +143,7 @@ void testGradientAndJacobian(
 
       Eigen::MatrixX<T> jacobianPlus = Eigen::MatrixX<T>::Zero(jacobianSize, nFrames * np);
       Eigen::VectorX<T> residualPlus = Eigen::VectorX<T>::Zero(jacobianSize);
-      int usedRows;
+      int usedRows = 0;
       errorFunction.getJacobian(
           castModelParameters<T>(parameters), state, jacobianPlus, residualPlus, usedRows);
       numJacobian.block(0, p, usedRows, 1) = (residualPlus - residual) / kStepSize;

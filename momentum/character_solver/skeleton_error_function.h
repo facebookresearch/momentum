@@ -91,7 +91,6 @@ class SkeletonErrorFunctionT {
       Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(residualSize, paramSize);
       Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(residualSize);
       int rows = 0;
-
       error = getJacobian(parameters, state, jacobian, residual, rows);
 
       // Update JtJ
