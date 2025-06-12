@@ -473,7 +473,7 @@ class OnlineBandedHouseholderQR {
   // Sets the diagonal of the R matrix to lambda.
   void initializeDiagonal();
 
-  [[nodiscard]] T R_band_entry(Eigen::Index iRow, Eigen::Index jCol) const {
+  T R_band_entry(Eigen::Index iRow, Eigen::Index jCol) const {
     const auto bandwidth = R_band_.rows();
     MT_CHECK(iRow <= jCol);
     MT_CHECK(jCol - iRow <= bandwidth);
