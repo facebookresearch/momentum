@@ -29,9 +29,11 @@
 
 // Forward-declare a class, define smart pointers
 #ifndef MOMENTUM_FWD_DECLARE_CLASS
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define MOMENTUM_FWD_DECLARE_CLASS(x) \
   class x;                            \
   MOMENTUM_DEFINE_POINTERS(x)
+// NOLINTEND(bugprone-macro-parentheses)
 #endif // MOMENTUM_FWD_DECLARE_CLASS
 
 // Forward-declare a templated class, define smart pointers for the class and its variants
@@ -40,6 +42,7 @@
 //    using Bar = BarT<float>;
 //    using Bard = BarT<double>;
 #ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS(x) \
   template <typename T>                        \
   class x##T;                                  \
@@ -47,6 +50,7 @@
   using x##d = x##T<double>;                   \
   MOMENTUM_DEFINE_POINTERS(x)                  \
   MOMENTUM_DEFINE_POINTERS(x##d)
+// NOLINTEND(bugprone-macro-parentheses)
 #endif // MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS
 
 // Forward-declare a templated struct, define smart pointers for the struct and its variants
@@ -55,6 +59,7 @@
 //    using Bar = BarT<float>;
 //    using Bard = BarT<double>;
 #ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT(x) \
   template <typename T>                         \
   struct x##T;                                  \
@@ -62,4 +67,5 @@
   using x##d = x##T<double>;                    \
   MOMENTUM_DEFINE_POINTERS(x)                   \
   MOMENTUM_DEFINE_POINTERS(x##d)
+// NOLINTEND(bugprone-macro-parentheses)
 #endif // MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT
