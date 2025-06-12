@@ -73,7 +73,7 @@ struct Locator {
         (name == locator.name) && (parent == locator.parent) && offset.isApprox(locator.offset) &&
         locked.isApprox(locator.locked) && isApprox(weight, locator.weight) &&
         limitOrigin.isApprox(locator.limitOrigin) && limitWeight.isApprox(locator.limitWeight));
-  };
+  }
 };
 
 /// A collection of locators attached to a skeleton
