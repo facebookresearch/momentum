@@ -50,9 +50,7 @@ SimdPositionConstraints::SimdPositionConstraints(const Skeleton* skel) {
   clearConstraints();
 }
 
-SimdPositionConstraints::~SimdPositionConstraints() {
-  // Do nothing
-}
+SimdPositionConstraints::~SimdPositionConstraints() = default;
 
 void SimdPositionConstraints::addConstraint(
     const size_t jointIndex,

@@ -51,9 +51,7 @@ SimdPlaneConstraints::SimdPlaneConstraints(const Skeleton* skel) {
   clearConstraints();
 }
 
-SimdPlaneConstraints::~SimdPlaneConstraints() {
-  // Do nothing
-}
+SimdPlaneConstraints::~SimdPlaneConstraints() = default;
 
 void SimdPlaneConstraints::addConstraint(
     const size_t jointIndex,

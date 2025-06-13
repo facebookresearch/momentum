@@ -52,7 +52,7 @@ SimdNormalConstraints::SimdNormalConstraints(const Skeleton* skel) {
   weights = dataPtr + dataSize * 9;
 }
 
-SimdNormalConstraints::~SimdNormalConstraints() {}
+SimdNormalConstraints::~SimdNormalConstraints() = default;
 
 bool SimdNormalConstraints::addConstraint(
     const size_t jointIndex,

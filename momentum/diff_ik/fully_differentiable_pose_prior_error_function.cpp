@@ -39,7 +39,8 @@ FullyDifferentiablePosePriorErrorFunctionT<T>::FullyDifferentiablePosePriorError
       names_(std::move(names)) {}
 
 template <typename T>
-FullyDifferentiablePosePriorErrorFunctionT<T>::~FullyDifferentiablePosePriorErrorFunctionT() {}
+FullyDifferentiablePosePriorErrorFunctionT<T>::~FullyDifferentiablePosePriorErrorFunctionT() =
+    default;
 
 template <typename T>
 void FullyDifferentiablePosePriorErrorFunctionT<T>::setPosePrior(

@@ -22,7 +22,7 @@ spanstreambuf::spanstreambuf(gsl::span<const std::byte> buffer) {
   this->setg(data, data, data + buffer.size());
 }
 
-spanstreambuf::~spanstreambuf() {}
+spanstreambuf::~spanstreambuf() = default;
 
 std::streamsize spanstreambuf::xsputn(
     const spanstreambuf::char_type* /* s */,
@@ -34,9 +34,7 @@ ispanstream::ispanstream(gsl::span<const std::byte> buffer) : std::istream(&sbuf
   // Empty
 }
 
-ispanstream::~ispanstream() {
-  // Empty
-}
+ispanstream::~ispanstream() = default;
 
 std::istream& GetLineCrossPlatform(std::istream& is, std::string& line) {
   line.clear();
