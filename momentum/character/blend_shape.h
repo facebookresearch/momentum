@@ -26,16 +26,16 @@ struct BlendShape : public BlendShapeBase {
 
   void setBaseShape(gsl::span<const Vector3f> baseShape) {
     baseShape_.assign(baseShape.begin(), baseShape.end());
-  };
+  }
 
   [[nodiscard]] const std::vector<Vector3f>& getBaseShape() const {
     return baseShape_;
-  };
+  }
 
   /// Whether SVD factorization is up-to-date
   [[nodiscard]] bool getFactorizationValid() const {
     return factorizationValid_;
-  };
+  }
 
   /// Applies blend weights to create a deformed shape
   ///
