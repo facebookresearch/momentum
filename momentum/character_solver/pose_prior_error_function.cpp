@@ -74,7 +74,7 @@ double PosePriorErrorFunctionT<T>::logProbability(const ModelParametersT<T>& par
   // NOTE: this is NOT the correct value for a full MPPCA. To simplify computation we only
   // consider the gaussian distribution which is "closest" to our data point and treat it as
   // if all other mixtures don't exist.
-  size_t meanShapeIdx;
+  size_t meanShapeIdx = 0;
   Eigen::VectorX<T> bestDiff;
   T minDist, bestR;
   getBestFitMode(params, meanShapeIdx, bestDiff, bestR, minDist);
@@ -109,7 +109,7 @@ double PosePriorErrorFunctionT<T>::getGradient(
   // NOTE: this is NOT the correct gradient for an MPPCA. To simplify computation we only
   // consider the gaussian distribution which is "closest" to our data point and treat it as
   // if all other mixtures don't exist.
-  size_t meanShapeIdx;
+  size_t meanShapeIdx = 0;
   Eigen::VectorX<T> bestDiff;
   T minDist, bestR;
   getBestFitMode(params, meanShapeIdx, bestDiff, bestR, minDist);
@@ -163,7 +163,7 @@ double PosePriorErrorFunctionT<T>::getJacobian(
   // NOTE: this is NOT the correct jacobian for an MPPCA. To simplify computation we only
   // consider the gaussian distribution which is "closest" to our data point and treat it as
   // if all other mixtures don't exist.
-  size_t meanShapeIdx;
+  size_t meanShapeIdx = 0;
   Eigen::VectorX<T> bestDiff;
   T minDist, bestR;
 
@@ -200,7 +200,7 @@ double PosePriorErrorFunctionT<T>::getJacobian(
 template <typename T>
 Eigen::VectorX<T> PosePriorErrorFunctionT<T>::getMeanShape(
     const ModelParametersT<T>& params) const {
-  size_t meanShapeIdx;
+  size_t meanShapeIdx = 0;
   Eigen::VectorX<T> bestDiff;
   T minDist, bestR;
   getBestFitMode(params, meanShapeIdx, bestDiff, bestR, minDist);

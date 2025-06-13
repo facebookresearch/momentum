@@ -38,7 +38,7 @@ bool intersectFace(
     }
   }
 
-  size_t iFaceA = 0, iFaceB;
+  size_t iFaceA = 0, iFaceB = 0;
   for (size_t i = 0; i < 2; i++) {
     // check for overlap by casting edges of triangle A to plane of triangle B
     // and checking if the point of intersection is inside triangle B
