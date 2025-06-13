@@ -179,7 +179,7 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
     pt.transform.setFromTriplets(triplets.begin(), triplets.end());
   } catch (...) {
     // create an identity parameter transform
-    pt = pt.identity(character.skeleton.getJointNames());
+    pt = ParameterTransform::identity(character.skeleton.getJointNames());
   }
 
   return pt;
