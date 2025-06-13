@@ -182,7 +182,7 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   }
 
   /// @return the current list of constraints immutable
-  const std::vector<Data>& getConstraints() const {
+  [[nodiscard]] const std::vector<Data>& getConstraints() const {
     return constraints_;
   }
 

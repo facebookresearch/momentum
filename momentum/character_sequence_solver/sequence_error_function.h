@@ -21,15 +21,15 @@ class SequenceErrorFunctionT {
       : skeleton_(skel), parameterTransform_(pt), activeJointParams_(pt.activeJointParams) {
     enabledParameters_.flip(); // all parameters enabled by default
   }
-  virtual ~SequenceErrorFunctionT() {}
+  virtual ~SequenceErrorFunctionT() = default;
 
   // Number of contiguous frames that this error function affects.
-  virtual size_t numFrames() const = 0;
+  [[nodiscard]] virtual size_t numFrames() const = 0;
 
   void setWeight(T w) {
     weight_ = w;
   }
-  float getWeight() const {
+  [[nodiscard]] float getWeight() const {
     return weight_;
   }
 
@@ -41,7 +41,7 @@ class SequenceErrorFunctionT {
     enabledParameters_ = ps;
   }
 
-  virtual double getError(
+  [[nodiscard]] virtual double getError(
       gsl::span<const ModelParametersT<T>> /* modelParameters */,
       gsl::span<const SkeletonStateT<T>> /* skelStates */) const {
     return 0.0f;
@@ -72,7 +72,7 @@ class SequenceErrorFunctionT {
     return 0.0f;
   }
 
-  virtual size_t getJacobianSize() const {
+  [[nodiscard]] virtual size_t getJacobianSize() const {
     return 0;
   }
 

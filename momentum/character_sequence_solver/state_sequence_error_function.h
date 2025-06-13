@@ -19,7 +19,7 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   StateSequenceErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
   StateSequenceErrorFunctionT(const Character& character);
 
-  size_t numFrames() const final {
+  [[nodiscard]] size_t numFrames() const final {
     return 2;
   }
 
@@ -42,7 +42,7 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) const final;
 
-  size_t getJacobianSize() const final;
+  [[nodiscard]] size_t getJacobianSize() const final;
 
   void setTargetWeights(const Eigen::VectorX<T>& posWeight, const Eigen::VectorX<T>& rotWeight);
   void setWeights(const float posWeight, const float rotationWeight) {
@@ -52,16 +52,16 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
 
   void reset();
 
-  const Eigen::VectorX<T>& getPositionWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getPositionWeights() const {
     return targetPositionWeights_;
   }
-  const Eigen::VectorX<T>& getRotationWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getRotationWeights() const {
     return targetRotationWeights_;
   }
-  const T& getPositionWeight() const {
+  [[nodiscard]] const T& getPositionWeight() const {
     return posWgt_;
   }
-  const T& getRotationWeight() const {
+  [[nodiscard]] const T& getRotationWeight() const {
     return rotWgt_;
   }
 

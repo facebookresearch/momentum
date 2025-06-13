@@ -93,7 +93,7 @@ void MultiposeSolverFunctionT<T>::setFrameParameters(
 }
 
 template <typename T>
-Eigen::VectorX<T> MultiposeSolverFunctionT<T>::getUniversalParameters() {
+Eigen::VectorX<T> MultiposeSolverFunctionT<T>::getUniversalParameters() const {
   return frameParameters_[0].v.cwiseProduct(universal_);
 }
 

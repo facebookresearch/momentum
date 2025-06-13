@@ -70,7 +70,6 @@ class SkeletonErrorFunctionT {
       const SkeletonStateT<T>& /* state */,
       Eigen::Ref<Eigen::MatrixX<T>> /* hessian */) {
     throw;
-    return;
   };
 
   virtual double getSolverDerivatives(
@@ -91,7 +90,7 @@ class SkeletonErrorFunctionT {
 
       Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(residualSize, paramSize);
       Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(residualSize);
-      int rows;
+      int rows = 0;
 
       error = getJacobian(parameters, state, jacobian, residual, rows);
 
@@ -114,7 +113,7 @@ class SkeletonErrorFunctionT {
     return error;
   }
 
-  virtual size_t getJacobianSize() const {
+  [[nodiscard]] virtual size_t getJacobianSize() const {
     return 0;
   }
 

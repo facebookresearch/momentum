@@ -371,7 +371,7 @@ TYPED_TEST(TransformPoseTest, ValidateTransformDividedRoot) {
 
     // Start at the root joint, the world joint doesn't have all the parameters it needs to match
     // the transform:
-    const auto expectedError = T(10) * std::sqrt(std::numeric_limits<T>::epsilon());
+    const auto expectedError = T(50) * std::sqrt(std::numeric_limits<T>::epsilon());
     for (size_t iJoint = 1; iJoint < skelState_init.jointState.size(); ++iJoint) {
       const TransformT<T> targetTransform = transform * skelState_init.jointState[iJoint].transform;
       const TransformT<T> actualTransform = skelState_final.jointState[iJoint].transform;

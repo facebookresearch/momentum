@@ -50,7 +50,7 @@ struct PolygonData {
   // Similar to errorMessage, but the issue is not severe enough to terminate.
   [[nodiscard]] std::string warnMessage(size_t numTexVertices) const;
 
-  size_t numPolygons() const;
+  [[nodiscard]] size_t numPolygons() const;
 };
 
 std::vector<Eigen::Vector3i> triangulate(

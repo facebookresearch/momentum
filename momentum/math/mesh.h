@@ -73,7 +73,7 @@ struct MeshT {
   /// @tparam T2 The target scalar type
   /// @return A new mesh with the target scalar type
   template <typename T2>
-  MeshT<T2> cast() const;
+  [[nodiscard]] MeshT<T2> cast() const;
 
   /// Reset the mesh by clearing all data.
   ///
