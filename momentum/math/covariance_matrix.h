@@ -28,25 +28,25 @@ class LowRankCovarianceMatrixT {
 
   void reset(T sigma, Eigen::Ref<const Eigen::MatrixX<T>> A);
 
-  Eigen::Index dimension() const;
+  [[nodiscard]] Eigen::Index dimension() const;
 
-  const Eigen::MatrixX<T>& basis() const;
+  [[nodiscard]] const Eigen::MatrixX<T>& basis() const;
 
-  T sigma() const;
+  [[nodiscard]] T sigma() const;
 
-  Eigen::VectorX<T> inverse_times_vec(Eigen::Ref<const Eigen::VectorX<T>> rhs) const;
-  Eigen::VectorX<T> times_vec(Eigen::Ref<const Eigen::VectorX<T>> rhs) const;
+  [[nodiscard]] Eigen::VectorX<T> inverse_times_vec(Eigen::Ref<const Eigen::VectorX<T>> rhs) const;
+  [[nodiscard]] Eigen::VectorX<T> times_vec(Eigen::Ref<const Eigen::VectorX<T>> rhs) const;
 
-  Eigen::MatrixX<T> inverse_times_mat(Eigen::Ref<const Eigen::MatrixX<T>> rhs) const;
-  Eigen::MatrixX<T> times_mat(Eigen::Ref<const Eigen::MatrixX<T>> rhs) const;
+  [[nodiscard]] Eigen::MatrixX<T> inverse_times_mat(Eigen::Ref<const Eigen::MatrixX<T>> rhs) const;
+  [[nodiscard]] Eigen::MatrixX<T> times_mat(Eigen::Ref<const Eigen::MatrixX<T>> rhs) const;
 
-  const Eigen::MatrixX<T>& R() const;
+  [[nodiscard]] const Eigen::MatrixX<T>& R() const;
 
   // The log of the determinant of the covariance matrix
-  T logDeterminant() const;
+  [[nodiscard]] T logDeterminant() const;
 
   // The log of the determinant of the inverse covariance matrix
-  T inverse_logDeterminant() const;
+  [[nodiscard]] T inverse_logDeterminant() const;
 
  private:
   // The QR factorization of A is defined by:

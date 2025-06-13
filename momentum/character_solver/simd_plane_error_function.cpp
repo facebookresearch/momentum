@@ -51,9 +51,7 @@ SimdPlaneConstraints::SimdPlaneConstraints(const Skeleton* skel) {
   clearConstraints();
 }
 
-SimdPlaneConstraints::~SimdPlaneConstraints() {
-  // Do nothing
-}
+SimdPlaneConstraints::~SimdPlaneConstraints() = default;
 
 void SimdPlaneConstraints::addConstraint(
     const size_t jointIndex,
@@ -487,6 +485,9 @@ double SimdPlaneErrorFunctionAVX::getError(
 
   // loop over all joints, as these are our base units
   for (int jointId = 0; jointId < constraints_->numJoints; jointId++) {
+    if (jointId >= static_cast<int>(state.jointState.size())) {
+      break;
+    }
     // pre-load some joint specific values
     const auto& transformation = state.jointState[jointId].transformation;
 

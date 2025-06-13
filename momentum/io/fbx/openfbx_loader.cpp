@@ -37,7 +37,7 @@ namespace momentum {
 namespace {
 
 Eigen::Vector3d toEigen(const ofbx::DVec3& v) {
-  return Eigen::Vector3d(v.x, v.y, v.z);
+  return {v.x, v.y, v.z};
 }
 
 Eigen::Affine3d toEigen(const ofbx::DMatrix& mat) {
@@ -48,17 +48,17 @@ Eigen::Vector3i getRotationOrder(ofbx::RotationOrder order) {
   switch (order) {
     case ofbx::RotationOrder::EULER_XYZ:
     default:
-      return Eigen::Vector3i(0, 1, 2);
+      return {0, 1, 2};
     case ofbx::RotationOrder::EULER_XZY:
-      return Eigen::Vector3i(0, 2, 1);
+      return {0, 2, 1};
     case ofbx::RotationOrder::EULER_YZX:
-      return Eigen::Vector3i(1, 2, 0);
+      return {1, 2, 0};
     case ofbx::RotationOrder::EULER_YXZ:
-      return Eigen::Vector3i(1, 0, 2);
+      return {1, 0, 2};
     case ofbx::RotationOrder::EULER_ZXY:
-      return Eigen::Vector3i(2, 0, 1);
+      return {2, 0, 1};
     case ofbx::RotationOrder::EULER_ZYX:
-      return Eigen::Vector3i(2, 1, 0);
+      return {2, 1, 0};
   }
 }
 
@@ -203,7 +203,7 @@ const ofbx::IElementProperty* getElementProperty(const ofbx::IElement* element, 
   return prop;
 }
 
-static double resolveDoubleProperty(const ofbx::Object& object, const char* name) {
+double resolveDoubleProperty(const ofbx::Object& object, const char* name) {
   const ofbx::IElement* element = resolveProperty(object, name);
   MT_THROW_IF(element == nullptr, "Unable to find property element in {}", object.name);
   const ofbx::IElementProperty* x = getElementProperty(element, 4);
@@ -661,8 +661,10 @@ void parseSkinnedModel(
         cluster->name,
         bone->name);
     const size_t boneIndex = fbxJointItr->second;
-    inverseBindPoseTransforms[boneIndex] =
-        toEigen(cluster->getTransformLinkMatrix()).inverse().cast<float>();
+    if (boneIndex < inverseBindPoseTransforms.size()) {
+      inverseBindPoseTransforms[boneIndex] =
+          toEigen(cluster->getTransformLinkMatrix()).inverse().cast<float>();
+    }
 
     const auto* skinning_indices_element = findChild(cluster->element, "Indexes");
     if (skinning_indices_element == nullptr || !skinning_indices_element->getFirstProperty()) {
@@ -875,6 +877,7 @@ MatrixXf parseAnimation(
     const size_t endIndex = startIndex + ((mode == 2) ? 1 : 3);
     for (size_t i = startIndex; i < endIndex; ++i) {
       if (writtenJoints.at(i)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
         char propertyName[128];
         property.toString(propertyName);
         MT_LOGW(
@@ -894,8 +897,10 @@ MatrixXf parseAnimation(
       // Aggregate the motion
       if (mode == 0) {
         // FBX unit is default to centimeter - the same as Momentum unit
-        motion.col(iFrame).template segment<3>(startIndex).noalias() =
-            toEigen(values).cast<float>() - skeleton.joints[jointIndex].translationOffset;
+        if (jointIndex < skeleton.joints.size()) {
+          motion.col(iFrame).template segment<3>(startIndex).noalias() =
+              toEigen(values).cast<float>() - skeleton.joints[jointIndex].translationOffset;
+        }
       } else if (mode == 1) {
         // assume the correct rotation order
         motion.col(iFrame).template segment<3>(startIndex).noalias() =

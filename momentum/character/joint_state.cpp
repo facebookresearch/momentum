@@ -17,7 +17,10 @@ namespace momentum {
 // Each joint thus has 7 parameters, 3 translation, 3 rotation, 1 scale.
 
 template <typename T>
-const Vector3<T> RotationAxis[] = {Vector3<T>::UnitX(), Vector3<T>::UnitY(), Vector3<T>::UnitZ()};
+const std::array<Vector3<T>, 3> RotationAxis = {
+    Vector3<T>::UnitX(),
+    Vector3<T>::UnitY(),
+    Vector3<T>::UnitZ()};
 
 template <typename T>
 void JointStateT<T>::set(

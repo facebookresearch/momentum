@@ -30,13 +30,16 @@ SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
       const auto w = skinWeights.weight(vertexIndex, i);
       const auto parentBone = skinWeights.index(vertexIndex, i);
       if (w > 0) {
-        boneWeights[nBoneWeights++] = {
-            parentBone,
-            w,
-            T(w) *
-                (skelState.jointState[parentBone].transformation *
-                 (character.inverseBindPose[parentBone].template cast<T>() *
-                  restMesh.vertices[vertexIndex]))};
+        if (parentBone < character.inverseBindPose.size() &&
+            parentBone < skelState.jointState.size()) {
+          boneWeights[nBoneWeights++] = {
+              parentBone,
+              w,
+              T(w) *
+                  (skelState.jointState[parentBone].transformation *
+                   (character.inverseBindPose[parentBone].template cast<T>() *
+                    restMesh.vertices[vertexIndex]))};
+        }
       }
     }
     std::sort(

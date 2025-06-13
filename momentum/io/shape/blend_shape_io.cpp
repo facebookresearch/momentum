@@ -72,8 +72,8 @@ BlendShapeBase loadBlendShapeBase(std::istream& data, int expectedShapes, int ex
   MatrixXf shapeVectors;
 
   // read dimensions
-  uint64_t numRows;
-  uint64_t numCols;
+  uint64_t numRows = 0;
+  uint64_t numCols = 0;
   data.read((char*)&numRows, sizeof(numRows));
   data.read((char*)&numCols, sizeof(numCols));
 
@@ -96,8 +96,8 @@ BlendShape loadBlendShape(std::istream& data, int expectedShapes, int expectedVe
   MatrixXf shapeVectors;
 
   // read dimensions
-  uint64_t numRows;
-  uint64_t numCols;
+  uint64_t numRows = 0;
+  uint64_t numCols = 0;
   data.read((char*)&numRows, sizeof(numRows));
   data.read((char*)&numCols, sizeof(numCols));
 

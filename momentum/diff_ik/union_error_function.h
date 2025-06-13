@@ -24,18 +24,18 @@ class UnionErrorFunctionT : public SkeletonErrorFunctionT<T>,
       const std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>>& errorFunctions);
 
   [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      override final;
+      final;
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) override final;
+      Eigen::Ref<Eigen::VectorX<T>> gradient) final;
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
-      int& usedRows) override final;
-  [[nodiscard]] size_t getJacobianSize() const override final;
+      int& usedRows) final;
+  [[nodiscard]] size_t getJacobianSize() const final;
 
   std::vector<std::string> inputs() const override;
   void getInputImp(const std::string& name, Eigen::Ref<Eigen::VectorX<T>> result) const override;

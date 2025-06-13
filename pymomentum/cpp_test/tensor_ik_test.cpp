@@ -147,7 +147,7 @@ Eigen::VectorX<T> extractErrorFunctionWeights(
 TEST(TensorIK, TensorIK) {
   const momentum::Character character = momentum::createTestCharacter();
 
-  typedef float T;
+  using T = float;
 
   momentum::GaussNewtonSolverOptions solverOptions;
   solverOptions.minIterations = 4;

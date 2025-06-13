@@ -92,7 +92,9 @@ void d_jointParametersToPositions(
     size_t jointIndex = parents[i];
     while (jointIndex != momentum::kInvalidIndex) {
       // check for valid index
-      assert(jointIndex < skeleton.joints.size());
+      if (jointIndex >= skeleton.joints.size()) {
+        break;
+      }
 
       const auto& jointState = skelState.jointState[jointIndex];
       const Eigen::Vector3<T> posd = p_world - jointState.translation();
@@ -113,7 +115,11 @@ void d_jointParametersToPositions(
           dLoss_dPosition.dot(jointState.getScaleDerivative(posd));
 
       // go to the next joint
-      jointIndex = skeleton.joints[jointIndex].parent;
+      if (jointIndex < skeleton.joints.size()) {
+        jointIndex = skeleton.joints[jointIndex].parent;
+      } else {
+        break;
+      }
     }
   }
 }

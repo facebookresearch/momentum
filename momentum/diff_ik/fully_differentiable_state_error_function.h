@@ -23,9 +23,9 @@ class FullyDifferentiableStateErrorFunctionT : public FullyDifferentiableSkeleto
   FullyDifferentiableStateErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
   ~FullyDifferentiableStateErrorFunctionT() override;
 
-  std::vector<std::string> inputs() const override final;
-  Eigen::Index getInputSize(const std::string& name) const override final;
-  const char* name() const override final {
+  [[nodiscard]] std::vector<std::string> inputs() const final;
+  [[nodiscard]] Eigen::Index getInputSize(const std::string& name) const final;
+  [[nodiscard]] const char* name() const final {
     return "StateErrorFunction";
   }
 
@@ -33,13 +33,11 @@ class FullyDifferentiableStateErrorFunctionT : public FullyDifferentiableSkeleto
       const std::string& inputName,
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      Eigen::Ref<const Eigen::VectorX<T>> inputVec) override final;
+      Eigen::Ref<const Eigen::VectorX<T>> inputVec) final;
 
  protected:
-  void getInputImp(const std::string& name, Eigen::Ref<Eigen::VectorX<T>> value)
-      const override final;
-  void setInputImp(const std::string& name, Eigen::Ref<const Eigen::VectorX<T>> value)
-      override final;
+  void getInputImp(const std::string& name, Eigen::Ref<Eigen::VectorX<T>> value) const final;
+  void setInputImp(const std::string& name, Eigen::Ref<const Eigen::VectorX<T>> value) final;
 
  private:
   template <typename JetType>

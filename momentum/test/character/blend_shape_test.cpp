@@ -344,7 +344,7 @@ TEST(BlendShapeTest, BlendShapeSetShapeVector) {
 
   // Force factorization to be computed
   std::vector<Vector3f> targetShape = createRandomVertices<float>(modelSize);
-  blendShape.estimateCoefficients(targetShape);
+  (void)blendShape.estimateCoefficients(targetShape);
 
   // Check that factorization is now valid
   EXPECT_TRUE(blendShape.getFactorizationValid());

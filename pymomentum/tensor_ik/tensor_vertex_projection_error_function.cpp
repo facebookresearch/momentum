@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "tensor_vertex_projection_error_function.h"
+#include "pymomentum/tensor_ik/tensor_vertex_projection_error_function.h"
 
-#include "tensor_error_function_utility.h"
+#include "pymomentum/tensor_ik/tensor_error_function_utility.h"
 
 #include <momentum/character/character.h>
 #include <momentum/character_solver/vertex_projection_error_function.h>

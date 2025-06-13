@@ -45,7 +45,7 @@ struct PoseShape {
   /// @param state Current state of the skeleton containing joint rotations
   /// @return Vector of 3D vertex positions representing the deformed shape
   /// @throws If baseShape.size() != shapeVectors.rows()
-  std::vector<Vector3f> compute(const SkeletonState& state) const;
+  [[nodiscard]] std::vector<Vector3f> compute(const SkeletonState& state) const;
 
   /// Checks if this PoseShape is approximately equal to another.
   ///
@@ -54,7 +54,7 @@ struct PoseShape {
   ///
   /// @param poseShape The PoseShape to compare with
   /// @return True if the PoseShape objects are approximately equal
-  inline bool isApprox(const PoseShape& poseShape) const {
+  [[nodiscard]] inline bool isApprox(const PoseShape& poseShape) const {
     return (
         (baseJoint == poseShape.baseJoint) && baseRot.isApprox(poseShape.baseRot) &&
         (jointMap == poseShape.jointMap) && baseShape.isApprox(poseShape.baseShape) &&

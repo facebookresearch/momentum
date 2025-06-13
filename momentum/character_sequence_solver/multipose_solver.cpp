@@ -80,8 +80,7 @@ void MultiposeSolverT<T>::doIteration() {
 
       residualBlock_.resize(jacobianSize);
       residualBlock_.setZero();
-
-      int rows;
+      int rows = 0;
       this->error_ +=
           solvable->getJacobian(frameParameters, skelState, jacobianBlock_, residualBlock_, rows);
 

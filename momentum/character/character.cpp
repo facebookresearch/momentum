@@ -628,8 +628,6 @@ void CharacterT<T>::addBlendShape(
   // Augment the parameter transform with blend shape parameters:
   std::tie(parameterTransform, parameterLimits) = addBlendShapeParameters(
       parameterTransform, parameterLimits, std::min(maxBlendShapes, blendShape_in->shapeSize()));
-
-  return;
 }
 
 template <typename T>

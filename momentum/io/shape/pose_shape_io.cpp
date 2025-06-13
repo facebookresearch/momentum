@@ -26,8 +26,8 @@ PoseShape loadPoseShape(const std::string& filename, const Character& character)
   }
 
   // read dimensions
-  uint64_t numRows;
-  uint64_t numJoints;
+  uint64_t numRows = 0;
+  uint64_t numJoints = 0;
   data.read((char*)&numRows, sizeof(numRows));
   data.read((char*)&numJoints, sizeof(numJoints));
   const uint64_t numCols = numJoints * 4;

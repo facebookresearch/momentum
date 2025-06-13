@@ -34,7 +34,7 @@ struct SimdPlaneConstraints final {
       float targetOffset,
       float targetWeight);
 
-  VectorXi getNumConstraints() const;
+  [[nodiscard]] VectorXi getNumConstraints() const;
 
  public:
   // max number of constraints per segment

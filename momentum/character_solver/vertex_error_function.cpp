@@ -52,7 +52,7 @@ VertexErrorFunctionT<T>::VertexErrorFunctionT(
 }
 
 template <typename T>
-VertexErrorFunctionT<T>::~VertexErrorFunctionT() {}
+VertexErrorFunctionT<T>::~VertexErrorFunctionT() = default;
 
 template <typename T>
 void VertexErrorFunctionT<T>::clearConstraints() {
@@ -194,7 +194,7 @@ double VertexErrorFunctionT<T>::calculatePositionGradient(
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
-    size_t jointIndex;
+    size_t jointIndex = 0;
     T boneWeight;
     Eigen::Vector3<T> pos;
     std::tie(jointIndex, boneWeight, pos) = skinningIter.next();

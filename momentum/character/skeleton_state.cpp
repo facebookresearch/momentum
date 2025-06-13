@@ -199,11 +199,19 @@ TransformT<T> transformAtoB(
       // parentB can't possible be a parent of parentA, so move parentB up one level in the
       // hierarchy.
       B_to_ancestorB = skelState.jointState[ancestorB].localTransform * B_to_ancestorB;
-      ancestorB = referenceSkeleton.joints[ancestorB].parent;
+      if (ancestorB < referenceSkeleton.joints.size()) {
+        ancestorB = referenceSkeleton.joints[ancestorB].parent;
+      } else {
+        break;
+      }
     } else if (
         ancestorA != kInvalidIndex && (ancestorB == kInvalidIndex || ancestorB < ancestorA)) {
       A_to_ancestorA = skelState.jointState[ancestorA].localTransform * A_to_ancestorA;
-      ancestorA = referenceSkeleton.joints[ancestorA].parent;
+      if (ancestorA < referenceSkeleton.joints.size()) {
+        ancestorA = referenceSkeleton.joints[ancestorA].parent;
+      } else {
+        break;
+      }
     } else {
       // Reached a common ancestor of A and B so we can stop.
       break;

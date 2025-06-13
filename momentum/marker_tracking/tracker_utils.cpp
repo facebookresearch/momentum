@@ -155,6 +155,12 @@ LocatorList extractLocatorsFromCharacter(
   const auto& skeleton = locatorCharacter.skeleton;
 
   LocatorList result = locators;
+
+  // Check if locators is empty
+  if (locators.empty()) {
+    return result;
+  }
+
   // revert each locator to the original attachment and add an offset
   for (size_t i = 0; i < locators.size(); i++) {
     // only map locators back that are not fixed
@@ -165,11 +171,29 @@ LocatorList extractLocatorsFromCharacter(
     // joint id
     const size_t jointId = locators[i].parent;
 
+    // Check bounds for jointState access
+    if (jointId >= state.jointState.size()) {
+      MT_LOGW(
+          "Joint ID {} is out of bounds for jointState (size: {})",
+          jointId,
+          state.jointState.size());
+      continue;
+    }
+
     // get global locator position
     const Vector3f pos = state.jointState[jointId].transformation * locators[i].offset;
 
     // change attachment to original joint
     result[i].parent = skeleton.joints[jointId].parent;
+
+    // Check bounds for parent joint access
+    if (result[i].parent >= state.jointState.size()) {
+      MT_LOGW(
+          "Parent joint ID {} is out of bounds for jointState (size: {})",
+          result[i].parent,
+          state.jointState.size());
+      continue;
+    }
 
     // calculate new offset
     const Vector3f offset = state.jointState[result[i].parent].transformation.inverse() * pos;

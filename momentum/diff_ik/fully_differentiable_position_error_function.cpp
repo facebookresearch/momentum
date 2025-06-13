@@ -201,26 +201,29 @@ T FullyDifferentiablePositionErrorFunctionT<T>::calculatePositionJacobian(
         const Eigen::Vector3<T> jc = jointState.getTranslationDerivative(d) * wgt;
         for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
              index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
-             ++index)
+             ++index) {
           jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
               jc * parameterTransform.transform.valuePtr()[index];
+        }
       }
       if (this->activeJointParams_[paramIndex + 3 + d]) {
         const Eigen::Vector3<T> jc = jointState.getRotationDerivative(d, posd) * wgt;
         for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3];
              index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-             ++index)
+             ++index) {
           jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
               jc * parameterTransform.transform.valuePtr()[index];
+        }
       }
     }
     if (this->activeJointParams_[paramIndex + 6]) {
       const Eigen::Vector3<T> jc = jointState.getScaleDerivative(posd) * wgt;
       for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
            index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
-           ++index)
+           ++index) {
         jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
             jc * parameterTransform.transform.valuePtr()[index];
+      }
     }
 
     // go to the next joint
@@ -330,9 +333,10 @@ T FullyDifferentiablePositionErrorFunctionT<T>::calculatePositionGradient(
         // explicitly multiply with the parameter transform to generate parameter space gradients
         for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
              index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
-             ++index)
+             ++index) {
           jGrad[parameterTransform.transform.innerIndexPtr()[index]] +=
               val * parameterTransform.transform.valuePtr()[index];
+        }
       }
       if (this->activeJointParams_[paramIndex + 3 + d]) {
         // calculate joint gradient
@@ -340,9 +344,10 @@ T FullyDifferentiablePositionErrorFunctionT<T>::calculatePositionGradient(
         // explicitly multiply with the parameter transform to generate parameter space gradients
         for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d];
              index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-             ++index)
+             ++index) {
           jGrad[parameterTransform.transform.innerIndexPtr()[index]] +=
               val * parameterTransform.transform.valuePtr()[index];
+        }
       }
     }
     if (this->activeJointParams_[paramIndex + 6]) {
@@ -351,9 +356,10 @@ T FullyDifferentiablePositionErrorFunctionT<T>::calculatePositionGradient(
       // explicitly multiply with the parameter transform to generate parameter space gradients
       for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
            index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
-           ++index)
+           ++index) {
         jGrad[parameterTransform.transform.innerIndexPtr()[index]] +=
             val * parameterTransform.transform.valuePtr()[index];
+      }
     }
 
     // go to the next joint

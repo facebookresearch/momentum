@@ -33,7 +33,7 @@ struct SimdPositionConstraints final {
       const Vector3f& target,
       float targetWeight);
 
-  VectorXi getNumConstraints() const;
+  [[nodiscard]] VectorXi getNumConstraints() const;
 
  public:
   // max number of constraints per segment

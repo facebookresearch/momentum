@@ -40,7 +40,6 @@ static inline int32_t getTypeSize(const fx::gltf::Accessor::Type& ty) {
     case fx::gltf::Accessor::Type::Vec3:
       return 3;
     case fx::gltf::Accessor::Type::Vec4:
-      return 4;
     case fx::gltf::Accessor::Type::Mat2:
       return 4;
     case fx::gltf::Accessor::Type::Mat3:

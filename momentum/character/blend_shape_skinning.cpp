@@ -107,7 +107,7 @@ void skinWithBlendShapes(
       dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
       [&blendWeights, &character, &transformations, &outputMesh](
           const size_t rangeBegin, const size_t rangeEnd) {
-        const auto& skin = *character.skinWeights;
+        const auto& skinWeights = *character.skinWeights;
         for (size_t iVert = rangeBegin; iVert != rangeEnd; iVert++) {
           // Compute rest position from blend shape:
           Eigen::Vector3<T> p_rest;
@@ -125,8 +125,8 @@ void skinWithBlendShapes(
 
           Eigen::Vector3<T> p_skinned = Eigen::Vector3<T>::Zero();
           for (uint32_t k = 0; k < kMaxSkinJoints; ++k) {
-            const auto bIndex = skin.index(iVert, k);
-            const T bWeight = skin.weight(iVert, k);
+            const auto bIndex = skinWeights.index(iVert, k);
+            const T bWeight = skinWeights.weight(iVert, k);
             if (bWeight == 0) {
               break;
             }

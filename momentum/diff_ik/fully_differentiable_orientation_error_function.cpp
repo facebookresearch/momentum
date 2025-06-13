@@ -164,9 +164,10 @@ T FullyDifferentiableOrientationErrorFunctionT<T>::calculateOrientationJacobian(
         // explicitly multiply with the parameter transform to generate parameter space gradients
         for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d];
              index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-             ++index)
+             ++index) {
           jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
               ja * parameterTransform.transform.valuePtr()[index];
+        }
       }
     }
 
@@ -272,9 +273,10 @@ T FullyDifferentiableOrientationErrorFunctionT<T>::calculateOrientationGradient(
         // explicitly multiply with the parameter transform to generate parameter space gradients
         for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d];
              index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-             ++index)
+             ++index) {
           jGrad[parameterTransform.transform.innerIndexPtr()[index]] +=
               val * parameterTransform.transform.valuePtr()[index];
+        }
       }
     }
 
@@ -287,7 +289,8 @@ T FullyDifferentiableOrientationErrorFunctionT<T>::calculateOrientationGradient(
 
 template <typename T>
 template <typename JetType>
-JetType FullyDifferentiableOrientationErrorFunctionT<T>::calculateOrientationGradient_dot(
+[[nodiscard]] JetType
+FullyDifferentiableOrientationErrorFunctionT<T>::calculateOrientationGradient_dot(
     const SkeletonStateT<T>& state,
     const size_t constrParent,
     const JetType& constrWeight,

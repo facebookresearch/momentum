@@ -15,6 +15,7 @@
 
 #include <Eigen/Dense>
 
+#include <array>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -23,7 +24,8 @@ namespace momentum {
 
 inline constexpr size_t kParametersPerJoint = 7;
 enum JointParameterNames { TX = 0, TY, TZ, RX, RY, RZ, SC };
-inline constexpr const char* kJointParameterNames[]{"tx", "ty", "tz", "rx", "ry", "rz", "sc"};
+inline constexpr std::array<const char*, kParametersPerJoint>
+    kJointParameterNames{"tx", "ty", "tz", "rx", "ry", "rz", "sc"};
 
 template <typename T>
 using JointVectorT = Eigen::Matrix<T, kParametersPerJoint, 1>;
@@ -82,18 +84,16 @@ struct EigenStrongType {
   }
 
   template <typename NewScalar>
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived<NewScalar> cast() const {
+  [[nodiscard]] EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived<NewScalar> cast() const {
     return v.template cast<NewScalar>();
   }
 
-  EIGEN_DEVICE_FUNC
-  EIGEN_STRONG_INLINE
-  auto size() const {
+  [[nodiscard]] EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE auto size() const {
     return v.size();
   }
 
   EIGEN_DEVICE_FUNC
-  static const Derived<Scalar> Zero(::Eigen::Index size) {
+  static Derived<Scalar> Zero(::Eigen::Index size) {
     return Derived<Scalar>(EigenType::Zero(size));
   }
 };

@@ -18,9 +18,7 @@
 namespace momentum {
 
 template <typename T>
-CharacterStateT<T>::CharacterStateT() {
-  // Empty
-}
+CharacterStateT<T>::CharacterStateT() = default;
 
 template <typename T>
 CharacterStateT<T>::CharacterStateT(const CharacterStateT& other)

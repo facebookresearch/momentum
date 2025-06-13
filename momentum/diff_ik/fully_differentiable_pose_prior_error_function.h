@@ -39,9 +39,9 @@ class FullyDifferentiablePosePriorErrorFunctionT
   static constexpr const char* kSigma = "sigma";
   static constexpr const char* kParameterIndices = "parameter_indices";
 
-  std::vector<std::string> inputs() const override final;
-  Eigen::Index getInputSize(const std::string& name) const override final;
-  const char* name() const override final {
+  [[nodiscard]] std::vector<std::string> inputs() const final;
+  [[nodiscard]] Eigen::Index getInputSize(const std::string& name) const final;
+  [[nodiscard]] const char* name() const final {
     return "MarkerErrorFunction";
   }
 
@@ -49,13 +49,11 @@ class FullyDifferentiablePosePriorErrorFunctionT
       const std::string& inputName,
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      Eigen::Ref<const Eigen::VectorX<T>> inputVec) override final;
+      Eigen::Ref<const Eigen::VectorX<T>> inputVec) final;
 
  protected:
-  void getInputImp(const std::string& name, Eigen::Ref<Eigen::VectorX<T>> value)
-      const override final;
-  void setInputImp(const std::string& name, Eigen::Ref<const Eigen::VectorX<T>> value)
-      override final;
+  void getInputImp(const std::string& name, Eigen::Ref<Eigen::VectorX<T>> value) const final;
+  void setInputImp(const std::string& name, Eigen::Ref<const Eigen::VectorX<T>> value) final;
 
   // pi_ are the mixture weights
   Eigen::VectorX<T> pi_;

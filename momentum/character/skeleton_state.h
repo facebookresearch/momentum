@@ -50,7 +50,7 @@ struct SkeletonStateT {
   JointStateListT<T> jointState;
 
   /// Creates an empty skeleton state
-  SkeletonStateT() noexcept {}
+  SkeletonStateT() noexcept = default;
 
   /// Creates a skeleton state from joint parameters and a reference skeleton
   ///
@@ -111,19 +111,21 @@ struct SkeletonStateT {
   /// @param state1 First skeleton state to compare
   /// @param state2 Second skeleton state to compare
   /// @return Similarity metrics between the two states
-  static StateSimilarity compare(const SkeletonStateT<T>& state1, const SkeletonStateT<T>& state2);
+  [[nodiscard]] static StateSimilarity compare(
+      const SkeletonStateT<T>& state1,
+      const SkeletonStateT<T>& state2);
 
   /// Extracts global transforms for all joints in the skeleton
   ///
   /// @return List of global transforms for all joints
-  TransformListT<T> toTransforms() const;
+  [[nodiscard]] TransformListT<T> toTransforms() const;
 
   /// Converts the skeleton state to a different scalar type
   ///
   /// @tparam T2 Target scalar type
   /// @return Skeleton state with the target scalar type
   template <typename T2>
-  SkeletonStateT<T2> cast() const {
+  [[nodiscard]] SkeletonStateT<T2> cast() const {
     SkeletonStateT<T2> result;
     result.set(*this);
     return result;

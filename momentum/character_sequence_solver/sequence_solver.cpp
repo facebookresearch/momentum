@@ -114,7 +114,7 @@ SequenceSolverT<T>::computePerFrameJacobian(SequenceSolverFunctionT<T>* fn, size
 
     const size_t n = errf->getJacobianSize();
 
-    int rows;
+    int rows = 0;
     errorCur += errf->getJacobian(
         frameParameters,
         skelState,
@@ -153,8 +153,7 @@ std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> SequenceSolverT
     const auto nFrames = errf->numFrames();
     MT_CHECK(nFrames <= bandwidth_cur);
     const size_t n = errf->getJacobianSize();
-
-    int rows;
+    int rows = 0;
     errorCur += errf->getJacobian(
         gsl::make_span(fn->frameParameters_).subspan(iFrame, nFrames),
         gsl::make_span(fn->states_).subspan(iFrame, nFrames),
@@ -225,6 +224,8 @@ double SequenceSolverT<T>::processPerFrameErrors_serial(
   return errorSum;
 }
 
+namespace {
+
 template <typename T, typename Comparator>
 class PriorityQueue {
  public:
@@ -238,17 +239,19 @@ class PriorityQueue {
     queue.pop_back();
   }
 
-  T& top() {
+  [[nodiscard]] T& top() {
     return queue.front();
   }
 
-  bool empty() const {
+  [[nodiscard]] bool empty() const {
     return queue.empty();
   }
 
  private:
   std::vector<T> queue;
 };
+
+} // namespace
 
 template <typename T>
 double SequenceSolverT<T>::processErrorFunctions_parallel(

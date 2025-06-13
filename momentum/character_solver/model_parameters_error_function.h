@@ -17,19 +17,20 @@ template <typename T>
 class ModelParametersErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
   ModelParametersErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  ModelParametersErrorFunctionT(const Character& character);
+  explicit ModelParametersErrorFunctionT(const Character& character);
 
   // Create a ModelParametersError that only targets the specified parameters:
   ModelParametersErrorFunctionT(const Character& character, const ParameterSet& active);
 
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& parameters,
+      const SkeletonStateT<T>& state) final;
   double getGradient(
-      const ModelParametersT<T>& params,
+      const ModelParametersT<T>& parameters,
       const SkeletonStateT<T>& state,
       Ref<Eigen::VectorX<T>> gradient) final;
   double getJacobian(
-      const ModelParametersT<T>& params,
+      const ModelParametersT<T>& parameters,
       const SkeletonStateT<T>& state,
       Ref<Eigen::MatrixX<T>> jacobian,
       Ref<Eigen::VectorX<T>> residual,
@@ -41,11 +42,11 @@ class ModelParametersErrorFunctionT : public SkeletonErrorFunctionT<T> {
     this->targetWeights_ = weights;
   }
 
-  const ModelParametersT<T>& getTargetParameters() const {
+  [[nodiscard]] const ModelParametersT<T>& getTargetParameters() const {
     return this->targetParameters_;
   }
 
-  const Eigen::VectorX<T>& getTargetWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getTargetWeights() const {
     return this->targetWeights_;
   }
 

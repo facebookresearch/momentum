@@ -49,11 +49,11 @@ BlendShape loadBlendShape(
 
 /// Loads a blend shape from a stream, including base shape and shape vectors.
 ///
-/// @param is Input stream containing blend shape data
+/// @param data Input stream containing blend shape data
 /// @param expectedShapes Limits number of shape vectors loaded if > 0, otherwise loads all
 /// @param expectedVertices Limits number of vertices loaded if > 0, otherwise loads all
 /// @return BlendShape object with loaded data
-BlendShape loadBlendShape(std::istream& is, int expectedShapes = -1, int expectedVertices = -1);
+BlendShape loadBlendShape(std::istream& data, int expectedShapes = -1, int expectedVertices = -1);
 
 /// Saves a blend shape to a file.
 ///

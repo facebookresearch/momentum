@@ -20,7 +20,7 @@ class LimitErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Skeleton& skel,
       const ParameterTransform& pt,
       const ParameterLimits& pl = ParameterLimits());
-  LimitErrorFunctionT(const Character& character);
+  explicit LimitErrorFunctionT(const Character& character);
   LimitErrorFunctionT(const Character& character, const ParameterLimits& pl);
 
   [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)

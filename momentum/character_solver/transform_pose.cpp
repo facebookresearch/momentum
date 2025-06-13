@@ -132,14 +132,14 @@ PoseTransformSolverT<T>::~PoseTransformSolverT() = default;
 
 template <typename T>
 void PoseTransformSolverT<T>::transformPose(
-    ModelParametersT<T>& modelParameters_full,
+    ModelParametersT<T>& modelParametersFull,
     const TransformT<T>& transform,
-    const ModelParametersT<T>& modelParameters_prev) {
+    const ModelParametersT<T>& modelParametersPrev) {
   MT_CHECK(
-      modelParameters_full.size() == numModelParametersFull_,
+      modelParametersFull.size() == numModelParametersFull_,
       "Model parameters don't match full character");
   MT_CHECK(
-      modelParameters_prev.size() == numModelParametersFull_ || modelParameters_prev.size() == 0,
+      modelParametersPrev.size() == numModelParametersFull_ || modelParametersPrev.size() == 0,
       "Prev model parameters don't match full character");
 
   // Initialize with params copied from fullParams:
@@ -147,7 +147,7 @@ void PoseTransformSolverT<T>::transformPose(
   for (size_t iSimplifiedParam = 0; iSimplifiedParam < simplifiedParamToFullParamIdx_.size();
        ++iSimplifiedParam) {
     const auto fullParamIdx = simplifiedParamToFullParamIdx_[iSimplifiedParam];
-    solvedParametersSimplified_[iSimplifiedParam] = modelParameters_full[fullParamIdx];
+    solvedParametersSimplified_[iSimplifiedParam] = modelParametersFull[fullParamIdx];
   }
 
   skelStateSimplified_.set(
@@ -155,13 +155,13 @@ void PoseTransformSolverT<T>::transformPose(
       characterSimplified_.skeleton,
       false);
 
-  if (modelParameters_prev.size() != 0) {
+  if (modelParametersPrev.size() != 0) {
     // Copy rigid parameters from previous solve to ensure continuity:
     for (size_t iSimplifiedParam = 0; iSimplifiedParam < simplifiedParamToFullParamIdx_.size();
          ++iSimplifiedParam) {
       const auto fullParamIdx = simplifiedParamToFullParamIdx_[iSimplifiedParam];
       if (rigidParametersSimplified_.test(iSimplifiedParam)) {
-        solvedParametersSimplified_[iSimplifiedParam] = modelParameters_prev[fullParamIdx];
+        solvedParametersSimplified_[iSimplifiedParam] = modelParametersPrev[fullParamIdx];
       }
     }
   }
@@ -215,7 +215,7 @@ void PoseTransformSolverT<T>::transformPose(
        ++simplifiedParamIdx) {
     if (rigidParametersSimplified_.test(simplifiedParamIdx)) {
       const auto fullParamIdx = simplifiedParamToFullParamIdx_[simplifiedParamIdx];
-      modelParameters_full.v[fullParamIdx] = solvedParametersSimplified_[simplifiedParamIdx];
+      modelParametersFull.v[fullParamIdx] = solvedParametersSimplified_[simplifiedParamIdx];
     }
   }
 }
@@ -225,7 +225,7 @@ std::vector<ModelParametersT<T>> transformPose(
     const Character& character,
     const std::vector<ModelParametersT<T>>& modelParameters,
     const std::vector<TransformT<T>>& transforms,
-    bool ensureContinuousOutput) {
+    [[maybe_unused]] bool ensureContinuousOutput) {
   MT_CHECK(
       transforms.size() == 1 || modelParameters.size() == transforms.size(),
       "Mismatched transforms and parameters");

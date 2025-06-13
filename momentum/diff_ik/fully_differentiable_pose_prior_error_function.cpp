@@ -39,7 +39,8 @@ FullyDifferentiablePosePriorErrorFunctionT<T>::FullyDifferentiablePosePriorError
       names_(std::move(names)) {}
 
 template <typename T>
-FullyDifferentiablePosePriorErrorFunctionT<T>::~FullyDifferentiablePosePriorErrorFunctionT() {}
+FullyDifferentiablePosePriorErrorFunctionT<T>::~FullyDifferentiablePosePriorErrorFunctionT() =
+    default;
 
 template <typename T>
 void FullyDifferentiablePosePriorErrorFunctionT<T>::setPosePrior(
@@ -198,8 +199,7 @@ Eigen::VectorX<T> FullyDifferentiablePosePriorErrorFunctionT<T>::d_gradient_d_in
   const Eigen::Index d = posePrior.d;
 
   Eigen::VectorX<T> result = Eigen::VectorX<T>::Zero(getInputSize(inputName));
-
-  size_t modeIdx;
+  size_t modeIdx = 0;
   Eigen::VectorX<T> bestDiff;
   T minDist, bestR;
   PosePriorErrorFunctionT<T>::getBestFitMode(params, modeIdx, bestDiff, bestR, minDist);

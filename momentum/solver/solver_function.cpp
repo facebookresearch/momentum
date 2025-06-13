@@ -22,7 +22,7 @@ template <typename T>
 double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj, VectorX<T>& jtr) {
   // Generic implementation, considering J in one block.
   // Vastly sub-optimal, but here for compatibility reasons
-  size_t actualRows;
+  size_t actualRows = 0;
   MatrixX<T> jacobian;
   VectorX<T> residual;
 

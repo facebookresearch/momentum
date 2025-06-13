@@ -34,7 +34,11 @@ void NormalErrorFunctionT<T>::evalFunction(
     v->get().at(1) = std::move(normal);
   }
   if (dfdv) {
-    dfdv->get().at(0) = v->get().at(1); // normal
+    if (v) {
+      dfdv->get().at(0) = v->get().at(1); // normal
+    } else {
+      dfdv->get().at(0) = normal;
+    }
     dfdv->get().at(1) = dist;
   }
 }

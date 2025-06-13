@@ -24,7 +24,7 @@ FullyDifferentiableMotionErrorFunctionT<T>::FullyDifferentiableMotionErrorFuncti
     : ModelParametersErrorFunctionT<T>(skel, pt) {}
 
 template <typename T>
-FullyDifferentiableMotionErrorFunctionT<T>::~FullyDifferentiableMotionErrorFunctionT() {}
+FullyDifferentiableMotionErrorFunctionT<T>::~FullyDifferentiableMotionErrorFunctionT() = default;
 
 template <typename T>
 std::vector<std::string> FullyDifferentiableMotionErrorFunctionT<T>::inputs() const {

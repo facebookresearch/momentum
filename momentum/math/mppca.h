@@ -55,13 +55,13 @@ struct MppcaT {
   /// @tparam T2 Target scalar type
   /// @return Converted MPPCA model
   template <typename T2>
-  MppcaT<T2> cast() const;
+  [[nodiscard]] MppcaT<T2> cast() const;
 
   /// Checks approximate equality with another model
   ///
   /// @param[in] mppcaT Model to compare with
   /// @return true if approximately equal
-  bool isApprox(const MppcaT<T>& mppcaT) const;
+  [[nodiscard]] bool isApprox(const MppcaT<T>& mppcaT) const;
 };
 
 } // namespace momentum

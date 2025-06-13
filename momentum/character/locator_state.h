@@ -31,7 +31,7 @@ struct LocatorState {
   /// @param referenceLocators List of locators to track
   LocatorState(const SkeletonState& skeletonState, const LocatorList& referenceLocators) noexcept {
     update(skeletonState, referenceLocators);
-  };
+  }
 
   /// Updates the world positions of all locators based on the current skeleton pose
   ///

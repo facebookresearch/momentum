@@ -24,7 +24,7 @@ FullyDifferentiableStateErrorFunctionT<T>::FullyDifferentiableStateErrorFunction
     : StateErrorFunctionT<T>(skel, pt) {}
 
 template <typename T>
-FullyDifferentiableStateErrorFunctionT<T>::~FullyDifferentiableStateErrorFunctionT() {}
+FullyDifferentiableStateErrorFunctionT<T>::~FullyDifferentiableStateErrorFunctionT() = default;
 
 template <typename T>
 std::vector<std::string> FullyDifferentiableStateErrorFunctionT<T>::inputs() const {

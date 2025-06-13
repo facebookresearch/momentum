@@ -98,10 +98,10 @@ class SolverFunctionT {
   virtual void setEnabledParameters(const ParameterSet& parameterSet);
 
   /// Returns the total number of parameters in the optimization problem
-  size_t getNumParameters() const;
+  [[nodiscard]] size_t getNumParameters() const;
 
   /// Returns the number of parameters currently enabled for optimization
-  size_t getActualParameters() const;
+  [[nodiscard]] size_t getActualParameters() const;
 
   /// Records solver state for debugging and analysis
   ///

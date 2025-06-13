@@ -270,7 +270,7 @@ void createAnimationCurves(
       float jointVal = jointValues(parameterIndex, f);
 
       // add translation offset for tx values
-      if (jointOffset < 3) {
+      if (jointOffset < 3 && jointIndex < character.skeleton.joints.size()) {
         jointVal += character.skeleton.joints[jointIndex].translationOffset[jointOffset];
       }
       // convert to degrees
@@ -340,7 +340,7 @@ void saveFbxCommon(
   std::vector<::fbxsdk::FbxNode*> skeletonNodes;
   std::unordered_map<size_t, fbxsdk::FbxNode*> jointToNodeMap;
 
-  ::fbxsdk::FbxNode* skeletonRootNode;
+  ::fbxsdk::FbxNode* skeletonRootNode = nullptr;
 
   for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
     const auto& joint = character.skeleton.joints[i];

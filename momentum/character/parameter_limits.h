@@ -118,7 +118,7 @@ struct ParameterLimit {
     return (
         (data == parameterLimit.data) && (type == parameterLimit.type) &&
         isApprox(weight, parameterLimit.weight));
-  };
+  }
 };
 
 using ParameterLimits = std::vector<ParameterLimit>;

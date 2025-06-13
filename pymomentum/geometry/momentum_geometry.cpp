@@ -421,7 +421,7 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
   }
 
   auto result = std::make_shared<momentum::BlendShape>(baseShapeRes, nShapes);
-  result->setShapeVectors(std::move(shapeVectorsRes));
+  result->setShapeVectors(shapeVectorsRes);
   return result;
 }
 

@@ -46,14 +46,14 @@ class SkeletonErrorFunctionT {
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */) {
     return 0.0f;
-  };
+  }
 
   virtual double getGradient(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
       Eigen::Ref<Eigen::VectorX<T>> /* gradient */) {
     return 0.0f;
-  };
+  }
 
   virtual double getJacobian(
       const ModelParametersT<T>& /* params */,
@@ -63,14 +63,13 @@ class SkeletonErrorFunctionT {
       int& usedRows) {
     usedRows = 0;
     return 0.0f;
-  };
+  }
 
   virtual void getHessian(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
       Eigen::Ref<Eigen::MatrixX<T>> /* hessian */) {
     throw;
-    return;
   };
 
   virtual double getSolverDerivatives(
@@ -91,8 +90,7 @@ class SkeletonErrorFunctionT {
 
       Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(residualSize, paramSize);
       Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(residualSize);
-      int rows;
-
+      int rows = 0;
       error = getJacobian(parameters, state, jacobian, residual, rows);
 
       // Update JtJ
@@ -114,7 +112,7 @@ class SkeletonErrorFunctionT {
     return error;
   }
 
-  virtual size_t getJacobianSize() const {
+  [[nodiscard]] virtual size_t getJacobianSize() const {
     return 0;
   }
 

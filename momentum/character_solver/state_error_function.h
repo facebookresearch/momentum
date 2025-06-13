@@ -17,7 +17,7 @@ template <typename T>
 class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
   StateErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  StateErrorFunctionT(const Character& character);
+  explicit StateErrorFunctionT(const Character& character);
 
   [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
       final;
@@ -52,16 +52,16 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return this->targetState_;
   }
 
-  const Eigen::VectorX<T>& getPositionWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getPositionWeights() const {
     return targetPositionWeights_;
   }
-  const Eigen::VectorX<T>& getRotationWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getRotationWeights() const {
     return targetRotationWeights_;
   }
-  const T& getPositionWeight() const {
+  [[nodiscard]] const T& getPositionWeight() const {
     return posWgt_;
   }
-  const T& getRotationWeight() const {
+  [[nodiscard]] const T& getRotationWeight() const {
     return rotWgt_;
   }
 
