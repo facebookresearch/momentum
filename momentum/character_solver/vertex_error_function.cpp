@@ -194,7 +194,7 @@ double VertexErrorFunctionT<T>::calculatePositionGradient(
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
-    size_t jointIndex;
+    size_t jointIndex = 0;
     T boneWeight;
     Eigen::Vector3<T> pos;
     std::tie(jointIndex, boneWeight, pos) = skinningIter.next();

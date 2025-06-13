@@ -134,9 +134,8 @@ void saveMmo(
   }
 
   std::ofstream fs(filename, std::ios::out | std::ios::binary);
-
   // write out sizes
-  size_t data;
+  size_t data = 0;
   data = parameterNames.size(); // number of parameters
   fs.write((const char*)&data, sizeof(size_t));
 

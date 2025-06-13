@@ -199,8 +199,7 @@ Eigen::VectorX<T> FullyDifferentiablePosePriorErrorFunctionT<T>::d_gradient_d_in
   const Eigen::Index d = posePrior.d;
 
   Eigen::VectorX<T> result = Eigen::VectorX<T>::Zero(getInputSize(inputName));
-
-  size_t modeIdx;
+  size_t modeIdx = 0;
   Eigen::VectorX<T> bestDiff;
   T minDist, bestR;
   PosePriorErrorFunctionT<T>::getBestFitMode(params, modeIdx, bestDiff, bestR, minDist);
