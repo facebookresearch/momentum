@@ -694,18 +694,12 @@ size_t LimitErrorFunctionT<T>::getJacobianSize() const {
     switch (limit.type) {
       case MinMax:
       case MinMaxJoint:
+      case Linear:
+      case LinearJoint:
+      case HalfPlane:
         count++;
         break;
       case MinMaxJointPassive:
-        break;
-      case Linear:
-        count++;
-        break;
-      case LinearJoint:
-        count++;
-        break;
-      case HalfPlane:
-        count++;
         break;
       case Ellipsoid:
         count += 3;

@@ -181,13 +181,9 @@ std::vector<std::string> FullyDifferentiableDistanceErrorFunctionT<T>::inputs() 
 template <typename T>
 Eigen::Index FullyDifferentiableDistanceErrorFunctionT<T>::getInputSize(
     const std::string& name) const {
-  if (name == kWeights) {
+  if (name == kWeights || name == kTargets) {
     return constraints_.size();
-  } else if (name == kOffsets) {
-    return 3 * constraints_.size();
-  } else if (name == kTargets) {
-    return constraints_.size();
-  } else if (name == kOrigins) {
+  } else if (name == kOffsets || name == kOrigins) {
     return 3 * constraints_.size();
   } else {
     throw std::runtime_error("Unknown input for DistanceErrorFunction: " + name);
