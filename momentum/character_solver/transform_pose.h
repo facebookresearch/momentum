@@ -49,12 +49,12 @@ class PoseTransformSolverT {
   /// Applies a rigid transform to the given model parameters.
   /// @param[in,out] modelParameters The model parameters to be transformed.
   /// @param[in] transform The transform to apply.
-  /// @param[in] prevPose The previous pose, which is used to ensure continuity (the solver will
-  /// initialize using the previous frame's rigid parameters).
+  /// @param[in] modelParametersPrev The previous pose, which is used to ensure continuity (the
+  /// solver will initialize using the previous frame's rigid parameters).
   void transformPose(
       ModelParametersT<T>& modelParameters,
       const TransformT<T>& transform,
-      const ModelParametersT<T>& prevPose = ModelParametersT<T>{});
+      const ModelParametersT<T>& modelParametersPrev = ModelParametersT<T>{});
 
  private:
   Eigen::Index numModelParametersFull_;
