@@ -44,6 +44,46 @@ When accessing elements within arrays, the Momentum codebase employs two methods
 
 ## Design Decisions
 
-### Prefer `gsl::span` over typed container like `std::vector`` as function argument
+### Prefer `gsl::span` over typed container like `std::vector` as function argument
 
 Using `std::vector<T>` as a function argument requires the call site to create an `std::vector<T>` instance even when the data is already stored in a compatible memory layout, such as contiguous memory. By switching to `gsl::span<T>`, call sites can avoid creating an additional `std::vector<T>` object and benefit from improved performance by not requiring an unnecessary data copy.
+
+### Header Include Style
+
+Momentum follows standard C++ conventions for header includes, using different syntax depending on the context:
+
+#### Public Headers (Use Angle Brackets `<>`)
+
+In **public Momentum headers** that are installed for users, use angle brackets:
+
+```cpp
+// In public header files (e.g., momentum/character/character.h)
+#include <momentum/common/checks.h>
+#include <momentum/math/mesh.h>
+```
+
+**Rationale**: Angle brackets instruct the compiler to search in system/standard include paths. When Momentum is installed as a library, downstream users and build systems will treat these as system headers and look for them in the appropriate system locations (e.g., `/usr/local/include`, `/opt/include`).
+
+#### Library Implementation Source Files (Use Quotes `""`)
+
+In **library implementation source files** (`.cpp` files in core library directories), use quotes:
+
+```cpp
+// In library implementation .cpp files
+#include "momentum/character/character.h"
+#include "momentum/common/checks.h"
+```
+
+**Rationale**: Quotes instruct the compiler to first search in local/relative directories before falling back to system paths. This ensures that during Momentum's own build process, the compiler finds the local development headers rather than any previously installed system versions.
+
+#### Tests, Tutorials, and Examples (Use Angle Brackets `<>`)
+
+In **tests, tutorials, and example code**, use angle brackets:
+
+```cpp
+// In test files, tutorials, and examples
+#include <momentum/character/character.h>
+#include <momentum/common/checks.h>
+```
+
+**Rationale**: Tests, tutorials, and examples represent user-facing code that demonstrates how external developers should consume the Momentum library. They should mirror the external user experience by using angle brackets as users would when the library is installed as a system library. This also serves as documentation showing the correct way to include headers.
