@@ -140,18 +140,18 @@ $(document).ready(function(){initNavTree('inverse__parameter__transform_8h_sourc
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="comment">// map joint parameters to model parameters.  The residual from the fit is</span></div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="comment">// left in the result&#39;s offsets vector.</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterParametersT&lt;T&gt;</a> <a class="code hl_function" href="structmomentum_1_1InverseParameterTransformT.html#a377e4fdee4331d4310870e7f67d634f4">apply</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">JointParametersT&lt;T&gt;</a>&amp; parameters) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterParametersT&lt;T&gt;</a> <a class="code hl_function" href="structmomentum_1_1InverseParameterTransformT.html#a377e4fdee4331d4310870e7f67d634f4">apply</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">JointParametersT&lt;T&gt;</a>&amp; parameters) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="comment">// Dimension of the output model parameters vector:</span></div>
 <div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structmomentum_1_1InverseParameterTransformT.html#a18197aead1eee02722b70fd8fd7fae09">   45</a></span>  Eigen::Index <a class="code hl_function" href="structmomentum_1_1InverseParameterTransformT.html#a18197aead1eee02722b70fd8fd7fae09">numAllModelParameters</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structmomentum_1_1InverseParameterTransformT.html#a18197aead1eee02722b70fd8fd7fae09">   45</a></span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] Eigen::Index <a class="code hl_function" href="structmomentum_1_1InverseParameterTransformT.html#a18197aead1eee02722b70fd8fd7fae09">numAllModelParameters</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="structmomentum_1_1InverseParameterTransformT.html#abdb7f8980230d04671d661273e7dba10">transform</a>.cols();</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  }</div>
 </div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="comment">// Dimension of the input joint parameters vector:</span></div>
 <div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structmomentum_1_1InverseParameterTransformT.html#af5670bbf141d893b896fc8b7075f94ce">   50</a></span>  Eigen::Index <a class="code hl_function" href="structmomentum_1_1InverseParameterTransformT.html#af5670bbf141d893b896fc8b7075f94ce">numJointParameters</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structmomentum_1_1InverseParameterTransformT.html#af5670bbf141d893b896fc8b7075f94ce">   50</a></span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] Eigen::Index <a class="code hl_function" href="structmomentum_1_1InverseParameterTransformT.html#af5670bbf141d893b896fc8b7075f94ce">numJointParameters</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="structmomentum_1_1InverseParameterTransformT.html#abdb7f8980230d04671d661273e7dba10">transform</a>.rows();</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  }</div>
 </div>
@@ -182,7 +182,7 @@ $(document).ready(function(){initNavTree('inverse__parameter__transform_8h_sourc
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="inverse__parameter__transform_8h.html">inverse_parameter_transform.h</a></li>
-    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Jun 13 2025 05:21:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

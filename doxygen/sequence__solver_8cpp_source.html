@@ -222,7 +222,7 @@ $(document).ready(function(){initNavTree('sequence__solver_8cpp_source.html','')
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">n</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobianSize();</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordtype">int</span> rows;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordtype">int</span> rows = 0;</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorCur</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobian(</div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameParameters</a>,</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelState</a>,</div>
@@ -262,7 +262,7 @@ $(document).ready(function(){initNavTree('sequence__solver_8cpp_source.html','')
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nFrames</a> &lt;= <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bandwidth_cur</a>);</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">n</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobianSize();</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keywordtype">int</span> rows;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keywordtype">int</span> rows = 0;</div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorCur</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobian(</div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        gsl::make_span(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">fn</a>-&gt;frameParameters_).subspan(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iFrame</a>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nFrames</a>),</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        gsl::make_span(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">fn</a>-&gt;states_).subspan(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iFrame</a>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nFrames</a>),</div>
@@ -352,13 +352,13 @@ $(document).ready(function(){initNavTree('sequence__solver_8cpp_source.html','')
 </div>
 <div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
 <div class="foldopen" id="foldopen00241" data-start="{" data-end="}">
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="classmomentum_1_1PriorityQueue.html#a09f4463381c883a6cd919d3a29c5cd8f">  241</a></span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&amp; <a class="code hl_function" href="classmomentum_1_1PriorityQueue.html#a09f4463381c883a6cd919d3a29c5cd8f">top</a>() {</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="classmomentum_1_1PriorityQueue.html#a09f4463381c883a6cd919d3a29c5cd8f">  241</a></span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&amp; <a class="code hl_function" href="classmomentum_1_1PriorityQueue.html#a09f4463381c883a6cd919d3a29c5cd8f">top</a>() {</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keywordflow">return</span> queue.front();</div>
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>  }</div>
 </div>
 <div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
 <div class="foldopen" id="foldopen00245" data-start="{" data-end="}">
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="classmomentum_1_1PriorityQueue.html#abc97c105a13b62c565a0d9164757245d">  245</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classmomentum_1_1PriorityQueue.html#abc97c105a13b62c565a0d9164757245d">empty</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="classmomentum_1_1PriorityQueue.html#abc97c105a13b62c565a0d9164757245d">  245</a></span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmomentum_1_1PriorityQueue.html#abc97c105a13b62c565a0d9164757245d">empty</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <span class="keywordflow">return</span> queue.empty();</div>
 <div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  }</div>
 </div>
@@ -675,7 +675,7 @@ $(document).ready(function(){initNavTree('sequence__solver_8cpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="sequence__solver_8cpp.html">sequence_solver.cpp</a></li>
-    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Jun 13 2025 05:21:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
