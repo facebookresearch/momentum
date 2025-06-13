@@ -8,7 +8,7 @@
 #include <momentum/math/types.h>
 #include <momentum/solver/solver.h>
 #include <momentum/solver/solver_function.h>
-#include "momentum/test/helpers/expect_throw.h"
+#include <momentum/test/helpers/expect_throw.h>
 
 #include <gtest/gtest.h>
 

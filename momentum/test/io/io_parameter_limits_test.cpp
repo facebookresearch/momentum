@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <momentum/character/parameter_limits.h>
 #include <momentum/io/skeleton/parameter_limits_io.h>
-#include "momentum/test/character/character_helpers.h"
+#include <momentum/test/character/character_helpers.h>
 
 using namespace momentum;
 
