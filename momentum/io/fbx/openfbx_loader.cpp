@@ -203,7 +203,7 @@ const ofbx::IElementProperty* getElementProperty(const ofbx::IElement* element, 
   return prop;
 }
 
-static double resolveDoubleProperty(const ofbx::Object& object, const char* name) {
+double resolveDoubleProperty(const ofbx::Object& object, const char* name) {
   const ofbx::IElement* element = resolveProperty(object, name);
   MT_THROW_IF(element == nullptr, "Unable to find property element in {}", object.name);
   const ofbx::IElementProperty* x = getElementProperty(element, 4);
