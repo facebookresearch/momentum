@@ -25,7 +25,7 @@ namespace momentum {
 
 [[nodiscard]] inline Quaternionf toMomentumQuaternionf(
     const std::array<float, 4>& gltfQuat) noexcept {
-  return Quaternionf(gltfQuat[3], gltfQuat[0], gltfQuat[1], gltfQuat[2]);
+  return {gltfQuat[3], gltfQuat[0], gltfQuat[1], gltfQuat[2]};
 }
 
 [[nodiscard]] inline std::array<float, 4> fromMomentumQuaternionf(
