@@ -91,10 +91,9 @@ LocatorList loadLocators(
     const ParameterTransform& parameterTransform) {
   std::ifstream instream(filename, std::ios::binary);
   MT_THROW_IF(!instream.is_open(), "Cannot find file {}", filename.string());
-
-  instream.seekg(0, instream.end);
+  instream.seekg(0, std::ios::end);
   auto length = instream.tellg();
-  instream.seekg(0, instream.beg);
+  instream.seekg(0, std::ios::beg);
 
   auto buffer = std::make_unique<char[]>(length);
   instream.read((char*)buffer.get(), length);
