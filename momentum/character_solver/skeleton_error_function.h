@@ -46,14 +46,14 @@ class SkeletonErrorFunctionT {
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */) {
     return 0.0f;
-  };
+  }
 
   virtual double getGradient(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
       Eigen::Ref<Eigen::VectorX<T>> /* gradient */) {
     return 0.0f;
-  };
+  }
 
   virtual double getJacobian(
       const ModelParametersT<T>& /* params */,
@@ -63,14 +63,14 @@ class SkeletonErrorFunctionT {
       int& usedRows) {
     usedRows = 0;
     return 0.0f;
-  };
+  }
 
   virtual void getHessian(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
       Eigen::Ref<Eigen::MatrixX<T>> /* hessian */) {
     throw;
-  };
+  }
 
   virtual double getSolverDerivatives(
       const ModelParametersT<T>& parameters,
