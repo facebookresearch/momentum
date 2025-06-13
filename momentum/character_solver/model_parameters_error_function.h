@@ -17,7 +17,7 @@ template <typename T>
 class ModelParametersErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
   ModelParametersErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  ModelParametersErrorFunctionT(const Character& character);
+  explicit ModelParametersErrorFunctionT(const Character& character);
 
   // Create a ModelParametersError that only targets the specified parameters:
   ModelParametersErrorFunctionT(const Character& character, const ParameterSet& active);

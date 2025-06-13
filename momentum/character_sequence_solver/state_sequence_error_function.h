@@ -17,7 +17,7 @@ template <typename T>
 class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
  public:
   StateSequenceErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  StateSequenceErrorFunctionT(const Character& character);
+  explicit StateSequenceErrorFunctionT(const Character& character);
 
   [[nodiscard]] size_t numFrames() const final {
     return 2;
