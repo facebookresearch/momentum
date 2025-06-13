@@ -50,7 +50,7 @@ namespace {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(filepath);
   } else if (format == CharacterFormat::Fbx) {
-    return loadFbxCharacter(filepath, true);
+    return loadFbxCharacter(filepath, KeepLocators::Yes);
   } else {
     return {};
   }
@@ -62,7 +62,7 @@ namespace {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(fileBuffer);
   } else if (format == CharacterFormat::Fbx) {
-    return loadFbxCharacter(fileBuffer, true);
+    return loadFbxCharacter(fileBuffer, KeepLocators::Yes);
   } else {
     return {};
   }

@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
     const auto [character, motions, fps] =
-        loadFbxCharacterWithMotion(options->fbxFile, true /*keepLocators*/, options->permissive);
+        loadFbxCharacterWithMotion(options->fbxFile, KeepLocators::Yes, options->permissive);
     // Validate the loaded motion
     if (motions.empty() || (motions.size() == 1 && motions.at(0).cols() == 0)) {
       MT_LOGW("No motion loaded from file");
