@@ -23,27 +23,27 @@
 using namespace momentum;
 
 int main(int argc, char* argv[]) {
-  const std::string appName("Refine Motion");
-  CLI::App app(appName);
-
-  // set up command line options
-  app.set_config("-c", "", "Input configuration", false);
-  auto ioOpt = std::make_shared<IOOptions>();
-  addIOOptions(app, ioOpt);
-
-  auto config = std::make_shared<RefineConfig>();
-  addRefineOptions(app, config);
-
-  std::string paramFile;
-  app.add_option(
-         "-p,--parameters",
-         paramFile,
-         "A new model parameter config for the character. Use at your own risk!")
-      ->check(CLI::ExistingFile);
-
-  // Only doing motion smoothing for now. We can also fine tune marker offsets or solve everything
-  // together again.
   try {
+    const std::string appName("Refine Motion");
+    CLI::App app(appName);
+
+    // set up command line options
+    app.set_config("-c", "", "Input configuration", false);
+    auto ioOpt = std::make_shared<IOOptions>();
+    addIOOptions(app, ioOpt);
+
+    auto config = std::make_shared<RefineConfig>();
+    addRefineOptions(app, config);
+
+    std::string paramFile;
+    app.add_option(
+           "-p,--parameters",
+           paramFile,
+           "A new model parameter config for the character. Use at your own risk!")
+        ->check(CLI::ExistingFile);
+
+    // Only doing motion smoothing for now. We can also fine tune marker offsets or solve everything
+    // together again.
     CLI11_PARSE(app, argc, argv);
 
     // Load character and motion
@@ -91,6 +91,9 @@ int main(int argc, char* argv[]) {
     MT_LOGI("{} saved", ioOpt->outputFile);
   } catch (std::exception& e) {
     MT_LOGE("{}", e.what());
+  } catch (...) {
+    // Handle any other exceptions to prevent them from escaping main
+    MT_LOGE("Unknown error occurred");
   }
 
   return 0;
