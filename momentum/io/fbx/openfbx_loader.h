@@ -9,6 +9,7 @@
 
 #include <momentum/character/fwd.h>
 #include <momentum/common/filesystem.h>
+#include <momentum/io/fbx/fbx_io.h>
 #include <momentum/math/types.h>
 
 #include <gsl/span>
@@ -20,25 +21,25 @@ namespace momentum {
 // Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
     const filesystem::path& inputPath,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
     gsl::span<const std::byte> inputSpan,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 } // namespace momentum

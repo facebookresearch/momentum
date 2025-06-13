@@ -145,7 +145,8 @@ int main(int argc, char** argv) {
       } else if (motionExt == ".fbx") {
         MT_LOGI("Loading motion from fbx...");
         int motionIndex = -1;
-        auto [c, motions, framerate] = loadFbxCharacterWithMotion(motionPath, true, false);
+        auto [c, motions, framerate] =
+            loadFbxCharacterWithMotion(motionPath, KeepLocators::Yes, false);
         // Validate the motion
         if (motions.empty() || (motions.size() == 1 && motions.at(0).cols() == 0)) {
           MT_LOGW("No motion loaded from file");

@@ -31,6 +31,9 @@ enum class FBXFrontVector { ParityEven = 1, ParityOdd = 2 };
 // Maps to fbxsdk::FbxAxisSystem::ECoordSystem
 enum class FBXCoordSystem { RightHanded, LeftHanded };
 
+// KeepLocators Specifies whether Nulls in the transform hierarchy should be turned into Locators.
+enum class KeepLocators { No, Yes };
+
 // A struct containing the up, front vectors and coordinate system
 struct FBXCoordSystemInfo {
   // Default to the same orientations as FbxAxisSystem::eMayaYUp
@@ -44,7 +47,7 @@ struct FBXCoordSystemInfo {
 // Permissive mode allows loading  mesh-only characters (without skin weights).
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
@@ -52,19 +55,19 @@ Character loadFbxCharacter(
 // Permissive mode allows loading  mesh-only characters (without skin weights).
 Character loadFbxCharacter(
     gsl::span<const std::byte> inputSpan,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
-    bool keepLocators = false,
+    KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
 // Permissive mode allows saving mesh-only characters (without skin weights).

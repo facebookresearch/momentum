@@ -949,7 +949,7 @@ std::tuple<std::unique_ptr<ofbx::u8[]>, size_t> readFileToBuffer(const filesyste
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     const gsl::span<const std::byte> fbxDataRaw,
-    bool keepLocators,
+    KeepLocators keepLocators,
     bool loadAnim,
     bool permissive) {
   auto fbxCharDataRaw = cast_span<const unsigned char>(fbxDataRaw);
@@ -1011,7 +1011,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       skeleton,
       ParameterTransform::empty(skeleton.joints.size() * kParametersPerJoint),
       ParameterLimits(),
-      keepLocators ? locators : LocatorList(),
+      keepLocators == KeepLocators::Yes ? locators : LocatorList(),
       &mesh,
       skinWeights.get(),
       collision.empty() ? nullptr : &collision);
@@ -1025,13 +1025,14 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 
 Character loadOpenFbxCharacter(
     const gsl::span<const std::byte> fbxDataRaw,
-    bool keepLocators,
+    KeepLocators keepLocators,
     bool permissive) {
   auto [character, motion, fps] = loadOpenFbx(fbxDataRaw, keepLocators, false, permissive);
   return character;
 }
 
-Character loadOpenFbxCharacter(const filesystem::path& path, bool keepLocators, bool permissive) {
+Character
+loadOpenFbxCharacter(const filesystem::path& path, KeepLocators keepLocators, bool permissive) {
   auto [buffer, length] = readFileToBuffer(path);
   return loadOpenFbxCharacter(
       gsl::as_bytes(gsl::make_span(buffer.get(), length)), keepLocators, permissive);
@@ -1039,14 +1040,14 @@ Character loadOpenFbxCharacter(const filesystem::path& path, bool keepLocators, 
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
-    bool keepLocators,
+    KeepLocators keepLocators,
     bool permissive) {
   return loadOpenFbx(inputSpan, keepLocators, true, permissive);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
-    bool keepLocators,
+    KeepLocators keepLocators,
     bool permissive) {
   auto [buffer, length] = readFileToBuffer(inputPath);
   return loadOpenFbxCharacterWithMotion(
