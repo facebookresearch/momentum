@@ -45,7 +45,7 @@ class SequenceErrorFunctionT {
       gsl::span<const ModelParametersT<T>> /* modelParameters */,
       gsl::span<const SkeletonStateT<T>> /* skelStates */) const {
     return 0.0f;
-  };
+  }
 
   // Get the gradient of the error.
   // modelParameters: numFrames() array of parameter vectors
