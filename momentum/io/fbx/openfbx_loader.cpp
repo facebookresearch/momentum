@@ -11,6 +11,7 @@
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/character/types.h"
+#include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/gsl_utils.h"
 #include "momentum/io/fbx/polygon_data.h"
@@ -22,7 +23,6 @@
 #include "momentum/math/mesh.h"
 #include "momentum/math/utility.h"
 
-#include <momentum/common/filesystem.h>
 #include <ofbx.h>
 #include <gsl/span_ext>
 
