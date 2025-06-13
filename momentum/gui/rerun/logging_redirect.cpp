@@ -33,6 +33,7 @@ arvr::logging::LogResult callback(
     size_t /* messageSizeInBytes */,
     bool /*isFatalLog*/,
     arvr::logging::CustomUserData userData) {
+  // NOLINTNEXTLINE(performance-no-int-to-ptr)
   const auto* rec = reinterpret_cast<const rerun::RecordingStream*>(userData);
 
   rerun::TextLogLevel level;

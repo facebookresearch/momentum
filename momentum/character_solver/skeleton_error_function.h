@@ -70,7 +70,7 @@ class SkeletonErrorFunctionT {
       const SkeletonStateT<T>& /* state */,
       Eigen::Ref<Eigen::MatrixX<T>> /* hessian */) {
     throw;
-  }
+  };
 
   virtual double getSolverDerivatives(
       const ModelParametersT<T>& parameters,

@@ -224,6 +224,8 @@ double SequenceSolverT<T>::processPerFrameErrors_serial(
   return errorSum;
 }
 
+namespace {
+
 template <typename T, typename Comparator>
 class PriorityQueue {
  public:
@@ -248,6 +250,8 @@ class PriorityQueue {
  private:
   std::vector<T> queue;
 };
+
+} // namespace
 
 template <typename T>
 double SequenceSolverT<T>::processErrorFunctions_parallel(
