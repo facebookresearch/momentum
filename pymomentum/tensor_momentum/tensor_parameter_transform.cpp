@@ -14,6 +14,7 @@
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/joint.h>
 #include <momentum/character/parameter_transform.h>
+#include <momentum/common/checks.h>
 
 #include <dispenso/parallel_for.h> // @manual
 #include <torch/csrc/jit/python/python_ivalue.h>
@@ -97,8 +98,8 @@ variable_list ApplyParameterTransformFunction<T>::forward(
         c10::ivalue::ConcretePyObjectHolder::create(characters);
   }
 
-  const int nBatch = checker.getBatchSize();
-
+  const auto nBatch = checker.getBatchSize();
+  MT_CHECK(paramTransform != nullptr || characters != nullptr);
   const auto paramTransforms =
       getParameterTransforms(paramTransform, characters, nBatch);
 
@@ -145,6 +146,7 @@ variable_list ApplyParameterTransformFunction<T>::backward(
     }
   }
 
+  MT_CHECK(paramTransform != nullptr || characters != nullptr);
   const int nJointParams = (paramTransform != nullptr)
       ? (int)paramTransform->numJointParameters()
       : anyCharacter(characters, "ParameterTransform.apply")
@@ -166,6 +168,7 @@ variable_list ApplyParameterTransformFunction<T>::backward(
 
   const auto nBatch = checker.getBatchSize();
 
+  MT_CHECK(paramTransform != nullptr || characters != nullptr);
   const auto paramTransforms =
       getParameterTransforms(paramTransform, characters, nBatch);
   const int nModelParams = (int)paramTransforms.front().numAllModelParameters();
@@ -190,12 +193,14 @@ variable_list ApplyParameterTransformFunction<T>::backward(
 at::Tensor applyParamTransform(
     const momentum::ParameterTransform* paramTransform,
     at::Tensor modelParams) {
+  MT_CHECK_NOTNULL(paramTransform);
   PyObject* characters = nullptr;
   return applyTemplatedAutogradFunction<ApplyParameterTransformFunction>(
       characters, paramTransform, modelParams)[0];
 }
 
 at::Tensor applyParamTransform(py::object characters, at::Tensor modelParams) {
+  MT_CHECK_NOTNULL(characters.ptr());
   const momentum::ParameterTransform* paramTransform = nullptr;
   return applyTemplatedAutogradFunction<ApplyParameterTransformFunction>(
       characters.ptr(), paramTransform, modelParams)[0];
