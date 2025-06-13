@@ -646,7 +646,7 @@ size_t appendNode(fx::gltf::Document& document, const std::string& name) {
   return nodeIdx;
 }
 
-const std::vector<size_t> addSkeletonToModel(
+std::vector<size_t> addSkeletonToModel(
     fx::gltf::Document& model,
     const Character& character,
     const bool updateExtension = true,

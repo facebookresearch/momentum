@@ -47,7 +47,7 @@ bool hasMomentumExtension(const fx::gltf::Document& model) {
   return hasExtension;
 }
 
-const nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
+nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
   if (extensionsAndExtras.count("extensions") != 0 &&
       extensionsAndExtras["extensions"].count("FB_momentum") != 0) {
     return extensionsAndExtras["extensions"]["FB_momentum"];
