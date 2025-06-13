@@ -340,7 +340,7 @@ void saveFbxCommon(
   std::vector<::fbxsdk::FbxNode*> skeletonNodes;
   std::unordered_map<size_t, fbxsdk::FbxNode*> jointToNodeMap;
 
-  ::fbxsdk::FbxNode* skeletonRootNode;
+  ::fbxsdk::FbxNode* skeletonRootNode = nullptr;
 
   for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
     const auto& joint = character.skeleton.joints[i];

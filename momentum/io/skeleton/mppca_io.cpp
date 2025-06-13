@@ -41,8 +41,8 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
     MT_THROW_IF(!inputStream, "Error loading Mppca model: empty input stream.");
 
     // load dimensions
-    uint64_t od;
-    uint64_t op;
+    uint64_t od = 0;
+    uint64_t op = 0;
     inputStream.read((char*)&od, sizeof(od));
     inputStream.read((char*)&op, sizeof(op));
 

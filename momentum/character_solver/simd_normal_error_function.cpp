@@ -63,7 +63,7 @@ bool SimdNormalConstraints::addConstraint(
   MT_CHECK(jointIndex < constraintCount.size());
 
   // add the constraint to the corresponding arrays of the jointIndex if there's enough space
-  uint32_t index;
+  uint32_t index = 0;
   while (true) {
     index = constraintCount[jointIndex];
     if (index == kMaxConstraints) {
