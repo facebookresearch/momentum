@@ -6,7 +6,6 @@
 # pyre-strict
 
 import unittest
-from typing import Optional
 
 import pymomentum.geometry as geometry
 import torch
