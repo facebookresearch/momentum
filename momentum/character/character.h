@@ -110,10 +110,9 @@ struct CharacterT {
 
   /// Creates a simplified character with only joints affected by the specified parameters
   ///
-  /// @param enabledParameters Parameters to keep (defaults to all parameters)
+  /// @param activeParams Parameters to keep (defaults to all parameters)
   /// @return A new character with simplified skeleton and parameter transform
-  [[nodiscard]] CharacterT simplify(
-      const ParameterSet& enabledParameters = ParameterSet().flip()) const;
+  [[nodiscard]] CharacterT simplify(const ParameterSet& activeParams = ParameterSet().flip()) const;
 
   /// Creates a simplified character with only the specified joints
   ///

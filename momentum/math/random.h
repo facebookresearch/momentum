@@ -272,7 +272,7 @@ template <typename T>
 /// Generates a random type T from the Gaussian distribution, using the global random number
 /// generator Random
 template <typename T>
-[[nodiscard]] T normal(const T& min, const T& max);
+[[nodiscard]] T normal(const T& mean, const T& sigma);
 
 /// Generates a random fixed size vector/matrix from the Gaussian distribution, using the global
 /// random number generator Random
