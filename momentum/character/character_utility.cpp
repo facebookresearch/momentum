@@ -338,9 +338,12 @@ Skeleton transformSkeleton(const Skeleton& skeleton, const Eigen::Affine3f& xfor
 
   Skeleton result(skeleton);
   MT_CHECK(!result.joints.empty());
-  result.joints.front().preRotation = rotation * skeleton.joints.front().preRotation;
-  result.joints.front().translationOffset =
-      rotation * skeleton.joints.front().translationOffset + translation;
+  MT_CHECK(!skeleton.joints.empty());
+  if (!result.joints.empty() && !skeleton.joints.empty()) {
+    result.joints.front().preRotation = rotation * skeleton.joints.front().preRotation;
+    result.joints.front().translationOffset =
+        rotation * skeleton.joints.front().translationOffset + translation;
+  }
   return result;
 }
 
@@ -572,7 +575,11 @@ Character removeJoints(const Character& character, gsl::span<const size_t> joint
         shouldRemove = true;
         break;
       }
-      parent = character.skeleton.joints[parent].parent;
+      if (parent < character.skeleton.joints.size()) {
+        parent = character.skeleton.joints[parent].parent;
+      } else {
+        break;
+      }
     }
 
     if (shouldRemove) {

@@ -173,9 +173,11 @@ double SimdNormalErrorFunction::getGradient(
   auto error = drjit::zeros<DoubleP>(); // use double to prevent rounding errors
   for (int jointId = 0; jointId < constraints_->numJoints; jointId++) {
     const size_t constraintCount = constraints_->constraintCount[jointId];
+    if (jointId >= static_cast<int>(state.jointState.size())) {
+      break;
+    }
     const Eigen::Matrix3f jointRotMat = state.jointState[jointId].rotation().toRotationMatrix();
     const auto& jointState_cons = state.jointState[jointId];
-
     for (uint32_t index = 0; index < constraintCount; index += kSimdPacketSize) {
       const auto constraintOffsetIndex = jointId * SimdNormalConstraints::kMaxConstraints + index;
 

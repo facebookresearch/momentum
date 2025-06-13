@@ -661,8 +661,10 @@ void parseSkinnedModel(
         cluster->name,
         bone->name);
     const size_t boneIndex = fbxJointItr->second;
-    inverseBindPoseTransforms[boneIndex] =
-        toEigen(cluster->getTransformLinkMatrix()).inverse().cast<float>();
+    if (boneIndex < inverseBindPoseTransforms.size()) {
+      inverseBindPoseTransforms[boneIndex] =
+          toEigen(cluster->getTransformLinkMatrix()).inverse().cast<float>();
+    }
 
     const auto* skinning_indices_element = findChild(cluster->element, "Indexes");
     if (skinning_indices_element == nullptr || !skinning_indices_element->getFirstProperty()) {
@@ -894,8 +896,10 @@ MatrixXf parseAnimation(
       // Aggregate the motion
       if (mode == 0) {
         // FBX unit is default to centimeter - the same as Momentum unit
-        motion.col(iFrame).template segment<3>(startIndex).noalias() =
-            toEigen(values).cast<float>() - skeleton.joints[jointIndex].translationOffset;
+        if (jointIndex < skeleton.joints.size()) {
+          motion.col(iFrame).template segment<3>(startIndex).noalias() =
+              toEigen(values).cast<float>() - skeleton.joints[jointIndex].translationOffset;
+        }
       } else if (mode == 1) {
         // assume the correct rotation order
         motion.col(iFrame).template segment<3>(startIndex).noalias() =
