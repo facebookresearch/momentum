@@ -109,7 +109,7 @@ class FullyDifferentiablePositionErrorFunctionT
       Eigen::VectorX<T>& jGrad) const;
 
   template <typename JetType>
-  JetType calculatePositionGradient_dot(
+  [[nodiscard]] JetType calculatePositionGradient_dot(
       const SkeletonStateT<T>& state,
       size_t iConstr,
       size_t constrParent,

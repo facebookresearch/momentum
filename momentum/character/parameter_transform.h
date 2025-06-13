@@ -90,86 +90,87 @@ struct ParameterTransformT {
 
   /// Return a ParameterTransform object with no model parameters. The model can still perform FK
   /// with JointParameters, but it does not have any degrees of freedom for IK.
-  static ParameterTransformT<T> empty(size_t nJointParameters);
+  [[nodiscard]] static ParameterTransformT<T> empty(size_t nJointParameters);
 
   /// Return a ParameterTransform object where the model parameters are identical to the joint
   /// parameters.
-  static ParameterTransformT<T> identity(gsl::span<const std::string> jointNames);
+  [[nodiscard]] static ParameterTransformT<T> identity(gsl::span<const std::string> jointNames);
 
   /// Compute activeJointParams based on the transform and the input ParameterSet.
-  VectorX<bool> computeActiveJointParams(const ParameterSet& ps = allParams()) const;
+  [[nodiscard]] VectorX<bool> computeActiveJointParams(const ParameterSet& ps = allParams()) const;
 
   /// Return the index of a model parameter from its name.
-  size_t getParameterIdByName(const std::string& nm) const;
+  [[nodiscard]] size_t getParameterIdByName(const std::string& nm) const;
 
   /// Map model parameters to joint parameters using a linear transformation.
-  JointParametersT<T> apply(const ModelParametersT<T>& parameters) const;
+  [[nodiscard]] JointParametersT<T> apply(const ModelParametersT<T>& parameters) const;
 
   /// Map model parameters to joint parameters using a linear transformation.
-  JointParametersT<T> apply(const CharacterParametersT<T>& parameters) const;
+  [[nodiscard]] JointParametersT<T> apply(const CharacterParametersT<T>& parameters) const;
 
   /// Return rest pose joint parameters.
-  JointParametersT<T> zero() const;
+  [[nodiscard]] JointParametersT<T> zero() const;
 
   /// Return bind pose joint parameters (same as the rest pose here).
-  JointParametersT<T> bindPose() const;
+  [[nodiscard]] JointParametersT<T> bindPose() const;
 
   /// Get a list of scaling parameters (with prefix "scale_").
-  ParameterSet getScalingParameters() const;
+  [[nodiscard]] ParameterSet getScalingParameters() const;
 
   /// Get a list of root parameters (with prefix "root_")
-  ParameterSet getRigidParameters() const;
+  [[nodiscard]] ParameterSet getRigidParameters() const;
 
   /// Return all parameters used for posing the body (excludes scaling parameters, blend shape
   /// parameters, or any parameters used for physics).
-  ParameterSet getPoseParameters() const;
+  [[nodiscard]] ParameterSet getPoseParameters() const;
 
   /// Get a list of blend shape parameters.
-  ParameterSet getBlendShapeParameters() const;
+  [[nodiscard]] ParameterSet getBlendShapeParameters() const;
 
   /// Get a list of face expression parameters.
-  ParameterSet getFaceExpressionParameters() const;
+  [[nodiscard]] ParameterSet getFaceExpressionParameters() const;
 
   /// Get a parameter set, if allowMissing is set then it will return an empty parameter set if no
   /// such parameterset is found in the file.
-  ParameterSet getParameterSet(const std::string& parameterSetName, bool allowMissing = false)
-      const;
+  [[nodiscard]] ParameterSet getParameterSet(
+      const std::string& parameterSetName,
+      bool allowMissing = false) const;
 
   template <typename T2>
-  ParameterTransformT<T2> cast() const;
+  [[nodiscard]] ParameterTransformT<T2> cast() const;
 
   /// Create a simplified transform given the enabled parameters.
-  ParameterTransformT<T> simplify(const ParameterSet& enabledParameters) const;
+  [[nodiscard]] ParameterTransformT<T> simplify(const ParameterSet& enabledParameters) const;
 
   /// Dimension of all model parameters, including pose, scaling, marker joints, and blendshape
   /// parameters for id and expressions.
-  Eigen::Index numAllModelParameters() const {
+  [[nodiscard]] Eigen::Index numAllModelParameters() const {
     return transform.cols();
   }
 
   /// Dimension of the output jointParameters vector.
-  Eigen::Index numJointParameters() const {
+  [[nodiscard]] Eigen::Index numJointParameters() const {
     return transform.rows();
   }
 
   /// Dimension of identity blendshape parameters.
-  Eigen::Index numBlendShapeParameters() const {
+  [[nodiscard]] Eigen::Index numBlendShapeParameters() const {
     return blendShapeParameters.size();
   }
 
   /// Dimension of facial expression parameters.
-  Eigen::Index numFaceExpressionParameters() const {
+  [[nodiscard]] Eigen::Index numFaceExpressionParameters() const {
     return faceExpressionParameters.size();
   }
 
   /// Dimension of skeletal model parameters, including pose parameters,
   /// scaling parameters, locator joint parameters etc. basically everything
   /// but blendshapes (ids and expressions).
-  Eigen::Index numSkeletonParameters() const {
+  [[nodiscard]] Eigen::Index numSkeletonParameters() const {
     return numAllModelParameters() - numBlendShapeParameters() - numFaceExpressionParameters();
   }
 
-  inline bool isApprox(const ParameterTransformT<T>& parameterTransform) const {
+  [[nodiscard]] inline bool isApprox(const ParameterTransformT<T>& parameterTransform) const {
     // special handling of zero sparse matrix
     bool isTransformEqual = false;
     if (transform.cols() > 0 && transform.rows() > 0 && parameterTransform.transform.cols() > 0 &&
@@ -197,7 +198,7 @@ using ParameterTransformd = ParameterTransformT<double>;
 
 /// Return a parameter mapping that only includes the listed parameters.
 template <typename T>
-std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
+[[nodiscard]] std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
     const ParameterTransformT<T>& paramTransform,
     const ParameterLimits& parameterLimits,
     const ParameterSet& paramSet);
@@ -208,17 +209,17 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
 /// enough joints to have "orphan" parameters still kicking around; to avoid this
 /// consider also applying an appropriate subsetParameterTransform() operation.
 template <typename T>
-ParameterTransformT<T> mapParameterTransformJoints(
+[[nodiscard]] ParameterTransformT<T> mapParameterTransformJoints(
     const ParameterTransformT<T>& parameterTransform,
     size_t numTargetJoints,
     const std::vector<size_t>& jointMapping);
 
-std::tuple<ParameterTransform, ParameterLimits> addBlendShapeParameters(
+[[nodiscard]] std::tuple<ParameterTransform, ParameterLimits> addBlendShapeParameters(
     ParameterTransform paramTransform,
     ParameterLimits parameterLimits,
     Eigen::Index nBlendShapes);
 
-std::tuple<ParameterTransform, ParameterLimits> addFaceExpressionParameters(
+[[nodiscard]] std::tuple<ParameterTransform, ParameterLimits> addFaceExpressionParameters(
     ParameterTransform paramTransform,
     ParameterLimits parameterLimits,
     Eigen::Index nFaceExpressionBlendShapes);

@@ -41,11 +41,11 @@ class ModelParametersErrorFunctionT : public SkeletonErrorFunctionT<T> {
     this->targetWeights_ = weights;
   }
 
-  const ModelParametersT<T>& getTargetParameters() const {
+  [[nodiscard]] const ModelParametersT<T>& getTargetParameters() const {
     return this->targetParameters_;
   }
 
-  const Eigen::VectorX<T>& getTargetWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getTargetWeights() const {
     return this->targetWeights_;
   }
 

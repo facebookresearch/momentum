@@ -33,7 +33,7 @@ class ColumnIndexedMatrix {
     validateColumnIndices(colIndices, mat.cols());
   }
 
-  auto col(Eigen::Index colIdx) {
+  [[nodiscard]] auto col(Eigen::Index colIdx) {
     if (useColumnIndices_) {
       return mat_.col(columnIndices_[colIdx]);
     } else {
@@ -41,11 +41,11 @@ class ColumnIndexedMatrix {
     }
   }
 
-  auto rows() const {
+  [[nodiscard]] auto rows() const {
     return mat_.rows();
   }
 
-  auto cols() const {
+  [[nodiscard]] auto cols() const {
     if (useColumnIndices_) {
       return (Eigen::Index)columnIndices_.size();
     } else {
@@ -53,11 +53,11 @@ class ColumnIndexedMatrix {
     }
   }
 
-  gsl::span<const Eigen::Index> columnIndices() const {
+  [[nodiscard]] gsl::span<const Eigen::Index> columnIndices() const {
     return columnIndices_;
   }
 
-  VectorType transpose_times(Eigen::Ref<VectorType> b) const {
+  [[nodiscard]] VectorType transpose_times(Eigen::Ref<VectorType> b) const {
     if (useColumnIndices_) {
       VectorType result(columnIndices_.size());
       for (Eigen::Index iCol = 0; iCol < (Eigen::Index)columnIndices_.size(); ++iCol) {
@@ -86,7 +86,7 @@ class ResizeableMatrix {
  public:
   using MatrixType = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
-  ResizeableMatrix() {}
+  ResizeableMatrix() = default;
   explicit ResizeableMatrix(Eigen::Index rows, Eigen::Index cols = 1) {
     resizeAndSetZero(rows, cols);
   }
@@ -100,10 +100,10 @@ class ResizeableMatrix {
     std::fill(std::begin(data_), std::end(data_), T(0));
   }
 
-  Eigen::Index rows() const {
+  [[nodiscard]] Eigen::Index rows() const {
     return rows_;
   }
-  Eigen::Index cols() const {
+  [[nodiscard]] Eigen::Index cols() const {
     return cols_;
   }
 
@@ -194,15 +194,15 @@ class OnlineHouseholderQR {
   // This version can be made efficient if you std::move() the passed-in matrices.
   void add(MatrixType A, VectorType b);
 
-  VectorType result() const;
+  [[nodiscard]] VectorType result() const;
 
-  const MatrixType& R() const {
+  [[nodiscard]] const MatrixType& R() const {
     return R_;
   }
-  const VectorType& y() const {
+  [[nodiscard]] const VectorType& y() const {
     return y_;
   }
-  VectorType At_times_b() const;
+  [[nodiscard]] VectorType At_times_b() const;
 
   void reset();
   void reset(Eigen::Index n, T lambda = T(0));
@@ -291,29 +291,29 @@ class OnlineBlockHouseholderQR {
   // of variables is very small this should not be an issue.
 
   // Retrieve the full dense result:
-  VectorType x_dense() const;
+  [[nodiscard]] VectorType x_dense() const;
 
   // Retrieve the answer for a single block:
-  VectorType x_i(size_t iBlock) const;
+  [[nodiscard]] VectorType x_i(size_t iBlock) const;
 
   // Retrieve the answer for just the final "common" rows.
-  VectorType x_n() const;
+  [[nodiscard]] VectorType x_n() const;
 
-  const MatrixType& R_ii(size_t iBlock) const {
+  [[nodiscard]] const MatrixType& R_ii(size_t iBlock) const {
     return R_ii_[iBlock];
   }
 
-  const VectorType& y_i(size_t iBlock) const {
+  [[nodiscard]] const VectorType& y_i(size_t iBlock) const {
     return y_i_[iBlock];
   }
 
-  MatrixType R_dense() const;
-  MatrixType y_dense() const;
+  [[nodiscard]] MatrixType R_dense() const;
+  [[nodiscard]] MatrixType y_dense() const;
 
-  VectorType At_times_b_i(size_t iBlock) const;
-  VectorType At_times_b_n() const;
-  VectorType At_times_b_dense() const;
-  T At_times_b_dot(Eigen::Ref<const VectorType> rhs) const;
+  [[nodiscard]] VectorType At_times_b_i(size_t iBlock) const;
+  [[nodiscard]] VectorType At_times_b_n() const;
+  [[nodiscard]] VectorType At_times_b_dense() const;
+  [[nodiscard]] T At_times_b_dot(Eigen::Ref<const VectorType> rhs) const;
 
   void reset();
 
@@ -447,25 +447,25 @@ class OnlineBandedHouseholderQR {
   // of variables is very small this should not be an issue.
 
   // Retrieve the full dense result:
-  VectorType x_dense() const;
-  MatrixType R_dense() const;
-  MatrixType y_dense() const {
+  [[nodiscard]] VectorType x_dense() const;
+  [[nodiscard]] MatrixType R_dense() const;
+  [[nodiscard]] MatrixType y_dense() const {
     return y_;
   }
 
-  VectorType At_times_b() const;
+  [[nodiscard]] VectorType At_times_b() const;
 
   void reset();
 
-  Eigen::Index bandwidth() const {
+  [[nodiscard]] Eigen::Index bandwidth() const {
     return R_band_.rows();
   }
 
-  Eigen::Index n_band() const {
+  [[nodiscard]] Eigen::Index n_band() const {
     return R_band_.cols();
   }
 
-  Eigen::Index n_common() const {
+  [[nodiscard]] Eigen::Index n_common() const {
     return R_common_.cols();
   }
 
@@ -473,7 +473,7 @@ class OnlineBandedHouseholderQR {
   // Sets the diagonal of the R matrix to lambda.
   void initializeDiagonal();
 
-  const T R_band_entry(Eigen::Index iRow, Eigen::Index jCol) const {
+  [[nodiscard]] T R_band_entry(Eigen::Index iRow, Eigen::Index jCol) const {
     const auto bandwidth = R_band_.rows();
     MT_CHECK(iRow <= jCol);
     MT_CHECK(jCol - iRow <= bandwidth);

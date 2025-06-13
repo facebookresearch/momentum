@@ -52,16 +52,16 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return this->targetState_;
   }
 
-  const Eigen::VectorX<T>& getPositionWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getPositionWeights() const {
     return targetPositionWeights_;
   }
-  const Eigen::VectorX<T>& getRotationWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getRotationWeights() const {
     return targetRotationWeights_;
   }
-  const T& getPositionWeight() const {
+  [[nodiscard]] const T& getPositionWeight() const {
     return posWgt_;
   }
-  const T& getRotationWeight() const {
+  [[nodiscard]] const T& getRotationWeight() const {
     return rotWgt_;
   }
 

@@ -40,21 +40,21 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
 
   void addErrorFunction(size_t frame, SkeletonErrorFunctionT<T>* errorFunction);
 
-  size_t getNumFrames() const {
+  [[nodiscard]] size_t getNumFrames() const {
     return states_.size();
   }
 
-  const ModelParametersT<T>& getFrameParameters(const size_t frame) const {
+  [[nodiscard]] const ModelParametersT<T>& getFrameParameters(const size_t frame) const {
     return frameParameters_[frame];
   }
 
   void setFrameParameters(size_t frame, const ModelParametersT<T>& parameters);
-  Eigen::VectorX<T> getUniversalParameters();
-  Eigen::VectorX<T> getJoinedParameterVector() const;
+  [[nodiscard]] Eigen::VectorX<T> getUniversalParameters() const;
+  [[nodiscard]] Eigen::VectorX<T> getJoinedParameterVector() const;
   void setJoinedParameterVector(const Eigen::VectorX<T>& joinedParameters);
 
-  ParameterSet getUniversalParameterSet() const;
-  ParameterSet getUniversalLocatorParameterSet() const;
+  [[nodiscard]] ParameterSet getUniversalParameterSet() const;
+  [[nodiscard]] ParameterSet getUniversalLocatorParameterSet() const;
 
  private:
   void setFrameParametersFromJoinedParameterVector(const Eigen::VectorX<T>& parameters);

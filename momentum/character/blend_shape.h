@@ -28,12 +28,12 @@ struct BlendShape : public BlendShapeBase {
     baseShape_.assign(baseShape.begin(), baseShape.end());
   };
 
-  const std::vector<Vector3f>& getBaseShape() const {
+  [[nodiscard]] const std::vector<Vector3f>& getBaseShape() const {
     return baseShape_;
   };
 
   /// Whether SVD factorization is up-to-date
-  bool getFactorizationValid() const {
+  [[nodiscard]] bool getFactorizationValid() const {
     return factorizationValid_;
   };
 
@@ -45,7 +45,8 @@ struct BlendShape : public BlendShapeBase {
   /// @param coefficients Weights for each shape vector
   /// @return Resulting deformed shape
   template <typename T>
-  std::vector<Eigen::Vector3<T>> computeShape(const BlendWeightsT<T>& coefficients) const;
+  [[nodiscard]] std::vector<Eigen::Vector3<T>> computeShape(
+      const BlendWeightsT<T>& coefficients) const;
 
   /// Output parameter version of computeShape
   ///
@@ -65,7 +66,7 @@ struct BlendShape : public BlendShapeBase {
   /// @param regularization Higher values produce smaller coefficients
   /// @param weights Optional per-vertex importance weights
   /// @return Estimated blend shape coefficients
-  VectorXf estimateCoefficients(
+  [[nodiscard]] VectorXf estimateCoefficients(
       gsl::span<const Vector3f> vertices,
       float regularization = 1.0f,
       const VectorXf& weights = VectorXf()) const;
@@ -79,7 +80,7 @@ struct BlendShape : public BlendShapeBase {
   /// Compares all components of two blend shapes
   ///
   /// @param blendShape Other blend shape to compare with
-  bool isApprox(const BlendShape& blendShape) const;
+  [[nodiscard]] bool isApprox(const BlendShape& blendShape) const;
 
  private:
   std::vector<Vector3f> baseShape_;

@@ -18,7 +18,7 @@ namespace momentum {
 /// such as pose-dependent shape changes
 struct BlendShapeBase {
  public:
-  BlendShapeBase() {}
+  BlendShapeBase() = default;
 
   /// @param modelSize Number of vertices in the model
   /// @param numShapes Number of blend shapes
@@ -29,7 +29,7 @@ struct BlendShapeBase {
     shapeVectors_ = shapeVectors;
   }
 
-  const MatrixXf& getShapeVectors() const {
+  [[nodiscard]] const MatrixXf& getShapeVectors() const {
     return shapeVectors_;
   }
 
@@ -39,7 +39,7 @@ struct BlendShapeBase {
   /// @param blendWeights Weights for each shape vector
   /// @return Combined vertex offsets
   template <typename T>
-  VectorX<T> computeDeltas(const BlendWeightsT<T>& blendWeights) const;
+  [[nodiscard]] VectorX<T> computeDeltas(const BlendWeightsT<T>& blendWeights) const;
 
   /// Adds weighted shape vectors to existing vertices
   ///
@@ -54,12 +54,12 @@ struct BlendShapeBase {
   /// @param shapeVector Vector of vertex offsets
   void setShapeVector(size_t index, gsl::span<const Vector3f> shapeVector);
 
-  Eigen::Index shapeSize() const {
+  [[nodiscard]] Eigen::Index shapeSize() const {
     return shapeVectors_.cols();
   }
 
   /// Returns number of vertices (rows/3)
-  size_t modelSize() const {
+  [[nodiscard]] size_t modelSize() const {
     return shapeVectors_.rows() / 3;
   }
 

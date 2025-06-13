@@ -246,7 +246,7 @@ TYPED_TEST(Momentum_ParameterTransformTest, GetParameterSets) {
   }
 
   // Test getParameterSet with non-existent set (should throw)
-  { EXPECT_THROW(transform.getParameterSet("non_existent"), std::runtime_error); }
+  { EXPECT_THROW((void)transform.getParameterSet("non_existent"), std::runtime_error); }
 
   // Test getParameterSet with non-existent set and allowMissing=true
   {
