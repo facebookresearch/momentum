@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('simd__generalized__loss_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">simd_generalized_loss.h</div></div>
 </div><!--header-->
@@ -111,20 +127,24 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>} <span class="comment">// namespace momentum</span></div>
-<div class="ttc" id="aclassmomentum_1_1GeneralizedLossT_html"><div class="ttname"><a href="classmomentum_1_1GeneralizedLossT.html">momentum::GeneralizedLossT</a></div><div class="ttdoc">Implementation of &quot;A General and Adaptive Robust Loss Function&quot; (https://arxiv.org/abs/1701....</div><div class="ttdef"><b>Definition</b> generalized_loss.h:21</div></div>
-<div class="ttc" id="aclassmomentum_1_1GeneralizedLossT_html_aecef3782ee033457dc96f05114856052"><div class="ttname"><a href="classmomentum_1_1GeneralizedLossT.html#aecef3782ee033457dc96f05114856052">momentum::GeneralizedLossT::kL2</a></div><div class="ttdeci">static constexpr T kL2</div><div class="ttdef"><b>Definition</b> generalized_loss.h:24</div></div>
-<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html">momentum::SimdGeneralizedLossT</a></div><div class="ttdoc">SIMD version of the generalized loss function.</div><div class="ttdef"><b>Definition</b> simd_generalized_loss.h:17</div></div>
-<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html_a657f29f85153da2898f894f2c0437a3c"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html#a657f29f85153da2898f894f2c0437a3c">momentum::SimdGeneralizedLossT::value</a></div><div class="ttdeci">Packet&lt; T &gt; value(const Packet&lt; T &gt; &amp;sqrError) const</div><div class="ttdoc">Computes the loss value for a given squared error.</div><div class="ttdef"><b>Definition</b> simd_generalized_loss.cpp:70</div></div>
-<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html_a7f25ad45c9d6258268d093e3ffc7b178"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html#a7f25ad45c9d6258268d093e3ffc7b178">momentum::SimdGeneralizedLossT::Base</a></div><div class="ttdeci">GeneralizedLossT&lt; T &gt; Base</div><div class="ttdef"><b>Definition</b> simd_generalized_loss.h:19</div></div>
-<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html_ad0fe27adf240860d17b5eff36ac30571"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html#ad0fe27adf240860d17b5eff36ac30571">momentum::SimdGeneralizedLossT::deriv</a></div><div class="ttdeci">Packet&lt; T &gt; deriv(const Packet&lt; T &gt; &amp;sqrError) const</div><div class="ttdoc">Computes the derivative of the loss function.</div><div class="ttdef"><b>Definition</b> simd_generalized_loss.cpp:95</div></div>
+<div class="ttc" id="aclassmomentum_1_1GeneralizedLossT_html"><div class="ttname"><a href="classmomentum_1_1GeneralizedLossT.html">momentum::GeneralizedLossT</a></div><div class="ttdoc">Implementation of &quot;A General and Adaptive Robust Loss Function&quot; (https://arxiv.org/abs/1701....</div><div class="ttdef"><b>Definition</b> <a href="generalized__loss_8h_source.html#l00021">generalized_loss.h:21</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1GeneralizedLossT_html_aecef3782ee033457dc96f05114856052"><div class="ttname"><a href="classmomentum_1_1GeneralizedLossT.html#aecef3782ee033457dc96f05114856052">momentum::GeneralizedLossT::kL2</a></div><div class="ttdeci">static constexpr T kL2</div><div class="ttdef"><b>Definition</b> <a href="generalized__loss_8h_source.html#l00024">generalized_loss.h:24</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html">momentum::SimdGeneralizedLossT</a></div><div class="ttdoc">SIMD version of the generalized loss function.</div><div class="ttdef"><b>Definition</b> <a href="simd__generalized__loss_8h_source.html#l00017">simd_generalized_loss.h:17</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html_a657f29f85153da2898f894f2c0437a3c"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html#a657f29f85153da2898f894f2c0437a3c">momentum::SimdGeneralizedLossT::value</a></div><div class="ttdeci">Packet&lt; T &gt; value(const Packet&lt; T &gt; &amp;sqrError) const</div><div class="ttdoc">Computes the loss value for a given squared error.</div><div class="ttdef"><b>Definition</b> <a href="simd__generalized__loss_8cpp_source.html#l00070">simd_generalized_loss.cpp:70</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html_a7f25ad45c9d6258268d093e3ffc7b178"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html#a7f25ad45c9d6258268d093e3ffc7b178">momentum::SimdGeneralizedLossT::Base</a></div><div class="ttdeci">GeneralizedLossT&lt; T &gt; Base</div><div class="ttdef"><b>Definition</b> <a href="simd__generalized__loss_8h_source.html#l00019">simd_generalized_loss.h:19</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SimdGeneralizedLossT_html_ad0fe27adf240860d17b5eff36ac30571"><div class="ttname"><a href="classmomentum_1_1SimdGeneralizedLossT.html#ad0fe27adf240860d17b5eff36ac30571">momentum::SimdGeneralizedLossT::deriv</a></div><div class="ttdeci">Packet&lt; T &gt; deriv(const Packet&lt; T &gt; &amp;sqrError) const</div><div class="ttdoc">Computes the derivative of the loss function.</div><div class="ttdef"><b>Definition</b> <a href="simd__generalized__loss_8cpp_source.html#l00095">simd_generalized_loss.cpp:95</a></div></div>
 <div class="ttc" id="ageneralized__loss_8h_html"><div class="ttname"><a href="generalized__loss_8h.html">generalized_loss.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
 <div class="ttc" id="asimd_8h_html"><div class="ttname"><a href="simd_8h.html">simd.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li><li class="navelem"><a class="el" href="simd__generalized__loss_8h.html">simd_generalized_loss.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

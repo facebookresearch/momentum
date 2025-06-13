@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structmomentum_1_1CharacterT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -215,6 +231,8 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 struct momentum::CharacterT&lt; T &gt;</div><p>A character model with skeletal structure, mesh, and optional components. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00023">23</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7693c5d25dd84cfe1afe85d166ef87ae" name="a7693c5d25dd84cfe1afe85d166ef87ae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7693c5d25dd84cfe1afe85d166ef87ae">&#9670;&#160;</a></span>CharacterT() <span class="overload">[1/3]</span></h2>
@@ -381,6 +399,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00028">28</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="character_8cpp_source.html#l00564">momentum::CharacterT&lt; T &gt;::initInverseBindPose()</a>, <a class="el" href="character_8h_source.html#l00061">momentum::CharacterT&lt; T &gt;::inverseBindPose</a>, <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_8h_source.html#l00043">momentum::CharacterT&lt; T &gt;::mesh</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="character_8h_source.html#l00049">momentum::CharacterT&lt; T &gt;::poseShapes</a>, <a class="el" href="character_8cpp_source.html#l00557">momentum::CharacterT&lt; T &gt;::resetJointMap()</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, and <a class="el" href="character_8h_source.html#l00046">momentum::CharacterT&lt; T &gt;::skinWeights</a>.</p>
+
 </div>
 </div>
 <a id="a6f912a911ee342836fee22ad310eeb61" name="a6f912a911ee342836fee22ad310eeb61"></a>
@@ -402,6 +424,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Copy constructor. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00078">78</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_8h_source.html#l00043">momentum::CharacterT&lt; T &gt;::mesh</a>.</p>
 
 </div>
 </div>
@@ -432,6 +458,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Set of parameters that affect the specified joints </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00163">163</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
 
 </div>
 </div>
@@ -479,6 +509,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00605">605</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00430">momentum::addBlendShapeParameters()</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00595">momentum::CharacterT&lt; T &gt;::withBlendShape()</a>.</p>
+
 </div>
 </div>
 <a id="a3cac3c8ef7f87f4905f13098751e50d2" name="a3cac3c8ef7f87f4905f13098751e50d2"></a>
@@ -517,6 +553,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </table>
   </dd>
 </dl>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00645">645</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00455">momentum::addFaceExpressionParameters()</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00636">momentum::CharacterT&lt; T &gt;::withFaceExpressionBlendShape()</a>.</p>
 
 </div>
 </div>
@@ -565,6 +607,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <p>The returned character contains a static mesh with all requested deformations baked in, while still supporting any parameters you elected to keep. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00691">691</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00085">momentum::ParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="linear__skinning_8cpp_source.html#l00021">momentum::applySSD()</a>, <a class="el" href="blend__shape__skinning_8cpp_source.html#l00022">momentum::extractBlendWeights()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00407">momentum::ParameterTransformT&lt; T &gt;::getBlendShapeParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="character_8h_source.html#l00061">momentum::CharacterT&lt; T &gt;::inverseBindPose</a>, <a class="el" href="character_8h_source.html#l00043">momentum::CharacterT&lt; T &gt;::mesh</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="character_8h_source.html#l00037">momentum::CharacterT&lt; T &gt;::parameterLimits</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, <a class="el" href="character_8h_source.html#l00046">momentum::CharacterT&lt; T &gt;::skinWeights</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00234">momentum::subsetParameterTransform()</a>.</p>
+
 </div>
 </div>
 <a id="a2e4f02c62ce45b489a0ac69df4d4dbdb" name="a2e4f02c62ce45b489a0ac69df4d4dbdb"></a>
@@ -593,6 +639,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with blend shapes baked into the mesh </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00669">669</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00407">momentum::ParameterTransformT&lt; T &gt;::getBlendShapeParameters()</a>, <a class="el" href="character_8h_source.html#l00043">momentum::CharacterT&lt; T &gt;::mesh</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="character_8h_source.html#l00037">momentum::CharacterT&lt; T &gt;::parameterLimits</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00234">momentum::subsetParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -623,6 +673,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with blend shapes baked into the mesh </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00686">686</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__skinning_8cpp_source.html#l00022">momentum::extractBlendWeights()</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>.</p>
+
 </div>
 </div>
 <a id="a6d67d09dac93bd96c44b4e3f2a0d09e8" name="a6d67d09dac93bd96c44b4e3f2a0d09e8"></a>
@@ -644,6 +698,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns parameters representing the character's bind pose. </p>
 <p>The bind pose is the rest pose when all model parameters and joint offsets are zero. When forward kinematics is applied to the bind pose, it results in the rest pose skeleton. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00543">543</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00024">momentum::kParametersPerJoint</a>, <a class="el" href="parameter__transform_8h_source.html#l00146">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_2types_8h_source.html#l00180">momentum::CharacterParametersT&lt; T &gt;::offsets</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, <a class="el" href="character_2types_8h_source.html#l00176">momentum::CharacterParametersT&lt; T &gt;::pose</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
 
 </div>
 </div>
@@ -667,6 +725,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Initializes the inverse bind pose transformations. </p>
 <p>The inverse bind pose is a set of affine transformations for each joint that map from world space to local joint space in the bind pose configuration. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00564">564</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00130">momentum::ParameterTransformT&lt; T &gt;::bindPose()</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>.</p>
+
 </div>
 </div>
 <a id="a85b626d63651fc8935300af36f12226e" name="a85b626d63651fc8935300af36f12226e"></a>
@@ -687,6 +751,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Initializes the parameter transform with the correct dimensions for this character. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00551">551</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00042">momentum::ParameterTransformT&lt; float &gt;::empty()</a>, <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00024">momentum::kParametersPerJoint</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>.</p>
 
 </div>
 </div>
@@ -709,6 +779,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Assignment operator. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00114">114</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
 
 </div>
 </div>
@@ -738,6 +810,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Boolean vector indicating which joints are affected by the parameters </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00137">137</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>, and <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -779,6 +855,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Remapped locators for the simplified character </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00508">508</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00130">momentum::ParameterTransformT&lt; T &gt;::bindPose()</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="parameter__transform_8h_source.html#l00146">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
+
 </div>
 </div>
 <a id="a0d30b7900156f0efedbf3550e3116025" name="a0d30b7900156f0efedbf3550e3116025"></a>
@@ -818,6 +898,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Remapped parameter limits for the simplified character </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00449">449</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00130">momentum::ParameterTransformT&lt; T &gt;::bindPose()</a>, <a class="el" href="parameter__limits_8h_source.html#l00026">momentum::Ellipsoid</a>, <a class="el" href="urdf__io_8cpp_source.html#l00025">limits</a>, <a class="el" href="parameter__limits_8h_source.html#l00022">momentum::MinMaxJoint</a>, <a class="el" href="parameter__limits_8h_source.html#l00023">momentum::MinMaxJointPassive</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="parameter__transform_8h_source.html#l00146">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
 
 </div>
 </div>
@@ -859,6 +943,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Remapped skin weights for the simplified character </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00394">394</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00130">momentum::ParameterTransformT&lt; T &gt;::bindPose()</a>, <a class="el" href="skin__weights_8h_source.html#l00041">momentum::SkinWeights::index</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="parameter__transform_8h_source.html#l00146">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>, and <a class="el" href="skin__weights_8h_source.html#l00048">momentum::SkinWeights::weight</a>.</p>
+
 </div>
 </div>
 <a id="a1267e01737efb84e2a2046baa2d72893" name="a1267e01737efb84e2a2046baa2d72893"></a>
@@ -879,6 +967,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Resets the joint map to identity (each joint maps to itself) </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00557">557</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>.</p>
 
 </div>
 </div>
@@ -909,6 +1003,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with simplified skeleton and parameter transform </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00380">380</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a0e1b215bdaba8392de202c82b24b15e1" name="a0e1b215bdaba8392de202c82b24b15e1"></a>
@@ -938,6 +1034,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with only the requested parameters </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00358">358</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00234">momentum::subsetParameterTransform()</a>.</p>
+
 </div>
 </div>
 <a id="ad325cac8f9384f8688e409c8b3cc7e6f" name="ad325cac8f9384f8688e409c8b3cc7e6f"></a>
@@ -966,6 +1066,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with only the requested joints </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00195">195</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
 
 </div>
 </div>
@@ -1022,6 +1126,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Parameters with active parameters zeroed in pose and applied to offsets </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00577">577</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00085">momentum::ParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="character_2types_8h_source.html#l00176">momentum::CharacterParametersT&lt; T &gt;::pose</a>.</p>
+
 </div>
 </div>
 <a id="a9003846179b0dd474a181929de59f704" name="a9003846179b0dd474a181929de59f704"></a>
@@ -1069,6 +1177,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with the specified blend shapes </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00595">595</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_8cpp_source.html#l00605">momentum::CharacterT&lt; T &gt;::addBlendShape()</a>.</p>
+
 </div>
 </div>
 <a id="a0df78d39a2c33cdbdbd0e09628364194" name="a0df78d39a2c33cdbdbd0e09628364194"></a>
@@ -1109,6 +1221,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A new character with the specified face expression blend shapes </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00636">636</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_8cpp_source.html#l00645">momentum::CharacterT&lt; T &gt;::addFaceExpressionBlendShape()</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -1128,6 +1244,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Shape variations that can be blended. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00055">55</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="blend__shape__skinning_8cpp_source.html#l00060">momentum::skinWithBlendShapes()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
+
 </div>
 </div>
 <a id="ac76728e3ec06055ea295ba450c2f92e9" name="ac76728e3ec06055ea295ba450c2f92e9"></a>
@@ -1145,6 +1265,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Collision volumes for the character. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00052">52</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="logger_8cpp_source.html#l00376">momentum::logCharacter()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00506">momentum::trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00345">momentum::trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00175">momentum::trackSequence()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
 
 </div>
 </div>
@@ -1164,6 +1288,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Facial expression blend shapes. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00058">58</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
+
 </div>
 </div>
 <a id="a091594fb949f1e0c84a1beb07e8de2d4" name="a091594fb949f1e0c84a1beb07e8de2d4"></a>
@@ -1181,6 +1309,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Inverse of the bind pose transformations for each joint. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00061">61</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00691">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00055">momentum::createLocatorCharacter()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="skinning__weight__iterator_8cpp_source.html#l00020">momentum::SkinningWeightIteratorT&lt; T &gt;::SkinningWeightIteratorT()</a>, <a class="el" href="blend__shape__skinning_8cpp_source.html#l00060">momentum::skinWithBlendShapes()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
 
 </div>
 </div>
@@ -1200,6 +1332,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Maps from original joint indices to simplified joint indices. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00064">64</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
 </div>
 </div>
 <a id="a3d0c2d4bc6e1d750544076c1db705de8" name="a3d0c2d4bc6e1d750544076c1db705de8"></a>
@@ -1217,6 +1351,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Points of interest attached to joints. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00040">40</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00849">momentum::calibrateLocators()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00641">momentum::calibrateModel()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00055">momentum::createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00245">momentum::extractMarkersFromMotion()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00960">momentum::getLocatorError()</a>, <a class="el" href="app__utils_8cpp_source.html#l00155">momentum::loadCharacterWithIdentity()</a>, <a class="el" href="logger_8cpp_source.html#l00376">momentum::logCharacter()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00911">momentum::refineMotion()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">momentum::sampleFrames()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00506">momentum::trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00345">momentum::trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00175">momentum::trackSequence()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
 
 </div>
 </div>
@@ -1236,6 +1374,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>3D mesh representing the character's surface </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00043">43</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00691">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00669">momentum::CharacterT&lt; T &gt;::bakeBlendShape()</a>, <a class="el" href="character_8cpp_source.html#l00078">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="pose__shape__io_8cpp_source.html#l00018">momentum::loadPoseShape()</a>, <a class="el" href="gltf__io_8cpp_source.html#l01085">momentum::makeCharacterDocument()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="blend__shape__skinning_8cpp_source.html#l00060">momentum::skinWithBlendShapes()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
+
 </div>
 </div>
 <a id="a5397c2a59176a09f5ac2ad84d2b4ec36" name="a5397c2a59176a09f5ac2ad84d2b4ec36"></a>
@@ -1253,6 +1395,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Character identifier. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00067">67</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00846">momentum::GltfBuilder::addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00949">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01047">momentum::GltfBuilder::addSkeletonStates()</a>, <a class="el" href="json__utils_8cpp_source.html#l00266">momentum::parameterLimitsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00183">momentum::parameterLimitsToJson()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
 
 </div>
 </div>
@@ -1272,6 +1418,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Constraints on model parameters. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00037">37</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00691">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00669">momentum::CharacterT&lt; T &gt;::bakeBlendShape()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00055">momentum::createLocatorCharacter()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="json__utils_8cpp_source.html#l00183">momentum::parameterLimitsToJson()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00728">momentum::LimitErrorFunctionT&lt; T &gt;::setLimits()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
+
 </div>
 </div>
 <a id="a78603211539ffff34921f4a21990a6f7" name="a78603211539ffff34921f4a21990a6f7"></a>
@@ -1289,6 +1439,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Maps model parameters to joint parameters. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00030">30</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00691">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00669">momentum::CharacterT&lt; T &gt;::bakeBlendShape()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00849">momentum::calibrateLocators()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00641">momentum::calibrateModel()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00055">momentum::createLocatorCharacter()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00960">momentum::getLocatorError()</a>, <a class="el" href="app__utils_8cpp_source.html#l00155">momentum::loadCharacterWithIdentity()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00170">momentum::mapMotionToCharacter()</a>, <a class="el" href="model__parameters__error__function_8cpp_source.html#l00028">momentum::ModelParametersErrorFunctionT&lt; T &gt;::ModelParametersErrorFunctionT()</a>, <a class="el" href="json__utils_8cpp_source.html#l00266">momentum::parameterLimitsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00183">momentum::parameterLimitsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00031">momentum::parameterSetsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00019">momentum::parameterSetsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00077">momentum::parameterTransformToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00058">momentum::poseConstraintsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00049">momentum::poseConstraintsToJson()</a>, <a class="el" href="transform__pose_8cpp_source.html#l00086">momentum::PoseTransformSolverT&lt; T &gt;::PoseTransformSolverT()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00911">momentum::refineMotion()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">momentum::sampleFrames()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00577">momentum::saveFbx()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00017">momentum::saveMmo()</a>, <a class="el" href="app__utils_8cpp_source.html#l00184">momentum::saveMotion()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="blend__shape__skinning_8cpp_source.html#l00050">momentum::skinWithBlendShapes()</a>, <a class="el" href="character_8cpp_source.html#l00577">momentum::CharacterT&lt; T &gt;::splitParameters()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00506">momentum::trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00345">momentum::trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00175">momentum::trackSequence()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
 
 </div>
 </div>
@@ -1308,6 +1462,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Pose-dependent shape corrections. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00049">49</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
+
 </div>
 </div>
 <a id="a6899cded4f8074538f1055a66c9b0f27" name="a6899cded4f8074538f1055a66c9b0f27"></a>
@@ -1325,6 +1483,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Skeletal structure defining the character's joints and hierarchy. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00027">27</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00691">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00055">momentum::createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00245">momentum::extractMarkersFromMotion()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00960">momentum::getLocatorError()</a>, <a class="el" href="app__utils_8cpp_source.html#l00155">momentum::loadCharacterWithIdentity()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="pose__shape__io_8cpp_source.html#l00018">momentum::loadPoseShape()</a>, <a class="el" href="logger_8cpp_source.html#l00376">momentum::logCharacter()</a>, <a class="el" href="gltf__io_8cpp_source.html#l01085">momentum::makeCharacterDocument()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00170">momentum::mapMotionToCharacter()</a>, <a class="el" href="json__utils_8cpp_source.html#l00266">momentum::parameterLimitsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00183">momentum::parameterLimitsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00097">momentum::parameterTransformFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00077">momentum::parameterTransformToJson()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">momentum::sampleFrames()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="app__utils_8cpp_source.html#l00184">momentum::saveMotion()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00506">momentum::trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00345">momentum::trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00175">momentum::trackSequence()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
 
 </div>
 </div>
@@ -1344,16 +1506,24 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Defines how mesh vertices are influenced by joints. </p>
 
+<p class="definition">Definition at line <a class="el" href="character_8h_source.html#l00046">46</a> of file <a class="el" href="character_8h_source.html">character.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00691">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; float &gt;::CharacterT()</a>, <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00310">momentum::scaleCharacter()</a>, <a class="el" href="skinning__weight__iterator_8cpp_source.html#l00020">momentum::SkinningWeightIteratorT&lt; T &gt;::SkinningWeightIteratorT()</a>, <a class="el" href="blend__shape__skinning_8cpp_source.html#l00060">momentum::skinWithBlendShapes()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00378">momentum::transformCharacter()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>character/<a class="el" href="character_8h_source.html">character.h</a></li>
-<li>character/<a class="el" href="character_8cpp.html">character.cpp</a></li>
+<li>character/<a class="el" href="character_8cpp_source.html">character.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

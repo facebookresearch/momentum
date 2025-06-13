@@ -1,0 +1,1 @@
+var structmomentum_1_1FixedAxisDataT=[["FixedAxisDataT","structmomentum_1_1FixedAxisDataT.html#a4982f33c2d8a61ce7b53023c971b8a90",null],["globalAxis","structmomentum_1_1FixedAxisDataT.html#abb9903635e9ff528dcc6c9b9a35c2e18",null],["localAxis","structmomentum_1_1FixedAxisDataT.html#a45dd248a72beb419fef51b118704ac9c",null]];

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('fbx__memory__stream_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">fbx_memory_stream.h</div></div>
 </div><!--header-->
@@ -152,27 +168,31 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>} <span class="comment">// namespace momentum</span></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html">momentum::FbxMemoryStream</a></div><div class="ttdef"><b>Definition</b> fbx_memory_stream.h:25</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a1dcf93872cb806828fa1027d0d89dcce"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a1dcf93872cb806828fa1027d0d89dcce">momentum::FbxMemoryStream::Read</a></div><div class="ttdeci">int Read(void *buffer, int count) const override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:55</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a32338cc96e1ffc3e84a20b92e7407322"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a32338cc96e1ffc3e84a20b92e7407322">momentum::FbxMemoryStream::Close</a></div><div class="ttdeci">bool Close() override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:33</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a3cc5ae5105f2ad994a8d7c3e9b3ff805"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a3cc5ae5105f2ad994a8d7c3e9b3ff805">momentum::FbxMemoryStream::Open</a></div><div class="ttdeci">bool Open(void *pStreamData) override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:27</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a6df00ecdfc5bd709ff18dbe997aab03b"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a6df00ecdfc5bd709ff18dbe997aab03b">momentum::FbxMemoryStream::~FbxMemoryStream</a></div><div class="ttdeci">~FbxMemoryStream() override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:19</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a7b61aaa902f4c7056316a2a3a5d7889a"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a7b61aaa902f4c7056316a2a3a5d7889a">momentum::FbxMemoryStream::GetError</a></div><div class="ttdeci">int GetError() const override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:107</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a9dbf38b30cf7c7f54096a18dab8d61b9"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a9dbf38b30cf7c7f54096a18dab8d61b9">momentum::FbxMemoryStream::Write</a></div><div class="ttdeci">int Write(const void *buffer, int count) override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:46</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_aa5c312d4c11a5a66f6d5bac590479437"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#aa5c312d4c11a5a66f6d5bac590479437">momentum::FbxMemoryStream::GetReaderID</a></div><div class="ttdeci">int GetReaderID() const override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:68</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_abc57af85c48f3248afa2814cfc759e47"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#abc57af85c48f3248afa2814cfc759e47">momentum::FbxMemoryStream::GetState</a></div><div class="ttdeci">EState GetState() override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:23</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_ad3445ab13906f669f499fcf82e08873e"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#ad3445ab13906f669f499fcf82e08873e">momentum::FbxMemoryStream::Flush</a></div><div class="ttdeci">bool Flush() override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:39</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_addaea2057f374aeff15bb86c01c88d10"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#addaea2057f374aeff15bb86c01c88d10">momentum::FbxMemoryStream::Seek</a></div><div class="ttdeci">void Seek(const FbxInt64 &amp;pOffset, const FbxFile::ESeekPos &amp;pSeekPos) override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:76</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_adec5b944b880f1a0d7dd8e57aa3e058c"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#adec5b944b880f1a0d7dd8e57aa3e058c">momentum::FbxMemoryStream::SetPosition</a></div><div class="ttdeci">void SetPosition(long pPosition) override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:102</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_ae9f9caeeb5c107ddae33c2d6f98bd0c4"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#ae9f9caeeb5c107ddae33c2d6f98bd0c4">momentum::FbxMemoryStream::GetPosition</a></div><div class="ttdeci">long GetPosition() const override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:94</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_aee03209e9cd9eed58f37d0e764a62327"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#aee03209e9cd9eed58f37d0e764a62327">momentum::FbxMemoryStream::ClearError</a></div><div class="ttdeci">void ClearError() override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:111</div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_af168c2fe989912c63619b616c71f7c38"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#af168c2fe989912c63619b616c71f7c38">momentum::FbxMemoryStream::GetWriterID</a></div><div class="ttdeci">int GetWriterID() const override</div><div class="ttdef"><b>Definition</b> fbx_memory_stream.cpp:72</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html">momentum::FbxMemoryStream</a></div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8h_source.html#l00025">fbx_memory_stream.h:25</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a1dcf93872cb806828fa1027d0d89dcce"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a1dcf93872cb806828fa1027d0d89dcce">momentum::FbxMemoryStream::Read</a></div><div class="ttdeci">int Read(void *buffer, int count) const override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00055">fbx_memory_stream.cpp:55</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a32338cc96e1ffc3e84a20b92e7407322"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a32338cc96e1ffc3e84a20b92e7407322">momentum::FbxMemoryStream::Close</a></div><div class="ttdeci">bool Close() override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00033">fbx_memory_stream.cpp:33</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a3cc5ae5105f2ad994a8d7c3e9b3ff805"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a3cc5ae5105f2ad994a8d7c3e9b3ff805">momentum::FbxMemoryStream::Open</a></div><div class="ttdeci">bool Open(void *pStreamData) override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00027">fbx_memory_stream.cpp:27</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a6df00ecdfc5bd709ff18dbe997aab03b"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a6df00ecdfc5bd709ff18dbe997aab03b">momentum::FbxMemoryStream::~FbxMemoryStream</a></div><div class="ttdeci">~FbxMemoryStream() override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00019">fbx_memory_stream.cpp:19</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a7b61aaa902f4c7056316a2a3a5d7889a"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a7b61aaa902f4c7056316a2a3a5d7889a">momentum::FbxMemoryStream::GetError</a></div><div class="ttdeci">int GetError() const override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00107">fbx_memory_stream.cpp:107</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_a9dbf38b30cf7c7f54096a18dab8d61b9"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#a9dbf38b30cf7c7f54096a18dab8d61b9">momentum::FbxMemoryStream::Write</a></div><div class="ttdeci">int Write(const void *buffer, int count) override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00046">fbx_memory_stream.cpp:46</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_aa5c312d4c11a5a66f6d5bac590479437"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#aa5c312d4c11a5a66f6d5bac590479437">momentum::FbxMemoryStream::GetReaderID</a></div><div class="ttdeci">int GetReaderID() const override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00068">fbx_memory_stream.cpp:68</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_abc57af85c48f3248afa2814cfc759e47"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#abc57af85c48f3248afa2814cfc759e47">momentum::FbxMemoryStream::GetState</a></div><div class="ttdeci">EState GetState() override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00023">fbx_memory_stream.cpp:23</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_ad3445ab13906f669f499fcf82e08873e"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#ad3445ab13906f669f499fcf82e08873e">momentum::FbxMemoryStream::Flush</a></div><div class="ttdeci">bool Flush() override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00039">fbx_memory_stream.cpp:39</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_addaea2057f374aeff15bb86c01c88d10"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#addaea2057f374aeff15bb86c01c88d10">momentum::FbxMemoryStream::Seek</a></div><div class="ttdeci">void Seek(const FbxInt64 &amp;pOffset, const FbxFile::ESeekPos &amp;pSeekPos) override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00076">fbx_memory_stream.cpp:76</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_adec5b944b880f1a0d7dd8e57aa3e058c"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#adec5b944b880f1a0d7dd8e57aa3e058c">momentum::FbxMemoryStream::SetPosition</a></div><div class="ttdeci">void SetPosition(long pPosition) override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00102">fbx_memory_stream.cpp:102</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_ae9f9caeeb5c107ddae33c2d6f98bd0c4"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#ae9f9caeeb5c107ddae33c2d6f98bd0c4">momentum::FbxMemoryStream::GetPosition</a></div><div class="ttdeci">long GetPosition() const override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00094">fbx_memory_stream.cpp:94</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_aee03209e9cd9eed58f37d0e764a62327"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#aee03209e9cd9eed58f37d0e764a62327">momentum::FbxMemoryStream::ClearError</a></div><div class="ttdeci">void ClearError() override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00111">fbx_memory_stream.cpp:111</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxMemoryStream_html_af168c2fe989912c63619b616c71f7c38"><div class="ttname"><a href="classmomentum_1_1FbxMemoryStream.html#af168c2fe989912c63619b616c71f7c38">momentum::FbxMemoryStream::GetWriterID</a></div><div class="ttdeci">int GetWriterID() const override</div><div class="ttdef"><b>Definition</b> <a href="fbx__memory__stream_8cpp_source.html#l00072">fbx_memory_stream.cpp:72</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="fbx__memory__stream_8h.html">fbx_memory_stream.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

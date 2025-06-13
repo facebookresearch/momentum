@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('profile_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a>  </div>
@@ -127,6 +143,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00075">75</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="ac1a0dba5b1a5d91846563bf72902ba53" name="ac1a0dba5b1a5d91846563bf72902ba53"></a>
@@ -155,6 +173,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00069">69</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="a701f53b55c8c18c960781b03a4267db2" name="a701f53b55c8c18c960781b03a4267db2"></a>
@@ -171,6 +191,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00076">76</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
 
 </div>
 </div>
@@ -190,6 +212,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00067">67</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="a82a8d7ee80ba8f807cccc095c42bd5fa" name="a82a8d7ee80ba8f807cccc095c42bd5fa"></a>
@@ -208,6 +232,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00068">68</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="aea0496071d886333288ddd0e1aa047c3" name="aea0496071d886333288ddd0e1aa047c3"></a>
@@ -224,6 +250,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00065">65</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
 
 </div>
 </div>
@@ -242,6 +270,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00066">66</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
 
 </div>
 </div>
@@ -271,6 +301,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00077">77</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="a4910c927ef9f64e11854ab1b0d7f9b6b" name="a4910c927ef9f64e11854ab1b0d7f9b6b"></a>
@@ -288,6 +320,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00072">72</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="a49a643cb9d4144845b05fe7159a04485" name="a49a643cb9d4144845b05fe7159a04485"></a>
@@ -304,6 +338,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00070">70</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
 
 </div>
 </div>
@@ -323,6 +359,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00071">71</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="a59b61422ee9c62529fec6aa2df29f414" name="a59b61422ee9c62529fec6aa2df29f414"></a>
@@ -341,6 +379,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00073">73</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 <a id="a1380b4e855b85ef4d562e28dcb537cc7" name="a1380b4e855b85ef4d562e28dcb537cc7"></a>
@@ -358,12 +398,18 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="profile_8h_source.html#l00074">74</a> of file <a class="el" href="profile_8h_source.html">profile.h</a>.</p>
+
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="profile_8h.html">profile.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

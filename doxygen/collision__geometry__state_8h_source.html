@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('collision__geometry__state_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">collision_geometry_state.h</div></div>
 </div><!--header-->
@@ -194,21 +210,25 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter_2fwd_8h_html"><div class="ttname"><a href="character_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="acollision__geometry_8h_html"><div class="ttname"><a href="collision__geometry_8h.html">collision_geometry.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a7f43d746798db9b244d37e2566a49b29"><div class="ttname"><a href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">momentum::CollisionGeometry</a></div><div class="ttdeci">CollisionGeometryT&lt; float &gt; CollisionGeometry</div><div class="ttdef"><b>Definition</b> collision_geometry.h:73</div></div>
-<div class="ttc" id="anamespacemomentum_html_aa3b5f5adf242e78c8e1c21b93a0efb24"><div class="ttname"><a href="namespacemomentum.html#aa3b5f5adf242e78c8e1c21b93a0efb24">momentum::updateAabb</a></div><div class="ttdeci">void updateAabb(axel::BoundingBox&lt; T &gt; &amp;aabb, const Vector3&lt; T &gt; &amp;originA, const Vector3&lt; T &gt; &amp;direction, const Vector2&lt; T &gt; &amp;radii)</div><div class="ttdoc">Updates an axis-aligned bounding box to encompass a tapered capsule.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:112</div></div>
-<div class="ttc" id="anamespacemomentum_html_af6147994fdcc226edada1f6c7a94c63f"><div class="ttname"><a href="namespacemomentum.html#af6147994fdcc226edada1f6c7a94c63f">momentum::overlaps</a></div><div class="ttdeci">bool overlaps(const Vector3&lt; T &gt; &amp;originA, const Vector3&lt; T &gt; &amp;directionA, const Vector2&lt; T &gt; &amp;radiiA, T deltaA, const Vector3&lt; T &gt; &amp;originB, const Vector3&lt; T &gt; &amp;directionB, const Vector2&lt; T &gt; &amp;radiiB, T deltaB, T &amp;outDistance, Vector2&lt; T &gt; &amp;outClosestPoints, T &amp;outOverlap)</div><div class="ttdoc">Determines if two tapered capsules overlap.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:67</div></div>
-<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html">momentum::CollisionGeometryStateT</a></div><div class="ttdoc">Represents collision geometry states using a Structure of Arrays (SoA) format.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:19</div></div>
-<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_a1f1f2930836106c4e04e1d3b8a6ed5a9"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#a1f1f2930836106c4e04e1d3b8a6ed5a9">momentum::CollisionGeometryStateT::origin</a></div><div class="ttdeci">std::vector&lt; Vector3&lt; T &gt; &gt; origin</div><div class="ttdoc">Capsule's origin in global coordinates.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:37</div></div>
-<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_a3d2c3727433dacc65aaede01f9bd7105"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105">momentum::CollisionGeometryStateT::direction</a></div><div class="ttdeci">std::vector&lt; Vector3&lt; T &gt; &gt; direction</div><div class="ttdoc">Capsule's direction vector (representing the X-axis) in global coordinates.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:40</div></div>
-<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_a7c64e8663780168e64e7854a9f5e750a"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#a7c64e8663780168e64e7854a9f5e750a">momentum::CollisionGeometryStateT::radius</a></div><div class="ttdeci">std::vector&lt; Vector2&lt; T &gt; &gt; radius</div><div class="ttdoc">Scaled radii of the capsule's endpoints.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:43</div></div>
-<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_aa10f2a1653fc6a3e0e1dc7a513019caf"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#aa10f2a1653fc6a3e0e1dc7a513019caf">momentum::CollisionGeometryStateT::delta</a></div><div class="ttdeci">std::vector&lt; T &gt; delta</div><div class="ttdoc">Signed difference between the capsule's radii (radius[1] - radius[0]).</div><div class="ttdef"><b>Definition</b> collision_geometry_state.h:46</div></div>
-<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_ad21db757e7569020951383b801808b8a"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#ad21db757e7569020951383b801808b8a">momentum::CollisionGeometryStateT::update</a></div><div class="ttdeci">void update(const SkeletonStateT&lt; T &gt; &amp;skeletonState, const CollisionGeometry &amp;collisionGeometry)</div><div class="ttdoc">Updates the state based on a given skeleton state and collision geometry.</div><div class="ttdef"><b>Definition</b> collision_geometry_state.cpp:15</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a7f43d746798db9b244d37e2566a49b29"><div class="ttname"><a href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">momentum::CollisionGeometry</a></div><div class="ttdeci">CollisionGeometryT&lt; float &gt; CollisionGeometry</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry_8h_source.html#l00073">collision_geometry.h:73</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aa3b5f5adf242e78c8e1c21b93a0efb24"><div class="ttname"><a href="namespacemomentum.html#aa3b5f5adf242e78c8e1c21b93a0efb24">momentum::updateAabb</a></div><div class="ttdeci">void updateAabb(axel::BoundingBox&lt; T &gt; &amp;aabb, const Vector3&lt; T &gt; &amp;originA, const Vector3&lt; T &gt; &amp;direction, const Vector2&lt; T &gt; &amp;radii)</div><div class="ttdoc">Updates an axis-aligned bounding box to encompass a tapered capsule.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00112">collision_geometry_state.h:112</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_af6147994fdcc226edada1f6c7a94c63f"><div class="ttname"><a href="namespacemomentum.html#af6147994fdcc226edada1f6c7a94c63f">momentum::overlaps</a></div><div class="ttdeci">bool overlaps(const Vector3&lt; T &gt; &amp;originA, const Vector3&lt; T &gt; &amp;directionA, const Vector2&lt; T &gt; &amp;radiiA, T deltaA, const Vector3&lt; T &gt; &amp;originB, const Vector3&lt; T &gt; &amp;directionB, const Vector2&lt; T &gt; &amp;radiiB, T deltaB, T &amp;outDistance, Vector2&lt; T &gt; &amp;outClosestPoints, T &amp;outOverlap)</div><div class="ttdoc">Determines if two tapered capsules overlap.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00067">collision_geometry_state.h:67</a></div></div>
+<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html">momentum::CollisionGeometryStateT</a></div><div class="ttdoc">Represents collision geometry states using a Structure of Arrays (SoA) format.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00019">collision_geometry_state.h:19</a></div></div>
+<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_a1f1f2930836106c4e04e1d3b8a6ed5a9"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#a1f1f2930836106c4e04e1d3b8a6ed5a9">momentum::CollisionGeometryStateT::origin</a></div><div class="ttdeci">std::vector&lt; Vector3&lt; T &gt; &gt; origin</div><div class="ttdoc">Capsule's origin in global coordinates.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00037">collision_geometry_state.h:37</a></div></div>
+<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_a3d2c3727433dacc65aaede01f9bd7105"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105">momentum::CollisionGeometryStateT::direction</a></div><div class="ttdeci">std::vector&lt; Vector3&lt; T &gt; &gt; direction</div><div class="ttdoc">Capsule's direction vector (representing the X-axis) in global coordinates.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00040">collision_geometry_state.h:40</a></div></div>
+<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_a7c64e8663780168e64e7854a9f5e750a"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#a7c64e8663780168e64e7854a9f5e750a">momentum::CollisionGeometryStateT::radius</a></div><div class="ttdeci">std::vector&lt; Vector2&lt; T &gt; &gt; radius</div><div class="ttdoc">Scaled radii of the capsule's endpoints.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00043">collision_geometry_state.h:43</a></div></div>
+<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_aa10f2a1653fc6a3e0e1dc7a513019caf"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#aa10f2a1653fc6a3e0e1dc7a513019caf">momentum::CollisionGeometryStateT::delta</a></div><div class="ttdeci">std::vector&lt; T &gt; delta</div><div class="ttdoc">Signed difference between the capsule's radii (radius[1] - radius[0]).</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8h_source.html#l00046">collision_geometry_state.h:46</a></div></div>
+<div class="ttc" id="astructmomentum_1_1CollisionGeometryStateT_html_ad21db757e7569020951383b801808b8a"><div class="ttname"><a href="structmomentum_1_1CollisionGeometryStateT.html#ad21db757e7569020951383b801808b8a">momentum::CollisionGeometryStateT::update</a></div><div class="ttdeci">void update(const SkeletonStateT&lt; T &gt; &amp;skeletonState, const CollisionGeometry &amp;collisionGeometry)</div><div class="ttdoc">Updates the state based on a given skeleton state and collision geometry.</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry__state_8cpp_source.html#l00015">collision_geometry_state.cpp:15</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="collision__geometry__state_8h.html">collision_geometry_state.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

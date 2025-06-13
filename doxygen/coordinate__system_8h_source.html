@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('coordinate__system_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_75c22d8fe85779426aa0eb5df8068da4.html">marker</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">coordinate_system.h</div></div>
 </div><!--header-->
@@ -113,22 +129,26 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>} <span class="comment">// namespace momentum</span></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a380a931c41256deb7ff10909e20a33cd"><div class="ttname"><a href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cd">momentum::UpVector</a></div><div class="ttdeci">UpVector</div><div class="ttdoc">This enumeration is used to define the primary up vector directions for various coordinate systems an...</div><div class="ttdef"><b>Definition</b> coordinate_system.h:14</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a380a931c41256deb7ff10909e20a33cd"><div class="ttname"><a href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cd">momentum::UpVector</a></div><div class="ttdeci">UpVector</div><div class="ttdoc">This enumeration is used to define the primary up vector directions for various coordinate systems an...</div><div class="ttdef"><b>Definition</b> <a href="coordinate__system_8h_source.html#l00014">coordinate_system.h:14</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a380a931c41256deb7ff10909e20a33cda02129bb861061d1a052c592e2dc6b383"><div class="ttname"><a href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda02129bb861061d1a052c592e2dc6b383">momentum::UpVector::X</a></div><div class="ttdeci">@ X</div><div class="ttdoc">X-axis up vector.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a380a931c41256deb7ff10909e20a33cda21c2e59531c8710156d34a3c30ac81d5"><div class="ttname"><a href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda21c2e59531c8710156d34a3c30ac81d5">momentum::UpVector::Z</a></div><div class="ttdeci">@ Z</div><div class="ttdoc">Z-axis up vector.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a380a931c41256deb7ff10909e20a33cda57cec4137b614c87cb4e24a3d003a3e0"><div class="ttname"><a href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda57cec4137b614c87cb4e24a3d003a3e0">momentum::UpVector::Y</a></div><div class="ttdeci">@ Y</div><div class="ttdoc">Y-axis up vector.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a380a931c41256deb7ff10909e20a33cdaa2a58a34017b64da2d589336e65b83ca"><div class="ttname"><a href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cdaa2a58a34017b64da2d589336e65b83ca">momentum::UpVector::YNeg</a></div><div class="ttdeci">@ YNeg</div><div class="ttdoc">Negative Y-axis up vector.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a3f4912f0cc8069c889ee81f140254d76a88183b946cc5f0e8c96b2e66e1c74a7e"><div class="ttname"><a href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76a88183b946cc5f0e8c96b2e66e1c74a7e">momentum::CharacterFormat::Unknown</a></div><div class="ttdeci">@ Unknown</div><div class="ttdoc">Unknown or unsupported file format.</div></div>
-<div class="ttc" id="anamespacemomentum_html_a5a26313d44b1c044b0e79fa1d6a92446"><div class="ttname"><a href="namespacemomentum.html#a5a26313d44b1c044b0e79fa1d6a92446">momentum::Unit</a></div><div class="ttdeci">Unit</div><div class="ttdoc">An enumeration representing the units of measurement used in marker data files.</div><div class="ttdef"><b>Definition</b> coordinate_system.h:22</div></div>
+<div class="ttc" id="anamespacemomentum_html_a5a26313d44b1c044b0e79fa1d6a92446"><div class="ttname"><a href="namespacemomentum.html#a5a26313d44b1c044b0e79fa1d6a92446">momentum::Unit</a></div><div class="ttdeci">Unit</div><div class="ttdoc">An enumeration representing the units of measurement used in marker data files.</div><div class="ttdef"><b>Definition</b> <a href="coordinate__system_8h_source.html#l00022">coordinate_system.h:22</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a5a26313d44b1c044b0e79fa1d6a92446a2ecda7a0252b442ac6ecf47462119f51"><div class="ttname"><a href="namespacemomentum.html#a5a26313d44b1c044b0e79fa1d6a92446a2ecda7a0252b442ac6ecf47462119f51">momentum::Unit::DM</a></div><div class="ttdeci">@ DM</div><div class="ttdoc">Decimeter.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a5a26313d44b1c044b0e79fa1d6a92446a69691c7bdcc3ce6d5d8a1361f22d04ac"><div class="ttname"><a href="namespacemomentum.html#a5a26313d44b1c044b0e79fa1d6a92446a69691c7bdcc3ce6d5d8a1361f22d04ac">momentum::Unit::M</a></div><div class="ttdeci">@ M</div><div class="ttdoc">Meters.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a5a26313d44b1c044b0e79fa1d6a92446a707354872d4e8210a2a573b99721b1fb"><div class="ttname"><a href="namespacemomentum.html#a5a26313d44b1c044b0e79fa1d6a92446a707354872d4e8210a2a573b99721b1fb">momentum::Unit::CM</a></div><div class="ttdeci">@ CM</div><div class="ttdoc">Centimeters.</div></div>
 <div class="ttc" id="anamespacemomentum_html_a5a26313d44b1c044b0e79fa1d6a92446aad05f78187c942f9dd521605fa81f1ba"><div class="ttname"><a href="namespacemomentum.html#a5a26313d44b1c044b0e79fa1d6a92446aad05f78187c942f9dd521605fa81f1ba">momentum::Unit::MM</a></div><div class="ttdeci">@ MM</div><div class="ttdoc">Millimeters.</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_75c22d8fe85779426aa0eb5df8068da4.html">marker</a></li><li class="navelem"><a class="el" href="coordinate__system_8h.html">coordinate_system.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

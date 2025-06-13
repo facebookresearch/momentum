@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1SkeletonErrorFunctionT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html">SkeletonErrorFunctionT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -83,9 +99,11 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::SkeletonErrorFunctionT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SkeletonErrorFunctionT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1SkeletonErrorFunctionT.png" usemap="#momentum::SkeletonErrorFunctionT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::SkeletonErrorFunctionT_3C_20T_20_3E_map" name="momentum::SkeletonErrorFunctionT_3C_20T_20_3E_map">
@@ -159,7 +177,11 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a935c03f07e1ef8aaeed9f9688b03075a" id="r_a935c03f07e1ef8aaeed9f9688b03075a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a935c03f07e1ef8aaeed9f9688b03075a">useHessian_</a> {<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a>}</td></tr>
 <tr class="separator:a935c03f07e1ef8aaeed9f9688b03075a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
+class momentum::SkeletonErrorFunctionT&lt; T &gt;</div>
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00018">18</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7e2cbf27313c809844ee08a6cda4fdad" name="a7e2cbf27313c809844ee08a6cda4fdad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7e2cbf27313c809844ee08a6cda4fdad">&#9670;&#160;</a></span>SkeletonErrorFunctionT()</h2>
 
@@ -195,6 +217,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00020">20</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00126">momentum::SkeletonErrorFunctionT&lt; T &gt;::enabledParameters_</a>.</p>
 
 </div>
 </div>
@@ -264,6 +290,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented in <a class="el" href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a39b35c222cc768b298b23ed34305e582">momentum::VertexProjectionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1CollisionErrorFunctionT.html#a8d1654e2dadd2070202b56a61e0acbef">momentum::CollisionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a1513864d16fb6c42cb2814ecfaf86ef0">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, Data, FuncDim, NumVec, NumPos &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, AimDataT&lt; T &gt;, 3, 2, 1 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, FixedAxisDataT&lt; T &gt;, 1, 1, 0 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, FixedAxisDataT&lt; T &gt;, 3, 1, 0 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, NormalDataT&lt; T &gt;, 1, 2, 1 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, OrientationDataT&lt; T &gt;, 9, 3, 0 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, PlaneDataT&lt; T &gt;, 1 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a7af49f469b86fa1e973ae1e75be65b0f">momentum::ConstraintErrorFunctionT&lt; T, PositionDataT&lt; T &gt; &gt;</a>, <a class="el" href="classmomentum_1_1LimitErrorFunctionT.html#aaeaa8f7dc51f43d7ee5906eada435723">momentum::LimitErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1ModelParametersErrorFunctionT.html#a47ecff07f3cce21c94c8a9c9b41d9d64">momentum::ModelParametersErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1PosePriorErrorFunctionT.html#a7be1d3b5b9b5392e4edddc8d3ca94c20">momentum::PosePriorErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SimdCollisionErrorFunctionT.html#a241e525cc502200a49a519981a6d34d4">momentum::SimdCollisionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1StateErrorFunctionT.html#ae8102402100f5eb03309b6b41e9b18a3">momentum::StateErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1VertexErrorFunctionT.html#ad3c09fcfe6a66b2aed3d1968aa0c6f53">momentum::VertexErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1FullyDifferentiableOrientationErrorFunctionT.html#a2d965cab880f54ec0ffcd65b09b598c9">momentum::FullyDifferentiableOrientationErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1FullyDifferentiablePositionErrorFunctionT.html#a31d6d905b6eaa0685d9f7de39f8bd4e5">momentum::FullyDifferentiablePositionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1UnionErrorFunctionT.html#aafc19c2d6bf639b69b512c98e470aec5">momentum::UnionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1DistanceErrorFunctionT.html#a4a8c58a90f8d9afb90595a627a628fcf">momentum::DistanceErrorFunctionT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1ProjectionErrorFunctionT.html#a91b1c78e8d33cfb80e06b0acb2034585">momentum::ProjectionErrorFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00045">45</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
 </div>
 </div>
 <a id="a4d900ddf2954913d83b5c7bc55c6fbe5" name="a4d900ddf2954913d83b5c7bc55c6fbe5"></a>
@@ -310,6 +338,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented in <a class="el" href="classmomentum_1_1VertexProjectionErrorFunctionT.html#ae564a81fc8aa6d4fe1c1dad87e672636">momentum::VertexProjectionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1PosePriorErrorFunctionT.html#a659cbaa4c706f1f59a256422d78bd109">momentum::PosePriorErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1StateErrorFunctionT.html#a09f4e9cd7c7600c0b18b50ffb7db0473">momentum::StateErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1VertexErrorFunctionT.html#a198d1ac208b1d78efeb0e8378e2ad9f6">momentum::VertexErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1UnionErrorFunctionT.html#a6a2635f53000853502dcb1d25ba47969">momentum::UnionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1DistanceErrorFunctionT.html#a4f4fe169a8945cdcb0bf3b53e72178c3">momentum::DistanceErrorFunctionT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1ProjectionErrorFunctionT.html#ac44af5a03be2a0f7c0790e35cea6b94a">momentum::ProjectionErrorFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00051">51</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__error__function_8h_source.html#l00076">momentum::SkeletonErrorFunctionT&lt; T &gt;::getSolverDerivatives()</a>.</p>
+
 </div>
 </div>
 <a id="a977f290f76fc4c35356e441d2884fc0d" name="a977f290f76fc4c35356e441d2884fc0d"></a>
@@ -353,6 +385,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00068">68</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__error__function_8h_source.html#l00076">momentum::SkeletonErrorFunctionT&lt; T &gt;::getSolverDerivatives()</a>.</p>
 
 </div>
 </div>
@@ -412,6 +448,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented in <a class="el" href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a9ffcecf3e2ce9c83f99cf14487674825">momentum::VertexProjectionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1PosePriorErrorFunctionT.html#a4b8499d1c36feee8741945c27e6c64e4">momentum::PosePriorErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1StateErrorFunctionT.html#ab747b7b2cbe8071eca92ae7cca2a541a">momentum::StateErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1VertexErrorFunctionT.html#a276c01602086b38a4feeaa5f695322b8">momentum::VertexErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1UnionErrorFunctionT.html#a921281b7d5b7de5eea02cdf97955834e">momentum::UnionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1DistanceErrorFunctionT.html#a9213e9152087a55cd04ef12806d562b5">momentum::DistanceErrorFunctionT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1ProjectionErrorFunctionT.html#aa430f7a65b8a76312509711811f03269">momentum::ProjectionErrorFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00058">58</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__error__function_8h_source.html#l00076">momentum::SkeletonErrorFunctionT&lt; T &gt;::getSolverDerivatives()</a>.</p>
+
 </div>
 </div>
 <a id="acdf427ac8dd801d2a4591a8d95ab905c" name="acdf427ac8dd801d2a4591a8d95ab905c"></a>
@@ -440,6 +480,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Reimplemented in <a class="el" href="classmomentum_1_1CollisionErrorFunctionT.html#a2862a90f2e259f0267d2eb29ebc8a77d">momentum::CollisionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a4341b131e30fd1546ace98b689b1a2a1">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, Data, FuncDim, NumVec, NumPos &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, AimDataT&lt; T &gt;, 3, 2, 1 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, FixedAxisDataT&lt; T &gt;, 1, 1, 0 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, FixedAxisDataT&lt; T &gt;, 3, 1, 0 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, NormalDataT&lt; T &gt;, 1, 2, 1 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, OrientationDataT&lt; T &gt;, 9, 3, 0 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, PlaneDataT&lt; T &gt;, 1 &gt;</a>, <a class="el" href="classmomentum_1_1ConstraintErrorFunctionT.html#a8d045ba942d08f75be259ec906a96ca8">momentum::ConstraintErrorFunctionT&lt; T, PositionDataT&lt; T &gt; &gt;</a>, <a class="el" href="classmomentum_1_1DistanceErrorFunctionT.html#aa71b23c9fb25f7d2aa6a728013236358">momentum::DistanceErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1LimitErrorFunctionT.html#aed2d63f25b9a7a6b777ce341ae9c90f3">momentum::LimitErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1ModelParametersErrorFunctionT.html#a56e948cafe05e33261647a74f08c6569">momentum::ModelParametersErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1PosePriorErrorFunctionT.html#a34f8f2f1ab80d4cfa701d603d875fba8">momentum::PosePriorErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1ProjectionErrorFunctionT.html#a23a8eb3303f57daee9b71ca1b4d28e4f">momentum::ProjectionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SimdCollisionErrorFunctionT.html#ab1d97fdaf832fb0da278b221dd3e2257">momentum::SimdCollisionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1StateErrorFunctionT.html#a49a9315ef4db65b2268444ad949a83d1">momentum::StateErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1VertexErrorFunctionT.html#aed349256ec62db23ea9292bd1e49e3f7">momentum::VertexErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a8f7fbcb9457662fa869db675703acf2a">momentum::VertexProjectionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1FullyDifferentiableOrientationErrorFunctionT.html#abeb3a2d56e31594bb05acfdbcadd850c">momentum::FullyDifferentiableOrientationErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1FullyDifferentiablePositionErrorFunctionT.html#ad47431ed697d937f0875112ded50973c">momentum::FullyDifferentiablePositionErrorFunctionT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SimdNormalErrorFunction.html#aacee5137c1fece53a448a2d6f6243335">momentum::SimdNormalErrorFunction</a>, <a class="el" href="classmomentum_1_1SimdPlaneErrorFunction.html#aa0c59472ed8fcf912998f9ea33936850">momentum::SimdPlaneErrorFunction</a>, <a class="el" href="classmomentum_1_1SimdPositionErrorFunction.html#ad6ce33ec604a2c3fbbfbfca8b723ffc9">momentum::SimdPositionErrorFunction</a>, and <a class="el" href="classmomentum_1_1UnionErrorFunctionT.html#a5b837ec821d3984fc558eb2b2757635f">momentum::UnionErrorFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00117">117</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__error__function_8h_source.html#l00076">momentum::SkeletonErrorFunctionT&lt; T &gt;::getSolverDerivatives()</a>.</p>
 
 </div>
 </div>
@@ -497,6 +541,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00076">76</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00051">momentum::SkeletonErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00068">momentum::SkeletonErrorFunctionT&lt; T &gt;::getHessian()</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00058">momentum::SkeletonErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00117">momentum::SkeletonErrorFunctionT&lt; T &gt;::getJacobianSize()</a>, <a class="el" href="character_2types_8h_source.html#l00091">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>, and <a class="el" href="skeleton__error__function_8h_source.html#l00127">momentum::SkeletonErrorFunctionT&lt; T &gt;::useHessian_</a>.</p>
+
 </div>
 </div>
 <a id="abee5723f37978cb1f62487492c75550d" name="abee5723f37978cb1f62487492c75550d"></a>
@@ -523,6 +571,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00033">33</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00124">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>.</p>
 
 </div>
 </div>
@@ -552,6 +604,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00037">37</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00125">momentum::SkeletonErrorFunctionT&lt; T &gt;::activeJointParams_</a>.</p>
+
 </div>
 </div>
 <a id="ab7dad7b38c6721a6180ea8de5f799d44" name="ab7dad7b38c6721a6180ea8de5f799d44"></a>
@@ -579,6 +635,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00041">41</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00126">momentum::SkeletonErrorFunctionT&lt; T &gt;::enabledParameters_</a>.</p>
 
 </div>
 </div>
@@ -608,6 +668,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00029">29</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00124">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -633,6 +697,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00125">125</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, and <a class="el" href="skeleton__error__function_8h_source.html#l00037">momentum::SkeletonErrorFunctionT&lt; T &gt;::setActiveJoints()</a>.</p>
+
 </div>
 </div>
 <a id="ae8119f5ffca7c7f192e28a3df8c55e2d" name="ae8119f5ffca7c7f192e28a3df8c55e2d"></a>
@@ -656,6 +724,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00126">126</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__error__function_8h_source.html#l00041">momentum::SkeletonErrorFunctionT&lt; T &gt;::setEnabledParameters()</a>, and <a class="el" href="skeleton__error__function_8h_source.html#l00020">momentum::SkeletonErrorFunctionT&lt; T &gt;::SkeletonErrorFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -681,6 +753,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00123">123</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, and <a class="el" href="simd__normal__error__function_8cpp_source.html#l00284">momentum::SimdNormalErrorFunction::getJacobian()</a>.</p>
+
 </div>
 </div>
 <a id="a0dbdc0abbdef36a8ff607fd23c6b80e8" name="a0dbdc0abbdef36a8ff607fd23c6b80e8"></a>
@@ -704,6 +780,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00122">122</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, and <a class="el" href="state__error__function_8cpp_source.html#l00019">momentum::StateErrorFunctionT&lt; T &gt;::StateErrorFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -729,6 +809,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00127">127</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__error__function_8h_source.html#l00076">momentum::SkeletonErrorFunctionT&lt; T &gt;::getSolverDerivatives()</a>.</p>
+
 </div>
 </div>
 <a id="a176349c1aa5dc112ac09b18b3328b4c4" name="a176349c1aa5dc112ac09b18b3328b4c4"></a>
@@ -753,6 +837,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="skeleton__error__function_8h_source.html#l00124">124</a> of file <a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00118">momentum::SimdNormalErrorFunction::getError()</a>, <a class="el" href="simd__plane__error__function_8cpp_source.html#l00108">momentum::SimdPlaneErrorFunction::getError()</a>, <a class="el" href="simd__position__error__function_8cpp_source.html#l00105">momentum::SimdPositionErrorFunction::getError()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00033">momentum::SkeletonErrorFunctionT&lt; T &gt;::getWeight()</a>, and <a class="el" href="skeleton__error__function_8h_source.html#l00029">momentum::SkeletonErrorFunctionT&lt; T &gt;::setWeight()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -760,9 +848,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <li>character_solver/<a class="el" href="skeleton__error__function_8h_source.html">skeleton_error_function.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html">SkeletonErrorFunctionT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

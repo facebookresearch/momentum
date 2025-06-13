@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1SimdCollisionErrorFunctionT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdCollisionErrorFunctionT.html">SimdCollisionErrorFunctionT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
@@ -90,9 +106,11 @@ $(function() {
  <a href="classmomentum_1_1SimdCollisionErrorFunctionT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::SimdCollisionErrorFunctionT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SimdCollisionErrorFunctionT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1SimdCollisionErrorFunctionT.png" usemap="#momentum::SimdCollisionErrorFunctionT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::SimdCollisionErrorFunctionT_3C_20T_20_3E_map" name="momentum::SimdCollisionErrorFunctionT_3C_20T_20_3E_map">
@@ -192,6 +210,8 @@ Static Protected Attributes</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 class momentum::SimdCollisionErrorFunctionT&lt; T &gt;</div><p>Represents an error function that penalizes self-intersections between collision geometries of the character. </p>
 <p>The function pre-filters collision geometries to ignore those attached to the same joint, those intersecting in the rest pose, or those very close in the rest pose. </p>
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00030">30</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a2a7eaaf3643286e3a486dae6041d7812" name="a2a7eaaf3643286e3a486dae6041d7812"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2a7eaaf3643286e3a486dae6041d7812">&#9670;&#160;</a></span>PairId</h2>
@@ -214,6 +234,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00062">62</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -260,6 +282,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00083">83</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="simd__collision__error__function_8cpp_source.html#l00104">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::updateCollisionPairs()</a>.</p>
+
 </div>
 </div>
 <a id="ae99a40f90d1d6dc75a27e8b623b2c186" name="ae99a40f90d1d6dc75a27e8b623b2c186"></a>
@@ -287,6 +313,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00092">92</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -316,6 +344,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00193">193</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="profile_8h_source.html#l00067">MT_PROFILE_EVENT</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00112">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -356,6 +388,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a1fd68a34b7108e012bcba6ee3dd3e7a5">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00235">235</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00024">momentum::kParametersPerJoint</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -400,6 +436,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00283">283</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00024">momentum::kParametersPerJoint</a>, <a class="el" href="simd_8h_source.html#l00033">momentum::kSimdPacketSize</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -457,6 +497,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00475">475</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00024">momentum::kParametersPerJoint</a>, and <a class="el" href="simd_8h_source.html#l00033">momentum::kSimdPacketSize</a>.</p>
+
 </div>
 </div>
 <a id="ab1d97fdaf832fb0da278b221dd3e2257" name="ab1d97fdaf832fb0da278b221dd3e2257"></a>
@@ -486,6 +530,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#acdf427ac8dd801d2a4591a8d95ab905c">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00666">666</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a9aa01bb14c977021b78801c74cafe318" name="a9aa01bb14c977021b78801c74cafe318"></a>
@@ -513,6 +559,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8cpp_source.html#l00104">104</a> of file <a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="collision__geometry__state_8h_source.html#l00067">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00112">momentum::updateAabb()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="simd__collision__error__function_8cpp_source.html#l00083">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::SimdCollisionErrorFunctionT()</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -538,6 +590,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00092">92</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
+
 </div>
 </div>
 <a id="a9c43cdceb46da767534c259f4b15b1cc" name="a9c43cdceb46da767534c259f4b15b1cc"></a>
@@ -561,6 +615,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00079">79</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -586,6 +642,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00083">83</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
+
 </div>
 </div>
 <a id="aa3ddb0f96ea2f42ca41c57bbfd97cf18" name="aa3ddb0f96ea2f42ca41c57bbfd97cf18"></a>
@@ -609,6 +667,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00087">87</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -634,6 +694,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00081">81</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
+
 </div>
 </div>
 <a id="a6cc8632d0258629aabe7dee4845bc034" name="a6cc8632d0258629aabe7dee4845bc034"></a>
@@ -657,6 +719,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00085">85</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -682,17 +746,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="simd__collision__error__function_8h_source.html#l00090">90</a> of file <a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>character_solver/<a class="el" href="character__solver_2fwd_8h_source.html">fwd.h</a></li>
 <li>character_solver/<a class="el" href="simd__collision__error__function_8h_source.html">simd_collision_error_function.h</a></li>
-<li>character_solver/<a class="el" href="simd__collision__error__function_8cpp.html">simd_collision_error_function.cpp</a></li>
+<li>character_solver/<a class="el" href="simd__collision__error__function_8cpp_source.html">simd_collision_error_function.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdCollisionErrorFunctionT.html">SimdCollisionErrorFunctionT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

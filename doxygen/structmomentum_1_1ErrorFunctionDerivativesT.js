@@ -1,0 +1,1 @@
+var structmomentum_1_1ErrorFunctionDerivativesT=[["errorFunction","structmomentum_1_1ErrorFunctionDerivativesT.html#ad2ade2f8352e3d7417c89df87ebdfc5c",null],["gradInputs","structmomentum_1_1ErrorFunctionDerivativesT.html#acd29d608cb0302c5a1999668f0b74305",null],["gradWeight","structmomentum_1_1ErrorFunctionDerivativesT.html#ab009d26987637e92c39824243c8c2b06",null]];

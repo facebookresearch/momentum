@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('covariance__matrix_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">covariance_matrix.h</div></div>
 </div><!--header-->
@@ -168,27 +184,31 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>} <span class="comment">// namespace momentum</span></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html">momentum::LowRankCovarianceMatrixT</a></div><div class="ttdef"><b>Definition</b> covariance_matrix.h:25</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a325e1fa38dc129b89e70a17781d86f7b"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a325e1fa38dc129b89e70a17781d86f7b">momentum::LowRankCovarianceMatrixT::times_mat</a></div><div class="ttdeci">Eigen::MatrixX&lt; T &gt; times_mat(Eigen::Ref&lt; const Eigen::MatrixX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:71</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a32eb3e615a2dd2cb5ee08205844aaeb3"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a32eb3e615a2dd2cb5ee08205844aaeb3">momentum::LowRankCovarianceMatrixT::times_vec</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; times_vec(Eigen::Ref&lt; const Eigen::VectorX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:53</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a49afbcf07f83d71421d5316446ae7219"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a49afbcf07f83d71421d5316446ae7219">momentum::LowRankCovarianceMatrixT::inverse_times_vec</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; inverse_times_vec(Eigen::Ref&lt; const Eigen::VectorX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:43</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a96cd7f6fd8cd22bfa0f49fc9fafb4349"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a96cd7f6fd8cd22bfa0f49fc9fafb4349">momentum::LowRankCovarianceMatrixT::dimension</a></div><div class="ttdeci">Eigen::Index dimension() const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:28</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_aa208ca50b0bb4d020de4a4c7e7142520"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#aa208ca50b0bb4d020de4a4c7e7142520">momentum::LowRankCovarianceMatrixT::R</a></div><div class="ttdeci">const Eigen::MatrixX&lt; T &gt; &amp; R() const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:79</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_aac29aa5d0116a51664e8639fa12de7c0"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#aac29aa5d0116a51664e8639fa12de7c0">momentum::LowRankCovarianceMatrixT::inverse_logDeterminant</a></div><div class="ttdeci">T inverse_logDeterminant() const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:102</div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html">momentum::LowRankCovarianceMatrixT</a></div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8h_source.html#l00025">covariance_matrix.h:25</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a325e1fa38dc129b89e70a17781d86f7b"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a325e1fa38dc129b89e70a17781d86f7b">momentum::LowRankCovarianceMatrixT::times_mat</a></div><div class="ttdeci">Eigen::MatrixX&lt; T &gt; times_mat(Eigen::Ref&lt; const Eigen::MatrixX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00071">covariance_matrix.cpp:71</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a32eb3e615a2dd2cb5ee08205844aaeb3"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a32eb3e615a2dd2cb5ee08205844aaeb3">momentum::LowRankCovarianceMatrixT::times_vec</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; times_vec(Eigen::Ref&lt; const Eigen::VectorX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00053">covariance_matrix.cpp:53</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a49afbcf07f83d71421d5316446ae7219"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a49afbcf07f83d71421d5316446ae7219">momentum::LowRankCovarianceMatrixT::inverse_times_vec</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; inverse_times_vec(Eigen::Ref&lt; const Eigen::VectorX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00043">covariance_matrix.cpp:43</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_a96cd7f6fd8cd22bfa0f49fc9fafb4349"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#a96cd7f6fd8cd22bfa0f49fc9fafb4349">momentum::LowRankCovarianceMatrixT::dimension</a></div><div class="ttdeci">Eigen::Index dimension() const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00028">covariance_matrix.cpp:28</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_aa208ca50b0bb4d020de4a4c7e7142520"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#aa208ca50b0bb4d020de4a4c7e7142520">momentum::LowRankCovarianceMatrixT::R</a></div><div class="ttdeci">const Eigen::MatrixX&lt; T &gt; &amp; R() const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00079">covariance_matrix.cpp:79</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_aac29aa5d0116a51664e8639fa12de7c0"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#aac29aa5d0116a51664e8639fa12de7c0">momentum::LowRankCovarianceMatrixT::inverse_logDeterminant</a></div><div class="ttdeci">T inverse_logDeterminant() const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00102">covariance_matrix.cpp:102</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_aaeef11621844a60ed6b13c249a684ec2"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#aaeef11621844a60ed6b13c249a684ec2">momentum::LowRankCovarianceMatrixT::LowRankCovarianceMatrixT</a></div><div class="ttdeci">LowRankCovarianceMatrixT()=default</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ac1c9d723dc49c52748a751e523f9802e"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ac1c9d723dc49c52748a751e523f9802e">momentum::LowRankCovarianceMatrixT::basis</a></div><div class="ttdeci">const Eigen::MatrixX&lt; T &gt; &amp; basis() const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:33</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_acb6d634eb661d1612892c6e5b37069f0"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0">momentum::LowRankCovarianceMatrixT::reset</a></div><div class="ttdeci">void reset(T sigma, Eigen::Ref&lt; const Eigen::MatrixX&lt; T &gt; &gt; A)</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:15</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ad3bfdfceece2c8c1e3c014beb8415bf0"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad3bfdfceece2c8c1e3c014beb8415bf0">momentum::LowRankCovarianceMatrixT::inverse_times_mat</a></div><div class="ttdeci">Eigen::MatrixX&lt; T &gt; inverse_times_mat(Eigen::Ref&lt; const Eigen::MatrixX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:61</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ad4c7c1af9e70a055cef9e457cc3ace23"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad4c7c1af9e70a055cef9e457cc3ace23">momentum::LowRankCovarianceMatrixT::sigma</a></div><div class="ttdeci">T sigma() const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:38</div></div>
-<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ae365a87718db846522238c5dcb66c760"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ae365a87718db846522238c5dcb66c760">momentum::LowRankCovarianceMatrixT::logDeterminant</a></div><div class="ttdeci">T logDeterminant() const</div><div class="ttdef"><b>Definition</b> covariance_matrix.cpp:84</div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ac1c9d723dc49c52748a751e523f9802e"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ac1c9d723dc49c52748a751e523f9802e">momentum::LowRankCovarianceMatrixT::basis</a></div><div class="ttdeci">const Eigen::MatrixX&lt; T &gt; &amp; basis() const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00033">covariance_matrix.cpp:33</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_acb6d634eb661d1612892c6e5b37069f0"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0">momentum::LowRankCovarianceMatrixT::reset</a></div><div class="ttdeci">void reset(T sigma, Eigen::Ref&lt; const Eigen::MatrixX&lt; T &gt; &gt; A)</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00015">covariance_matrix.cpp:15</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ad3bfdfceece2c8c1e3c014beb8415bf0"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad3bfdfceece2c8c1e3c014beb8415bf0">momentum::LowRankCovarianceMatrixT::inverse_times_mat</a></div><div class="ttdeci">Eigen::MatrixX&lt; T &gt; inverse_times_mat(Eigen::Ref&lt; const Eigen::MatrixX&lt; T &gt; &gt; rhs) const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00061">covariance_matrix.cpp:61</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ad4c7c1af9e70a055cef9e457cc3ace23"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad4c7c1af9e70a055cef9e457cc3ace23">momentum::LowRankCovarianceMatrixT::sigma</a></div><div class="ttdeci">T sigma() const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00038">covariance_matrix.cpp:38</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1LowRankCovarianceMatrixT_html_ae365a87718db846522238c5dcb66c760"><div class="ttname"><a href="classmomentum_1_1LowRankCovarianceMatrixT.html#ae365a87718db846522238c5dcb66c760">momentum::LowRankCovarianceMatrixT::logDeterminant</a></div><div class="ttdeci">T logDeterminant() const</div><div class="ttdef"><b>Definition</b> <a href="covariance__matrix_8cpp_source.html#l00084">covariance_matrix.cpp:84</a></div></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
 <div class="ttc" id="aonline__householder__qr_8h_html"><div class="ttname"><a href="online__householder__qr_8h.html">online_householder_qr.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li><li class="navelem"><a class="el" href="covariance__matrix_8h.html">covariance_matrix.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

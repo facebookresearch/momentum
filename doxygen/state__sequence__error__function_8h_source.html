@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('state__sequence__error__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">state_sequence_error_function.h</div></div>
 </div><!--header-->
@@ -178,35 +194,39 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter__sequence__solver_2fwd_8h_html"><div class="ttname"><a href="character__sequence__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html">momentum::SequenceErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> sequence_error_function.h:18</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html">momentum::StateSequenceErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:17</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a03d9ba8ea448602ad5ca2b651b988d98"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a03d9ba8ea448602ad5ca2b651b988d98">momentum::StateSequenceErrorFunctionT::setWeights</a></div><div class="ttdeci">void setWeights(const float posWeight, const float rotationWeight)</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:48</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a1647ba81ec8d159d7daac4bdff3fef9f"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a1647ba81ec8d159d7daac4bdff3fef9f">momentum::StateSequenceErrorFunctionT::kPositionWeight</a></div><div class="ttdeci">static constexpr T kPositionWeight</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:77</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a1d042064767c834b88f7754f8f9ea807"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a1d042064767c834b88f7754f8f9ea807">momentum::StateSequenceErrorFunctionT::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.cpp:34</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a21c252d85eea97a88dca0bbcf1284d86"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a21c252d85eea97a88dca0bbcf1284d86">momentum::StateSequenceErrorFunctionT::getRotationWeights</a></div><div class="ttdeci">const Eigen::VectorX&lt; T &gt; &amp; getRotationWeights() const</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:58</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a23a33f701fa5b4a0893149ba5defc44a"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a23a33f701fa5b4a0893149ba5defc44a">momentum::StateSequenceErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt; modelParameters, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt; skelStates, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) const final</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.cpp:208</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a26099042f65dc7ece8f8ce990c4d8012"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a26099042f65dc7ece8f8ce990c4d8012">momentum::StateSequenceErrorFunctionT::getPositionWeights</a></div><div class="ttdeci">const Eigen::VectorX&lt; T &gt; &amp; getPositionWeights() const</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:55</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a40d1c2a71221b0f156716fa0ccc58800"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a40d1c2a71221b0f156716fa0ccc58800">momentum::StateSequenceErrorFunctionT::numFrames</a></div><div class="ttdeci">size_t numFrames() const final</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:22</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a4b98f7f4c2a76a01e3f94d213a9f4e9e"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a4b98f7f4c2a76a01e3f94d213a9f4e9e">momentum::StateSequenceErrorFunctionT::getPositionWeight</a></div><div class="ttdeci">const T &amp; getPositionWeight() const</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:61</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a6a08458d800a9181f9c3c26f43ceb2e3"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a6a08458d800a9181f9c3c26f43ceb2e3">momentum::StateSequenceErrorFunctionT::getError</a></div><div class="ttdeci">double getError(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt; modelParameters, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt; skelStates) const final</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.cpp:51</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a8172774174ec804744a0619ef88c8c2d"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a8172774174ec804744a0619ef88c8c2d">momentum::StateSequenceErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt; modelParameters, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt; skelStates, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) const final</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.cpp:87</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a81f017427de12b72ef57dbb8a848f466"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a81f017427de12b72ef57dbb8a848f466">momentum::StateSequenceErrorFunctionT::getRotationWeight</a></div><div class="ttdeci">const T &amp; getRotationWeight() const</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:64</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a993e521a6fd920b5022f0ad0c7592da7"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a993e521a6fd920b5022f0ad0c7592da7">momentum::StateSequenceErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.cpp:201</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_aa07cf17c4d62edfe4560f24786a80bea"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#aa07cf17c4d62edfe4560f24786a80bea">momentum::StateSequenceErrorFunctionT::setTargetWeights</a></div><div class="ttdeci">void setTargetWeights(const Eigen::VectorX&lt; T &gt; &amp;posWeight, const Eigen::VectorX&lt; T &gt; &amp;rotWeight)</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.cpp:40</div></div>
-<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_aae23b59a1d2b0969683d1ad7e5815e38"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#aae23b59a1d2b0969683d1ad7e5815e38">momentum::StateSequenceErrorFunctionT::kOrientationWeight</a></div><div class="ttdeci">static constexpr T kOrientationWeight</div><div class="ttdef"><b>Definition</b> state_sequence_error_function.h:78</div></div>
-<div class="ttc" id="anamespaceEigen_html"><div class="ttname"><a href="namespaceEigen.html">Eigen</a></div><div class="ttdef"><b>Definition</b> types.h:35</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a15524ec60f1a3e6d0ec96db0eaeac0b1"><div class="ttname"><a href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">momentum::VectorX</a></div><div class="ttdeci">Vector&lt; T, Dynamic &gt; VectorX</div><div class="ttdef"><b>Definition</b> types.h:199</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html">momentum::SequenceErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00018">sequence_error_function.h:18</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html">momentum::StateSequenceErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00017">state_sequence_error_function.h:17</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a03d9ba8ea448602ad5ca2b651b988d98"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a03d9ba8ea448602ad5ca2b651b988d98">momentum::StateSequenceErrorFunctionT::setWeights</a></div><div class="ttdeci">void setWeights(const float posWeight, const float rotationWeight)</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00048">state_sequence_error_function.h:48</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a1647ba81ec8d159d7daac4bdff3fef9f"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a1647ba81ec8d159d7daac4bdff3fef9f">momentum::StateSequenceErrorFunctionT::kPositionWeight</a></div><div class="ttdeci">static constexpr T kPositionWeight</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00077">state_sequence_error_function.h:77</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a1d042064767c834b88f7754f8f9ea807"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a1d042064767c834b88f7754f8f9ea807">momentum::StateSequenceErrorFunctionT::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00034">state_sequence_error_function.cpp:34</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a21c252d85eea97a88dca0bbcf1284d86"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a21c252d85eea97a88dca0bbcf1284d86">momentum::StateSequenceErrorFunctionT::getRotationWeights</a></div><div class="ttdeci">const Eigen::VectorX&lt; T &gt; &amp; getRotationWeights() const</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00058">state_sequence_error_function.h:58</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a23a33f701fa5b4a0893149ba5defc44a"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a23a33f701fa5b4a0893149ba5defc44a">momentum::StateSequenceErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt; modelParameters, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt; skelStates, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) const final</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00208">state_sequence_error_function.cpp:208</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a26099042f65dc7ece8f8ce990c4d8012"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a26099042f65dc7ece8f8ce990c4d8012">momentum::StateSequenceErrorFunctionT::getPositionWeights</a></div><div class="ttdeci">const Eigen::VectorX&lt; T &gt; &amp; getPositionWeights() const</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00055">state_sequence_error_function.h:55</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a40d1c2a71221b0f156716fa0ccc58800"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a40d1c2a71221b0f156716fa0ccc58800">momentum::StateSequenceErrorFunctionT::numFrames</a></div><div class="ttdeci">size_t numFrames() const final</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00022">state_sequence_error_function.h:22</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a4b98f7f4c2a76a01e3f94d213a9f4e9e"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a4b98f7f4c2a76a01e3f94d213a9f4e9e">momentum::StateSequenceErrorFunctionT::getPositionWeight</a></div><div class="ttdeci">const T &amp; getPositionWeight() const</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00061">state_sequence_error_function.h:61</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a6a08458d800a9181f9c3c26f43ceb2e3"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a6a08458d800a9181f9c3c26f43ceb2e3">momentum::StateSequenceErrorFunctionT::getError</a></div><div class="ttdeci">double getError(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt; modelParameters, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt; skelStates) const final</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00051">state_sequence_error_function.cpp:51</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a8172774174ec804744a0619ef88c8c2d"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a8172774174ec804744a0619ef88c8c2d">momentum::StateSequenceErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt; modelParameters, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt; skelStates, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) const final</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00087">state_sequence_error_function.cpp:87</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a81f017427de12b72ef57dbb8a848f466"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a81f017427de12b72ef57dbb8a848f466">momentum::StateSequenceErrorFunctionT::getRotationWeight</a></div><div class="ttdeci">const T &amp; getRotationWeight() const</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00064">state_sequence_error_function.h:64</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_a993e521a6fd920b5022f0ad0c7592da7"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#a993e521a6fd920b5022f0ad0c7592da7">momentum::StateSequenceErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00201">state_sequence_error_function.cpp:201</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_aa07cf17c4d62edfe4560f24786a80bea"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#aa07cf17c4d62edfe4560f24786a80bea">momentum::StateSequenceErrorFunctionT::setTargetWeights</a></div><div class="ttdeci">void setTargetWeights(const Eigen::VectorX&lt; T &gt; &amp;posWeight, const Eigen::VectorX&lt; T &gt; &amp;rotWeight)</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00040">state_sequence_error_function.cpp:40</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1StateSequenceErrorFunctionT_html_aae23b59a1d2b0969683d1ad7e5815e38"><div class="ttname"><a href="classmomentum_1_1StateSequenceErrorFunctionT.html#aae23b59a1d2b0969683d1ad7e5815e38">momentum::StateSequenceErrorFunctionT::kOrientationWeight</a></div><div class="ttdeci">static constexpr T kOrientationWeight</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8h_source.html#l00078">state_sequence_error_function.h:78</a></div></div>
+<div class="ttc" id="anamespaceEigen_html"><div class="ttname"><a href="namespaceEigen.html">Eigen</a></div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00035">types.h:35</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a15524ec60f1a3e6d0ec96db0eaeac0b1"><div class="ttname"><a href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">momentum::VectorX</a></div><div class="ttdeci">Vector&lt; T, Dynamic &gt; VectorX</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00199">types.h:199</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
 <div class="ttc" id="asequence__error__function_8h_html"><div class="ttname"><a href="sequence__error__function_8h.html">sequence_error_function.h</a></div></div>
 <div class="ttc" id="askeleton__state_8h_html"><div class="ttname"><a href="skeleton__state_8h.html">skeleton_state.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="state__sequence__error__function_8h.html">state_sequence_error_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

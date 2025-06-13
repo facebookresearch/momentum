@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structmomentum_1_1JointStateT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1JointStateT.html">JointStateT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
@@ -222,6 +238,8 @@ struct momentum::JointStateT&lt; T &gt;</div><p>Represents the state of a joint 
 <li>S is the uniform scale factor</li>
 </ul>
 <p>Each joint has 7 parameters: 3 translation, 3 rotation, and 1 scale. </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00030">30</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="acad541805e3010d6dbc47735a4189912" name="acad541805e3010d6dbc47735a4189912"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acad541805e3010d6dbc47735a4189912">&#9670;&#160;</a></span>Affine3</h2>
@@ -236,6 +254,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00031">31</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
 
 </div>
 </div>
@@ -278,6 +298,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The derivative vector </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8cpp_source.html#l00071">71</a> of file <a class="el" href="joint__state_8cpp_source.html">joint_state.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <a id="a4b321c718eee074243a744050385704b" name="a4b321c718eee074243a744050385704b"></a>
@@ -315,6 +339,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The derivative vector </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8cpp_source.html#l00083">83</a> of file <a class="el" href="joint__state_8cpp_source.html">joint_state.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a0d8f3870ddc01b38aed0d5ca8dbcea93" name="a0d8f3870ddc01b38aed0d5ca8dbcea93"></a>
@@ -343,6 +369,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The derivative vector </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8cpp_source.html#l00077">77</a> of file <a class="el" href="joint__state_8cpp_source.html">joint_state.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -373,6 +403,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the joint's local rotation quaternion (mutable) </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00108">108</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00039">momentum::JointStateT&lt; T &gt;::localTransform</a>.</p>
+
 </div>
 </div>
 <a id="a1de7881664fa00f5cf8624e3bfe88fe6" name="a1de7881664fa00f5cf8624e3bfe88fe6"></a>
@@ -402,6 +436,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the joint's local rotation quaternion. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00103">103</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00039">momentum::JointStateT&lt; T &gt;::localTransform</a>.</p>
+
 </div>
 </div>
 <a id="a74b1881fc192ff63c194efcd75861f22" name="a74b1881fc192ff63c194efcd75861f22"></a>
@@ -430,6 +468,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the joint's local scale factor (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00130">130</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00039">momentum::JointStateT&lt; T &gt;::localTransform</a>.</p>
 
 </div>
 </div>
@@ -461,6 +503,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Access the joint's local scale factor. </p>
 <p>This scale propagates to all descendant joints </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00125">125</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00039">momentum::JointStateT&lt; T &gt;::localTransform</a>.</p>
+
 </div>
 </div>
 <a id="aa0e1fe1022a0b433a79f04a79b127e61" name="aa0e1fe1022a0b433a79f04a79b127e61"></a>
@@ -489,6 +535,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the joint's local translation vector (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00118">118</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00039">momentum::JointStateT&lt; T &gt;::localTransform</a>.</p>
 
 </div>
 </div>
@@ -519,6 +569,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the joint's local translation vector. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00113">113</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00039">momentum::JointStateT&lt; T &gt;::localTransform</a>.</p>
+
 </div>
 </div>
 <a id="a2fe41e549fbbc250ba68b017f430765d" name="a2fe41e549fbbc250ba68b017f430765d"></a>
@@ -547,6 +601,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the W component of the global rotation quaternion (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00190">190</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -577,6 +635,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the W component of the global rotation quaternion. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00185">185</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="a97136baf01f91f637e839dd0671109f0" name="a97136baf01f91f637e839dd0671109f0"></a>
@@ -605,6 +667,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the X component of the global rotation quaternion (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00200">200</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -635,6 +701,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the X component of the global rotation quaternion. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00195">195</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="a288b7b1616a864590487c0764fa357a8" name="a288b7b1616a864590487c0764fa357a8"></a>
@@ -663,6 +733,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the Y component of the global rotation quaternion (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00210">210</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -693,6 +767,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the Y component of the global rotation quaternion. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00205">205</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="a3420bde80563521a8b292f69e1b0ca8f" name="a3420bde80563521a8b292f69e1b0ca8f"></a>
@@ -721,6 +799,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the Z component of the global rotation quaternion (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00220">220</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -751,6 +833,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the Z component of the global rotation quaternion. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00215">215</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="afd7fa174154b8f6010107e6768e6c015" name="afd7fa174154b8f6010107e6768e6c015"></a>
@@ -779,6 +865,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the joint's global rotation quaternion (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00140">140</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -809,6 +899,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the joint's global rotation quaternion. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00135">135</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="aa9efc24358b291520ddffb8e1cb74321" name="aa9efc24358b291520ddffb8e1cb74321"></a>
@@ -837,6 +931,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the joint's global scale factor (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00232">232</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -867,6 +965,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the joint's global scale factor. </p>
 <p>This is the cumulative scale from all parent joints </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00227">227</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -903,6 +1005,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </table>
   </dd>
 </dl>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8cpp_source.html#l00089">89</a> of file <a class="el" href="joint__state_8cpp_source.html">joint_state.cpp</a>.</p>
 
 </div>
 </div>
@@ -966,6 +1070,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8cpp_source.html#l00023">23</a> of file <a class="el" href="joint__state_8cpp_source.html">joint_state.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8cpp_source.html#l00068">momentum::TransformT&lt; T &gt;::toAffine3()</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
+
 </div>
 </div>
 <a id="a285362e20832c9f2bc54e7bb7614dcfb" name="a285362e20832c9f2bc54e7bb7614dcfb"></a>
@@ -994,6 +1102,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the joint's global position vector (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00150">150</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -1024,6 +1136,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the joint's global position vector. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00145">145</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="a290b76ba6f633658cbe5444e192129d3" name="a290b76ba6f633658cbe5444e192129d3"></a>
@@ -1052,6 +1168,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the X component of the global position (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00160">160</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -1082,6 +1202,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the X component of the global position. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00155">155</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="a52289d51eaf9e8321c6d011c6e3ec503" name="a52289d51eaf9e8321c6d011c6e3ec503"></a>
@@ -1110,6 +1234,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the Y component of the global position (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00170">170</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -1140,6 +1268,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the Y component of the global position. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00165">165</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <a id="accedcc0c6081fa5c091c498ad5670b1c" name="accedcc0c6081fa5c091c498ad5670b1c"></a>
@@ -1168,6 +1300,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Access the Z component of the global position (mutable) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00180">180</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -1198,6 +1334,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Access the Z component of the global position. </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00175">175</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">References <a class="el" href="joint__state_8h_source.html#l00044">momentum::JointStateT&lt; T &gt;::transform</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -1218,6 +1358,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Indicates if derivative data needs recomputation. </p>
 <p>When true, derivative methods should not be called as they may return invalid results </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00059">59</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
 </div>
 </div>
 <a id="a13bbf4421722969c75b02b1f52173310" name="a13bbf4421722969c75b02b1f52173310"></a>
@@ -1236,6 +1378,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Local transformation relative to parent joint. </p>
 <p>Defined by the joint parameters (translation, rotation, scale) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00039">39</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="joint__state_8h_source.html#l00108">momentum::JointStateT&lt; T &gt;::localRotation()</a>, <a class="el" href="joint__state_8h_source.html#l00103">momentum::JointStateT&lt; T &gt;::localRotation()</a>, <a class="el" href="joint__state_8h_source.html#l00130">momentum::JointStateT&lt; T &gt;::localScale()</a>, <a class="el" href="joint__state_8h_source.html#l00125">momentum::JointStateT&lt; T &gt;::localScale()</a>, <a class="el" href="joint__state_8h_source.html#l00118">momentum::JointStateT&lt; T &gt;::localTranslation()</a>, and <a class="el" href="joint__state_8h_source.html#l00113">momentum::JointStateT&lt; T &gt;::localTranslation()</a>.</p>
 
 </div>
 </div>
@@ -1256,6 +1402,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Rotation axes in global space. </p>
 <p>Each column represents one rotation axis (X, Y, Z) in global coordinates </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00054">54</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
 </div>
 </div>
 <a id="a4cc644cb9318738ff92a2f52f44fa9c3" name="a4cc644cb9318738ff92a2f52f44fa9c3"></a>
@@ -1275,6 +1423,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Global transformation in world space. </p>
 <p>Combines parent transformations with local transformation </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00044">44</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="joint__state_8h_source.html#l00190">momentum::JointStateT&lt; T &gt;::quatW()</a>, <a class="el" href="joint__state_8h_source.html#l00185">momentum::JointStateT&lt; T &gt;::quatW()</a>, <a class="el" href="joint__state_8h_source.html#l00200">momentum::JointStateT&lt; T &gt;::quatX()</a>, <a class="el" href="joint__state_8h_source.html#l00195">momentum::JointStateT&lt; T &gt;::quatX()</a>, <a class="el" href="joint__state_8h_source.html#l00210">momentum::JointStateT&lt; T &gt;::quatY()</a>, <a class="el" href="joint__state_8h_source.html#l00205">momentum::JointStateT&lt; T &gt;::quatY()</a>, <a class="el" href="joint__state_8h_source.html#l00220">momentum::JointStateT&lt; T &gt;::quatZ()</a>, <a class="el" href="joint__state_8h_source.html#l00215">momentum::JointStateT&lt; T &gt;::quatZ()</a>, <a class="el" href="joint__state_8h_source.html#l00140">momentum::JointStateT&lt; T &gt;::rotation()</a>, <a class="el" href="joint__state_8h_source.html#l00135">momentum::JointStateT&lt; T &gt;::rotation()</a>, <a class="el" href="joint__state_8h_source.html#l00232">momentum::JointStateT&lt; T &gt;::scale()</a>, <a class="el" href="joint__state_8h_source.html#l00227">momentum::JointStateT&lt; T &gt;::scale()</a>, <a class="el" href="joint__state_8h_source.html#l00150">momentum::JointStateT&lt; T &gt;::translation()</a>, <a class="el" href="joint__state_8h_source.html#l00145">momentum::JointStateT&lt; T &gt;::translation()</a>, <a class="el" href="joint__state_8h_source.html#l00160">momentum::JointStateT&lt; T &gt;::x()</a>, <a class="el" href="joint__state_8h_source.html#l00155">momentum::JointStateT&lt; T &gt;::x()</a>, <a class="el" href="joint__state_8h_source.html#l00170">momentum::JointStateT&lt; T &gt;::y()</a>, <a class="el" href="joint__state_8h_source.html#l00165">momentum::JointStateT&lt; T &gt;::y()</a>, <a class="el" href="joint__state_8h_source.html#l00180">momentum::JointStateT&lt; T &gt;::z()</a>, and <a class="el" href="joint__state_8h_source.html#l00175">momentum::JointStateT&lt; T &gt;::z()</a>.</p>
+
 </div>
 </div>
 <a id="ad8fc503cd6b04bc5c5f633ad3f1d0339" name="ad8fc503cd6b04bc5c5f633ad3f1d0339"></a>
@@ -1292,6 +1444,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Complete transformation matrix from local to global space (legacy, to be removed) </p>
+
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00034">34</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
 
 </div>
 </div>
@@ -1312,17 +1466,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Translation axes in global space. </p>
 <p>Each column represents one translation axis (X, Y, Z) in global coordinates </p>
 
+<p class="definition">Definition at line <a class="el" href="joint__state_8h_source.html#l00049">49</a> of file <a class="el" href="joint__state_8h_source.html">joint_state.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>character/<a class="el" href="character_2fwd_8h_source.html">fwd.h</a></li>
 <li>character/<a class="el" href="joint__state_8h_source.html">joint_state.h</a></li>
-<li>character/<a class="el" href="joint__state_8cpp.html">joint_state.cpp</a></li>
+<li>character/<a class="el" href="joint__state_8cpp_source.html">joint_state.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1JointStateT.html">JointStateT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('mesh_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">mesh.h</div></div>
 </div><!--header-->
@@ -129,25 +145,29 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="amath_2fwd_8h_html"><div class="ttname"><a href="math_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html"><div class="ttname"><a href="structmomentum_1_1MeshT.html">momentum::MeshT</a></div><div class="ttdoc">A generic mesh representation with support for vertices, faces, lines, and texture coordinates.</div><div class="ttdef"><b>Definition</b> mesh.h:20</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a067360df2b2d1f9a55c7c34c1a8f2390"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a067360df2b2d1f9a55c7c34c1a8f2390">momentum::MeshT::texcoord_faces</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; texcoord_faces</div><div class="ttdoc">List of texture coordinate indices per face Maps each face to its corresponding texture coordinates.</div><div class="ttdef"><b>Definition</b> mesh.h:53</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a229f2cdf3a2c5de22c5280ea785642f9"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a229f2cdf3a2c5de22c5280ea785642f9">momentum::MeshT::texcoord_lines</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int32_t &gt; &gt; texcoord_lines</div><div class="ttdoc">List of texture coordinate indices per line Maps each line to its corresponding texture coordinates.</div><div class="ttdef"><b>Definition</b> mesh.h:57</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a5785a167dd2a949c45c462a7de893ef0"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a5785a167dd2a949c45c462a7de893ef0">momentum::MeshT::texcoords</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector2f &gt; texcoords</div><div class="ttdoc">List of texture coordinates (UV coordinates).</div><div class="ttdef"><b>Definition</b> mesh.h:49</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a5ffcac1bc7d2ba548fde602e05c07c67"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a5ffcac1bc7d2ba548fde602e05c07c67">momentum::MeshT::updateNormals</a></div><div class="ttdeci">void updateNormals()</div><div class="ttdoc">Compute vertex normals by averaging connected face normals.</div><div class="ttdef"><b>Definition</b> mesh.cpp:17</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a69237a67fd0124f60fe21f7587322fae"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a69237a67fd0124f60fe21f7587322fae">momentum::MeshT::confidence</a></div><div class="ttdeci">std::vector&lt; T &gt; confidence</div><div class="ttdoc">List of per-vertex confidence values Higher values typically indicate higher confidence in the vertex...</div><div class="ttdef"><b>Definition</b> mesh.h:39</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a73d406702a8b190efeb8cde984b01c88"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a73d406702a8b190efeb8cde984b01c88">momentum::MeshT::vertices</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; vertices</div><div class="ttdoc">List of mesh vertices in 3D space.</div><div class="ttdef"><b>Definition</b> mesh.h:22</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_a9370e7b956ccb6eb93ff5c7cb285fb52"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a9370e7b956ccb6eb93ff5c7cb285fb52">momentum::MeshT::normals</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; normals</div><div class="ttdoc">List of vertex normals (same size as vertices when computed)</div><div class="ttdef"><b>Definition</b> mesh.h:25</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_aa198a7be95aeca6c072129b0188114d7"><div class="ttname"><a href="structmomentum_1_1MeshT.html#aa198a7be95aeca6c072129b0188114d7">momentum::MeshT::lines</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int32_t &gt; &gt; lines</div><div class="ttdoc">List of polylines defined by vertex indices Each inner vector represents a single polyline.</div><div class="ttdef"><b>Definition</b> mesh.h:32</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_ab64f378ae3a6c1d656b92bce9d6c124c"><div class="ttname"><a href="structmomentum_1_1MeshT.html#ab64f378ae3a6c1d656b92bce9d6c124c">momentum::MeshT::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset the mesh by clearing all data.</div><div class="ttdef"><b>Definition</b> mesh.cpp:76</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_acf270a428de37b54d65a3c03d5e83524"><div class="ttname"><a href="structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524">momentum::MeshT::faces</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; faces</div><div class="ttdoc">List of triangular faces defined by vertex indices.</div><div class="ttdef"><b>Definition</b> mesh.h:28</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_ad28cd022ebedc1d8a0877227a67eb0bf"><div class="ttname"><a href="structmomentum_1_1MeshT.html#ad28cd022ebedc1d8a0877227a67eb0bf">momentum::MeshT::colors</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3b &gt; colors</div><div class="ttdoc">List of per-vertex RGB colors (0-255 for each channel)</div><div class="ttdef"><b>Definition</b> mesh.h:35</div></div>
-<div class="ttc" id="astructmomentum_1_1MeshT_html_af988c9e94391f69cf3ff4daf971b8e5a"><div class="ttname"><a href="structmomentum_1_1MeshT.html#af988c9e94391f69cf3ff4daf971b8e5a">momentum::MeshT::cast</a></div><div class="ttdeci">MeshT&lt; T2 &gt; cast() const</div><div class="ttdoc">Cast the mesh to a different scalar type.</div><div class="ttdef"><b>Definition</b> mesh.cpp:61</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html"><div class="ttname"><a href="structmomentum_1_1MeshT.html">momentum::MeshT</a></div><div class="ttdoc">A generic mesh representation with support for vertices, faces, lines, and texture coordinates.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00020">mesh.h:20</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a067360df2b2d1f9a55c7c34c1a8f2390"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a067360df2b2d1f9a55c7c34c1a8f2390">momentum::MeshT::texcoord_faces</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; texcoord_faces</div><div class="ttdoc">List of texture coordinate indices per face Maps each face to its corresponding texture coordinates.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00053">mesh.h:53</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a229f2cdf3a2c5de22c5280ea785642f9"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a229f2cdf3a2c5de22c5280ea785642f9">momentum::MeshT::texcoord_lines</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int32_t &gt; &gt; texcoord_lines</div><div class="ttdoc">List of texture coordinate indices per line Maps each line to its corresponding texture coordinates.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00057">mesh.h:57</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a5785a167dd2a949c45c462a7de893ef0"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a5785a167dd2a949c45c462a7de893ef0">momentum::MeshT::texcoords</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector2f &gt; texcoords</div><div class="ttdoc">List of texture coordinates (UV coordinates).</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00049">mesh.h:49</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a5ffcac1bc7d2ba548fde602e05c07c67"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a5ffcac1bc7d2ba548fde602e05c07c67">momentum::MeshT::updateNormals</a></div><div class="ttdeci">void updateNormals()</div><div class="ttdoc">Compute vertex normals by averaging connected face normals.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8cpp_source.html#l00017">mesh.cpp:17</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a69237a67fd0124f60fe21f7587322fae"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a69237a67fd0124f60fe21f7587322fae">momentum::MeshT::confidence</a></div><div class="ttdeci">std::vector&lt; T &gt; confidence</div><div class="ttdoc">List of per-vertex confidence values Higher values typically indicate higher confidence in the vertex...</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00039">mesh.h:39</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a73d406702a8b190efeb8cde984b01c88"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a73d406702a8b190efeb8cde984b01c88">momentum::MeshT::vertices</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; vertices</div><div class="ttdoc">List of mesh vertices in 3D space.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00022">mesh.h:22</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_a9370e7b956ccb6eb93ff5c7cb285fb52"><div class="ttname"><a href="structmomentum_1_1MeshT.html#a9370e7b956ccb6eb93ff5c7cb285fb52">momentum::MeshT::normals</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; normals</div><div class="ttdoc">List of vertex normals (same size as vertices when computed)</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00025">mesh.h:25</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_aa198a7be95aeca6c072129b0188114d7"><div class="ttname"><a href="structmomentum_1_1MeshT.html#aa198a7be95aeca6c072129b0188114d7">momentum::MeshT::lines</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int32_t &gt; &gt; lines</div><div class="ttdoc">List of polylines defined by vertex indices Each inner vector represents a single polyline.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00032">mesh.h:32</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_ab64f378ae3a6c1d656b92bce9d6c124c"><div class="ttname"><a href="structmomentum_1_1MeshT.html#ab64f378ae3a6c1d656b92bce9d6c124c">momentum::MeshT::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset the mesh by clearing all data.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8cpp_source.html#l00076">mesh.cpp:76</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_acf270a428de37b54d65a3c03d5e83524"><div class="ttname"><a href="structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524">momentum::MeshT::faces</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; faces</div><div class="ttdoc">List of triangular faces defined by vertex indices.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00028">mesh.h:28</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_ad28cd022ebedc1d8a0877227a67eb0bf"><div class="ttname"><a href="structmomentum_1_1MeshT.html#ad28cd022ebedc1d8a0877227a67eb0bf">momentum::MeshT::colors</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3b &gt; colors</div><div class="ttdoc">List of per-vertex RGB colors (0-255 for each channel)</div><div class="ttdef"><b>Definition</b> <a href="mesh_8h_source.html#l00035">mesh.h:35</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MeshT_html_af988c9e94391f69cf3ff4daf971b8e5a"><div class="ttname"><a href="structmomentum_1_1MeshT.html#af988c9e94391f69cf3ff4daf971b8e5a">momentum::MeshT::cast</a></div><div class="ttdeci">MeshT&lt; T2 &gt; cast() const</div><div class="ttdoc">Cast the mesh to a different scalar type.</div><div class="ttdef"><b>Definition</b> <a href="mesh_8cpp_source.html#l00061">mesh.cpp:61</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li><li class="navelem"><a class="el" href="mesh_8h.html">mesh.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

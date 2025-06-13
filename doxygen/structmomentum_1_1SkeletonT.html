@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structmomentum_1_1SkeletonT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SkeletonT.html">SkeletonT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -123,6 +139,8 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 struct momentum::SkeletonT&lt; T &gt;</div><p>The skeletal structure of a momentum Character. </p>
+
+<p class="definition">Definition at line <a class="el" href="skeleton_8h_source.html#l00022">22</a> of file <a class="el" href="skeleton_8h_source.html">skeleton.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6eb641fcf2e704fed84c1cc6a3aa953a" name="a6eb641fcf2e704fed84c1cc6a3aa953a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6eb641fcf2e704fed84c1cc6a3aa953a">&#9670;&#160;</a></span>SkeletonT() <span class="overload">[1/2]</span></h2>
@@ -152,6 +170,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Constructor that validates joint hierarchy. </p>
 <p>Ensures parent indices are valid (parent &lt; child index or kInvalidIndex). </p>
+
+<p class="definition">Definition at line <a class="el" href="skeleton_8cpp_source.html#l00016">16</a> of file <a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -213,6 +235,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Converts the skeleton to use a different scalar type. </p>
 <p>Returns a copy of this skeleton with all numeric values converted to type U. </p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton_8h_source.html#l00060">60</a> of file <a class="el" href="skeleton_8h_source.html">skeleton.h</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>.</p>
+
 </div>
 </div>
 <a id="a40a202cffa13ff0fc09ea8481c834d4a" name="a40a202cffa13ff0fc09ea8481c834d4a"></a>
@@ -245,6 +271,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Finds the closest common ancestor of two joints in the hierarchy. </p>
 <p>Returns the index of the joint that is the lowest common ancestor in the hierarchy for the two specified joints. </p>
+
+<p class="definition">Definition at line <a class="el" href="skeleton_8cpp_source.html#l00085">85</a> of file <a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -291,6 +321,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="skeleton_8cpp_source.html#l00044">44</a> of file <a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="exception_8h_source.html#l00039">MT_THROW_IF_T</a>.</p>
+
 </div>
 </div>
 <a id="a4527772cd814be6f2bd6d742234f251f" name="a4527772cd814be6f2bd6d742234f251f"></a>
@@ -313,6 +347,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the index of a joint with the given name, or kInvalidIndex if not found. </p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton_8cpp_source.html#l00024">24</a> of file <a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="pose__shape__io_8cpp_source.html#l00018">momentum::loadPoseShape()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00170">momentum::mapMotionToCharacter()</a>, <a class="el" href="json__utils_8cpp_source.html#l00266">momentum::parameterLimitsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00097">momentum::parameterTransformFromJson()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00216">momentum::parseParameterTransform()</a>.</p>
+
 </div>
 </div>
 <a id="ac9aaec7e80183040d9916ea4d9e91910" name="ac9aaec7e80183040d9916ea4d9e91910"></a>
@@ -333,6 +371,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Returns a vector containing all joint names in the skeleton. </p>
+
+<p class="definition">Definition at line <a class="el" href="skeleton_8cpp_source.html#l00034">34</a> of file <a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="logger_8cpp_source.html#l00068">momentum::logJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00097">momentum::parameterTransformFromJson()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00184">momentum::saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -367,6 +409,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Determines if one joint is an ancestor of another in the hierarchy. </p>
 <p>Returns true if ancestorJointId is an ancestor of jointId. A joint is considered to be its own ancestor (isAncestor(id, id) returns true). </p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton_8cpp_source.html#l00071">71</a> of file <a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -386,17 +432,25 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>The list of joints in this skeleton. </p>
 
+<p class="definition">Definition at line <a class="el" href="skeleton_8h_source.html#l00024">24</a> of file <a class="el" href="skeleton_8h_source.html">skeleton.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00163">momentum::CharacterT&lt; T &gt;::activeJointsToParameters()</a>, <a class="el" href="character_8cpp_source.html#l00669">momentum::CharacterT&lt; float &gt;::bakeBlendShape()</a>, <a class="el" href="character_8cpp_source.html#l00543">momentum::CharacterT&lt; T &gt;::bindPose()</a>, <a class="el" href="skeleton_8h_source.html#l00060">momentum::SkeletonT&lt; T &gt;::cast()</a>, <a class="el" href="character_8cpp_source.html#l00028">momentum::CharacterT&lt; T &gt;::CharacterT()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00149">momentum::extractLocatorsFromCharacter()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, <a class="el" href="character_8cpp_source.html#l00551">momentum::CharacterT&lt; T &gt;::initParameterTransform()</a>, <a class="el" href="locator__io_8cpp_source.html#l00108">momentum::loadLocatorsFromBuffer()</a>, <a class="el" href="pose__shape__io_8cpp_source.html#l00018">momentum::loadPoseShape()</a>, <a class="el" href="logger_8cpp_source.html#l00068">momentum::logJoints()</a>, <a class="el" href="gltf__io_8cpp_source.html#l01085">momentum::makeCharacterDocument()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00170">momentum::mapMotionToCharacter()</a>, <a class="el" href="json__utils_8cpp_source.html#l00183">momentum::parameterLimitsToJson()</a>, <a class="el" href="character_8cpp_source.html#l00137">momentum::CharacterT&lt; T &gt;::parametersToActiveJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00097">momentum::parameterTransformFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00077">momentum::parameterTransformToJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00216">momentum::parseParameterTransform()</a>, <a class="el" href="character__utility_8cpp_source.html#l00555">momentum::removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00394">momentum::replaceSkeletonHierarchy()</a>, <a class="el" href="character_8cpp_source.html#l00557">momentum::CharacterT&lt; T &gt;::resetJointMap()</a>, <a class="el" href="locator__io_8cpp_source.html#l00215">momentum::saveLocators()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="character_8cpp_source.html#l00195">momentum::CharacterT&lt; T &gt;::simplifySkeleton()</a>, <a class="el" href="skeleton_8cpp_source.html#l00016">momentum::SkeletonT&lt; T &gt;::SkeletonT()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00019">momentum::StateErrorFunctionT&lt; T &gt;::StateErrorFunctionT()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00019">momentum::StateSequenceErrorFunctionT&lt; T &gt;::StateSequenceErrorFunctionT()</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00693">momentum::writeParameterLimits()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>character/<a class="el" href="character_2fwd_8h_source.html">fwd.h</a></li>
 <li>character/<a class="el" href="skeleton_8h_source.html">skeleton.h</a></li>
-<li>character/<a class="el" href="skeleton_8cpp.html">skeleton.cpp</a></li>
+<li>character/<a class="el" href="skeleton_8cpp_source.html">skeleton.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SkeletonT.html">SkeletonT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

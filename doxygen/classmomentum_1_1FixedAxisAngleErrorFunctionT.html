@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1FixedAxisAngleErrorFunctionT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1FixedAxisAngleErrorFunctionT.html">FixedAxisAngleErrorFunctionT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -87,9 +103,11 @@ $(function() {
  <a href="classmomentum_1_1FixedAxisAngleErrorFunctionT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="fixed__axis__error__function_8h_source.html">fixed_axis_error_function.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::FixedAxisAngleErrorFunctionT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::FixedAxisAngleErrorFunctionT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1FixedAxisAngleErrorFunctionT.png" usemap="#momentum::FixedAxisAngleErrorFunctionT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::FixedAxisAngleErrorFunctionT_3C_20T_20_3E_map" name="momentum::FixedAxisAngleErrorFunctionT_3C_20T_20_3E_map">
@@ -217,6 +235,8 @@ Additional Inherited Members</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 class momentum::FixedAxisAngleErrorFunctionT&lt; T &gt;</div><p>Angle: compute the angle between the two axis using acosine of their dot product. </p>
+
+<p class="definition">Definition at line <a class="el" href="fixed__axis__error__function_8h_source.html#l00106">106</a> of file <a class="el" href="fixed__axis__error__function_8h_source.html">fixed_axis_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1b88e3e6234167480756edca0bd606ec" name="a1b88e3e6234167480756edca0bd606ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1b88e3e6234167480756edca0bd606ec">&#9670;&#160;</a></span>FixedAxisAngleErrorFunctionT() <span class="overload">[1/2]</span></h2>
@@ -266,6 +286,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="fixed__axis__error__function_8h_source.html#l00109">109</a> of file <a class="el" href="fixed__axis__error__function_8h_source.html">fixed_axis_error_function.h</a>.</p>
+
 </div>
 </div>
 <a id="a371321a08a295b185bc4017bc69ad186" name="a371321a08a295b185bc4017bc69ad186"></a>
@@ -309,6 +331,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="fixed__axis__error__function_8h_source.html#l00116">116</a> of file <a class="el" href="fixed__axis__error__function_8h_source.html">fixed_axis_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -367,6 +391,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="fixed__axis__error__function_8cpp_source.html#l00058">58</a> of file <a class="el" href="fixed__axis__error__function_8cpp_source.html">fixed_axis_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="simd_8h_source.html#l00092">momentum::dot()</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -395,16 +423,22 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Default constant weight in MarkerErrorFunction. </p>
 <p>This can be used for backwards compatibility in <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#ae8c207dc49349a8dcbf6134f4b5d4cc6">setWeight()</a>. </p>
 
+<p class="definition">Definition at line <a class="el" href="fixed__axis__error__function_8h_source.html#l00128">128</a> of file <a class="el" href="fixed__axis__error__function_8h_source.html">fixed_axis_error_function.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>character_solver/<a class="el" href="fixed__axis__error__function_8h_source.html">fixed_axis_error_function.h</a></li>
-<li>character_solver/<a class="el" href="fixed__axis__error__function_8cpp.html">fixed_axis_error_function.cpp</a></li>
+<li>character_solver/<a class="el" href="fixed__axis__error__function_8cpp_source.html">fixed_axis_error_function.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1FixedAxisAngleErrorFunctionT.html">FixedAxisAngleErrorFunctionT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

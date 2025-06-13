@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structmomentum_1_1BlendShapeBase.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -86,9 +102,11 @@ $(function() {
  <a href="structmomentum_1_1BlendShapeBase.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::BlendShapeBase:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::BlendShapeBase:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="structmomentum_1_1BlendShapeBase.png" usemap="#momentum::BlendShapeBase_map" alt=""/>
   <map id="momentum::BlendShapeBase_map" name="momentum::BlendShapeBase_map">
@@ -130,6 +148,8 @@ Protected Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Skinning class that manages blend shape vectors/offsets. </p>
 <p>Used to model facial expressions and potentially other deformations such as pose-dependent shape changes </p>
+
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00019">19</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae682db07693f8f813b77d4ef8927bb9d" name="ae682db07693f8f813b77d4ef8927bb9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae682db07693f8f813b77d4ef8927bb9d">&#9670;&#160;</a></span>BlendShapeBase() <span class="overload">[1/2]</span></h2>
@@ -153,6 +173,8 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00021">21</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
 
 </div>
 </div>
@@ -188,6 +210,8 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8cpp_source.html#l00033">33</a> of file <a class="el" href="blend__shape__base_8cpp_source.html">blend_shape_base.cpp</a>.</p>
 
 </div>
 </div>
@@ -235,6 +259,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8cpp_source.html#l00025">25</a> of file <a class="el" href="blend__shape__base_8cpp_source.html">blend_shape_base.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__base_8cpp_source.html#l00015">computeDeltas()</a>.</p>
+
 </div>
 </div>
 <a id="a5daedb903806c0ee7f4681904e7e8e72" name="a5daedb903806c0ee7f4681904e7e8e72"></a>
@@ -270,6 +298,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Combined vertex offsets </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8cpp_source.html#l00015">15</a> of file <a class="el" href="blend__shape__base_8cpp_source.html">blend_shape_base.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="blend__shape__base_8h_source.html#l00067">shapeVectors_</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="blend__shape__base_8cpp_source.html#l00025">applyDeltas()</a>.</p>
+
 </div>
 </div>
 <a id="a339f2293f1c4ba1dbc93f43ce7389513" name="a339f2293f1c4ba1dbc93f43ce7389513"></a>
@@ -294,6 +328,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00032">32</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__base_8h_source.html#l00067">shapeVectors_</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="blend__shape_8cpp_source.html#l00101">momentum::BlendShape::isApprox()</a>, and <a class="el" href="blend__shape__io_8cpp_source.html#l00128">momentum::saveBlendShape()</a>.</p>
 
 </div>
 </div>
@@ -321,6 +361,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Returns number of vertices (rows/3) </p>
+
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00062">62</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__base_8h_source.html#l00067">shapeVectors_</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="blend__shape__base_8cpp_source.html#l00036">setShapeVector()</a>.</p>
 
 </div>
 </div>
@@ -357,6 +403,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8cpp_source.html#l00036">36</a> of file <a class="el" href="blend__shape__base_8cpp_source.html">blend_shape_base.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__base_8h_source.html#l00062">modelSize()</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="blend__shape__base_8h_source.html#l00067">shapeVectors_</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="blend__shape_8cpp_source.html#l00094">momentum::BlendShape::setShapeVector()</a>.</p>
+
 </div>
 </div>
 <a id="ad6a62ecf44f4868ca345ff0e8dafa33a" name="ad6a62ecf44f4868ca345ff0e8dafa33a"></a>
@@ -389,6 +441,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00028">28</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__base_8h_source.html#l00067">shapeVectors_</a>.</p>
+
 </div>
 </div>
 <a id="ad68e00ff60adce38bed53e1dbe8cedd9" name="ad68e00ff60adce38bed53e1dbe8cedd9"></a>
@@ -414,6 +470,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00057">57</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
+
+<p class="reference">References <a class="el" href="blend__shape__base_8h_source.html#l00067">shapeVectors_</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -437,16 +497,24 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="blend__shape__base_8h_source.html#l00067">67</a> of file <a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="blend__shape__base_8cpp_source.html#l00015">computeDeltas()</a>, <a class="el" href="blend__shape_8cpp_source.html#l00023">momentum::BlendShape::computeShape()</a>, <a class="el" href="blend__shape_8cpp_source.html#l00039">momentum::BlendShape::estimateCoefficients()</a>, <a class="el" href="blend__shape__base_8h_source.html#l00032">getShapeVectors()</a>, <a class="el" href="blend__shape_8cpp_source.html#l00101">momentum::BlendShape::isApprox()</a>, <a class="el" href="blend__shape__base_8h_source.html#l00062">modelSize()</a>, <a class="el" href="blend__shape__base_8cpp_source.html#l00036">setShapeVector()</a>, <a class="el" href="blend__shape__base_8h_source.html#l00028">setShapeVectors()</a>, and <a class="el" href="blend__shape__base_8h_source.html#l00057">shapeSize()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>character/<a class="el" href="blend__shape__base_8h_source.html">blend_shape_base.h</a></li>
-<li>character/<a class="el" href="blend__shape__base_8cpp.html">blend_shape_base.cpp</a></li>
+<li>character/<a class="el" href="blend__shape__base_8cpp_source.html">blend_shape_base.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

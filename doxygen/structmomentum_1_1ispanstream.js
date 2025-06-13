@@ -1,0 +1,1 @@
+var structmomentum_1_1ispanstream=[["ispanstream","structmomentum_1_1ispanstream.html#aec2b13be2310814247f6461b580054fb",null],["~ispanstream","structmomentum_1_1ispanstream.html#ad320f9b3d23fa0da0ddc701d13b9193d",null]];

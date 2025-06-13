@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('plane__error__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">plane_error_function.h</div></div>
 </div><!--header-->
@@ -168,34 +184,38 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>} <span class="comment">// namespace momentum</span></div>
-<div class="ttc" id="aclassmomentum_1_1ConstraintErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1ConstraintErrorFunctionT.html">momentum::ConstraintErrorFunctionT</a></div><div class="ttdoc">The ConstraintErrorFunction is a base class of a general form of constraint errors l = w * loss(f^2),...</div><div class="ttdef"><b>Definition</b> constraint_error_function.h:73</div></div>
-<div class="ttc" id="aclassmomentum_1_1GeneralizedLossT_html"><div class="ttname"><a href="classmomentum_1_1GeneralizedLossT.html">momentum::GeneralizedLossT</a></div><div class="ttdoc">Implementation of &quot;A General and Adaptive Robust Loss Function&quot; (https://arxiv.org/abs/1701....</div><div class="ttdef"><b>Definition</b> generalized_loss.h:21</div></div>
-<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html">momentum::PlaneErrorFunctionT</a></div><div class="ttdoc">The PlaneErrorFunction computes the point-on-plane error or point-in-half-plane error.</div><div class="ttdef"><b>Definition</b> plane_error_function.h:47</div></div>
-<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_a11608b9d576330a9c747e23adec741f0"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#a11608b9d576330a9c747e23adec741f0">momentum::PlaneErrorFunctionT::PlaneErrorFunctionT</a></div><div class="ttdeci">PlaneErrorFunctionT(const Character &amp;character, const bool above=false, const T &amp;lossAlpha=GeneralizedLossT&lt; T &gt;::kL2, const T &amp;lossC=T(1))</div><div class="ttdoc">A convenience api where character contains info of the skeleton and parameter transform.</div><div class="ttdef"><b>Definition</b> plane_error_function.h:73</div></div>
-<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_aa84d12dd31054a2c719ac9b7abdeb0a6"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#aa84d12dd31054a2c719ac9b7abdeb0a6">momentum::PlaneErrorFunctionT::kLegacyWeight</a></div><div class="ttdeci">static constexpr T kLegacyWeight</div><div class="ttdoc">Default constant weight in MarkerErrorFunction.</div><div class="ttdef"><b>Definition</b> plane_error_function.h:87</div></div>
-<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_aefee2e7f417dacca0b5aa074633f6ef5"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#aefee2e7f417dacca0b5aa074633f6ef5">momentum::PlaneErrorFunctionT::PlaneErrorFunctionT</a></div><div class="ttdeci">PlaneErrorFunctionT(const Skeleton &amp;skel, const ParameterTransform &amp;pt, const bool above=false, const T &amp;lossAlpha=GeneralizedLossT&lt; T &gt;::kL2, const T &amp;lossC=T(1))</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> plane_error_function.h:57</div></div>
-<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_af54e4a816dd499375d7fc1c775c893e2"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#af54e4a816dd499375d7fc1c775c893e2">momentum::PlaneErrorFunctionT::evalFunction</a></div><div class="ttdeci">void evalFunction(size_t constrIndex, const JointStateT&lt; T &gt; &amp;state, Vector&lt; T, 1 &gt; &amp;f, optional_ref&lt; std::array&lt; Vector3&lt; T &gt;, 1 &gt; &gt; v={}, optional_ref&lt; std::array&lt; Eigen::Matrix&lt; T, 1, 3 &gt;, 1 &gt; &gt;={}) const final</div><div class="ttdef"><b>Definition</b> plane_error_function.cpp:53</div></div>
+<div class="ttc" id="aclassmomentum_1_1ConstraintErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1ConstraintErrorFunctionT.html">momentum::ConstraintErrorFunctionT</a></div><div class="ttdoc">The ConstraintErrorFunction is a base class of a general form of constraint errors l = w * loss(f^2),...</div><div class="ttdef"><b>Definition</b> <a href="constraint__error__function_8h_source.html#l00073">constraint_error_function.h:73</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1GeneralizedLossT_html"><div class="ttname"><a href="classmomentum_1_1GeneralizedLossT.html">momentum::GeneralizedLossT</a></div><div class="ttdoc">Implementation of &quot;A General and Adaptive Robust Loss Function&quot; (https://arxiv.org/abs/1701....</div><div class="ttdef"><b>Definition</b> <a href="generalized__loss_8h_source.html#l00021">generalized_loss.h:21</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html">momentum::PlaneErrorFunctionT</a></div><div class="ttdoc">The PlaneErrorFunction computes the point-on-plane error or point-in-half-plane error.</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00047">plane_error_function.h:47</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_a11608b9d576330a9c747e23adec741f0"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#a11608b9d576330a9c747e23adec741f0">momentum::PlaneErrorFunctionT::PlaneErrorFunctionT</a></div><div class="ttdeci">PlaneErrorFunctionT(const Character &amp;character, const bool above=false, const T &amp;lossAlpha=GeneralizedLossT&lt; T &gt;::kL2, const T &amp;lossC=T(1))</div><div class="ttdoc">A convenience api where character contains info of the skeleton and parameter transform.</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00073">plane_error_function.h:73</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_aa84d12dd31054a2c719ac9b7abdeb0a6"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#aa84d12dd31054a2c719ac9b7abdeb0a6">momentum::PlaneErrorFunctionT::kLegacyWeight</a></div><div class="ttdeci">static constexpr T kLegacyWeight</div><div class="ttdoc">Default constant weight in MarkerErrorFunction.</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00087">plane_error_function.h:87</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_aefee2e7f417dacca0b5aa074633f6ef5"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#aefee2e7f417dacca0b5aa074633f6ef5">momentum::PlaneErrorFunctionT::PlaneErrorFunctionT</a></div><div class="ttdeci">PlaneErrorFunctionT(const Skeleton &amp;skel, const ParameterTransform &amp;pt, const bool above=false, const T &amp;lossAlpha=GeneralizedLossT&lt; T &gt;::kL2, const T &amp;lossC=T(1))</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00057">plane_error_function.h:57</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PlaneErrorFunctionT_html_af54e4a816dd499375d7fc1c775c893e2"><div class="ttname"><a href="classmomentum_1_1PlaneErrorFunctionT.html#af54e4a816dd499375d7fc1c775c893e2">momentum::PlaneErrorFunctionT::evalFunction</a></div><div class="ttdeci">void evalFunction(size_t constrIndex, const JointStateT&lt; T &gt; &amp;state, Vector&lt; T, 1 &gt; &amp;f, optional_ref&lt; std::array&lt; Vector3&lt; T &gt;, 1 &gt; &gt; v={}, optional_ref&lt; std::array&lt; Eigen::Matrix&lt; T, 1, 3 &gt;, 1 &gt; &gt;={}) const final</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8cpp_source.html#l00053">plane_error_function.cpp:53</a></div></div>
 <div class="ttc" id="aconstraint__error__function_8h_html"><div class="ttname"><a href="constraint__error__function_8h.html">constraint_error_function.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a4592ff582211f3fcf32daa8b95376d2f"><div class="ttname"><a href="namespacemomentum.html#a4592ff582211f3fcf32daa8b95376d2f">momentum::optional_ref</a></div><div class="ttdeci">std::optional&lt; std::reference_wrapper&lt; T &gt; &gt; optional_ref</div><div class="ttdoc">An optional of a reference.</div><div class="ttdef"><b>Definition</b> constraint_error_function.h:39</div></div>
-<div class="ttc" id="anamespacemomentum_html_aad57fc7a34fd00ee8b6203a828a05b01"><div class="ttname"><a href="namespacemomentum.html#aad57fc7a34fd00ee8b6203a828a05b01">momentum::createFloorConstraints</a></div><div class="ttdeci">std::vector&lt; PlaneDataT&lt; T &gt; &gt; createFloorConstraints(const std::string &amp;prefix, const LocatorList &amp;locators, const Vector3&lt; T &gt; &amp;floorNormal, const T &amp;floorOffset, const float weight)</div><div class="ttdoc">Create non-penetration half-plane constraints from locators with the input prefix.</div><div class="ttdef"><b>Definition</b> plane_error_function.cpp:18</div></div>
-<div class="ttc" id="anamespacemomentum_html_ac06297b73bd818fa28ad4bbc98d2e3ad"><div class="ttname"><a href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">momentum::LocatorList</a></div><div class="ttdeci">std::vector&lt; Locator &gt; LocatorList</div><div class="ttdoc">A collection of locators attached to a skeleton.</div><div class="ttdef"><b>Definition</b> locator.h:80</div></div>
-<div class="ttc" id="aparameter__limits__io_8cpp_html_a2365fd804ac418addca1f58612d72e02"><div class="ttname"><a href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform</div><div class="ttdef"><b>Definition</b> parameter_limits_io.cpp:216</div></div>
-<div class="ttc" id="aparameter__limits__io_8cpp_html_ada778489ae2a13019d0156bc37013fbf"><div class="ttname"><a href="parameter__limits__io_8cpp.html#ada778489ae2a13019d0156bc37013fbf">skeleton</a></div><div class="ttdeci">const Skeleton &amp; skeleton</div><div class="ttdef"><b>Definition</b> parameter_limits_io.cpp:217</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a4592ff582211f3fcf32daa8b95376d2f"><div class="ttname"><a href="namespacemomentum.html#a4592ff582211f3fcf32daa8b95376d2f">momentum::optional_ref</a></div><div class="ttdeci">std::optional&lt; std::reference_wrapper&lt; T &gt; &gt; optional_ref</div><div class="ttdoc">An optional of a reference.</div><div class="ttdef"><b>Definition</b> <a href="constraint__error__function_8h_source.html#l00039">constraint_error_function.h:39</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aad57fc7a34fd00ee8b6203a828a05b01"><div class="ttname"><a href="namespacemomentum.html#aad57fc7a34fd00ee8b6203a828a05b01">momentum::createFloorConstraints</a></div><div class="ttdeci">std::vector&lt; PlaneDataT&lt; T &gt; &gt; createFloorConstraints(const std::string &amp;prefix, const LocatorList &amp;locators, const Vector3&lt; T &gt; &amp;floorNormal, const T &amp;floorOffset, const float weight)</div><div class="ttdoc">Create non-penetration half-plane constraints from locators with the input prefix.</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8cpp_source.html#l00018">plane_error_function.cpp:18</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ac06297b73bd818fa28ad4bbc98d2e3ad"><div class="ttname"><a href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">momentum::LocatorList</a></div><div class="ttdeci">std::vector&lt; Locator &gt; LocatorList</div><div class="ttdoc">A collection of locators attached to a skeleton.</div><div class="ttdef"><b>Definition</b> <a href="locator_8h_source.html#l00080">locator.h:80</a></div></div>
+<div class="ttc" id="aparameter__limits__io_8cpp_html_a2365fd804ac418addca1f58612d72e02"><div class="ttname"><a href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform</div><div class="ttdef"><b>Definition</b> <a href="parameter__limits__io_8cpp_source.html#l00216">parameter_limits_io.cpp:216</a></div></div>
+<div class="ttc" id="aparameter__limits__io_8cpp_html_ada778489ae2a13019d0156bc37013fbf"><div class="ttname"><a href="parameter__limits__io_8cpp.html#ada778489ae2a13019d0156bc37013fbf">skeleton</a></div><div class="ttdeci">const Skeleton &amp; skeleton</div><div class="ttdef"><b>Definition</b> <a href="parameter__limits__io_8cpp_source.html#l00217">parameter_limits_io.cpp:217</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
-<div class="ttc" id="astructmomentum_1_1ConstraintData_html"><div class="ttname"><a href="structmomentum_1_1ConstraintData.html">momentum::ConstraintData</a></div><div class="ttdoc">Base structure of constraint data.</div><div class="ttdef"><b>Definition</b> constraint_error_function.h:21</div></div>
+<div class="ttc" id="astructmomentum_1_1ConstraintData_html"><div class="ttname"><a href="structmomentum_1_1ConstraintData.html">momentum::ConstraintData</a></div><div class="ttdoc">Base structure of constraint data.</div><div class="ttdef"><b>Definition</b> <a href="constraint__error__function_8h_source.html#l00021">constraint_error_function.h:21</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
-<div class="ttc" id="astructmomentum_1_1PlaneDataT_html"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html">momentum::PlaneDataT</a></div><div class="ttdoc">Point-on-plane or Point-in-half-plane constraint data.</div><div class="ttdef"><b>Definition</b> plane_error_function.h:18</div></div>
-<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_a32dc07da6bb963eeeabb7e105d49fbb6"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#a32dc07da6bb963eeeabb7e105d49fbb6">momentum::PlaneDataT::PlaneDataT</a></div><div class="ttdeci">PlaneDataT(const Vector3&lt; T &gt; &amp;inOffset, const Vector3&lt; T &gt; &amp;inNormal, const T inD, size_t pIndex, float w, const std::string &amp;n=&quot;&quot;)</div><div class="ttdef"><b>Definition</b> plane_error_function.h:23</div></div>
-<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_a89c2a12535f0106bf7eee70de262aace"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#a89c2a12535f0106bf7eee70de262aace">momentum::PlaneDataT::offset</a></div><div class="ttdeci">Vector3&lt; T &gt; offset</div><div class="ttdef"><b>Definition</b> plane_error_function.h:19</div></div>
-<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_a949d9de15fe1bb44542b2ee10c6b1b93"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#a949d9de15fe1bb44542b2ee10c6b1b93">momentum::PlaneDataT::d</a></div><div class="ttdeci">T d</div><div class="ttdef"><b>Definition</b> plane_error_function.h:21</div></div>
-<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_aadc2f648b8bad0a46a64ccf6b8b091b6"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#aadc2f648b8bad0a46a64ccf6b8b091b6">momentum::PlaneDataT::normal</a></div><div class="ttdeci">Vector3&lt; T &gt; normal</div><div class="ttdef"><b>Definition</b> plane_error_function.h:20</div></div>
+<div class="ttc" id="astructmomentum_1_1PlaneDataT_html"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html">momentum::PlaneDataT</a></div><div class="ttdoc">Point-on-plane or Point-in-half-plane constraint data.</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00018">plane_error_function.h:18</a></div></div>
+<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_a32dc07da6bb963eeeabb7e105d49fbb6"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#a32dc07da6bb963eeeabb7e105d49fbb6">momentum::PlaneDataT::PlaneDataT</a></div><div class="ttdeci">PlaneDataT(const Vector3&lt; T &gt; &amp;inOffset, const Vector3&lt; T &gt; &amp;inNormal, const T inD, size_t pIndex, float w, const std::string &amp;n=&quot;&quot;)</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00023">plane_error_function.h:23</a></div></div>
+<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_a89c2a12535f0106bf7eee70de262aace"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#a89c2a12535f0106bf7eee70de262aace">momentum::PlaneDataT::offset</a></div><div class="ttdeci">Vector3&lt; T &gt; offset</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00019">plane_error_function.h:19</a></div></div>
+<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_a949d9de15fe1bb44542b2ee10c6b1b93"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#a949d9de15fe1bb44542b2ee10c6b1b93">momentum::PlaneDataT::d</a></div><div class="ttdeci">T d</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00021">plane_error_function.h:21</a></div></div>
+<div class="ttc" id="astructmomentum_1_1PlaneDataT_html_aadc2f648b8bad0a46a64ccf6b8b091b6"><div class="ttname"><a href="structmomentum_1_1PlaneDataT.html#aadc2f648b8bad0a46a64ccf6b8b091b6">momentum::PlaneDataT::normal</a></div><div class="ttdeci">Vector3&lt; T &gt; normal</div><div class="ttdef"><b>Definition</b> <a href="plane__error__function_8h_source.html#l00020">plane_error_function.h:20</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="plane__error__function_8h.html">plane_error_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

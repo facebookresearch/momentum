@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('mppca__io_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_be408ddeaaae0a91adcdd3f13093f868.html">skeleton</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">mppca_io.h</div></div>
 </div><!--header-->
@@ -109,15 +125,19 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="amath_2fwd_8h_html"><div class="ttname"><a href="math_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a4152be9f3a221c20be9fe6c81118aa1e"><div class="ttname"><a href="namespacemomentum.html#a4152be9f3a221c20be9fe6c81118aa1e">momentum::Mppca</a></div><div class="ttdeci">MppcaT&lt; float &gt; Mppca</div><div class="ttdef"><b>Definition</b> fwd.h:39</div></div>
-<div class="ttc" id="anamespacemomentum_html_a5b92d655cbc8999154eb70b27554afb3"><div class="ttname"><a href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">momentum::loadMppca</a></div><div class="ttdeci">std::shared_ptr&lt; const Mppca &gt; loadMppca(const gsl::span&lt; const unsigned char &gt; posePriorDataRaw)</div><div class="ttdef"><b>Definition</b> mppca_io.cpp:18</div></div>
-<div class="ttc" id="anamespacemomentum_html_ad0778f4670c7fffe2ed4cbdd0ef39ac1"><div class="ttname"><a href="namespacemomentum.html#ad0778f4670c7fffe2ed4cbdd0ef39ac1">momentum::saveMppca</a></div><div class="ttdeci">void saveMppca(const Mppca &amp;mppca, const std::string &amp;name)</div><div class="ttdef"><b>Definition</b> mppca_io.cpp:84</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a4152be9f3a221c20be9fe6c81118aa1e"><div class="ttname"><a href="namespacemomentum.html#a4152be9f3a221c20be9fe6c81118aa1e">momentum::Mppca</a></div><div class="ttdeci">MppcaT&lt; float &gt; Mppca</div><div class="ttdef"><b>Definition</b> <a href="math_2fwd_8h_source.html#l00039">fwd.h:39</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a5b92d655cbc8999154eb70b27554afb3"><div class="ttname"><a href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">momentum::loadMppca</a></div><div class="ttdeci">std::shared_ptr&lt; const Mppca &gt; loadMppca(const gsl::span&lt; const unsigned char &gt; posePriorDataRaw)</div><div class="ttdef"><b>Definition</b> <a href="mppca__io_8cpp_source.html#l00018">mppca_io.cpp:18</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ad0778f4670c7fffe2ed4cbdd0ef39ac1"><div class="ttname"><a href="namespacemomentum.html#ad0778f4670c7fffe2ed4cbdd0ef39ac1">momentum::saveMppca</a></div><div class="ttdeci">void saveMppca(const Mppca &amp;mppca, const std::string &amp;name)</div><div class="ttdef"><b>Definition</b> <a href="mppca__io_8cpp_source.html#l00084">mppca_io.cpp:84</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_be408ddeaaae0a91adcdd3f13093f868.html">skeleton</a></li><li class="navelem"><a class="el" href="mppca__io_8h.html">mppca_io.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

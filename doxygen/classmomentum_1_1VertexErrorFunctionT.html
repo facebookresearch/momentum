@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1VertexErrorFunctionT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1VertexErrorFunctionT.html">VertexErrorFunctionT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -83,9 +99,11 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="vertex__error__function_8h_source.html">vertex_error_function.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::VertexErrorFunctionT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::VertexErrorFunctionT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1VertexErrorFunctionT.png" usemap="#momentum::VertexErrorFunctionT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::VertexErrorFunctionT_3C_20T_20_3E_map" name="momentum::VertexErrorFunctionT_3C_20T_20_3E_map">
@@ -154,7 +172,11 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a935c03f07e1ef8aaeed9f9688b03075a inherit pro_attribs_classmomentum_1_1SkeletonErrorFunctionT" id="r_a935c03f07e1ef8aaeed9f9688b03075a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a935c03f07e1ef8aaeed9f9688b03075a">useHessian_</a> {<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a>}</td></tr>
 <tr class="separator:a935c03f07e1ef8aaeed9f9688b03075a inherit pro_attribs_classmomentum_1_1SkeletonErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
+class momentum::VertexErrorFunctionT&lt; T &gt;</div>
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8h_source.html#l00045">45</a> of file <a class="el" href="vertex__error__function_8h_source.html">vertex_error_function.h</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad37c1524e90cd28cdb0e29a45cced182" name="ad37c1524e90cd28cdb0e29a45cced182"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad37c1524e90cd28cdb0e29a45cced182">&#9670;&#160;</a></span>VertexErrorFunctionT()</h2>
 
@@ -197,6 +219,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00035">35</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>, and <a class="el" href="parameter__limits_8cpp_source.html#l00015">momentum::toString()</a>.</p>
+
 </div>
 </div>
 <a id="ad0ca27c12c86f5d56bbe57d9e6a27e89" name="ad0ca27c12c86f5d56bbe57d9e6a27e89"></a>
@@ -223,6 +249,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00055">55</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -267,6 +295,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00063">63</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <a id="a407ca52c9889d26bea886a34df738733" name="a407ca52c9889d26bea886a34df738733"></a>
@@ -285,6 +317,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00058">58</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -312,6 +346,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8h_source.html#l00077">77</a> of file <a class="el" href="vertex__error__function_8h_source.html">vertex_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -352,6 +388,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a1fd68a34b7108e012bcba6ee3dd3e7a5">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00073">73</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="limit__error__function_8cpp_source.html#l00018">momentum::kPositionWeight</a>, <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>, <a class="el" href="random-inl_8h_source.html#l00382">momentum::normal()</a>, and <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>.</p>
 
 </div>
 </div>
@@ -398,6 +438,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a4d900ddf2954913d83b5c7bc55c6fbe5">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00622">622</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>.</p>
 
 </div>
 </div>
@@ -457,6 +501,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a2ff8bbf599bb7d2bc9db855bb97ce803">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00693">693</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00067">MT_PROFILE_EVENT</a>.</p>
+
 </div>
 </div>
 <a id="aed349256ec62db23ea9292bd1e49e3f7" name="aed349256ec62db23ea9292bd1e49e3f7"></a>
@@ -486,6 +534,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#acdf427ac8dd801d2a4591a8d95ab905c">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8cpp_source.html#l00764">764</a> of file <a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -511,6 +561,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8h_source.html#l00082">82</a> of file <a class="el" href="vertex__error__function_8h_source.html">vertex_error_function.h</a>.</p>
+
 </div>
 </div>
 <a id="aa2ae8e16b0f5bda79ed903a1203d40fd" name="aa2ae8e16b0f5bda79ed903a1203d40fd"></a>
@@ -535,17 +587,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="vertex__error__function_8h_source.html#l00081">81</a> of file <a class="el" href="vertex__error__function_8h_source.html">vertex_error_function.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>character_solver/<a class="el" href="character__solver_2fwd_8h_source.html">fwd.h</a></li>
 <li>character_solver/<a class="el" href="vertex__error__function_8h_source.html">vertex_error_function.h</a></li>
-<li>character_solver/<a class="el" href="vertex__error__function_8cpp.html">vertex_error_function.cpp</a></li>
+<li>character_solver/<a class="el" href="vertex__error__function_8cpp_source.html">vertex_error_function.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1VertexErrorFunctionT.html">VertexErrorFunctionT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

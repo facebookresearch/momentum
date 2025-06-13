@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1ColumnIndexedMatrix.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
@@ -106,7 +122,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aac2dadc13abe4dbdcb4416ba62e87e78" id="r_aac2dadc13abe4dbdcb4416ba62e87e78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#ace66ea271ffd3bf4552b99289f934470">VectorType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#aac2dadc13abe4dbdcb4416ba62e87e78">transpose_times</a> (Eigen::Ref&lt; <a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#ace66ea271ffd3bf4552b99289f934470">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:aac2dadc13abe4dbdcb4416ba62e87e78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> MatrixType&gt;<br />
+class momentum::ColumnIndexedMatrix&lt; MatrixType &gt;</div>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00025">25</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="ace66ea271ffd3bf4552b99289f934470" name="ace66ea271ffd3bf4552b99289f934470"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ace66ea271ffd3bf4552b99289f934470">&#9670;&#160;</a></span>VectorType</h2>
 
@@ -120,6 +140,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00027">27</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -149,6 +171,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00029">29</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -188,6 +212,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00031">31</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
+<p class="reference">References <a class="el" href="online__householder__qr_8cpp_source.html#l00097">momentum::validateColumnIndices()</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -217,6 +245,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00036">36</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
 </div>
 </div>
 <a id="a82dd1455c29ca45f40cd467c8385716a" name="a82dd1455c29ca45f40cd467c8385716a"></a>
@@ -243,6 +273,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00048">48</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -271,6 +303,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00056">56</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
 </div>
 </div>
 <a id="a8e1b9bc5f65449978ba283ac01deff4b" name="a8e1b9bc5f65449978ba283ac01deff4b"></a>
@@ -297,6 +331,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00044">44</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -326,15 +362,21 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00060">60</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>math/<a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

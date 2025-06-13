@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1SequenceSolverFunctionT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">SequenceSolverFunctionT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -83,9 +99,11 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::SequenceSolverFunctionT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SequenceSolverFunctionT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1SequenceSolverFunctionT.png" usemap="#momentum::SequenceSolverFunctionT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::SequenceSolverFunctionT_3C_20T_20_3E_map" name="momentum::SequenceSolverFunctionT_3C_20T_20_3E_map">
@@ -181,7 +199,11 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memdesc:a6dce4ef63d088f4eabd17b11d57d01be inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of parameters currently enabled for optimization.  <br /></td></tr>
 <tr class="separator:a6dce4ef63d088f4eabd17b11d57d01be inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
+class momentum::SequenceSolverFunctionT&lt; T &gt;</div>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00024">24</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a747c473be8879aa6f60d635769420e84" name="a747c473be8879aa6f60d635769420e84"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a747c473be8879aa6f60d635769420e84">&#9670;&#160;</a></span>SequenceSolverFunctionT()</h2>
 
@@ -222,6 +244,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00025">25</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="utility_8h_source.html#l00037">momentum::allParams()</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -253,6 +279,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00418">418</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="sequence__solver__function_8h_source.html#l00021">momentum::kAllFrames</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <a id="ad61d25978636004a1abe5def338f2f83" name="ad61d25978636004a1abe5def338f2f83"></a>
@@ -283,6 +313,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00433">433</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="sequence__solver__function_8h_source.html#l00021">momentum::kAllFrames</a>, and <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <a id="afb27eaba2c667bc772c3846e686ee1ca" name="afb27eaba2c667bc772c3846e686ee1ca"></a>
@@ -311,6 +345,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00167">167</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <a id="a2826cddd269ff2d4dfe7b4b969f05ddc" name="a2826cddd269ff2d4dfe7b4b969f05ddc"></a>
@@ -338,6 +376,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00062">62</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -376,6 +416,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00209">209</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -427,6 +471,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00271">271</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00067">MT_PROFILE_EVENT</a>.</p>
+
 </div>
 </div>
 <a id="ac26631f78fe4d34c06f4c17f73d0f84f" name="ac26631f78fe4d34c06f4c17f73d0f84f"></a>
@@ -445,6 +493,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00138">138</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -475,6 +525,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>An Eigen::VectorX&lt;T&gt; object containing the joined parameter vector of all frames. </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00112">112</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <a id="a8102fa80527b2600cd81d1a753b69ade" name="a8102fa80527b2600cd81d1a753b69ade"></a>
@@ -502,6 +556,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00058">58</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+
 </div>
 </div>
 <a id="ab79a2f79db44367c9836545a090da916" name="ab79a2f79db44367c9836545a090da916"></a>
@@ -520,6 +576,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00100">100</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00096">momentum::EigenStrongType&lt; ModelParametersT, ::Eigen::VectorX&lt; T &gt; &gt;::Zero()</a>.</p>
 
 </div>
 </div>
@@ -547,6 +607,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00045">45</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -586,6 +648,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SolverFunctionT.html#aa75eca8db9c61ec8af90fb9ff76522c1">momentum::SolverFunctionT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00042">42</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
 </div>
 </div>
 <a id="abc8561afa6a15b2bac839fd59b40033d" name="abc8561afa6a15b2bac839fd59b40033d"></a>
@@ -616,6 +680,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00090">90</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="character_2types_8h_source.html#l00091">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>.</p>
+
 </div>
 </div>
 <a id="a5c3560897a67a20305975404698ff366" name="a5c3560897a67a20305975404698ff366"></a>
@@ -635,6 +703,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00143">143</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -674,6 +744,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00404">404</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Friends And Related Symbol Documentation</h2>
@@ -699,17 +773,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00106">106</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>character_sequence_solver/<a class="el" href="character__sequence__solver_2fwd_8h_source.html">fwd.h</a></li>
 <li>character_sequence_solver/<a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a></li>
-<li>character_sequence_solver/<a class="el" href="sequence__solver__function_8cpp.html">sequence_solver_function.cpp</a></li>
+<li>character_sequence_solver/<a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">SequenceSolverFunctionT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

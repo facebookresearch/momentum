@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('collision__error__function__stateless_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">collision_error_function_stateless.h</div></div>
 </div><!--header-->
@@ -149,33 +165,37 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter__solver_2fwd_8h_html"><div class="ttname"><a href="character__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html">momentum::CollisionErrorFunctionStatelessT</a></div><div class="ttdoc">NOTE: This is a resurrected version of the CollisionErrorFunction (previously updated by D50818775).</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.h:26</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a0d94722063d2eb117de56a720ff6d59a"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a0d94722063d2eb117de56a720ff6d59a">momentum::CollisionErrorFunctionStatelessT::updateCollisionPairs</a></div><div class="ttdeci">void updateCollisionPairs()</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.cpp:44</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a1513864d16fb6c42cb2814ecfaf86ef0"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a1513864d16fb6c42cb2814ecfaf86ef0">momentum::CollisionErrorFunctionStatelessT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.cpp:121</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a1d50fdb90ac70348cd03fa9d410304c0"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a1d50fdb90ac70348cd03fa9d410304c0">momentum::CollisionErrorFunctionStatelessT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; VectorX&lt; T &gt; &gt; gradient) override</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.cpp:169</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a21b3c62f6d09a9b0a8b278514bc59f7f"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a21b3c62f6d09a9b0a8b278514bc59f7f">momentum::CollisionErrorFunctionStatelessT::collisionPairs</a></div><div class="ttdeci">std::vector&lt; Vector3i &gt; collisionPairs</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.h:62</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a3e5c5ee72bbc77764d50eeeb26ab11cd"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a3e5c5ee72bbc77764d50eeeb26ab11cd">momentum::CollisionErrorFunctionStatelessT::getCollisionPairs</a></div><div class="ttdeci">std::vector&lt; Vector2i &gt; getCollisionPairs() const</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.cpp:108</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a4341b131e30fd1546ace98b689b1a2a1"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a4341b131e30fd1546ace98b689b1a2a1">momentum::CollisionErrorFunctionStatelessT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.cpp:534</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a5f6638eefaf86fd452fa2f865028667a"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a5f6638eefaf86fd452fa2f865028667a">momentum::CollisionErrorFunctionStatelessT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; MatrixX&lt; T &gt; &gt; jacobian, Ref&lt; VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) override</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.cpp:338</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a990776c86189f0224d7e219f7492b8bf"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a990776c86189f0224d7e219f7492b8bf">momentum::CollisionErrorFunctionStatelessT::collisionState</a></div><div class="ttdeci">CollisionGeometryStateT&lt; T &gt; collisionState</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.h:66</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a9a7fba5838fdb6a04b9eecc8a446be83"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a9a7fba5838fdb6a04b9eecc8a446be83">momentum::CollisionErrorFunctionStatelessT::kCollisionWeight</a></div><div class="ttdeci">static constexpr T kCollisionWeight</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.h:69</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a9c5bba7c2934231ac774f72af12dece9"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a9c5bba7c2934231ac774f72af12dece9">momentum::CollisionErrorFunctionStatelessT::collisionActive</a></div><div class="ttdeci">VectorX&lt; bool &gt; collisionActive</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.h:64</div></div>
-<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_afd8c57248b2684f4a1e08eabbdbd4982"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#afd8c57248b2684f4a1e08eabbdbd4982">momentum::CollisionErrorFunctionStatelessT::collisionGeometry</a></div><div class="ttdeci">const CollisionGeometry collisionGeometry</div><div class="ttdef"><b>Definition</b> collision_error_function_stateless.h:58</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> skeleton_error_function.h:18</div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html">momentum::CollisionErrorFunctionStatelessT</a></div><div class="ttdoc">NOTE: This is a resurrected version of the CollisionErrorFunction (previously updated by D50818775).</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8h_source.html#l00026">collision_error_function_stateless.h:26</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a0d94722063d2eb117de56a720ff6d59a"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a0d94722063d2eb117de56a720ff6d59a">momentum::CollisionErrorFunctionStatelessT::updateCollisionPairs</a></div><div class="ttdeci">void updateCollisionPairs()</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8cpp_source.html#l00044">collision_error_function_stateless.cpp:44</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a1513864d16fb6c42cb2814ecfaf86ef0"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a1513864d16fb6c42cb2814ecfaf86ef0">momentum::CollisionErrorFunctionStatelessT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8cpp_source.html#l00121">collision_error_function_stateless.cpp:121</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a1d50fdb90ac70348cd03fa9d410304c0"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a1d50fdb90ac70348cd03fa9d410304c0">momentum::CollisionErrorFunctionStatelessT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; VectorX&lt; T &gt; &gt; gradient) override</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8cpp_source.html#l00169">collision_error_function_stateless.cpp:169</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a21b3c62f6d09a9b0a8b278514bc59f7f"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a21b3c62f6d09a9b0a8b278514bc59f7f">momentum::CollisionErrorFunctionStatelessT::collisionPairs</a></div><div class="ttdeci">std::vector&lt; Vector3i &gt; collisionPairs</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8h_source.html#l00062">collision_error_function_stateless.h:62</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a3e5c5ee72bbc77764d50eeeb26ab11cd"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a3e5c5ee72bbc77764d50eeeb26ab11cd">momentum::CollisionErrorFunctionStatelessT::getCollisionPairs</a></div><div class="ttdeci">std::vector&lt; Vector2i &gt; getCollisionPairs() const</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8cpp_source.html#l00108">collision_error_function_stateless.cpp:108</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a4341b131e30fd1546ace98b689b1a2a1"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a4341b131e30fd1546ace98b689b1a2a1">momentum::CollisionErrorFunctionStatelessT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8cpp_source.html#l00534">collision_error_function_stateless.cpp:534</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a5f6638eefaf86fd452fa2f865028667a"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a5f6638eefaf86fd452fa2f865028667a">momentum::CollisionErrorFunctionStatelessT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; MatrixX&lt; T &gt; &gt; jacobian, Ref&lt; VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) override</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8cpp_source.html#l00338">collision_error_function_stateless.cpp:338</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a990776c86189f0224d7e219f7492b8bf"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a990776c86189f0224d7e219f7492b8bf">momentum::CollisionErrorFunctionStatelessT::collisionState</a></div><div class="ttdeci">CollisionGeometryStateT&lt; T &gt; collisionState</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8h_source.html#l00066">collision_error_function_stateless.h:66</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a9a7fba5838fdb6a04b9eecc8a446be83"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a9a7fba5838fdb6a04b9eecc8a446be83">momentum::CollisionErrorFunctionStatelessT::kCollisionWeight</a></div><div class="ttdeci">static constexpr T kCollisionWeight</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8h_source.html#l00069">collision_error_function_stateless.h:69</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_a9c5bba7c2934231ac774f72af12dece9"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#a9c5bba7c2934231ac774f72af12dece9">momentum::CollisionErrorFunctionStatelessT::collisionActive</a></div><div class="ttdeci">VectorX&lt; bool &gt; collisionActive</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8h_source.html#l00064">collision_error_function_stateless.h:64</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1CollisionErrorFunctionStatelessT_html_afd8c57248b2684f4a1e08eabbdbd4982"><div class="ttname"><a href="classmomentum_1_1CollisionErrorFunctionStatelessT.html#afd8c57248b2684f4a1e08eabbdbd4982">momentum::CollisionErrorFunctionStatelessT::collisionGeometry</a></div><div class="ttdeci">const CollisionGeometry collisionGeometry</div><div class="ttdef"><b>Definition</b> <a href="collision__error__function__stateless_8h_source.html#l00058">collision_error_function_stateless.h:58</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="skeleton__error__function_8h_source.html#l00018">skeleton_error_function.h:18</a></div></div>
 <div class="ttc" id="acollision__geometry_8h_html"><div class="ttname"><a href="collision__geometry_8h.html">collision_geometry.h</a></div></div>
 <div class="ttc" id="acollision__geometry__state_8h_html"><div class="ttname"><a href="collision__geometry__state_8h.html">collision_geometry_state.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a45e7bad11d6956c9cd6651e17c98772d"><div class="ttname"><a href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">momentum::Ref</a></div><div class="ttdeci">Eigen::Ref&lt; T &gt; Ref</div><div class="ttdef"><b>Definition</b> types.h:47</div></div>
-<div class="ttc" id="anamespacemomentum_html_a7f43d746798db9b244d37e2566a49b29"><div class="ttname"><a href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">momentum::CollisionGeometry</a></div><div class="ttdeci">CollisionGeometryT&lt; float &gt; CollisionGeometry</div><div class="ttdef"><b>Definition</b> collision_geometry.h:73</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a45e7bad11d6956c9cd6651e17c98772d"><div class="ttname"><a href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">momentum::Ref</a></div><div class="ttdeci">Eigen::Ref&lt; T &gt; Ref</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00047">types.h:47</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a7f43d746798db9b244d37e2566a49b29"><div class="ttname"><a href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">momentum::CollisionGeometry</a></div><div class="ttdeci">CollisionGeometryT&lt; float &gt; CollisionGeometry</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry_8h_source.html#l00073">collision_geometry.h:73</a></div></div>
 <div class="ttc" id="askeleton__error__function_8h_html"><div class="ttname"><a href="skeleton__error__function_8h.html">skeleton_error_function.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="collision__error__function__stateless_8h.html">collision_error_function_stateless.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

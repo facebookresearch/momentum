@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('sequence__error__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">sequence_error_function.h</div></div>
 </div><!--header-->
@@ -192,33 +208,37 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="acharacter_2fwd_8h_html"><div class="ttname"><a href="character_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="acharacter_2types_8h_html"><div class="ttname"><a href="character_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="acharacter__sequence__solver_2fwd_8h_html"><div class="ttname"><a href="character__sequence__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html">momentum::SequenceErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> sequence_error_function.h:18</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a1fad6d506625972899141d29ee7a15ff"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a1fad6d506625972899141d29ee7a15ff">momentum::SequenceErrorFunctionT::getGradient</a></div><div class="ttdeci">virtual double getGradient(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt;, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt;, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt;) const</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:54</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a39317c33da69d0ab85007347be6dbc86"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a39317c33da69d0ab85007347be6dbc86">momentum::SequenceErrorFunctionT::getError</a></div><div class="ttdeci">virtual double getError(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt;, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt;) const</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:44</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a3ea7a6bcb6c6d68aaad5965692b92bb4"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a3ea7a6bcb6c6d68aaad5965692b92bb4">momentum::SequenceErrorFunctionT::parameterTransform_</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform_</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:81</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a4ce97c9dee464c5d8be06cbc8ba64cb5"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a4ce97c9dee464c5d8be06cbc8ba64cb5">momentum::SequenceErrorFunctionT::setActiveJoints</a></div><div class="ttdeci">void setActiveJoints(const VectorX&lt; bool &gt; &amp;aj)</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:36</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a6e1bc6bc4a7c0cd208740987cb4e304d"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a6e1bc6bc4a7c0cd208740987cb4e304d">momentum::SequenceErrorFunctionT::activeJointParams_</a></div><div class="ttdeci">VectorX&lt; bool &gt; activeJointParams_</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:83</div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html">momentum::SequenceErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00018">sequence_error_function.h:18</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a1fad6d506625972899141d29ee7a15ff"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a1fad6d506625972899141d29ee7a15ff">momentum::SequenceErrorFunctionT::getGradient</a></div><div class="ttdeci">virtual double getGradient(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt;, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt;, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt;) const</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00054">sequence_error_function.h:54</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a39317c33da69d0ab85007347be6dbc86"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a39317c33da69d0ab85007347be6dbc86">momentum::SequenceErrorFunctionT::getError</a></div><div class="ttdeci">virtual double getError(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt;, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt;) const</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00044">sequence_error_function.h:44</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a3ea7a6bcb6c6d68aaad5965692b92bb4"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a3ea7a6bcb6c6d68aaad5965692b92bb4">momentum::SequenceErrorFunctionT::parameterTransform_</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform_</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00081">sequence_error_function.h:81</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a4ce97c9dee464c5d8be06cbc8ba64cb5"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a4ce97c9dee464c5d8be06cbc8ba64cb5">momentum::SequenceErrorFunctionT::setActiveJoints</a></div><div class="ttdeci">void setActiveJoints(const VectorX&lt; bool &gt; &amp;aj)</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00036">sequence_error_function.h:36</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a6e1bc6bc4a7c0cd208740987cb4e304d"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a6e1bc6bc4a7c0cd208740987cb4e304d">momentum::SequenceErrorFunctionT::activeJointParams_</a></div><div class="ttdeci">VectorX&lt; bool &gt; activeJointParams_</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00083">sequence_error_function.h:83</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a6ec59de34d9ebf076525851414fbb547"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a6ec59de34d9ebf076525851414fbb547">momentum::SequenceErrorFunctionT::numFrames</a></div><div class="ttdeci">virtual size_t numFrames() const =0</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a706388309ded580a3bf9c1865fef7dbd"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a706388309ded580a3bf9c1865fef7dbd">momentum::SequenceErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">virtual size_t getJacobianSize() const</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:75</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a71dc97d0102ee5a29879553f0ce93fe0"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a71dc97d0102ee5a29879553f0ce93fe0">momentum::SequenceErrorFunctionT::getWeight</a></div><div class="ttdeci">float getWeight() const</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:32</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a795ff1a23a954ddc20ab8d30a88dcc3b"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a795ff1a23a954ddc20ab8d30a88dcc3b">momentum::SequenceErrorFunctionT::setEnabledParameters</a></div><div class="ttdeci">void setEnabledParameters(const ParameterSet &amp;ps)</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:40</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a8e1ae34dcbb2e655cb7e44d6642a1679"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a8e1ae34dcbb2e655cb7e44d6642a1679">momentum::SequenceErrorFunctionT::~SequenceErrorFunctionT</a></div><div class="ttdeci">virtual ~SequenceErrorFunctionT()</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:24</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a9f2f237dec6cafdddc27a024fa56ec3c"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a9f2f237dec6cafdddc27a024fa56ec3c">momentum::SequenceErrorFunctionT::setWeight</a></div><div class="ttdeci">void setWeight(T w)</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:29</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_aae3845ce1f429509cfb058163717751a"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#aae3845ce1f429509cfb058163717751a">momentum::SequenceErrorFunctionT::enabledParameters_</a></div><div class="ttdeci">ParameterSet enabledParameters_</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:84</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_acfd02899afa8740ed5fe2609c7b8009d"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#acfd02899afa8740ed5fe2609c7b8009d">momentum::SequenceErrorFunctionT::skeleton_</a></div><div class="ttdeci">const Skeleton &amp; skeleton_</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:80</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_af326369a97176474331b6b6bc94afb44"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#af326369a97176474331b6b6bc94afb44">momentum::SequenceErrorFunctionT::weight_</a></div><div class="ttdeci">T weight_</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:82</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_af668c04c352c535e55cdeec0b29cdbc1"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#af668c04c352c535e55cdeec0b29cdbc1">momentum::SequenceErrorFunctionT::getJacobian</a></div><div class="ttdeci">virtual double getJacobian(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt;, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt;, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt;, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt;, int &amp;usedRows) const</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:65</div></div>
-<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_af9063080bf28e049fadca4719edffac0"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#af9063080bf28e049fadca4719edffac0">momentum::SequenceErrorFunctionT::SequenceErrorFunctionT</a></div><div class="ttdeci">SequenceErrorFunctionT(const Skeleton &amp;skel, const ParameterTransform &amp;pt)</div><div class="ttdef"><b>Definition</b> sequence_error_function.h:20</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> types.h:402</div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a706388309ded580a3bf9c1865fef7dbd"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a706388309ded580a3bf9c1865fef7dbd">momentum::SequenceErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">virtual size_t getJacobianSize() const</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00075">sequence_error_function.h:75</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a71dc97d0102ee5a29879553f0ce93fe0"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a71dc97d0102ee5a29879553f0ce93fe0">momentum::SequenceErrorFunctionT::getWeight</a></div><div class="ttdeci">float getWeight() const</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00032">sequence_error_function.h:32</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a795ff1a23a954ddc20ab8d30a88dcc3b"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a795ff1a23a954ddc20ab8d30a88dcc3b">momentum::SequenceErrorFunctionT::setEnabledParameters</a></div><div class="ttdeci">void setEnabledParameters(const ParameterSet &amp;ps)</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00040">sequence_error_function.h:40</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a8e1ae34dcbb2e655cb7e44d6642a1679"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a8e1ae34dcbb2e655cb7e44d6642a1679">momentum::SequenceErrorFunctionT::~SequenceErrorFunctionT</a></div><div class="ttdeci">virtual ~SequenceErrorFunctionT()</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00024">sequence_error_function.h:24</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_a9f2f237dec6cafdddc27a024fa56ec3c"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#a9f2f237dec6cafdddc27a024fa56ec3c">momentum::SequenceErrorFunctionT::setWeight</a></div><div class="ttdeci">void setWeight(T w)</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00029">sequence_error_function.h:29</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_aae3845ce1f429509cfb058163717751a"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#aae3845ce1f429509cfb058163717751a">momentum::SequenceErrorFunctionT::enabledParameters_</a></div><div class="ttdeci">ParameterSet enabledParameters_</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00084">sequence_error_function.h:84</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_acfd02899afa8740ed5fe2609c7b8009d"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#acfd02899afa8740ed5fe2609c7b8009d">momentum::SequenceErrorFunctionT::skeleton_</a></div><div class="ttdeci">const Skeleton &amp; skeleton_</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00080">sequence_error_function.h:80</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_af326369a97176474331b6b6bc94afb44"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#af326369a97176474331b6b6bc94afb44">momentum::SequenceErrorFunctionT::weight_</a></div><div class="ttdeci">T weight_</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00082">sequence_error_function.h:82</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_af668c04c352c535e55cdeec0b29cdbc1"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#af668c04c352c535e55cdeec0b29cdbc1">momentum::SequenceErrorFunctionT::getJacobian</a></div><div class="ttdeci">virtual double getJacobian(gsl::span&lt; const ModelParametersT&lt; T &gt; &gt;, gsl::span&lt; const SkeletonStateT&lt; T &gt; &gt;, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt;, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt;, int &amp;usedRows) const</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00065">sequence_error_function.h:65</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SequenceErrorFunctionT_html_af9063080bf28e049fadca4719edffac0"><div class="ttname"><a href="classmomentum_1_1SequenceErrorFunctionT.html#af9063080bf28e049fadca4719edffac0">momentum::SequenceErrorFunctionT::SequenceErrorFunctionT</a></div><div class="ttdeci">SequenceErrorFunctionT(const Skeleton &amp;skel, const ParameterTransform &amp;pt)</div><div class="ttdef"><b>Definition</b> <a href="sequence__error__function_8h_source.html#l00020">sequence_error_function.h:20</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00402">types.h:402</a></div></div>
 <div class="ttc" id="aparameter__transform_8h_html"><div class="ttname"><a href="parameter__transform_8h.html">parameter_transform.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="sequence__error__function_8h.html">sequence_error_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structmomentum_1_1TransformT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1TransformT.html">TransformT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -193,6 +209,8 @@ struct momentum::TransformT&lt; T &gt;</div><p>Lightweight transform with separa
   </table>
   </dd>
 </dl>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00025">25</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6ce0882c7a044e8be7321b2845cfa5cc" name="a6ce0882c7a044e8be7321b2845cfa5cc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6ce0882c7a044e8be7321b2845cfa5cc">&#9670;&#160;</a></span>TransformT() <span class="overload">[1/6]</span></h2>
@@ -220,6 +238,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Creates identity transform. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00054">54</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
 
 </div>
 </div>
@@ -258,6 +278,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </table>
   </dd>
 </dl>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00062">62</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
 
 </div>
 </div>
@@ -305,6 +327,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Constructor with components. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00070">70</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
 </div>
 </div>
 <a id="a05783c9a591c00f08d39029c610786bd" name="a05783c9a591c00f08d39029c610786bd"></a>
@@ -351,6 +375,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Move constructor. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00079">79</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
 </div>
 </div>
 <a id="a1aba24b3dcce93e7b0f29abb5d76399a" name="a1aba24b3dcce93e7b0f29abb5d76399a"></a>
@@ -381,6 +407,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Constructor from Affine3. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00090">90</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8cpp_source.html#l00050">momentum::TransformT&lt; T &gt;::fromAffine3()</a>.</p>
+
 </div>
 </div>
 <a id="a058c3eff61b4ee5810a316f723e11bbd" name="a058c3eff61b4ee5810a316f723e11bbd"></a>
@@ -410,6 +440,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Constructor from 4x4 matrix. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00095">95</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8cpp_source.html#l00055">momentum::TransformT&lt; T &gt;::fromMatrix()</a>.</p>
 
 </div>
 </div>
@@ -449,6 +483,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00174">174</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
 </div>
 </div>
 <a id="a50b07b72abc17b600f111f04b17580e7" name="a50b07b72abc17b600f111f04b17580e7"></a>
@@ -478,6 +514,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Converts from <a class="el" href="namespaceEigen.html">Eigen</a>'s Affine3. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00050">50</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8h_source.html#l00100">momentum::TransformT&lt; T &gt;::operator=()</a>, and <a class="el" href="transform_8h_source.html#l00090">momentum::TransformT&lt; T &gt;::TransformT()</a>.</p>
 
 </div>
 </div>
@@ -509,6 +549,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Converts from 4x4 matrix. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00055">55</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8h_source.html#l00106">momentum::TransformT&lt; T &gt;::operator=()</a>, and <a class="el" href="transform_8h_source.html#l00095">momentum::TransformT&lt; T &gt;::TransformT()</a>.</p>
+
 </div>
 </div>
 <a id="af9dcee54b230893fc71675e4ab3c40d0" name="af9dcee54b230893fc71675e4ab3c40d0"></a>
@@ -529,6 +575,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Computes inverse transform. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00087">87</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -584,6 +632,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00031">31</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
+
 </div>
 </div>
 <a id="a2226bfa3fa482bcad3145fdcf53e4660" name="a2226bfa3fa482bcad3145fdcf53e4660"></a>
@@ -613,6 +665,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Creates a transform with only rotation. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00016">16</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -644,6 +698,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Creates a transform with only scaling. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00026">26</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a80f53ce864995f042e2d3dd7321692f4" name="a80f53ce864995f042e2d3dd7321692f4"></a>
@@ -674,6 +730,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Creates a transform with only translation. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00021">21</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a8f12b183052fef002286ffa15c9464f8" name="a8f12b183052fef002286ffa15c9464f8"></a>
@@ -702,6 +760,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Converts to Affine3. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00135">135</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8cpp_source.html#l00068">momentum::TransformT&lt; T &gt;::toAffine3()</a>.</p>
 
 </div>
 </div>
@@ -733,6 +795,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Multiplies with Affine3. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00122">122</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, <a class="el" href="transform_8h_source.html#l00157">momentum::TransformT&lt; T &gt;::toLinear()</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
+
 </div>
 </div>
 <a id="a39182560b813fb3eae0cb9f7342f8b68" name="a39182560b813fb3eae0cb9f7342f8b68"></a>
@@ -762,6 +828,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Combines transforms (applies other first, then this) </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00112">112</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
 
 </div>
 </div>
@@ -793,6 +863,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Transforms a point. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00130">130</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8cpp_source.html#l00077">momentum::TransformT&lt; T &gt;::transformPoint()</a>.</p>
+
 </div>
 </div>
 <a id="af2e66fd5a4c4682e1470754b257b3ce2" name="af2e66fd5a4c4682e1470754b257b3ce2"></a>
@@ -822,6 +896,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Assignment from Affine3. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00100">100</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8cpp_source.html#l00050">momentum::TransformT&lt; T &gt;::fromAffine3()</a>.</p>
 
 </div>
 </div>
@@ -853,6 +931,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Assignment from 4x4 matrix. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00106">106</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8cpp_source.html#l00055">momentum::TransformT&lt; T &gt;::fromMatrix()</a>.</p>
+
 </div>
 </div>
 <a id="a0249a8c86ecdf924f93a4e920b82089e" name="a0249a8c86ecdf924f93a4e920b82089e"></a>
@@ -875,6 +957,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Applies only rotation to a vector. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00082">82</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a2cda3e127d6c1534e8a814ae12782489" name="a2cda3e127d6c1534e8a814ae12782489"></a>
@@ -895,6 +979,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Converts to Affine3. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00068">68</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00152">momentum::TransformT&lt; T &gt;::toRotationMatrix()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8h_source.html#l00135">momentum::TransformT&lt; T &gt;::operator Affine3&lt; T &gt;()</a>, and <a class="el" href="joint__state_8cpp_source.html#l00023">momentum::JointStateT&lt; T &gt;::set()</a>.</p>
 
 </div>
 </div>
@@ -925,6 +1015,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns rotation*scale as 3x3 matrix. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00157">157</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00152">momentum::TransformT&lt; T &gt;::toRotationMatrix()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8h_source.html#l00122">momentum::TransformT&lt; T &gt;::operator*()</a>.</p>
+
 </div>
 </div>
 <a id="ad886ae80a5697912ffa5a4da405af752" name="ad886ae80a5697912ffa5a4da405af752"></a>
@@ -953,6 +1049,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Converts to 4x4 matrix. </p>
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00143">143</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
 
 </div>
 </div>
@@ -983,6 +1083,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns rotation as 3x3 matrix. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00152">152</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00026">momentum::TransformT&lt; T &gt;::rotation</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8cpp_source.html#l00068">momentum::TransformT&lt; T &gt;::toAffine3()</a>, and <a class="el" href="transform_8h_source.html#l00157">momentum::TransformT&lt; T &gt;::toLinear()</a>.</p>
+
 </div>
 </div>
 <a id="a770b759e836d2e51c244322d0f5a8bff" name="a770b759e836d2e51c244322d0f5a8bff"></a>
@@ -1005,6 +1111,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Applies full transform to a point. </p>
 
+<p class="definition">Definition at line <a class="el" href="transform_8cpp_source.html#l00077">77</a> of file <a class="el" href="transform_8cpp_source.html">transform.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8h_source.html#l00130">momentum::TransformT&lt; T &gt;::operator*()</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -1022,6 +1132,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00026">26</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8cpp_source.html#l00055">momentum::TransformT&lt; T &gt;::fromMatrix()</a>, <a class="el" href="transform_8cpp_source.html#l00031">momentum::TransformT&lt; T &gt;::makeRandom()</a>, <a class="el" href="transform_8h_source.html#l00122">momentum::TransformT&lt; T &gt;::operator*()</a>, <a class="el" href="transform_8h_source.html#l00112">momentum::TransformT&lt; T &gt;::operator*()</a>, <a class="el" href="joint__state_8cpp_source.html#l00023">momentum::JointStateT&lt; T &gt;::set()</a>, <a class="el" href="transform_8h_source.html#l00143">momentum::TransformT&lt; T &gt;::toMatrix()</a>, and <a class="el" href="transform_8h_source.html#l00152">momentum::TransformT&lt; T &gt;::toRotationMatrix()</a>.</p>
+
 </div>
 </div>
 <a id="a35a9aadaa2f4d9ac2dd3e34521484185" name="a35a9aadaa2f4d9ac2dd3e34521484185"></a>
@@ -1037,6 +1151,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00028">28</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8cpp_source.html#l00055">momentum::TransformT&lt; T &gt;::fromMatrix()</a>, <a class="el" href="transform_8cpp_source.html#l00031">momentum::TransformT&lt; T &gt;::makeRandom()</a>, <a class="el" href="transform_8h_source.html#l00122">momentum::TransformT&lt; T &gt;::operator*()</a>, <a class="el" href="transform_8h_source.html#l00112">momentum::TransformT&lt; T &gt;::operator*()</a>, <a class="el" href="transform_8h_source.html#l00157">momentum::TransformT&lt; T &gt;::toLinear()</a>, and <a class="el" href="transform_8h_source.html#l00143">momentum::TransformT&lt; T &gt;::toMatrix()</a>.</p>
 
 </div>
 </div>
@@ -1054,17 +1172,25 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="transform_8h_source.html#l00027">27</a> of file <a class="el" href="transform_8h_source.html">transform.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="transform_8cpp_source.html#l00055">momentum::TransformT&lt; T &gt;::fromMatrix()</a>, <a class="el" href="transform_8cpp_source.html#l00031">momentum::TransformT&lt; T &gt;::makeRandom()</a>, <a class="el" href="transform_8h_source.html#l00122">momentum::TransformT&lt; T &gt;::operator*()</a>, <a class="el" href="transform_8h_source.html#l00112">momentum::TransformT&lt; T &gt;::operator*()</a>, <a class="el" href="joint__state_8cpp_source.html#l00023">momentum::JointStateT&lt; T &gt;::set()</a>, and <a class="el" href="transform_8h_source.html#l00143">momentum::TransformT&lt; T &gt;::toMatrix()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>math/<a class="el" href="math_2fwd_8h_source.html">fwd.h</a></li>
 <li>math/<a class="el" href="transform_8h_source.html">transform.h</a></li>
-<li>math/<a class="el" href="transform_8cpp.html">transform.cpp</a></li>
+<li>math/<a class="el" href="transform_8cpp_source.html">transform.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1TransformT.html">TransformT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

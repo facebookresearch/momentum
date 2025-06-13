@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('simd_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_438dd2bc29fc0ff4a3e7d65d3220f2b7.html">simd</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">simd.h</div></div>
 </div><!--header-->
@@ -251,35 +267,39 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
 <div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div></div>
-<div class="ttc" id="aexception_8h_html_a9b406adb60f122613db3463c42c4d6ec"><div class="ttname"><a href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a></div><div class="ttdeci">#define MT_THROW_IF(Condition,...)</div><div class="ttdoc">Conditionally throws a std::runtime_error with a formatted message if the condition is true.</div><div class="ttdef"><b>Definition</b> exception.h:50</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a0fc2afe43b2fd442387d507fd40cdea0"><div class="ttname"><a href="namespacemomentum.html#a0fc2afe43b2fd442387d507fd40cdea0">momentum::kAvxPacketSize</a></div><div class="ttdeci">constexpr size_t kAvxPacketSize</div><div class="ttdef"><b>Definition</b> simd.h:30</div></div>
-<div class="ttc" id="anamespacemomentum_html_a13b4e1500a9663dd56c0e9ee20205acb"><div class="ttname"><a href="namespacemomentum.html#a13b4e1500a9663dd56c0e9ee20205acb">momentum::VectorP</a></div><div class="ttdeci">drjit::Array&lt; Packet&lt; T &gt;, Dim &gt; VectorP</div><div class="ttdef"><b>Definition</b> simd.h:44</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a2f9ed099fa9b206312926f7d04f8ddd9"><div class="ttname"><a href="namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9">momentum::kSimdPacketSize</a></div><div class="ttdeci">constexpr size_t kSimdPacketSize</div><div class="ttdef"><b>Definition</b> simd.h:33</div></div>
-<div class="ttc" id="anamespacemomentum_html_a3b477c9e843b9d7b0cc96a3021f50811"><div class="ttname"><a href="namespacemomentum.html#a3b477c9e843b9d7b0cc96a3021f50811">momentum::operator-</a></div><div class="ttdeci">Vector3P&lt; S &gt; operator-(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates subtraction of Eigen::Vector3f and Vector3P.</div><div class="ttdef"><b>Definition</b> simd.h:136</div></div>
-<div class="ttc" id="anamespacemomentum_html_a3c50b779f3e2b68a3ce7fbb094184549"><div class="ttname"><a href="namespacemomentum.html#a3c50b779f3e2b68a3ce7fbb094184549">momentum::FloatP</a></div><div class="ttdeci">Packet&lt; float &gt; FloatP</div><div class="ttdef"><b>Definition</b> simd.h:39</div></div>
-<div class="ttc" id="anamespacemomentum_html_a48aa47b7e646b6dc4ed28a60cc6a75a1"><div class="ttname"><a href="namespacemomentum.html#a48aa47b7e646b6dc4ed28a60cc6a75a1">momentum::kSimdAlignment</a></div><div class="ttdeci">constexpr size_t kSimdAlignment</div><div class="ttdef"><b>Definition</b> simd.h:34</div></div>
-<div class="ttc" id="anamespacemomentum_html_a4eea1ce34b79cf212d55c263a7d15c6b"><div class="ttname"><a href="namespacemomentum.html#a4eea1ce34b79cf212d55c263a7d15c6b">momentum::operator*</a></div><div class="ttdeci">Vector3P&lt; S &gt; operator*(const Eigen::MatrixBase&lt; Derived &gt; &amp;xf, const Vector3P&lt; S &gt; &amp;vec)</div><div class="ttdoc">Calculates multiplication of 3x3 matrix and each 3x1 vector in packet.</div><div class="ttdef"><b>Definition</b> simd.h:158</div></div>
-<div class="ttc" id="anamespacemomentum_html_a6e841fb80f1015d501cd5164213a1c05"><div class="ttname"><a href="namespacemomentum.html#a6e841fb80f1015d501cd5164213a1c05">momentum::dot</a></div><div class="ttdeci">FloatP dot(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates dot product of Eigen::Vector3f and 3-vector of packets.</div><div class="ttdef"><b>Definition</b> simd.h:92</div></div>
-<div class="ttc" id="anamespacemomentum_html_a70eea525237da5fa78becb9af015ae71"><div class="ttname"><a href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">momentum::checkAlignment</a></div><div class="ttdeci">void checkAlignment(const Eigen::Ref&lt; Eigen::MatrixXf &gt; &amp;mat, size_t offset=0)</div><div class="ttdoc">Checks if the data of the matrix is aligned correctly.</div><div class="ttdef"><b>Definition</b> simd.h:75</div></div>
-<div class="ttc" id="anamespacemomentum_html_a7e20c2c521ff3d536234ad6f9fb2e9a4"><div class="ttname"><a href="namespacemomentum.html#a7e20c2c521ff3d536234ad6f9fb2e9a4">momentum::Vector2P</a></div><div class="ttdeci">VectorP&lt; T, 2 &gt; Vector2P</div><div class="ttdef"><b>Definition</b> simd.h:47</div></div>
-<div class="ttc" id="anamespacemomentum_html_a9211b8c5a8604fe2135ba848946836d5"><div class="ttname"><a href="namespacemomentum.html#a9211b8c5a8604fe2135ba848946836d5">momentum::computeOffset</a></div><div class="ttdeci">size_t computeOffset(const Eigen::Ref&lt; Eigen::MatrixXf &gt; &amp;mat)</div><div class="ttdoc">Computes the offset required for the matrix data to meet the alignment requirement.</div><div class="ttdef"><b>Definition</b> simd.h:60</div></div>
-<div class="ttc" id="anamespacemomentum_html_aae0f4b5515490de397ca652135ff675e"><div class="ttname"><a href="namespacemomentum.html#aae0f4b5515490de397ca652135ff675e">momentum::operator+</a></div><div class="ttdeci">Vector3P&lt; S &gt; operator+(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates summation of Eigen::Vector3f and Vector3P.</div><div class="ttdef"><b>Definition</b> simd.h:114</div></div>
-<div class="ttc" id="anamespacemomentum_html_ac3a23def000e00773511664ca5db476b"><div class="ttname"><a href="namespacemomentum.html#ac3a23def000e00773511664ca5db476b">momentum::cross</a></div><div class="ttdeci">Vector3P&lt; S &gt; cross(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates cross product of Eigen::Vector3f and Vector3P.</div><div class="ttdef"><b>Definition</b> simd.h:179</div></div>
-<div class="ttc" id="anamespacemomentum_html_ac855e339571e21adc0b622a8d05747e9"><div class="ttname"><a href="namespacemomentum.html#ac855e339571e21adc0b622a8d05747e9">momentum::IntP</a></div><div class="ttdeci">Packet&lt; int &gt; IntP</div><div class="ttdef"><b>Definition</b> simd.h:41</div></div>
-<div class="ttc" id="anamespacemomentum_html_ad69fb80d92405f98b701ed3b09d9ae20"><div class="ttname"><a href="namespacemomentum.html#ad69fb80d92405f98b701ed3b09d9ae20">momentum::Packet</a></div><div class="ttdeci">drjit::Packet&lt; T, kSimdPacketSize &gt; Packet</div><div class="ttdef"><b>Definition</b> simd.h:37</div></div>
-<div class="ttc" id="anamespacemomentum_html_af3a3b5f2df84c8acf8d37df7f2eb9ee6"><div class="ttname"><a href="namespacemomentum.html#af3a3b5f2df84c8acf8d37df7f2eb9ee6">momentum::Vector3P</a></div><div class="ttdeci">VectorP&lt; T, 3 &gt; Vector3P</div><div class="ttdef"><b>Definition</b> simd.h:50</div></div>
-<div class="ttc" id="anamespacemomentum_html_af42f9f90f23c3a61a485410cde3e7580"><div class="ttname"><a href="namespacemomentum.html#af42f9f90f23c3a61a485410cde3e7580">momentum::Vector2fP</a></div><div class="ttdeci">Vector2P&lt; float &gt; Vector2fP</div><div class="ttdef"><b>Definition</b> simd.h:52</div></div>
-<div class="ttc" id="anamespacemomentum_html_af8254a42d02b0638b91a4e40344b4eb8"><div class="ttname"><a href="namespacemomentum.html#af8254a42d02b0638b91a4e40344b4eb8">momentum::Vector3fP</a></div><div class="ttdeci">Vector3P&lt; float &gt; Vector3fP</div><div class="ttdef"><b>Definition</b> simd.h:53</div></div>
-<div class="ttc" id="anamespacemomentum_html_afad3af6ee3e3c1eeb1221cd98011157b"><div class="ttname"><a href="namespacemomentum.html#afad3af6ee3e3c1eeb1221cd98011157b">momentum::Vector3dP</a></div><div class="ttdeci">Vector3P&lt; double &gt; Vector3dP</div><div class="ttdef"><b>Definition</b> simd.h:56</div></div>
-<div class="ttc" id="anamespacemomentum_html_afbe10e16212eab335f14435015e5bd88"><div class="ttname"><a href="namespacemomentum.html#afbe10e16212eab335f14435015e5bd88">momentum::kAvxAlignment</a></div><div class="ttdeci">constexpr size_t kAvxAlignment</div><div class="ttdef"><b>Definition</b> simd.h:31</div></div>
-<div class="ttc" id="anamespacemomentum_html_afc082f44e99ecd9f189566f6e47192fc"><div class="ttname"><a href="namespacemomentum.html#afc082f44e99ecd9f189566f6e47192fc">momentum::Vector2dP</a></div><div class="ttdeci">Vector2P&lt; double &gt; Vector2dP</div><div class="ttdef"><b>Definition</b> simd.h:55</div></div>
-<div class="ttc" id="anamespacemomentum_html_afe3eed78243df9949325928bbedb680f"><div class="ttname"><a href="namespacemomentum.html#afe3eed78243df9949325928bbedb680f">momentum::DoubleP</a></div><div class="ttdeci">Packet&lt; double &gt; DoubleP</div><div class="ttdef"><b>Definition</b> simd.h:40</div></div>
+<div class="ttc" id="aexception_8h_html_a9b406adb60f122613db3463c42c4d6ec"><div class="ttname"><a href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a></div><div class="ttdeci">#define MT_THROW_IF(Condition,...)</div><div class="ttdoc">Conditionally throws a std::runtime_error with a formatted message if the condition is true.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00050">exception.h:50</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a0fc2afe43b2fd442387d507fd40cdea0"><div class="ttname"><a href="namespacemomentum.html#a0fc2afe43b2fd442387d507fd40cdea0">momentum::kAvxPacketSize</a></div><div class="ttdeci">constexpr size_t kAvxPacketSize</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00030">simd.h:30</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a13b4e1500a9663dd56c0e9ee20205acb"><div class="ttname"><a href="namespacemomentum.html#a13b4e1500a9663dd56c0e9ee20205acb">momentum::VectorP</a></div><div class="ttdeci">drjit::Array&lt; Packet&lt; T &gt;, Dim &gt; VectorP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00044">simd.h:44</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a2f9ed099fa9b206312926f7d04f8ddd9"><div class="ttname"><a href="namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9">momentum::kSimdPacketSize</a></div><div class="ttdeci">constexpr size_t kSimdPacketSize</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00033">simd.h:33</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a3b477c9e843b9d7b0cc96a3021f50811"><div class="ttname"><a href="namespacemomentum.html#a3b477c9e843b9d7b0cc96a3021f50811">momentum::operator-</a></div><div class="ttdeci">Vector3P&lt; S &gt; operator-(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates subtraction of Eigen::Vector3f and Vector3P.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00136">simd.h:136</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a3c50b779f3e2b68a3ce7fbb094184549"><div class="ttname"><a href="namespacemomentum.html#a3c50b779f3e2b68a3ce7fbb094184549">momentum::FloatP</a></div><div class="ttdeci">Packet&lt; float &gt; FloatP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00039">simd.h:39</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a48aa47b7e646b6dc4ed28a60cc6a75a1"><div class="ttname"><a href="namespacemomentum.html#a48aa47b7e646b6dc4ed28a60cc6a75a1">momentum::kSimdAlignment</a></div><div class="ttdeci">constexpr size_t kSimdAlignment</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00034">simd.h:34</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a4eea1ce34b79cf212d55c263a7d15c6b"><div class="ttname"><a href="namespacemomentum.html#a4eea1ce34b79cf212d55c263a7d15c6b">momentum::operator*</a></div><div class="ttdeci">Vector3P&lt; S &gt; operator*(const Eigen::MatrixBase&lt; Derived &gt; &amp;xf, const Vector3P&lt; S &gt; &amp;vec)</div><div class="ttdoc">Calculates multiplication of 3x3 matrix and each 3x1 vector in packet.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00158">simd.h:158</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a6e841fb80f1015d501cd5164213a1c05"><div class="ttname"><a href="namespacemomentum.html#a6e841fb80f1015d501cd5164213a1c05">momentum::dot</a></div><div class="ttdeci">FloatP dot(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates dot product of Eigen::Vector3f and 3-vector of packets.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00092">simd.h:92</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a70eea525237da5fa78becb9af015ae71"><div class="ttname"><a href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">momentum::checkAlignment</a></div><div class="ttdeci">void checkAlignment(const Eigen::Ref&lt; Eigen::MatrixXf &gt; &amp;mat, size_t offset=0)</div><div class="ttdoc">Checks if the data of the matrix is aligned correctly.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00075">simd.h:75</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a7e20c2c521ff3d536234ad6f9fb2e9a4"><div class="ttname"><a href="namespacemomentum.html#a7e20c2c521ff3d536234ad6f9fb2e9a4">momentum::Vector2P</a></div><div class="ttdeci">VectorP&lt; T, 2 &gt; Vector2P</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00047">simd.h:47</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a9211b8c5a8604fe2135ba848946836d5"><div class="ttname"><a href="namespacemomentum.html#a9211b8c5a8604fe2135ba848946836d5">momentum::computeOffset</a></div><div class="ttdeci">size_t computeOffset(const Eigen::Ref&lt; Eigen::MatrixXf &gt; &amp;mat)</div><div class="ttdoc">Computes the offset required for the matrix data to meet the alignment requirement.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00060">simd.h:60</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aae0f4b5515490de397ca652135ff675e"><div class="ttname"><a href="namespacemomentum.html#aae0f4b5515490de397ca652135ff675e">momentum::operator+</a></div><div class="ttdeci">Vector3P&lt; S &gt; operator+(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates summation of Eigen::Vector3f and Vector3P.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00114">simd.h:114</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ac3a23def000e00773511664ca5db476b"><div class="ttname"><a href="namespacemomentum.html#ac3a23def000e00773511664ca5db476b">momentum::cross</a></div><div class="ttdeci">Vector3P&lt; S &gt; cross(const Eigen::MatrixBase&lt; Derived &gt; &amp;v1, const Vector3P&lt; S &gt; &amp;v2)</div><div class="ttdoc">Calculates cross product of Eigen::Vector3f and Vector3P.</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00179">simd.h:179</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ac855e339571e21adc0b622a8d05747e9"><div class="ttname"><a href="namespacemomentum.html#ac855e339571e21adc0b622a8d05747e9">momentum::IntP</a></div><div class="ttdeci">Packet&lt; int &gt; IntP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00041">simd.h:41</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ad69fb80d92405f98b701ed3b09d9ae20"><div class="ttname"><a href="namespacemomentum.html#ad69fb80d92405f98b701ed3b09d9ae20">momentum::Packet</a></div><div class="ttdeci">drjit::Packet&lt; T, kSimdPacketSize &gt; Packet</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00037">simd.h:37</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_af3a3b5f2df84c8acf8d37df7f2eb9ee6"><div class="ttname"><a href="namespacemomentum.html#af3a3b5f2df84c8acf8d37df7f2eb9ee6">momentum::Vector3P</a></div><div class="ttdeci">VectorP&lt; T, 3 &gt; Vector3P</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00050">simd.h:50</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_af42f9f90f23c3a61a485410cde3e7580"><div class="ttname"><a href="namespacemomentum.html#af42f9f90f23c3a61a485410cde3e7580">momentum::Vector2fP</a></div><div class="ttdeci">Vector2P&lt; float &gt; Vector2fP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00052">simd.h:52</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_af8254a42d02b0638b91a4e40344b4eb8"><div class="ttname"><a href="namespacemomentum.html#af8254a42d02b0638b91a4e40344b4eb8">momentum::Vector3fP</a></div><div class="ttdeci">Vector3P&lt; float &gt; Vector3fP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00053">simd.h:53</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_afad3af6ee3e3c1eeb1221cd98011157b"><div class="ttname"><a href="namespacemomentum.html#afad3af6ee3e3c1eeb1221cd98011157b">momentum::Vector3dP</a></div><div class="ttdeci">Vector3P&lt; double &gt; Vector3dP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00056">simd.h:56</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_afbe10e16212eab335f14435015e5bd88"><div class="ttname"><a href="namespacemomentum.html#afbe10e16212eab335f14435015e5bd88">momentum::kAvxAlignment</a></div><div class="ttdeci">constexpr size_t kAvxAlignment</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00031">simd.h:31</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_afc082f44e99ecd9f189566f6e47192fc"><div class="ttname"><a href="namespacemomentum.html#afc082f44e99ecd9f189566f6e47192fc">momentum::Vector2dP</a></div><div class="ttdeci">Vector2P&lt; double &gt; Vector2dP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00055">simd.h:55</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_afe3eed78243df9949325928bbedb680f"><div class="ttname"><a href="namespacemomentum.html#afe3eed78243df9949325928bbedb680f">momentum::DoubleP</a></div><div class="ttdeci">Packet&lt; double &gt; DoubleP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00040">simd.h:40</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_438dd2bc29fc0ff4a3e7d65d3220f2b7.html">simd</a></li><li class="navelem"><a class="el" href="simd_8h.html">simd.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

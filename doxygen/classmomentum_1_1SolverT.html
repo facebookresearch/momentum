@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1SolverT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SolverT.html">SolverT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -87,9 +103,11 @@ $(function() {
  <a href="classmomentum_1_1SolverT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="solver_8h_source.html">solver.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::SolverT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SolverT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1SolverT.png" usemap="#momentum::SolverT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::SolverT_3C_20T_20_3E_map" name="momentum::SolverT_3C_20T_20_3E_map">
@@ -193,6 +211,8 @@ Protected Attributes</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 class momentum::SolverT&lt; T &gt;</div><p>Base class for numerical optimization solvers. </p>
 <p>Provides common functionality for iterative optimization algorithms including parameter management, convergence checking, and history tracking. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00041">41</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af4f1df2bed49af36593851b752e3b1f1" name="af4f1df2bed49af36593851b752e3b1f1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af4f1df2bed49af36593851b752e3b1f1">&#9670;&#160;</a></span>SolverT()</h2>
@@ -223,6 +243,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Constructor with solver options and function to optimize. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00017">17</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="solver_8h_source.html#l00103">momentum::SolverT&lt; T &gt;::activeParameters_</a>, <a class="el" href="solver_8h_source.html#l00106">momentum::SolverT&lt; T &gt;::actualParameters_</a>, <a class="el" href="solver_8h_source.html#l00111">momentum::SolverT&lt; T &gt;::newParameterPattern_</a>, <a class="el" href="solver_8h_source.html#l00094">momentum::SolverT&lt; T &gt;::numParameters_</a>, <a class="el" href="solver_8h_source.html#l00100">momentum::SolverT&lt; T &gt;::parameters_</a>, <a class="el" href="solver_8cpp_source.html#l00029">momentum::SolverT&lt; T &gt;::setOptions()</a>, and <a class="el" href="solver_8h_source.html#l00097">momentum::SolverT&lt; T &gt;::solverFunction_</a>.</p>
 
 </div>
 </div>
@@ -304,6 +328,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the current set of enabled parameters. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00122">122</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
 </div>
 </div>
 <a id="aba0c451b4e334013083243405e993e78" name="aba0c451b4e334013083243405e993e78"></a>
@@ -326,6 +352,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Returns the history of the solver's iterations. </p>
 <p>The history contains matrices for parameters, errors, and other solver-specific data </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00137">137</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
 </div>
 </div>
 <a id="a61f7572131b9cdc76c64b1eaf481761b" name="a61f7572131b9cdc76c64b1eaf481761b"></a>
@@ -347,6 +375,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the maximum number of iterations before terminating. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00147">147</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
 </div>
 </div>
 <a id="aa518cedfeba7708a75ade00abb4e2945" name="aa518cedfeba7708a75ade00abb4e2945"></a>
@@ -367,6 +397,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Returns the minimum number of iterations before checking convergence. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00142">142</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -468,6 +500,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented in <a class="el" href="classmomentum_1_1SequenceSolverT.html#af92cb872ee0f894c95f05cd4ceee2440">momentum::SequenceSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00037">37</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="sequence__solver_8h_source.html#l00056">momentum::SequenceSolverT&lt; T &gt;::setEnabledParameters()</a>, and <a class="el" href="subset__gauss__newton__solver_8cpp_source.html#l00064">momentum::SubsetGaussNewtonSolverT&lt; T &gt;::setEnabledParameters()</a>.</p>
+
 </div>
 </div>
 <a id="a199af677b34be0c2221ca6ad62698e62" name="a199af677b34be0c2221ca6ad62698e62"></a>
@@ -500,6 +536,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented in <a class="el" href="classmomentum_1_1MultiposeSolverT.html#aeffe5aa9e50f6d4269c2efc1bdb436a5">momentum::MultiposeSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1SequenceSolverT.html#adef5075edc63b6f681cc7792a7b8ee6e">momentum::SequenceSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverQRT.html#af953c94b82d4929b015ee9096eb12c2f">momentum::GaussNewtonSolverQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1TrustRegionQRT.html#a07dd4361339362a615416a700928e229">momentum::TrustRegionQRT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#ab99172aa834f6dc7ab174cd7588750cf">momentum::GaussNewtonSolverT&lt; T &gt;</a>, <a class="el" href="classmomentum_1_1GradientDescentSolverT.html#a50a0ada2532cf6803233f3de4498f862">momentum::GradientDescentSolverT&lt; T &gt;</a>, and <a class="el" href="classmomentum_1_1SubsetGaussNewtonSolverT.html#a6993596c31cf66127d68c7f9d7f3e05a">momentum::SubsetGaussNewtonSolverT&lt; T &gt;</a>.</p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00029">29</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="multipose__solver_8cpp_source.html#l00036">momentum::MultiposeSolverT&lt; T &gt;::setOptions()</a>, <a class="el" href="sequence__solver_8cpp_source.html#l00047">momentum::SequenceSolverT&lt; T &gt;::setOptions()</a>, <a class="el" href="gauss__newton__solver__qr_8cpp_source.html#l00041">momentum::GaussNewtonSolverQRT&lt; T &gt;::setOptions()</a>, <a class="el" href="trust__region__qr_8cpp_source.html#l00041">momentum::TrustRegionQRT&lt; T &gt;::setOptions()</a>, <a class="el" href="gauss__newton__solver_8cpp_source.html#l00034">momentum::GaussNewtonSolverT&lt; T &gt;::setOptions()</a>, <a class="el" href="gradient__descent__solver_8cpp_source.html#l00033">momentum::GradientDescentSolverT&lt; T &gt;::setOptions()</a>, <a class="el" href="subset__gauss__newton__solver_8cpp_source.html#l00037">momentum::SubsetGaussNewtonSolverT&lt; T &gt;::setOptions()</a>, and <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
+
 </div>
 </div>
 <a id="a5537f6c45a1103109a7b703c7d7eeb37" name="a5537f6c45a1103109a7b703c7d7eeb37"></a>
@@ -522,6 +562,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Sets the current parameter values without solving. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00127">127</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
 </div>
 </div>
 <a id="ac92423f2c8c9d626fa63e203a90cfadb" name="ac92423f2c8c9d626fa63e203a90cfadb"></a>
@@ -543,6 +585,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Controls whether to store iteration history for debugging and analysis. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00132">132</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -573,6 +617,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Final objective function value after optimization </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="solver_8cpp_source.html#l00047">47</a> of file <a class="el" href="solver_8cpp_source.html">solver.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -600,6 +648,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Bitset indicating which parameters are enabled for optimization. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00103">103</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
+
 </div>
 </div>
 <a id="af97017324ce715e76dd01f026c857768" name="af97017324ce715e76dd01f026c857768"></a>
@@ -625,6 +677,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Number of parameters currently enabled for optimization. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00106">106</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
 
 </div>
 </div>
@@ -652,6 +708,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Current objective function value. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00117">117</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
 </div>
 </div>
 <a id="a76a50c26a8b442d695aa703244025be2" name="a76a50c26a8b442d695aa703244025be2"></a>
@@ -677,6 +735,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Current iteration count. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00114">114</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="multipose__solver_8h_source.html#l00043">momentum::MultiposeSolverT&lt; T &gt;::init()</a>, <a class="el" href="sequence__solver_8h_source.html#l00066">momentum::SequenceSolverT&lt; T &gt;::init()</a>, <a class="el" href="trust__region__qr_8h_source.html#l00047">momentum::TrustRegionQRT&lt; T &gt;::init()</a>, <a class="el" href="multipose__solver_8h_source.html#l00038">momentum::MultiposeSolverT&lt; T &gt;::iter()</a>, <a class="el" href="sequence__solver_8h_source.html#l00061">momentum::SequenceSolverT&lt; T &gt;::iter()</a>, and <a class="el" href="trust__region__qr_8h_source.html#l00042">momentum::TrustRegionQRT&lt; T &gt;::iter()</a>.</p>
 
 </div>
 </div>
@@ -705,6 +767,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Recorded data from optimization process. </p>
 <p>Contains matrices for parameters, errors, and other solver-specific data </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00128">128</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
 </div>
 </div>
 <a id="a6a52b6c0abfe8942a3b0dbdfdd5eb582" name="a6a52b6c0abfe8942a3b0dbdfdd5eb582"></a>
@@ -730,6 +794,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Previous iteration's objective function value. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00120">120</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
 
 </div>
 </div>
@@ -758,6 +824,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Flag indicating parameter structure has changed. </p>
 <p>Used to trigger reinitialization of solver data structures </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00111">111</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
+
 </div>
 </div>
 <a id="ae83db1a172c236fe48bfaf8f8855bade" name="ae83db1a172c236fe48bfaf8f8855bade"></a>
@@ -783,6 +853,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Total number of parameters in the optimization problem. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00094">94</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="sequence__solver_8h_source.html#l00056">momentum::SequenceSolverT&lt; T &gt;::setEnabledParameters()</a>, and <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
 
 </div>
 </div>
@@ -810,6 +884,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Current parameter values. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00100">100</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="multipose__solver_8h_source.html#l00048">momentum::MultiposeSolverT&lt; T &gt;::getP()</a>, <a class="el" href="sequence__solver_8h_source.html#l00071">momentum::SequenceSolverT&lt; T &gt;::getP()</a>, <a class="el" href="trust__region__qr_8h_source.html#l00052">momentum::TrustRegionQRT&lt; T &gt;::getP()</a>, and <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
+
 </div>
 </div>
 <a id="aee49a4cfe460ce8b148c3f52e90caef2" name="aee49a4cfe460ce8b148c3f52e90caef2"></a>
@@ -835,6 +913,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Function to be optimized. </p>
+
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00097">97</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="sequence__solver_8h_source.html#l00056">momentum::SequenceSolverT&lt; T &gt;::setEnabledParameters()</a>, and <a class="el" href="solver_8cpp_source.html#l00017">momentum::SolverT&lt; T &gt;::SolverT()</a>.</p>
 
 </div>
 </div>
@@ -862,6 +944,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Whether to record optimization progress for analysis. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00123">123</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
 </div>
 </div>
 <a id="a9a7081025c8799075f3f0abb1be9a60b" name="a9a7081025c8799075f3f0abb1be9a60b"></a>
@@ -888,17 +972,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Whether to output detailed progress information. </p>
 
+<p class="definition">Definition at line <a class="el" href="solver_8h_source.html#l00131">131</a> of file <a class="el" href="solver_8h_source.html">solver.h</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>solver/<a class="el" href="solver_2fwd_8h_source.html">fwd.h</a></li>
 <li>solver/<a class="el" href="solver_8h_source.html">solver.h</a></li>
-<li>solver/<a class="el" href="solver_8cpp.html">solver.cpp</a></li>
+<li>solver/<a class="el" href="solver_8cpp_source.html">solver.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SolverT.html">SolverT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

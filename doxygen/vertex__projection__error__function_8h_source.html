@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('vertex__projection__error__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">vertex_projection_error_function.h</div></div>
 </div><!--header-->
@@ -201,34 +217,38 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter__solver_2fwd_8h_html"><div class="ttname"><a href="character__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> skeleton_error_function.h:18</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html">momentum::VertexProjectionErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:34</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a39b35c222cc768b298b23ed34305e582"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a39b35c222cc768b298b23ed34305e582">momentum::VertexProjectionErrorFunctionT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;modelParameters, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.cpp:63</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a3f6e2a0c515878b47a69c7fe3880e0f3"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a3f6e2a0c515878b47a69c7fe3880e0f3">momentum::VertexProjectionErrorFunctionT::clearConstraints</a></div><div class="ttdeci">void clearConstraints()</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.cpp:47</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a421b911a8a9bc22eeeb0d48cce606257"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a421b911a8a9bc22eeeb0d48cce606257">momentum::VertexProjectionErrorFunctionT::getConstraints</a></div><div class="ttdeci">const std::vector&lt; VertexProjectionConstraintT&lt; T &gt; &gt; &amp; getConstraints() const</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:64</div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="skeleton__error__function_8h_source.html#l00018">skeleton_error_function.h:18</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html">momentum::VertexProjectionErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00034">vertex_projection_error_function.h:34</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a39b35c222cc768b298b23ed34305e582"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a39b35c222cc768b298b23ed34305e582">momentum::VertexProjectionErrorFunctionT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;modelParameters, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8cpp_source.html#l00063">vertex_projection_error_function.cpp:63</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a3f6e2a0c515878b47a69c7fe3880e0f3"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a3f6e2a0c515878b47a69c7fe3880e0f3">momentum::VertexProjectionErrorFunctionT::clearConstraints</a></div><div class="ttdeci">void clearConstraints()</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8cpp_source.html#l00047">vertex_projection_error_function.cpp:47</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a421b911a8a9bc22eeeb0d48cce606257"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a421b911a8a9bc22eeeb0d48cce606257">momentum::VertexProjectionErrorFunctionT::getConstraints</a></div><div class="ttdeci">const std::vector&lt; VertexProjectionConstraintT&lt; T &gt; &gt; &amp; getConstraints() const</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00064">vertex_projection_error_function.h:64</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a52f73747dfeab5589b5bcfe5866cf5c7"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a52f73747dfeab5589b5bcfe5866cf5c7">momentum::VertexProjectionErrorFunctionT::~VertexProjectionErrorFunctionT</a></div><div class="ttdeci">~VertexProjectionErrorFunctionT() override</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a8f7fbcb9457662fa869db675703acf2a"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a8f7fbcb9457662fa869db675703acf2a">momentum::VertexProjectionErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.cpp:503</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a9ffcecf3e2ce9c83f99cf14487674825"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a9ffcecf3e2ce9c83f99cf14487674825">momentum::VertexProjectionErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;modelParameters, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) final</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.cpp:460</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_aba7c06528ad0a602f68896ebd9a7f865"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#aba7c06528ad0a602f68896ebd9a7f865">momentum::VertexProjectionErrorFunctionT::addConstraint</a></div><div class="ttdeci">void addConstraint(int vertexIndex, T weight, const Eigen::Vector2&lt; T &gt; &amp;targetPosition, const Eigen::Matrix&lt; T, 3, 4 &gt; &amp;projection)</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.cpp:52</div></div>
-<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_ae564a81fc8aa6d4fe1c1dad87e672636"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#ae564a81fc8aa6d4fe1c1dad87e672636">momentum::VertexProjectionErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;modelParameters, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) final</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.cpp:416</div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a8f7fbcb9457662fa869db675703acf2a"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a8f7fbcb9457662fa869db675703acf2a">momentum::VertexProjectionErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8cpp_source.html#l00503">vertex_projection_error_function.cpp:503</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_a9ffcecf3e2ce9c83f99cf14487674825"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#a9ffcecf3e2ce9c83f99cf14487674825">momentum::VertexProjectionErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;modelParameters, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) final</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8cpp_source.html#l00460">vertex_projection_error_function.cpp:460</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_aba7c06528ad0a602f68896ebd9a7f865"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#aba7c06528ad0a602f68896ebd9a7f865">momentum::VertexProjectionErrorFunctionT::addConstraint</a></div><div class="ttdeci">void addConstraint(int vertexIndex, T weight, const Eigen::Vector2&lt; T &gt; &amp;targetPosition, const Eigen::Matrix&lt; T, 3, 4 &gt; &amp;projection)</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8cpp_source.html#l00052">vertex_projection_error_function.cpp:52</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1VertexProjectionErrorFunctionT_html_ae564a81fc8aa6d4fe1c1dad87e672636"><div class="ttname"><a href="classmomentum_1_1VertexProjectionErrorFunctionT.html#ae564a81fc8aa6d4fe1c1dad87e672636">momentum::VertexProjectionErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;modelParameters, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) final</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8cpp_source.html#l00416">vertex_projection_error_function.cpp:416</a></div></div>
 <div class="ttc" id="amath_2fwd_8h_html"><div class="ttname"><a href="math_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="anamespaceEigen_html"><div class="ttname"><a href="namespaceEigen.html">Eigen</a></div><div class="ttdef"><b>Definition</b> types.h:35</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a45e7bad11d6956c9cd6651e17c98772d"><div class="ttname"><a href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">momentum::Ref</a></div><div class="ttdeci">Eigen::Ref&lt; T &gt; Ref</div><div class="ttdef"><b>Definition</b> types.h:47</div></div>
-<div class="ttc" id="anamespacemomentum_html_aee224074a9b2b9755e2a2befa8c731bb"><div class="ttname"><a href="namespacemomentum.html#aee224074a9b2b9755e2a2befa8c731bb">momentum::Vector2</a></div><div class="ttdeci">Vector&lt; T, 2 &gt; Vector2</div><div class="ttdef"><b>Definition</b> types.h:226</div></div>
+<div class="ttc" id="anamespaceEigen_html"><div class="ttname"><a href="namespaceEigen.html">Eigen</a></div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00035">types.h:35</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a45e7bad11d6956c9cd6651e17c98772d"><div class="ttname"><a href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">momentum::Ref</a></div><div class="ttdeci">Eigen::Ref&lt; T &gt; Ref</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00047">types.h:47</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aee224074a9b2b9755e2a2befa8c731bb"><div class="ttname"><a href="namespacemomentum.html#aee224074a9b2b9755e2a2befa8c731bb">momentum::Vector2</a></div><div class="ttdeci">Vector&lt; T, 2 &gt; Vector2</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00226">types.h:226</a></div></div>
 <div class="ttc" id="askeleton__error__function_8h_html"><div class="ttname"><a href="skeleton__error__function_8h.html">skeleton_error_function.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
-<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html">momentum::VertexProjectionConstraintT</a></div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:17</div></div>
-<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_a6ad71ce6281dd03c92ed7faf688e3bb3"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#a6ad71ce6281dd03c92ed7faf688e3bb3">momentum::VertexProjectionConstraintT::cast</a></div><div class="ttdeci">VertexProjectionConstraintT&lt; T2 &gt; cast() const</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:24</div></div>
-<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_abace7d9dbab0ff5a36e2517bb1a1240d"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#abace7d9dbab0ff5a36e2517bb1a1240d">momentum::VertexProjectionConstraintT::weight</a></div><div class="ttdeci">T weight</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:19</div></div>
-<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_abecc12878955c0e7d9abff4260285a5d"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#abecc12878955c0e7d9abff4260285a5d">momentum::VertexProjectionConstraintT::projection</a></div><div class="ttdeci">Eigen::Matrix&lt; T, 3, 4 &gt; projection</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:21</div></div>
-<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_acfd2a88415e1c703527277defece8293"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#acfd2a88415e1c703527277defece8293">momentum::VertexProjectionConstraintT::targetPosition</a></div><div class="ttdeci">Eigen::Vector2&lt; T &gt; targetPosition</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:20</div></div>
-<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_adc7dc4f7caf50de0c528c455c0add901"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#adc7dc4f7caf50de0c528c455c0add901">momentum::VertexProjectionConstraintT::vertexIndex</a></div><div class="ttdeci">int vertexIndex</div><div class="ttdef"><b>Definition</b> vertex_projection_error_function.h:18</div></div>
+<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html">momentum::VertexProjectionConstraintT</a></div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00017">vertex_projection_error_function.h:17</a></div></div>
+<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_a6ad71ce6281dd03c92ed7faf688e3bb3"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#a6ad71ce6281dd03c92ed7faf688e3bb3">momentum::VertexProjectionConstraintT::cast</a></div><div class="ttdeci">VertexProjectionConstraintT&lt; T2 &gt; cast() const</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00024">vertex_projection_error_function.h:24</a></div></div>
+<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_abace7d9dbab0ff5a36e2517bb1a1240d"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#abace7d9dbab0ff5a36e2517bb1a1240d">momentum::VertexProjectionConstraintT::weight</a></div><div class="ttdeci">T weight</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00019">vertex_projection_error_function.h:19</a></div></div>
+<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_abecc12878955c0e7d9abff4260285a5d"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#abecc12878955c0e7d9abff4260285a5d">momentum::VertexProjectionConstraintT::projection</a></div><div class="ttdeci">Eigen::Matrix&lt; T, 3, 4 &gt; projection</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00021">vertex_projection_error_function.h:21</a></div></div>
+<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_acfd2a88415e1c703527277defece8293"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#acfd2a88415e1c703527277defece8293">momentum::VertexProjectionConstraintT::targetPosition</a></div><div class="ttdeci">Eigen::Vector2&lt; T &gt; targetPosition</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00020">vertex_projection_error_function.h:20</a></div></div>
+<div class="ttc" id="astructmomentum_1_1VertexProjectionConstraintT_html_adc7dc4f7caf50de0c528c455c0add901"><div class="ttname"><a href="structmomentum_1_1VertexProjectionConstraintT.html#adc7dc4f7caf50de0c528c455c0add901">momentum::VertexProjectionConstraintT::vertexIndex</a></div><div class="ttdeci">int vertexIndex</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00018">vertex_projection_error_function.h:18</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="vertex__projection__error__function_8h.html">vertex_projection_error_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

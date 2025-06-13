@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('skeleton__solver__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">skeleton_solver_function.h</div></div>
 </div><!--header-->
@@ -163,31 +179,35 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="acharacter_2fwd_8h_html"><div class="ttname"><a href="character_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="acharacter_2types_8h_html"><div class="ttname"><a href="character_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="acharacter__solver_2fwd_8h_html"><div class="ttname"><a href="character__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html">momentum::SkeletonSolverFunctionT</a></div><div class="ttdef"><b>Definition</b> skeleton_solver_function.h:19</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a0068056bd29966832b6a170eddd3085a"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a0068056bd29966832b6a170eddd3085a">momentum::SkeletonSolverFunctionT::addErrorFunction</a></div><div class="ttdeci">void addErrorFunction(std::shared_ptr&lt; SkeletonErrorFunctionT&lt; T &gt; &gt; solvable)</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:290</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a12609d84e18cb99c49a960ff01793943"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a12609d84e18cb99c49a960ff01793943">momentum::SkeletonSolverFunctionT::getJtJR</a></div><div class="ttdeci">double getJtJR(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;jtj, Eigen::VectorX&lt; T &gt; &amp;jtr) override</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:166</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a1ac8a7ccd26f3db8ac5c3b7a83584a14"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a1ac8a7ccd26f3db8ac5c3b7a83584a14">momentum::SkeletonSolverFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::VectorX&lt; T &gt; &amp;gradient) final</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:66</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a3b05f5ea9fe9927eae591da54c2e9ea0"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a3b05f5ea9fe9927eae591da54c2e9ea0">momentum::SkeletonSolverFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;jacobian, Eigen::VectorX&lt; T &gt; &amp;residual, size_t &amp;actualRows) final</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:109</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a3eaccdbe617867230438d4f02a02b43f"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a3eaccdbe617867230438d4f02a02b43f">momentum::SkeletonSolverFunctionT::getSkeleton</a></div><div class="ttdeci">const Skeleton * getSkeleton()</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.h:53</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a4eb33db7ddf165db1f5ea5a6750968d2"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a4eb33db7ddf165db1f5ea5a6750968d2">momentum::SkeletonSolverFunctionT::getError</a></div><div class="ttdeci">double getError(const Eigen::VectorX&lt; T &gt; &amp;parameters) final</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:49</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a73f2cb90cce4b24685dd9bad2b468710"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a73f2cb90cce4b24685dd9bad2b468710">momentum::SkeletonSolverFunctionT::getErrorFunctions</a></div><div class="ttdeci">const std::vector&lt; std::shared_ptr&lt; SkeletonErrorFunctionT&lt; T &gt; &gt; &gt; &amp; getErrorFunctions() const</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:302</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a97509b179b7c0b2afc76dde0ae2b0578"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a97509b179b7c0b2afc76dde0ae2b0578">momentum::SkeletonSolverFunctionT::getParameterTransform</a></div><div class="ttdeci">const ParameterTransformT&lt; T &gt; * getParameterTransform()</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.h:56</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_ab3354cf2ce67b0ca86c0b855bde48235"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#ab3354cf2ce67b0ca86c0b855bde48235">momentum::SkeletonSolverFunctionT::getSolverDerivatives</a></div><div class="ttdeci">double getSolverDerivatives(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;hess, Eigen::VectorX&lt; T &gt; &amp;grad) override</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:248</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_ab743f448d9c241064f7b797345d890ac"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#ab743f448d9c241064f7b797345d890ac">momentum::SkeletonSolverFunctionT::setEnabledParameters</a></div><div class="ttdeci">void setEnabledParameters(const ParameterSet &amp;ps) final</div><div class="ttdoc">Specifies which parameters should be optimized.</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:30</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_ad7ec43ec342ff562d629d06fa19872af"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#ad7ec43ec342ff562d629d06fa19872af">momentum::SkeletonSolverFunctionT::clearErrorFunctions</a></div><div class="ttdeci">void clearErrorFunctions()</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:296</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_af7c08d4c64b9ab133db84348e5ae65d2"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#af7c08d4c64b9ab133db84348e5ae65d2">momentum::SkeletonSolverFunctionT::updateParameters</a></div><div class="ttdeci">void updateParameters(Eigen::VectorX&lt; T &gt; &amp;parameters, const Eigen::VectorX&lt; T &gt; &amp;delta) final</div><div class="ttdef"><b>Definition</b> skeleton_solver_function.cpp:281</div></div>
-<div class="ttc" id="aclassmomentum_1_1SolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SolverFunctionT.html">momentum::SolverFunctionT</a></div><div class="ttdoc">Abstract base class for optimization objective functions.</div><div class="ttdef"><b>Definition</b> solver_function.h:22</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> types.h:402</div></div>
-<div class="ttc" id="aparameter__limits__io_8cpp_html_a2365fd804ac418addca1f58612d72e02"><div class="ttname"><a href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform</div><div class="ttdef"><b>Definition</b> parameter_limits_io.cpp:216</div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html">momentum::SkeletonSolverFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8h_source.html#l00019">skeleton_solver_function.h:19</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a0068056bd29966832b6a170eddd3085a"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a0068056bd29966832b6a170eddd3085a">momentum::SkeletonSolverFunctionT::addErrorFunction</a></div><div class="ttdeci">void addErrorFunction(std::shared_ptr&lt; SkeletonErrorFunctionT&lt; T &gt; &gt; solvable)</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00290">skeleton_solver_function.cpp:290</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a12609d84e18cb99c49a960ff01793943"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a12609d84e18cb99c49a960ff01793943">momentum::SkeletonSolverFunctionT::getJtJR</a></div><div class="ttdeci">double getJtJR(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;jtj, Eigen::VectorX&lt; T &gt; &amp;jtr) override</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00166">skeleton_solver_function.cpp:166</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a1ac8a7ccd26f3db8ac5c3b7a83584a14"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a1ac8a7ccd26f3db8ac5c3b7a83584a14">momentum::SkeletonSolverFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::VectorX&lt; T &gt; &amp;gradient) final</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00066">skeleton_solver_function.cpp:66</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a3b05f5ea9fe9927eae591da54c2e9ea0"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a3b05f5ea9fe9927eae591da54c2e9ea0">momentum::SkeletonSolverFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;jacobian, Eigen::VectorX&lt; T &gt; &amp;residual, size_t &amp;actualRows) final</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00109">skeleton_solver_function.cpp:109</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a3eaccdbe617867230438d4f02a02b43f"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a3eaccdbe617867230438d4f02a02b43f">momentum::SkeletonSolverFunctionT::getSkeleton</a></div><div class="ttdeci">const Skeleton * getSkeleton()</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8h_source.html#l00053">skeleton_solver_function.h:53</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a4eb33db7ddf165db1f5ea5a6750968d2"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a4eb33db7ddf165db1f5ea5a6750968d2">momentum::SkeletonSolverFunctionT::getError</a></div><div class="ttdeci">double getError(const Eigen::VectorX&lt; T &gt; &amp;parameters) final</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00049">skeleton_solver_function.cpp:49</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a73f2cb90cce4b24685dd9bad2b468710"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a73f2cb90cce4b24685dd9bad2b468710">momentum::SkeletonSolverFunctionT::getErrorFunctions</a></div><div class="ttdeci">const std::vector&lt; std::shared_ptr&lt; SkeletonErrorFunctionT&lt; T &gt; &gt; &gt; &amp; getErrorFunctions() const</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00302">skeleton_solver_function.cpp:302</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_a97509b179b7c0b2afc76dde0ae2b0578"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#a97509b179b7c0b2afc76dde0ae2b0578">momentum::SkeletonSolverFunctionT::getParameterTransform</a></div><div class="ttdeci">const ParameterTransformT&lt; T &gt; * getParameterTransform()</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8h_source.html#l00056">skeleton_solver_function.h:56</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_ab3354cf2ce67b0ca86c0b855bde48235"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#ab3354cf2ce67b0ca86c0b855bde48235">momentum::SkeletonSolverFunctionT::getSolverDerivatives</a></div><div class="ttdeci">double getSolverDerivatives(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;hess, Eigen::VectorX&lt; T &gt; &amp;grad) override</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00248">skeleton_solver_function.cpp:248</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_ab743f448d9c241064f7b797345d890ac"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#ab743f448d9c241064f7b797345d890ac">momentum::SkeletonSolverFunctionT::setEnabledParameters</a></div><div class="ttdeci">void setEnabledParameters(const ParameterSet &amp;ps) final</div><div class="ttdoc">Specifies which parameters should be optimized.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00030">skeleton_solver_function.cpp:30</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_ad7ec43ec342ff562d629d06fa19872af"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#ad7ec43ec342ff562d629d06fa19872af">momentum::SkeletonSolverFunctionT::clearErrorFunctions</a></div><div class="ttdeci">void clearErrorFunctions()</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00296">skeleton_solver_function.cpp:296</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonSolverFunctionT_html_af7c08d4c64b9ab133db84348e5ae65d2"><div class="ttname"><a href="classmomentum_1_1SkeletonSolverFunctionT.html#af7c08d4c64b9ab133db84348e5ae65d2">momentum::SkeletonSolverFunctionT::updateParameters</a></div><div class="ttdeci">void updateParameters(Eigen::VectorX&lt; T &gt; &amp;parameters, const Eigen::VectorX&lt; T &gt; &amp;delta) final</div><div class="ttdef"><b>Definition</b> <a href="skeleton__solver__function_8cpp_source.html#l00281">skeleton_solver_function.cpp:281</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SolverFunctionT.html">momentum::SolverFunctionT</a></div><div class="ttdoc">Abstract base class for optimization objective functions.</div><div class="ttdef"><b>Definition</b> <a href="solver__function_8h_source.html#l00022">solver_function.h:22</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00402">types.h:402</a></div></div>
+<div class="ttc" id="aparameter__limits__io_8cpp_html_a2365fd804ac418addca1f58612d72e02"><div class="ttname"><a href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform</div><div class="ttdef"><b>Definition</b> <a href="parameter__limits__io_8cpp_source.html#l00216">parameter_limits_io.cpp:216</a></div></div>
 <div class="ttc" id="aparameter__transform_8h_html"><div class="ttname"><a href="parameter__transform_8h.html">parameter_transform.h</a></div></div>
 <div class="ttc" id="asolver__function_8h_html"><div class="ttname"><a href="solver__function_8h.html">solver_function.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skeleton__solver__function_8h.html">skeleton_solver_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('model__parameters__error__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">model_parameters_error_function.h</div></div>
 </div><!--header-->
@@ -151,29 +167,33 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter__solver_2fwd_8h_html"><div class="ttname"><a href="character__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html">momentum::ModelParametersErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> model_parameters_error_function.h:17</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a1284aa13f286d2ac13fa9ab0801fccee"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a1284aa13f286d2ac13fa9ab0801fccee">momentum::ModelParametersErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) final</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.cpp:65</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a1c0f6cb9f22e89b55c8a1a15eff251d7"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a1c0f6cb9f22e89b55c8a1a15eff251d7">momentum::ModelParametersErrorFunctionT::setTargetParameters</a></div><div class="ttdeci">void setTargetParameters(const ModelParametersT&lt; T &gt; &amp;params, const Eigen::VectorX&lt; T &gt; &amp;weights)</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.h:39</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a2838343ed048ff874db12e1a1802fd5f"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a2838343ed048ff874db12e1a1802fd5f">momentum::ModelParametersErrorFunctionT::kMotionWeight</a></div><div class="ttdeci">static constexpr T kMotionWeight</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.h:57</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a3b8d60d88d43848aa84426af0ba84e36"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a3b8d60d88d43848aa84426af0ba84e36">momentum::ModelParametersErrorFunctionT::getTargetParameters</a></div><div class="ttdeci">const ModelParametersT&lt; T &gt; &amp; getTargetParameters() const</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.h:44</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a47ecff07f3cce21c94c8a9c9b41d9d64"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a47ecff07f3cce21c94c8a9c9b41d9d64">momentum::ModelParametersErrorFunctionT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.cpp:43</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a56e948cafe05e33261647a74f08c6569"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a56e948cafe05e33261647a74f08c6569">momentum::ModelParametersErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.cpp:88</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_aaea27dd1c9a5b1718f1f633672dec7d2"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#aaea27dd1c9a5b1718f1f633672dec7d2">momentum::ModelParametersErrorFunctionT::getTargetWeights</a></div><div class="ttdeci">const Eigen::VectorX&lt; T &gt; &amp; getTargetWeights() const</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.h:48</div></div>
-<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_af87a4efe90cff97b490a02e278b3e5bb"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#af87a4efe90cff97b490a02e278b3e5bb">momentum::ModelParametersErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) final</div><div class="ttdef"><b>Definition</b> model_parameters_error_function.cpp:93</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> skeleton_error_function.h:18</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a45e7bad11d6956c9cd6651e17c98772d"><div class="ttname"><a href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">momentum::Ref</a></div><div class="ttdeci">Eigen::Ref&lt; T &gt; Ref</div><div class="ttdef"><b>Definition</b> types.h:47</div></div>
-<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> types.h:402</div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html">momentum::ModelParametersErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8h_source.html#l00017">model_parameters_error_function.h:17</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a1284aa13f286d2ac13fa9ab0801fccee"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a1284aa13f286d2ac13fa9ab0801fccee">momentum::ModelParametersErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) final</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8cpp_source.html#l00065">model_parameters_error_function.cpp:65</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a1c0f6cb9f22e89b55c8a1a15eff251d7"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a1c0f6cb9f22e89b55c8a1a15eff251d7">momentum::ModelParametersErrorFunctionT::setTargetParameters</a></div><div class="ttdeci">void setTargetParameters(const ModelParametersT&lt; T &gt; &amp;params, const Eigen::VectorX&lt; T &gt; &amp;weights)</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8h_source.html#l00039">model_parameters_error_function.h:39</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a2838343ed048ff874db12e1a1802fd5f"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a2838343ed048ff874db12e1a1802fd5f">momentum::ModelParametersErrorFunctionT::kMotionWeight</a></div><div class="ttdeci">static constexpr T kMotionWeight</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8h_source.html#l00057">model_parameters_error_function.h:57</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a3b8d60d88d43848aa84426af0ba84e36"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a3b8d60d88d43848aa84426af0ba84e36">momentum::ModelParametersErrorFunctionT::getTargetParameters</a></div><div class="ttdeci">const ModelParametersT&lt; T &gt; &amp; getTargetParameters() const</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8h_source.html#l00044">model_parameters_error_function.h:44</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a47ecff07f3cce21c94c8a9c9b41d9d64"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a47ecff07f3cce21c94c8a9c9b41d9d64">momentum::ModelParametersErrorFunctionT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8cpp_source.html#l00043">model_parameters_error_function.cpp:43</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_a56e948cafe05e33261647a74f08c6569"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#a56e948cafe05e33261647a74f08c6569">momentum::ModelParametersErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8cpp_source.html#l00088">model_parameters_error_function.cpp:88</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_aaea27dd1c9a5b1718f1f633672dec7d2"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#aaea27dd1c9a5b1718f1f633672dec7d2">momentum::ModelParametersErrorFunctionT::getTargetWeights</a></div><div class="ttdeci">const Eigen::VectorX&lt; T &gt; &amp; getTargetWeights() const</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8h_source.html#l00048">model_parameters_error_function.h:48</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1ModelParametersErrorFunctionT_html_af87a4efe90cff97b490a02e278b3e5bb"><div class="ttname"><a href="classmomentum_1_1ModelParametersErrorFunctionT.html#af87a4efe90cff97b490a02e278b3e5bb">momentum::ModelParametersErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) final</div><div class="ttdef"><b>Definition</b> <a href="model__parameters__error__function_8cpp_source.html#l00093">model_parameters_error_function.cpp:93</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="skeleton__error__function_8h_source.html#l00018">skeleton_error_function.h:18</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a45e7bad11d6956c9cd6651e17c98772d"><div class="ttname"><a href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">momentum::Ref</a></div><div class="ttdeci">Eigen::Ref&lt; T &gt; Ref</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00047">types.h:47</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00402">types.h:402</a></div></div>
 <div class="ttc" id="askeleton__error__function_8h_html"><div class="ttname"><a href="skeleton__error__function_8h.html">skeleton_error_function.h</a></div></div>
 <div class="ttc" id="askeleton__state_8h_html"><div class="ttname"><a href="skeleton__state_8h.html">skeleton_state.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="model__parameters__error__function_8h.html">model_parameters_error_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

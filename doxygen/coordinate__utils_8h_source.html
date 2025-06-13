@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('coordinate__utils_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c2f13be7e03d9233fc5bd49f0a0b157c.html">gltf</a></li><li class="navelem"><a class="el" href="dir_432cb5a14feb3e5b0e96466e6b7440bb.html">utils</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">coordinate_utils.h</div></div>
 </div><!--header-->
@@ -158,21 +174,25 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="aconstants_8h_html"><div class="ttname"><a href="constants_8h.html">constants.h</a></div></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a063db1902d2932bc04e4be4df1509a87"><div class="ttname"><a href="namespacemomentum.html#a063db1902d2932bc04e4be4df1509a87">momentum::toM</a></div><div class="ttdeci">constexpr T toM(T x=T(1)) noexcept</div><div class="ttdoc">Converts the given length x (in centimeters) to meters.</div><div class="ttdef"><b>Definition</b> constants.h:68</div></div>
-<div class="ttc" id="anamespacemomentum_html_a0665c7e57c805965d6ca082c7ad7a1ee"><div class="ttname"><a href="namespacemomentum.html#a0665c7e57c805965d6ca082c7ad7a1ee">momentum::Quaternionf</a></div><div class="ttdeci">Quaternion&lt; float &gt; Quaternionf</div><div class="ttdef"><b>Definition</b> types.h:372</div></div>
-<div class="ttc" id="anamespacemomentum_html_a0b6518dbf3bb255f302a0bc95dafe3d0"><div class="ttname"><a href="namespacemomentum.html#a0b6518dbf3bb255f302a0bc95dafe3d0">momentum::toMomentumQuaternionf</a></div><div class="ttdeci">Quaternionf toMomentumQuaternionf(const std::array&lt; float, 4 &gt; &amp;gltfQuat) noexcept</div><div class="ttdef"><b>Definition</b> coordinate_utils.h:26</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a696395c265b72a334cc61f3903c52c99"><div class="ttname"><a href="namespacemomentum.html#a696395c265b72a334cc61f3903c52c99">momentum::toCm</a></div><div class="ttdeci">constexpr T toCm(T x=T(1)) noexcept</div><div class="ttdoc">Converts the given length x (in meters) to centimeters.</div><div class="ttdef"><b>Definition</b> constants.h:77</div></div>
-<div class="ttc" id="anamespacemomentum_html_a70f1c805ecb6005e0944ee9d03b57a4b"><div class="ttname"><a href="namespacemomentum.html#a70f1c805ecb6005e0944ee9d03b57a4b">momentum::toMomentumVec3f</a></div><div class="ttdeci">Vector3f toMomentumVec3f(const std::array&lt; float, 3 &gt; &amp;vec) noexcept</div><div class="ttdef"><b>Definition</b> coordinate_utils.h:18</div></div>
-<div class="ttc" id="anamespacemomentum_html_a729723921289a60f8beb25b8305da4e0"><div class="ttname"><a href="namespacemomentum.html#a729723921289a60f8beb25b8305da4e0">momentum::fromMomentumVec3f</a></div><div class="ttdeci">Vector3f fromMomentumVec3f(const Vector3f &amp;vec) noexcept</div><div class="ttdef"><b>Definition</b> coordinate_utils.h:22</div></div>
-<div class="ttc" id="anamespacemomentum_html_a880c53f9521a9cc681c1b8825dd46fef"><div class="ttname"><a href="namespacemomentum.html#a880c53f9521a9cc681c1b8825dd46fef">momentum::fromMomentumQuaternionf</a></div><div class="ttdeci">std::array&lt; float, 4 &gt; fromMomentumQuaternionf(const Quaternionf &amp;quat) noexcept</div><div class="ttdef"><b>Definition</b> coordinate_utils.h:31</div></div>
-<div class="ttc" id="anamespacemomentum_html_a954f7505066845a67c868e1ae88a5b1e"><div class="ttname"><a href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">momentum::VectorXf</a></div><div class="ttdeci">VectorX&lt; float &gt; VectorXf</div><div class="ttdef"><b>Definition</b> types.h:201</div></div>
-<div class="ttc" id="anamespacemomentum_html_ae82b3ca4dc893c348bf22f3c7815f782"><div class="ttname"><a href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">momentum::Vector3f</a></div><div class="ttdeci">Vector3&lt; float &gt; Vector3f</div><div class="ttdef"><b>Definition</b> types.h:243</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a063db1902d2932bc04e4be4df1509a87"><div class="ttname"><a href="namespacemomentum.html#a063db1902d2932bc04e4be4df1509a87">momentum::toM</a></div><div class="ttdeci">constexpr T toM(T x=T(1)) noexcept</div><div class="ttdoc">Converts the given length x (in centimeters) to meters.</div><div class="ttdef"><b>Definition</b> <a href="constants_8h_source.html#l00068">constants.h:68</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a0665c7e57c805965d6ca082c7ad7a1ee"><div class="ttname"><a href="namespacemomentum.html#a0665c7e57c805965d6ca082c7ad7a1ee">momentum::Quaternionf</a></div><div class="ttdeci">Quaternion&lt; float &gt; Quaternionf</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00372">types.h:372</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a0b6518dbf3bb255f302a0bc95dafe3d0"><div class="ttname"><a href="namespacemomentum.html#a0b6518dbf3bb255f302a0bc95dafe3d0">momentum::toMomentumQuaternionf</a></div><div class="ttdeci">Quaternionf toMomentumQuaternionf(const std::array&lt; float, 4 &gt; &amp;gltfQuat) noexcept</div><div class="ttdef"><b>Definition</b> <a href="coordinate__utils_8h_source.html#l00026">coordinate_utils.h:26</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a696395c265b72a334cc61f3903c52c99"><div class="ttname"><a href="namespacemomentum.html#a696395c265b72a334cc61f3903c52c99">momentum::toCm</a></div><div class="ttdeci">constexpr T toCm(T x=T(1)) noexcept</div><div class="ttdoc">Converts the given length x (in meters) to centimeters.</div><div class="ttdef"><b>Definition</b> <a href="constants_8h_source.html#l00077">constants.h:77</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a70f1c805ecb6005e0944ee9d03b57a4b"><div class="ttname"><a href="namespacemomentum.html#a70f1c805ecb6005e0944ee9d03b57a4b">momentum::toMomentumVec3f</a></div><div class="ttdeci">Vector3f toMomentumVec3f(const std::array&lt; float, 3 &gt; &amp;vec) noexcept</div><div class="ttdef"><b>Definition</b> <a href="coordinate__utils_8h_source.html#l00018">coordinate_utils.h:18</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a729723921289a60f8beb25b8305da4e0"><div class="ttname"><a href="namespacemomentum.html#a729723921289a60f8beb25b8305da4e0">momentum::fromMomentumVec3f</a></div><div class="ttdeci">Vector3f fromMomentumVec3f(const Vector3f &amp;vec) noexcept</div><div class="ttdef"><b>Definition</b> <a href="coordinate__utils_8h_source.html#l00022">coordinate_utils.h:22</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a880c53f9521a9cc681c1b8825dd46fef"><div class="ttname"><a href="namespacemomentum.html#a880c53f9521a9cc681c1b8825dd46fef">momentum::fromMomentumQuaternionf</a></div><div class="ttdeci">std::array&lt; float, 4 &gt; fromMomentumQuaternionf(const Quaternionf &amp;quat) noexcept</div><div class="ttdef"><b>Definition</b> <a href="coordinate__utils_8h_source.html#l00031">coordinate_utils.h:31</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a954f7505066845a67c868e1ae88a5b1e"><div class="ttname"><a href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">momentum::VectorXf</a></div><div class="ttdeci">VectorX&lt; float &gt; VectorXf</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00201">types.h:201</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ae82b3ca4dc893c348bf22f3c7815f782"><div class="ttname"><a href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">momentum::Vector3f</a></div><div class="ttdeci">Vector3&lt; float &gt; Vector3f</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00243">types.h:243</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c2f13be7e03d9233fc5bd49f0a0b157c.html">gltf</a></li><li class="navelem"><a class="el" href="dir_432cb5a14feb3e5b0e96466e6b7440bb.html">utils</a></li><li class="navelem"><a class="el" href="coordinate__utils_8h.html">coordinate_utils.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

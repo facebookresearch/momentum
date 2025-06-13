@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('multipose__solver__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">multipose_solver_function.h</div></div>
 </div><!--header-->
@@ -172,34 +188,38 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="acharacter_2types_8h_html"><div class="ttname"><a href="character_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="acharacter__sequence__solver_2fwd_8h_html"><div class="ttname"><a href="character__sequence__solver_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="acharacter__solver_2fwd_8h_html"><div class="ttname"><a href="character__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html">momentum::MultiposeSolverFunctionT</a></div><div class="ttdef"><b>Definition</b> multipose_solver_function.h:20</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a0c171b9a3b7111e103610d50f0587b90"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a0c171b9a3b7111e103610d50f0587b90">momentum::MultiposeSolverFunctionT::getNumFrames</a></div><div class="ttdeci">size_t getNumFrames() const</div><div class="ttdef"><b>Definition</b> multipose_solver_function.h:43</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a1437f5335c6bdff024920d49fe78246b"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a1437f5335c6bdff024920d49fe78246b">momentum::MultiposeSolverFunctionT::getUniversalLocatorParameterSet</a></div><div class="ttdeci">ParameterSet getUniversalLocatorParameterSet() const</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:154</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a1f84236098547f5b826c0daed1f01af5"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a1f84236098547f5b826c0daed1f01af5">momentum::MultiposeSolverFunctionT::getUniversalParameters</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; getUniversalParameters()</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:96</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a2d72c867545ec40e05556a8f8d15cb58"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a2d72c867545ec40e05556a8f8d15cb58">momentum::MultiposeSolverFunctionT::getFrameParameters</a></div><div class="ttdeci">const ModelParametersT&lt; T &gt; &amp; getFrameParameters(const size_t frame) const</div><div class="ttdef"><b>Definition</b> multipose_solver_function.h:47</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a2f2e7e5f02ce7bd6f50a6049c32f5ee1"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a2f2e7e5f02ce7bd6f50a6049c32f5ee1">momentum::MultiposeSolverFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;jacobian, Eigen::VectorX&lt; T &gt; &amp;residual, size_t &amp;actualRows) final</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:238</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a40e9c7f73550462fd35be08976531f47"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a40e9c7f73550462fd35be08976531f47">momentum::MultiposeSolverFunctionT::updateParameters</a></div><div class="ttdeci">void updateParameters(Eigen::VectorX&lt; T &gt; &amp;parameters, const Eigen::VectorX&lt; T &gt; &amp;gradient) final</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:346</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a5a682b6d4f91ac3df9ff8356218992a0"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a5a682b6d4f91ac3df9ff8356218992a0">momentum::MultiposeSolverFunctionT::addErrorFunction</a></div><div class="ttdeci">void addErrorFunction(size_t frame, SkeletonErrorFunctionT&lt; T &gt; *errorFunction)</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:360</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a5bbd28c1f6919b761aaa8aedf337c7d2"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a5bbd28c1f6919b761aaa8aedf337c7d2">momentum::MultiposeSolverFunctionT::getUniversalParameterSet</a></div><div class="ttdeci">ParameterSet getUniversalParameterSet() const</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:143</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a610d1efa0106937d855d6dff057a2f49"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a610d1efa0106937d855d6dff057a2f49">momentum::MultiposeSolverFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::VectorX&lt; T &gt; &amp;gradient) final</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:196</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a7992cacf058d98c569d86d349ef49ff2"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a7992cacf058d98c569d86d349ef49ff2">momentum::MultiposeSolverFunctionT::getError</a></div><div class="ttdeci">double getError(const Eigen::VectorX&lt; T &gt; &amp;parameters) final</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:171</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a91e52676b24b51b0667b830332b9f307"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a91e52676b24b51b0667b830332b9f307">momentum::MultiposeSolverFunctionT::setEnabledParameters</a></div><div class="ttdeci">void setEnabledParameters(const ParameterSet &amp;parameterSet) final</div><div class="ttdoc">Specifies which parameters should be optimized.</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:56</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a9b6136b216c3df72f99338b18b265207"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a9b6136b216c3df72f99338b18b265207">momentum::MultiposeSolverFunctionT::setFrameParameters</a></div><div class="ttdeci">void setFrameParameters(size_t frame, const ModelParametersT&lt; T &gt; &amp;parameters)</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:86</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_ab5282aad4ff1e26506f0d01657793382"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#ab5282aad4ff1e26506f0d01657793382">momentum::MultiposeSolverFunctionT::setJoinedParameterVector</a></div><div class="ttdeci">void setJoinedParameterVector(const Eigen::VectorX&lt; T &gt; &amp;joinedParameters)</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:120</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_ae615921aa0a427ecd558a40b9e6793fa"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#ae615921aa0a427ecd558a40b9e6793fa">momentum::MultiposeSolverFunctionT::getJoinedParameterVector</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; getJoinedParameterVector() const</div><div class="ttdef"><b>Definition</b> multipose_solver_function.cpp:101</div></div>
-<div class="ttc" id="aclassmomentum_1_1MultiposeSolverT_html"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverT.html">momentum::MultiposeSolverT</a></div><div class="ttdef"><b>Definition</b> multipose_solver.h:30</div></div>
-<div class="ttc" id="aclassmomentum_1_1SolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SolverFunctionT.html">momentum::SolverFunctionT</a></div><div class="ttdoc">Abstract base class for optimization objective functions.</div><div class="ttdef"><b>Definition</b> solver_function.h:22</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> types.h:402</div></div>
-<div class="ttc" id="aparameter__limits__io_8cpp_html_a2365fd804ac418addca1f58612d72e02"><div class="ttname"><a href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform</div><div class="ttdef"><b>Definition</b> parameter_limits_io.cpp:216</div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html">momentum::MultiposeSolverFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8h_source.html#l00020">multipose_solver_function.h:20</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a0c171b9a3b7111e103610d50f0587b90"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a0c171b9a3b7111e103610d50f0587b90">momentum::MultiposeSolverFunctionT::getNumFrames</a></div><div class="ttdeci">size_t getNumFrames() const</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8h_source.html#l00043">multipose_solver_function.h:43</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a1437f5335c6bdff024920d49fe78246b"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a1437f5335c6bdff024920d49fe78246b">momentum::MultiposeSolverFunctionT::getUniversalLocatorParameterSet</a></div><div class="ttdeci">ParameterSet getUniversalLocatorParameterSet() const</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00154">multipose_solver_function.cpp:154</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a1f84236098547f5b826c0daed1f01af5"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a1f84236098547f5b826c0daed1f01af5">momentum::MultiposeSolverFunctionT::getUniversalParameters</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; getUniversalParameters()</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00096">multipose_solver_function.cpp:96</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a2d72c867545ec40e05556a8f8d15cb58"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a2d72c867545ec40e05556a8f8d15cb58">momentum::MultiposeSolverFunctionT::getFrameParameters</a></div><div class="ttdeci">const ModelParametersT&lt; T &gt; &amp; getFrameParameters(const size_t frame) const</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8h_source.html#l00047">multipose_solver_function.h:47</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a2f2e7e5f02ce7bd6f50a6049c32f5ee1"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a2f2e7e5f02ce7bd6f50a6049c32f5ee1">momentum::MultiposeSolverFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::MatrixX&lt; T &gt; &amp;jacobian, Eigen::VectorX&lt; T &gt; &amp;residual, size_t &amp;actualRows) final</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00238">multipose_solver_function.cpp:238</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a40e9c7f73550462fd35be08976531f47"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a40e9c7f73550462fd35be08976531f47">momentum::MultiposeSolverFunctionT::updateParameters</a></div><div class="ttdeci">void updateParameters(Eigen::VectorX&lt; T &gt; &amp;parameters, const Eigen::VectorX&lt; T &gt; &amp;gradient) final</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00346">multipose_solver_function.cpp:346</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a5a682b6d4f91ac3df9ff8356218992a0"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a5a682b6d4f91ac3df9ff8356218992a0">momentum::MultiposeSolverFunctionT::addErrorFunction</a></div><div class="ttdeci">void addErrorFunction(size_t frame, SkeletonErrorFunctionT&lt; T &gt; *errorFunction)</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00360">multipose_solver_function.cpp:360</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a5bbd28c1f6919b761aaa8aedf337c7d2"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a5bbd28c1f6919b761aaa8aedf337c7d2">momentum::MultiposeSolverFunctionT::getUniversalParameterSet</a></div><div class="ttdeci">ParameterSet getUniversalParameterSet() const</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00143">multipose_solver_function.cpp:143</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a610d1efa0106937d855d6dff057a2f49"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a610d1efa0106937d855d6dff057a2f49">momentum::MultiposeSolverFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const Eigen::VectorX&lt; T &gt; &amp;parameters, Eigen::VectorX&lt; T &gt; &amp;gradient) final</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00196">multipose_solver_function.cpp:196</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a7992cacf058d98c569d86d349ef49ff2"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a7992cacf058d98c569d86d349ef49ff2">momentum::MultiposeSolverFunctionT::getError</a></div><div class="ttdeci">double getError(const Eigen::VectorX&lt; T &gt; &amp;parameters) final</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00171">multipose_solver_function.cpp:171</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a91e52676b24b51b0667b830332b9f307"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a91e52676b24b51b0667b830332b9f307">momentum::MultiposeSolverFunctionT::setEnabledParameters</a></div><div class="ttdeci">void setEnabledParameters(const ParameterSet &amp;parameterSet) final</div><div class="ttdoc">Specifies which parameters should be optimized.</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00056">multipose_solver_function.cpp:56</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_a9b6136b216c3df72f99338b18b265207"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#a9b6136b216c3df72f99338b18b265207">momentum::MultiposeSolverFunctionT::setFrameParameters</a></div><div class="ttdeci">void setFrameParameters(size_t frame, const ModelParametersT&lt; T &gt; &amp;parameters)</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00086">multipose_solver_function.cpp:86</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_ab5282aad4ff1e26506f0d01657793382"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#ab5282aad4ff1e26506f0d01657793382">momentum::MultiposeSolverFunctionT::setJoinedParameterVector</a></div><div class="ttdeci">void setJoinedParameterVector(const Eigen::VectorX&lt; T &gt; &amp;joinedParameters)</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00120">multipose_solver_function.cpp:120</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html_ae615921aa0a427ecd558a40b9e6793fa"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html#ae615921aa0a427ecd558a40b9e6793fa">momentum::MultiposeSolverFunctionT::getJoinedParameterVector</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; getJoinedParameterVector() const</div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8cpp_source.html#l00101">multipose_solver_function.cpp:101</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1MultiposeSolverT_html"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverT.html">momentum::MultiposeSolverT</a></div><div class="ttdef"><b>Definition</b> <a href="multipose__solver_8h_source.html#l00030">multipose_solver.h:30</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SolverFunctionT.html">momentum::SolverFunctionT</a></div><div class="ttdoc">Abstract base class for optimization objective functions.</div><div class="ttdef"><b>Definition</b> <a href="solver__function_8h_source.html#l00022">solver_function.h:22</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aadb2e10e938b6dde5b7faf1dfb44ce7e"><div class="ttname"><a href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">momentum::ParameterSet</a></div><div class="ttdeci">std::bitset&lt; kMaxModelParams &gt; ParameterSet</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00402">types.h:402</a></div></div>
+<div class="ttc" id="aparameter__limits__io_8cpp_html_a2365fd804ac418addca1f58612d72e02"><div class="ttname"><a href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a></div><div class="ttdeci">const ParameterTransform &amp; parameterTransform</div><div class="ttdef"><b>Definition</b> <a href="parameter__limits__io_8cpp_source.html#l00216">parameter_limits_io.cpp:216</a></div></div>
 <div class="ttc" id="aparameter__transform_8h_html"><div class="ttname"><a href="parameter__transform_8h.html">parameter_transform.h</a></div></div>
 <div class="ttc" id="asolver__function_8h_html"><div class="ttname"><a href="solver__function_8h.html">solver_function.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="multipose__solver__function_8h.html">multipose_solver_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

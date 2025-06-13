@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('aligned_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">aligned.h</div></div>
 </div><!--header-->
@@ -241,31 +257,35 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>} <span class="comment">// namespace momentum</span></div>
 </div>
-<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html">momentum::AlignedAllocator</a></div><div class="ttdoc">An allocator that aligns memory blocks according to a specified alignment.</div><div class="ttdef"><b>Definition</b> aligned.h:101</div></div>
+<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html">momentum::AlignedAllocator</a></div><div class="ttdoc">An allocator that aligns memory blocks according to a specified alignment.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00101">aligned.h:101</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_a264f56fa181915ffbbabac82b459fa50"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#a264f56fa181915ffbbabac82b459fa50">momentum::AlignedAllocator::AlignedAllocator</a></div><div class="ttdeci">AlignedAllocator() noexcept=default</div></div>
-<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_a5d489095d21b57e1c6c04eb32c4af922"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#a5d489095d21b57e1c6c04eb32c4af922">momentum::AlignedAllocator::deallocate</a></div><div class="ttdeci">void deallocate(T *ptr, std::size_t) noexcept</div><div class="ttdoc">Deallocates a block of memory that was previously allocated by allocate.</div><div class="ttdef"><b>Definition</b> aligned.h:125</div></div>
-<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_acaf977a5d94cfa12515b528974a6b69a"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#acaf977a5d94cfa12515b528974a6b69a">momentum::AlignedAllocator::allocate</a></div><div class="ttdeci">T * allocate(std::size_t n)</div><div class="ttdoc">Allocates a block of memory that can hold n elements of type T.</div><div class="ttdef"><b>Definition</b> aligned.h:116</div></div>
-<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_ae1501f6ef686a19fd7b7c0ec932dd2a3"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#ae1501f6ef686a19fd7b7c0ec932dd2a3">momentum::AlignedAllocator::value_type</a></div><div class="ttdeci">T value_type</div><div class="ttdef"><b>Definition</b> aligned.h:103</div></div>
+<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_a5d489095d21b57e1c6c04eb32c4af922"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#a5d489095d21b57e1c6c04eb32c4af922">momentum::AlignedAllocator::deallocate</a></div><div class="ttdeci">void deallocate(T *ptr, std::size_t) noexcept</div><div class="ttdoc">Deallocates a block of memory that was previously allocated by allocate.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00125">aligned.h:125</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_acaf977a5d94cfa12515b528974a6b69a"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#acaf977a5d94cfa12515b528974a6b69a">momentum::AlignedAllocator::allocate</a></div><div class="ttdeci">T * allocate(std::size_t n)</div><div class="ttdoc">Allocates a block of memory that can hold n elements of type T.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00116">aligned.h:116</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1AlignedAllocator_html_ae1501f6ef686a19fd7b7c0ec932dd2a3"><div class="ttname"><a href="classmomentum_1_1AlignedAllocator.html#ae1501f6ef686a19fd7b7c0ec932dd2a3">momentum::AlignedAllocator::value_type</a></div><div class="ttdeci">T value_type</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00103">aligned.h:103</a></div></div>
 <div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div></div>
-<div class="ttc" id="aexception_8h_html_a60b753237325b6cc993ef71153931fa1"><div class="ttname"><a href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">MT_THROW_IF_T</a></div><div class="ttdeci">#define MT_THROW_IF_T(Condition, Exception,...)</div><div class="ttdoc">Conditionally throws an exception of a specified type with a formatted message if the condition is tr...</div><div class="ttdef"><b>Definition</b> exception.h:39</div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1574573ed42864faba5f91f15a807dd4"><div class="ttname"><a href="namespacemomentum.html#a1574573ed42864faba5f91f15a807dd4">momentum::aligned_malloc</a></div><div class="ttdeci">void * aligned_malloc(size_t size, size_t align)</div><div class="ttdef"><b>Definition</b> aligned.h:42</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a7324d605f781d83129b5719b88ccade1"><div class="ttname"><a href="namespacemomentum.html#a7324d605f781d83129b5719b88ccade1">momentum::roundUpToAlignment</a></div><div class="ttdeci">constexpr std::size_t roundUpToAlignment(std::size_t value, std::size_t alignment)</div><div class="ttdef"><b>Definition</b> aligned.h:52</div></div>
-<div class="ttc" id="anamespacemomentum_html_a9bcbd8fb0fee8f49b625da94efa5c87b"><div class="ttname"><a href="namespacemomentum.html#a9bcbd8fb0fee8f49b625da94efa5c87b">momentum::makeAlignedShared</a></div><div class="ttdeci">std::shared_ptr&lt; T &gt; makeAlignedShared(std::size_t n, Deleter deleter=Deleter())</div><div class="ttdoc">Creates a std::shared_ptr for aligned memory.</div><div class="ttdef"><b>Definition</b> aligned.h:90</div></div>
-<div class="ttc" id="anamespacemomentum_html_a9cc5e889c89f341a44a10a3f380a2d30"><div class="ttname"><a href="namespacemomentum.html#a9cc5e889c89f341a44a10a3f380a2d30">momentum::aligned_free</a></div><div class="ttdeci">void aligned_free(void *ptr)</div><div class="ttdef"><b>Definition</b> aligned.h:46</div></div>
-<div class="ttc" id="anamespacemomentum_html_aa354b65ee126e9a125ca1ac4f6824b1a"><div class="ttname"><a href="namespacemomentum.html#aa354b65ee126e9a125ca1ac4f6824b1a">momentum::alignedAlloc</a></div><div class="ttdeci">T * alignedAlloc(std::size_t n)</div><div class="ttdoc">Allocates a block of memory that can hold n elements of type T with the specified alignment.</div><div class="ttdef"><b>Definition</b> aligned.h:62</div></div>
-<div class="ttc" id="anamespacemomentum_html_aa3fd365f9b233a3ebfa77f42f85edaf9"><div class="ttname"><a href="namespacemomentum.html#aa3fd365f9b233a3ebfa77f42f85edaf9">momentum::operator==</a></div><div class="ttdeci">bool operator==(const AlignedAllocator&lt; T, Alignment &gt; &amp;, const AlignedAllocator&lt; U, Alignment &gt; &amp;)</div><div class="ttdoc">Checks if storage allocated from lhs can be deallocated from rhs, and vice versa.</div><div class="ttdef"><b>Definition</b> aligned.h:139</div></div>
-<div class="ttc" id="anamespacemomentum_html_ab5c869aea42d26527a6d242e1ab80b7f"><div class="ttname"><a href="namespacemomentum.html#ab5c869aea42d26527a6d242e1ab80b7f">momentum::operator!=</a></div><div class="ttdeci">bool operator!=(const AlignedAllocator&lt; T, Alignment &gt; &amp;, const AlignedAllocator&lt; U, Alignment &gt; &amp;)</div><div class="ttdoc">Checks if storage allocated from lhs cannot be deallocated from rhs, and vice versa.</div><div class="ttdef"><b>Definition</b> aligned.h:149</div></div>
-<div class="ttc" id="anamespacemomentum_html_af6bde3f4a167672c8c2f967a3ec44310"><div class="ttname"><a href="namespacemomentum.html#af6bde3f4a167672c8c2f967a3ec44310">momentum::makeAlignedUnique</a></div><div class="ttdeci">std::unique_ptr&lt; T, Deleter &gt; makeAlignedUnique(std::size_t n, Deleter deleter=Deleter())</div><div class="ttdoc">Creates a std::unique_ptr for aligned memory.</div><div class="ttdef"><b>Definition</b> aligned.h:82</div></div>
-<div class="ttc" id="astructmomentum_1_1AlignedAllocator_1_1rebind_html"><div class="ttname"><a href="structmomentum_1_1AlignedAllocator_1_1rebind.html">momentum::AlignedAllocator::rebind</a></div><div class="ttdef"><b>Definition</b> aligned.h:130</div></div>
-<div class="ttc" id="astructmomentum_1_1AlignedAllocator_1_1rebind_html_a9d26668aa11881c6bf5825206ecf7bdd"><div class="ttname"><a href="structmomentum_1_1AlignedAllocator_1_1rebind.html#a9d26668aa11881c6bf5825206ecf7bdd">momentum::AlignedAllocator::rebind::other</a></div><div class="ttdeci">AlignedAllocator&lt; U, Alignment &gt; other</div><div class="ttdef"><b>Definition</b> aligned.h:131</div></div>
-<div class="ttc" id="astructmomentum_1_1AlignedDeleter_html"><div class="ttname"><a href="structmomentum_1_1AlignedDeleter.html">momentum::AlignedDeleter</a></div><div class="ttdoc">Custom deleter for aligned memory.</div><div class="ttdef"><b>Definition</b> aligned.h:74</div></div>
-<div class="ttc" id="astructmomentum_1_1AlignedDeleter_html_ae4421bc6c38185c31150de9999b78008"><div class="ttname"><a href="structmomentum_1_1AlignedDeleter.html#ae4421bc6c38185c31150de9999b78008">momentum::AlignedDeleter::operator()</a></div><div class="ttdeci">void operator()(void *ptr) const</div><div class="ttdef"><b>Definition</b> aligned.h:75</div></div>
+<div class="ttc" id="aexception_8h_html_a60b753237325b6cc993ef71153931fa1"><div class="ttname"><a href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">MT_THROW_IF_T</a></div><div class="ttdeci">#define MT_THROW_IF_T(Condition, Exception,...)</div><div class="ttdoc">Conditionally throws an exception of a specified type with a formatted message if the condition is tr...</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00039">exception.h:39</a></div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1574573ed42864faba5f91f15a807dd4"><div class="ttname"><a href="namespacemomentum.html#a1574573ed42864faba5f91f15a807dd4">momentum::aligned_malloc</a></div><div class="ttdeci">void * aligned_malloc(size_t size, size_t align)</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00042">aligned.h:42</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a7324d605f781d83129b5719b88ccade1"><div class="ttname"><a href="namespacemomentum.html#a7324d605f781d83129b5719b88ccade1">momentum::roundUpToAlignment</a></div><div class="ttdeci">constexpr std::size_t roundUpToAlignment(std::size_t value, std::size_t alignment)</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00052">aligned.h:52</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a9bcbd8fb0fee8f49b625da94efa5c87b"><div class="ttname"><a href="namespacemomentum.html#a9bcbd8fb0fee8f49b625da94efa5c87b">momentum::makeAlignedShared</a></div><div class="ttdeci">std::shared_ptr&lt; T &gt; makeAlignedShared(std::size_t n, Deleter deleter=Deleter())</div><div class="ttdoc">Creates a std::shared_ptr for aligned memory.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00090">aligned.h:90</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a9cc5e889c89f341a44a10a3f380a2d30"><div class="ttname"><a href="namespacemomentum.html#a9cc5e889c89f341a44a10a3f380a2d30">momentum::aligned_free</a></div><div class="ttdeci">void aligned_free(void *ptr)</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00046">aligned.h:46</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aa354b65ee126e9a125ca1ac4f6824b1a"><div class="ttname"><a href="namespacemomentum.html#aa354b65ee126e9a125ca1ac4f6824b1a">momentum::alignedAlloc</a></div><div class="ttdeci">T * alignedAlloc(std::size_t n)</div><div class="ttdoc">Allocates a block of memory that can hold n elements of type T with the specified alignment.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00062">aligned.h:62</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aa3fd365f9b233a3ebfa77f42f85edaf9"><div class="ttname"><a href="namespacemomentum.html#aa3fd365f9b233a3ebfa77f42f85edaf9">momentum::operator==</a></div><div class="ttdeci">bool operator==(const AlignedAllocator&lt; T, Alignment &gt; &amp;, const AlignedAllocator&lt; U, Alignment &gt; &amp;)</div><div class="ttdoc">Checks if storage allocated from lhs can be deallocated from rhs, and vice versa.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00139">aligned.h:139</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ab5c869aea42d26527a6d242e1ab80b7f"><div class="ttname"><a href="namespacemomentum.html#ab5c869aea42d26527a6d242e1ab80b7f">momentum::operator!=</a></div><div class="ttdeci">bool operator!=(const AlignedAllocator&lt; T, Alignment &gt; &amp;, const AlignedAllocator&lt; U, Alignment &gt; &amp;)</div><div class="ttdoc">Checks if storage allocated from lhs cannot be deallocated from rhs, and vice versa.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00149">aligned.h:149</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_af6bde3f4a167672c8c2f967a3ec44310"><div class="ttname"><a href="namespacemomentum.html#af6bde3f4a167672c8c2f967a3ec44310">momentum::makeAlignedUnique</a></div><div class="ttdeci">std::unique_ptr&lt; T, Deleter &gt; makeAlignedUnique(std::size_t n, Deleter deleter=Deleter())</div><div class="ttdoc">Creates a std::unique_ptr for aligned memory.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00082">aligned.h:82</a></div></div>
+<div class="ttc" id="astructmomentum_1_1AlignedAllocator_1_1rebind_html"><div class="ttname"><a href="structmomentum_1_1AlignedAllocator_1_1rebind.html">momentum::AlignedAllocator::rebind</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00130">aligned.h:130</a></div></div>
+<div class="ttc" id="astructmomentum_1_1AlignedAllocator_1_1rebind_html_a9d26668aa11881c6bf5825206ecf7bdd"><div class="ttname"><a href="structmomentum_1_1AlignedAllocator_1_1rebind.html#a9d26668aa11881c6bf5825206ecf7bdd">momentum::AlignedAllocator::rebind::other</a></div><div class="ttdeci">AlignedAllocator&lt; U, Alignment &gt; other</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00131">aligned.h:131</a></div></div>
+<div class="ttc" id="astructmomentum_1_1AlignedDeleter_html"><div class="ttname"><a href="structmomentum_1_1AlignedDeleter.html">momentum::AlignedDeleter</a></div><div class="ttdoc">Custom deleter for aligned memory.</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00074">aligned.h:74</a></div></div>
+<div class="ttc" id="astructmomentum_1_1AlignedDeleter_html_ae4421bc6c38185c31150de9999b78008"><div class="ttname"><a href="structmomentum_1_1AlignedDeleter.html#ae4421bc6c38185c31150de9999b78008">momentum::AlignedDeleter::operator()</a></div><div class="ttdeci">void operator()(void *ptr) const</div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00075">aligned.h:75</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="aligned_8h.html">aligned.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

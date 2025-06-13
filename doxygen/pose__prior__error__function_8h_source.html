@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('pose__prior__error__function_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">pose_prior_error_function.h</div></div>
 </div><!--header-->
@@ -161,32 +177,36 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter__solver_2fwd_8h_html"><div class="ttname"><a href="character__solver_2fwd_8h.html">fwd.h</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html">momentum::PosePriorErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> pose_prior_error_function.h:19</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a1095ade6a93772ec65f107acf61f02c0"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a1095ade6a93772ec65f107acf61f02c0">momentum::PosePriorErrorFunctionT::loadInternal</a></div><div class="ttdeci">void loadInternal()</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:41</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a34f8f2f1ab80d4cfa701d603d875fba8"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a34f8f2f1ab80d4cfa701d603d875fba8">momentum::PosePriorErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:136</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a3d29e92d4cdf75a45f2715c3e80c7c1f"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a3d29e92d4cdf75a45f2715c3e80c7c1f">momentum::PosePriorErrorFunctionT::getMeanShape</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; getMeanShape(const ModelParametersT&lt; T &gt; &amp;params) const</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:201</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a4b8499d1c36feee8741945c27e6c64e4"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a4b8499d1c36feee8741945c27e6c64e4">momentum::PosePriorErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) final</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:145</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a4c1064b25046dcc2d38a1184ab77d80b"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a4c1064b25046dcc2d38a1184ab77d80b">momentum::PosePriorErrorFunctionT::setPosePrior</a></div><div class="ttdeci">void setPosePrior(std::shared_ptr&lt; const MppcaT&lt; T &gt; &gt; pp)</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:34</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a5396ec8c214913adef19552a598f2ebb"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a5396ec8c214913adef19552a598f2ebb">momentum::PosePriorErrorFunctionT::logProbability</a></div><div class="ttdeci">double logProbability(const ModelParametersT&lt; T &gt; &amp;params) const</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:68</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a659cbaa4c706f1f59a256422d78bd109"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a659cbaa4c706f1f59a256422d78bd109">momentum::PosePriorErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) final</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:94</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a71daf255ef33bc9e24bd57e75803cfa3"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a71daf255ef33bc9e24bd57e75803cfa3">momentum::PosePriorErrorFunctionT::posePrior_</a></div><div class="ttdeci">std::shared_ptr&lt; const MppcaT&lt; T &gt; &gt; posePrior_</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.h:66</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a78c85b9cc9eddf332d388397ff866b77"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a78c85b9cc9eddf332d388397ff866b77">momentum::PosePriorErrorFunctionT::getBestFitMode</a></div><div class="ttdeci">void getBestFitMode(const ModelParametersT&lt; T &gt; &amp;params, size_t &amp;bestIdx, Eigen::VectorX&lt; T &gt; &amp;bestDiff, T &amp;bestR, T &amp;minDist) const</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:215</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a7be1d3b5b9b5392e4edddc8d3ca94c20"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a7be1d3b5b9b5392e4edddc8d3ca94c20">momentum::PosePriorErrorFunctionT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.cpp:86</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_aa4c1b0f7eb15d23afd82746e506b5429"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#aa4c1b0f7eb15d23afd82746e506b5429">momentum::PosePriorErrorFunctionT::kPosePriorWeight</a></div><div class="ttdeci">static constexpr T kPosePriorWeight</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.h:69</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_ac1cdd7c88e2a41d8098bad40d250074c"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#ac1cdd7c88e2a41d8098bad40d250074c">momentum::PosePriorErrorFunctionT::ppMap_</a></div><div class="ttdeci">std::vector&lt; size_t &gt; ppMap_</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.h:59</div></div>
-<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_adbc15a29693b3c74e7154b509ab8745e"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#adbc15a29693b3c74e7154b509ab8745e">momentum::PosePriorErrorFunctionT::invMap_</a></div><div class="ttdeci">std::vector&lt; size_t &gt; invMap_</div><div class="ttdef"><b>Definition</b> pose_prior_error_function.h:60</div></div>
-<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> skeleton_error_function.h:18</div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html">momentum::PosePriorErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8h_source.html#l00019">pose_prior_error_function.h:19</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a1095ade6a93772ec65f107acf61f02c0"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a1095ade6a93772ec65f107acf61f02c0">momentum::PosePriorErrorFunctionT::loadInternal</a></div><div class="ttdeci">void loadInternal()</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00041">pose_prior_error_function.cpp:41</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a34f8f2f1ab80d4cfa701d603d875fba8"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a34f8f2f1ab80d4cfa701d603d875fba8">momentum::PosePriorErrorFunctionT::getJacobianSize</a></div><div class="ttdeci">size_t getJacobianSize() const final</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00136">pose_prior_error_function.cpp:136</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a3d29e92d4cdf75a45f2715c3e80c7c1f"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a3d29e92d4cdf75a45f2715c3e80c7c1f">momentum::PosePriorErrorFunctionT::getMeanShape</a></div><div class="ttdeci">Eigen::VectorX&lt; T &gt; getMeanShape(const ModelParametersT&lt; T &gt; &amp;params) const</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00201">pose_prior_error_function.cpp:201</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a4b8499d1c36feee8741945c27e6c64e4"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a4b8499d1c36feee8741945c27e6c64e4">momentum::PosePriorErrorFunctionT::getJacobian</a></div><div class="ttdeci">double getJacobian(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::MatrixX&lt; T &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; residual, int &amp;usedRows) final</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00145">pose_prior_error_function.cpp:145</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a4c1064b25046dcc2d38a1184ab77d80b"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a4c1064b25046dcc2d38a1184ab77d80b">momentum::PosePriorErrorFunctionT::setPosePrior</a></div><div class="ttdeci">void setPosePrior(std::shared_ptr&lt; const MppcaT&lt; T &gt; &gt; pp)</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00034">pose_prior_error_function.cpp:34</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a5396ec8c214913adef19552a598f2ebb"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a5396ec8c214913adef19552a598f2ebb">momentum::PosePriorErrorFunctionT::logProbability</a></div><div class="ttdeci">double logProbability(const ModelParametersT&lt; T &gt; &amp;params) const</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00068">pose_prior_error_function.cpp:68</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a659cbaa4c706f1f59a256422d78bd109"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a659cbaa4c706f1f59a256422d78bd109">momentum::PosePriorErrorFunctionT::getGradient</a></div><div class="ttdeci">double getGradient(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; gradient) final</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00094">pose_prior_error_function.cpp:94</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a71daf255ef33bc9e24bd57e75803cfa3"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a71daf255ef33bc9e24bd57e75803cfa3">momentum::PosePriorErrorFunctionT::posePrior_</a></div><div class="ttdeci">std::shared_ptr&lt; const MppcaT&lt; T &gt; &gt; posePrior_</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8h_source.html#l00066">pose_prior_error_function.h:66</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a78c85b9cc9eddf332d388397ff866b77"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a78c85b9cc9eddf332d388397ff866b77">momentum::PosePriorErrorFunctionT::getBestFitMode</a></div><div class="ttdeci">void getBestFitMode(const ModelParametersT&lt; T &gt; &amp;params, size_t &amp;bestIdx, Eigen::VectorX&lt; T &gt; &amp;bestDiff, T &amp;bestR, T &amp;minDist) const</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00215">pose_prior_error_function.cpp:215</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_a7be1d3b5b9b5392e4edddc8d3ca94c20"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#a7be1d3b5b9b5392e4edddc8d3ca94c20">momentum::PosePriorErrorFunctionT::getError</a></div><div class="ttdeci">double getError(const ModelParametersT&lt; T &gt; &amp;params, const SkeletonStateT&lt; T &gt; &amp;state) final</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8cpp_source.html#l00086">pose_prior_error_function.cpp:86</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_aa4c1b0f7eb15d23afd82746e506b5429"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#aa4c1b0f7eb15d23afd82746e506b5429">momentum::PosePriorErrorFunctionT::kPosePriorWeight</a></div><div class="ttdeci">static constexpr T kPosePriorWeight</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8h_source.html#l00069">pose_prior_error_function.h:69</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_ac1cdd7c88e2a41d8098bad40d250074c"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#ac1cdd7c88e2a41d8098bad40d250074c">momentum::PosePriorErrorFunctionT::ppMap_</a></div><div class="ttdeci">std::vector&lt; size_t &gt; ppMap_</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8h_source.html#l00059">pose_prior_error_function.h:59</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1PosePriorErrorFunctionT_html_adbc15a29693b3c74e7154b509ab8745e"><div class="ttname"><a href="classmomentum_1_1PosePriorErrorFunctionT.html#adbc15a29693b3c74e7154b509ab8745e">momentum::PosePriorErrorFunctionT::invMap_</a></div><div class="ttdeci">std::vector&lt; size_t &gt; invMap_</div><div class="ttdef"><b>Definition</b> <a href="pose__prior__error__function_8h_source.html#l00060">pose_prior_error_function.h:60</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkeletonErrorFunctionT_html"><div class="ttname"><a href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="skeleton__error__function_8h_source.html#l00018">skeleton_error_function.h:18</a></div></div>
 <div class="ttc" id="amppca_8h_html"><div class="ttname"><a href="mppca_8h.html">mppca.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
 <div class="ttc" id="askeleton__error__function_8h_html"><div class="ttname"><a href="skeleton__error__function_8h.html">skeleton_error_function.h</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="pose__prior__error__function_8h.html">pose_prior_error_function.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmomentum_1_1SimdGeneralizedLossT.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdGeneralizedLossT.html">SimdGeneralizedLossT</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
@@ -86,9 +102,11 @@ $(function() {
  <a href="classmomentum_1_1SimdGeneralizedLossT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="simd__generalized__loss_8h_source.html">simd_generalized_loss.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for momentum::SimdGeneralizedLossT&lt; T &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SimdGeneralizedLossT&lt; T &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
   <img src="classmomentum_1_1SimdGeneralizedLossT.png" usemap="#momentum::SimdGeneralizedLossT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::SimdGeneralizedLossT_3C_20T_20_3E_map" name="momentum::SimdGeneralizedLossT_3C_20T_20_3E_map">
@@ -157,6 +175,8 @@ Additional Inherited Members</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 class momentum::SimdGeneralizedLossT&lt; T &gt;</div><p>SIMD version of the generalized loss function. </p>
+
+<p class="definition">Definition at line <a class="el" href="simd__generalized__loss_8h_source.html#l00017">17</a> of file <a class="el" href="simd__generalized__loss_8h_source.html">simd_generalized_loss.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a7f25ad45c9d6258268d093e3ffc7b178" name="a7f25ad45c9d6258268d093e3ffc7b178"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7f25ad45c9d6258268d093e3ffc7b178">&#9670;&#160;</a></span>Base</h2>
@@ -171,6 +191,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simd__generalized__loss_8h_source.html#l00019">19</a> of file <a class="el" href="simd__generalized__loss_8h_source.html">simd_generalized_loss.h</a>.</p>
 
 </div>
 </div>
@@ -220,6 +242,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="simd__generalized__loss_8cpp_source.html#l00065">65</a> of file <a class="el" href="simd__generalized__loss_8cpp_source.html">simd_generalized_loss.cpp</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -250,6 +274,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Derivative value as a SIMD packet </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="simd__generalized__loss_8cpp_source.html#l00095">95</a> of file <a class="el" href="simd__generalized__loss_8cpp_source.html">simd_generalized_loss.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="log_8h_source.html#l00126">MT_LOGE</a>.</p>
+
 </div>
 </div>
 <a id="a657f29f85153da2898f894f2c0437a3c" name="a657f29f85153da2898f894f2c0437a3c"></a>
@@ -279,17 +307,25 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Loss value as a SIMD packet </dd></dl>
 
+<p class="definition">Definition at line <a class="el" href="simd__generalized__loss_8cpp_source.html#l00070">70</a> of file <a class="el" href="simd__generalized__loss_8cpp_source.html">simd_generalized_loss.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="log_8h_source.html#l00126">MT_LOGE</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>math/<a class="el" href="math_2fwd_8h_source.html">fwd.h</a></li>
 <li>math/<a class="el" href="simd__generalized__loss_8h_source.html">simd_generalized_loss.h</a></li>
-<li>math/<a class="el" href="simd__generalized__loss_8cpp.html">simd_generalized_loss.cpp</a></li>
+<li>math/<a class="el" href="simd__generalized__loss_8cpp_source.html">simd_generalized_loss.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdGeneralizedLossT.html">SimdGeneralizedLossT</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

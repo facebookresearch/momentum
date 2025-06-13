@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('skeleton__state_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">skeleton_state.h</div></div>
 </div><!--header-->
@@ -180,31 +196,35 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="acharacter_2types_8h_html"><div class="ttname"><a href="character_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="ajoint__state_8h_html"><div class="ttname"><a href="joint__state_8h.html">joint_state.h</a></div></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a364f3010613a117b922b2a89415c6d3a"><div class="ttname"><a href="namespacemomentum.html#a364f3010613a117b922b2a89415c6d3a">momentum::transformAtoB</a></div><div class="ttdeci">TransformT&lt; T &gt; transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; T &gt; &amp;skelState)</div><div class="ttdoc">Computes the relative transform between two joints in a skeleton.</div><div class="ttdef"><b>Definition</b> skeleton_state.cpp:184</div></div>
-<div class="ttc" id="anamespacemomentum_html_a954f7505066845a67c868e1ae88a5b1e"><div class="ttname"><a href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">momentum::VectorXf</a></div><div class="ttdeci">VectorX&lt; float &gt; VectorXf</div><div class="ttdef"><b>Definition</b> types.h:201</div></div>
-<div class="ttc" id="anamespacemomentum_html_ab2f864f0ca7e568dba712163aa8569f2"><div class="ttname"><a href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">momentum::Skeleton</a></div><div class="ttdeci">SkeletonT&lt; float &gt; Skeleton</div><div class="ttdef"><b>Definition</b> fwd.h:170</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html">momentum::SkeletonStateT</a></div><div class="ttdoc">Represents the complete state of a skeleton.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:45</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a0204ae0a4aebdc4b3b28210043fb8ec5"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a0204ae0a4aebdc4b3b28210043fb8ec5">momentum::SkeletonStateT::SkeletonStateT</a></div><div class="ttdeci">SkeletonStateT() noexcept</div><div class="ttdoc">Creates an empty skeleton state.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:53</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a3009e2a2538a5320e8fd80f8f0a19459"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a3009e2a2538a5320e8fd80f8f0a19459">momentum::SkeletonStateT::cast</a></div><div class="ttdeci">SkeletonStateT&lt; T2 &gt; cast() const</div><div class="ttdoc">Converts the skeleton state to a different scalar type.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:126</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a5dbb5a099dcc3c5ad42ddcce612c9cc3"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a5dbb5a099dcc3c5ad42ddcce612c9cc3">momentum::SkeletonStateT::set</a></div><div class="ttdeci">void set(const JointParametersT&lt; T &gt; &amp;jointParameters, const Skeleton &amp;referenceSkeleton, bool computeDeriv=true)</div><div class="ttdoc">Updates the skeleton state with new joint parameters.</div><div class="ttdef"><b>Definition</b> skeleton_state.cpp:61</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a637a6efeab4a26312e8b81afa3ffc2a2"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2">momentum::SkeletonStateT::jointParameters</a></div><div class="ttdeci">JointParametersT&lt; T &gt; jointParameters</div><div class="ttdoc">Joint parameters for all joints in the skeleton.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:47</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a87f3d964f6e997519d84985ae1d27b22"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a87f3d964f6e997519d84985ae1d27b22">momentum::SkeletonStateT::toTransforms</a></div><div class="ttdeci">TransformListT&lt; T &gt; toTransforms() const</div><div class="ttdoc">Extracts global transforms for all joints in the skeleton.</div><div class="ttdef"><b>Definition</b> skeleton_state.cpp:127</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a946ea0259e7a1b272ef5afcac8ae5b37"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a946ea0259e7a1b272ef5afcac8ae5b37">momentum::SkeletonStateT::jointState</a></div><div class="ttdeci">JointStateListT&lt; T &gt; jointState</div><div class="ttdoc">Computed joint states for all joints in the skeleton.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:50</div></div>
-<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_aa2e30bfc6eab4c79bc005591cd26aac6"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#aa2e30bfc6eab4c79bc005591cd26aac6">momentum::SkeletonStateT::compare</a></div><div class="ttdeci">static StateSimilarity compare(const SkeletonStateT&lt; T &gt; &amp;state1, const SkeletonStateT&lt; T &gt; &amp;state2)</div><div class="ttdoc">Compares two skeleton states and returns similarity metrics.</div><div class="ttdef"><b>Definition</b> skeleton_state.cpp:137</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a364f3010613a117b922b2a89415c6d3a"><div class="ttname"><a href="namespacemomentum.html#a364f3010613a117b922b2a89415c6d3a">momentum::transformAtoB</a></div><div class="ttdeci">TransformT&lt; T &gt; transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; T &gt; &amp;skelState)</div><div class="ttdoc">Computes the relative transform between two joints in a skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8cpp_source.html#l00184">skeleton_state.cpp:184</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a954f7505066845a67c868e1ae88a5b1e"><div class="ttname"><a href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">momentum::VectorXf</a></div><div class="ttdeci">VectorX&lt; float &gt; VectorXf</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00201">types.h:201</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ab2f864f0ca7e568dba712163aa8569f2"><div class="ttname"><a href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">momentum::Skeleton</a></div><div class="ttdeci">SkeletonT&lt; float &gt; Skeleton</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00170">fwd.h:170</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html">momentum::SkeletonStateT</a></div><div class="ttdoc">Represents the complete state of a skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00045">skeleton_state.h:45</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a0204ae0a4aebdc4b3b28210043fb8ec5"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a0204ae0a4aebdc4b3b28210043fb8ec5">momentum::SkeletonStateT::SkeletonStateT</a></div><div class="ttdeci">SkeletonStateT() noexcept</div><div class="ttdoc">Creates an empty skeleton state.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00053">skeleton_state.h:53</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a3009e2a2538a5320e8fd80f8f0a19459"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a3009e2a2538a5320e8fd80f8f0a19459">momentum::SkeletonStateT::cast</a></div><div class="ttdeci">SkeletonStateT&lt; T2 &gt; cast() const</div><div class="ttdoc">Converts the skeleton state to a different scalar type.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00126">skeleton_state.h:126</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a5dbb5a099dcc3c5ad42ddcce612c9cc3"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a5dbb5a099dcc3c5ad42ddcce612c9cc3">momentum::SkeletonStateT::set</a></div><div class="ttdeci">void set(const JointParametersT&lt; T &gt; &amp;jointParameters, const Skeleton &amp;referenceSkeleton, bool computeDeriv=true)</div><div class="ttdoc">Updates the skeleton state with new joint parameters.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8cpp_source.html#l00061">skeleton_state.cpp:61</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a637a6efeab4a26312e8b81afa3ffc2a2"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2">momentum::SkeletonStateT::jointParameters</a></div><div class="ttdeci">JointParametersT&lt; T &gt; jointParameters</div><div class="ttdoc">Joint parameters for all joints in the skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00047">skeleton_state.h:47</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a87f3d964f6e997519d84985ae1d27b22"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a87f3d964f6e997519d84985ae1d27b22">momentum::SkeletonStateT::toTransforms</a></div><div class="ttdeci">TransformListT&lt; T &gt; toTransforms() const</div><div class="ttdoc">Extracts global transforms for all joints in the skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8cpp_source.html#l00127">skeleton_state.cpp:127</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_a946ea0259e7a1b272ef5afcac8ae5b37"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#a946ea0259e7a1b272ef5afcac8ae5b37">momentum::SkeletonStateT::jointState</a></div><div class="ttdeci">JointStateListT&lt; T &gt; jointState</div><div class="ttdoc">Computed joint states for all joints in the skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00050">skeleton_state.h:50</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkeletonStateT_html_aa2e30bfc6eab4c79bc005591cd26aac6"><div class="ttname"><a href="structmomentum_1_1SkeletonStateT.html#aa2e30bfc6eab4c79bc005591cd26aac6">momentum::SkeletonStateT::compare</a></div><div class="ttdeci">static StateSimilarity compare(const SkeletonStateT&lt; T &gt; &amp;state1, const SkeletonStateT&lt; T &gt; &amp;state2)</div><div class="ttdoc">Compares two skeleton states and returns similarity metrics.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8cpp_source.html#l00137">skeleton_state.cpp:137</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html">momentum::StateSimilarity</a></div><div class="ttdoc">Measures of similarity between two skeleton states.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:19</div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_a9996210ca9782dc8473dad5df4e46955"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#a9996210ca9782dc8473dad5df4e46955">momentum::StateSimilarity::orientationRMSE</a></div><div class="ttdeci">float orientationRMSE</div><div class="ttdoc">Root mean square of orientation errors across all joints.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:30</div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_a9ad0192dfdeb9e11fbfffc1573a503ef"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#a9ad0192dfdeb9e11fbfffc1573a503ef">momentum::StateSimilarity::positionRMSE</a></div><div class="ttdeci">float positionRMSE</div><div class="ttdoc">Root mean square of position errors across all joints.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:27</div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_ab7bb6e4107a6d5e0ae401f94a5db7d39"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#ab7bb6e4107a6d5e0ae401f94a5db7d39">momentum::StateSimilarity::orientationMax</a></div><div class="ttdeci">float orientationMax</div><div class="ttdoc">Maximum orientation error across all joints.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:36</div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_ac7d1707c59b51cc67fea1c2aaf624169"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#ac7d1707c59b51cc67fea1c2aaf624169">momentum::StateSimilarity::positionMax</a></div><div class="ttdeci">float positionMax</div><div class="ttdoc">Maximum position error across all joints.</div><div class="ttdef"><b>Definition</b> skeleton_state.h:33</div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_acb6d375cf5952898ef788226fa40959a"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#acb6d375cf5952898ef788226fa40959a">momentum::StateSimilarity::orientationError</a></div><div class="ttdeci">VectorXf orientationError</div><div class="ttdoc">Orientation error for each joint (in radians)</div><div class="ttdef"><b>Definition</b> skeleton_state.h:24</div></div>
-<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_af4f9de50f62b7698e6eceaaf66c2d957"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#af4f9de50f62b7698e6eceaaf66c2d957">momentum::StateSimilarity::positionError</a></div><div class="ttdeci">VectorXf positionError</div><div class="ttdoc">Position error for each joint (in distance units)</div><div class="ttdef"><b>Definition</b> skeleton_state.h:21</div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html">momentum::StateSimilarity</a></div><div class="ttdoc">Measures of similarity between two skeleton states.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00019">skeleton_state.h:19</a></div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_a9996210ca9782dc8473dad5df4e46955"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#a9996210ca9782dc8473dad5df4e46955">momentum::StateSimilarity::orientationRMSE</a></div><div class="ttdeci">float orientationRMSE</div><div class="ttdoc">Root mean square of orientation errors across all joints.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00030">skeleton_state.h:30</a></div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_a9ad0192dfdeb9e11fbfffc1573a503ef"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#a9ad0192dfdeb9e11fbfffc1573a503ef">momentum::StateSimilarity::positionRMSE</a></div><div class="ttdeci">float positionRMSE</div><div class="ttdoc">Root mean square of position errors across all joints.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00027">skeleton_state.h:27</a></div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_ab7bb6e4107a6d5e0ae401f94a5db7d39"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#ab7bb6e4107a6d5e0ae401f94a5db7d39">momentum::StateSimilarity::orientationMax</a></div><div class="ttdeci">float orientationMax</div><div class="ttdoc">Maximum orientation error across all joints.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00036">skeleton_state.h:36</a></div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_ac7d1707c59b51cc67fea1c2aaf624169"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#ac7d1707c59b51cc67fea1c2aaf624169">momentum::StateSimilarity::positionMax</a></div><div class="ttdeci">float positionMax</div><div class="ttdoc">Maximum position error across all joints.</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00033">skeleton_state.h:33</a></div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_acb6d375cf5952898ef788226fa40959a"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#acb6d375cf5952898ef788226fa40959a">momentum::StateSimilarity::orientationError</a></div><div class="ttdeci">VectorXf orientationError</div><div class="ttdoc">Orientation error for each joint (in radians)</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00024">skeleton_state.h:24</a></div></div>
+<div class="ttc" id="astructmomentum_1_1StateSimilarity_html_af4f9de50f62b7698e6eceaaf66c2d957"><div class="ttname"><a href="structmomentum_1_1StateSimilarity.html#af4f9de50f62b7698e6eceaaf66c2d957">momentum::StateSimilarity::positionError</a></div><div class="ttdeci">VectorXf positionError</div><div class="ttdoc">Position error for each joint (in distance units)</div><div class="ttdef"><b>Definition</b> <a href="skeleton__state_8h_source.html#l00021">skeleton_state.h:21</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="skeleton__state_8h.html">skeleton_state.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

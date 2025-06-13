@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structmomentum_1_1SkinWeights.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -107,6 +123,8 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores skinning weights and joint indices for character mesh deformation. </p>
+
+<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00036">36</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a52e011da31571b4bda2c67af718f33ba" name="a52e011da31571b4bda2c67af718f33ba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a52e011da31571b4bda2c67af718f33ba">&#9670;&#160;</a></span>operator==()</h2>
@@ -133,6 +151,10 @@ Public Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the objects are equal, false otherwise </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="skin__weights_8cpp_source.html#l00029">29</a> of file <a class="el" href="skin__weights_8cpp_source.html">skin_weights.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skin__weights_8h_source.html#l00041">index</a>, and <a class="el" href="skin__weights_8h_source.html#l00048">weight</a>.</p>
 
 </div>
 </div>
@@ -177,6 +199,10 @@ Public Attributes</h2></td></tr>
   </dd>
 </dl>
 
+<p class="definition">Definition at line <a class="el" href="skin__weights_8cpp_source.html#l00014">14</a> of file <a class="el" href="skin__weights_8cpp_source.html">skin_weights.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skin__weights_8h_source.html#l00041">index</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="skin__weights_8h_source.html#l00048">weight</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -195,6 +221,10 @@ Public Attributes</h2></td></tr>
 <p>Joint indices that influence each vertex. </p>
 <p>Each row corresponds to a vertex, and each column contains the index of a joint that influences that vertex. Unused influences are set to 0. </p>
 
+<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00041">41</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skin__weights_8cpp_source.html#l00029">operator==()</a>, <a class="el" href="character_8cpp_source.html#l00394">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, and <a class="el" href="skin__weights_8cpp_source.html#l00014">set()</a>.</p>
+
 </div>
 </div>
 <a id="a1cf0ddf5cddae2665c4a66d5fd7a213a" name="a1cf0ddf5cddae2665c4a66d5fd7a213a"></a>
@@ -212,16 +242,24 @@ Public Attributes</h2></td></tr>
 <p>Weight of each joint's influence on each vertex. </p>
 <p>Each row corresponds to a vertex, and each column contains the weight of a joint's influence on that vertex. Weights for a vertex typically sum to 1.0. Unused influences are set to 0.0. </p>
 
+<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00048">48</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skin__weights_8cpp_source.html#l00029">operator==()</a>, <a class="el" href="character_8cpp_source.html#l00394">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, and <a class="el" href="skin__weights_8cpp_source.html#l00014">set()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>character/<a class="el" href="skin__weights_8h_source.html">skin_weights.h</a></li>
-<li>character/<a class="el" href="skin__weights_8cpp.html">skin_weights.cpp</a></li>
+<li>character/<a class="el" href="skin__weights_8cpp_source.html">skin_weights.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:16 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>

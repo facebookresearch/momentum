@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,7 @@
   <td id="projectalign">
    <div id="projectname">Momentum
    </div>
-   <div id="projectbrief">A library for human kinematic motion and numerical optimization solvers to apply human motion</div>
+   <div id="projectbrief">A library for solving nonlinear optimization problems related to human body kinematics</div>
   </td>
  </tr>
  </tbody>
@@ -52,6 +56,23 @@ $(function() {
 $(document).ready(function() { init_codefold(0); });
 /* @license-end */
 </script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('skin__weights_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -73,11 +94,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">skin_weights.h</div></div>
 </div><!--header-->
@@ -122,19 +138,23 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter_2types_8h_html"><div class="ttname"><a href="character_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
-<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> aligned.h:15</div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> types.h:228</div></div>
-<div class="ttc" id="anamespacemomentum_html_a4ad4eae5ddde47975d87661b7ee5b769"><div class="ttname"><a href="namespacemomentum.html#a4ad4eae5ddde47975d87661b7ee5b769">momentum::WeightMatrix</a></div><div class="ttdeci">Eigen::Matrix&lt; float, Eigen::Dynamic, kMaxSkinJoints, Eigen::AutoAlign|Eigen::RowMajor &gt; WeightMatrix</div><div class="ttdoc">Matrix type for storing weights of joint influences on each vertex.</div><div class="ttdef"><b>Definition</b> skin_weights.h:33</div></div>
-<div class="ttc" id="anamespacemomentum_html_a97256a0d253dcab1a5368348ca462c90"><div class="ttname"><a href="namespacemomentum.html#a97256a0d253dcab1a5368348ca462c90">momentum::IndexMatrix</a></div><div class="ttdeci">Eigen::Matrix&lt; uint32_t, Eigen::Dynamic, kMaxSkinJoints, Eigen::AutoAlign|Eigen::RowMajor &gt; IndexMatrix</div><div class="ttdoc">Matrix type for storing joint indices that influence each vertex.</div><div class="ttdef"><b>Definition</b> skin_weights.h:26</div></div>
-<div class="ttc" id="astructmomentum_1_1SkinWeights_html"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html">momentum::SkinWeights</a></div><div class="ttdoc">Stores skinning weights and joint indices for character mesh deformation.</div><div class="ttdef"><b>Definition</b> skin_weights.h:36</div></div>
-<div class="ttc" id="astructmomentum_1_1SkinWeights_html_a1cf0ddf5cddae2665c4a66d5fd7a213a"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#a1cf0ddf5cddae2665c4a66d5fd7a213a">momentum::SkinWeights::weight</a></div><div class="ttdeci">WeightMatrix weight</div><div class="ttdoc">Weight of each joint's influence on each vertex.</div><div class="ttdef"><b>Definition</b> skin_weights.h:48</div></div>
-<div class="ttc" id="astructmomentum_1_1SkinWeights_html_a4203cd8ddc42da97d1e7aa66cae60da8"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#a4203cd8ddc42da97d1e7aa66cae60da8">momentum::SkinWeights::index</a></div><div class="ttdeci">IndexMatrix index</div><div class="ttdoc">Joint indices that influence each vertex.</div><div class="ttdef"><b>Definition</b> skin_weights.h:41</div></div>
-<div class="ttc" id="astructmomentum_1_1SkinWeights_html_a52e011da31571b4bda2c67af718f33ba"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#a52e011da31571b4bda2c67af718f33ba">momentum::SkinWeights::operator==</a></div><div class="ttdeci">bool operator==(const SkinWeights &amp;skinWeights) const</div><div class="ttdoc">Compares two SkinWeights objects for equality.</div><div class="ttdef"><b>Definition</b> skin_weights.cpp:29</div></div>
-<div class="ttc" id="astructmomentum_1_1SkinWeights_html_ac1a2078dd5e29bc7a3d8e7450e609d75"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#ac1a2078dd5e29bc7a3d8e7450e609d75">momentum::SkinWeights::set</a></div><div class="ttdeci">void set(const std::vector&lt; std::vector&lt; size_t &gt; &gt; &amp;ind, const std::vector&lt; std::vector&lt; float &gt; &gt; &amp;wgt)</div><div class="ttdoc">Sets the skin weights from vectors of joint indices and weights.</div><div class="ttdef"><b>Definition</b> skin_weights.cpp:14</div></div>
+<div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a4ad4eae5ddde47975d87661b7ee5b769"><div class="ttname"><a href="namespacemomentum.html#a4ad4eae5ddde47975d87661b7ee5b769">momentum::WeightMatrix</a></div><div class="ttdeci">Eigen::Matrix&lt; float, Eigen::Dynamic, kMaxSkinJoints, Eigen::AutoAlign|Eigen::RowMajor &gt; WeightMatrix</div><div class="ttdoc">Matrix type for storing weights of joint influences on each vertex.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8h_source.html#l00032">skin_weights.h:33</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a97256a0d253dcab1a5368348ca462c90"><div class="ttname"><a href="namespacemomentum.html#a97256a0d253dcab1a5368348ca462c90">momentum::IndexMatrix</a></div><div class="ttdeci">Eigen::Matrix&lt; uint32_t, Eigen::Dynamic, kMaxSkinJoints, Eigen::AutoAlign|Eigen::RowMajor &gt; IndexMatrix</div><div class="ttdoc">Matrix type for storing joint indices that influence each vertex.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8h_source.html#l00025">skin_weights.h:26</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkinWeights_html"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html">momentum::SkinWeights</a></div><div class="ttdoc">Stores skinning weights and joint indices for character mesh deformation.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8h_source.html#l00036">skin_weights.h:36</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkinWeights_html_a1cf0ddf5cddae2665c4a66d5fd7a213a"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#a1cf0ddf5cddae2665c4a66d5fd7a213a">momentum::SkinWeights::weight</a></div><div class="ttdeci">WeightMatrix weight</div><div class="ttdoc">Weight of each joint's influence on each vertex.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8h_source.html#l00048">skin_weights.h:48</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkinWeights_html_a4203cd8ddc42da97d1e7aa66cae60da8"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#a4203cd8ddc42da97d1e7aa66cae60da8">momentum::SkinWeights::index</a></div><div class="ttdeci">IndexMatrix index</div><div class="ttdoc">Joint indices that influence each vertex.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8h_source.html#l00041">skin_weights.h:41</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkinWeights_html_a52e011da31571b4bda2c67af718f33ba"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#a52e011da31571b4bda2c67af718f33ba">momentum::SkinWeights::operator==</a></div><div class="ttdeci">bool operator==(const SkinWeights &amp;skinWeights) const</div><div class="ttdoc">Compares two SkinWeights objects for equality.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8cpp_source.html#l00029">skin_weights.cpp:29</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkinWeights_html_ac1a2078dd5e29bc7a3d8e7450e609d75"><div class="ttname"><a href="structmomentum_1_1SkinWeights.html#ac1a2078dd5e29bc7a3d8e7450e609d75">momentum::SkinWeights::set</a></div><div class="ttdeci">void set(const std::vector&lt; std::vector&lt; size_t &gt; &gt; &amp;ind, const std::vector&lt; std::vector&lt; float &gt; &gt; &amp;wgt)</div><div class="ttdoc">Sets the skin weights from vectors of joint indices and weights.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8cpp_source.html#l00014">skin_weights.cpp:14</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="skin__weights_8h.html">skin_weights.h</a></li>
+    <li class="footer">Generated on Thu Jun 12 2025 23:58:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
 </body>
 </html>
