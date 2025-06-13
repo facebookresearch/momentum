@@ -124,7 +124,7 @@ $(document).ready(function(){initNavTree('stream__utils_8cpp_source.html',''); i
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}</div>
 </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="structmomentum_1_1spanstreambuf.html#a3db80852f0608b1c8d2918f804c539ab">   25</a></span><a class="code hl_function" href="structmomentum_1_1spanstreambuf.html#a3db80852f0608b1c8d2918f804c539ab">spanstreambuf::~spanstreambuf</a>() {}</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><a class="code hl_function" href="structmomentum_1_1spanstreambuf.html#a3db80852f0608b1c8d2918f804c539ab">spanstreambuf::~spanstreambuf</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="structmomentum_1_1spanstreambuf.html#a0208a9352777d6ab0f245cd948fdf4d5">   27</a></span>std::streamsize <a class="code hl_function" href="structmomentum_1_1spanstreambuf.html#a0208a9352777d6ab0f245cd948fdf4d5">spanstreambuf::xsputn</a>(</div>
@@ -140,56 +140,52 @@ $(document).ready(function(){initNavTree('stream__utils_8cpp_source.html',''); i
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}</div>
 </div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="foldopen" id="foldopen00037" data-start="{" data-end="}">
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structmomentum_1_1ispanstream.html#ad320f9b3d23fa0da0ddc701d13b9193d">   37</a></span><a class="code hl_function" href="structmomentum_1_1ispanstream.html#ad320f9b3d23fa0da0ddc701d13b9193d">ispanstream::~ispanstream</a>() {</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="comment">// Empty</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><a class="code hl_function" href="structmomentum_1_1ispanstream.html#ad320f9b3d23fa0da0ddc701d13b9193d">ispanstream::~ispanstream</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a94b50e1e83cd6d9bce4a253de470316f">   39</a></span>std::istream&amp; <a class="code hl_function" href="namespacemomentum.html#a94b50e1e83cd6d9bce4a253de470316f">GetLineCrossPlatform</a>(std::istream&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>, std::string&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">line</a>) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">line</a>.clear();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordflow">while</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.good()) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.get();</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.good()) {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    }</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a> == <span class="charliteral">&#39;\n&#39;</span>) {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a> == <span class="charliteral">&#39;\r&#39;</span>) {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">next_c</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.peek();</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>      <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.good()) {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>      }</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>      <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">next_c</a> == <span class="charliteral">&#39;\n&#39;</span>) {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.get();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>      }</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    }</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">line</a>.push_back(gsl::narrow_cast&lt;char&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a>));</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  }</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
 </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a94b50e1e83cd6d9bce4a253de470316f">   41</a></span>std::istream&amp; <a class="code hl_function" href="namespacemomentum.html#a94b50e1e83cd6d9bce4a253de470316f">GetLineCrossPlatform</a>(std::istream&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>, std::string&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">line</a>) {</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">line</a>.clear();</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keywordflow">while</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.good()) {</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.get();</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.good()) {</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a> == <span class="charliteral">&#39;\n&#39;</span>) {</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a> == <span class="charliteral">&#39;\r&#39;</span>) {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>      <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">next_c</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.peek();</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>      <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.good()) {</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>      }</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>      <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">next_c</a> == <span class="charliteral">&#39;\n&#39;</span>) {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>.get();</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>      }</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    }</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">line</a>.push_back(gsl::narrow_cast&lt;char&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a>));</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  }</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">is</a>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
-</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div></div>
 <div class="ttc" id="aexception_8h_html_a4d17a9ca866d9cde9827cc39ab49a5e6"><div class="ttname"><a href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a></div><div class="ttdeci">#define MT_THROW(...)</div><div class="ttdoc">Throws a std::runtime_error with a formatted message.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00028">exception.h:28</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a94b50e1e83cd6d9bce4a253de470316f"><div class="ttname"><a href="namespacemomentum.html#a94b50e1e83cd6d9bce4a253de470316f">momentum::GetLineCrossPlatform</a></div><div class="ttdeci">std::istream &amp; GetLineCrossPlatform(std::istream &amp;is, std::string &amp;line)</div><div class="ttdoc">Reads a line from the input stream, handling line endings for different platforms.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00041">stream_utils.cpp:41</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a94b50e1e83cd6d9bce4a253de470316f"><div class="ttname"><a href="namespacemomentum.html#a94b50e1e83cd6d9bce4a253de470316f">momentum::GetLineCrossPlatform</a></div><div class="ttdeci">std::istream &amp; GetLineCrossPlatform(std::istream &amp;is, std::string &amp;line)</div><div class="ttdoc">Reads a line from the input stream, handling line endings for different platforms.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00039">stream_utils.cpp:39</a></div></div>
 <div class="ttc" id="astream__utils_8h_html"><div class="ttname"><a href="stream__utils_8h.html">stream_utils.h</a></div></div>
-<div class="ttc" id="astructmomentum_1_1ispanstream_html_ad320f9b3d23fa0da0ddc701d13b9193d"><div class="ttname"><a href="structmomentum_1_1ispanstream.html#ad320f9b3d23fa0da0ddc701d13b9193d">momentum::ispanstream::~ispanstream</a></div><div class="ttdeci">virtual ~ispanstream()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00037">stream_utils.cpp:37</a></div></div>
+<div class="ttc" id="astructmomentum_1_1ispanstream_html_ad320f9b3d23fa0da0ddc701d13b9193d"><div class="ttname"><a href="structmomentum_1_1ispanstream.html#ad320f9b3d23fa0da0ddc701d13b9193d">momentum::ispanstream::~ispanstream</a></div><div class="ttdeci">virtual ~ispanstream()</div><div class="ttdoc">Destructor.</div></div>
 <div class="ttc" id="astructmomentum_1_1ispanstream_html_aec2b13be2310814247f6461b580054fb"><div class="ttname"><a href="structmomentum_1_1ispanstream.html#aec2b13be2310814247f6461b580054fb">momentum::ispanstream::ispanstream</a></div><div class="ttdeci">ispanstream(gsl::span&lt; const std::byte &gt; buffer)</div><div class="ttdoc">Construct an ispanstream with a buffer.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00033">stream_utils.cpp:33</a></div></div>
 <div class="ttc" id="astructmomentum_1_1spanstreambuf_html_a0208a9352777d6ab0f245cd948fdf4d5"><div class="ttname"><a href="structmomentum_1_1spanstreambuf.html#a0208a9352777d6ab0f245cd948fdf4d5">momentum::spanstreambuf::xsputn</a></div><div class="ttdeci">std::streamsize xsputn(const char_type *s, std::streamsize n) override</div><div class="ttdoc">Write a sequence of characters to the output buffer.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00027">stream_utils.cpp:27</a></div></div>
-<div class="ttc" id="astructmomentum_1_1spanstreambuf_html_a3db80852f0608b1c8d2918f804c539ab"><div class="ttname"><a href="structmomentum_1_1spanstreambuf.html#a3db80852f0608b1c8d2918f804c539ab">momentum::spanstreambuf::~spanstreambuf</a></div><div class="ttdeci">virtual ~spanstreambuf() override</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00025">stream_utils.cpp:25</a></div></div>
+<div class="ttc" id="astructmomentum_1_1spanstreambuf_html_a3db80852f0608b1c8d2918f804c539ab"><div class="ttname"><a href="structmomentum_1_1spanstreambuf.html#a3db80852f0608b1c8d2918f804c539ab">momentum::spanstreambuf::~spanstreambuf</a></div><div class="ttdeci">virtual ~spanstreambuf() override</div><div class="ttdoc">Destructor.</div></div>
 <div class="ttc" id="astructmomentum_1_1spanstreambuf_html_a51623953bc9975626fd3350032fbf4de"><div class="ttname"><a href="structmomentum_1_1spanstreambuf.html#a51623953bc9975626fd3350032fbf4de">momentum::spanstreambuf::spanstreambuf</a></div><div class="ttdeci">spanstreambuf(gsl::span&lt; const std::byte &gt; buffer={})</div><div class="ttdoc">Construct a spanstreambuf with an optional buffer.</div><div class="ttdef"><b>Definition</b> <a href="stream__utils_8cpp_source.html#l00014">stream_utils.cpp:14</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -197,7 +193,7 @@ $(document).ready(function(){initNavTree('stream__utils_8cpp_source.html',''); i
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c6663ea744fa78d5b13e43f1978a7a4d.html">common</a></li><li class="navelem"><a class="el" href="stream__utils_8cpp.html">stream_utils.cpp</a></li>
-    <li class="footer">Generated on Fri Jun 13 2025 06:26:31 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Jun 13 2025 17:01:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
