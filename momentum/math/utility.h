@@ -34,7 +34,7 @@ namespace momentum {
 /// @{
 
 /// Creates a ParameterSet with all parameters set to active
-inline const ParameterSet allParams() {
+inline ParameterSet allParams() {
   ParameterSet params;
   params.set();
   return params;
