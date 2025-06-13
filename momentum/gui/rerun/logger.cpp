@@ -76,10 +76,12 @@ void logJoints(
   std::vector<std::vector<std::array<float, 3>>> lines;
   labels.reserve(names.size());
   lines.reserve(names.size());
-
   for (size_t iJoint = 0; iJoint < jointStates.size(); ++iJoint) {
+    if (iJoint >= skeleton.joints.size()) {
+      break;
+    }
     const size_t parentIdx = skeleton.joints[iJoint].parent;
-    if (parentIdx != kInvalidIndex) {
+    if (parentIdx != kInvalidIndex && parentIdx < jointStates.size()) {
       lines.push_back(
           {toStdArray3f(jointStates[parentIdx].transform.translation),
            toStdArray3f(jointStates[iJoint].transform.translation)});

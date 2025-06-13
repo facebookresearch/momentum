@@ -247,8 +247,10 @@ void addMorphWeightsToModel(
   // store weight values in gltf document
   auto& animation = addMomentumAnimationToModel(model, motionName);
   const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps);
-  model.accessors[timestampIdx].min.emplace_back(timestamps.front());
-  model.accessors[timestampIdx].max.emplace_back(timestamps.back());
+  if (!timestamps.empty() && !model.accessors.empty() && timestampIdx < model.accessors.size()) {
+    model.accessors[timestampIdx].min.emplace_back(timestamps.front());
+    model.accessors[timestampIdx].max.emplace_back(timestamps.back());
+  }
 
   animation.channels.emplace_back();
   auto& channel = animation.channels.back();
@@ -357,8 +359,11 @@ void addActorAnimationToModel(
 
     // create animation channel
     const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps[j]);
-    model.accessors[timestampIdx].min.emplace_back(timestamps[j].front());
-    model.accessors[timestampIdx].max.emplace_back(timestamps[j].back());
+    if (!timestamps[j].empty() && !model.accessors.empty() &&
+        timestampIdx < model.accessors.size()) {
+      model.accessors[timestampIdx].min.emplace_back(timestamps[j].front());
+      model.accessors[timestampIdx].max.emplace_back(timestamps[j].back());
+    }
 
     animation.channels.emplace_back();
     auto& tchannel = animation.channels.back();
@@ -518,8 +523,10 @@ void addSkeletonStatesToModel(
   // add data to gltf document
   auto& animation = addMomentumAnimationToModel(model, motionName);
   const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps);
-  model.accessors[timestampIdx].min.emplace_back(timestamps.front());
-  model.accessors[timestampIdx].max.emplace_back(timestamps.back());
+  if (!timestamps.empty() && !model.accessors.empty() && timestampIdx < model.accessors.size()) {
+    model.accessors[timestampIdx].min.emplace_back(timestamps.front());
+    model.accessors[timestampIdx].max.emplace_back(timestamps.back());
+  }
 
   // only save the animation channels that actually have any useful data
   for (size_t j = 0; j < numJoints; j++) {
@@ -654,7 +661,7 @@ const std::vector<size_t> addSkeletonToModel(
     const auto nodeIndex = appendNode(model, joint.name);
     auto& node = model.nodes[nodeIndex];
     if (i == 0) {
-      if (modelRootNodeIndex != kInvalidIndex) {
+      if (modelRootNodeIndex != kInvalidIndex && modelRootNodeIndex < model.nodes.size()) {
         model.nodes[modelRootNodeIndex].children.push_back(nodeIndex);
       } else {
         auto& scene = getDefaultScene(model);
