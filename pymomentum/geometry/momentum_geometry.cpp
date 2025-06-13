@@ -174,7 +174,7 @@ at::Tensor mapJointParameters(
   return result;
 }
 
-constexpr bool keepLocators = true;
+constexpr momentum::KeepLocators keepLocators = momentum::KeepLocators::Yes;
 
 momentum::Character loadFBXCharacterFromFile(
     const std::string& fbxPath,

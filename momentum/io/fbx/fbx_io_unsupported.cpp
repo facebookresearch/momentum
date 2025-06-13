@@ -13,23 +13,26 @@
 
 namespace momentum {
 
-Character loadFbxCharacter(const filesystem::path& inputPath, bool keepLocators, bool permissive) {
+Character
+loadFbxCharacter(const filesystem::path& inputPath, KeepLocators keepLocators, bool permissive) {
   return loadOpenFbxCharacter(inputPath, keepLocators, permissive);
 }
 
 Character
-loadFbxCharacter(gsl::span<const std::byte> inputSpan, bool keepLocators, bool permissive) {
+loadFbxCharacter(gsl::span<const std::byte> inputSpan, KeepLocators keepLocators, bool permissive) {
   return loadOpenFbxCharacter(inputSpan, keepLocators, permissive);
 }
 
-std::tuple<Character, std::vector<MatrixXf>, float>
-loadFbxCharacterWithMotion(const filesystem::path& inputPath, bool keepLocators, bool permissive) {
+std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators,
+    bool permissive) {
   return loadOpenFbxCharacterWithMotion(inputPath, keepLocators, permissive);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
-    bool keepLocators,
+    KeepLocators keepLocators,
     bool permissive) {
   return loadOpenFbxCharacterWithMotion(inputSpan, keepLocators, permissive);
 }
