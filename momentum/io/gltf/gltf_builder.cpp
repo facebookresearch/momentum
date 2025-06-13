@@ -287,8 +287,8 @@ Mesh createUnitCube(const Eigen::Vector3b& color) {
   cube.colors = std::vector<Eigen::Vector3b>(8, color);
   return cube;
 }
-static const auto kUnitCubeRed = createUnitCube(Eigen::Vector3b(255, 0, 0));
-static const auto kUnitCubeGreen = createUnitCube(Eigen::Vector3b(0, 255, 0));
+const auto kUnitCubeRed = createUnitCube(Eigen::Vector3b(255, 0, 0));
+const auto kUnitCubeGreen = createUnitCube(Eigen::Vector3b(0, 255, 0));
 
 void addActorAnimationToModel(
     fx::gltf::Document& model,
