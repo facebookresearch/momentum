@@ -37,7 +37,7 @@ namespace momentum {
 namespace {
 
 Eigen::Vector3d toEigen(const ofbx::DVec3& v) {
-  return Eigen::Vector3d(v.x, v.y, v.z);
+  return {v.x, v.y, v.z};
 }
 
 Eigen::Affine3d toEigen(const ofbx::DMatrix& mat) {
@@ -48,17 +48,17 @@ Eigen::Vector3i getRotationOrder(ofbx::RotationOrder order) {
   switch (order) {
     case ofbx::RotationOrder::EULER_XYZ:
     default:
-      return Eigen::Vector3i(0, 1, 2);
+      return {0, 1, 2};
     case ofbx::RotationOrder::EULER_XZY:
-      return Eigen::Vector3i(0, 2, 1);
+      return {0, 2, 1};
     case ofbx::RotationOrder::EULER_YZX:
-      return Eigen::Vector3i(1, 2, 0);
+      return {1, 2, 0};
     case ofbx::RotationOrder::EULER_YXZ:
-      return Eigen::Vector3i(1, 0, 2);
+      return {1, 0, 2};
     case ofbx::RotationOrder::EULER_ZXY:
-      return Eigen::Vector3i(2, 0, 1);
+      return {2, 0, 1};
     case ofbx::RotationOrder::EULER_ZYX:
-      return Eigen::Vector3i(2, 1, 0);
+      return {2, 1, 0};
   }
 }
 
