@@ -112,34 +112,36 @@ struct CharacterT {
   ///
   /// @param enabledParameters Parameters to keep (defaults to all parameters)
   /// @return A new character with simplified skeleton and parameter transform
-  CharacterT simplify(const ParameterSet& enabledParameters = ParameterSet().flip()) const;
+  [[nodiscard]] CharacterT simplify(
+      const ParameterSet& enabledParameters = ParameterSet().flip()) const;
 
   /// Creates a simplified character with only the specified joints
   ///
   /// @param activeJoints Boolean vector indicating which joints to keep
   /// @return A new character with only the requested joints
-  CharacterT simplifySkeleton(const std::vector<bool>& activeJoints) const;
+  [[nodiscard]] CharacterT simplifySkeleton(const std::vector<bool>& activeJoints) const;
 
   /// Creates a simplified character with only the specified parameters
   ///
   /// @param parameterSet Set of parameters to keep
   /// @return A new character with only the requested parameters
-  CharacterT simplifyParameterTransform(const ParameterSet& parameterSet) const;
+  [[nodiscard]] CharacterT simplifyParameterTransform(const ParameterSet& parameterSet) const;
 
   /// Remaps skin weights from original character to simplified version
   ///
   /// @param skinWeights Original skin weights
   /// @param originalCharacter Original character containing the full joint hierarchy
   /// @return Remapped skin weights for the simplified character
-  SkinWeights remapSkinWeights(const SkinWeights& skinWeights, const CharacterT& originalCharacter)
-      const;
+  [[nodiscard]] SkinWeights remapSkinWeights(
+      const SkinWeights& skinWeights,
+      const CharacterT& originalCharacter) const;
 
   /// Remaps parameter limits from original character to simplified version
   ///
   /// @param limits Original parameter limits
   /// @param originalCharacter Original character containing the full joint hierarchy
   /// @return Remapped parameter limits for the simplified character
-  ParameterLimits remapParameterLimits(
+  [[nodiscard]] ParameterLimits remapParameterLimits(
       const ParameterLimits& limits,
       const CharacterT& originalCharacter) const;
 
@@ -148,25 +150,27 @@ struct CharacterT {
   /// @param locs Original locators
   /// @param originalCharacter Original character containing the full joint hierarchy
   /// @return Remapped locators for the simplified character
-  LocatorList remapLocators(const LocatorList& locs, const CharacterT& originalCharacter) const;
+  [[nodiscard]] LocatorList remapLocators(
+      const LocatorList& locs,
+      const CharacterT& originalCharacter) const;
 
   /// Determines which joints are affected by the specified parameters
   ///
   /// @param parameterSet Set of parameters to check
   /// @return Boolean vector indicating which joints are affected by the parameters
-  std::vector<bool> parametersToActiveJoints(const ParameterSet& parameterSet) const;
+  [[nodiscard]] std::vector<bool> parametersToActiveJoints(const ParameterSet& parameterSet) const;
 
   /// Determines which parameters affect the specified joints
   ///
   /// @param activeJoints Boolean vector indicating which joints to check
   /// @return Set of parameters that affect the specified joints
-  ParameterSet activeJointsToParameters(const std::vector<bool>& activeJoints) const;
+  [[nodiscard]] ParameterSet activeJointsToParameters(const std::vector<bool>& activeJoints) const;
 
   /// Returns parameters representing the character's bind pose
   ///
   /// The bind pose is the rest pose when all model parameters and joint offsets are zero.
   /// When forward kinematics is applied to the bind pose, it results in the rest pose skeleton.
-  CharacterParameters bindPose() const;
+  [[nodiscard]] CharacterParameters bindPose() const;
 
   /// Initializes the parameter transform with the correct dimensions for this character
   void initParameterTransform();
@@ -186,7 +190,7 @@ struct CharacterT {
   /// @param parameters Input parameters to split
   /// @param parameterSet Set indicating which parameters are active
   /// @return Parameters with active parameters zeroed in pose and applied to offsets
-  static CharacterParameters splitParameters(
+  [[nodiscard]] static CharacterParameters splitParameters(
       const CharacterT& character,
       const CharacterParameters& parameters,
       const ParameterSet& parameterSet);
@@ -197,7 +201,7 @@ struct CharacterT {
   /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
   /// @param overwriteBaseShape Whether to set the blend shape base to the character's mesh
   /// @return A new character with the specified blend shapes
-  CharacterT withBlendShape(
+  [[nodiscard]] CharacterT withBlendShape(
       BlendShape_p blendShape_in,
       Eigen::Index maxBlendShapes,
       bool overwriteBaseShape = true) const;
@@ -207,7 +211,7 @@ struct CharacterT {
   /// @param blendShape_in Face expression blend shapes to add to the character
   /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
   /// @return A new character with the specified face expression blend shapes
-  CharacterT withFaceExpressionBlendShape(
+  [[nodiscard]] CharacterT withFaceExpressionBlendShape(
       BlendShapeBase_const_p blendShape_in,
       Eigen::Index maxBlendShapes = -1) const;
 
@@ -233,13 +237,13 @@ struct CharacterT {
   ///
   /// @param modelParams Model parameters containing blend shape weights
   /// @return A new character with blend shapes baked into the mesh
-  CharacterT bakeBlendShape(const ModelParameters& modelParams) const;
+  [[nodiscard]] CharacterT bakeBlendShape(const ModelParameters& modelParams) const;
 
   /// Creates a new character with blend shapes baked into the mesh
   ///
   /// @param blendWeights Blend shape weights to apply
   /// @return A new character with blend shapes baked into the mesh
-  CharacterT bakeBlendShape(const BlendWeights& blendWeights) const;
+  [[nodiscard]] CharacterT bakeBlendShape(const BlendWeights& blendWeights) const;
 
   /// Generic "bake-out" for turning a character into self-contained geometry.
   ///
@@ -251,7 +255,7 @@ struct CharacterT {
   ///
   /// The returned character contains a static mesh with all requested deformations baked in, while
   /// still supporting any parameters you elected to keep.
-  CharacterT bake(
+  [[nodiscard]] CharacterT bake(
       const ModelParameters& modelParams,
       bool bakeBlendShapes = true,
       bool bakeScales = true) const;

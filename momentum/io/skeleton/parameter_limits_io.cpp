@@ -78,7 +78,7 @@ class Tokenizer {
     verifyToken(expectedToken);
   }
 
-  Token peek() const {
+  [[nodiscard]] Token peek() const {
     return _curToken;
   }
 
@@ -167,9 +167,9 @@ class Tokenizer {
     const auto jointIndex = jointIndexFromName(jointName);
 
     const auto subParamName = jointParameterName.substr(dotPos + 1);
-    const auto* kJointParameterNamesEnd = kJointParameterNames + kParametersPerJoint;
+    const auto* kJointParameterNamesEnd = kJointParameterNames.data() + kParametersPerJoint;
     const auto* subParamItr =
-        std::find_if(kJointParameterNames, kJointParameterNamesEnd, [&](const char* name) {
+        std::find_if(kJointParameterNames.data(), kJointParameterNamesEnd, [&](const char* name) {
           return subParamName == name;
         });
     MT_THROW_IF(
@@ -178,7 +178,7 @@ class Tokenizer {
         subParamName,
         _lineIndex,
         _str);
-    return {jointIndex, std::distance(kJointParameterNames, subParamItr)};
+    return {jointIndex, std::distance(kJointParameterNames.data(), subParamItr)};
   }
 
   [[nodiscard]] std::pair<size_t, size_t> getJointParameterIndex() {

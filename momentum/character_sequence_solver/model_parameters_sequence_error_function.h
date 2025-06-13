@@ -19,7 +19,7 @@ class ModelParametersSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   ModelParametersSequenceErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
   ModelParametersSequenceErrorFunctionT(const Character& character);
 
-  size_t numFrames() const final {
+  [[nodiscard]] size_t numFrames() const final {
     return 2;
   }
 
@@ -42,13 +42,13 @@ class ModelParametersSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) const final;
 
-  size_t getJacobianSize() const final;
+  [[nodiscard]] size_t getJacobianSize() const final;
 
   void setTargetWeights(const Eigen::VectorX<T>& weights) {
     this->targetWeights_ = weights;
   }
 
-  const Eigen::VectorX<T>& getTargetWeights() const {
+  [[nodiscard]] const Eigen::VectorX<T>& getTargetWeights() const {
     return this->targetWeights_;
   }
 

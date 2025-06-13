@@ -39,15 +39,15 @@ struct InverseParameterTransformT {
 
   // map joint parameters to model parameters.  The residual from the fit is
   // left in the result's offsets vector.
-  CharacterParametersT<T> apply(const JointParametersT<T>& parameters) const;
+  [[nodiscard]] CharacterParametersT<T> apply(const JointParametersT<T>& parameters) const;
 
   // Dimension of the output model parameters vector:
-  Eigen::Index numAllModelParameters() const {
+  [[nodiscard]] Eigen::Index numAllModelParameters() const {
     return transform.cols();
   }
 
   // Dimension of the input joint parameters vector:
-  Eigen::Index numJointParameters() const {
+  [[nodiscard]] Eigen::Index numJointParameters() const {
     return transform.rows();
   }
 };
