@@ -381,7 +381,7 @@ template <typename T>
 typename OnlineBlockHouseholderQR<T>::VectorType OnlineBlockHouseholderQR<T>::At_times_b_i(
     size_t iBlock) const {
   // As noted above, A^T*b = R^T*y
-  return R_ii_[iBlock].transpose() * y_i_[iBlock] + R_in_[iBlock].transpose() * y_i_[iBlock];
+  return R_ii_[iBlock].transpose() * y_i_[iBlock];
 }
 
 template <typename T>
