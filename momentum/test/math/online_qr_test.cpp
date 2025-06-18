@@ -685,6 +685,57 @@ TEST(OnlineBlockQR, RandomMatrix) {
   }
 }
 
+// Test OnlineBlockHouseholderQR with edge cases
+TEST(OnlineBlockQR, EdgeCases) {
+  // Test with zero common columns
+  OnlineBlockHouseholderQR<double> qr(0);
+
+  // Create test matrices
+  Eigen::MatrixXd A_diag(3, 2);
+  A_diag << 1, 2, 3, 4, 5, 6;
+
+  Eigen::MatrixXd A_common(3, 0); // Empty matrix
+
+  Eigen::VectorXd b(3);
+  b << 7, 8, 9;
+
+  // This should work without errors
+  qr.add(0, A_diag, A_common, b);
+
+  // Test result accessors
+  Eigen::VectorXd x_dense = qr.x_dense();
+  EXPECT_EQ(x_dense.size(), 2);
+
+  Eigen::VectorXd x_i = qr.x_i(0);
+  EXPECT_EQ(x_i.size(), 2);
+
+  Eigen::VectorXd x_n = qr.x_n();
+  EXPECT_EQ(x_n.size(), 0);
+
+  // Test At_times_b accessors
+  Eigen::VectorXd Atb_i = qr.At_times_b_i(0);
+  EXPECT_EQ(Atb_i.size(), 2);
+
+  Eigen::VectorXd Atb_n = qr.At_times_b_n();
+  EXPECT_EQ(Atb_n.size(), 0);
+
+  Eigen::VectorXd Atb_dense = qr.At_times_b_dense();
+  EXPECT_EQ(Atb_dense.size(), 2);
+
+  // Test At_times_b_dot
+  Eigen::VectorXd rhs = Eigen::VectorXd::Ones(2);
+  double dot = qr.At_times_b_dot(rhs);
+  EXPECT_NEAR(dot, Atb_dense.dot(rhs), 1e-10);
+
+  // Test R_ii and y_i accessors
+  const Eigen::MatrixXd& R_ii_0 = qr.R_ii(0);
+  const Eigen::VectorXd& y_i_0 = qr.y_i(0);
+
+  EXPECT_EQ(R_ii_0.rows(), 2);
+  EXPECT_EQ(R_ii_0.cols(), 2);
+  EXPECT_EQ(y_i_0.size(), 2);
+}
+
 // Test OnlineBlockHouseholderQR with column indices
 TEST(OnlineBlockQR, WithColumnIndices) {
   // Create a block QR solver
@@ -1353,4 +1404,79 @@ TEST(OnlineQR, WithColumnIndices) {
 
   // The residual should be reasonably small (not necessarily < 1e-10 due to numerical issues)
   EXPECT_LT(residualNorm, 10.0);
+}
+
+// Test to verify the correctness of At_times_b_i() function
+TEST(OnlineBlockQR, AtTimesBiCorrectness) {
+  // At_times_b_i is supposed to be producing the result of what would happen if you actually had
+  // the original A matrix and multiplied it by b, it's mostly a convenience function so you don't
+  // have to hang onto the original A matrix.
+  std::mt19937 rng(42); // Fixed seed for reproducibility
+
+  // Create test data
+  const int n_common = 2;
+
+  // Block 0
+  Eigen::MatrixXd A0_diag = makeRandomMatrix<double>(4, 3, rng);
+  Eigen::MatrixXd A0_common = makeRandomMatrix<double>(4, n_common, rng);
+  Eigen::VectorXd b0 = makeRandomMatrix<double>(4, 1, rng);
+
+  // Block 1
+  Eigen::MatrixXd A1_diag = makeRandomMatrix<double>(3, 2, rng);
+  Eigen::MatrixXd A1_common = makeRandomMatrix<double>(3, n_common, rng);
+  Eigen::VectorXd b1 = makeRandomMatrix<double>(3, 1, rng);
+
+  // Assemble the full system
+  std::vector<Eigen::MatrixXd> A_diag = {A0_diag, A1_diag};
+  std::vector<Eigen::MatrixXd> A_common = {A0_common, A1_common};
+  std::vector<Eigen::VectorXd> b_vec = {b0, b1};
+
+  Eigen::MatrixXd A_full = assembleBlockMatrix<double>(A_diag, A_common, n_common);
+  Eigen::VectorXd b_full = stack<double>(b_vec);
+
+  // Compute ground truth A^T * b
+  Eigen::VectorXd AtB_groundtruth = A_full.transpose() * b_full;
+
+  // Set up block QR solver
+  OnlineBlockHouseholderQR<double> qr_block(n_common);
+  qr_block.add(0, A0_diag, A0_common, b0);
+  qr_block.add(1, A1_diag, A1_common, b1);
+
+  // Test At_times_b_i for each block
+  // At_times_b_i should return A_diag_i^T * b_i for block i (the diagonal block contribution)
+  // This is the contribution to the diagonal parameters from block i
+  Eigen::VectorXd AtB_block0_expected = A0_diag.transpose() * b0;
+  Eigen::VectorXd AtB_block0_computed = qr_block.At_times_b_i(0);
+
+  Eigen::VectorXd AtB_block1_expected = A1_diag.transpose() * b1;
+  Eigen::VectorXd AtB_block1_computed = qr_block.At_times_b_i(1);
+
+  // Check if At_times_b_i returns the diagonal block contribution A_diag_i^T * b_i
+  double error_0 = (AtB_block0_expected - AtB_block0_computed).norm();
+  double error_1 = (AtB_block1_expected - AtB_block1_computed).norm();
+
+  EXPECT_LT(error_0, 1e-10)
+      << "At_times_b_i(0) should return A0_diag^T * b0 (diagonal block contribution)\n"
+      << "Expected: " << AtB_block0_expected.transpose() << "\n"
+      << "Got:      " << AtB_block0_computed.transpose() << "\n"
+      << "Difference: " << (AtB_block0_expected - AtB_block0_computed).transpose() << "\n"
+      << "Error norm: " << error_0;
+
+  EXPECT_LT(error_1, 1e-10)
+      << "At_times_b_i(1) should return A1_diag^T * b1 (diagonal block contribution)\n"
+      << "Expected: " << AtB_block1_expected.transpose() << "\n"
+      << "Got:      " << AtB_block1_computed.transpose() << "\n"
+      << "Difference: " << (AtB_block1_expected - AtB_block1_computed).transpose() << "\n"
+      << "Error norm: " << error_1;
+
+  // Also verify that the dense version matches the full ground truth
+  Eigen::VectorXd AtB_dense = qr_block.At_times_b_dense();
+  EXPECT_LT((AtB_groundtruth - AtB_dense).norm(), 1e-10)
+      << "Dense At_times_b should match full A^T * b";
+
+  // Verify that At_times_b_n() returns the contribution from common parameters
+  Eigen::VectorXd AtB_n_computed = qr_block.At_times_b_n();
+  Eigen::VectorXd AtB_n_expected = A0_common.transpose() * b0 + A1_common.transpose() * b1;
+  EXPECT_LT((AtB_n_expected - AtB_n_computed).norm(), 1e-10)
+      << "At_times_b_n() should return sum of A_common^T * b for all blocks";
 }

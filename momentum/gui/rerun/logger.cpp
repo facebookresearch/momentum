@@ -53,7 +53,7 @@ void logMesh(
     std::optional<rerun::Color> color) {
   auto rerunMesh = rerun::Mesh3D(mesh.vertices).with_triangle_indices(mesh.faces);
   if (color.has_value()) {
-    rerunMesh = std::move(rerunMesh).with_vertex_colors(color.value());
+    rerunMesh = std::move(rerunMesh).with_albedo_factor(rerun::AlbedoFactor(color.value()));
   } else if (mesh.colors.size() == mesh.vertices.size()) {
     rerunMesh = std::move(rerunMesh).with_vertex_colors(mesh.colors);
   }
