@@ -96,10 +96,10 @@ config_dev = { cmd = """
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Debug build" }
-build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j4 --target all", depends-on = [
+build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target all", depends-on = [
     "config",
 ], description = "Build Release version" }
-build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/debug -j4 --target all", depends-on = [
+build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/debug -j --target all", depends-on = [
     "config_dev",
 ], description = "Build Debug version" }
 build_fast = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j4 --target all", depends-on = [
