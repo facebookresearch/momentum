@@ -21,7 +21,7 @@ namespace momentum {
 /// 1. Skinning functions:
 ///    - skinWithBlendShapes(character, state, blendWeights, outputMesh): Use when you already have
 ///      blend weights calculated and want to apply them directly.
-///    - skinWithBlendShapes(character, state, modelParameters, outputMesh): Use when you have model
+///    - skinWithBlendShapes(character, state, modelParams, outputMesh): Use when you have model
 ///      parameters and need to extract blend weights before skinning. This is more convenient for
 ///      high-level character animation where you work with model parameters.
 ///
@@ -57,13 +57,13 @@ void skinWithBlendShapes(
 ///
 /// @param character Character containing mesh, blend shapes, and skinning data
 /// @param state Current pose of the skeleton
-/// @param modelParameters Model parameters containing blend shape weights
+/// @param modelParams Model parameters containing blend shape weights
 /// @param outputMesh Mesh to store the resulting deformed vertices
 template <typename T>
 void skinWithBlendShapes(
     const Character& character,
     const SkeletonStateT<T>& state,
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& modelParams,
     MeshT<T>& outputMesh);
 
 /// Extracts blend shape weights from model parameters.

@@ -44,20 +44,20 @@ Eigen::Index FullyDifferentiableMotionErrorFunctionT<T>::getInputSize(
 template <typename T>
 void FullyDifferentiableMotionErrorFunctionT<T>::getInputImp(
     const std::string& name,
-    Eigen::Ref<Eigen::VectorX<T>> result) const {
+    Eigen::Ref<Eigen::VectorX<T>> value) const {
   if (name == kTargetParameters) {
     const auto& targetParameters = this->getTargetParameters();
     if (targetParameters.size() != this->parameterTransform_.numAllModelParameters()) {
-      result = Eigen::VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters());
+      value = Eigen::VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters());
     } else {
-      result = targetParameters.v;
+      value = targetParameters.v;
     }
   } else if (name == kTargetWeights) {
     const auto& targetWeights = this->getTargetWeights();
     if (targetWeights.size() != this->parameterTransform_.numAllModelParameters()) {
-      result = Eigen::VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters());
+      value = Eigen::VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters());
     } else {
-      result = targetWeights;
+      value = targetWeights;
     }
   } else {
     MT_THROW("Unknown input to FullyDifferentiableMotionErrorFunctionT: {}", name);

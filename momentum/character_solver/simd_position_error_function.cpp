@@ -70,8 +70,9 @@ void SimdPositionConstraints::addConstraint(
     targetY[finalIndex] = target.y();
     targetZ[finalIndex] = target.z();
     weights[finalIndex] = targetWeight;
-  } else
+  } else {
     constraintCount[jointIndex]--;
+  }
 }
 
 VectorXi SimdPositionConstraints::getNumConstraints() const {

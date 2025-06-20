@@ -46,19 +46,19 @@ Eigen::Index FullyDifferentiableStateErrorFunctionT<T>::getInputSize(
 template <typename T>
 void FullyDifferentiableStateErrorFunctionT<T>::getInputImp(
     const std::string& name,
-    Eigen::Ref<Eigen::VectorX<T>> result) const {
+    Eigen::Ref<Eigen::VectorX<T>> value) const {
   if (name == "targetPositionWeights") {
-    result = this->getPositionWeights();
+    value = this->getPositionWeights();
   } else if (name == "targetRotationWeights") {
-    result = this->getRotationWeights();
+    value = this->getRotationWeights();
   } else if (name == "targetState") {
     const TransformListT<T>& targetState = this->getTargetState();
 
     for (size_t iJoint = 0; iJoint < this->skeleton_.joints.size(); ++iJoint) {
-      result.template segment<3>(8 * iJoint + 0) = targetState[iJoint].translation;
-      result.template segment<4>(8 * iJoint + 3) =
+      value.template segment<3>(8 * iJoint + 0) = targetState[iJoint].translation;
+      value.template segment<4>(8 * iJoint + 3) =
           targetState[iJoint].rotation.normalized().coeffs();
-      result(8 * iJoint + 7) = targetState[iJoint].scale;
+      value(8 * iJoint + 7) = targetState[iJoint].scale;
     }
   } else {
     MT_THROW("Unknown input to FullyDifferentiableMotionErrorFunctionT: {}", name);

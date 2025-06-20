@@ -106,8 +106,9 @@ void saveMppca(const Mppca& mppca, const std::string& name) {
 
   // write pi, mu, W, sigma2
   data.write((char*)mppca.Rpre.data(), sizeof(float) * op);
-  for (size_t i = 0; i < mppca.Cinv.size(); i++)
-    data.write((char*)mppca.Cinv[i].data(), sizeof(float) * od * od);
+  for (const auto& Cinv : mppca.Cinv) {
+    data.write((char*)Cinv.data(), sizeof(float) * od * od);
+  }
   data.write((char*)mppca.mu.data(), sizeof(float) * op * od);
 
   // close file

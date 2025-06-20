@@ -192,14 +192,14 @@ ParameterSet CharacterT<T>::activeJointsToParameters(const std::vector<bool>& ac
 
 // create simplified skeleton for enabled parameters
 template <typename T>
-CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& enabledJoints) const {
+CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoints) const {
   MT_CHECK(
-      enabledJoints.size() == skeleton.joints.size(),
+      activeJoints.size() == skeleton.joints.size(),
       "{} is not {}",
-      enabledJoints.size(),
+      activeJoints.size(),
       skeleton.joints.size());
   MT_THROW_IF(
-      std::find(enabledJoints.begin(), enabledJoints.end(), true) == enabledJoints.end(),
+      std::find(activeJoints.begin(), activeJoints.end(), true) == activeJoints.end(),
       "In simplifySkeleton, no joints are enabled; resulting skeleton must have at least one valid joint.");
 
   Skeleton simplifiedSkeleton;
@@ -214,9 +214,9 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& enabledJo
   // create a parameter transform with the correct offsets
   auto zeroTransform = parameterTransform;
 
-  for (size_t jointIndex = 0; jointIndex < enabledJoints.size(); ++jointIndex) {
+  for (size_t jointIndex = 0; jointIndex < activeJoints.size(); ++jointIndex) {
     // zero out all offsets related to joints that are enabled, keep the disabled ones set
-    if (enabledJoints[jointIndex]) {
+    if (activeJoints[jointIndex]) {
       for (size_t o = 0; o < kParametersPerJoint; o++) {
         zeroTransform.offsets(jointIndex * kParametersPerJoint + o) = 0.0f;
       }
@@ -260,7 +260,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& enabledJo
     }
 
     // is joint enabled?
-    if (enabledJoints[aIndex]) {
+    if (activeJoints[aIndex]) {
       // create copy
       Joint jt = j;
 
@@ -416,8 +416,9 @@ SkinWeights CharacterT<T>::remapSkinWeights(
   // go over all vertices
   for (int v = 0; v < result.index.rows(); v++) {
     // remap the parent bones according to the map
-    for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++)
+    for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       result.index(v, i) = gsl::narrow<uint32_t>(jointMap[result.index(v, i)]);
+    }
 
     // join together all weights with the same parent
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
@@ -628,8 +629,6 @@ void CharacterT<T>::addBlendShape(
   // Augment the parameter transform with blend shape parameters:
   std::tie(parameterTransform, parameterLimits) = addBlendShapeParameters(
       parameterTransform, parameterLimits, std::min(maxBlendShapes, blendShape_in->shapeSize()));
-
-  return;
 }
 
 template <typename T>

@@ -477,9 +477,10 @@ double LimitErrorFunctionT<T>::getJacobian(
             // gradients
             for (auto index = parameterTransform.transform.outerIndexPtr()[jointIndex];
                  index < parameterTransform.transform.outerIndexPtr()[jointIndex + 1];
-                 ++index)
+                 ++index) {
               jacobian(count, parameterTransform.transform.innerIndexPtr()[index]) +=
                   wgt * parameterTransform.transform.valuePtr()[index];
+            }
             residual(count) = val * wgt;
           } else if (state.jointParameters(jointIndex) > data.limits[1]) {
             const T val = state.jointParameters[jointIndex] - data.limits[1];
@@ -488,9 +489,10 @@ double LimitErrorFunctionT<T>::getJacobian(
             // gradients
             for (auto index = parameterTransform.transform.outerIndexPtr()[jointIndex];
                  index < parameterTransform.transform.outerIndexPtr()[jointIndex + 1];
-                 ++index)
+                 ++index) {
               jacobian(count, parameterTransform.transform.innerIndexPtr()[index]) +=
                   wgt * parameterTransform.transform.valuePtr()[index];
+            }
             residual(count) = val * wgt;
           }
         }
@@ -642,26 +644,29 @@ double LimitErrorFunctionT<T>::getJacobian(
               const Eigen::Vector3<T> jc = jointState.getTranslationDerivative(d) * jwgt;
               for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
                    index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index)
+                   ++index) {
                 jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
                     jc * parameterTransform.transform.valuePtr()[index];
+              }
             }
             if (this->activeJointParams_[paramIndex + 3 + d]) {
               const Eigen::Vector3<T> jc = jointState.getRotationDerivative(d, posd) * jwgt;
               for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3];
                    index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index)
+                   ++index) {
                 jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
                     jc * parameterTransform.transform.valuePtr()[index];
+              }
             }
           }
           if (this->activeJointParams_[paramIndex + 6]) {
             const Eigen::Vector3<T> jc = jointState.getScaleDerivative(posd) * jwgt;
             for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
                  index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index)
+                 ++index) {
               jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
                   jc * parameterTransform.transform.valuePtr()[index];
+            }
           }
 
           // go to the next joint

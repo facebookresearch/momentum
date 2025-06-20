@@ -53,11 +53,11 @@ MultiposeSolverFunctionT<T>::MultiposeSolverFunctionT(
 }
 
 template <typename T>
-void MultiposeSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
+void MultiposeSolverFunctionT<T>::setEnabledParameters(const ParameterSet& parameterSet) {
   // find the last enabled parameter
   this->actualParameters_ = 0;
   for (Eigen::Index i = 0; i < parameterTransform_->numAllModelParameters(); i++) {
-    if (ps.test(i)) {
+    if (parameterSet.test(i)) {
       this->actualParameters_ = gsl::narrow_cast<int>(i);
     }
   }
@@ -72,7 +72,7 @@ void MultiposeSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
   }
 
   // set the enabled joints based on the parameter set
-  activeJointParams_ = parameterTransform_->computeActiveJointParams(ps);
+  activeJointParams_ = parameterTransform_->computeActiveJointParams(parameterSet);
 
   // give data to helper functions
   for (size_t f = 0; f < getNumFrames(); f++) {

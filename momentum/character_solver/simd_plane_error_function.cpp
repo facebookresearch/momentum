@@ -73,8 +73,9 @@ void SimdPlaneConstraints::addConstraint(
     normalZ[finalIndex] = targetNormal.z();
     targets[finalIndex] = targetOffset;
     weights[finalIndex] = targetWeight;
-  } else
+  } else {
     constraintCount[jointIndex]--;
+  }
 }
 
 VectorXi SimdPlaneConstraints::getNumConstraints() const {
