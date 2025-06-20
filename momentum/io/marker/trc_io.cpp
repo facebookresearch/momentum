@@ -56,8 +56,9 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
     return res;
   }
   std::vector<std::string> markerNames;
-  for (size_t i = 2; i < tokens.size(); i++)
+  for (size_t i = 2; i < tokens.size(); i++) {
     markerNames.push_back(tokens[i]);
+  }
 
   // ignore next line
   GetLineCrossPlatform(infile, line);

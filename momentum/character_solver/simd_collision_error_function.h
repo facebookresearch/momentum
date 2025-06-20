@@ -32,7 +32,7 @@ class SimdCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   explicit SimdCollisionErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
-      const CollisionGeometry& collision_geometry);
+      const CollisionGeometry& collisionGeometry);
 
   explicit SimdCollisionErrorFunctionT(const Character& character);
 

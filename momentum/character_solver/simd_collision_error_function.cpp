@@ -83,8 +83,8 @@ template <typename T>
 SimdCollisionErrorFunctionT<T>::SimdCollisionErrorFunctionT(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    const CollisionGeometry& cg)
-    : SkeletonErrorFunctionT<T>(skel, pt), collisionGeometry_(cg) {
+    const CollisionGeometry& collisionGeometry)
+    : SkeletonErrorFunctionT<T>(skel, pt), collisionGeometry_(collisionGeometry) {
   updateCollisionPairs();
 }
 

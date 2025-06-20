@@ -21,7 +21,7 @@ std::vector<Eigen::Vector3<T>> BlendShape::computeShape(
 
 template <typename T>
 void BlendShape::computeShape(
-    const BlendWeightsT<T>& blendWeights,
+    const BlendWeightsT<T>& coefficients,
     std::vector<Eigen::Vector3<T>>& output) const {
   MT_CHECK(
       gsl::narrow<Eigen::Index>(baseShape_.size()) * 3 == shapeVectors_.rows(),
@@ -33,7 +33,7 @@ void BlendShape::computeShape(
   Eigen::Map<Eigen::VectorX<T>> outputVec(&output[0][0], output.size() * 3);
   const Eigen::Map<const Eigen::VectorXf> baseVec(&baseShape_[0][0], baseShape_.size() * 3);
 
-  outputVec = baseVec.template cast<T>() + computeDeltas<T>(blendWeights);
+  outputVec = baseVec.template cast<T>() + computeDeltas<T>(coefficients);
 }
 
 VectorXf BlendShape::estimateCoefficients(

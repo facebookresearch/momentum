@@ -39,11 +39,11 @@ SequenceSolverFunctionT<T>::SequenceSolverFunctionT(
 }
 
 template <typename T>
-void SequenceSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
-  updateParameterSets(ps);
+void SequenceSolverFunctionT<T>::setEnabledParameters(const ParameterSet& parameterSet) {
+  updateParameterSets(parameterSet);
 
   // set the enabled joints based on the parameter set
-  activeJointParams_ = parameterTransform_->computeActiveJointParams(ps);
+  activeJointParams_ = parameterTransform_->computeActiveJointParams(parameterSet);
 
   // give data to helper functions
   for (size_t f = 0; f < getNumFrames(); f++) {

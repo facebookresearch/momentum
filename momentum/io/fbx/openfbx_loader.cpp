@@ -948,11 +948,11 @@ std::tuple<std::unique_ptr<ofbx::u8[]>, size_t> readFileToBuffer(const filesyste
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
-    const gsl::span<const std::byte> fbxDataRaw,
+    const gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool loadAnim,
     bool permissive) {
-  auto fbxCharDataRaw = cast_span<const unsigned char>(fbxDataRaw);
+  auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
   const size_t length = fbxCharDataRaw.size();
   MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
 
@@ -1024,10 +1024,10 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 } // namespace
 
 Character loadOpenFbxCharacter(
-    const gsl::span<const std::byte> fbxDataRaw,
+    const gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool permissive) {
-  auto [character, motion, fps] = loadOpenFbx(fbxDataRaw, keepLocators, false, permissive);
+  auto [character, motion, fps] = loadOpenFbx(inputData, keepLocators, false, permissive);
   return character;
 }
 
@@ -1039,10 +1039,10 @@ loadOpenFbxCharacter(const filesystem::path& path, KeepLocators keepLocators, bo
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
-    gsl::span<const std::byte> inputSpan,
+    gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool permissive) {
-  return loadOpenFbx(inputSpan, keepLocators, true, permissive);
+  return loadOpenFbx(inputData, keepLocators, true, permissive);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(

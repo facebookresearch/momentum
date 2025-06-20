@@ -239,8 +239,9 @@ std::tuple<MatrixXf, std::vector<std::string>> getAuxilaryDataFromMotion(
   }
 
   values.resize(gsl::narrow<Eigen::Index>(names.size()), poses.cols());
-  for (size_t i = 0; i < map.size(); i++)
+  for (size_t i = 0; i < map.size(); i++) {
     values.row(i) = poses.row(map[i]);
+  }
 
   return result;
 }

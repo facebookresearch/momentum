@@ -193,14 +193,14 @@ OnlineBlockHouseholderQR<T>::OnlineBlockHouseholderQR(const Eigen::Index n_commo
 template <typename T>
 void OnlineBlockHouseholderQR<T>::addMutating(
     size_t iBlock,
-    ColumnIndexedMatrix<MatrixType> A_ii,
-    ColumnIndexedMatrix<MatrixType> A_in,
+    ColumnIndexedMatrix<MatrixType> A_diag,
+    ColumnIndexedMatrix<MatrixType> A_common,
     Eigen::Ref<VectorType> b) {
-  const Eigen::Index n_diag = A_ii.cols();
+  const Eigen::Index n_diag = A_diag.cols();
   const Eigen::Index n_common = R_nn_.cols();
-  MT_CHECK(A_ii.rows() == b.rows());
-  MT_CHECK(A_in.rows() == b.rows());
-  MT_CHECK(A_in.cols() == n_common);
+  MT_CHECK(A_diag.rows() == b.rows());
+  MT_CHECK(A_common.rows() == b.rows());
+  MT_CHECK(A_common.cols() == n_common);
 
   while (R_ii_.size() <= iBlock) {
     R_ii_.push_back(MatrixType());
@@ -220,8 +220,8 @@ void OnlineBlockHouseholderQR<T>::addMutating(
 
     R_in_[iBlock] = MatrixType::Zero(n_diag, n_common);
   } else {
-    MT_CHECK(R_ii_[iBlock].cols() == A_ii.cols());
-    MT_CHECK(y_i_[iBlock].rows() == A_ii.cols());
+    MT_CHECK(R_ii_[iBlock].cols() == A_diag.cols());
+    MT_CHECK(y_i_[iBlock].rows() == A_diag.cols());
   }
 
   auto& R_ii = R_ii_[iBlock];
@@ -230,7 +230,7 @@ void OnlineBlockHouseholderQR<T>::addMutating(
   auto& R_nn = R_nn_;
 
   for (Eigen::Index iCol = 0; iCol < n_diag; ++iCol) {
-    if (A_ii.col(iCol).isZero()) {
+    if (A_diag.col(iCol).isZero()) {
       continue;
     }
 
@@ -248,7 +248,7 @@ void OnlineBlockHouseholderQR<T>::addMutating(
     //     [ 0 0 a a ]
     // We will apply a Householder reflection (I - beta*v*v^T) * A
     // This will zero out the ith column.
-    const auto [beta, mu] = computeHouseholderVec<T>(R_ii(iCol, iCol), A_ii.col(iCol));
+    const auto [beta, mu] = computeHouseholderVec<T>(R_ii(iCol, iCol), A_diag.col(iCol));
     if (beta == 0) {
       continue;
     }
@@ -258,13 +258,14 @@ void OnlineBlockHouseholderQR<T>::addMutating(
     R_ii(iCol, iCol) = mu;
 
     // Apply the Householder vector to the remaining columns.
-    const auto& v2m = A_ii.col(iCol);
+    const auto& v2m = A_diag.col(iCol);
     for (Eigen::Index jCol_diag = iCol + 1; jCol_diag < n_diag; ++jCol_diag) {
-      applyHouseholderTransformation<T>(beta, v2m, R_ii(iCol, jCol_diag), A_ii.col(jCol_diag));
+      applyHouseholderTransformation<T>(beta, v2m, R_ii(iCol, jCol_diag), A_diag.col(jCol_diag));
     }
 
     for (Eigen::Index jCol_common = 0; jCol_common < n_common; ++jCol_common) {
-      applyHouseholderTransformation<T>(beta, v2m, R_in(iCol, jCol_common), A_in.col(jCol_common));
+      applyHouseholderTransformation<T>(
+          beta, v2m, R_in(iCol, jCol_common), A_common.col(jCol_common));
     }
 
     // Apply the Householder vector to the rhs.
@@ -273,16 +274,17 @@ void OnlineBlockHouseholderQR<T>::addMutating(
 
   // Now for the common parameters:
   for (Eigen::Index iCol = 0; iCol < n_common; ++iCol) {
-    const auto [beta, mu] = computeHouseholderVec<T>(R_nn(iCol, iCol), A_in.col(iCol));
+    const auto [beta, mu] = computeHouseholderVec<T>(R_nn(iCol, iCol), A_common.col(iCol));
     if (beta == 0) {
       continue;
     }
 
     R_nn(iCol, iCol) = mu;
 
-    const auto& v2m = A_in.col(iCol);
+    const auto& v2m = A_common.col(iCol);
     for (Eigen::Index jCol_common = iCol + 1; jCol_common < n_common; ++jCol_common) {
-      applyHouseholderTransformation<T>(beta, v2m, R_nn_(iCol, jCol_common), A_in.col(jCol_common));
+      applyHouseholderTransformation<T>(
+          beta, v2m, R_nn_(iCol, jCol_common), A_common.col(jCol_common));
     }
 
     // Apply the Householder vector to the rhs.

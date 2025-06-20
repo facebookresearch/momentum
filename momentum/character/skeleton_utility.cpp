@@ -22,7 +22,7 @@ ModelParameters extrapolateModelParameters(
   }
 
   // yes, perform extrapolation
-  const ModelParameters result =
+  ModelParameters result =
       current.v + (current.v - previous.v).cwiseMin(maxDelta).cwiseMax(-maxDelta) * factor;
 
   return result;

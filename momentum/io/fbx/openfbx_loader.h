@@ -26,7 +26,7 @@ Character loadOpenFbxCharacter(
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
-    gsl::span<const std::byte> inputSpan,
+    gsl::span<const std::byte> inputData,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
@@ -38,7 +38,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
-    gsl::span<const std::byte> inputSpan,
+    gsl::span<const std::byte> inputData,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false);
 
