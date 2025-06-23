@@ -213,16 +213,17 @@ $(document).ready(function(){initNavTree('mppca__io_8cpp_source.html',''); initR
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="comment">// write pi, mu, W, sigma2</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  data.write((<span class="keywordtype">char</span>*)<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppca</a>.Rpre.data(), <span class="keyword">sizeof</span>(<span class="keywordtype">float</span>) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">op</a>);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> = 0; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> &lt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppca</a>.Cinv.size(); <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>++)</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    data.write((<span class="keywordtype">char</span>*)<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppca</a>.Cinv[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>].data(), <span class="keyword">sizeof</span>(<span class="keywordtype">float</span>) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">od</a> * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">od</a>);</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  data.write((<span class="keywordtype">char</span>*)<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppca</a>.mu.data(), <span class="keyword">sizeof</span>(<span class="keywordtype">float</span>) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">op</a> * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">od</a>);</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="comment">// close file</span></div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  data.close();</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; Cinv : <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppca</a>.Cinv) {</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    data.write((<span class="keywordtype">char</span>*)Cinv.data(), <span class="keyword">sizeof</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">od</a> * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">od</a>);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  }</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  data.write((<span class="keywordtype">char</span>*)<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppca</a>.mu.data(), <span class="keyword">sizeof</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">op</a> * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">od</a>);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <span class="comment">// close file</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  data.close();</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>}</div>
 </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="achecks_8h_html_ad864080ec7d619a1d96851a0de141aab"><div class="ttname"><a href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a></div><div class="ttdeci">#define MT_CHECK(condition,...)</div><div class="ttdef"><b>Definition</b> <a href="checks_8h_source.html#l00023">checks.h:23</a></div></div>
 <div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div></div>
 <div class="ttc" id="aexception_8h_html_a4d17a9ca866d9cde9827cc39ab49a5e6"><div class="ttname"><a href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a></div><div class="ttdeci">#define MT_THROW(...)</div><div class="ttdoc">Throws a std::runtime_error with a formatted message.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00028">exception.h:28</a></div></div>
@@ -243,7 +244,7 @@ $(document).ready(function(){initNavTree('mppca__io_8cpp_source.html',''); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_be408ddeaaae0a91adcdd3f13093f868.html">skeleton</a></li><li class="navelem"><a class="el" href="mppca__io_8cpp.html">mppca_io.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 17 2025 00:29:52 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 23 2025 22:59:46 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

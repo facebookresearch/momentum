@@ -132,10 +132,10 @@ $(document).ready(function(){initNavTree('normal__error__function_8cpp_source.ht
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a>[0] = <a class="code hl_function" href="namespacemomentum.html#a04ef8b62f7e0da96fb67403b17c12efe">normal</a>.dot(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dist</a>);</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <span class="keywordflow">if</span> (v) {</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    v-&gt;get().at(0) = std::move(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">point</a>);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    v-&gt;get().at(1) = std::move(<a class="code hl_function" href="namespacemomentum.html#a04ef8b62f7e0da96fb67403b17c12efe">normal</a>);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    v-&gt;get().at(1) = <a class="code hl_function" href="namespacemomentum.html#a04ef8b62f7e0da96fb67403b17c12efe">normal</a>;</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  }</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>) {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>-&gt;get().at(0) = v-&gt;get().at(1); <span class="comment">// normal</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>-&gt;get().at(0) = std::move(<a class="code hl_function" href="namespacemomentum.html#a04ef8b62f7e0da96fb67403b17c12efe">normal</a>);</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>-&gt;get().at(1) = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dist</a>;</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  }</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>}</div>
@@ -162,7 +162,7 @@ $(document).ready(function(){initNavTree('normal__error__function_8cpp_source.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="normal__error__function_8cpp.html">normal_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 17 2025 00:29:52 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 23 2025 22:59:45 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

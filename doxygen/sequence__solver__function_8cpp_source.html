@@ -142,11 +142,11 @@ $(document).ready(function(){initNavTree('sequence__solver__function_8cpp_source
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00042" data-start="{" data-end="}">
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classmomentum_1_1SequenceSolverFunctionT.html#a949d1314dd090f79d17b53dc128c1883">   42</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1SequenceSolverFunctionT.html#a949d1314dd090f79d17b53dc128c1883">SequenceSolverFunctionT&lt;T&gt;::setEnabledParameters</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ps</a>) {</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  updateParameterSets(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ps</a>);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classmomentum_1_1SequenceSolverFunctionT.html#a949d1314dd090f79d17b53dc128c1883">   42</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1SequenceSolverFunctionT.html#a949d1314dd090f79d17b53dc128c1883">SequenceSolverFunctionT&lt;T&gt;::setEnabledParameters</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>) {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  updateParameterSets(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>);</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="comment">// set the enabled joints based on the parameter set</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  activeJointParams_ = parameterTransform_-&gt;computeActiveJointParams(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ps</a>);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  activeJointParams_ = parameterTransform_-&gt;computeActiveJointParams(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>);</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="comment">// give data to helper functions</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a> = 0; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a> &lt; getNumFrames(); <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a>++) {</div>
@@ -618,7 +618,7 @@ $(document).ready(function(){initNavTree('sequence__solver__function_8cpp_source
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="sequence__solver__function_8cpp.html">sequence_solver_function.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 17 2025 00:29:52 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 23 2025 22:59:45 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
