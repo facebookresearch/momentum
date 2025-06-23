@@ -185,24 +185,49 @@ PYBIND11_MODULE(geometry, m) {
       .def(
           "with_mesh_and_skin_weights",
           [](const mm::Character& character,
-             const mm::Mesh* mesh,
+             const mm::Mesh& mesh,
              const std::optional<mm::SkinWeights>& skinWeights) {
-            mm::Character characterWithMesh = character;
-            characterWithMesh.mesh = std::make_unique<mm::Mesh>(*mesh);
             if (skinWeights) {
-              const auto numMeshVertices = mesh->vertices.size();
               MT_THROW_IF(
-                  skinWeights && mesh &&
-                      numMeshVertices != skinWeights->index.rows() &&
-                      numMeshVertices != skinWeights->weight.rows(),
-                  "The number of mesh vertices and skin weight index/weight matrix rows should be the same {} vs {} vs {}",
-                  numMeshVertices,
+                  skinWeights->index.rows() != skinWeights->weight.rows(),
+                  "The number of rows in the index and weight matrices should match; got {} and {}.",
                   skinWeights->index.rows(),
-                  skinWeights->weight.rows())
-              characterWithMesh.skinWeights =
-                  std::make_unique<mm::SkinWeights>(*skinWeights);
+                  skinWeights->weight.rows());
+
+              MT_THROW_IF(
+                  skinWeights->index.maxCoeff() >=
+                      character.skeleton.joints.size(),
+                  "Skin weight index is out of range; max index is {}, but there are only {} joints.",
+                  skinWeights->index.maxCoeff(),
+                  character.skeleton.joints.size());
             }
-            return characterWithMesh;
+
+            const mm::SkinWeights* skinWeightsPtr = character.skinWeights.get();
+            if (skinWeights) {
+              skinWeightsPtr = &skinWeights.value();
+            }
+
+            if (skinWeightsPtr) {
+              MT_THROW_IF(
+                  skinWeightsPtr->weight.rows() != mesh.vertices.size(),
+                  "The number of mesh vertices and skin weight index/weight matrix rows should be the same {} vs {}",
+                  mesh.vertices.size(),
+                  skinWeightsPtr->index.rows());
+            }
+
+            return momentum::Character(
+                character.skeleton,
+                character.parameterTransform,
+                character.parameterLimits,
+                character.locators,
+                &mesh,
+                skinWeightsPtr,
+                character.collision.get(),
+                character.poseShapes.get(),
+                character.blendShape,
+                character.faceExpressionBlendShape,
+                character.name,
+                character.inverseBindPose);
           },
           "Adds mesh and skin weight to the character and return a new character instance",
           py::arg("mesh"),
