@@ -26,6 +26,10 @@ class SkeletonErrorFunctionT {
   }
   virtual ~SkeletonErrorFunctionT() = default;
 
+  [[nodiscard]] const Skeleton& getSkeleton() const {
+    return skeleton_;
+  }
+
   void setWeight(T w) {
     weight_ = w;
   }
