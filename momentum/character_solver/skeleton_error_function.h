@@ -30,6 +30,10 @@ class SkeletonErrorFunctionT {
     return skeleton_;
   }
 
+  [[nodiscard]] const ParameterTransform& getParameterTransform() const {
+    return parameterTransform_;
+  }
+
   void setWeight(T w) {
     weight_ = w;
   }
