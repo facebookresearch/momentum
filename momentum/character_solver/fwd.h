@@ -730,4 +730,28 @@ using VertexErrorFunctiond_const_p = ::std::shared_ptr<const VertexErrorFunction
 using VertexErrorFunctiond_const_u = ::std::unique_ptr<const VertexErrorFunctiond>;
 using VertexErrorFunctiond_const_w = ::std::weak_ptr<const VertexErrorFunctiond>;
 
+template <typename T>
+class VertexProjectionErrorFunctionT;
+using VertexProjectionErrorFunction = VertexProjectionErrorFunctionT<float>;
+using VertexProjectionErrorFunctiond = VertexProjectionErrorFunctionT<double>;
+
+using VertexProjectionErrorFunction_p = ::std::shared_ptr<VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_u = ::std::unique_ptr<VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_w = ::std::weak_ptr<VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_const_p =
+    ::std::shared_ptr<const VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_const_u =
+    ::std::unique_ptr<const VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_const_w = ::std::weak_ptr<const VertexProjectionErrorFunction>;
+
+using VertexProjectionErrorFunctiond_p = ::std::shared_ptr<VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_u = ::std::unique_ptr<VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_w = ::std::weak_ptr<VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_const_p =
+    ::std::shared_ptr<const VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_const_u =
+    ::std::unique_ptr<const VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_const_w =
+    ::std::weak_ptr<const VertexProjectionErrorFunctiond>;
+
 } // namespace momentum
