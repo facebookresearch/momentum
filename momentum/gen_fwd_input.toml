@@ -54,6 +54,7 @@ template_structs = [
     "PlaneData",
     "PositionData",
     "VertexConstraint",
+    "VertexProjectionConstraint",
 ]
 classes = [
     "SimdNormalErrorFunction",
@@ -88,6 +89,7 @@ template_classes = [
     "StateErrorFunction",
     "TrustRegionQR",
     "VertexErrorFunction",
+    "VertexProjectionErrorFunction",
 ]
 
 [[fwd]]
