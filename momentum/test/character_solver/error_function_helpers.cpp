@@ -131,6 +131,17 @@ void testGradientAndJacobian(
       numJacobian.col(k) = (residualPlus - residual) / kStepSize;
     }
 
+    // Dump mismatched jacobian rows:
+    for (int iRow = 0; iRow < jacobianSize; ++iRow) {
+      const auto diff = (numJacobian.row(iRow) - jacobian.row(iRow)).norm();
+      if (diff > 1e-3) {
+        MT_LOGI("Mismatched jacobian row: {}", iRow);
+        MT_LOGI("  numJacobian: {}", numJacobian.row(iRow));
+        MT_LOGI("  jacobian: {}", jacobian.row(iRow));
+        MT_LOGI("  diff: {}", diff);
+      }
+    }
+
     EXPECT_LE(
         (numJacobian - jacobian).norm() /
             ((numJacobian + jacobian).norm() + Momentum_ErrorFunctionsTest<T>::getEps()),
@@ -140,6 +151,11 @@ void testGradientAndJacobian(
   // check the gradients are similar
   {
     SCOPED_TRACE("Checking Numerical Gradient");
+    for (int iDOF = 0; iDOF < transform.numAllModelParameters(); ++iDOF) {
+      std::cout << "iDOF: " << iDOF << "  " << anaGradient(iDOF) << "  " << numGradient(iDOF)
+                << "  " << jacGradient(iDOF) << "\n";
+    }
+
     if ((numGradient + anaGradient).norm() != 0.0) {
       EXPECT_LE(
           (numGradient - anaGradient).norm() /
