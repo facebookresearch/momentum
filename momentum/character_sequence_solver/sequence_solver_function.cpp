@@ -28,6 +28,9 @@ SequenceSolverFunctionT<T>::SequenceSolverFunctionT(
     const ParameterSet& universal,
     const size_t nFrames)
     : skeleton_(skel), parameterTransform_(parameterTransform), universalParameters_(universal) {
+  MT_CHECK(skeleton_ != nullptr);
+  MT_CHECK(parameterTransform_ != nullptr);
+
   states_.resize(nFrames);
   perFrameErrorFunctions_.resize(nFrames);
   sequenceErrorFunctions_.resize(nFrames);

@@ -78,6 +78,13 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
 
   void setJoinedParameterVector(const Eigen::VectorX<T>& joinedParameters);
 
+  [[nodiscard]] const Skeleton* getSkeleton() const {
+    return skeleton_;
+  }
+  [[nodiscard]] const ParameterTransformT<T>* getParameterTransform() const {
+    return parameterTransform_;
+  }
+
  private:
   void setFrameParametersFromJoinedParameterVector(const Eigen::VectorX<T>& parameters);
 
