@@ -14,12 +14,16 @@
 #include "momentum/character/types.h"
 #include "momentum/character_solver/fwd.h"
 #include "momentum/math/constants.h"
+#include "momentum/math/random.h"
 
 namespace momentum {
 
 template <typename T>
 struct Momentum_ErrorFunctionsTest : testing::Test {
   using Type = T;
+
+  // Shared random number generator with fixed seed for consistent test results
+  Random<> rng{12345};
 
   static constexpr T getEps() {
     return Eps<T>(1e-5f, 1e-9);
