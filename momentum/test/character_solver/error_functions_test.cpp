@@ -1373,8 +1373,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
   {
     SCOPED_TRACE("FixedAxisCosL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
-        FixedAxisDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        FixedAxisDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        FixedAxisDataT<T>(
+            this->rng.template uniform<Vector3<T>>(-1, 1),
+            this->rng.template uniform<Vector3<T>>(-1, 1),
+            2,
+            TEST_WEIGHT_VALUE),
+        FixedAxisDataT<T>(
+            this->rng.template uniform<Vector3<T>>(-1, 1),
+            this->rng.template uniform<Vector3<T>>(-1, 1),
+            1,
+            TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1385,7 +1393,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
         transform,
         Eps<T>(2e-2f, 1e-4));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          this->rng.template uniform<VectorX<T>>(transform.numAllModelParameters(), T(-1), T(1));
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1635,8 +1644,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
   const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
-  Random<> rng(12345);
-
   // create constraints
   ProjectionErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform, 0.01);
   Eigen::Matrix4<T> projection = Eigen::Matrix4<T>::Identity();
@@ -1647,11 +1654,11 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
     // projections are ignored behind the camera
     for (int i = 0; i < 5; ++i) {
       errorFunction.addConstraint(ProjectionConstraintDataT<T>{
-          (projection + rng.uniformAffine3<T>().matrix()).topRows(3),
-          rng.uniform<size_t>(size_t(0), size_t(2)),
-          rng.normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
-          rng.uniform<T>(0.1, 2.0),
-          rng.normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
+          (projection + this->rng.template uniformAffine3<T>().matrix()).topRows(3),
+          this->rng.template uniform<size_t>(size_t(0), size_t(2)),
+          this->rng.template normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
+          this->rng.template uniform<T>(0.1, 2.0),
+          this->rng.template normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
     }
 
     if constexpr (std::is_same_v<T, float>) {
@@ -1677,7 +1684,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
 
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          rng.uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
+          this->rng.template uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
       const momentum::SkeletonStateT<T> skelState(transform.apply(parameters), skeleton);
       ASSERT_GT(errorFunction.getError(parameters, skelState), 0);
       TEST_GRADIENT_AND_JACOBIAN(
