@@ -45,6 +45,8 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   [[nodiscard]] size_t getJacobianSize() const final;
 
   void setTargetWeights(const Eigen::VectorX<T>& posWeight, const Eigen::VectorX<T>& rotWeight);
+  void setPositionTargetWeights(const Eigen::VectorX<T>& posWeight);
+  void setRotationTargetWeights(const Eigen::VectorX<T>& rotWeight);
   void setWeights(const float posWeight, const float rotationWeight) {
     posWgt_ = posWeight;
     rotWgt_ = rotationWeight;
