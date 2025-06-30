@@ -212,6 +212,30 @@ using VertexProjectionConstraintd_const_p = ::std::shared_ptr<const VertexProjec
 using VertexProjectionConstraintd_const_u = ::std::unique_ptr<const VertexProjectionConstraintd>;
 using VertexProjectionConstraintd_const_w = ::std::weak_ptr<const VertexProjectionConstraintd>;
 
+template <typename T>
+struct PointTriangleVertexConstraintT;
+using PointTriangleVertexConstraint = PointTriangleVertexConstraintT<float>;
+using PointTriangleVertexConstraintd = PointTriangleVertexConstraintT<double>;
+
+using PointTriangleVertexConstraint_p = ::std::shared_ptr<PointTriangleVertexConstraint>;
+using PointTriangleVertexConstraint_u = ::std::unique_ptr<PointTriangleVertexConstraint>;
+using PointTriangleVertexConstraint_w = ::std::weak_ptr<PointTriangleVertexConstraint>;
+using PointTriangleVertexConstraint_const_p =
+    ::std::shared_ptr<const PointTriangleVertexConstraint>;
+using PointTriangleVertexConstraint_const_u =
+    ::std::unique_ptr<const PointTriangleVertexConstraint>;
+using PointTriangleVertexConstraint_const_w = ::std::weak_ptr<const PointTriangleVertexConstraint>;
+
+using PointTriangleVertexConstraintd_p = ::std::shared_ptr<PointTriangleVertexConstraintd>;
+using PointTriangleVertexConstraintd_u = ::std::unique_ptr<PointTriangleVertexConstraintd>;
+using PointTriangleVertexConstraintd_w = ::std::weak_ptr<PointTriangleVertexConstraintd>;
+using PointTriangleVertexConstraintd_const_p =
+    ::std::shared_ptr<const PointTriangleVertexConstraintd>;
+using PointTriangleVertexConstraintd_const_u =
+    ::std::unique_ptr<const PointTriangleVertexConstraintd>;
+using PointTriangleVertexConstraintd_const_w =
+    ::std::weak_ptr<const PointTriangleVertexConstraintd>;
+
 class SimdNormalErrorFunction;
 
 using SimdNormalErrorFunction_p = ::std::shared_ptr<SimdNormalErrorFunction>;
@@ -753,5 +777,30 @@ using VertexProjectionErrorFunctiond_const_u =
     ::std::unique_ptr<const VertexProjectionErrorFunctiond>;
 using VertexProjectionErrorFunctiond_const_w =
     ::std::weak_ptr<const VertexProjectionErrorFunctiond>;
+
+template <typename T>
+class PointTriangleVertexErrorFunctionT;
+using PointTriangleVertexErrorFunction = PointTriangleVertexErrorFunctionT<float>;
+using PointTriangleVertexErrorFunctiond = PointTriangleVertexErrorFunctionT<double>;
+
+using PointTriangleVertexErrorFunction_p = ::std::shared_ptr<PointTriangleVertexErrorFunction>;
+using PointTriangleVertexErrorFunction_u = ::std::unique_ptr<PointTriangleVertexErrorFunction>;
+using PointTriangleVertexErrorFunction_w = ::std::weak_ptr<PointTriangleVertexErrorFunction>;
+using PointTriangleVertexErrorFunction_const_p =
+    ::std::shared_ptr<const PointTriangleVertexErrorFunction>;
+using PointTriangleVertexErrorFunction_const_u =
+    ::std::unique_ptr<const PointTriangleVertexErrorFunction>;
+using PointTriangleVertexErrorFunction_const_w =
+    ::std::weak_ptr<const PointTriangleVertexErrorFunction>;
+
+using PointTriangleVertexErrorFunctiond_p = ::std::shared_ptr<PointTriangleVertexErrorFunctiond>;
+using PointTriangleVertexErrorFunctiond_u = ::std::unique_ptr<PointTriangleVertexErrorFunctiond>;
+using PointTriangleVertexErrorFunctiond_w = ::std::weak_ptr<PointTriangleVertexErrorFunctiond>;
+using PointTriangleVertexErrorFunctiond_const_p =
+    ::std::shared_ptr<const PointTriangleVertexErrorFunctiond>;
+using PointTriangleVertexErrorFunctiond_const_u =
+    ::std::unique_ptr<const PointTriangleVertexErrorFunctiond>;
+using PointTriangleVertexErrorFunctiond_const_w =
+    ::std::weak_ptr<const PointTriangleVertexErrorFunctiond>;
 
 } // namespace momentum
