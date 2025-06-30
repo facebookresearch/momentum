@@ -236,6 +236,7 @@ character_solver_public_headers = [
     "character_solver/trust_region_qr.h",
     "character_solver/vertex_error_function.h",
     "character_solver/vertex_projection_error_function.h",
+    "character_solver/point_triangle_vertex_error_function.h",
 ]
 
 character_solver_sources = [
@@ -260,6 +261,7 @@ character_solver_sources = [
     "character_solver/trust_region_qr.cpp",
     "character_solver/vertex_error_function.cpp",
     "character_solver/vertex_projection_error_function.cpp",
+    "character_solver/point_triangle_vertex_error_function.cpp",
 ]
 
 character_solver_test_sources = [

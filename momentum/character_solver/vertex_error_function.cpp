@@ -520,7 +520,7 @@ double VertexErrorFunctionT<T>::calculateNormalJacobian(
       this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
   const T dist = diff.dot(normal);
 
-  const T wgt = std::sqrt(constr.weight * kPositionWeight * this->weight_);
+  const T wgt = std::sqrt(constr.weight * kPlaneWeight * this->weight_);
 
   SkinningWeightIteratorT<T> skinningIter(
       this->character_, *this->restMesh_, state, constr.vertexIndex);

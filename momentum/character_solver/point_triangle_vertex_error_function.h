@@ -11,44 +11,42 @@
 #include <momentum/character_solver/plane_error_function.h>
 #include <momentum/character_solver/position_error_function.h>
 #include <momentum/character_solver/skeleton_error_function.h>
+#include <momentum/character_solver/vertex_error_function.h>
 #include <momentum/math/fwd.h>
 
 namespace momentum {
 
 template <typename T>
-struct VertexConstraintT {
-  int vertexIndex = -1;
+struct PointTriangleVertexConstraintT {
+  int srcVertexIndex = -1;
+  Eigen::Vector3i tgtTriangleIndices;
+  Eigen::Vector3<T> tgtTriangleBaryCoords;
+  T depth = 0;
   T weight = 1;
-  Eigen::Vector3<T> targetPosition;
-  Eigen::Vector3<T> targetNormal;
 
   template <typename T2>
   VertexConstraintT<T2> cast() const {
     return {
-        this->vertexIndex,
-        static_cast<T2>(this->weight),
-        this->targetPosition.template cast<T2>(),
-        this->targetNormal.template cast<T2>()};
+        this->srcVertexIndex,
+        this->tgtTriangleIndices,
+        this->tgtTriangleBaryCoords.template cast<T2>(),
+        static_cast<T2>(this->depth),
+        static_cast<T2>(this->weight)};
   }
 };
 
-enum class VertexConstraintType {
-  Position, // Target the vertex position
-  Plane, // point-to-plane distance using the target normal
-  Normal, // point-to-plane distance using the source (body) normal
-  SymmetricNormal, // Point-to-plane using a 50/50 mix of source and target normal
-};
-
-[[nodiscard]] std::string_view toString(VertexConstraintType type);
-
+/// Support constraining different parts of the mesh together by specifying that a source vertex
+/// should target a location on the mesh defined by a target triangle and its normal.  The target
+/// point is specified as sum_i (bary_i * target_triangle_vertex_i) + depth *
+/// target_triangle_normal. Note that this constraint applies "forces" both to the source vertex and
+/// every vertex in the target triangle, so it will actually try to pull both toward each other.
 template <typename T>
-class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
+class PointTriangleVertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
-  explicit VertexErrorFunctionT(
+  explicit PointTriangleVertexErrorFunctionT(
       const Character& character,
-      VertexConstraintType type = VertexConstraintType::Position,
-      size_t maxThreads = 0);
-  virtual ~VertexErrorFunctionT() override;
+      VertexConstraintType type = VertexConstraintType::Position);
+  virtual ~PointTriangleVertexErrorFunctionT() override;
 
   [[nodiscard]] double getError(
       const ModelParametersT<T>& modelParameters,
@@ -70,30 +68,33 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   void addConstraint(
       int vertexIndex,
-      T weight,
-      const Eigen::Vector3<T>& targetPosition,
-      const Eigen::Vector3<T>& targetNormal);
+      const Eigen::Vector3i& triangleIndices,
+      const Eigen::Vector3<T>& triangleBaryCoords,
+      float depth = 0,
+      T weight = 1);
   void clearConstraints();
 
-  [[nodiscard]] const std::vector<VertexConstraintT<T>>& getConstraints() const {
+  [[nodiscard]] const std::vector<PointTriangleVertexConstraintT<T>>& getConstraints() const {
     return constraints_;
   }
 
   static constexpr T kPositionWeight = PositionErrorFunctionT<T>::kLegacyWeight;
   static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
 
+  size_t getNumVertices() const;
+
  private:
   double calculatePositionJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
-      const VertexConstraintT<T>& constr,
+      const PointTriangleVertexConstraintT<T>& constr,
       Ref<Eigen::MatrixX<T>> jac,
       Ref<Eigen::VectorX<T>> res) const;
 
   double calculateNormalJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
-      const VertexConstraintT<T>& constr,
+      const PointTriangleVertexConstraintT<T>& constr,
       T sourceNormalWeight,
       T targetNormalWeight,
       Ref<Eigen::MatrixX<T>> jac,
@@ -102,30 +103,22 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculatePositionGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
-      const VertexConstraintT<T>& constr,
+      const PointTriangleVertexConstraintT<T>& constr,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   double calculateNormalGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
-      const VertexConstraintT<T>& constr,
+      const PointTriangleVertexConstraintT<T>& constr,
       T sourceNormalWeight,
       T targetNormalWeight,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
-
-  // Utility function used now in calculateNormalJacobian and calculatePositionGradient
-  // to calculate derivatives with respect to position in world space (considering skinning)
-  void calculateDWorldPos(
-      const SkeletonStateT<T>& state,
-      const VertexConstraintT<T>& constr,
-      const Eigen::Vector3<T>& d_restPos,
-      Eigen::Vector3<T>& d_worldPos) const;
 
   std::pair<T, T> computeNormalWeights() const;
 
   const Character& character_;
 
-  std::vector<VertexConstraintT<T>> constraints_;
+  std::vector<PointTriangleVertexConstraintT<T>> constraints_;
 
   std::unique_ptr<MeshT<T>>
       neutralMesh_; // Rest mesh without facial expression basis,
@@ -137,8 +130,6 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
       posedMesh_; // The posed mesh after the skeleton transforms have been applied.
 
   const VertexConstraintType constraintType_;
-
-  size_t maxThreads_;
 
   void updateMeshes(const ModelParametersT<T>& modelParameters, const SkeletonStateT<T>& state);
 };
