@@ -40,10 +40,19 @@ template <typename T>
 void StateSequenceErrorFunctionT<T>::setTargetWeights(
     const Eigen::VectorX<T>& posWeight,
     const Eigen::VectorX<T>& rotWeight) {
-  MT_CHECK(posWeight.size() == static_cast<Eigen::Index>(this->skeleton_.joints.size()));
-  MT_CHECK(rotWeight.size() == static_cast<Eigen::Index>(this->skeleton_.joints.size()));
+  setPositionTargetWeights(posWeight);
+  setRotationTargetWeights(rotWeight);
+}
 
+template <typename T>
+void StateSequenceErrorFunctionT<T>::setPositionTargetWeights(const Eigen::VectorX<T>& posWeight) {
+  MT_CHECK(posWeight.size() == static_cast<Eigen::Index>(this->skeleton_.joints.size()));
   targetPositionWeights_ = posWeight;
+}
+
+template <typename T>
+void StateSequenceErrorFunctionT<T>::setRotationTargetWeights(const Eigen::VectorX<T>& rotWeight) {
+  MT_CHECK(rotWeight.size() == static_cast<Eigen::Index>(this->skeleton_.joints.size()));
   targetRotationWeights_ = rotWeight;
 }
 
