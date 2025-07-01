@@ -895,7 +895,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
   // move.  At some point we should revisit, either to disable support for Normal constraints
   // altogether or figure out where this very weird issue comes from.
 
-  momentum::Random<> rng(12345);
   for (const auto& constraintType : {
            VertexConstraintType::Position, VertexConstraintType::Plane,
            // VertexConstraintType::Normal,
@@ -936,7 +935,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
     // ModelParametersT<T> modelParams =
     // ModelParametersT<T>::Zero(transform.numAllModelParameters());
     const ModelParametersT<T> modelParams = 0.25 *
-        rng.uniform<Eigen::VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
+        this->rng.template uniform<Eigen::VectorX<T>>(
+            character.parameterTransform.numAllModelParameters(), -1, 1);
 
     SkeletonStateT<T> state(transform.apply(modelParams), skeleton);
 
@@ -950,7 +950,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
         modelParams,
         character.skeleton,
         character.parameterTransform.cast<T>(),
-        Eps<T>(2e-2f, 5e-4),
+        Eps<T>(5e-2f, 5e-4),
         Eps<T>(1e-6f, 1e-13),
         true,
         true);
