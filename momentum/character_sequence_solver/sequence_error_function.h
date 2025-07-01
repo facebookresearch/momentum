@@ -76,6 +76,14 @@ class SequenceErrorFunctionT {
     return 0;
   }
 
+  [[nodiscard]] const Skeleton& getSkeleton() const {
+    return this->skeleton_;
+  }
+
+  [[nodiscard]] const ParameterTransform& getParameterTransform() const {
+    return this->parameterTransform_;
+  }
+
  protected:
   const Skeleton& skeleton_;
   const ParameterTransform& parameterTransform_;
