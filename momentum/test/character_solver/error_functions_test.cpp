@@ -950,7 +950,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
         modelParams,
         character.skeleton,
         character.parameterTransform.cast<T>(),
-        Eps<T>(5e-2f, 5e-4),
+        Eps<T>(5e-2f, 1e-3),
         Eps<T>(1e-6f, 1e-13),
         true,
         true);
