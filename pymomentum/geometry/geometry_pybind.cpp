@@ -42,6 +42,8 @@
 #include <algorithm>
 #include <limits>
 
+#include <fmt/format.h>
+
 namespace py = pybind11;
 namespace mm = momentum;
 
@@ -488,7 +490,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           &loadGLTFCharacterWithMotionFromBytes,
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
-  
+
   :parameter gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
   :return: a valid Character.
         )",
@@ -607,7 +609,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           &loadGLTFCharacterWithMotion,
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and a motion sequence from a gltf file.  Note that motion can only be read from GLTF files
-saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use 
+saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use
 :meth:`load_gltf_with_skel_states`.
 
 :parameter gltfFilename: A .gltf file; e.g. character_s0.glb.
@@ -617,11 +619,11 @@ saved using momentum, which stores model parameters in a custom extension.  For 
       .def_static(
           "load_gltf_with_skel_states_from_bytes",
           &loadGLTFCharacterWithSkelStatesFromBytes,
-          R"(Load a character and a skeleton state motion sequence from gltf bytes.  Unlike 
+          R"(Load a character and a skeleton state motion sequence from gltf bytes.  Unlike
 :meth:`load_gltf_with_motion`, this function should work with any GLTF file since it reads the raw transforms from the file
-and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not 
+and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
-  
+
 :parameter gltf_bytes: The bytes of a gltf file.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
         )",
@@ -629,11 +631,11 @@ support the proprietary momentum motion format for storing model parameters in G
       .def_static(
           "load_gltf_with_skel_states",
           &loadGLTFCharacterWithSkelStates,
-          R"(Load a character and a skel state sequence from a gltf file.  Unlike 
+          R"(Load a character and a skel state sequence from a gltf file.  Unlike
 :meth:`load_gltf_with_motion`, this function should work with any GLTF file since it reads the raw transforms from the file
-and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not 
+and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
-    
+
 :parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
           )",
@@ -807,7 +809,15 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
                     character.parameterTransform, enabledParamsTensor)));
           },
           "Maps a list of parameter indices to a list of joints driven by those parameters.",
-          py::arg("active_parameters"));
+          py::arg("active_parameters"))
+      .def("__repr__", [](const mm::Character& c) {
+        return fmt::format(
+            "Character(name='{}', joints={}, parameters={}, has_mesh={})",
+            c.name,
+            c.skeleton.joints.size(),
+            c.parameterTransform.numAllModelParameters(),
+            c.mesh ? "True" : "False");
+      });
 
   // =====================================================
   // momentum::Joint
@@ -868,7 +878,20 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def_property_readonly(
           "translation_offset",
           [](const mm::Joint& joint) { return joint.translationOffset; },
-          "Returns the translation offset for this joint in default pose of the character.");
+          "Returns the translation offset for this joint in default pose of the character.")
+      .def("__repr__", [](const mm::Joint& j) {
+        return fmt::format(
+            "Joint(name='{}', parent={}, offset=[{} {} {}], pre_rotation=[{} {} {} {}])",
+            j.name,
+            j.parent == mm::kInvalidIndex ? -1 : static_cast<int>(j.parent),
+            j.translationOffset.x(),
+            j.translationOffset.y(),
+            j.translationOffset.z(),
+            j.preRotation.x(),
+            j.preRotation.y(),
+            j.preRotation.z(),
+            j.preRotation.w());
+      });
 
   // =====================================================
   // momentum::Skeleton
@@ -1007,7 +1030,10 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
             return pymomentum::asArray(preRotations);
           },
           "Returns skeleton joint offsets tensor for all joints shape: (num_joints, 4)")
-      .def_readonly("joints", &mm::Skeleton::joints);
+      .def_readonly("joints", &mm::Skeleton::joints)
+      .def("__repr__", [](const mm::Skeleton& s) {
+        return fmt::format("Skeleton(joints={})", s.joints.size());
+      });
 
   // =====================================================
   // momentum::SkinWeights
@@ -1029,7 +1055,13 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def_property_readonly(
           "index",
           [](const mm::SkinWeights& skinning) { return skinning.index; },
-          "Returns the skinning indices.");
+          "Returns the skinning indices.")
+      .def("__repr__", [](const mm::SkinWeights& sw) {
+        return fmt::format(
+            "SkinWeights(vertices={}, influences={})",
+            sw.weight.rows(),
+            sw.weight.cols());
+      });
 
   // =====================================================
   // momentum::Mesh
@@ -1210,10 +1242,21 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
             return py::array(py::cast(intersections));
           },
           "Test if the mesh self intersects anywhere and return all intersecting face pairs")
-      .def("with_updated_normals", [](const mm::Mesh& mesh) {
-        mm::Mesh result = mesh;
-        result.updateNormals();
-        return result;
+      .def(
+          "with_updated_normals",
+          [](const mm::Mesh& mesh) {
+            mm::Mesh result = mesh;
+            result.updateNormals();
+            return result;
+          })
+      .def("__repr__", [](const mm::Mesh& m) {
+        return fmt::format(
+            "Mesh(vertices={}, faces={}, has_normals={}, has_colors={}, has_texcoords={})",
+            m.vertices.size(),
+            m.faces.size(),
+            !m.normals.empty() ? "True" : "False",
+            !m.colors.empty() ? "True" : "False",
+            !m.texcoords.empty() ? "True" : "False");
       });
 
   blendShapeClass
@@ -1303,7 +1346,13 @@ The resulting shape is equal to the base shape plus a linear combination of the 
 
 :parameter coeffs: A torch.Tensor of size [n_batch x n_shapes] containing blend shape coefficients.
 :result: A [n_batch x n_vertices x 3] tensor containing the vertex positions.)",
-          py::arg("coeffs"));
+          py::arg("coeffs"))
+      .def("__repr__", [](const mm::BlendShape& bs) {
+        return fmt::format(
+            "BlendShape(shapes={}, vertices={})",
+            bs.shapeSize(),
+            bs.modelSize());
+      });
 
   // =====================================================
   // momentum::Locator
@@ -1550,7 +1599,95 @@ Create a parameter limit with min and max values for a joint parameter.
           py::arg("parent"),
           py::arg("offset"),
           py::arg("ellipsoid"),
-          py::arg("weight") = 1.0f);
+          py::arg("weight") = 1.0f)
+      .def("__repr__", [](const mm::ParameterLimit& pl) {
+        std::string typeStr;
+        std::string dataStr;
+
+        switch (pl.type) {
+          case mm::LimitType::MinMax:
+            typeStr = "MinMax";
+            dataStr = fmt::format(
+                "param={}, min={}, max={}",
+                pl.data.minMax.parameterIndex,
+                pl.data.minMax.limits[0],
+                pl.data.minMax.limits[1]);
+            break;
+          case mm::LimitType::MinMaxJoint:
+            typeStr = "MinMaxJoint";
+            dataStr = fmt::format(
+                "joint={}, param={}, min={}, max={}",
+                pl.data.minMaxJoint.jointIndex,
+                pl.data.minMaxJoint.jointParameter,
+                pl.data.minMaxJoint.limits[0],
+                pl.data.minMaxJoint.limits[1]);
+            break;
+          case mm::LimitType::MinMaxJointPassive:
+            typeStr = "MinMaxJointPassive";
+            dataStr = fmt::format(
+                "joint={}, param={}, min={}, max={}",
+                pl.data.minMaxJoint.jointIndex,
+                pl.data.minMaxJoint.jointParameter,
+                pl.data.minMaxJoint.limits[0],
+                pl.data.minMaxJoint.limits[1]);
+            break;
+          case mm::LimitType::Linear:
+            typeStr = "Linear";
+            dataStr = fmt::format(
+                "ref={}, target={}, scale={}, offset={}",
+                pl.data.linear.referenceIndex,
+                pl.data.linear.targetIndex,
+                pl.data.linear.scale,
+                pl.data.linear.offset);
+            break;
+          case mm::LimitType::LinearJoint:
+            typeStr = "LinearJoint";
+            dataStr = fmt::format(
+                "ref_joint={}, ref_param={}, target_joint={}, target_param={}, scale={}, offset={}",
+                pl.data.linearJoint.referenceJointIndex,
+                pl.data.linearJoint.referenceJointParameter,
+                pl.data.linearJoint.targetJointIndex,
+                pl.data.linearJoint.targetJointParameter,
+                pl.data.linearJoint.scale,
+                pl.data.linearJoint.offset);
+            break;
+          case mm::LimitType::Ellipsoid:
+            typeStr = "Ellipsoid";
+            dataStr = fmt::format(
+                "ellipsoid_parent={}, parent={}, offset=[{} {} {}]",
+                pl.data.ellipsoid.ellipsoidParent,
+                pl.data.ellipsoid.parent,
+                pl.data.ellipsoid.offset[0],
+                pl.data.ellipsoid.offset[1],
+                pl.data.ellipsoid.offset[2]);
+            break;
+          case mm::LimitType::HalfPlane:
+            typeStr = "HalfPlane";
+            dataStr = fmt::format(
+                "param1={}, param2={}, normal=[{} {}], offset={}",
+                pl.data.halfPlane.param1,
+                pl.data.halfPlane.param2,
+                pl.data.halfPlane.normal[0],
+                pl.data.halfPlane.normal[1],
+                pl.data.halfPlane.offset);
+            break;
+          default:
+            typeStr = "Unknown";
+            dataStr = "";
+            break;
+        }
+
+        if (!dataStr.empty()) {
+          return fmt::format(
+              "ParameterLimit(type={}, weight={}, {})",
+              typeStr,
+              pl.weight,
+              dataStr);
+        } else {
+          return fmt::format(
+              "ParameterLimit(type={}, weight={})", typeStr, pl.weight);
+        }
+      });
 
   parameterLimitDataClass
       .def_readonly("minmax", &mm::LimitData::minMax, "Data for MinMax limit.")
@@ -1566,7 +1703,10 @@ Create a parameter limit with min and max values for a joint parameter.
       .def_readonly(
           "halfplane", &mm::LimitData::halfPlane, "Data for HalfPlane limit.")
       .def_readonly(
-          "ellipsoid", &mm::LimitData::ellipsoid, "Data for Ellipsoid limit.");
+          "ellipsoid", &mm::LimitData::ellipsoid, "Data for Ellipsoid limit.")
+      .def("__repr__", [](const mm::LimitData& ld) {
+        return fmt::format("LimitData()");
+      });
 
   parameterLimitMinMaxClass
       .def_readonly(
@@ -1580,7 +1720,14 @@ Create a parameter limit with min and max values for a joint parameter.
       .def_property_readonly(
           "max",
           [](const mm::LimitMinMax& data) { return data.limits[1]; },
-          "Maximum value of MinMax limit.");
+          "Maximum value of MinMax limit.")
+      .def("__repr__", [](const mm::LimitMinMax& lmm) {
+        return fmt::format(
+            "LimitMinMax(param={}, min={}, max={})",
+            lmm.parameterIndex,
+            lmm.limits[0],
+            lmm.limits[1]);
+      });
 
   parameterLimitMinMaxJointClass
       .def_readonly(
@@ -1598,7 +1745,15 @@ Create a parameter limit with min and max values for a joint parameter.
       .def_property_readonly(
           "max",
           [](const mm::LimitMinMaxJoint& data) { return data.limits[1]; },
-          "Maximum value of MinMaxJoint limit.");
+          "Maximum value of MinMaxJoint limit.")
+      .def("__repr__", [](const mm::LimitMinMaxJoint& lmmj) {
+        return fmt::format(
+            "LimitMinMaxJoint(joint={}, param={}, min={}, max={})",
+            lmmj.jointIndex,
+            lmmj.jointParameter,
+            lmmj.limits[0],
+            lmmj.limits[1]);
+      });
 
   parameterLimitLinearClass
       .def_readonly(
@@ -1627,13 +1782,22 @@ Create a parameter limit with min and max values for a joint parameter.
             }
           })
       .def_property_readonly(
-          "range_max", [](const mm::LimitLinear& data) -> std::optional<float> {
+          "range_max",
+          [](const mm::LimitLinear& data) -> std::optional<float> {
             if (data.rangeMax >= std::numeric_limits<float>::max()) {
               return std::optional<float>{};
             } else {
               return std::make_optional(data.rangeMax);
             }
-          });
+          })
+      .def("__repr__", [](const mm::LimitLinear& ll) {
+        return fmt::format(
+            "LimitLinear(ref={}, target={}, scale={}, offset={})",
+            ll.referenceIndex,
+            ll.targetIndex,
+            ll.scale,
+            ll.offset);
+      });
 
   parameterLimitLinearJointClass
       .def_readonly(
@@ -1677,13 +1841,32 @@ Create a parameter limit with min and max values for a joint parameter.
             } else {
               return std::make_optional(data.rangeMax);
             }
-          });
+          })
+      .def("__repr__", [](const mm::LimitLinearJoint& llj) {
+        return fmt::format(
+            "LimitLinearJoint(ref_joint={}, ref_param={}, target_joint={}, target_param={}, scale={}, offset={})",
+            llj.referenceJointIndex,
+            llj.referenceJointParameter,
+            llj.targetJointIndex,
+            llj.targetJointParameter,
+            llj.scale,
+            llj.offset);
+      });
 
   parameterLimitHalfPlaneClass
       .def_readonly("param1_index", &mm::LimitHalfPlane::param1)
       .def_readonly("param2_index", &mm::LimitHalfPlane::param2)
       .def_readonly("offset", &mm::LimitHalfPlane::offset)
-      .def_readonly("normal", &mm::LimitHalfPlane::normal);
+      .def_readonly("normal", &mm::LimitHalfPlane::normal)
+      .def("__repr__", [](const mm::LimitHalfPlane& lhp) {
+        return fmt::format(
+            "LimitHalfPlane(param1={}, param2={}, normal=[{} {}], offset={})",
+            lhp.param1,
+            lhp.param2,
+            lhp.normal[0],
+            lhp.normal[1],
+            lhp.offset);
+      });
 
   parameterLimitEllipsoidClass
       .def_property_readonly(
@@ -1698,7 +1881,16 @@ Create a parameter limit with min and max values for a joint parameter.
           })
       .def_readonly("offset", &mm::LimitEllipsoid::offset)
       .def_readonly("ellipsoid_parent", &mm::LimitEllipsoid::ellipsoidParent)
-      .def_readonly("parent", &mm::LimitEllipsoid::parent);
+      .def_readonly("parent", &mm::LimitEllipsoid::parent)
+      .def("__repr__", [](const mm::LimitEllipsoid& le) {
+        return fmt::format(
+            "LimitEllipsoid(ellipsoid_parent={}, parent={}, offset=[{} {} {}])",
+            le.ellipsoidParent,
+            le.parent,
+            le.offset.x(),
+            le.offset.y(),
+            le.offset.z());
+      });
 
   // =====================================================
   // momentum::ParameterTransform
@@ -1822,23 +2014,35 @@ can be used to enable/disable finger motion in the character model.  )")
       .def_property_readonly(
           "transform",
           &getParameterTransformTensor,
-          "Returns the parameter transform matrix which when applied maps model parameters to joint parameters.");
-  ;
+          "Returns the parameter transform matrix which when applied maps model parameters to joint parameters.")
+      .def("__repr__", [](const mm::ParameterTransform& pt) {
+        return fmt::format(
+            "ParameterTransform(parameters={}, joints={})",
+            pt.numAllModelParameters(),
+            pt.transform.rows() / mm::kParametersPerJoint);
+      });
 
   // =====================================================
   // momentum::InverseParameterTransform
   // - apply()
   // =====================================================
-  inverseParameterTransformClass.def(
-      "apply",
-      &applyInverseParamTransform,
-      R"(Apply the inverse parameter transform to a 7*nJoints-dimensional joint parameter vector (returns the k-dimensional model parameter vector).
+  inverseParameterTransformClass
+      .def(
+          "apply",
+          &applyInverseParamTransform,
+          R"(Apply the inverse parameter transform to a 7*nJoints-dimensional joint parameter vector (returns the k-dimensional model parameter vector).
 
 Because the number of joint parameters is much larger than the number of model parameters, this will in general have a non-zero residual.
 
 :param joint_parameters: Joint parameter tensor with dimensions (nBatch x 7*nJoints).
 :return: A torch.Tensor containing the (nBatch x nModelParameters) model parameters.)",
-      py::arg("joint_parameters"));
+          py::arg("joint_parameters"))
+      .def("__repr__", [](const mm::InverseParameterTransform& ipt) {
+        return fmt::format(
+            "InverseParameterTransform(parameters={}, joints={})",
+            ipt.transform.cols(),
+            ipt.transform.rows() / mm::kParametersPerJoint);
+      });
 
   // =====================================================
   // momentum::Mppca
@@ -1921,7 +2125,11 @@ The resulting tensors are as follows:
           "from_bytes",
           &loadPosePriorFromBytes,
           "Load a mixture PCA model (e.g. poseprior.mppca).",
-          py::arg("mppca_bytes"));
+          py::arg("mppca_bytes"))
+      .def("__repr__", [](const mm::Mppca& mppca) {
+        return fmt::format(
+            "Mppca(mixtures={}, dimension={})", mppca.p, mppca.d);
+      });
 
   // Class TaperedCapsule, defining the properties:
   //    transformation
@@ -1971,9 +2179,18 @@ The resulting tensors are as follows:
           },
           "Parent joint to which the capsule is attached.")
       .def_property_readonly(
-          "length", [](const mm::TaperedCapsule& capsule) -> float {
+          "length",
+          [](const mm::TaperedCapsule& capsule) -> float {
             return capsule.length;
-          });
+          })
+      .def("__repr__", [](const mm::TaperedCapsule& tc) {
+        return fmt::format(
+            "TaperedCapsule(parent={}, length={}, radius=[{}, {}])",
+            tc.parent,
+            tc.length,
+            tc.radius[0],
+            tc.radius[1]);
+      });
 
   // Class Marker, defining the properties:
   //    name
@@ -1986,7 +2203,16 @@ The resulting tensors are as follows:
       .def_readwrite(
           "occluded",
           &mm::Marker::occluded,
-          "True if the marker is occluded with no position info");
+          "True if the marker is occluded with no position info")
+      .def("__repr__", [](const mm::Marker& m) {
+        return fmt::format(
+            "Marker(name='{}', pos=[{} {} {}], occluded={})",
+            m.name,
+            m.pos.x(),
+            m.pos.y(),
+            m.pos.z(),
+            m.occluded ? "True" : "False");
+      });
 
   // Class MarkerSequence, defining the properties:
   //    name
@@ -1998,7 +2224,14 @@ The resulting tensors are as follows:
           "frames",
           &mm::MarkerSequence::frames,
           "Marker data in [nframes][nMarkers]")
-      .def_readwrite("fps", &mm::MarkerSequence::fps, "Frame rate");
+      .def_readwrite("fps", &mm::MarkerSequence::fps, "Frame rate")
+      .def("__repr__", [](const mm::MarkerSequence& ms) {
+        return fmt::format(
+            "MarkerSequence(name='{}', frames={}, fps={})",
+            ms.name,
+            ms.frames.size(),
+            ms.fps);
+      });
 
   // =====================================================
   // momentum::FBXCoordSystemInfo
@@ -2036,7 +2269,56 @@ The resulting tensors are as follows:
           [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
             return coordSystemInfo.coordSystem;
           },
-          "Returns the coordinate system.");
+          "Returns the coordinate system.")
+      .def("__repr__", [](const mm::FBXCoordSystemInfo& info) {
+        std::string upVectorStr;
+        switch (info.upVector) {
+          case mm::FBXUpVector::XAxis:
+            upVectorStr = "XAxis";
+            break;
+          case mm::FBXUpVector::YAxis:
+            upVectorStr = "YAxis";
+            break;
+          case mm::FBXUpVector::ZAxis:
+            upVectorStr = "ZAxis";
+            break;
+          default:
+            upVectorStr = "Unknown";
+            break;
+        }
+
+        std::string frontVectorStr;
+        switch (info.frontVector) {
+          case mm::FBXFrontVector::ParityEven:
+            frontVectorStr = "ParityEven";
+            break;
+          case mm::FBXFrontVector::ParityOdd:
+            frontVectorStr = "ParityOdd";
+            break;
+          default:
+            frontVectorStr = "Unknown";
+            break;
+        }
+
+        std::string coordSystemStr;
+        switch (info.coordSystem) {
+          case mm::FBXCoordSystem::RightHanded:
+            coordSystemStr = "RightHanded";
+            break;
+          case mm::FBXCoordSystem::LeftHanded:
+            coordSystemStr = "LeftHanded";
+            break;
+          default:
+            coordSystemStr = "Unknown";
+            break;
+        }
+
+        return fmt::format(
+            "FBXCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
+            upVectorStr,
+            frontVectorStr,
+            coordSystemStr);
+      });
 
   // loadMotion(gltfFilename)
   m.def(
