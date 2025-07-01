@@ -37,6 +37,12 @@ void StateSequenceErrorFunctionT<T>::reset() {
 }
 
 template <typename T>
+void StateSequenceErrorFunctionT<T>::setTargetState(TransformListT<T> target) {
+  MT_CHECK(target.size() == this->skeleton_.joints.size());
+  targetState_ = target;
+}
+
+template <typename T>
 void StateSequenceErrorFunctionT<T>::setTargetWeights(
     const Eigen::VectorX<T>& posWeight,
     const Eigen::VectorX<T>& rotWeight) {
@@ -77,14 +83,17 @@ double StateSequenceErrorFunctionT<T>::getError(
     // Note: |R0 - RT|² is a valid norm on SO3, it doesn't have the same slope as the squared angle
     // difference
     //       but it's derivative doesn't have a singularity at the minimum, so is more stable
-    const Eigen::Quaternion<T>& prevRot = prevState.jointState[i].rotation();
+    const TransformT<T> targetTransform =
+        (i < targetState_.size()) ? targetState_[i] : TransformT<T>();
+    const TransformT<T> transformedPrev = targetTransform * prevState.jointState[i].transform;
+    const Eigen::Quaternion<T>& prevRot = transformedPrev.rotation;
     const Eigen::Quaternion<T>& nextRot = nextState.jointState[i].rotation();
     const Eigen::Matrix3<T> rotDiff = nextRot.toRotationMatrix() - prevRot.toRotationMatrix();
     error += rotDiff.squaredNorm() * kOrientationWeight * rotWgt_ * targetRotationWeights_[i];
 
     // calculate position error
     const Eigen::Vector3<T> diff =
-        nextState.jointState[i].translation() - prevState.jointState[i].translation();
+        nextState.jointState[i].translation() - transformedPrev.translation;
     error += diff.squaredNorm() * kPositionWeight * posWgt_ * targetPositionWeights_[i];
   }
 
@@ -117,7 +126,10 @@ double StateSequenceErrorFunctionT<T>::getGradient(
     }
 
     // calculate orientation gradient
-    const Eigen::Quaternion<T>& prevRot = prevState.jointState[i].rotation();
+    const TransformT<T> targetTransform =
+        (i < targetState_.size()) ? targetState_[i] : TransformT<T>();
+    const TransformT<T> transformedPrev = targetTransform * prevState.jointState[i].transform;
+    const Eigen::Quaternion<T>& prevRot = transformedPrev.rotation;
     const Eigen::Quaternion<T>& nextRot = nextState.jointState[i].rotation();
     const Eigen::Matrix3<T> rotDiff = nextRot.toRotationMatrix() - prevRot.toRotationMatrix();
     const T rwgt = kOrientationWeight * rotWgt_ * this->weight_ * targetRotationWeights_[i];
@@ -125,12 +137,13 @@ double StateSequenceErrorFunctionT<T>::getGradient(
 
     // calculate position gradient
     const Eigen::Vector3<T> diff =
-        nextState.jointState[i].translation() - prevState.jointState[i].translation();
+        nextState.jointState[i].translation() - transformedPrev.translation;
     const T pwgt = kPositionWeight * posWgt_ * this->weight_ * targetPositionWeights_[i];
     error += diff.squaredNorm() * pwgt;
 
     auto addGradient = [&](const SkeletonStateT<T>& state,
                            T sign,
+                           const TransformT<T>& transform,
                            Eigen::Ref<Eigen::VectorX<T>> grad) {
       const Eigen::Quaternion<T>& rot = state.jointState[i].rotation();
 
@@ -151,7 +164,9 @@ double StateSequenceErrorFunctionT<T>::getGradient(
           if (this->activeJointParams_[paramIndex + d]) {
             // calculate joint gradient
             const T val = sign * T(2) *
-                diff.dot(state.jointState[jointIndex].getTranslationDerivative(d)) * pwgt;
+                diff.dot(
+                    transform.rotate(state.jointState[jointIndex].getTranslationDerivative(d))) *
+                pwgt;
             // explicitly multiply with the parameter transform to generate parameter space
             // gradients
             for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
@@ -164,9 +179,11 @@ double StateSequenceErrorFunctionT<T>::getGradient(
           if (this->activeJointParams_[paramIndex + 3 + d]) {
             // calculate joint gradient consisting of position gradient and orientation gradient
             const Eigen::Vector3<T> axis = state.jointState[jointIndex].rotationAxis.col(d);
-            const auto rotD = crossProductMatrix(axis) * rot;
+            const auto rotD = transform.rotation * crossProductMatrix(axis) * rot;
             const T val = sign * T(2) *
-                (diff.dot(state.jointState[jointIndex].getRotationDerivative(d, posd)) * pwgt +
+                (diff.dot(transform.rotate(
+                     state.jointState[jointIndex].getRotationDerivative(d, posd))) *
+                     pwgt +
                  rwgt * rotD.cwiseProduct(rotDiff).sum());
             // explicitly multiply with the parameter transform to generate parameter space
             // gradients
@@ -182,8 +199,9 @@ double StateSequenceErrorFunctionT<T>::getGradient(
         }
         if (this->activeJointParams_[paramIndex + 6]) {
           // calculate joint gradient
-          const T val =
-              sign * T(2) * diff.dot(state.jointState[jointIndex].getScaleDerivative(posd)) * pwgt;
+          const T val = sign * T(2) *
+              diff.dot(transform.rotate(state.jointState[jointIndex].getScaleDerivative(posd))) *
+              pwgt;
           // explicitly multiply with the parameter transform to generate parameter space gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
@@ -198,8 +216,8 @@ double StateSequenceErrorFunctionT<T>::getGradient(
       }
     };
 
-    addGradient(prevState, T(-1), gradient.segment(0, nParam));
-    addGradient(nextState, T(1), gradient.segment(nParam, nParam));
+    addGradient(prevState, T(-1), targetTransform, gradient.segment(0, nParam));
+    addGradient(nextState, T(1), TransformT<T>(), gradient.segment(nParam, nParam));
   }
 
   // return error
@@ -239,18 +257,25 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
       continue;
     }
 
+    const TransformT<T> targetTransform =
+        (i < targetState_.size()) ? targetState_[i] : TransformT<T>();
+    const TransformT<T> transformedPrev = targetTransform * prevState.jointState[i].transform;
+
     // calculate translation gradient
     const auto transDiff =
-        (nextState.jointState[i].translation() - prevState.jointState[i].translation()).eval();
+        (nextState.jointState[i].translation() - transformedPrev.translation).eval();
+
+    // Residual is (T_next - T_offset * T_prev)
+    // For the translation component, this becomes: T_next - R_offset * t_prev - T_offset)
+    // We can drop the T_offset term for the Jacobian because it's a constant.
 
     // calculate orientation gradient
-    const Eigen::Quaternion<T>& prevRot = prevState.jointState[i].rotation();
+    const Eigen::Quaternion<T>& prevRot = transformedPrev.rotation;
     const Eigen::Quaternion<T>& nextRot = nextState.jointState[i].rotation();
     const Eigen::Matrix3<T> rotDiff = nextRot.toRotationMatrix() - prevRot.toRotationMatrix();
     const T rwgt = kOrientationWeight * rotWgt_ * this->weight_ * targetRotationWeights_[i];
     error += rotDiff.squaredNorm() * rwgt;
     const T awgt = std::sqrt(rwgt);
-
     // calculate the difference between target and position and error
     const T pwgt = kPositionWeight * posWgt_ * this->weight_ * targetPositionWeights_[i];
     const T wgt = std::sqrt(pwgt);
@@ -262,7 +287,10 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
     res.template bottomRows<9>() =
         Map<const Eigen::VectorX<T>>(rotDiff.data(), rotDiff.size()) * awgt;
 
-    auto addJacobian = [&](const SkeletonStateT<T>& state, T sign, Ref<Eigen::MatrixX<T>> jac) {
+    auto addJacobian = [&](const SkeletonStateT<T>& state,
+                           T sign,
+                           const TransformT<T>& transform,
+                           Ref<Eigen::MatrixX<T>> jac) {
       const Eigen::Quaternion<T>& rot = state.jointState[i].rotation();
 
       // loop over all joints the constraint is attached to and calculate jacobian
@@ -280,7 +308,8 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
         // calculate derivatives based on active joints
         for (size_t d = 0; d < 3; d++) {
           if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector3<T> jc = sign * jointState.getTranslationDerivative(d) * wgt;
+            const Eigen::Vector3<T> jc =
+                sign * (transform.rotate(jointState.getTranslationDerivative(d))) * wgt;
             for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
                  index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
                  ++index) {
@@ -291,10 +320,12 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
           }
 
           if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector3<T> jc = sign * jointState.getRotationDerivative(d, posd) * wgt;
+            const Eigen::Vector3<T> jc =
+                sign * (transform.rotate(jointState.getRotationDerivative(d, posd))) * wgt;
 
             const Eigen::Vector3<T> axis = state.jointState[jointIndex].rotationAxis.col(d);
-            const Eigen::Matrix3<T> rotD = sign * crossProductMatrix(axis) * rot * awgt;
+            const Eigen::Matrix3<T> rotD = sign * transform.rotation.toRotationMatrix() *
+                crossProductMatrix(axis) * rot * awgt;
             const auto ja = Map<const Eigen::VectorX<T>>(rotD.data(), rotD.size());
 
             for (auto index =
@@ -313,7 +344,8 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
         }
 
         if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector3<T> jc = sign * jointState.getScaleDerivative(posd) * wgt;
+          const Eigen::Vector3<T> jc =
+              sign * (transform.rotate(jointState.getScaleDerivative(posd))) * wgt;
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
                ++index) {
@@ -328,8 +360,8 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
       }
     };
 
-    addJacobian(prevState, T(-1), jacobian_full.block(offset, 0, 12, nParam));
-    addJacobian(nextState, T(1), jacobian_full.block(offset, nParam, 12, nParam));
+    addJacobian(prevState, T(-1), targetTransform, jacobian_full.block(offset, 0, 12, nParam));
+    addJacobian(nextState, T(1), TransformT<T>(), jacobian_full.block(offset, nParam, 12, nParam));
     offset += 12;
   }
 

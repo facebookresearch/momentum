@@ -20,6 +20,7 @@
 #include "momentum/character_sequence_solver/state_sequence_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/math/mesh.h"
+#include "momentum/math/random.h"
 #include "momentum/test/character/character_helpers.h"
 
 using namespace momentum;
@@ -258,7 +259,50 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_GradientsAndJacobians) 
         errorFunction, zeroModelParameters(character, 2), skeleton, transform);
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
-      testGradientAndJacobian<double>(errorFunction, parameters, skeleton, transform, 2e-3f);
+      testGradientAndJacobian<double>(
+          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  // create constraints
+  StateSequenceErrorFunctiond errorFunction(character);
+  {
+    Random<> gen(1234);
+    SCOPED_TRACE("Motion Test");
+    SkeletonState reference(transform.bindPose(), skeleton);
+
+    VectorXd posWeights = VectorXd::Ones(skeleton.joints.size());
+    VectorXd rotWeights = VectorXd::Ones(skeleton.joints.size());
+
+    std::vector<Transformd> offsets(skeleton.joints.size());
+    for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+      offsets[i].translation = gen.normal<Eigen::Vector3d>(0, 2.0);
+      offsets[i].rotation = gen.uniformQuaternion<double>();
+      offsets[i].scale = 1.0 + gen.normal<double>(0, 0.02);
+    }
+    errorFunction.setTargetState(offsets);
+
+    posWeights(0) = 2.0f;
+    posWeights(1) = 1.0f;
+    posWeights(2) = 3;
+
+    rotWeights(0) = 2.0f;
+    rotWeights(1) = 2.0f;
+    rotWeights(2) = 0;
+    errorFunction.setTargetWeights(posWeights, rotWeights);
+    testGradientAndJacobian<double>(
+        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(
+          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
     }
   }
 }
