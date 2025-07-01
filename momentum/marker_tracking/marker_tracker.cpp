@@ -656,8 +656,8 @@ void calibrateModel(
 
   const size_t numFrames = markerData.size();
   // uniformly sample frames for calibration
-  int frameStride = (numFrames - 1) / config.calibFrames;
-  frameStride = std::max(1, frameStride);
+  size_t frameStride = (numFrames - 1) / config.calibFrames;
+  frameStride = std::max(size_t(1), frameStride);
 
   // create a solving character with markers as bones
   Character solvingCharacter = createLocatorCharacter(character, "locator_");
@@ -863,9 +863,6 @@ void calibrateLocators(
       character.parameterTransform.numAllModelParameters());
 
   const size_t numFrames = markerData.size();
-  // uniformly sample frames for calibration
-  int frameStride = (numFrames - 1) / config.calibFrames;
-  frameStride = std::max(1, frameStride);
 
   // create a solving character with locators as bones
   Character solvingCharacter = createLocatorCharacter(character, "locator_");
@@ -887,14 +884,47 @@ void calibrateLocators(
   MatrixXf motion = MatrixXf::Zero(transformExtended.numAllModelParameters(), numFrames);
   CharacterParameters fullParams;
 
+  // pick frames to solve
+  std::vector<size_t> frameIndices;
+  if (config.greedySampling > 0) {
+    // track sequence with selected stride. we need to sample at least config.calibFrames frames
+    // so make sure we have a stride that allows that
+    size_t sampleStride = std::min(numFrames / config.calibFrames, config.greedySampling);
+    motion.topRows(transform.numAllModelParameters()) =
+        trackPosesPerframe(markerData, character, identity, trackingConfig, sampleStride);
+
+    const ParameterSet ps = transformExtended.getPoseParameters() &
+        ~transformExtended.getRigidParameters() & ~locatorSet;
+    frameIndices = sampleFrames(
+        character,
+        motion.topRows(transform.numAllModelParameters()),
+        markerData,
+        ps,
+        sampleStride,
+        config.calibFrames);
+  } else {
+    // uniformly sample frames for calibration
+    size_t frameStride = (numFrames - 1) / config.calibFrames;
+    frameStride = std::max(size_t(1), frameStride);
+    for (size_t fi = 0; fi < numFrames; fi += frameStride) {
+      frameIndices.emplace_back(fi);
+      motion.col(fi) = identity.v;
+    }
+  }
+
   // Iterate for a few times
   for (size_t iIter = 0; iIter < config.majorIter; ++iIter) {
     MT_LOGI_IF(config.debug, "Iteration {} of locator calibration", iIter);
 
     // Solve only for poses using solved locators; it helps to adjust poses to get out of bad
     // solutions.
-    motion.topRows(transform.numAllModelParameters()) =
-        trackPosesPerframe(markerData, character, identity, trackingConfig, frameStride);
+    motion.topRows(transform.numAllModelParameters()) = trackPosesForFrames(
+        markerData,
+        character,
+        motion.topRows(transform.numAllModelParameters()),
+        trackingConfig,
+        frameIndices);
+
     // Solve for both markers and poses.
     // TODO: add a small regularization to prevent too large a change
     motion = trackSequence(
@@ -903,8 +933,8 @@ void calibrateLocators(
         locatorSet,
         motion,
         trackingConfig,
+        frameIndices,
         0.0,
-        frameStride,
         config.enforceFloorInFirstFrame,
         config.firstFramePoseConstraintSet);
     // Extract solved locators
