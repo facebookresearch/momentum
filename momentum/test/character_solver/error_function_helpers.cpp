@@ -141,10 +141,33 @@ void testGradientAndJacobian(
   {
     SCOPED_TRACE("Checking Numerical Gradient");
     if ((numGradient + anaGradient).norm() != 0.0) {
-      EXPECT_LE(
-          (numGradient - anaGradient).norm() /
-              ((numGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps()),
-          numThreshold);
+      const T gradientMismatch = (numGradient - anaGradient).norm() /
+          ((numGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps());
+
+      if (gradientMismatch > numThreshold) {
+        MT_LOGI(
+            "Numerical gradient mismatch detected: {} > {} (threshold)\n"
+            "Numerical gradient norm: {}, Analytical gradient norm: {}\n"
+            "Difference norm: {}",
+            gradientMismatch,
+            numThreshold,
+            numGradient.norm(),
+            anaGradient.norm(),
+            (numGradient - anaGradient).norm());
+
+        // Dump mismatched gradient components:
+        for (int iParam = 0; iParam < numGradient.size(); ++iParam) {
+          const auto diff = std::abs(numGradient(iParam) - anaGradient(iParam));
+          if (diff > 1e-3) {
+            MT_LOGI("Mismatched gradient component: {}", iParam);
+            MT_LOGI("  numGradient: {}", numGradient(iParam));
+            MT_LOGI("  anaGradient: {}", anaGradient(iParam));
+            MT_LOGI("  diff: {}", diff);
+          }
+        }
+      }
+
+      EXPECT_LE(gradientMismatch, numThreshold);
     }
   }
 
@@ -152,10 +175,22 @@ void testGradientAndJacobian(
   {
     SCOPED_TRACE("Checking Numerical Gradient");
     if ((jacGradient + anaGradient).norm() != 0.0) {
-      EXPECT_LE(
-          (jacGradient - anaGradient).norm() /
-              ((jacGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps()),
-          jacThreshold);
+      const T gradientMismatch = (jacGradient - anaGradient).norm() /
+          ((jacGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps());
+
+      if (gradientMismatch > jacThreshold) {
+        MT_LOGI(
+            "Jacobian gradient mismatch detected: {} > {} (threshold)\n"
+            "Jacobian gradient norm: {}, Analytical gradient norm: {}\n"
+            "Difference norm: {}",
+            gradientMismatch,
+            jacThreshold,
+            jacGradient.norm(),
+            anaGradient.norm(),
+            (jacGradient - anaGradient).norm());
+      }
+
+      EXPECT_LE(gradientMismatch, jacThreshold);
     }
   }
 

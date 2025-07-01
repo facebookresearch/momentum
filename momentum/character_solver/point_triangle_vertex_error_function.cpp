@@ -428,8 +428,12 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
       diff_est.col(k) = tgtPosPlusDiff;
     }
 
-    std::cout << "d_targetPos_d_srcPos c: \n" << d_targetPos_d_srcPos[kTriVert] << std::endl;
-    std::cout << "d_targetPos_d_srcPos e: \n" << diff_est << std::endl;
+    const T derivativeMismatch = (d_targetPos_d_srcPos[kTriVert] - diff_est).norm();
+    if (derivativeMismatch > 1e-6) {
+      MT_LOGI("Target position derivative mismatch detected: {}", derivativeMismatch);
+      MT_LOGI("  d_targetPos_d_srcPos (computed): \n{}", d_targetPos_d_srcPos[kTriVert]);
+      MT_LOGI("  d_targetPos_d_srcPos (estimated): \n{}", diff_est);
+    }
   }
 #endif
 
