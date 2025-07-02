@@ -227,6 +227,127 @@ TYPED_TEST(CharacterTest, AssignmentOperator) {
   EXPECT_EQ(assignedCharacter.name, "assigned");
 }
 
+// Test move constructor
+TYPED_TEST(CharacterTest, MoveConstructor) {
+  using CharacterType = typename TestFixture::CharacterType;
+
+  // Create a character to move from
+  CharacterType originalCharacter = this->character;
+
+  // Store original data for comparison
+  const size_t originalJointCount = originalCharacter.skeleton.joints.size();
+  const std::string originalName = originalCharacter.name;
+  const size_t originalParamCount = originalCharacter.parameterTransform.numAllModelParameters();
+  const bool hadMesh = originalCharacter.mesh != nullptr;
+  const bool hadSkinWeights = originalCharacter.skinWeights != nullptr;
+
+  // Move construct a new character
+  CharacterType movedCharacter = std::move(originalCharacter);
+
+  // Verify the moved character has the expected data
+  EXPECT_EQ(movedCharacter.skeleton.joints.size(), originalJointCount);
+  EXPECT_EQ(movedCharacter.name, originalName);
+  EXPECT_EQ(movedCharacter.parameterTransform.numAllModelParameters(), originalParamCount);
+  EXPECT_EQ(movedCharacter.mesh != nullptr, hadMesh);
+  EXPECT_EQ(movedCharacter.skinWeights != nullptr, hadSkinWeights);
+
+  // Verify that the moved character is functional
+  if (movedCharacter.skeleton.joints.size() > 0) {
+    const auto bindPose = movedCharacter.bindPose();
+    EXPECT_EQ(bindPose.pose.size(), static_cast<Eigen::Index>(originalParamCount));
+  }
+}
+
+// Test move assignment operator
+TYPED_TEST(CharacterTest, MoveAssignment) {
+  using CharacterType = typename TestFixture::CharacterType;
+
+  // Create two characters
+  CharacterType originalCharacter = this->character;
+  CharacterType targetCharacter = createTestCharacter<TypeParam>(3); // Different size
+
+  // Store original data for comparison
+  const size_t originalJointCount = originalCharacter.skeleton.joints.size();
+  const std::string originalName = originalCharacter.name;
+  const size_t originalParamCount = originalCharacter.parameterTransform.numAllModelParameters();
+  const bool hadMesh = originalCharacter.mesh != nullptr;
+  const bool hadSkinWeights = originalCharacter.skinWeights != nullptr;
+
+  // Move assign
+  targetCharacter = std::move(originalCharacter);
+
+  // Verify the target character has the expected data
+  EXPECT_EQ(targetCharacter.skeleton.joints.size(), originalJointCount);
+  EXPECT_EQ(targetCharacter.name, originalName);
+  EXPECT_EQ(targetCharacter.parameterTransform.numAllModelParameters(), originalParamCount);
+  EXPECT_EQ(targetCharacter.mesh != nullptr, hadMesh);
+  EXPECT_EQ(targetCharacter.skinWeights != nullptr, hadSkinWeights);
+
+  // Verify that the moved character is functional
+  if (targetCharacter.skeleton.joints.size() > 0) {
+    const auto bindPose = targetCharacter.bindPose();
+    EXPECT_EQ(bindPose.pose.size(), static_cast<Eigen::Index>(originalParamCount));
+  }
+}
+
+// Test move semantics performance (ensure no unnecessary copies)
+TYPED_TEST(CharacterTest, MovePerformance) {
+  using CharacterType = typename TestFixture::CharacterType;
+
+  // Create a character to move from
+  CharacterType originalCharacter = this->character;
+
+  // Store pointers to unique_ptr managed objects
+  const void* originalMeshPtr = originalCharacter.mesh.get();
+  const void* originalSkinWeightsPtr = originalCharacter.skinWeights.get();
+
+  // Move construct - should transfer ownership without copying
+  CharacterType movedCharacter = std::move(originalCharacter);
+
+  // Verify that the same objects were transferred (no deep copy)
+  EXPECT_EQ(movedCharacter.mesh.get(), originalMeshPtr);
+  EXPECT_EQ(movedCharacter.skinWeights.get(), originalSkinWeightsPtr);
+
+  // Original character should have null pointers after move
+  EXPECT_EQ(originalCharacter.mesh.get(), nullptr);
+  EXPECT_EQ(originalCharacter.skinWeights.get(), nullptr);
+}
+
+// Test move semantics with complex character (with blend shapes)
+TYPED_TEST(CharacterTest, MoveWithBlendShapes) {
+  using CharacterType = typename TestFixture::CharacterType;
+
+  // Create a character with blend shapes to move from
+  CharacterType originalCharacter = this->characterWithBlendShapes;
+
+  // Store original data for comparison
+  const size_t originalJointCount = originalCharacter.skeleton.joints.size();
+  const size_t originalParamCount = originalCharacter.parameterTransform.numAllModelParameters();
+  const bool hadBlendShape = originalCharacter.blendShape != nullptr;
+  const bool hadMesh = originalCharacter.mesh != nullptr;
+
+  // Test move constructor
+  CharacterType movedCharacter = std::move(originalCharacter);
+
+  // Verify the moved character has the expected data
+  EXPECT_EQ(movedCharacter.skeleton.joints.size(), originalJointCount);
+  EXPECT_EQ(movedCharacter.parameterTransform.numAllModelParameters(), originalParamCount);
+  EXPECT_EQ(movedCharacter.blendShape != nullptr, hadBlendShape);
+  EXPECT_EQ(movedCharacter.mesh != nullptr, hadMesh);
+
+  // Verify that the moved character is functional
+  if (movedCharacter.skeleton.joints.size() > 0) {
+    const auto bindPose = movedCharacter.bindPose();
+    EXPECT_EQ(bindPose.pose.size(), static_cast<Eigen::Index>(originalParamCount));
+  }
+
+  // Test that blend shape functionality is preserved
+  if (movedCharacter.blendShape && movedCharacter.mesh) {
+    EXPECT_GT(movedCharacter.blendShape->shapeSize(), 0);
+    EXPECT_EQ(movedCharacter.blendShape->modelSize(), movedCharacter.mesh->vertices.size());
+  }
+}
+
 // Test parametersToActiveJoints method
 TYPED_TEST(CharacterTest, ParametersToActiveJoints) {
   // Create a parameter set with some active parameters

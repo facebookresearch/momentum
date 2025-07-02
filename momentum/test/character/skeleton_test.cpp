@@ -347,6 +347,95 @@ TYPED_TEST(SkeletonTest, Cast) {
   }
 }
 
+// Test move constructor
+TYPED_TEST(SkeletonTest, MoveConstructor) {
+  using SkeletonType = typename TestFixture::SkeletonType;
+
+  // Create a skeleton with the test joints
+  SkeletonType originalSkeleton(this->joints);
+
+  // Store original data for comparison
+  const size_t originalJointCount = originalSkeleton.joints.size();
+  const std::string originalFirstJointName =
+      originalSkeleton.joints.empty() ? "" : originalSkeleton.joints[0].name;
+
+  // Move construct a new skeleton
+  SkeletonType movedSkeleton = std::move(originalSkeleton);
+
+  // Verify the moved skeleton has the expected data
+  EXPECT_EQ(movedSkeleton.joints.size(), originalJointCount);
+  if (!movedSkeleton.joints.empty()) {
+    EXPECT_EQ(movedSkeleton.joints[0].name, originalFirstJointName);
+  }
+
+  // Verify that the moved skeleton is functional
+  if (movedSkeleton.joints.size() > 1) {
+    EXPECT_NE(movedSkeleton.getJointIdByName(originalFirstJointName), kInvalidIndex);
+  }
+}
+
+// Test move assignment operator
+TYPED_TEST(SkeletonTest, MoveAssignment) {
+  using SkeletonType = typename TestFixture::SkeletonType;
+
+  // Create two skeletons with different joint configurations
+  SkeletonType originalSkeleton(this->joints);
+
+  // Create a different skeleton for the target
+  JointList otherJoints;
+  otherJoints.resize(2);
+  otherJoints[0].name = "other_root";
+  otherJoints[0].parent = kInvalidIndex;
+  otherJoints[0].translationOffset = Vector3<float>(0, 0, 0);
+  otherJoints[0].preRotation = Quaternion<float>::Identity();
+  otherJoints[1].name = "other_joint";
+  otherJoints[1].parent = 0;
+  otherJoints[1].translationOffset = Vector3<float>(2, 0, 0);
+  otherJoints[1].preRotation = Quaternion<float>::Identity();
+
+  SkeletonType targetSkeleton(otherJoints);
+
+  // Store original data for comparison
+  const size_t originalJointCount = originalSkeleton.joints.size();
+  const std::string originalFirstJointName =
+      originalSkeleton.joints.empty() ? "" : originalSkeleton.joints[0].name;
+
+  // Move assign
+  targetSkeleton = std::move(originalSkeleton);
+
+  // Verify the target skeleton has the expected data
+  EXPECT_EQ(targetSkeleton.joints.size(), originalJointCount);
+  if (!targetSkeleton.joints.empty()) {
+    EXPECT_EQ(targetSkeleton.joints[0].name, originalFirstJointName);
+  }
+
+  // Verify that the moved skeleton is functional
+  if (targetSkeleton.joints.size() > 1) {
+    EXPECT_NE(targetSkeleton.getJointIdByName(originalFirstJointName), kInvalidIndex);
+  }
+}
+
+// Test that moved-from objects are in a valid but unspecified state
+TYPED_TEST(SkeletonTest, MovedFromObjectState) {
+  using SkeletonType = typename TestFixture::SkeletonType;
+
+  // Create a skeleton with the test joints
+  SkeletonType originalSkeleton(this->joints);
+
+  // Move construct
+  SkeletonType movedSkeleton = std::move(originalSkeleton);
+
+  // The moved-from object should be in a valid but unspecified state
+  // We can't make strong assertions about its state, but it should not crash
+  // when accessing basic properties
+  EXPECT_NO_THROW({
+    auto jointCount = originalSkeleton.joints.size();
+    auto jointNames = originalSkeleton.getJointNames();
+    (void)jointCount;
+    (void)jointNames; // Suppress unused variable warnings
+  });
+}
+
 // Test error cases
 TYPED_TEST(SkeletonTest, ErrorCases) {
   using SkeletonType = typename TestFixture::SkeletonType;

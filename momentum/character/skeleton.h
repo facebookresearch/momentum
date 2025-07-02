@@ -23,10 +23,24 @@ struct SkeletonT {
   /// The list of joints in this skeleton.
   JointList joints;
 
+  /// Default constructor
+  SkeletonT() = default;
+
   /// Constructor that validates joint hierarchy.
   /// Ensures parent indices are valid (parent < child index or kInvalidIndex).
   explicit SkeletonT(JointList joints);
-  SkeletonT() = default;
+
+  /// Copy constructor
+  SkeletonT(const SkeletonT& other) = default;
+
+  /// Move constructor
+  SkeletonT(SkeletonT&& other) noexcept = default;
+
+  /// Copy assignment operator
+  SkeletonT& operator=(const SkeletonT& other) = default;
+
+  /// Move assignment operator
+  SkeletonT& operator=(SkeletonT&& other) noexcept = default;
 
   /// Returns the index of a joint with the given name, or kInvalidIndex if not found.
   [[nodiscard]] size_t getJointIdByName(std::string_view name) const;
