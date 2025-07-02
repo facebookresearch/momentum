@@ -908,8 +908,10 @@ void calibrateLocators(
     frameStride = std::max(size_t(1), frameStride);
     for (size_t fi = 0; fi < numFrames; fi += frameStride) {
       frameIndices.emplace_back(fi);
-      motion.col(fi) = identity.v;
     }
+
+    motion.topRows(transform.numAllModelParameters()) =
+        trackPosesPerframe(markerData, character, identity, trackingConfig, frameStride);
   }
 
   // Iterate for a few times
