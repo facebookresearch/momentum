@@ -105,6 +105,9 @@ CharacterT<T>::CharacterT(const CharacterT& c)
 }
 
 template <typename T>
+CharacterT<T>::CharacterT(CharacterT&& c) noexcept = default;
+
+template <typename T>
 CharacterT<T>::CharacterT() = default;
 
 template <typename T>
@@ -132,6 +135,9 @@ CharacterT<T>& CharacterT<T>::operator=(const CharacterT& rhs) {
 
   return *this;
 }
+
+template <typename T>
+CharacterT<T>& CharacterT<T>::operator=(CharacterT&& rhs) noexcept = default;
 
 template <typename T>
 std::vector<bool> CharacterT<T>::parametersToActiveJoints(const ParameterSet& parameterSet) const {

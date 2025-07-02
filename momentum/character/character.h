@@ -105,8 +105,14 @@ struct CharacterT {
   /// Copy constructor
   CharacterT(const CharacterT& c);
 
-  /// Assignment operator
+  /// Move constructor
+  CharacterT(CharacterT&& c) noexcept;
+
+  /// Copy assignment operator
   CharacterT& operator=(const CharacterT& rhs);
+
+  /// Move assignment operator
+  CharacterT& operator=(CharacterT&& rhs) noexcept;
 
   /// Creates a simplified character with only joints affected by the specified parameters
   ///
