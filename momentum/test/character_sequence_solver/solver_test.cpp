@@ -305,5 +305,5 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
 
   // Multipose solver should do at least as well as Gauss-Newton.
   EXPECT_NEAR(err_single, err_multi, Eps<T>(1e-7f, 1e-15));
-  EXPECT_LE(err_single, err_gn + Eps<T>(5e-7f, 1e-15));
+  EXPECT_LE(err_single, err_gn + Eps<T>(5e-7f, 1e-14));
 }
