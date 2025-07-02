@@ -13,6 +13,10 @@
 
 namespace momentum {
 
+/// Error function that penalizes the difference between the current skeleton state and the next
+/// skeleton state. Note that by default this penalizes any difference between adjacent skeleton
+/// states. If we specify a target state, this will be applied as an offset to the current state,
+/// that is, the error will penalize the difference between offset * currentState and nextState.
 template <typename T>
 class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
  public:
@@ -44,8 +48,17 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
 
   [[nodiscard]] size_t getJacobianSize() const final;
 
+  /// Set the target weights for each joint's position and rotation.
+  /// @param posWeight Per-joint position weights.
+  /// @param rotWeight Per-joint rotation weights.
   void setTargetWeights(const Eigen::VectorX<T>& posWeight, const Eigen::VectorX<T>& rotWeight);
+
+  /// Set the target position weights for each joint.
+  /// @param posWeight Per-joint position weights.
   void setPositionTargetWeights(const Eigen::VectorX<T>& posWeight);
+
+  /// Set the target rotation weights for each joint.
+  /// @param rotWeight Per-joint rotation weights.
   void setRotationTargetWeights(const Eigen::VectorX<T>& rotWeight);
   void setWeights(const float posWeight, const float rotationWeight) {
     posWgt_ = posWeight;
@@ -67,9 +80,19 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
     return rotWgt_;
   }
 
+  /// Set the target state for the skeleton.
+  ///
+  /// This function allows specifying a target state that the skeleton should aim to achieve.
+  /// The target state is represented as a list of transforms, one for each joint.
+  /// The error will penalize the difference between offset * currentState and nextState.
+  /// @param target A list of transforms representing the target state for each joint.
+  void setTargetState(TransformListT<T> target);
+
  private:
   Eigen::VectorX<T> targetPositionWeights_;
   Eigen::VectorX<T> targetRotationWeights_;
+
+  TransformListT<T> targetState_;
 
   T posWgt_;
   T rotWgt_;
