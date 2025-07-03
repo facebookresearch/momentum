@@ -100,8 +100,10 @@ class Random final {
   /// @param[in] min The lower bound in scalar.
   /// @param[in] max The upper bound in scalar.
   template <typename DynamicVector>
-  [[nodiscard]] DynamicVector
-  uniform(int size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max);
+  [[nodiscard]] DynamicVector uniform(
+      Eigen::Index size,
+      typename DynamicVector::Scalar min,
+      typename DynamicVector::Scalar max);
 
   /// Generates a random matrix from the uniform distribution, where the size is dynamic
   ///
@@ -121,8 +123,8 @@ class Random final {
   /// @param[in] max The upper bound in scalar.
   template <typename DynamicMatrix>
   [[nodiscard]] DynamicMatrix uniform(
-      int rows,
-      int cols,
+      Eigen::Index rows,
+      Eigen::Index cols,
       typename DynamicMatrix::Scalar min,
       typename DynamicMatrix::Scalar max);
 
@@ -192,8 +194,10 @@ class Random final {
   /// @param[in] mean The mean of the Gaussian distribution
   /// @param[in] sigma The standard deviation of the Gaussian distribution
   template <typename DynamicVector>
-  [[nodiscard]] DynamicVector
-  normal(int size, typename DynamicVector::Scalar mean, typename DynamicVector::Scalar sigma);
+  [[nodiscard]] DynamicVector normal(
+      Eigen::Index size,
+      typename DynamicVector::Scalar mean,
+      typename DynamicVector::Scalar sigma);
 
   /// Generates a random value from the Gaussian distribution
   ///
@@ -204,8 +208,8 @@ class Random final {
   /// @param[in] sigma The standard deviation of the Gaussian distribution
   template <typename DynamicMatrix>
   [[nodiscard]] DynamicMatrix normal(
-      int rows,
-      int cols,
+      Eigen::Index rows,
+      Eigen::Index cols,
       typename DynamicMatrix::Scalar mean,
       typename DynamicMatrix::Scalar sigma);
 
@@ -237,13 +241,16 @@ template <typename FixedSizeT>
 /// number generator Random
 template <typename DynamicVector>
 [[nodiscard]] DynamicVector
-uniform(int size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max);
+uniform(Eigen::Index size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max);
 
 /// Generates a random type dynamic size matrix from the uniform distribution, using the global
 /// random number generator Random
 template <typename DynamicMatrix>
-[[nodiscard]] DynamicMatrix
-uniform(int rows, int cols, typename DynamicMatrix::Scalar min, typename DynamicMatrix::Scalar max);
+[[nodiscard]] DynamicMatrix uniform(
+    Eigen::Index rows,
+    Eigen::Index cols,
+    typename DynamicMatrix::Scalar min,
+    typename DynamicMatrix::Scalar max);
 
 /// Generates a random quaternion from a uniform distribution on SO(3)
 template <typename T>
@@ -284,15 +291,17 @@ template <typename FixedSizeT>
 /// Generates a random dynamic size vector from the Gaussian distribution, using the global random
 /// number generator Random
 template <typename DynamicVector>
-[[nodiscard]] DynamicVector
-normal(int size, typename DynamicVector::Scalar mean, typename DynamicVector::Scalar sigma);
+[[nodiscard]] DynamicVector normal(
+    Eigen::Index size,
+    typename DynamicVector::Scalar mean,
+    typename DynamicVector::Scalar sigma);
 
 /// Generates a random dynamic size matrix from the Gaussian distribution, using the global random
 /// number generator Random
 template <typename DynamicMatrix>
 [[nodiscard]] DynamicMatrix normal(
-    int rows,
-    int cols,
+    Eigen::Index rows,
+    Eigen::Index cols,
     typename DynamicMatrix::Scalar mean,
     typename DynamicMatrix::Scalar sigma);
 

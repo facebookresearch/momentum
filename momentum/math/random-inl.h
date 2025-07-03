@@ -26,26 +26,17 @@ using NormalRealDist = std::normal_distribution<RealType>;
 /// Check whether \c T can be used for std::uniform_int_distribution<T>
 /// Reference:
 /// https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
-template <typename T, typename Enable = void>
-struct is_compatible_to_uniform_int_distribution : std::false_type {
-  // Define nothing
-};
-
 template <typename T>
-struct is_compatible_to_uniform_int_distribution<
-    T,
-    typename std::enable_if<
-        std::is_same<typename std::remove_cv<T>::type, short>::value ||
-        std::is_same<typename std::remove_cv<T>::type, int>::value ||
-        std::is_same<typename std::remove_cv<T>::type, long>::value ||
-        std::is_same<typename std::remove_cv<T>::type, long long>::value ||
-        std::is_same<typename std::remove_cv<T>::type, unsigned short>::value ||
-        std::is_same<typename std::remove_cv<T>::type, unsigned int>::value ||
-        std::is_same<typename std::remove_cv<T>::type, unsigned long>::value ||
-        std::is_same<typename std::remove_cv<T>::type, unsigned long long>::value>::type>
-    : std::true_type {
-  // Define nothing
-};
+struct is_compatible_to_uniform_int_distribution
+    : std::disjunction<
+          std::is_same<std::remove_cv_t<T>, short>,
+          std::is_same<std::remove_cv_t<T>, int>,
+          std::is_same<std::remove_cv_t<T>, long>,
+          std::is_same<std::remove_cv_t<T>, long long>,
+          std::is_same<std::remove_cv_t<T>, unsigned short>,
+          std::is_same<std::remove_cv_t<T>, unsigned int>,
+          std::is_same<std::remove_cv_t<T>, unsigned long>,
+          std::is_same<std::remove_cv_t<T>, unsigned long long>> {};
 
 template <typename T>
 inline constexpr bool is_compatible_to_uniform_int_distribution_v =
@@ -88,28 +79,29 @@ template <typename Derived, typename Generator>
     Generator& generator) {
   // Dynamic matrix
   if constexpr (!Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr(min.rows(), min.cols(), [&](const int i, const int j) {
-      return generateScalarUniform<typename Derived::Scalar>(min(i, j), max(i, j), generator);
-    });
+    return Derived::PlainObject::NullaryExpr(
+        min.rows(), min.cols(), [&](const Eigen::Index i, const Eigen::Index j) {
+          return generateScalarUniform<typename Derived::Scalar>(min(i, j), max(i, j), generator);
+        });
   }
   // Fixed matrix
   else if constexpr (
       !Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr([&](const int i, const int j) {
+    return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i, const Eigen::Index j) {
       return generateScalarUniform<typename Derived::Scalar>(min(i, j), max(i, j), generator);
     });
   }
   // Dynamic vector
   else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr(min.size(), [&](const int i) {
+    return Derived::PlainObject::NullaryExpr(min.size(), [&](const Eigen::Index i) {
       return generateScalarUniform<typename Derived::Scalar>(min[i], max[i], generator);
     });
   }
   // Fixed vector
   else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr([&](const int i) {
+    return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i) {
       return generateScalarUniform<typename Derived::Scalar>(min[i], max[i], generator);
     });
   }
@@ -150,28 +142,28 @@ template <typename Derived, typename Generator>
   // Dynamic matrix
   if constexpr (!Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr(
-        mean.rows(), mean.cols(), [&](const int i, const int j) {
+        mean.rows(), mean.cols(), [&](const Eigen::Index i, const Eigen::Index j) {
           return generateScalarNormal<typename Derived::Scalar>(mean(i, j), sigma(i, j), generator);
         });
   }
   // Fixed matrix
   else if constexpr (
       !Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr([&](const int i, const int j) {
+    return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i, const Eigen::Index j) {
       return generateScalarNormal<typename Derived::Scalar>(mean(i, j), sigma(i, j), generator);
     });
   }
   // Dynamic vector
   else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr(mean.size(), [&](const int i) {
+    return Derived::PlainObject::NullaryExpr(mean.size(), [&](const Eigen::Index i) {
       return generateScalarNormal<typename Derived::Scalar>(mean[i], sigma[i], generator);
     });
   }
   // Fixed vector
   else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
-    return Derived::PlainObject::NullaryExpr([&](const int i) {
+    return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i) {
       return generateScalarNormal<typename Derived::Scalar>(mean[i], sigma[i], generator);
     });
   }
@@ -220,7 +212,7 @@ FixedSizeT Random<Generator>::uniform(
 template <typename Generator>
 template <typename DynamicVector>
 DynamicVector Random<Generator>::uniform(
-    int size,
+    Eigen::Index size,
     typename DynamicVector::Scalar min,
     typename DynamicVector::Scalar max) {
   return detail::generateMatrixUniform(
@@ -230,8 +222,8 @@ DynamicVector Random<Generator>::uniform(
 template <typename Generator>
 template <typename DynamicMatrix>
 DynamicMatrix Random<Generator>::uniform(
-    int rows,
-    int cols,
+    Eigen::Index rows,
+    Eigen::Index cols,
     typename DynamicMatrix::Scalar min,
     typename DynamicMatrix::Scalar max) {
   return detail::generateMatrixUniform(
@@ -292,7 +284,7 @@ FixedSizeT Random<Generator>::normal(
 template <typename Generator>
 template <typename DynamicVector>
 DynamicVector Random<Generator>::normal(
-    int size,
+    Eigen::Index size,
     typename DynamicVector::Scalar mean,
     typename DynamicVector::Scalar sigma) {
   return detail::generateMatrixNormal(
@@ -302,8 +294,8 @@ DynamicVector Random<Generator>::normal(
 template <typename Generator>
 template <typename DynamicMatrix>
 DynamicMatrix Random<Generator>::normal(
-    int rows,
-    int cols,
+    Eigen::Index rows,
+    Eigen::Index cols,
     typename DynamicMatrix::Scalar mean,
     typename DynamicMatrix::Scalar sigma) {
   return detail::generateMatrixNormal(
@@ -340,15 +332,15 @@ FixedSizeT uniform(typename FixedSizeT::Scalar min, typename FixedSizeT::Scalar 
 
 template <typename DynamicVector>
 DynamicVector
-uniform(int size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max) {
+uniform(Eigen::Index size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max) {
   auto& rand = Random<>::GetSingleton();
   return rand.uniform<DynamicVector>(size, min, max);
 }
 
 template <typename DynamicMatrix>
 DynamicMatrix uniform(
-    int rows,
-    int cols,
+    Eigen::Index rows,
+    Eigen::Index cols,
     typename DynamicMatrix::Scalar min,
     typename DynamicMatrix::Scalar max) {
   auto& rand = Random<>::GetSingleton();
@@ -391,16 +383,18 @@ FixedSizeT normal(typename FixedSizeT::Scalar mean, typename FixedSizeT::Scalar 
 }
 
 template <typename DynamicVector>
-DynamicVector
-normal(int size, typename DynamicVector::Scalar mean, typename DynamicVector::Scalar sigma) {
+DynamicVector normal(
+    Eigen::Index size,
+    typename DynamicVector::Scalar mean,
+    typename DynamicVector::Scalar sigma) {
   auto& rand = Random<>::GetSingleton();
   return rand.uniform<DynamicVector>(size, mean, sigma);
 }
 
 template <typename DynamicMatrix>
 DynamicMatrix normal(
-    int rows,
-    int cols,
+    Eigen::Index rows,
+    Eigen::Index cols,
     typename DynamicMatrix::Scalar mean,
     typename DynamicMatrix::Scalar sigma) {
   auto& rand = Random<>::GetSingleton();
