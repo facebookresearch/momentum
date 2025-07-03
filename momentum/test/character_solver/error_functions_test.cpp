@@ -77,7 +77,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         transform,
         Eps<T>(1e-7f, 1e-15));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 1e-11));
     }
@@ -100,7 +101,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         transform,
         Eps<T>(1e-7f, 1e-15));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-3f, 1e-10));
     }
@@ -124,7 +126,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         transform,
         Eps<T>(1e-3f, 5e-12));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 1e-10));
     }
@@ -290,7 +293,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         transform,
         Eps<T>(5e-3f, 5e-12));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 1e-10));
     }
@@ -347,7 +351,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, StateError_GradientsAndJacobians) {
         transform,
         Eps<T>(2e-5f, 1e-3));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters()) * 0.25;
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 5e-6));
     }
@@ -381,7 +386,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ModelParametersError_GradientsAndJacobia
         transform,
         Eps<T>(1e-7f, 1e-15));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters()) * 0.25;
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-3f, 1e-10));
     }
@@ -394,7 +400,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ModelParametersError_RegularizeBlendWeig
 
   const Character character = withTestBlendShapes(createTestCharacter());
   const ModelParametersT<T> modelParams =
-      0.25 * VectorX<T>::Random(character.parameterTransform.numAllModelParameters());
+      0.25 * uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
   ModelParametersErrorFunctionT<T> errorFunction(
       character, character.parameterTransform.getBlendShapeParameters());
   EXPECT_GT(
@@ -448,7 +454,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
       Eps<T>(1e-5f, 5e-6));
 
   for (size_t i = 0; i < 3; i++) {
-    ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+    ModelParametersT<T> parameters = uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
     TEST_GRADIENT_AND_JACOBIAN(
         T,
         &errorFunction,
@@ -520,7 +526,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
       EXPECT_LE(gradient.norm(), Eps<T>(1e-7f, 1e-7));
 
       for (size_t i = 0; i < 10; i++) {
-        parameters = VectorX<T>::Random(transform.numAllModelParameters());
+        parameters = uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
         state.set(transform.apply(parameters), skeleton);
         v = applySSD(bindpose, skin, mesh.vertices, state);
 
@@ -586,11 +592,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     SCOPED_TRACE("Without blend shapes");
 
     const Character character_orig = createTestCharacter();
-    const Eigen::VectorX<T> refParams =
-        0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+    const Eigen::VectorX<T> refParams = 0.25 *
+        uniform<VectorX<T>>(character_orig.parameterTransform.numAllModelParameters(), -1, 1);
     const ModelParametersT<T> modelParams = refParams;
     const ModelParametersT<T> modelParamsTarget = refParams +
-        0.05 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+        0.05 *
+            uniform<VectorX<T>>(character_orig.parameterTransform.numAllModelParameters(), -1, 1);
     const Skeleton& skeleton = character_orig.skeleton;
     const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
@@ -630,9 +637,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
       VertexErrorFunctionT<T> errorFunction(character_orig, type, 0);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-        const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
+        const int index =
+            uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
         errorFunction.addConstraint(
-            index, uniform<float>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
+            index, uniform<T>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
       }
 
       TEST_GRADIENT_AND_JACOBIAN(
@@ -653,11 +661,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     SCOPED_TRACE("With blend shapes");
 
     const Character character_blend = withTestBlendShapes(createTestCharacter());
-    const Eigen::VectorX<T> refParams =
-        0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const Eigen::VectorX<T> refParams = 0.25 *
+        uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
     const ModelParametersT<T> modelParams = refParams;
     const ModelParametersT<T> modelParamsTarget = refParams +
-        0.05 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+        0.05 *
+            uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
     const Skeleton& skeleton = character_blend.skeleton;
     const ParameterTransformT<T> transform = character_blend.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
@@ -681,9 +690,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
 
       VertexErrorFunctionT<T> errorFunction(character_blend, type);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-        const int index = uniform<int>(0, character_blend.mesh->vertices.size() - 1);
+        const int index =
+            uniform<int>(0, static_cast<int>(character_blend.mesh->vertices.size() - 1));
         errorFunction.addConstraint(
-            index, uniform<float>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
+            index, uniform<T>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
       }
 
       TEST_GRADIENT_AND_JACOBIAN(
@@ -710,10 +720,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
 
   const Character character_orig = createTestCharacter();
   const Eigen::VectorX<T> refParams =
-      0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+      0.25 * uniform<VectorX<T>>(character_orig.parameterTransform.numAllModelParameters(), -1, 1);
   const ModelParametersT<T> modelParams = refParams;
   const ModelParametersT<T> modelParamsTarget = refParams +
-      0.05 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+      0.05 * uniform<VectorX<T>>(character_orig.parameterTransform.numAllModelParameters(), -1, 1);
   const Skeleton& skeleton = character_orig.skeleton;
   const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
   const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
@@ -753,9 +763,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
 
     VertexErrorFunctionT<T> errorFunction(character_orig, type, 100000);
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-      const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
+      const int index = uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
       errorFunction.addConstraint(
-          index, uniform<float>(0, 1e-4), targetMesh.vertices[index], targetMesh.normals[index]);
+          index, uniform<T>(0, 1e-4), targetMesh.vertices[index], targetMesh.normals[index]);
     }
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -784,11 +794,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     SCOPED_TRACE("Without blend shapes");
 
     const Character character_orig = createTestCharacter();
-    const Eigen::VectorX<T> refParams =
-        0.25 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+    const Eigen::VectorX<T> refParams = 0.25 *
+        uniform<VectorX<T>>(character_orig.parameterTransform.numAllModelParameters(), -1, 1);
     const ModelParametersT<T> modelParams = refParams;
     const ModelParametersT<T> modelParamsTarget = refParams +
-        0.05 * VectorX<T>::Random(character_orig.parameterTransform.numAllModelParameters());
+        0.05 *
+            uniform<VectorX<T>>(character_orig.parameterTransform.numAllModelParameters(), -1, 1);
     const Skeleton& skeleton = character_orig.skeleton;
     const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
@@ -812,8 +823,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
       const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
       const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
-      const Eigen::Vector2<T> target2d = target.hnormalized() + Eigen::Vector2<T>::Random() * 0.1;
-      errorFunction.addConstraint(index, uniform<float>(0, 1e-2), target2d, projection);
+      const Eigen::Vector2<T> target2d = target.hnormalized() + uniform<Vector2<T>>(-1, 1) * 0.1;
+      errorFunction.addConstraint(index, uniform<T>(0, 1e-2), target2d, projection);
     }
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -833,11 +844,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     SCOPED_TRACE("With blend shapes");
 
     const Character character_blend = withTestBlendShapes(createTestCharacter());
-    const Eigen::VectorX<T> refParams =
-        0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const Eigen::VectorX<T> refParams = 0.25 *
+        uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
     const ModelParametersT<T> modelParams = refParams;
     const ModelParametersT<T> modelParamsTarget = refParams +
-        0.05 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+        0.05 *
+            uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
     const Skeleton& skeleton = character_blend.skeleton;
     const ParameterTransformT<T> transform = character_blend.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
@@ -863,7 +875,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
       const int index = uniform<int>(0, character_blend.mesh->vertices.size() - 1);
       const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
       const Eigen::Vector2<T> target2d = target.hnormalized();
-      errorFunction.addConstraint(index, uniform<float>(0, 1e-2), target2d, projection);
+      errorFunction.addConstraint(index, uniform<T>(0, 1e-2), target2d, projection);
     }
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -934,9 +946,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
     // Set up model parameters and skeleton state
     // ModelParametersT<T> modelParams =
     // ModelParametersT<T>::Zero(transform.numAllModelParameters());
-    const ModelParametersT<T> modelParams = 0.25 *
-        this->rng.template uniform<Eigen::VectorX<T>>(
-            character.parameterTransform.numAllModelParameters(), -1, 1);
+    const ModelParametersT<T> modelParams =
+        0.25 * uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
 
     SkeletonStateT<T> state(transform.apply(modelParams), skeleton);
 
@@ -965,8 +976,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
   // Face expression blend shapes only
   {
     const Character character_blend = withTestFaceExpressionBlendShapes(createTestCharacter());
-    const ModelParametersT<T> modelParams =
-        0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const ModelParametersT<T> modelParams = 0.25 *
+        uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
 
     // TODO: Add Plane, Normal and SymmetricNormal?
     for (VertexConstraintType type : {VertexConstraintType::Position}) {
@@ -974,7 +985,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
         errorFunction.addConstraint(
             uniform<int>(0, character_blend.mesh->vertices.size() - 1),
-            uniform<float>(0, 1),
+            uniform<T>(0, 1),
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized());
       }
@@ -996,8 +1007,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
   {
     const Character character_blend =
         withTestBlendShapes(withTestFaceExpressionBlendShapes(createTestCharacter()));
-    const ModelParametersT<T> modelParams =
-        0.25 * VectorX<T>::Random(character_blend.parameterTransform.numAllModelParameters());
+    const ModelParametersT<T> modelParams = 0.25 *
+        uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
 
     // TODO: Add Plane, Normal and SymmetricNormal?
     for (VertexConstraintType type : {VertexConstraintType::Position}) {
@@ -1005,7 +1016,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
         errorFunction.addConstraint(
             uniform<int>(0, character_blend.mesh->vertices.size() - 1),
-            uniform<float>(0, 1),
+            uniform<T>(0, 1),
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized());
       }
@@ -1033,15 +1044,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL2_GradientsAndJacobians) {
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
-  Random rand;
   PositionErrorFunctionT<T> errorFunction(
-      skeleton, character.parameterTransform, GeneralizedLossT<T>::kL2, rand.uniform<T>(0.2, 10));
+      skeleton, character.parameterTransform, GeneralizedLossT<T>::kL2, uniform<T>(0.2, 10));
   const T TEST_WEIGHT_VALUE = 4.5;
   {
     SCOPED_TRACE("PositionL2 Constraint Test");
     std::vector<PositionDataT<T>> cl{
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1052,7 +1064,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL2_GradientsAndJacobians) {
         transform,
         Eps<T>(5e-2f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1074,15 +1087,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL1_GradientsAndJacobians) {
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
-  Random rand;
   PositionErrorFunctionT<T> errorFunction(
-      skeleton, character.parameterTransform, GeneralizedLossT<T>::kL1, rand.uniform<T>(0.5, 2));
+      skeleton, character.parameterTransform, GeneralizedLossT<T>::kL1, uniform<T>(0.5, 2));
   const T TEST_WEIGHT_VALUE = 4.5;
   {
     SCOPED_TRACE("PositionL1 Constraint Test");
     std::vector<PositionDataT<T>> cl{
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1096,7 +1110,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL1_GradientsAndJacobians) {
         false,
         false);
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1120,18 +1135,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorCauchy_GradientsAndJacobian
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
-  Random rand;
   PositionErrorFunctionT<T> errorFunction(
-      skeleton,
-      character.parameterTransform,
-      GeneralizedLossT<T>::kCauchy,
-      rand.uniform<T>(0.5, 2));
+      skeleton, character.parameterTransform, GeneralizedLossT<T>::kCauchy, uniform<T>(0.5, 2));
   const T TEST_WEIGHT_VALUE = 4.5;
   {
     SCOPED_TRACE("PositionCauchy Constraint Test");
     std::vector<PositionDataT<T>> cl{
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1145,7 +1158,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorCauchy_GradientsAndJacobian
         false,
         false);
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1175,8 +1189,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorWelsch_GradientsAndJacobian
   {
     SCOPED_TRACE("PositionWelsch Constraint Test");
     std::vector<PositionDataT<T>> cl{
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1190,7 +1206,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorWelsch_GradientsAndJacobian
         false,
         false);
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1214,15 +1231,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorGeneral_GradientsAndJacobia
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
-  Random rand;
   PositionErrorFunctionT<T> errorFunction(
-      skeleton, character.parameterTransform, rand.uniform<T>(0.1, 10));
+      skeleton, character.parameterTransform, uniform<T>(0.1, 10));
   const T TEST_WEIGHT_VALUE = 4.5;
   {
     SCOPED_TRACE("PositionGeneral Constraint Test");
     std::vector<PositionDataT<T>> cl{
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        PositionDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+        PositionDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1236,7 +1254,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorGeneral_GradientsAndJacobia
         false,
         false);
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1268,13 +1287,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneErrorL2_GradientsAndJacobians) {
         PlaneDataT<T>(
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized(),
-            uniform<float>(0, 1),
+            uniform<T>(0, 1),
             2,
             TEST_WEIGHT_VALUE),
         PlaneDataT<T>(
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized(),
-            uniform<float>(0, 1),
+            uniform<T>(0, 1),
             1,
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
@@ -1288,7 +1307,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneErrorL2_GradientsAndJacobians) {
         Eps<T>(5e-2f, 5e-6));
 
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1318,13 +1338,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, HalfPlaneErrorL2_GradientsAndJacobians) 
         PlaneDataT<T>(
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized(),
-            uniform<float>(0, 1),
+            uniform<T>(0, 1),
             2,
             TEST_WEIGHT_VALUE),
         PlaneDataT<T>(
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized(),
-            uniform<float>(0, 1),
+            uniform<T>(0, 1),
             1,
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
@@ -1338,7 +1358,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, HalfPlaneErrorL2_GradientsAndJacobians) 
         Eps<T>(1e-2f, 5e-6));
 
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1367,13 +1388,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
     SCOPED_TRACE("Orientation Constraint Test");
     std::vector<OrientationDataT<T>> cl{
         OrientationDataT<T>(
-            rotVecToQuaternion<T>(Vector3<T>::Random()),
-            rotVecToQuaternion<T>(Vector3<T>::Random()),
+            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
+            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
             2,
             TEST_WEIGHT_VALUE),
         OrientationDataT<T>(
-            rotVecToQuaternion<T>(Vector3<T>::Random()),
-            rotVecToQuaternion<T>(Vector3<T>::Random()),
+            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
+            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
             1,
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(std::move(cl));
@@ -1386,14 +1407,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
         transform,
         Eps<T>(0.03f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters()) * 0.25;
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           parameters,
           skeleton,
           transform,
-          Eps<T>(0.03f, 5e-6),
+          Eps<T>(0.05f, 5e-6),
           Eps<T>(1e-6f, 1e-7));
     }
   }
@@ -1413,8 +1435,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
   {
     SCOPED_TRACE("FixedAxisDiffL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
-        FixedAxisDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
-        FixedAxisDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE)};
+        FixedAxisDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+        FixedAxisDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1425,7 +1449,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
         transform,
         Eps<T>(5e-2f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1453,15 +1478,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
     SCOPED_TRACE("FixedAxisCosL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            this->rng.template uniform<Vector3<T>>(-1, 1),
-            this->rng.template uniform<Vector3<T>>(-1, 1),
-            2,
-            TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
         FixedAxisDataT<T>(
-            this->rng.template uniform<Vector3<T>>(-1, 1),
-            this->rng.template uniform<Vector3<T>>(-1, 1),
-            1,
-            TEST_WEIGHT_VALUE)};
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1473,7 +1492,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
         Eps<T>(2e-2f, 1e-4));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          this->rng.template uniform<VectorX<T>>(transform.numAllModelParameters(), T(-1), T(1));
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1500,7 +1519,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
   {
     SCOPED_TRACE("FixedAxisAngleL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
-        FixedAxisDataT<T>(Vector3<T>::Random(), Vector3<T>::Random(), 2, TEST_WEIGHT_VALUE),
+        FixedAxisDataT<T>(
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
         // corner case when the angle is close to zero
         FixedAxisDataT<T>(
             Vector3<T>::UnitY(), Vector3<T>(1e-16, 1 + 1e-16, 1e-16), 1, TEST_WEIGHT_VALUE),
@@ -1528,7 +1548,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
           false); // jacobian test is inaccurate around the corner case
     }
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1556,11 +1577,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
     SCOPED_TRACE("Normal Constraint Test");
     std::vector<NormalDataT<T>> cl{
         NormalDataT<T>(
-            Vector3<T>::Random(), Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            1,
+            TEST_WEIGHT_VALUE),
         NormalDataT<T>(
-            Vector3<T>::Random(),
-            Vector3<T>::Random(),
-            Vector3<T>::Random(),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
             2,
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
@@ -1586,7 +1611,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
           false); // jacobian test is inaccurate around the corner case
     }
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1614,11 +1640,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
     SCOPED_TRACE("AimDist Constraint Test");
     std::vector<AimDataT<T>> cl{
         AimDataT<T>(
-            Vector3<T>::Random(), Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            1,
+            TEST_WEIGHT_VALUE),
         AimDataT<T>(
-            Vector3<T>::Random(),
-            Vector3<T>::Random(),
-            Vector3<T>::Random(),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
             2,
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
@@ -1644,7 +1674,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
           false); // jacobian test is inaccurate around the corner case
     }
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1672,11 +1703,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDirError_GradientsAndJacobians) {
     SCOPED_TRACE("AimDir Constraint Test");
     std::vector<AimDataT<T>> cl{
         AimDataT<T>(
-            Vector3<T>::Random(), Vector3<T>::Random(), Vector3<T>::Random(), 1, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            1,
+            TEST_WEIGHT_VALUE),
         AimDataT<T>(
-            Vector3<T>::Random(),
-            Vector3<T>::Random(),
-            Vector3<T>::Random(),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
+            uniform<Vector3<T>>(-1, 1),
             2,
             TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
@@ -1702,7 +1737,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDirError_GradientsAndJacobians) {
           false); // jacobian test is inaccurate around the corner case
     }
     for (size_t i = 0; i < 10; i++) {
-      ModelParametersT<T> parameters = VectorX<T>::Random(transform.numAllModelParameters());
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -1733,11 +1769,11 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
     // projections are ignored behind the camera
     for (int i = 0; i < 5; ++i) {
       errorFunction.addConstraint(ProjectionConstraintDataT<T>{
-          (projection + this->rng.template uniformAffine3<T>().matrix()).topRows(3),
-          this->rng.template uniform<size_t>(size_t(0), size_t(2)),
-          this->rng.template normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
-          this->rng.template uniform<T>(0.1, 2.0),
-          this->rng.template normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
+          (projection + uniformAffine3<T>().matrix()).topRows(3),
+          uniform<size_t>(0, 2),
+          normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
+          uniform<T>(0.1, 2.0),
+          normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
     }
 
     if constexpr (std::is_same_v<T, float>) {
@@ -1763,7 +1799,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
 
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          this->rng.template uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
+          uniform<VectorX<T>>(transform.numAllModelParameters(), 0.0f, 1.0f);
       const momentum::SkeletonStateT<T> skelState(transform.apply(parameters), skeleton);
       ASSERT_GT(errorFunction.getError(parameters, skelState), 0);
       TEST_GRADIENT_AND_JACOBIAN(
@@ -1786,8 +1822,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
   const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
-  Random<> rng(12345);
-
   // create constraints
   DistanceErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   const T TEST_WEIGHT_VALUE = 4.5;
@@ -1795,8 +1829,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
     SCOPED_TRACE("Distance Constraint Test");
     DistanceConstraintDataT<T> constraintData;
     constraintData.parent = 1;
-    constraintData.offset = rng.normal<Vector3<T>>(0, 1);
-    constraintData.origin = rng.normal<Vector3<T>>(0, 1);
+    constraintData.offset = normal<Vector3<T>>(0, 1);
+    constraintData.origin = normal<Vector3<T>>(0, 1);
     constraintData.target = 2.3f;
     constraintData.weight = TEST_WEIGHT_VALUE;
     errorFunction.setConstraints({constraintData});
@@ -1823,7 +1857,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
     }
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          rng.uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
+          uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,

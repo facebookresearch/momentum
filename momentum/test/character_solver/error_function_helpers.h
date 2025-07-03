@@ -22,8 +22,18 @@ template <typename T>
 struct Momentum_ErrorFunctionsTest : testing::Test {
   using Type = T;
 
-  // Shared random number generator with fixed seed for consistent test results
-  Random<> rng{12345};
+  static constexpr uint32_t kTestSeed = 12345;
+
+  void SetUp() override {
+    Random<>::GetSingleton().setSeed(kTestSeed);
+  }
+
+  void TearDown() override {
+    // Check that the seed hasn't been changed by other code during the test
+    EXPECT_EQ(Random<>::GetSingleton().getSeed(), kTestSeed)
+        << "Random seed was modified during test execution. Expected: " << kTestSeed
+        << ", Actual: " << Random<>::GetSingleton().getSeed();
+  }
 
   static constexpr T getEps() {
     return Eps<T>(1e-5f, 1e-9);
