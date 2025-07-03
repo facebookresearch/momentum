@@ -379,7 +379,7 @@ T normal(const T& mean, const T& sigma) {
 template <typename FixedSizeT>
 FixedSizeT normal(typename FixedSizeT::Scalar mean, typename FixedSizeT::Scalar sigma) {
   auto& rand = Random<>::GetSingleton();
-  return rand.uniform<FixedSizeT>(mean, sigma);
+  return rand.normal<FixedSizeT>(mean, sigma);
 }
 
 template <typename DynamicVector>
@@ -388,7 +388,7 @@ DynamicVector normal(
     typename DynamicVector::Scalar mean,
     typename DynamicVector::Scalar sigma) {
   auto& rand = Random<>::GetSingleton();
-  return rand.uniform<DynamicVector>(size, mean, sigma);
+  return rand.normal<DynamicVector>(size, mean, sigma);
 }
 
 template <typename DynamicMatrix>
@@ -398,7 +398,7 @@ DynamicMatrix normal(
     typename DynamicMatrix::Scalar mean,
     typename DynamicMatrix::Scalar sigma) {
   auto& rand = Random<>::GetSingleton();
-  return rand.uniform<DynamicMatrix>(rows, cols, mean, sigma);
+  return rand.normal<DynamicMatrix>(rows, cols, mean, sigma);
 }
 
 } // namespace momentum
