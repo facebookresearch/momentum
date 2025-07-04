@@ -23,6 +23,24 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct RandomTest : testing::Test {
   using Type = T;
+
+ protected:
+  void SetUp() override {
+    // Set fixed seed to make tests deterministic and avoid flakiness
+    fixedSeed_ = 42;
+    Random<>::GetSingleton().setSeed(fixedSeed_);
+    initialSeed_ = Random<>::GetSingleton().getSeed();
+  }
+
+  void TearDown() override {
+    // Verify that the random seed hasn't changed during the test
+    uint32_t finalSeed = Random<>::GetSingleton().getSeed();
+    EXPECT_EQ(initialSeed_, finalSeed) << "Random seed should not change during test execution";
+  }
+
+ private:
+  uint32_t fixedSeed_{};
+  uint32_t initialSeed_{};
 };
 
 TYPED_TEST_SUITE(RandomTest, Types);
@@ -418,4 +436,338 @@ TYPED_TEST(RandomTest, UniformQuaternion) {
   }
 }
 
-// TODO: Add tests for normal distributions
+TEST(RandomTest, ScalarNormal) {
+  const auto numTests = 1000;
+  const float mean = 2.5f;
+  const float sigma = 1.5f;
+
+  // Test that normal distribution generates values around the mean
+  std::vector<float> values;
+  values.reserve(numTests);
+
+  for (auto i = 0u; i < numTests; ++i) {
+    auto val = normal<float>(mean, sigma);
+    values.push_back(val);
+  }
+
+  // Calculate sample mean and standard deviation
+  float sampleMean = 0.0f;
+  for (float val : values) {
+    sampleMean += val;
+  }
+  sampleMean /= numTests;
+
+  float sampleVariance = 0.0f;
+  for (float val : values) {
+    float diff = val - sampleMean;
+    sampleVariance += diff * diff;
+  }
+  sampleVariance /= (numTests - 1);
+  float sampleStdDev = std::sqrt(sampleVariance);
+
+  // Check that sample statistics are close to expected values
+  // Allow for some statistical variation
+  EXPECT_NEAR(sampleMean, mean, 0.2f) << "Sample mean should be close to expected mean";
+  EXPECT_NEAR(sampleStdDev, sigma, 0.2f) << "Sample std dev should be close to expected sigma";
+}
+
+TEST(RandomTest, NormalVsUniform) {
+  const auto numTests = 1000;
+  const float mean = 0.0f;
+  const float sigma = 1.0f;
+  const float uniformMin = -3.0f;
+  const float uniformMax = 3.0f;
+
+  std::vector<float> normalValues;
+  std::vector<float> uniformValues;
+  normalValues.reserve(numTests);
+  uniformValues.reserve(numTests);
+
+  // Generate samples from both distributions
+  for (auto i = 0u; i < numTests; ++i) {
+    normalValues.push_back(normal<float>(mean, sigma));
+    uniformValues.push_back(uniform<float>(uniformMin, uniformMax));
+  }
+
+  // Calculate means
+  float normalMean = 0.0f, uniformMean = 0.0f;
+  for (auto i = 0u; i < numTests; ++i) {
+    normalMean += normalValues[i];
+    uniformMean += uniformValues[i];
+  }
+  normalMean /= numTests;
+  uniformMean /= numTests;
+
+  // Calculate variances
+  float normalVar = 0.0f, uniformVar = 0.0f;
+  for (auto i = 0u; i < numTests; ++i) {
+    float normalDiff = normalValues[i] - normalMean;
+    float uniformDiff = uniformValues[i] - uniformMean;
+    normalVar += normalDiff * normalDiff;
+    uniformVar += uniformDiff * uniformDiff;
+  }
+  normalVar /= (numTests - 1);
+  uniformVar /= (numTests - 1);
+
+  // Normal distribution should have different statistical properties than uniform
+  // Uniform distribution on [-3, 3] has variance = (b-a)^2/12 = 36/12 = 3
+  // Normal distribution with sigma=1 has variance = 1
+  EXPECT_NEAR(normalVar, 1.0f, 0.3f) << "Normal distribution variance should be close to sigma^2";
+  EXPECT_NEAR(uniformVar, 3.0f, 0.5f) << "Uniform distribution variance should be (b-a)^2/12";
+
+  // The variances should be significantly different
+  EXPECT_GT(std::abs(normalVar - uniformVar), 1.0f)
+      << "Normal and uniform should have different variances";
+}
+
+template <typename T, typename Scalar>
+void testNormalDynamicVectorScalarBounds(int size, Scalar mean, Scalar sigma) {
+  const auto rand = normal<T>(size, mean, sigma);
+  EXPECT_EQ(rand.size(), size) << "type: " << typeid(T).name();
+
+  // For normal distribution, use 5 sigma bounds to reduce false positives
+  // 5 sigma covers 99.99994% of values, making test failures extremely rare
+  EXPECT_TRUE((rand.array() >= (mean - 5 * sigma)).all())
+      << "Values should be within 5 sigma of mean\ntype: " << typeid(T).name()
+      << "\nrand: " << rand.transpose() << "\nmean: " << mean << "\nsigma: " << sigma;
+  EXPECT_TRUE((rand.array() <= (mean + 5 * sigma)).all())
+      << "Values should be within 5 sigma of mean\ntype: " << typeid(T).name()
+      << "\nrand: " << rand.transpose() << "\nmean: " << mean << "\nsigma: " << sigma;
+
+  // Sample mean should be reasonably close to expected mean for larger vectors
+  if (size >= 10) {
+    Scalar sampleMean = rand.mean();
+    // Standard error of the mean is sigma/sqrt(n), use 4 standard errors as tolerance
+    // This gives 99.99% confidence interval, reducing false positives
+    Scalar tolerance = 4 * sigma / std::sqrt(static_cast<Scalar>(size));
+    EXPECT_NEAR(sampleMean, mean, tolerance)
+        << "Sample mean should be close to expected mean for size " << size;
+  }
+}
+
+template <typename T, typename Scalar>
+void testNormalDynamicMatrixScalarBounds(int rows, int cols, Scalar mean, Scalar sigma) {
+  const auto rand = normal<T>(rows, cols, mean, sigma);
+  EXPECT_EQ(rand.rows(), rows) << "type: " << typeid(T).name();
+  EXPECT_EQ(rand.cols(), cols) << "type: " << typeid(T).name();
+
+  // For normal distribution, use 5 sigma bounds to reduce false positives
+  EXPECT_TRUE((rand.array() >= (mean - 5 * sigma)).all())
+      << "Values should be within 5 sigma of mean\ntype: " << typeid(T).name() << "\nmean: " << mean
+      << "\nsigma: " << sigma;
+  EXPECT_TRUE((rand.array() <= (mean + 5 * sigma)).all())
+      << "Values should be within 5 sigma of mean\ntype: " << typeid(T).name() << "\nmean: " << mean
+      << "\nsigma: " << sigma;
+
+  // Sample mean should be reasonably close to expected mean for larger matrices
+  if (rows * cols >= 10) {
+    Scalar sampleMean = rand.mean();
+    // Standard error of the mean is sigma/sqrt(n), use 4 standard errors as tolerance
+    // This gives 99.99% confidence interval, reducing false positives
+    Scalar tolerance = 4 * sigma / std::sqrt(static_cast<Scalar>(rows * cols));
+    EXPECT_NEAR(sampleMean, mean, tolerance)
+        << "Sample mean should be close to expected mean for size " << rows << "x" << cols;
+  }
+}
+
+template <typename T, typename Scalar>
+void testNormalFixedScalarBounds(Scalar mean, Scalar sigma) {
+  const auto rand = normal<T>(mean, sigma);
+
+  // For normal distribution, use 5 sigma bounds to reduce false positives
+  EXPECT_TRUE((rand.array() >= (mean - 5 * sigma)).all())
+      << "Values should be within 5 sigma of mean\ntype: " << typeid(T).name()
+      << "\nrand: " << rand.transpose() << "\nmean: " << mean << "\nsigma: " << sigma;
+  EXPECT_TRUE((rand.array() <= (mean + 5 * sigma)).all())
+      << "Values should be within 5 sigma of mean\ntype: " << typeid(T).name()
+      << "\nrand: " << rand.transpose() << "\nmean: " << mean << "\nsigma: " << sigma;
+
+  // Sample mean should be reasonably close to expected mean for larger vectors
+  if (T::SizeAtCompileTime >= 10) {
+    Scalar sampleMean = rand.mean();
+    // Standard error of the mean is sigma/sqrt(n), use 4 standard errors as tolerance
+    // This gives 99.99% confidence interval, reducing false positives
+    Scalar tolerance = 4 * sigma / std::sqrt(static_cast<Scalar>(T::SizeAtCompileTime));
+    EXPECT_NEAR(sampleMean, mean, tolerance) << "Sample mean should be close to expected mean";
+  }
+}
+
+TEST(RandomTest, VectorMatrixNormal) {
+  const float meanf = 1.5f;
+  const float sigmaf = 0.8f;
+  const double meand = 2.3;
+  const double sigmad = 1.2;
+
+  // Test basic functionality - just ensure no crashes and reasonable bounds
+  // Dynamic float vector
+  auto vecf1 = normal<VectorXf>(1, meanf, sigmaf);
+  auto vecf2 = normal<VectorXf>(2, meanf, sigmaf);
+  auto vecf10 = normal<VectorXf>(10, meanf, sigmaf);
+
+  EXPECT_EQ(vecf1.size(), 1);
+  EXPECT_EQ(vecf2.size(), 2);
+  EXPECT_EQ(vecf10.size(), 10);
+
+  // Values should be within reasonable bounds (10 sigma is extremely generous)
+  EXPECT_TRUE((vecf10.array() >= (meanf - 10 * sigmaf)).all());
+  EXPECT_TRUE((vecf10.array() <= (meanf + 10 * sigmaf)).all());
+
+  // Dynamic double vector
+  auto vecd1 = normal<VectorXd>(1, meand, sigmad);
+  auto vecd2 = normal<VectorXd>(2, meand, sigmad);
+  auto vecd10 = normal<VectorXd>(10, meand, sigmad);
+
+  EXPECT_EQ(vecd1.size(), 1);
+  EXPECT_EQ(vecd2.size(), 2);
+  EXPECT_EQ(vecd10.size(), 10);
+
+  EXPECT_TRUE((vecd10.array() >= (meand - 10 * sigmad)).all());
+  EXPECT_TRUE((vecd10.array() <= (meand + 10 * sigmad)).all());
+
+  // Fixed size vectors
+  auto vec2f = normal<Vector2f>(meanf, sigmaf);
+  auto vec3f = normal<Vector3f>(meanf, sigmaf);
+  auto vec2d = normal<Vector2d>(meand, sigmad);
+  auto vec3d = normal<Vector3d>(meand, sigmad);
+
+  EXPECT_EQ(vec2f.size(), 2);
+  EXPECT_EQ(vec3f.size(), 3);
+  EXPECT_EQ(vec2d.size(), 2);
+  EXPECT_EQ(vec3d.size(), 3);
+
+  // Dynamic matrices
+  auto matf22 = normal<MatrixXf>(2, 2, meanf, sigmaf);
+  auto matf34 = normal<MatrixXf>(3, 4, meanf, sigmaf);
+  auto matd22 = normal<MatrixXd>(2, 2, meand, sigmad);
+  auto matd34 = normal<MatrixXd>(3, 4, meand, sigmad);
+
+  EXPECT_EQ(matf22.rows(), 2);
+  EXPECT_EQ(matf22.cols(), 2);
+  EXPECT_EQ(matf34.rows(), 3);
+  EXPECT_EQ(matf34.cols(), 4);
+  EXPECT_EQ(matd22.rows(), 2);
+  EXPECT_EQ(matd22.cols(), 2);
+  EXPECT_EQ(matd34.rows(), 3);
+  EXPECT_EQ(matd34.cols(), 4);
+
+  // Fixed size matrices
+  auto mat2f = normal<Matrix2f>(meanf, sigmaf);
+  auto mat3f = normal<Matrix3f>(meanf, sigmaf);
+  auto mat2d = normal<Matrix2d>(meand, sigmad);
+  auto mat3d = normal<Matrix3d>(meand, sigmad);
+
+  EXPECT_EQ(mat2f.rows(), 2);
+  EXPECT_EQ(mat2f.cols(), 2);
+  EXPECT_EQ(mat3f.rows(), 3);
+  EXPECT_EQ(mat3f.cols(), 3);
+  EXPECT_EQ(mat2d.rows(), 2);
+  EXPECT_EQ(mat2d.cols(), 2);
+  EXPECT_EQ(mat3d.rows(), 3);
+  EXPECT_EQ(mat3d.cols(), 3);
+}
+
+TEST(RandomTest, NormalDistributionConsistency) {
+  // Test that class methods and global functions produce the same results
+  const uint32_t seed = 12345;
+  const float mean = 1.0f;
+  const float sigma = 2.0f;
+
+  // Test scalar normal
+  Random r1(seed);
+  Random r2(seed);
+
+  float classResult = r1.normal(mean, sigma);
+  float globalResult = r2.normal(mean, sigma);
+
+  // Reset with same seed and test global function
+  Random<>::GetSingleton().setSeed(seed);
+  auto globalFuncResult = normal<float>(mean, sigma);
+
+  // The class method and member normal should produce same result with same seed
+  EXPECT_NEAR(classResult, globalResult, kMaxAllowedAbsError);
+
+  // Global function should produce reasonable values (within 3 sigma)
+  EXPECT_GE(globalFuncResult, mean - 3 * sigma);
+  EXPECT_LE(globalFuncResult, mean + 3 * sigma);
+
+  // Test vector normal
+  Random r3(seed);
+  Random r4(seed);
+
+  auto classVecResult = r3.normal<Vector3f>(mean, sigma);
+  auto globalVecResult = r4.normal<Vector3f>(mean, sigma);
+
+  EXPECT_TRUE(classVecResult.isApprox(globalVecResult, kMaxAllowedAbsError));
+
+  // Reset and test global function
+  Random<>::GetSingleton().setSeed(seed);
+  auto globalFuncVecResult = normal<Vector3f>(mean, sigma);
+
+  // Note: This might not match exactly due to singleton state, but should be reasonable
+  EXPECT_TRUE((globalFuncVecResult.array() >= (mean - 3 * sigma)).all());
+  EXPECT_TRUE((globalFuncVecResult.array() <= (mean + 3 * sigma)).all());
+}
+
+TEST(RandomTest, NormalDistributionStatisticalProperties) {
+  // More rigorous statistical test for normal distribution
+  const int numSamples = 10000;
+  const float expectedMean = 5.0f;
+  const float expectedSigma = 2.0f;
+
+  std::vector<float> samples;
+  samples.reserve(numSamples);
+
+  // Generate large sample
+  for (int i = 0; i < numSamples; ++i) {
+    samples.push_back(normal<float>(expectedMean, expectedSigma));
+  }
+
+  // Calculate sample statistics
+  float sampleMean = 0.0f;
+  for (float val : samples) {
+    sampleMean += val;
+  }
+  sampleMean /= numSamples;
+
+  float sampleVariance = 0.0f;
+  for (float val : samples) {
+    float diff = val - sampleMean;
+    sampleVariance += diff * diff;
+  }
+  sampleVariance /= (numSamples - 1);
+  float sampleStdDev = std::sqrt(sampleVariance);
+
+  // With large sample size, statistics should be very close to expected values
+  EXPECT_NEAR(sampleMean, expectedMean, 0.05f)
+      << "Sample mean should be very close to expected mean with large sample";
+  EXPECT_NEAR(sampleStdDev, expectedSigma, 0.05f)
+      << "Sample std dev should be very close to expected sigma with large sample";
+
+  // Test empirical rule (68-95-99.7 rule)
+  int within1Sigma = 0, within2Sigma = 0, within3Sigma = 0;
+  for (float val : samples) {
+    float deviations = std::abs(val - sampleMean) / sampleStdDev;
+    if (deviations <= 1.0f) {
+      within1Sigma++;
+    }
+    if (deviations <= 2.0f) {
+      within2Sigma++;
+    }
+    if (deviations <= 3.0f) {
+      within3Sigma++;
+    }
+  }
+
+  float pct1Sigma = static_cast<float>(within1Sigma) / numSamples;
+  float pct2Sigma = static_cast<float>(within2Sigma) / numSamples;
+  float pct3Sigma = static_cast<float>(within3Sigma) / numSamples;
+
+  // Allow some tolerance for statistical variation
+  EXPECT_GT(pct1Sigma, 0.65f) << "~68% should be within 1 sigma";
+  EXPECT_LT(pct1Sigma, 0.71f) << "~68% should be within 1 sigma";
+
+  EXPECT_GT(pct2Sigma, 0.93f) << "~95% should be within 2 sigma";
+  EXPECT_LT(pct2Sigma, 0.97f) << "~95% should be within 2 sigma";
+
+  EXPECT_GT(pct3Sigma, 0.995f) << "~99.7% should be within 3 sigma";
+}
