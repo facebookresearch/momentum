@@ -82,6 +82,10 @@ class SolverT {
   /// Returns the maximum number of iterations before terminating
   [[nodiscard]] size_t getMaxIterations() const;
 
+  [[nodiscard]] size_t getNumParameters() const {
+    return numParameters_;
+  }
+
  protected:
   /// Initializes solver state before optimization begins
   virtual void initializeSolver() = 0;
