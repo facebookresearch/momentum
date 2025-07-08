@@ -18,8 +18,6 @@ namespace momentum {
 template <typename T>
 StateErrorFunctionT<T>::StateErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt)
     : SkeletonErrorFunctionT<T>(skel, pt) {
-  targetParameters_.setZero(pt.numAllModelParameters());
-  targetParameterWeights_.setZero(pt.numAllModelParameters());
   targetPositionWeights_.setOnes(this->skeleton_.joints.size());
   targetRotationWeights_.setOnes(this->skeleton_.joints.size());
   posWgt_ = T(1);
@@ -52,16 +50,6 @@ template <typename T>
 void StateErrorFunctionT<T>::setTargetState(TransformListT<T> target) {
   MT_CHECK(target.size() == this->skeleton_.joints.size());
   this->targetState_ = std::move(target);
-}
-
-template <typename T>
-void StateErrorFunctionT<T>::setTargetParameters(
-    const Eigen::VectorX<T>& params,
-    const Eigen::VectorX<T>& weights) {
-  MT_CHECK(params.size() == targetParameters_.size());
-
-  targetParameters_ = params;
-  targetParameterWeights_ = weights;
 }
 
 template <typename T>
@@ -102,14 +90,9 @@ double StateErrorFunctionT<T>::getError(
   double error = 0.0;
 
   // ignore if we don't have any reasonable data
-  if (targetState_.size() != state.jointState.size() || targetParameters_.size() != params.size()) {
+  if (targetState_.size() != state.jointState.size()) {
     return error;
   }
-
-  // calculate difference between parameters and desired parameters
-  const Eigen::VectorX<T> pdiff =
-      (params.v - targetParameters_).cwiseProduct(targetParameterWeights_);
-  error += pdiff.squaredNorm();
 
   // go over the joint states and calculate the rotation difference contribution on joints that are
   // at the end
@@ -152,15 +135,9 @@ double StateErrorFunctionT<T>::getGradient(
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
 
   // ignore if we don't have any reasonable data
-  if (targetState_.size() != state.jointState.size() || targetParameters_.size() != params.size()) {
+  if (targetState_.size() != state.jointState.size()) {
     return error;
   }
-
-  // calculate difference between parameters and desired parameters
-  const Eigen::VectorX<T> pdiff =
-      (params.v - targetParameters_).cwiseProduct(targetParameterWeights_);
-  error += pdiff.squaredNorm() * this->weight_;
-  gradient += T(2) * pdiff * this->weight_;
 
   // also go over the joint states and calculate the rotation difference contribution on joints that
   // are at the end
@@ -248,9 +225,6 @@ template <typename T>
 size_t StateErrorFunctionT<T>::getJacobianSize() const {
   auto result =
       (targetPositionWeights_.array() != 0 || targetRotationWeights_.array() != 0).count() * 12;
-  if (!targetParameterWeights_.isZero()) {
-    result += targetParameterWeights_.size();
-  }
   return result;
 }
 
@@ -267,23 +241,11 @@ double StateErrorFunctionT<T>::getJacobian(
   double error = 0.0;
 
   // ignore if we don't have any reasonable data
-  if (targetState_.size() != state.jointState.size() || targetParameters_.size() != params.size()) {
+  if (targetState_.size() != state.jointState.size()) {
     return error;
   }
 
   Eigen::Index offset = 0;
-
-  // calculate difference between parameters and desired parameters
-  if (!targetParameterWeights_.isZero()) {
-    const Eigen::VectorX<T> pdiff =
-        (params.v - targetParameters_).cwiseProduct(targetParameterWeights_);
-    const T sWeight = std::sqrt(this->weight_);
-    jacobian.topLeftCorner(pdiff.size(), pdiff.size()).diagonal().noalias() =
-        targetParameterWeights_ * sWeight;
-    residual.head(pdiff.size()).noalias() = pdiff * sWeight;
-    error += pdiff.squaredNorm() * this->weight_;
-    offset += params.size();
-  }
 
   // calculate state difference jacobians
   for (size_t i = 0; i < this->skeleton_.joints.size(); ++i) {

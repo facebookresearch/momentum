@@ -46,7 +46,6 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
     posWgt_ = posWeight;
     rotWgt_ = rotationWeight;
   }
-  void setTargetParameters(const Eigen::VectorX<T>& params, const Eigen::VectorX<T>& weights);
 
   [[nodiscard]] const TransformListT<T>& getTargetState() const {
     return this->targetState_;
@@ -66,8 +65,6 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
   }
 
  private:
-  Eigen::VectorX<T> targetParameterWeights_;
-  Eigen::VectorX<T> targetParameters_;
   TransformListT<T> targetState_;
   Eigen::VectorX<T> targetPositionWeights_;
   Eigen::VectorX<T> targetRotationWeights_;
