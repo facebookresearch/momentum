@@ -69,6 +69,9 @@ double SolverT<T>::solve(Eigen::VectorX<T>& params) {
     iterationCount.setZero();
   }
 
+  errorHistory_.clear();
+  errorHistory_.reserve(maxIterations_);
+
   MT_CHECK(params.size() == gsl::narrow<Eigen::DenseIndex>(numParameters_));
   parameters_ = params;
 
@@ -84,6 +87,7 @@ double SolverT<T>::solve(Eigen::VectorX<T>& params) {
   for (; iteration_ < maxIterations_; iteration_++) {
     // do actual iteration (iterations should update the error value)
     doIteration();
+    errorHistory_.push_back(error_);
 
     MT_LOGI_IF(this->verbose_, "Iteration: {}, error: {}", this->iteration_, error_);
 

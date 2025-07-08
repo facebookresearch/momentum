@@ -166,21 +166,14 @@ at::Tensor solveTensorIKProblem(
             derivedSolverOptions, &solverFunction);
       }
       solver->setEnabledParameters(activeParams);
-      // To record model params and errors at each iteration, and the
-      // iteration count.
-      solver->setStoreHistory(true);
 
       Eigen::VectorX<T> parameters_opt =
           toEigenMap<T>(modelParameters_init_cur);
       solver->solve(parameters_opt);
 
       // Record iteration count.
-      const std::unordered_map<std::string, Eigen::MatrixX<T>>& iterHistory =
-          solver->getHistory();
-      const auto iterCountIterator = iterHistory.find("iterations");
-      assert(iterCountIterator != iterHistory.end());
-      size_t iterCount = size_t(iterCountIterator->second(0, 0) + 0.5);
-      nTotalSolveIKIter += iterCount;
+      const std::vector<double>& iterHistory = solver->getErrorHistory();
+      nTotalSolveIKIter += iterHistory.size();
 
       if (parameters_opt.array().isNaN().any() ||
           parameters_opt.array().isInf().any()) {
