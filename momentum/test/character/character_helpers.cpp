@@ -120,28 +120,35 @@ CollisionGeometry createDefaultCollisionGeometry(size_t numJoints) {
 
 // The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
 // and two dummy faces.
-std::tuple<Mesh, SkinWeights> createDefaultMesh() {
+std::tuple<Mesh, SkinWeights> createDefaultMesh(int numBones) {
   std::tuple<Mesh, SkinWeights> result;
   auto& mesh = std::get<0>(result);
   auto& skin = std::get<1>(result);
 
-  constexpr size_t kNumSegments = 25;
+  constexpr int kNumSegmentsPerJoint = 5;
+  const int kNumSegments = kNumSegmentsPerJoint * numBones;
 
   skin.index.resize(2 * kNumSegments, Eigen::NoChange);
   skin.weight.resize(2 * kNumSegments, Eigen::NoChange);
   skin.index.setZero();
   skin.weight.setZero();
 
-  for (size_t i = 0; i < kNumSegments; i++) {
-    const float fraction = static_cast<float>(i) / static_cast<float>(kNumSegments - 1);
-    mesh.vertices.emplace_back(0.0f, fraction, 0.0f);
-    mesh.vertices.emplace_back(1.0f, fraction, 0.0f);
+  for (int iBone = 0; iBone < numBones; ++iBone) {
+    for (int kBoneSegment = 0; kBoneSegment < kNumSegmentsPerJoint; kBoneSegment++) {
+      const auto nextBone = std::clamp(iBone + 1, 0, numBones - 1);
+      const float fraction =
+          static_cast<float>(kBoneSegment) / static_cast<float>(kNumSegmentsPerJoint);
+      const float yValue = static_cast<float>(iBone) + fraction;
+      mesh.vertices.emplace_back(-0.5f, yValue, 0.0f);
+      mesh.vertices.emplace_back(0.5f, yValue, 0.0f);
 
-    for (int k = 0; k < 2; ++k) {
-      skin.index(2 * i + k, 0) = 0;
-      skin.index(2 * i + k, 1) = 1;
-      skin.weight(2 * i + k, 0) = 1.0f - fraction;
-      skin.weight(2 * i + k, 1) = fraction;
+      const auto iSegment = iBone * kNumSegmentsPerJoint + kBoneSegment;
+      for (int k = 0; k < 2; ++k) {
+        skin.index(2 * iSegment + k, 0) = iBone;
+        skin.index(2 * iSegment + k, 1) = nextBone;
+        skin.weight(2 * iSegment + k, 0) = 1.0f - fraction;
+        skin.weight(2 * iSegment + k, 1) = fraction;
+      }
     }
   }
 
@@ -150,6 +157,11 @@ std::tuple<Mesh, SkinWeights> createDefaultMesh() {
     if (skin.weight(i, 1) > skin.weight(i, 0)) {
       std::swap(skin.index(i, 1), skin.index(i, 0));
       std::swap(skin.weight(i, 1), skin.weight(i, 0));
+    }
+
+    if (skin.index(i, 0) == skin.index(i, 1)) {
+      skin.weight(i, 0) += skin.weight(i, 1);
+      skin.weight(i, 1) = 0.0f;
     }
   }
 
@@ -182,7 +194,7 @@ ParameterLimits createDefaultParameterLimits() {
 template <typename T>
 CharacterT<T> createTestCharacter(size_t numJoints) {
   MT_CHECK(numJoints >= 3, "The number of joints '{}' should be equal to 3 or greater.", numJoints);
-  auto [mesh, skin] = createDefaultMesh();
+  auto [mesh, skin] = createDefaultMesh(static_cast<int>(numJoints));
   auto collisionGeometry = createDefaultCollisionGeometry(numJoints);
   return CharacterT<T>(
       createDefaultSkeleton(numJoints),
