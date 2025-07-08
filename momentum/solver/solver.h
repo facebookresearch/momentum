@@ -86,6 +86,11 @@ class SolverT {
     return numParameters_;
   }
 
+  /// Returns the history of objective function values over the iterations of the solve
+  [[nodiscard]] const std::vector<double>& getErrorHistory() const {
+    return errorHistory_;
+  }
+
  protected:
   /// Initializes solver state before optimization begins
   virtual void initializeSolver() = 0;
@@ -130,6 +135,8 @@ class SolverT {
   ///
   /// Contains matrices for parameters, errors, and other solver-specific data
   std::unordered_map<std::string, Eigen::MatrixX<T>> iterationHistory_;
+  /// History of objective function values over the iterations
+  std::vector<double> errorHistory_;
 
   /// Whether to output detailed progress information
   bool verbose_ = false;
