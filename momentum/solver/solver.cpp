@@ -8,6 +8,7 @@
 #include "momentum/solver/solver.h"
 
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/common/profile.h"
 #include "momentum/solver/solver_function.h"
 
@@ -83,6 +84,8 @@ double SolverT<T>::solve(Eigen::VectorX<T>& params) {
   for (; iteration_ < maxIterations_; iteration_++) {
     // do actual iteration (iterations should update the error value)
     doIteration();
+
+    MT_LOGI_IF(this->verbose_, "Iteration: {}, error: {}", this->iteration_, error_);
 
     // check for convergence
     bool converged = false;
