@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmomentum_1_1StateSequenceErrorFun
 </div><!--header-->
 <div class="contents">
 
+<p>Error function that penalizes the difference between the current skeleton state and the next skeleton state.  
+ <a href="classmomentum_1_1StateSequenceErrorFunctionT.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::StateSequenceErrorFunctionT&lt; T &gt;:</div>
@@ -128,10 +131,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a993e521a6fd920b5022f0ad0c7592da7" id="r_a993e521a6fd920b5022f0ad0c7592da7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#a993e521a6fd920b5022f0ad0c7592da7">getJacobianSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
 <tr class="separator:a993e521a6fd920b5022f0ad0c7592da7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa07cf17c4d62edfe4560f24786a80bea" id="r_aa07cf17c4d62edfe4560f24786a80bea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#aa07cf17c4d62edfe4560f24786a80bea">setTargetWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posWeight</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rotWeight</a>)</td></tr>
+<tr class="memdesc:aa07cf17c4d62edfe4560f24786a80bea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the target weights for each joint's position and rotation.  <br /></td></tr>
 <tr class="separator:aa07cf17c4d62edfe4560f24786a80bea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affa009a2ef0884eaa517b71628824a94" id="r_affa009a2ef0884eaa517b71628824a94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#affa009a2ef0884eaa517b71628824a94">setPositionTargetWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posWeight</a>)</td></tr>
+<tr class="memdesc:affa009a2ef0884eaa517b71628824a94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the target position weights for each joint.  <br /></td></tr>
 <tr class="separator:affa009a2ef0884eaa517b71628824a94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a4bef783c085f81f099880050b43b05" id="r_a0a4bef783c085f81f099880050b43b05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#a0a4bef783c085f81f099880050b43b05">setRotationTargetWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rotWeight</a>)</td></tr>
+<tr class="memdesc:a0a4bef783c085f81f099880050b43b05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the target rotation weights for each joint.  <br /></td></tr>
 <tr class="separator:a0a4bef783c085f81f099880050b43b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03d9ba8ea448602ad5ca2b651b988d98" id="r_a03d9ba8ea448602ad5ca2b651b988d98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#a03d9ba8ea448602ad5ca2b651b988d98">setWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posWeight</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rotationWeight</a>)</td></tr>
 <tr class="separator:a03d9ba8ea448602ad5ca2b651b988d98"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,6 +151,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4b98f7f4c2a76a01e3f94d213a9f4e9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81f017427de12b72ef57dbb8a848f466" id="r_a81f017427de12b72ef57dbb8a848f466"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#a81f017427de12b72ef57dbb8a848f466">getRotationWeight</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:a81f017427de12b72ef57dbb8a848f466"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64be67691c252468fb94e695763ce779" id="r_a64be67691c252468fb94e695763ce779"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html#a64be67691c252468fb94e695763ce779">setTargetState</a> (<a class="el" href="namespacemomentum.html#a4ae7e4e6c3d921a5197e36e87fea1c1b">TransformListT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; target)</td></tr>
+<tr class="memdesc:a64be67691c252468fb94e695763ce779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the target state for the skeleton.  <br /></td></tr>
+<tr class="separator:a64be67691c252468fb94e695763ce779"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmomentum_1_1SequenceErrorFunctionT')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html">momentum::SequenceErrorFunctionT&lt; T &gt;</a></td></tr>
 <tr class="memitem:af9063080bf28e049fadca4719edffac0 inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT" id="r_af9063080bf28e049fadca4719edffac0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#af9063080bf28e049fadca4719edffac0">SequenceErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pt</a>)</td></tr>
 <tr class="separator:af9063080bf28e049fadca4719edffac0 inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -158,6 +167,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4ce97c9dee464c5d8be06cbc8ba64cb5 inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a795ff1a23a954ddc20ab8d30a88dcc3b inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT" id="r_a795ff1a23a954ddc20ab8d30a88dcc3b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a795ff1a23a954ddc20ab8d30a88dcc3b">setEnabledParameters</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ps</a>)</td></tr>
 <tr class="separator:a795ff1a23a954ddc20ab8d30a88dcc3b inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dc8c86646e375c2750ea2dd2eebce3a inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT" id="r_a7dc8c86646e375c2750ea2dd2eebce3a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a7dc8c86646e375c2750ea2dd2eebce3a">getSkeleton</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a7dc8c86646e375c2750ea2dd2eebce3a inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3be0414be053f5ab6e63106ae92a650b inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT" id="r_a3be0414be053f5ab6e63106ae92a650b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a3be0414be053f5ab6e63106ae92a650b">getParameterTransform</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a3be0414be053f5ab6e63106ae92a650b inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -182,8 +195,10 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::StateSequenceErrorFunctionT&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00017">17</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+class momentum::StateSequenceErrorFunctionT&lt; T &gt;</div><p>Error function that penalizes the difference between the current skeleton state and the next skeleton state. </p>
+<p>Note that by default this penalizes any difference between adjacent skeleton states. If we specify a target state, this will be applied as an offset to the current state, that is, the error will penalize the difference between offset * currentState and nextState. </p>
+
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00021">21</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae565022cff7e12d05a0ecbf9c155dd2a" name="ae565022cff7e12d05a0ecbf9c155dd2a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae565022cff7e12d05a0ecbf9c155dd2a">&#9670;&#160;</a></span>StateSequenceErrorFunctionT() <span class="overload">[1/2]</span></h2>
@@ -215,7 +230,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00019">19</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, and <a class="el" href="sequence__error__function_8h_source.html#l00080">momentum::SequenceErrorFunctionT&lt; T &gt;::skeleton_</a>.</p>
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, and <a class="el" href="sequence__error__function_8h_source.html#l00088">momentum::SequenceErrorFunctionT&lt; T &gt;::skeleton_</a>.</p>
 
 </div>
 </div>
@@ -288,7 +303,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a39317c33da69d0ab85007347be6dbc86">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00060">60</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00066">66</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="limit__error__function_8cpp_source.html#l00018">momentum::kPositionWeight</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
 
@@ -338,7 +353,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a1fad6d506625972899141d29ee7a15ff">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00096">96</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00105">105</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="utility_8h_source.html#l00237">momentum::crossProductMatrix()</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00018">momentum::kPositionWeight</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
 
@@ -400,7 +415,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#af668c04c352c535e55cdeec0b29cdbc1">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00217">217</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00235">235</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="utility_8h_source.html#l00237">momentum::crossProductMatrix()</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00018">momentum::kPositionWeight</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
 
@@ -433,7 +448,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a706388309ded580a3bf9c1865fef7dbd">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00210">210</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00228">228</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -462,7 +477,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00063">63</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00076">76</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -491,7 +506,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00057">57</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00070">70</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -520,7 +535,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00066">66</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00079">79</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -549,7 +564,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00060">60</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00073">73</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -580,7 +595,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Implements <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a6ec59de34d9ebf076525851414fbb547">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00022">22</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00026">26</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -623,7 +638,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00048">48</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p>Set the target position weights for each joint. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">posWeight</td><td>Per-joint position weights. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00054">54</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -647,7 +670,47 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00054">54</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p>Set the target rotation weights for each joint. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rotWeight</td><td>Per-joint rotation weights. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00060">60</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+
+</div>
+</div>
+<a id="a64be67691c252468fb94e695763ce779" name="a64be67691c252468fb94e695763ce779"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64be67691c252468fb94e695763ce779">&#9670;&#160;</a></span>setTargetState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html">momentum::StateSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::setTargetState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a4ae7e4e6c3d921a5197e36e87fea1c1b">TransformListT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td>
+          <td class="paramname"><em>target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the target state for the skeleton. </p>
+<p>This function allows specifying a target state that the skeleton should aim to achieve. The target state is represented as a list of transforms, one for each joint. The error will penalize the difference between offset * currentState and nextState. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>A list of transforms representing the target state for each joint. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00040">40</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -681,7 +744,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00040">40</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
+<p>Set the target weights for each joint's position and rotation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">posWeight</td><td>Per-joint position weights. </td></tr>
+    <tr><td class="paramname">rotWeight</td><td>Per-joint rotation weights. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8cpp_source.html#l00046">46</a> of file <a class="el" href="state__sequence__error__function_8cpp_source.html">state_sequence_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -721,7 +793,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00050">50</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00063">63</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -748,7 +820,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00080">80</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00103">103</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -774,7 +846,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00079">79</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="state__sequence__error__function_8h_source.html#l00102">102</a> of file <a class="el" href="state__sequence__error__function_8h_source.html">state_sequence_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -789,7 +861,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1StateSequenceErrorFunctionT.html">StateSequenceErrorFunctionT</a></li>
-    <li class="footer">Generated on Tue Jul 1 2025 21:45:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jul 8 2025 20:48:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
