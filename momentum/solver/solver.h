@@ -27,7 +27,7 @@ struct SolverOptions {
   float threshold = 1.0f;
 
   /// Enable detailed logging during optimization
-  bool verbose = true;
+  bool verbose = false;
 
   /// Virtual destructor for polymorphic behavior
   virtual ~SolverOptions() = default;
@@ -132,7 +132,7 @@ class SolverT {
   std::unordered_map<std::string, Eigen::MatrixX<T>> iterationHistory_;
 
   /// Whether to output detailed progress information
-  bool verbose_;
+  bool verbose_ = false;
 
  private:
   /// Minimum iterations before checking convergence criteria
