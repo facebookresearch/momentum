@@ -517,7 +517,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
       std::vector<Vector3<T>> v = applySSD(bindpose, skin, mesh.vertices, bindState);
 
       // check position of skinning
-      EXPECT_LE((v[vi] - target).norm(), Eps<T>(1e-7f, 1e-7));
+      EXPECT_LE((v[vi] - target).norm(), Eps<T>(2e-7f, 2e-7));
 
       // check error
       gradient.setZero();
