@@ -34,21 +34,32 @@ struct AimDataT : ConstraintData {
         globalTarget(inTarget) {}
 };
 
-/// The AimDistErrorFunction computes the distance from the aim target point to an aim ray (an
-/// original and a positive direction). The distance is minimized if the target lies on the ray (ie.
-/// on the positive direction), or when the target point is close to the ray origin. Another way to
-/// look at this loss is to minimize the element-wise differences between the aim vector's
-/// projection to the ray direction and the aim vector itself (therefore a shorter aim vector also
-/// has a smaller norm).
+/// Base class for all types of aim constraints.
 template <typename T>
-class AimDistErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
+class AimBaseErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
+ protected:
+  explicit AimBaseErrorFunctionT(
+      const Skeleton& skel,
+      const ParameterTransform& pt,
+      const T& lossAlpha,
+      const T& lossC)
+      : ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
+};
+
+/// The AimDistErrorFunction minimizes the distance between a ray (origin, direction) defined in
+/// joint-local space and the world-space target point.   The residual is defined as the distance
+/// between the tartet position and its projection onto the ray.  Note that the ray is only defined
+/// for positive t values, meaning that if the target point is _behind_ the ray origin, its
+/// projection will be at the ray origin where t=0.
+template <typename T>
+class AimDistErrorFunctionT : public AimBaseErrorFunctionT<T> {
  public:
   explicit AimDistErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
+      : AimBaseErrorFunctionT<T>(skel, pt, lossAlpha, lossC) {}
 
   explicit AimDistErrorFunctionT(
       const Character& character,
@@ -73,19 +84,19 @@ class AimDistErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3,
       optional_ref<std::array<Eigen::Matrix3<T>, 2>> dfdv = {}) const final;
 };
 
-/// The AimDirErrorFunction computes the element-wise differences between the normalized aim vector
-/// and the ray direction. Because the aim vector is normalized, the distance to the ray origin
-/// doesn't affect the loss as in AimDistErrorFunction. When the aim vector is close to zero length,
-/// we will clamp it to zero.
+/// The AimDirErrorFunction minimizes the element-wise difference between a ray (origin, direction)
+/// defined in joint-local space and the normalized vector connecting the ray origin to the
+/// world-space target point.  If the vector has near-zero length, the residual is set to zero to
+/// avoid divide-by-zero.
 template <typename T>
-class AimDirErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
+class AimDirErrorFunctionT : public AimBaseErrorFunctionT<T> {
  public:
   explicit AimDirErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
+      : AimBaseErrorFunctionT<T>(skel, pt, lossAlpha, lossC) {}
 
   explicit AimDirErrorFunctionT(
       const Character& character,
