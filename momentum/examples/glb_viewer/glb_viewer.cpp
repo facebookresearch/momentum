@@ -169,7 +169,7 @@ int main(int argc, char* argv[]) {
     for (size_t iFrame = firstFrame; iFrame < lastFrame; iFrame += options->stride) {
       // log timeline
       rec.set_time_sequence("frame_index", iFrame);
-      rec.set_time_seconds("log_time", (float)iFrame / fps);
+      rec.set_time_duration_secs("log_time", (float)iFrame / fps);
 
       // log character info
       if (iFrame < nFrames) {
