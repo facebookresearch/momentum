@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     for (auto i = 0; i < kNumFrames; ++i) {
       // log timeline
       rec.set_time_sequence("frame_index", i);
-      rec.set_time_seconds("log_time", (float)i / fps);
+      rec.set_time_duration_secs("log_time", (float)i / fps);
 
       charParams.pose = motion.col(i);
       charState.set(
