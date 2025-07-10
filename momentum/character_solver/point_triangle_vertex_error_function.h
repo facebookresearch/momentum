@@ -82,6 +82,9 @@ class PointTriangleVertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
 
   size_t getNumVertices() const;
+  [[nodiscard]] const Character& getCharacter() const {
+    return character_;
+  }
 
  private:
   double calculatePositionJacobian(
