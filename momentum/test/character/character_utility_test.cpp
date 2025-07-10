@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "momentum/character/blend_shape.h"
+#include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry.h"
@@ -15,6 +16,7 @@
 #include "momentum/character/locator.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
@@ -93,65 +95,94 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
   MOMENTUM_EXPECT_DEATH(static_cast<void>(scaleCharacter(this->character, -1.0f)), "scale > 0.0f");
 }
 
-// Test transformCharacter function
-TEST_F(CharacterUtilityTest, TransformCharacter) {
+std::shared_ptr<momentum::Mesh> toSkinnedMesh(
+    const momentum::Character& character,
+    const momentum::ModelParametersT<float>& modelParameters) {
+  auto mesh = std::make_shared<momentum::Mesh>(*character.mesh);
+
+  momentum::SkeletonState skelState(
+      character.parameterTransform.apply(modelParameters.v.cast<float>()), character.skeleton);
+
+  momentum::skinWithBlendShapes(character, skelState, modelParameters, *mesh);
+  mesh->updateNormals();
+
+  return mesh;
+}
+
+void testTransformCharacter(const Character& character) {
   // Create a rotation matrix (90 degrees around Y axis)
   Quaternionf rotation = Quaternionf(Eigen::AngleAxis<float>(pi() / 2, Vector3f::UnitY()));
   Eigen::Affine3f transform = Eigen::Affine3f::Identity();
   transform.linear() = rotation.toRotationMatrix();
   transform.translation() = Vector3f(1, 2, 3);
 
+  momentum::ModelParameters modelParams(character.parameterTransform.numAllModelParameters());
+  modelParams.v.setZero();
+
+  // set non-zero values for model parameters that do not correspond to the global transform
+  for (size_t i = 6; i < modelParams.v.size(); ++i) {
+    modelParams.v[i] = 0.1f;
+  }
+  const auto meshOriginal = toSkinnedMesh(character, modelParams);
+
   // Store original values for comparison
-  Vector3f originalVertex = this->character.mesh->vertices[0];
-  Vector3f originalNormal = this->character.mesh->normals[0];
+  Vector3f originalVertex = meshOriginal->vertices[0];
+  Vector3f originalNormal = meshOriginal->normals[0];
 
   // Transform the character
-  Character transformedCharacter = transformCharacter(this->character, transform);
+  Character transformedCharacter = transformCharacter(character, transform);
 
   // Check that the skeleton was transformed correctly
-  EXPECT_EQ(transformedCharacter.skeleton.joints.size(), this->character.skeleton.joints.size());
+  EXPECT_EQ(transformedCharacter.skeleton.joints.size(), character.skeleton.joints.size());
 
   // Check that the root joint's pre-rotation was updated
-  Quaternionf expectedRootRotation = rotation * this->character.skeleton.joints[0].preRotation;
+  Quaternionf expectedRootRotation = rotation * character.skeleton.joints[0].preRotation;
   EXPECT_TRUE(transformedCharacter.skeleton.joints[0].preRotation.isApprox(expectedRootRotation));
 
   // Check that the root joint's translation offset was updated
   Vector3f expectedRootTranslation =
-      rotation * this->character.skeleton.joints[0].translationOffset + transform.translation();
+      rotation * character.skeleton.joints[0].translationOffset + transform.translation();
   EXPECT_TRUE(
       transformedCharacter.skeleton.joints[0].translationOffset.isApprox(expectedRootTranslation));
 
   // Check that mesh vertices were transformed
-  EXPECT_TRUE(transformedCharacter.mesh);
-  EXPECT_EQ(transformedCharacter.mesh->vertices.size(), this->character.mesh->vertices.size());
+  const auto meshTransformed = toSkinnedMesh(transformedCharacter, modelParams);
+  EXPECT_TRUE(meshTransformed);
+  EXPECT_EQ(meshTransformed->vertices.size(), character.mesh->vertices.size());
   Vector3f expectedVertex = transform * originalVertex;
-  EXPECT_TRUE(transformedCharacter.mesh->vertices[0].isApprox(expectedVertex));
+  EXPECT_TRUE(meshTransformed->vertices[0].isApprox(expectedVertex));
 
   // Check that mesh normals were transformed (only by the rotation part)
-  EXPECT_EQ(transformedCharacter.mesh->normals.size(), this->character.mesh->normals.size());
+  EXPECT_EQ(meshTransformed->normals.size(), character.mesh->normals.size());
   Vector3f expectedNormal = transform.linear() * originalNormal;
-  EXPECT_TRUE(transformedCharacter.mesh->normals[0].isApprox(expectedNormal));
+  EXPECT_TRUE(meshTransformed->normals[0].isApprox(expectedNormal));
 
   // Check that inverse bind pose was transformed
-  EXPECT_EQ(transformedCharacter.inverseBindPose.size(), this->character.inverseBindPose.size());
-  for (size_t i = 0; i < this->character.inverseBindPose.size(); ++i) {
-    Eigen::Affine3f expectedInverseBindPose =
-        this->character.inverseBindPose[i] * transform.inverse();
+  EXPECT_EQ(transformedCharacter.inverseBindPose.size(), character.inverseBindPose.size());
+  for (size_t i = 0; i < character.inverseBindPose.size(); ++i) {
+    Eigen::Affine3f expectedInverseBindPose = character.inverseBindPose[i] * transform.inverse();
     EXPECT_TRUE(transformedCharacter.inverseBindPose[i].isApprox(expectedInverseBindPose));
   }
 
   // Test with identity transform (should be identity operation)
   Character identityTransformedCharacter =
-      transformCharacter(this->character, Eigen::Affine3f::Identity());
-  EXPECT_TRUE(identityTransformedCharacter.mesh->vertices[0].isApprox(originalVertex));
-  EXPECT_TRUE(identityTransformedCharacter.mesh->normals[0].isApprox(originalNormal));
+      transformCharacter(character, Eigen::Affine3f::Identity());
+
+  const auto identityMeshTransformed = toSkinnedMesh(identityTransformedCharacter, modelParams);
+  EXPECT_TRUE(identityMeshTransformed->vertices[0].isApprox(originalVertex));
+  EXPECT_TRUE(identityMeshTransformed->normals[0].isApprox(originalNormal));
 
   // Test with a transform that includes scale (should cause a fatal error)
   Eigen::Affine3f scaleTransform = Eigen::Affine3f::Identity();
   scaleTransform.linear() = 2.0f * Eigen::Matrix3f::Identity();
   MOMENTUM_EXPECT_DEATH(
-      static_cast<void>(transformCharacter(this->character, scaleTransform)),
+      static_cast<void>(transformCharacter(character, scaleTransform)),
       "singularValues\\(i\\) > 0.99 && singularValues\\(i\\) < 1.01");
+}
+
+// Test transformCharacter function
+TEST_F(CharacterUtilityTest, TransformCharacter) {
+  testTransformCharacter(this->character);
 }
 
 // Test removeJoints function
