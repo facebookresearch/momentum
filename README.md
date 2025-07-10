@@ -33,24 +33,29 @@ Momentum binary builds are available for Windows, macOS, and Linux via [Pixi](ht
 
 For Windows, please install [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or greater.
 
-#### Pixi
+#### [Pixi](https://prefix.dev/channels/conda-forge/packages/momentum)
 
 ```
-# Momentum (C++)
+# C++ only
 pixi add momentum-cpp
 
-# PyMomentum (Python)
+# Python only (auto-detects GPU/CPU)
 pixi add pymomentum
 
-# Both
+# Python with specific backend
+pixi add pymomentum-gpu  # or pymomentum-cpu
+
+# Both C++ and Python
 pixi add momentum
 ```
 
-#### Conda
+#### [Conda](https://anaconda.org/conda-forge/momentum)
 
 ```
+# Replace 'pixi add' with 'conda install -c conda-forge'
 conda install -c conda-forge momentum-cpp
-conda install -c conda-forge pymomentum # Windows is not supported yet
+conda install -c conda-forge pymomentum
+conda install -c conda-forge pymomentum-gpu  # or pymomentum-cpu
 conda install -c conda-forge momentum
 ```
 
