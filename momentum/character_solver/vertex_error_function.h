@@ -82,6 +82,10 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   static constexpr T kPositionWeight = PositionErrorFunctionT<T>::kLegacyWeight;
   static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
 
+  [[nodiscard]] const Character& getCharacter() const {
+    return character_;
+  }
+
  private:
   double calculatePositionJacobian(
       const ModelParametersT<T>& modelParameters,
