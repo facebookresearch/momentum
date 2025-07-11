@@ -32,10 +32,12 @@ class CharacterUtilityTest : public ::testing::Test {
     // Create test characters with different numbers of joints
     character = createTestCharacter<float>(5);
     smallCharacter = createTestCharacter<float>(3);
+    characterWithBlendShapes = withTestBlendShapes(character);
   }
 
   Character character;
   Character smallCharacter;
+  Character characterWithBlendShapes;
 };
 
 // Test scaleCharacter function
@@ -182,7 +184,11 @@ void testTransformCharacter(const Character& character) {
 
 // Test transformCharacter function
 TEST_F(CharacterUtilityTest, TransformCharacter) {
+  // test a character without blend shapes
   testTransformCharacter(this->character);
+
+  // test a character with blend shapes
+  testTransformCharacter(this->characterWithBlendShapes);
 }
 
 // Test removeJoints function
