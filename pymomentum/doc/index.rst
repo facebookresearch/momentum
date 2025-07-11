@@ -9,4 +9,5 @@ Welcome to PyMomentum
    quaternion
    skel_state
    solver
+   solver2
    marker_tracking

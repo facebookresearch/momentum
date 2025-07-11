@@ -139,7 +139,7 @@ void defAimErrorFunction(
                 ? std::make_optional(weight->unchecked<1>())
                 : std::nullopt;
 
-            for (ssize_t i = 0; i < localPoint.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < localPoint.shape(0); ++i) {
               validateJointIndex(parentAcc(i), "parent", self.getSkeleton());
               self.addConstraint(mm::AimDataT<float>(
                   Eigen::Vector3f(
@@ -260,7 +260,7 @@ void defFixedAxisError(
                 ? std::make_optional(weight->unchecked<1>())
                 : std::nullopt;
 
-            for (ssize_t i = 0; i < localAxis.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < localAxis.shape(0); ++i) {
               self.addConstraint(mm::FixedAxisDataT<float>(
                   Eigen::Vector3f(
                       localAxisAcc(i, 0),
@@ -391,7 +391,7 @@ plane defined by a local point and a local normal vector.)")
                 ? std::make_optional(weight->unchecked<1>())
                 : std::nullopt;
 
-            for (ssize_t i = 0; i < parent.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               self.addConstraint(mm::NormalDataT<float>(
                   localPointAcc.has_value() ? Eigen::Vector3f(
                                                   (*localPointAcc)(i, 0),
@@ -512,7 +512,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
 
             py::gil_scoped_release release;
 
-            for (ssize_t i = 0; i < parent.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               mm::DistanceConstraintDataT<float> constraint;
               constraint.origin = Eigen::Vector3f(
                   originAcc(i, 0), originAcc(i, 1), originAcc(i, 2));
@@ -646,7 +646,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
 
             py::gil_scoped_release release;
 
-            for (ssize_t i = 0; i < parent.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               mm::ProjectionConstraintDataT<float> constraint;
 
               // Set projection matrix
@@ -789,7 +789,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
 
             py::gil_scoped_release release;
 
-            for (ssize_t i = 0; i < vertexIndex.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < vertexIndex.shape(0); ++i) {
               // Set projection matrix
               Eigen::Matrix<float, 3, 4> proj;
               for (int row = 0; row < 3; ++row) {
@@ -920,7 +920,7 @@ distance is greater than zero (ie. the point being above).)")
 
             py::gil_scoped_release release;
 
-            for (ssize_t i = 0; i < parent.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               self.addConstraint(mm::PlaneDataT<float>(
                   offsetAcc.has_value() ? Eigen::Vector3f(
                                               (*offsetAcc)(i, 0),
@@ -1220,7 +1220,7 @@ avoid divide-by-zero. )");
                       " weights size does not match the number of joints in the skeleton.");
                 }
                 Eigen::VectorXf weights(jointCount);
-                for (ssize_t i = 0; i < jointCount; ++i) {
+                for (py::ssize_t i = 0; i < jointCount; ++i) {
                   weights[i] = wAcc(i);
                 }
                 return weights;
@@ -1637,7 +1637,7 @@ rotation matrix to a target rotation.)")
 
             py::gil_scoped_release release;
 
-            for (ssize_t i = 0; i < parent.shape(0); ++i) {
+            for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               validateJointIndex(parentAcc(i), "parent", self.getSkeleton());
               self.addConstraint(mm::OrientationDataT<float>(
                   offsetAcc.has_value() ? Eigen::Quaternionf(
@@ -1685,8 +1685,8 @@ rotation matrix to a target rotation.)")
           "get_collision_pairs",
           [](const mm::CollisionErrorFunction& self) {
             const auto& collisionPairs = self.getCollisionPairs();
-            py::array_t<float> result(
-                std::vector<ssize_t>{(ssize_t)collisionPairs.size(), 2});
+            py::array_t<float> result(std::vector<py::ssize_t>{
+                (py::ssize_t)collisionPairs.size(), 2});
             auto resultAcc = result.mutable_unchecked<2>();
             for (size_t i = 0; i < collisionPairs.size(); ++i) {
               resultAcc(i, 0) = collisionPairs[i].x();
