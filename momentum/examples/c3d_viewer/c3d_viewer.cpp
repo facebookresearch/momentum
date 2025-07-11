@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
 
       for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
         rec.set_time_sequence("frame_index", iFrame);
-        rec.set_time_duration_secs("log_time", (float)iFrame / actor.fps);
+        rec.set_time_seconds("log_time", (float)iFrame / actor.fps);
         logMarkers(rec, "world/" + streamName, actor.frames.at(iFrame));
 
         if (options->plot) {
