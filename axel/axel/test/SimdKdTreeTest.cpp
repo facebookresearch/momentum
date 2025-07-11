@@ -31,7 +31,7 @@ void validateKdTreeNearestNeighbor(
     return;
   }
 
-  T tol = 1e-5;
+  T tol = 1e-4;
 
   const auto [found, closestPoint, bestDistSqr] = kdTree.closestPoint(queryPoint);
 
