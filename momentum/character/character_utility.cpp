@@ -6,6 +6,7 @@
  */
 
 #include "momentum/character/character_utility.h"
+#include "momentum/character/blend_shape.h"
 
 #include "momentum/character/joint.h"
 #include "momentum/character/skin_weights.h"
@@ -347,6 +348,47 @@ Skeleton transformSkeleton(const Skeleton& skeleton, const Eigen::Affine3f& xfor
   return result;
 }
 
+BlendShape_const_p transformBlendShape(
+    const BlendShape_const_p& blendShape,
+    const Eigen::Affine3f& xform) {
+  if (!blendShape) {
+    return nullptr;
+  }
+
+  const Eigen::Vector3f singularValues = xform.linear().jacobiSvd().singularValues();
+  for (Eigen::Index i = 0; i < 3; ++i) {
+    MT_CHECK(
+        singularValues(i) > 0.99 && singularValues(i) < 1.01,
+        "Transform should not include scale or shear.");
+  }
+
+  const Eigen::Quaternionf rotation(xform.linear());
+  const Eigen::Vector3f translation(xform.translation());
+
+  momentum::BlendShape_p blendShapeTransformed =
+      std::make_unique<momentum::BlendShape>(*blendShape);
+
+  // apply the full transformation to the blendshape basis
+  std::vector<Vector3f> baseShape = blendShapeTransformed->getBaseShape();
+  for (auto& v : baseShape) {
+    v = xform * v;
+  }
+  blendShapeTransformed->setBaseShape(baseShape);
+
+  // apply only the rotation to the shape vectors
+  Eigen::MatrixXf shapeVectors = blendShapeTransformed->getShapeVectors();
+  // Apply rotation to each 3D displacement within each shape vector column
+  for (Eigen::Index iShape = 0; iShape < shapeVectors.cols(); ++iShape) {
+    for (Eigen::Index iVertex = 0; iVertex < shapeVectors.rows() / 3; ++iVertex) {
+      Eigen::Vector3f displacement = shapeVectors.block<3, 1>(iVertex * 3, iShape);
+      shapeVectors.block<3, 1>(iVertex * 3, iShape) = rotation * displacement;
+    }
+  }
+  blendShapeTransformed->setShapeVectors(shapeVectors);
+
+  return blendShapeTransformed;
+}
+
 std::unique_ptr<Mesh> transformMesh(const std::unique_ptr<Mesh>& mesh, const Eigen::Affine3f& xf) {
   if (!mesh) {
     return {};
@@ -388,7 +430,7 @@ Character transformCharacter(const Character& character, const Affine3f& xform) 
       character.skinWeights.get(),
       character.collision.get(),
       character.poseShapes.get(),
-      character.blendShape,
+      transformBlendShape(character.blendShape, xform),
       character.faceExpressionBlendShape,
       character.name,
       transformInverseBindPose(character.inverseBindPose, xform)};
