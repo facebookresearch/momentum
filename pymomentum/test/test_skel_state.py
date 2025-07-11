@@ -290,6 +290,56 @@ class TestSkelState(unittest.TestCase):
             "Points tensor should have last dimension 3", str(context.exception)
         )
 
+    def test_slerp_extremes(self) -> None:
+        nMats = 6
+        s0 = generate_random_skel_state(nMats)
+        s1 = generate_random_skel_state(nMats)
+
+        # Test slerp at t=0 should return s0
+        s_slerp_0 = pym_skel_state.slerp(s0, s1, torch.tensor([0.0]))
+        self.assertTrue(
+            torch.allclose(
+                pym_skel_state.to_matrix(s_slerp_0),
+                pym_skel_state.to_matrix(s0),
+                atol=1e-4,
+            ),
+            "Expected slerp result to be s0 when t=0.",
+        )
+
+        # Test slerp at t=1 should return s1
+        s_slerp_1 = pym_skel_state.slerp(s0, s1, torch.tensor([1.0]))
+        self.assertTrue(
+            torch.allclose(
+                pym_skel_state.to_matrix(s_slerp_1),
+                pym_skel_state.to_matrix(s1),
+                atol=1e-4,
+            ),
+            "Expected slerp result to be s1 when t=1.",
+        )
+
+    def test_slerp_midpoint(self) -> None:
+        nMats = 6
+        s0 = generate_random_skel_state(nMats)
+        s1 = generate_random_skel_state(nMats)
+
+        # Perform slerp at t=0.5
+        s_slerp_mid = pym_skel_state.slerp(s0, s1, torch.tensor([0.5]))
+
+        # Extract components
+        t0, _, s0_scale = pym_skel_state.split(s0)
+        t1, _, s1_scale = pym_skel_state.split(s1)
+        t_mid, _, s_mid_scale = pym_skel_state.split(s_slerp_mid)
+
+        # Check if translation and scale are in the middle
+        self.assertTrue(
+            torch.allclose(t_mid, (t0 + t1) / 2, atol=1e-4),
+            "Expected translation to be the midpoint when t=0.5.",
+        )
+        self.assertTrue(
+            torch.allclose(s_mid_scale, (s0_scale + s1_scale) / 2, atol=1e-4),
+            "Expected scale to be the midpoint when t=0.5.",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

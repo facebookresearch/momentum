@@ -274,6 +274,28 @@ def blend(
     return torch.cat((t_blend, q_blend, s_blend), -1)
 
 
+def slerp(s0: torch.Tensor, s1: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+    """
+    Spherical linear interpolation between two skeleton states.
+
+    :parameter s0: The first skeleton state.
+    :parameter s1: The second skeleton state.
+    :parameter t: The interpolation factor, where 0 <= t <= 1.  t=0 corresponds to s0, t=1 corresponds to s1.
+    :return: The interpolated skeleton state.
+    """
+    check(s0)
+    check(s1)
+
+    t = match_leading_dimensions(t, s0)
+    t0, q0, s0 = split(s0)
+    t1, q1, s1 = split(s1)
+
+    s = (1 - t) * s0 + t * s1
+    q = quaternion.slerp(q0, q1, t)
+    t = (1 - t) * t0 + t * t1
+    return torch.cat((t, q, s), -1)
+
+
 def from_matrix(matrices: torch.Tensor) -> torch.Tensor:
     """
     Convert 4x4 matrices to skeleton states.  Assumes that the scale is uniform.
