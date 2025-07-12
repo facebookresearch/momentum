@@ -26,7 +26,7 @@ std::string getDimStr(const py::array& array) {
   std::ostringstream oss;
   oss << "[";
   bool first = true;
-  for (ssize_t iDim = 0; iDim < array.ndim(); ++iDim) {
+  for (py::ssize_t iDim = 0; iDim < array.ndim(); ++iDim) {
     auto dim = array.shape(iDim);
     if (!first) {
       oss << ", ";
@@ -145,7 +145,7 @@ mm::ParameterSet arrayToParameterSet(
 
 Eigen::VectorXf arrayToVec(
     const py::array_t<float>& array,
-    ssize_t expectedSize,
+    py::ssize_t expectedSize,
     const char* parameterName) {
   if (array.ndim() != 1) {
     throw std::runtime_error(
@@ -177,7 +177,7 @@ mm::ParameterSet arrayToParameterSet(
 
 Eigen::VectorXf arrayToVec(
     const std::optional<py::array_t<float>>& array,
-    ssize_t expectedSize,
+    py::ssize_t expectedSize,
     float defaultValue,
     const char* parameterName) {
   if (!array.has_value()) {
@@ -218,13 +218,13 @@ void validateIndexArray(
 
   if (indexArray.ndim() == 1) {
     auto a = indexArray.unchecked<1>();
-    for (ssize_t i = 0; i < indexArray.shape(0); ++i) {
+    for (py::ssize_t i = 0; i < indexArray.shape(0); ++i) {
       validateIndex(a(i));
     }
   } else if (indexArray.ndim() == 2) {
     auto a = indexArray.unchecked<2>();
-    for (ssize_t i = 0; i < indexArray.shape(0); ++i) {
-      for (ssize_t j = 0; j < indexArray.shape(1); ++j) {
+    for (py::ssize_t i = 0; i < indexArray.shape(0); ++i) {
+      for (py::ssize_t j = 0; j < indexArray.shape(1); ++j) {
         validateIndex(a(i, j));
       }
     }
@@ -310,7 +310,7 @@ mm::TransformList toTransformList(const py::array_t<float>& array) {
 
   auto acc = array.unchecked<2>();
 
-  for (ssize_t i = 0; i < nTransforms; ++i) {
+  for (py::ssize_t i = 0; i < nTransforms; ++i) {
     Eigen::Vector3f position(acc(i, 0), acc(i, 1), acc(i, 2));
     // Quaternions in pymomentum are: (x=3, y=4, z=5, w=6)
     // Eigen quaternion constructor takes (w, x, y, z)

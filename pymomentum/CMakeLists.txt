@@ -168,6 +168,7 @@ mt_python_binding(
     ${TORCH_CXX_FLAGS}
 )
 
+# Use 'pymomentum_solver' to avoid conflicts with the solver module
 mt_python_binding(
   NAME pymomentum_solver
   MODULE_NAME solver
@@ -184,6 +185,27 @@ mt_python_binding(
     tensor_ik
     tensor_momentum
     tensor_utility
+    ${ATEN_LIBRARIES}
+    ${TORCH_LIBRARIES}
+    ${torch_python}
+  COMPILE_OPTIONS
+    ${TORCH_CXX_FLAGS}
+)
+
+mt_python_binding(
+  NAME solver2
+  PYMOMENTUM_HEADERS_VARS solver2_public_headers
+  PYMOMENTUM_SOURCES_VARS solver2_sources
+  INCLUDE_DIRECTORIES
+    ${ATEN_INCLUDE_DIR}
+    ${TORCH_INCLUDE_DIRS}
+  LINK_LIBRARIES
+    character
+    character_solver
+    character_sequence_solver
+    math
+    skeleton
+    solver
     ${ATEN_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${torch_python}

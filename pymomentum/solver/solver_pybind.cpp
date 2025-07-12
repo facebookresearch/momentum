@@ -30,6 +30,11 @@ PYBIND11_MODULE(solver, m) {
   pybind11::module_::import("torch"); // @dep=//caffe2:torch
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
+  auto solver2 = pybind11::module_::import(
+      "pymomentum.solver2"); // @dep=fbcode//pymomentum:solver2
+
+  m.attr("VertexConstraintType") =
+      solver2.attr("VertexConstraintType").attr("Position");
 
   py::enum_<ErrorFunctionType>(
       m,
@@ -54,16 +59,6 @@ PYBIND11_MODULE(solver, m) {
       .value("Cholesky", LinearSolverType::Cholesky)
       .value("QR", LinearSolverType::QR)
       .value("TrustRegionQR", LinearSolverType::TrustRegionQR);
-
-  py::enum_<momentum::VertexConstraintType>(
-      m,
-      "VertexConstraintType",
-      R"(Types of error functions passed to solveBodyIKProblem().)")
-      .value("Position", momentum::VertexConstraintType::Position)
-      .value("Plane", momentum::VertexConstraintType::Plane)
-      .value("Normal", momentum::VertexConstraintType::Normal)
-      .value(
-          "SymmetricNormal", momentum::VertexConstraintType::SymmetricNormal);
 
   py::class_<SolverOptions>(
       m,

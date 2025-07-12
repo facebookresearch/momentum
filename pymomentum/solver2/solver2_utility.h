@@ -48,12 +48,12 @@ momentum::ParameterSet arrayToParameterSet(
 
 Eigen::VectorXf arrayToVec(
     const pybind11::array_t<float>& array,
-    ssize_t expectedSize,
+    pybind11::ssize_t expectedSize,
     const char* parameterName);
 
 Eigen::VectorXf arrayToVec(
     const std::optional<pybind11::array_t<float>>& array,
-    ssize_t expectedSize,
+    pybind11::ssize_t expectedSize,
     float defaultValue,
     const char* parameterName);
 
