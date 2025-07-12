@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
 </ul>
 
@@ -172,7 +173,6 @@
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.ErrorFunctionType"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.LinearSolverType"><code class="docutils literal notranslate"><span class="pre">LinearSolverType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.SolverOptions"><code class="docutils literal notranslate"><span class="pre">SolverOptions</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.VertexConstraintType"><code class="docutils literal notranslate"><span class="pre">VertexConstraintType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.get_gradient_statistics"><code class="docutils literal notranslate"><span class="pre">get_gradient_statistics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.get_solve_ik_statistics"><code class="docutils literal notranslate"><span class="pre">get_solve_ik_statistics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.gradient"><code class="docutils literal notranslate"><span class="pre">gradient()</span></code></a></li>
@@ -184,6 +184,46 @@
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.solve_ik"><code class="docutils literal notranslate"><span class="pre">solve_ik()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.solve_sequence_ik"><code class="docutils literal notranslate"><span class="pre">solve_sequence_ik()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.transform_pose"><code class="docutils literal notranslate"><span class="pre">transform_pose()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.AimDirErrorFunction"><code class="docutils literal notranslate"><span class="pre">AimDirErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.AimDistErrorFunction"><code class="docutils literal notranslate"><span class="pre">AimDistErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.CollisionErrorFunction"><code class="docutils literal notranslate"><span class="pre">CollisionErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.DistanceErrorFunction"><code class="docutils literal notranslate"><span class="pre">DistanceErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.FixedAxisAngleErrorFunction"><code class="docutils literal notranslate"><span class="pre">FixedAxisAngleErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.FixedAxisCosErrorFunction"><code class="docutils literal notranslate"><span class="pre">FixedAxisCosErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.FixedAxisDiffErrorFunction"><code class="docutils literal notranslate"><span class="pre">FixedAxisDiffErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.GaussNewtonSolver"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolver</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.GaussNewtonSolverOptions"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.GaussNewtonSolverQR"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.GaussNewtonSolverQROptions"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQROptions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.LimitErrorFunction"><code class="docutils literal notranslate"><span class="pre">LimitErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.ModelParametersErrorFunction"><code class="docutils literal notranslate"><span class="pre">ModelParametersErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.ModelParametersSequenceErrorFunction"><code class="docutils literal notranslate"><span class="pre">ModelParametersSequenceErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.NormalErrorFunction"><code class="docutils literal notranslate"><span class="pre">NormalErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.OrientationErrorFunction"><code class="docutils literal notranslate"><span class="pre">OrientationErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.PlaneErrorFunction"><code class="docutils literal notranslate"><span class="pre">PlaneErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.PointTriangleVertexErrorFunction"><code class="docutils literal notranslate"><span class="pre">PointTriangleVertexErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.PosePriorErrorFunction"><code class="docutils literal notranslate"><span class="pre">PosePriorErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.PositionErrorFunction"><code class="docutils literal notranslate"><span class="pre">PositionErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.ProjectionErrorFunction"><code class="docutils literal notranslate"><span class="pre">ProjectionErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SequenceErrorFunction"><code class="docutils literal notranslate"><span class="pre">SequenceErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SequenceSolverFunction"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SequenceSolverOptions"><code class="docutils literal notranslate"><span class="pre">SequenceSolverOptions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SkeletonErrorFunction"><code class="docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SkeletonSolverFunction"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.Solver"><code class="docutils literal notranslate"><span class="pre">Solver</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SolverFunction"><code class="docutils literal notranslate"><span class="pre">SolverFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SolverOptions"><code class="docutils literal notranslate"><span class="pre">SolverOptions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.StateErrorFunction"><code class="docutils literal notranslate"><span class="pre">StateErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.StateSequenceErrorFunction"><code class="docutils literal notranslate"><span class="pre">StateSequenceErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SubsetGaussNewtonSolver"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolver</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.SubsetGaussNewtonSolverOptions"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.VertexConstraintType"><code class="docutils literal notranslate"><span class="pre">VertexConstraintType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.VertexErrorFunction"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.VertexProjectionErrorFunction"><code class="docutils literal notranslate"><span class="pre">VertexProjectionErrorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver2.html#pymomentum.solver2.solve_sequence"><code class="docutils literal notranslate"><span class="pre">solve_sequence()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a><ul>
