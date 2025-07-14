@@ -707,6 +707,27 @@ This is useful for camera-based constraints where you want to match a 3D point t
 }
 
 void defVertexProjectionErrorFunction(py::module_& m) {
+  py::class_<mm::VertexProjectionConstraint>(
+      m,
+      "VertexProjectionConstraint",
+      "Read-only access to a vertex projection constraint.")
+      .def_readonly(
+          "vertex_index",
+          &mm::VertexProjectionConstraint::vertexIndex,
+          "Returns the index of the vertex to project.")
+      .def_readonly(
+          "weight",
+          &mm::VertexProjectionConstraint::weight,
+          "Returns the weight of the constraint.")
+      .def_readonly(
+          "target_position",
+          &mm::VertexProjectionConstraint::targetPosition,
+          "Returns the target 2D position.")
+      .def_readonly(
+          "projection",
+          &mm::VertexProjectionConstraint::projection,
+          "Returns the 3x4 projection matrix.");
+
   py::class_<
       mm::VertexProjectionErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
@@ -757,6 +778,13 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           "clear_constraints",
           &mm::VertexProjectionErrorFunctionT<float>::clearConstraints,
           "Clears all vertex projection constraints from the error function.")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::VertexProjectionErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of vertex projection constraints.",
+          py::return_value_policy::reference_internal)
       .def(
           "add_constraints",
           [](mm::VertexProjectionErrorFunctionT<float>& self,
@@ -1301,6 +1329,24 @@ avoid divide-by-zero. )");
           mm::VertexConstraintType::SymmetricNormal,
           "Point-to-plane using a 50/50 mix of source and target normal");
 
+  py::class_<mm::VertexConstraint>(m, "VertexConstraint")
+      .def_readonly(
+          "vertex_index",
+          &mm::VertexConstraint::vertexIndex,
+          "The index of the vertex to constrain.")
+      .def_readonly(
+          "weight",
+          &mm::VertexConstraint::weight,
+          "The weight of the constraint.")
+      .def_readonly(
+          "target_position",
+          &mm::VertexConstraint::targetPosition,
+          "The target position for the vertex.")
+      .def_readonly(
+          "target_normal",
+          &mm::VertexConstraint::targetNormal,
+          "The target normal for the vertex.");
+
   py::class_<
       mm::VertexErrorFunction,
       mm::SkeletonErrorFunction,
@@ -1405,7 +1451,13 @@ avoid divide-by-zero. )");
       .def(
           "clear_constraints",
           &mm::VertexErrorFunction::clearConstraints,
-          "Clears all vertex constraints from the error function.");
+          "Clears all vertex constraints from the error function.")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::VertexErrorFunction& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of vertex constraints.");
 
   py::class_<
       mm::PointTriangleVertexErrorFunction,
