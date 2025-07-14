@@ -17,7 +17,8 @@ namespace momentum {
 /// Provides configuration specific to the subset-based Gauss-Newton solver
 /// that optimizes only a selected subset of parameters
 struct SubsetGaussNewtonSolverOptions : SolverOptions {
-  /// Damping parameter added to Hessian diagonal for numerical stability
+  /// Damping parameter added to Hessian diagonal for numerical stability; see
+  /// https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
   ///
   /// Higher values improve stability but may slow convergence
   float regularization = 0.05f;
