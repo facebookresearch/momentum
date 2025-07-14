@@ -738,12 +738,15 @@ void defVertexProjectionErrorFunction(py::module_& m) {
 This is useful for camera-based constraints where you want to match a 3D vertex to a 2D observation.)")
       .def(
           py::init<>(
-              [](const mm::Character& character, size_t maxThreads)
+              [](const mm::Character& character,
+                 size_t maxThreads,
+                 float weight)
                   -> std::shared_ptr<
                       mm::VertexProjectionErrorFunctionT<float>> {
                 auto result =
                     std::make_shared<mm::VertexProjectionErrorFunctionT<float>>(
                         character, maxThreads);
+                result->setWeight(weight);
                 return result;
               }),
           R"(Initialize a VertexProjectionErrorFunction.
@@ -752,7 +755,9 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
             :param max_threads: The maximum number of threads to use for computation.)",
           py::keep_alive<1, 2>(),
           py::arg("character"),
-          py::arg("max_threads") = 0)
+          py::kw_only(),
+          py::arg("max_threads") = 0,
+          py::arg("weight") = 1.0f)
       .def(
           "add_constraint",
           [](mm::VertexProjectionErrorFunctionT<float>& self,
@@ -1562,16 +1567,22 @@ avoid divide-by-zero. )");
       std::shared_ptr<mm::PosePriorErrorFunction>>(m, "PosePriorErrorFunction")
       .def(
           py::init<>([](const mm::Character& character,
-                        std::shared_ptr<const mm::Mppca> posePrior) {
-            return std::make_shared<mm::PosePriorErrorFunction>(
+                        std::shared_ptr<const mm::Mppca> posePrior,
+                        float weight) {
+            auto result = std::make_shared<mm::PosePriorErrorFunction>(
                 character, posePrior);
+            result->setWeight(weight);
+            return result;
           }),
           R"(A skeleton error function that uses a mixture of PCA models pose prior to penalize deviations from expected poses.
 
   :param character: The character to use.
-  :param pose_prior: The pose prior model to use.)",
+  :param pose_prior: The pose prior model to use.
+  :param weight: The weight applied to the error function.)",
           py::arg("character"),
-          py::arg("pose_prior"))
+          py::arg("pose_prior"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
       .def(
           "set_pose_prior",
           &mm::PosePriorErrorFunction::setPosePrior,
@@ -1726,13 +1737,19 @@ rotation matrix to a target rotation.)")
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::CollisionErrorFunction>>(m, "CollisionErrorFunction")
       .def(
-          py::init<>([](const mm::Character& character) {
-            return std::make_shared<mm::CollisionErrorFunction>(character);
+          py::init<>([](const mm::Character& character, float weight) {
+            auto result =
+                std::make_shared<mm::CollisionErrorFunction>(character);
+            result->setWeight(weight);
+            return result;
           }),
           R"(A skeleton error function that penalizes collisions between character parts.
 
-        :param character: The character to use.)",
-          py::arg("character"))
+        :param character: The character to use.
+        :param weight: The weight applied to the error function.)",
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
       .def(
           "get_collision_pairs",
           [](const mm::CollisionErrorFunction& self) {
