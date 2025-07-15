@@ -282,14 +282,11 @@ If not provided, all quaternions will be weighted equally.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.quaternion.quaternion_to_xyz_euler">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">quaternion_to_xyz_euler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.quaternion_to_xyz_euler" title="Link to this definition"></a></dt>
-<dd><p>Convert quaternions to XYZ Euler rotations.</p>
-<dl class="field-list simple">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">quaternion_to_xyz_euler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.quaternion_to_xyz_euler" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>quat</strong> – (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A (nBatch x k x 3) tensor containing (x, y, z) Euler angles.</p>
+<dd class="field-odd"><p><strong>eps</strong> – a small number to avoid calling asin(1) or asin(-1).
+Should not be smaller than 1e-6 as this can cause NaN gradients for some models.</p>
 </dd>
 </dl>
 </dd></dl>
