@@ -133,9 +133,10 @@ void defAimErrorFunction(
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(
-                  "Invalid names; expected " + std::to_string(parent.shape(0)) +
-                  " names but got " + std::to_string(name->size()));
+              throw std::runtime_error(fmt::format(
+                  "Invalid names; expected {} names but got {}",
+                  parent.shape(0),
+                  name->size()));
             }
 
             py::gil_scoped_release release;
@@ -266,9 +267,10 @@ void defFixedAxisError(
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(
-                  "Invalid names; expected " + std::to_string(parent.shape(0)) +
-                  " names but got " + std::to_string(name->size()));
+              throw std::runtime_error(fmt::format(
+                  "Invalid names; expected {} names but got {}",
+                  parent.shape(0),
+                  name->size()));
             }
 
             auto localAxisAcc = localAxis.unchecked<2>();
@@ -402,9 +404,10 @@ plane defined by a local point and a local normal vector.)")
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(
-                  "Invalid names; expected " + std::to_string(parent.shape(0)) +
-                  " names but got " + std::to_string(name->size()));
+              throw std::runtime_error(fmt::format(
+                  "Invalid names; expected {} names but got {}",
+                  parent.shape(0),
+                  name->size()));
             }
 
             auto localPointAcc = localPoint.has_value()
@@ -994,9 +997,10 @@ distance is greater than zero (ie. the point being above).)")
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(
-                  "Invalid names; expected " + std::to_string(parent.shape(0)) +
-                  " names but got " + std::to_string(name->size()));
+              throw std::runtime_error(fmt::format(
+                  "Invalid names; expected {} names but got {}",
+                  parent.shape(0),
+                  name->size()));
             }
 
             auto offsetAcc = offset.has_value()
@@ -1386,10 +1390,10 @@ avoid divide-by-zero. )");
 
             const auto targetTransforms = toTransformList(targetStateArray);
             if (targetTransforms.size() != self.getSkeleton().joints.size()) {
-              throw std::runtime_error(
-                  "Expected target state array of shape (njoints, 8) where nJoints=" +
-                  std::to_string(self.getSkeleton().joints.size()) +
-                  " but got " + getDimStr(targetStateArray) + ".");
+              throw std::runtime_error(fmt::format(
+                  "Expected target state array of shape (njoints, 8) where nJoints={} but got {}.",
+                  self.getSkeleton().joints.size(),
+                  getDimStr(targetStateArray)));
             }
 
             self.setTargetState(targetTransforms);
