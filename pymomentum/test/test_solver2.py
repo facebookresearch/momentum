@@ -191,9 +191,8 @@ class TestSolver(unittest.TestCase):
         )
 
         # Create solver function with the model parameters error
-        solver_function = pym_solver2.SkeletonSolverFunction(
-            character, [model_params_error]
-        )
+        solver_function = pym_solver2.SkeletonSolverFunction(character)
+        solver_function.error_functions = [model_params_error]
 
         # Set solver options
         solver_options = pym_solver2.GaussNewtonSolverOptions()

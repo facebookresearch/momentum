@@ -134,6 +134,22 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
       mm::SolverFunction,
       std::shared_ptr<mm::SkeletonSolverFunction>>(m, "SkeletonSolverFunction")
       .def(
+          "__repr__",
+          [](const mm::SkeletonSolverFunction& self) {
+            std::string result = "SkeletonSolverFunction(error_functions=[";
+            const auto& errorFunctions = self.getErrorFunctions();
+            for (size_t i = 0; i < errorFunctions.size(); ++i) {
+              // Call the __repr__ method of each error function
+              py::object pyErrorFunction = py::cast(errorFunctions[i]);
+              result += py::str(pyErrorFunction);
+              if (i + 1 < errorFunctions.size()) {
+                result += ", ";
+              }
+            }
+            result += "])";
+            return result;
+          })
+      .def(
           py::init<>(
               [](const mm::Character& character,
                  const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>&
@@ -158,6 +174,26 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
             validateErrorFunctionMatchesCharacter(self, *errorFunction);
             self.addErrorFunction(errorFunction);
           })
+      .def(
+          "clear_error_functions",
+          &mm::SkeletonSolverFunction::clearErrorFunctions,
+          "Clears all error functions from the solver.")
+      .def_property(
+          "error_functions",
+          &mm::SkeletonSolverFunction::getErrorFunctions,
+          [](mm::SkeletonSolverFunction& self,
+             const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>&
+                 errorFunctions) {
+            for (const auto& e : errorFunctions) {
+              validateErrorFunctionMatchesCharacter(self, *e);
+            }
+
+            self.clearErrorFunctions();
+            for (const auto& errorFunction : errorFunctions) {
+              self.addErrorFunction(errorFunction);
+            }
+          })
+
       .def(
           "get_error",
           [](mm::SkeletonSolverFunction& self,
