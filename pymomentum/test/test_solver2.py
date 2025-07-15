@@ -46,7 +46,6 @@ class TestSolver(unittest.TestCase):
         pos_error.add_constraints(
             parent=np.arange(n_joints), target=skel_state_target[:, :3].numpy()
         )
-
         solver_function = pym_solver2.SkeletonSolverFunction(character, [pos_error])
 
         solver_options = pym_solver2.GaussNewtonSolverOptions()
