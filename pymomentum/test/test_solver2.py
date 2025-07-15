@@ -518,6 +518,7 @@ class TestSolver(unittest.TestCase):
         vertex_error_function.add_constraint(
             vertex_index, weight, target_position, target_normal
         )
+        self.assertEqual(len(vertex_error_function.constraints), 1)
 
         # Create solver function with the vertex error
         solver_function = pym_solver2.SkeletonSolverFunction(
@@ -1188,6 +1189,7 @@ class TestSolver(unittest.TestCase):
             target_position=target_2d,
             projection=projection,
         )
+        self.assertEqual(len(vertex_projection_error_function.constraints), 1)
 
         # Create solver function with the vertex projection error
         solver_function = pym_solver2.SkeletonSolverFunction(
