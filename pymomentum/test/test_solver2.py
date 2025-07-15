@@ -72,6 +72,33 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
         assert solver.per_iteration_errors == per_iter_errors_prev
 
+    def test_incorrect_params(self) -> None:
+        """Test solve_ik() with incorrect parameter transform."""
+
+        # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
+        # and a few dummy faces.
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        solver_function = pym_solver2.SkeletonSolverFunction(
+            character, [pym_solver2.LimitErrorFunction(character)]
+        )
+        solver = pym_solver2.GaussNewtonSolver(
+            solver_function, pym_solver2.GaussNewtonSolverOptions()
+        )
+        self.assertRaises(
+            RuntimeError, solver.solve, np.zeros(n_params + 1, dtype=np.float32)
+        )
+
+        # make sure if we try to combine error functions from different characters, it fails:
+        character2 = pym_geometry.create_test_character(num_joints=4)
+        self.assertRaises(
+            RuntimeError,
+            solver_function.add_error_function,
+            pym_solver2.LimitErrorFunction(character2),
+        )
+
     def test_get_gradient_and_jacobian(self) -> None:
         """Test that get_gradient and get_jacobian do something reasonable for error functions."""
 

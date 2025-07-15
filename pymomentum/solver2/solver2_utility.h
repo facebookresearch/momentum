@@ -3,6 +3,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character_solver/fwd.h>
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -86,6 +87,10 @@ void validateVertexIndex(
     const pybind11::array_t<int>& vertexIndex,
     const char* name,
     const momentum::Character& character);
+
+void validateErrorFunctionMatchesCharacter(
+    const momentum::SkeletonSolverFunction& solverFunction,
+    const momentum::SkeletonErrorFunction& errorFunction);
 
 momentum::TransformList toTransformList(const pybind11::array_t<float>& array);
 

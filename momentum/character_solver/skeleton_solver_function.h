@@ -50,10 +50,10 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
   [[nodiscard]] const std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>>& getErrorFunctions()
       const;
 
-  const Skeleton* getSkeleton() {
+  [[nodiscard]] const Skeleton* getSkeleton() const {
     return skeleton_;
   }
-  const ParameterTransformT<T>* getParameterTransform() {
+  [[nodiscard]] const ParameterTransformT<T>* getParameterTransform() const {
     return parameterTransform_;
   }
 

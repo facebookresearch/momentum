@@ -8,6 +8,9 @@
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character_solver/skeleton_error_function.h>
+#include <momentum/character_solver/skeleton_solver_function.h>
+
 #include <momentum/math/mesh.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
@@ -350,6 +353,21 @@ momentum::ModelParameters toModelParameters(
 
 Eigen::Quaternionf toQuaternion(const Eigen::Vector4f& q) {
   return Eigen::Quaternionf(q(3), q(0), q(1), q(2)).normalized();
+}
+
+void validateErrorFunctionMatchesCharacter(
+    const momentum::SkeletonSolverFunction& solverFunction,
+    const momentum::SkeletonErrorFunction& errorFunction) {
+  if (solverFunction.getSkeleton() != &errorFunction.getSkeleton()) {
+    throw std::runtime_error(
+        "Skeleton in solver function does not match skeleton in error function; did you use the correct Character when constructing it?");
+  }
+
+  if (solverFunction.getParameterTransform() !=
+      &errorFunction.getParameterTransform()) {
+    throw std::runtime_error(
+        "Parameter transform in solver function does not match parameter transform in error function; did you use the correct Character when constructing it?");
+  }
 }
 
 } // namespace pymomentum
