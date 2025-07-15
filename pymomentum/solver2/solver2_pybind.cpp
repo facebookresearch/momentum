@@ -135,6 +135,8 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
                 auto result = std::make_shared<mm::SkeletonSolverFunction>(
                     &character.skeleton, &character.parameterTransform);
                 for (const auto& errorFunction : errorFunctions) {
+                  validateErrorFunctionMatchesCharacter(
+                      *result, *errorFunction);
                   result->addErrorFunction(errorFunction);
                 }
                 return result;
@@ -147,6 +149,7 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
           "add_error_function",
           [](mm::SkeletonSolverFunction& self,
              std::shared_ptr<mm::SkeletonErrorFunction> errorFunction) {
+            validateErrorFunctionMatchesCharacter(self, *errorFunction);
             self.addErrorFunction(errorFunction);
           })
       .def(
@@ -401,6 +404,11 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       .def(
           "solve",
           [](mm::Solver& self, Eigen::VectorXf parameters) -> Eigen::VectorXf {
+            if (parameters.size() != self.getNumParameters()) {
+              throw std::runtime_error(
+                  "Expected parameters to be of size " +
+                  std::to_string(self.getNumParameters()));
+            }
             self.solve(parameters);
             return parameters;
           },
