@@ -19,7 +19,8 @@ namespace momentum {
 
 /// Gauss-Newton solver with QR decomposition specific options
 struct GaussNewtonSolverQROptions : SolverOptions {
-  /// Regularization parameter for QR decomposition.
+  /// Damping parameter added to Hessian diagonal for numerical stability; see
+  /// https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
   float regularization = 0.05f;
 
   /// Flag to enable line search during optimization.
