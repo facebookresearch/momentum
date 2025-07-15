@@ -130,7 +130,7 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a7be264908aaba843bb9fe36e2ec33ae9" id="r_a7be264908aaba843bb9fe36e2ec33ae9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SubsetGaussNewtonSolverOptions.html#a7be264908aaba843bb9fe36e2ec33ae9">regularization</a> = 0.05<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
-<tr class="memdesc:a7be264908aaba843bb9fe36e2ec33ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Damping parameter added to Hessian diagonal for numerical stability.  <br /></td></tr>
+<tr class="memdesc:a7be264908aaba843bb9fe36e2ec33ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Damping parameter added to Hessian diagonal for numerical stability; see <a href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm">https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm</a>.  <br /></td></tr>
 <tr class="separator:a7be264908aaba843bb9fe36e2ec33ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b6b80f9a80670d1be3ff114106b7f76" id="r_a9b6b80f9a80670d1be3ff114106b7f76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SubsetGaussNewtonSolverOptions.html#a9b6b80f9a80670d1be3ff114106b7f76">doLineSearch</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
 <tr class="memdesc:a9b6b80f9a80670d1be3ff114106b7f76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables backtracking line search to ensure error reduction at each step.  <br /></td></tr>
@@ -208,7 +208,7 @@ Public Attributes</h2></td></tr>
 
 <p>Construct from base solver options while preserving Subset Gauss-Newton defaults. </p>
 
-<p class="definition">Definition at line <a class="el" href="subset__gauss__newton__solver_8h_source.html#l00032">32</a> of file <a class="el" href="subset__gauss__newton__solver_8h_source.html">subset_gauss_newton_solver.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subset__gauss__newton__solver_8h_source.html#l00033">33</a> of file <a class="el" href="subset__gauss__newton__solver_8h_source.html">subset_gauss_newton_solver.h</a>.</p>
 
 </div>
 </div>
@@ -227,7 +227,7 @@ Public Attributes</h2></td></tr>
 
 <p>Enables backtracking line search to ensure error reduction at each step. </p>
 
-<p class="definition">Definition at line <a class="el" href="subset__gauss__newton__solver_8h_source.html#l00026">26</a> of file <a class="el" href="subset__gauss__newton__solver_8h_source.html">subset_gauss_newton_solver.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subset__gauss__newton__solver_8h_source.html#l00027">27</a> of file <a class="el" href="subset__gauss__newton__solver_8h_source.html">subset_gauss_newton_solver.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="subset__gauss__newton__solver_8cpp_source.html#l00016">momentum::SubsetGaussNewtonSolverT&lt; T &gt;::SubsetGaussNewtonSolverT()</a>.</p>
 
@@ -245,10 +245,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Damping parameter added to Hessian diagonal for numerical stability. </p>
+<p>Damping parameter added to Hessian diagonal for numerical stability; see <a href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm">https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm</a>. </p>
 <p>Higher values improve stability but may slow convergence </p>
 
-<p class="definition">Definition at line <a class="el" href="subset__gauss__newton__solver_8h_source.html#l00023">23</a> of file <a class="el" href="subset__gauss__newton__solver_8h_source.html">subset_gauss_newton_solver.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="subset__gauss__newton__solver_8h_source.html#l00024">24</a> of file <a class="el" href="subset__gauss__newton__solver_8h_source.html">subset_gauss_newton_solver.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="subset__gauss__newton__solver_8cpp_source.html#l00016">momentum::SubsetGaussNewtonSolverT&lt; T &gt;::SubsetGaussNewtonSolverT()</a>.</p>
 
@@ -263,7 +263,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SubsetGaussNewtonSolverOptions.html">SubsetGaussNewtonSolverOptions</a></li>
-    <li class="footer">Generated on Sat Jul 12 2025 02:10:27 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jul 15 2025 02:20:59 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

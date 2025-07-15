@@ -258,10 +258,10 @@
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig.collision_error_weight">collision_error_weight (pymomentum.marker_tracking.TrackingConfig property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.collision_geometry">collision_geometry (pymomentum.geometry.Character property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.CollisionErrorFunction">CollisionErrorFunction (class in pymomentum.solver2)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.colors">colors (pymomentum.geometry.Mesh property)</a>
@@ -274,6 +274,12 @@
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.conjugate">conjugate() (in module pymomentum.quaternion)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.VertexErrorFunction.constraints">constraints (pymomentum.solver2.VertexErrorFunction property)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.VertexProjectionErrorFunction.constraints">(pymomentum.solver2.VertexProjectionErrorFunction property)</a>
+</li>
+      </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.FBXCoordSystemInfo.coordSystem">coordSystem (pymomentum.geometry.FBXCoordSystemInfo property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.ParameterLimit.create_ellipsoid">create_ellipsoid() (pymomentum.geometry.ParameterLimit static method)</a>
@@ -951,6 +957,8 @@
 </li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Projection">Projection (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint.projection">projection (pymomentum.solver2.VertexProjectionConstraint property)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.ProjectionErrorFunction">ProjectionErrorFunction (class in pymomentum.solver2)</a>
 </li>
       <li>
@@ -1219,6 +1227,14 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.LimitLinear.target_model_parameter_index">target_model_parameter_index (pymomentum.geometry.LimitLinear property)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.VertexConstraint.target_normal">target_normal (pymomentum.solver2.VertexConstraint property)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.VertexConstraint.target_position">target_position (pymomentum.solver2.VertexConstraint property)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint.target_position">(pymomentum.solver2.VertexProjectionConstraint property)</a>
+</li>
+      </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.texcoord_faces">texcoord_faces (pymomentum.geometry.Mesh property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.texcoord_lines">texcoord_lines (pymomentum.geometry.Mesh property)</a>
@@ -1233,10 +1249,10 @@
       </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.to_bytes">to_bytes() (pymomentum.geometry.BlendShape method)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.Character.to_gltf">to_gltf() (pymomentum.geometry.Character static method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.Character.to_gltf">to_gltf() (pymomentum.geometry.Character static method)</a>
+</li>
       <li><a href="skel_state.html#pymomentum.skel_state.to_matrix">to_matrix() (in module pymomentum.skel_state)</a>
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.to_rotation_matrix">to_rotation_matrix() (in module pymomentum.quaternion)</a>
@@ -1299,17 +1315,27 @@
         <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.value">(pymomentum.solver2.VertexConstraintType property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.SolverOptions.verbose">verbose (pymomentum.solver2.SolverOptions property)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Vertex">Vertex (pymomentum.solver.ErrorFunctionType attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="solver2.html#pymomentum.solver2.VertexConstraint.vertex_index">vertex_index (pymomentum.solver2.VertexConstraint property)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint.vertex_index">(pymomentum.solver2.VertexProjectionConstraint property)</a>
+</li>
+      </ul></li>
+      <li><a href="solver2.html#pymomentum.solver2.VertexConstraint">VertexConstraint (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType">VertexConstraintType (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexErrorFunction">VertexErrorFunction (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.VertexProjection">VertexProjection (pymomentum.solver.ErrorFunctionType attribute)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint">VertexProjectionConstraint (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexProjectionErrorFunction">VertexProjectionErrorFunction (class in pymomentum.solver2)</a>
 </li>
@@ -1330,11 +1356,15 @@
 </li>
         <li><a href="solver2.html#pymomentum.solver2.SkeletonErrorFunction.weight">(pymomentum.solver2.SkeletonErrorFunction property)</a>
 </li>
-      </ul></li>
-      <li><a href="geometry.html#pymomentum.geometry.Character.with_blend_shape">with_blend_shape() (pymomentum.geometry.Character method)</a>
+        <li><a href="solver2.html#pymomentum.solver2.VertexConstraint.weight">(pymomentum.solver2.VertexConstraint property)</a>
 </li>
+        <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint.weight">(pymomentum.solver2.VertexProjectionConstraint property)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.Character.with_blend_shape">with_blend_shape() (pymomentum.geometry.Character method)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Character.with_collision_geometry">with_collision_geometry() (pymomentum.geometry.Character method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.with_locators">with_locators() (pymomentum.geometry.Character method)</a>

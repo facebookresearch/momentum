@@ -201,6 +201,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.regularization"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions.regularization</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint"><code class="docutils literal notranslate"><span class="pre">VertexConstraint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.target_normal"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.target_normal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.target_position"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.target_position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.vertex_index"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.vertex_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.weight"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.weight</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexConstraintType"><code class="docutils literal notranslate"><span class="pre">VertexConstraintType</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraintType.Normal"><code class="docutils literal notranslate"><span class="pre">VertexConstraintType.Normal</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraintType.Plane"><code class="docutils literal notranslate"><span class="pre">VertexConstraintType.Plane</span></code></a></li>
@@ -214,12 +221,21 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.add_constraint()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.add_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.clear_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.constraints</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionConstraint"><code class="docutils literal notranslate"><span class="pre">VertexProjectionConstraint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionConstraint.projection"><code class="docutils literal notranslate"><span class="pre">VertexProjectionConstraint.projection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionConstraint.target_position"><code class="docutils literal notranslate"><span class="pre">VertexProjectionConstraint.target_position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionConstraint.vertex_index"><code class="docutils literal notranslate"><span class="pre">VertexProjectionConstraint.vertex_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionConstraint.weight"><code class="docutils literal notranslate"><span class="pre">VertexProjectionConstraint.weight</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionErrorFunction"><code class="docutils literal notranslate"><span class="pre">VertexProjectionErrorFunction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">VertexProjectionErrorFunction.add_constraint()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">VertexProjectionErrorFunction.add_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">VertexProjectionErrorFunction.clear_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">VertexProjectionErrorFunction.constraints</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.solve_sequence"><code class="docutils literal notranslate"><span class="pre">solve_sequence()</span></code></a></li>
@@ -1472,6 +1488,36 @@ This is useful for camera-based constraints where you want to match a 3D point t
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexConstraint</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.target_normal">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_normal</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.target_normal" title="Link to this definition"></a></dt>
+<dd><p>The target normal for the vertex.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.target_position">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_position</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.target_position" title="Link to this definition"></a></dt>
+<dd><p>The target position for the vertex.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.vertex_index">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vertex_index</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.vertex_index" title="Link to this definition"></a></dt>
+<dd><p>The index of the vertex to constrain.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.weight" title="Link to this definition"></a></dt>
+<dd><p>The weight of the constraint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraintType">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexConstraintType</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraintType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
@@ -1566,6 +1612,43 @@ This is useful for camera-based constraints where you want to match a 3D point t
 <dd><p>Clears all vertex constraints from the error function.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of vertex constraints.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionConstraint">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexProjectionConstraint</span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionConstraint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Read-only access to a vertex projection constraint.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionConstraint.projection">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionConstraint.projection" title="Link to this definition"></a></dt>
+<dd><p>Returns the 3x4 projection matrix.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionConstraint.target_position">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_position</span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionConstraint.target_position" title="Link to this definition"></a></dt>
+<dd><p>Returns the target 2D position.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionConstraint.vertex_index">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vertex_index</span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionConstraint.vertex_index" title="Link to this definition"></a></dt>
+<dd><p>Returns the index of the vertex to project.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionConstraint.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionConstraint.weight" title="Link to this definition"></a></dt>
+<dd><p>Returns the weight of the constraint.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1622,6 +1705,12 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionErrorFunction.clear_constraints">
 <span class="sig-name descname"><span class="pre">clear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionErrorFunction" title="pymomentum.solver2.VertexProjectionErrorFunction"><span class="pre">pymomentum.solver2.VertexProjectionErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionErrorFunction.clear_constraints" title="Link to this definition"></a></dt>
 <dd><p>Clears all vertex projection constraints from the error function.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexProjectionErrorFunction.constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.VertexProjectionErrorFunction.constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of vertex projection constraints.</p>
 </dd></dl>
 
 </dd></dl>
