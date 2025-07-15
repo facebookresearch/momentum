@@ -168,6 +168,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction.add_error_function"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction.add_error_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction.clear_error_functions"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction.clear_error_functions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction.error_functions"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction.error_functions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction.get_error"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction.get_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction.get_gradient"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction.get_gradient()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction.get_jacobian"><code class="docutils literal notranslate"><span class="pre">SkeletonSolverFunction.get_jacobian()</span></code></a></li>
@@ -1306,6 +1308,17 @@ This is useful for camera-based constraints where you want to match a 3D point t
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.SkeletonSolverFunction.add_error_function">
 <span class="sig-name descname"><span class="pre">add_error_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction" title="pymomentum.solver2.SkeletonSolverFunction"><span class="pre">pymomentum.solver2.SkeletonSolverFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><span class="pre">pymomentum.solver2.SkeletonErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.SkeletonSolverFunction.add_error_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.SkeletonSolverFunction.clear_error_functions">
+<span class="sig-name descname"><span class="pre">clear_error_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SkeletonSolverFunction" title="pymomentum.solver2.SkeletonSolverFunction"><span class="pre">pymomentum.solver2.SkeletonSolverFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.SkeletonSolverFunction.clear_error_functions" title="Link to this definition"></a></dt>
+<dd><p>Clears all error functions from the solver.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.SkeletonSolverFunction.error_functions">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_functions</span></span><a class="headerlink" href="#pymomentum.solver2.SkeletonSolverFunction.error_functions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
