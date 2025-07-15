@@ -18,6 +18,7 @@
 #include <momentum/solver/subset_gauss_newton_solver.h>
 
 #include <dispenso/parallel_for.h> // @manual
+#include <fmt/format.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -32,6 +33,11 @@ namespace py = pybind11;
 namespace mm = momentum;
 
 namespace pymomentum {
+
+// Utility function to convert bool to Python-style string representation
+std::string boolToString(bool value) {
+  return value ? "True" : "False";
+}
 
 PYBIND11_MODULE(solver2, m) {
   // TODO more explanation
@@ -48,8 +54,8 @@ PYBIND11_MODULE(solver2, m) {
       .def(
           "__repr__",
           [](const mm::SkeletonErrorFunction& self) {
-            return "SkeletonErrorFunction(weight=" +
-                std::to_string(self.getWeight()) + ")";
+            return fmt::format(
+                "SkeletonErrorFunction(weight={})", self.getWeight());
           })
       .def_property(
           "weight",
@@ -331,6 +337,16 @@ Note that if you're trying to actually solve a problem using SGD, you should con
   py::class_<mm::SolverOptions, std::shared_ptr<mm::SolverOptions>>(
       m, "SolverOptions")
       .def(py::init<>())
+      .def(
+          "__repr__",
+          [](const mm::SolverOptions& self) {
+            return fmt::format(
+                "SolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={})",
+                self.minIterations,
+                self.maxIterations,
+                self.threshold,
+                boolToString(self.verbose));
+          })
       .def_readwrite(
           "min_iterations",
           &mm::SolverOptions::minIterations,
@@ -354,6 +370,21 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       std::shared_ptr<mm::GaussNewtonSolverOptions>>(
       m, "GaussNewtonSolverOptions")
       .def(py::init<>())
+      .def(
+          "__repr__",
+          [](const mm::GaussNewtonSolverOptions& self) {
+            return fmt::format(
+                "GaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, use_block_jtj={}, direct_sparse_jtj={}, sparse_matrix_threshold={})",
+                self.minIterations,
+                self.maxIterations,
+                self.threshold,
+                boolToString(self.verbose),
+                self.regularization,
+                boolToString(self.doLineSearch),
+                boolToString(self.useBlockJtJ),
+                boolToString(self.directSparseJtJ),
+                self.sparseMatrixThreshold);
+          })
       .def_readwrite(
           "regularization",
           &mm::GaussNewtonSolverOptions::regularization,
@@ -383,6 +414,18 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       "GaussNewtonSolverQROptions",
       "Options specific to the Gauss-Newton QR solver")
       .def(py::init<>())
+      .def(
+          "__repr__",
+          [](const mm::GaussNewtonSolverQROptions& self) {
+            return fmt::format(
+                "GaussNewtonSolverQROptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
+                self.minIterations,
+                self.maxIterations,
+                self.threshold,
+                boolToString(self.verbose),
+                self.regularization,
+                boolToString(self.doLineSearch));
+          })
       .def_readwrite(
           "regularization",
           &mm::GaussNewtonSolverQROptions::regularization,
@@ -400,6 +443,18 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       "SubsetGaussNewtonSolverOptions",
       "Options specific to the Subset Gauss-Newton solver")
       .def(py::init<>())
+      .def(
+          "__repr__",
+          [](const mm::SubsetGaussNewtonSolverOptions& self) {
+            return fmt::format(
+                "SubsetGaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
+                self.minIterations,
+                self.maxIterations,
+                self.threshold,
+                boolToString(self.verbose),
+                self.regularization,
+                boolToString(self.doLineSearch));
+          })
       .def_readwrite(
           "regularization",
           &mm::SubsetGaussNewtonSolverOptions::regularization,
@@ -415,6 +470,20 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       std::shared_ptr<mm::SequenceSolverOptions>>(
       m, "SequenceSolverOptions", "Options specific to the sequence solver")
       .def(py::init<>())
+      .def(
+          "__repr__",
+          [](const mm::SequenceSolverOptions& self) {
+            return fmt::format(
+                "SequenceSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, multithreaded={}, progress_bar={})",
+                self.minIterations,
+                self.maxIterations,
+                self.threshold,
+                boolToString(self.verbose),
+                self.regularization,
+                boolToString(self.doLineSearch),
+                boolToString(self.multithreaded),
+                boolToString(self.progressBar));
+          })
       .def_readwrite(
           "regularization",
           &mm::SequenceSolverOptions::regularization,
