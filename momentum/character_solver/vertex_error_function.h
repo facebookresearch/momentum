@@ -79,6 +79,10 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
+  [[nodiscard]] size_t numConstraints() const {
+    return constraints_.size();
+  }
+
   static constexpr T kPositionWeight = PositionErrorFunctionT<T>::kLegacyWeight;
   static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
 

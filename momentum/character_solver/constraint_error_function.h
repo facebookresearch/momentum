@@ -186,6 +186,10 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
+  [[nodiscard]] size_t numConstraints() const {
+    return constraints_.size();
+  }
+
   /// Clear the current list of constraints
   void clearConstraints() {
     constraints_.clear();

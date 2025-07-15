@@ -69,6 +69,10 @@ class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return character_;
   }
 
+  [[nodiscard]] size_t numConstraints() const {
+    return constraints_.size();
+  }
+
  private:
   double calculateJacobian(
       const ModelParametersT<T>& modelParameters,

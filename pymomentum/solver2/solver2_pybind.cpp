@@ -45,6 +45,12 @@ PYBIND11_MODULE(solver2, m) {
   py::class_<
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::SkeletonErrorFunction>>(m, "SkeletonErrorFunction")
+      .def(
+          "__repr__",
+          [](const mm::SkeletonErrorFunction& self) {
+            return "SkeletonErrorFunction(weight=" +
+                std::to_string(self.getWeight()) + ")";
+          })
       .def_property(
           "weight",
           &mm::SkeletonErrorFunction::getWeight,
