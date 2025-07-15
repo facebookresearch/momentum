@@ -26,7 +26,7 @@
 #include <momentum/character_solver/vertex_projection_error_function.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
-#include <dispenso/parallel_for.h> // @manual
+#include <fmt/format.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -49,6 +49,15 @@ void defAimErrorFunction(
       AimErrorFunctionT,
       mm::SkeletonErrorFunction,
       std::shared_ptr<AimErrorFunctionT>>(m, name, description)
+      .def(
+          "__repr__",
+          [=](const AimErrorFunctionT& self) -> std::string {
+            return fmt::format(
+                "{}(weight={}, num_constraints={})",
+                name,
+                self.getWeight(),
+                self.numConstraints());
+          })
       .def(
           py::init<>(
               [](const mm::Character& character,
@@ -183,6 +192,15 @@ void defFixedAxisError(
       mm::SkeletonErrorFunctionT<float>,
       std::shared_ptr<FixedAxisErrorFunctionT>>(m, name, description)
       .def(
+          "__repr__",
+          [=](const FixedAxisErrorFunctionT& self) -> std::string {
+            return fmt::format(
+                "{}(weight={}, num_constraints={})",
+                name,
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
           py::init<>(
               [](const mm::Character& character,
                  float lossAlpha,
@@ -298,6 +316,14 @@ void defNormalErrorFunction(py::module_& m) {
       "NormalErrorFunction",
       R"(The NormalErrorFunction computes a "point-to-plane" (signed) distance from a target point to the
 plane defined by a local point and a local normal vector.)")
+      .def(
+          "__repr__",
+          [](const mm::NormalErrorFunctionT<float>& self) {
+            return fmt::format(
+                "NormalErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
       .def(
           py::init<>(
               [](const mm::Character& character,
@@ -437,6 +463,14 @@ void defDistanceErrorFunction(py::module_& m) {
       R"(The DistanceErrorFunction computes the squared difference between the distance from a point to an origin
 and a target distance. The constraint is defined as ||(p_joint - origin)^2 - target||^2.)")
       .def(
+          "__repr__",
+          [](const mm::DistanceErrorFunctionT<float>& self) {
+            return fmt::format(
+                "DistanceErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
           py::init<>(
               [](const mm::Character& character, float weight)
                   -> std::shared_ptr<mm::DistanceErrorFunctionT<float>> {
@@ -560,6 +594,14 @@ void defProjectionErrorFunction(py::module_& m) {
       "ProjectionErrorFunction",
       R"(The ProjectionErrorFunction projects a 3D point to a 2D point using a projection matrix.
 This is useful for camera-based constraints where you want to match a 3D point to a 2D observation.)")
+      .def(
+          "__repr__",
+          [](const mm::ProjectionErrorFunctionT<float>& self) {
+            return fmt::format(
+                "ProjectionErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
       .def(
           py::init<>(
               [](const mm::Character& character, float nearClip, float weight)
@@ -737,6 +779,14 @@ void defVertexProjectionErrorFunction(py::module_& m) {
       R"(The VertexProjectionErrorFunction projects 3D vertices onto 2D points using a projection matrix.
 This is useful for camera-based constraints where you want to match a 3D vertex to a 2D observation.)")
       .def(
+          "__repr__",
+          [](const mm::VertexProjectionErrorFunctionT<float>& self) {
+            return fmt::format(
+                "VertexProjectionErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
           py::init<>(
               [](const mm::Character& character,
                  size_t maxThreads,
@@ -862,6 +912,14 @@ void defPlaneErrorFunction(py::module_& m) {
 For point-on-plane error (above = false), it computes the signed distance of a point to a plane
 using the plane equation. For half-plane error (above = true), the error is zero when the
 distance is greater than zero (ie. the point being above).)")
+      .def(
+          "__repr__",
+          [](const mm::PlaneErrorFunction& self) {
+            return fmt::format(
+                "PlaneErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
       .def(
           py::init<>(
               [](const mm::Character& character,
@@ -995,6 +1053,12 @@ void addErrorFunctions(py::module_& m) {
       "LimitErrorFunction",
       "A skeleton error function that penalizes joints that exceed their limits.")
       .def(
+          "__repr__",
+          [](const mm::LimitErrorFunction& self) {
+            return fmt::format(
+                "LimitErrorFunction(weight={})", self.getWeight());
+          })
+      .def(
           py::init<>([](const mm::Character& character, float weight) {
             auto result = std::make_shared<mm::LimitErrorFunction>(character);
             result->setWeight(weight);
@@ -1012,6 +1076,12 @@ void addErrorFunctions(py::module_& m) {
       m,
       "ModelParametersErrorFunction",
       "A skeleton error function that penalizes the difference between the target model parameters and the current model parameters.")
+      .def(
+          "__repr__",
+          [](const mm::ModelParametersErrorFunction& self) {
+            return fmt::format(
+                "ModelParametersErrorFunction(weight={})", self.getWeight());
+          })
       .def(
           py::init<>([](const mm::Character& character,
                         const std::optional<py::array_t<float>>& targetParams,
@@ -1071,6 +1141,14 @@ void addErrorFunctions(py::module_& m) {
 
 Uses a generalized loss function that support various forms of losses such as L1, L2, and Cauchy.  Details can be found in the paper 'A General and Adaptive Robust Loss Function' by Jonathan T. Barron.
       )")
+      .def(
+          "__repr__",
+          [](const mm::PositionErrorFunction& self) {
+            return fmt::format(
+                "PositionErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
       .def(
           py::init<>(
               [](const mm::Character& character,
@@ -1229,6 +1307,12 @@ avoid divide-by-zero. )");
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::StateErrorFunction>>(m, "StateErrorFunction")
       .def(
+          "__repr__",
+          [](const mm::StateErrorFunction& self) {
+            return fmt::format(
+                "StateErrorFunction(weight={})", self.getWeight());
+          })
+      .def(
           py::init<>([](const mm::Character& character,
                         float weight,
                         float positionWeight,
@@ -1357,6 +1441,14 @@ avoid divide-by-zero. )");
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::VertexErrorFunction>>(m, "VertexErrorFunction")
       .def(
+          "__repr__",
+          [](const mm::VertexErrorFunction& self) {
+            return fmt::format(
+                "VertexErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
           py::init<>([](const mm::Character& character,
                         mm::VertexConstraintType constraintType,
                         float weight,
@@ -1470,6 +1562,13 @@ avoid divide-by-zero. )");
       std::shared_ptr<mm::PointTriangleVertexErrorFunction>>(
       m, "PointTriangleVertexErrorFunction")
       .def(
+          "__repr__",
+          [](const mm::PointTriangleVertexErrorFunction& self) {
+            return fmt::format(
+                "PointTriangleVertexErrorFunction(weight={})",
+                self.getWeight());
+          })
+      .def(
           py::init<>(
               [](const mm::Character& character,
                  mm::VertexConstraintType constraintType,
@@ -1566,6 +1665,12 @@ avoid divide-by-zero. )");
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::PosePriorErrorFunction>>(m, "PosePriorErrorFunction")
       .def(
+          "__repr__",
+          [](const mm::PosePriorErrorFunction& self) {
+            return fmt::format(
+                "PosePriorErrorFunction(weight={})", self.getWeight());
+          })
+      .def(
           py::init<>([](const mm::Character& character,
                         std::shared_ptr<const mm::Mppca> posePrior,
                         float weight) {
@@ -1611,6 +1716,14 @@ avoid divide-by-zero. )");
       "OrientationErrorFunction",
       R"(A skeleton error function that minimizes the F-norm of the element-wise difference of a 3x3
 rotation matrix to a target rotation.)")
+      .def(
+          "__repr__",
+          [](const mm::OrientationErrorFunctionT<float>& self) {
+            return fmt::format(
+                "OrientationErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
       .def(
           py::init<>(
               [](const mm::Character& character,
@@ -1736,6 +1849,14 @@ rotation matrix to a target rotation.)")
       mm::CollisionErrorFunction,
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::CollisionErrorFunction>>(m, "CollisionErrorFunction")
+      .def(
+          "__repr__",
+          [](const mm::CollisionErrorFunction& self) {
+            return fmt::format(
+                "CollisionErrorFunction(weight={}, collision_pairs={})",
+                self.getWeight(),
+                self.getCollisionPairs().size());
+          })
       .def(
           py::init<>([](const mm::Character& character, float weight) {
             auto result =
