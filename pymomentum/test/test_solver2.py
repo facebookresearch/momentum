@@ -507,6 +507,8 @@ class TestSolver(unittest.TestCase):
         vertex_error_function = pym_solver2.VertexErrorFunction(
             character, pym_solver2.VertexConstraintType.Position
         )
+        vertex_error_function.weight = 2.0
+        self.assertAlmostEqual(vertex_error_function.weight, 2.0)
 
         # Define a vertex and its target position
         vertex_index = 0

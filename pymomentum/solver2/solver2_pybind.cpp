@@ -47,8 +47,8 @@ PYBIND11_MODULE(solver2, m) {
       std::shared_ptr<mm::SkeletonErrorFunction>>(m, "SkeletonErrorFunction")
       .def_property(
           "weight",
-          &mm::SkeletonErrorFunction::setWeight,
-          &mm::SkeletonErrorFunction::getWeight)
+          &mm::SkeletonErrorFunction::getWeight,
+          &mm::SkeletonErrorFunction::setWeight)
       .def(
           "get_error",
           [](mm::SkeletonErrorFunction& self,
