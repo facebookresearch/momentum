@@ -371,6 +371,41 @@ def blend(
     return result
 
 
+def slerp(q0: torch.Tensor, q1: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+    """
+    Perform spherical linear interpolation (slerp) between two quaternions.
+
+    :parameter q0: The starting quaternion.
+    :parameter q1: The ending quaternion.
+    :parameter t: The interpolation parameter, where 0 <= t <= 1.  t=0 corresponds to q0, t=1 corresponds to q1.
+    :return: The interpolated quaternion.
+    """
+    check(q0)
+    check(q1)
+
+    # Compute the cosine of the angle between the two quaternions
+    cos_theta = torch.einsum("...x,...x", q0, q1)[..., None]
+
+    # If the dot product is negative, the quaternions have opposite handed-ness
+    # and slerp won't take the shorter path. Fix by reversing one quaternion.
+    q1 = torch.where(cos_theta < 0, -q1, q1)
+    cos_theta = torch.abs(cos_theta)
+
+    # Use linear interpolation for very close quaternions to avoid division by zero
+    lerp_result = normalize(q1 + t * (q1 - q0))
+
+    # Calculate the angle and the sin of the angle
+    eps = 1e-4
+    theta = torch.acos(torch.clamp(cos_theta, 0, 1.0 - eps))
+    inv_sin_theta = torch.reciprocal(torch.sin(theta))
+    c0 = torch.sin((1 - t) * theta) * inv_sin_theta
+    c1 = torch.sin(t * theta) * inv_sin_theta
+
+    slerp_result = normalize(c0 * q0 + c1 * q1)
+
+    return torch.where(cos_theta > 0.9995, lerp_result, slerp_result)
+
+
 def from_two_vectors(v1: torch.Tensor, v2: torch.Tensor) -> torch.Tensor:
     """
     Construct a quaternion that rotates one vector into another.
