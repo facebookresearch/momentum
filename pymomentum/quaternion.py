@@ -81,26 +81,32 @@ def inverse(q: torch.Tensor) -> torch.Tensor:
     return conjugate(q) / (q * q).sum(-1, keepdim=True)
 
 
-def quaternion_to_xyz_euler(q: torch.Tensor) -> torch.Tensor:
-    """
-    Convert quaternions to XYZ Euler rotations.
+def _get_nonzero_denominator(d: torch.Tensor, eps: float) -> torch.Tensor:
+    near_zeros = torch.abs(d) < eps
+    d = d * (near_zeros.logical_not())
+    d = d + torch.sign(d) * (near_zeros * eps)
+    return d
 
-    :parameter quat: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
-    :return: A (nBatch x k x 3) tensor containing (x, y, z) Euler angles.
+
+def quaternion_to_xyz_euler(q: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
     """
-    check(q)
-    qx = q.select(-1, 0)
-    qy = q.select(-1, 1)
-    qz = q.select(-1, 2)
-    qw = q.select(-1, 3)
-    qx2 = torch.square(qx)
-    qy2 = torch.square(qy)
-    qz2 = torch.square(qz)
-    ones = torch.ones_like(qw)
-    rx = torch.atan2(2 * (qw * qx + qy * qz), ones - 2 * (qx2 + qy2))
-    ry = torch.asin(torch.clamp(2 * (qw * qy - qz * qx), -1, 1))
-    rz = torch.atan2(2 * (qw * qz + qx * qy), ones - 2 * (qy2 + qz2))
-    return torch.stack((rx, ry, rz), -1)
+    :param eps: a small number to avoid calling asin(1) or asin(-1).
+        Should not be smaller than 1e-6 as this can cause NaN gradients for some models.
+    """
+    q = normalize(q)
+    x, y, z, w = q.unbind(-1)
+
+    denom = _get_nonzero_denominator(
+        1 - 2 * (torch.square(x) + torch.square(y)), eps=eps
+    )
+    rx = torch.atan2(2 * (w * x + y * z), denom)
+    ry = torch.asin(torch.clamp(2 * (w * y - z * x), -1 + eps, 1 - eps))
+
+    denom = _get_nonzero_denominator(
+        1 - 2 * (torch.square(y) + torch.square(z)), eps=eps
+    )
+    rz = torch.atan2(2 * (w * z + x * y), denom)
+    return torch.stack([rx, ry, rz], -1)
 
 
 def rotate_vector(q: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
