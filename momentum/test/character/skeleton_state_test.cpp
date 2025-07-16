@@ -10,6 +10,8 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/math/constants.h"
+#include "momentum/math/random.h"
+#include "momentum/test/character/character_helpers.h"
 
 using namespace momentum;
 
@@ -503,6 +505,39 @@ TYPED_TEST(SkeletonStateTest, TransformAtoB) {
 
   // The results should be the same
   EXPECT_TRUE(point1.isApprox(point2, 1e-5));
+}
+
+TYPED_TEST(SkeletonStateTest, SkeletonStateToJointParameters) {
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+
+  const auto testCharacter = createTestCharacter();
+
+  // Create a state
+  Random<> rng(42);
+  const momentum::JointParametersT<TypeParam> jointParameters =
+      rng.uniform<Eigen::VectorX<TypeParam>>(
+          kParametersPerJoint * testCharacter.skeleton.joints.size(), -1.0f, 1.0f);
+  const SkeletonStateType state(jointParameters, this->skeleton, false);
+  const auto jointParameters2 = skeletonStateToJointParameters(state, this->skeleton);
+  const SkeletonStateType state2(jointParameters2, this->skeleton, false);
+
+  ASSERT_EQ(state.jointState.size(), state2.jointState.size());
+
+  for (size_t i = 0; i < state.jointState.size(); ++i) {
+    EXPECT_LE(
+        (state.jointState[i].transformation.matrix() - state2.jointState[i].transformation.matrix())
+            .norm(),
+        1e-5);
+  }
+
+  EXPECT_LT((jointParameters.v - jointParameters2.v).norm(), 1e-5);
+
+  std::vector<TransformT<TypeParam>> transforms;
+  for (const auto& s : state2.jointState) {
+    transforms.push_back(s.transform);
+  }
+  const auto jointParameters3 = skeletonStateToJointParameters(transforms, this->skeleton);
+  EXPECT_LT((jointParameters.v - jointParameters3.v).norm(), 1e-5);
 }
 
 // Note: We're not testing error cases because they use MT_CHECK which causes fatal errors

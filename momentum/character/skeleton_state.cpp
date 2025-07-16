@@ -223,6 +223,68 @@ TransformT<T> transformAtoB(
   return B_to_ancestorB.inverse() * A_to_ancestorA;
 }
 
+namespace {
+
+template <typename T>
+[[nodiscard]] Eigen::Vector<T, kParametersPerJoint> localTransformToJointParameters(
+    const Joint& joint,
+    const TransformT<T>& localTransform) {
+  Eigen::Vector<T, kParametersPerJoint> result = Eigen::Vector<T, 7>::Zero();
+  result.template segment<3>(0) =
+      localTransform.translation - joint.translationOffset.template cast<T>();
+
+  const Eigen::Quaternion<T> localRotation =
+      joint.preRotation.template cast<T>().inverse().template cast<T>() * localTransform.rotation;
+  result.template segment<3>(3) = quaternionToEuler(localRotation);
+  result(6) = std::log2(localTransform.scale);
+  return result;
+}
+
+} // namespace
+
+template <typename T>
+JointParametersT<T> skeletonStateToJointParameters(
+    const SkeletonStateT<T>& state,
+    const Skeleton& skeleton) {
+  JointParametersT<T> result =
+      JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
+  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+    const auto parentJoint = skeleton.joints[i].parent;
+    TransformT<T> parentXF;
+    if (parentJoint != kInvalidIndex) {
+      parentXF = state.jointState[parentJoint].transform;
+    }
+
+    // parentXF * localXF = jointXF
+    const TransformT<T> localXF = state.jointState[i].localTransform;
+    result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
+        localTransformToJointParameters(skeleton.joints[i], localXF);
+  }
+
+  return result;
+}
+
+template <typename T>
+JointParametersT<T> skeletonStateToJointParameters(
+    const TransformListT<T>& state,
+    const Skeleton& skeleton) {
+  JointParametersT<T> result =
+      JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
+  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+    const auto parentJoint = skeleton.joints[i].parent;
+    TransformT<T> parentXF;
+    if (parentJoint != kInvalidIndex) {
+      parentXF = state[parentJoint];
+    }
+
+    // parentXF * localXF = jointXF
+    const TransformT<T> localXF = parentXF.inverse() * state[i];
+    result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
+        localTransformToJointParameters(skeleton.joints[i], localXF);
+  }
+  return result;
+}
+
 template struct SkeletonStateT<float>;
 template struct SkeletonStateT<double>;
 
@@ -244,5 +306,19 @@ template TransformT<double> transformAtoB(
     size_t jointB,
     const Skeleton& referenceSkeleton,
     const SkeletonStateT<double>& skelState);
+
+template JointParametersT<float> skeletonStateToJointParameters(
+    const SkeletonStateT<float>& state,
+    const Skeleton& skeleton);
+template JointParametersT<double> skeletonStateToJointParameters(
+    const SkeletonStateT<double>& state,
+    const Skeleton& skeleton);
+
+template JointParametersT<float> skeletonStateToJointParameters(
+    const TransformListT<float>& state,
+    const Skeleton& skeleton);
+template JointParametersT<double> skeletonStateToJointParameters(
+    const TransformListT<double>& state,
+    const Skeleton& skeleton);
 
 } // namespace momentum
