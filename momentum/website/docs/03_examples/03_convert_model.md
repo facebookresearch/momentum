@@ -6,6 +6,14 @@ sidebar_position: 3
 
 The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX and GLB formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx` or `.glb`). If no input model is provided, the tool will automatically read the animation from an existing GLB or FBX file.
 
+<FbInternalOnly>
+
+:::note
+The buck mode `@arvr/mode/win/opt` is for Windows. Use `@arvr/mode/mac-arm/opt` for macOS or `@arvr/mode/platform010/opt` for Linux.
+:::
+
+</FbInternalOnly>
+
 ```
 convert_model [OPTIONS]
 
@@ -31,7 +39,7 @@ pixi run convert_model -m character.fbx -p character.model -l character.locators
 
 <FbInternalOnly>
 ```
-buck2 run @<mode> convert_model -- -m character.fbx -p character.model -l character.locators -o character.glb
+buck run @arvr/mode/win/opt convert_model -- -m character.fbx -p character.model -l character.locators -o character.glb
 ```
 </FbInternalOnly>
 
@@ -45,7 +53,7 @@ pixi run convert_model -d animation.glb -o animation.fbx
 
 <FbInternalOnly>
 ```
-buck2 run @<mode> convert_model -- -d animation.glb -o animation.fbx
+buck run @arvr/mode/win/opt convert_model -- -d animation.glb -o animation.fbx
 ```
 </FbInternalOnly>
 
@@ -59,7 +67,7 @@ pixi run convert_model -d animation.fbx -p character.model -o animation.glb
 
 <FbInternalOnly>
 ```
-buck2 run @<mode> convert_model -- -d animation.fbx -p character.model -o animation.glb
+buck run @arvr/mode/win/opt convert_model -- -d animation.fbx -p character.model -o animation.glb
 ```
 </FbInternalOnly>
 
@@ -73,6 +81,6 @@ pixi run convert_model -m character.fbx -p character.model -d animation_s0.glb -
 
 <FbInternalOnly>
 ```
-buck2 run @<mode> convert_model -- -m character.fbx -p character.model -d animation_s0.glb -o animation_s4.fbx -c
+buck run @arvr/mode/win/opt convert_model -- -m character.fbx -p character.model -d animation_s0.glb -o animation_s4.fbx -c
 ```
 </FbInternalOnly>

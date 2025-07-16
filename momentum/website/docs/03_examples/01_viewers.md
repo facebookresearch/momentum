@@ -8,13 +8,29 @@ Momentum supports various file formats for storing characters and motions. In th
 
 For simplicity, we have built individual viewers for each file format. Each viewer example may require different arguments. Please use the `--help` option to see the correct usage of each example.
 
+<FbInternalOnly>
+
+:::note
+The buck mode `@arvr/mode/win/opt` is for Windows. Use `@arvr/mode/mac-arm/opt` for macOS or `@arvr/mode/platform010/opt` for Linux.
+:::
+
+</FbInternalOnly>
+
 ## GLB Viewer
 
 To run the GLB viewer, use the following command:
 
+<OssOnly>
 ```
 pixi run glb_viewer --input <my_file.glb>
 ```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt glb_viewer -- --input <my_file.glb>
+```
+</FbInternalOnly>
 
 ![glb_viewer](/img/glb_viewer.png)
 
@@ -24,9 +40,17 @@ pixi run glb_viewer --input <my_file.glb>
 
 To run the FBX viewer, use the following command:
 
+<OssOnly>
 ```
 pixi run fbx_viewer --input <my_file.fbx>
 ```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt fbx_viewer -- --input <my_file.fbx>
+```
+</FbInternalOnly>
 
 * [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/fbx_viewer)
 
@@ -34,9 +58,17 @@ pixi run fbx_viewer --input <my_file.fbx>
 
 To run the C3D viewer, use the following command:
 
+<OssOnly>
 ```
 pixi run c3d_viewer --input <my_file.c3d>
 ```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt c3d_viewer -- --input <my_file.c3d>
+```
+</FbInternalOnly>
 
 * [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/c3d_viewer)
 
@@ -44,9 +76,17 @@ pixi run c3d_viewer --input <my_file.c3d>
 
 To run the URDF viewer, use the following command:
 
+<OssOnly>
 ```
 pixi run urdf_viewer --input <my_file.urdf>
 ```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt urdf_viewer -- --input <my_file.urdf>
+```
+</FbInternalOnly>
 
 * [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/urdf_viewer)
 
