@@ -266,6 +266,98 @@ class TestQuaternion(unittest.TestCase):
         self.assertIn("weights=torch.Size([2, 5])", str(context.exception))
         self.assertIn("quaternions=torch.Size([2, 3, 4])", str(context.exception))
 
+    def test_slerp_extremes(self) -> None:
+        torch.manual_seed(0)  # ensure repeatability
+        nMat = 5
+        q1 = generateRandomQuats(nMat)
+        q2 = generateRandomQuats(nMat)
+
+        # Test slerp at t=0 should return q1
+        q_slerp_0 = quaternion.slerp(q1, q2, torch.tensor([0.0]))
+        self.assertTrue(
+            torch.allclose(
+                quaternion.to_rotation_matrix(q_slerp_0),
+                quaternion.to_rotation_matrix(q1),
+                rtol=1e-3,
+                atol=1e-4,
+            )
+        )
+
+        # Test slerp at t=1 should return q2
+        q_slerp_1 = quaternion.slerp(q1, q2, torch.tensor([1.0]))
+        self.assertTrue(
+            torch.allclose(
+                quaternion.to_rotation_matrix(q_slerp_1),
+                quaternion.to_rotation_matrix(q2),
+                rtol=1e-3,
+                atol=1e-4,
+            )
+        )
+
+    def test_slerp_midpoint(self) -> None:
+        q1 = quaternion.euler_xyz_to_quaternion(torch.tensor([0.0, 0.0, 0.0]))
+        q2 = quaternion.euler_xyz_to_quaternion(torch.tensor([math.pi / 2, 0.0, 0.0]))
+
+        # Test slerp at t=0.5 should be in the middle
+        q_result = quaternion.slerp(q1, q2, torch.tensor([0.5]))
+
+        q_target = quaternion.euler_xyz_to_quaternion(
+            torch.tensor([math.pi / 4, 0.0, 0.0])
+        )
+        # Check if the slerp result is approximately in the middle
+        self.assertLess(
+            torch.norm(
+                quaternion.to_rotation_matrix(q_result)
+                - quaternion.to_rotation_matrix(q_target)
+            ),
+            1e-1,
+            "Expected slerp result to be approximately in the middle.",
+        )
+
+        q3 = quaternion.euler_xyz_to_quaternion(torch.tensor([math.pi, 0.0, 0.0]))
+        q_result2 = quaternion.slerp(q1, q3, torch.tensor([0.5]))
+        q_target2a = quaternion.euler_xyz_to_quaternion(
+            torch.tensor([math.pi / 2, 0.0, 0.0])
+        )
+        q_target2b = quaternion.euler_xyz_to_quaternion(
+            torch.tensor([-math.pi / 2, 0.0, 0.0])
+        )
+        # Could go either way around the circle, so check both
+        diff2a = torch.norm(
+            quaternion.to_rotation_matrix(q_result2)
+            - quaternion.to_rotation_matrix(q_target2a)
+        )
+        diff2b = torch.norm(
+            quaternion.to_rotation_matrix(q_result2)
+            - quaternion.to_rotation_matrix(q_target2b)
+        )
+        self.assertTrue(diff2a < 1e-5 or diff2b < 1e-5)
+
+    def test_slerp_close_matrices(self) -> None:
+        torch.manual_seed(0)  # ensure repeatability
+        nMat = 5
+        q1 = generateRandomQuats(nMat)
+
+        q_result = quaternion.slerp(q1, q1, torch.tensor([0.5]))
+
+        self.assertLess(
+            torch.norm(
+                quaternion.to_rotation_matrix(q_result)
+                - quaternion.to_rotation_matrix(q1)
+            ),
+            1e-5,
+        )
+
+        q_result = quaternion.slerp(q1, -q1, torch.tensor([0.5]))
+
+        self.assertLess(
+            torch.norm(
+                quaternion.to_rotation_matrix(q_result)
+                - quaternion.to_rotation_matrix(q1)
+            ),
+            1e-5,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
