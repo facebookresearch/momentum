@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.quaternion_to_xyz_euler"><code class="docutils literal notranslate"><span class="pre">quaternion_to_xyz_euler()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.rotate_vector"><code class="docutils literal notranslate"><span class="pre">rotate_vector()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.to_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix()</span></code></a></li>
 </ul>
@@ -304,6 +305,24 @@ Should not be smaller than 1e-6 as this can cause NaN gradients for some models.
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(nBatch x k x 3) rotated vectors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.slerp">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">slerp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.slerp" title="Link to this definition"></a></dt>
+<dd><p>Perform spherical linear interpolation (slerp) between two quaternions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> – The starting quaternion.</p></li>
+<li><p><strong>q1</strong> – The ending quaternion.</p></li>
+<li><p><strong>t</strong> – The interpolation parameter, where 0 &lt;= t &lt;= 1.  t=0 corresponds to q0, t=1 corresponds to q1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The interpolated quaternion.</p>
 </dd>
 </dl>
 </dd></dl>

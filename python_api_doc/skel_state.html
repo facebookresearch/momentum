@@ -57,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.match_leading_dimensions"><code class="docutils literal notranslate"><span class="pre">match_leading_dimensions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.to_matrix"><code class="docutils literal notranslate"><span class="pre">to_matrix()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.transform_points"><code class="docutils literal notranslate"><span class="pre">transform_points()</span></code></a></li>
@@ -260,6 +261,24 @@
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state.slerp">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state.</span></span><span class="sig-name descname"><span class="pre">slerp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.skel_state.slerp" title="Link to this definition"></a></dt>
+<dd><p>Spherical linear interpolation between two skeleton states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> – The first skeleton state.</p></li>
+<li><p><strong>s1</strong> – The second skeleton state.</p></li>
+<li><p><strong>t</strong> – The interpolation factor, where 0 &lt;= t &lt;= 1.  t=0 corresponds to s0, t=1 corresponds to s1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The interpolated skeleton state.</p>
 </dd>
 </dl>
 </dd></dl>
