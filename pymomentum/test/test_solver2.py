@@ -295,7 +295,7 @@ class TestSolver(unittest.TestCase):
 
         # Add StateSequenceErrorFunction for smoothness across frames
         smoothness_error = pym_solver2.StateSequenceErrorFunction(character, weight=1.0)
-        solver_function.add_sequence_error_function(0, smoothness_error)
+        solver_function.add_sequence_error_function_all_frames(smoothness_error)
 
         # Set solver options
         solver_options = pym_solver2.SequenceSolverOptions()
