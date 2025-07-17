@@ -85,6 +85,14 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
     return parameterTransform_;
   }
 
+  [[nodiscard]] const auto& getErrorFunctions(size_t iFrame) const {
+    return perFrameErrorFunctions_.at(iFrame);
+  }
+
+  [[nodiscard]] const auto& getSequenceErrorFunctions(size_t iFrame) const {
+    return sequenceErrorFunctions_.at(iFrame);
+  }
+
  private:
   void setFrameParametersFromJoinedParameterVector(const Eigen::VectorX<T>& parameters);
 
