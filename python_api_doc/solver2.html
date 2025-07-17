@@ -150,6 +150,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_error_function"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.add_error_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.add_sequence_error_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function_all_frames"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.add_sequence_error_function_all_frames()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.get_error_functions"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.get_error_functions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.get_sequence_error_functions"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.get_sequence_error_functions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.set_enabled_parameters"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.set_enabled_parameters()</span></code></a></li>
 </ul>
 </li>
@@ -1211,6 +1213,26 @@ This is useful for camera-based constraints where you want to match a 3D point t
 <dd class="field-odd"><p><strong>error_function</strong> – The error function to add.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.SequenceSolverFunction.get_error_functions">
+<span class="sig-name descname"><span class="pre">get_error_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction" title="pymomentum.solver2.SequenceSolverFunction"><span class="pre">pymomentum.solver2.SequenceSolverFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><span class="pre">pymomentum.solver2.SkeletonErrorFunction</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.solver2.SequenceSolverFunction.get_error_functions" title="Link to this definition"></a></dt>
+<dd><p>Returns the per-frame error functions for a given frame.</p>
+<blockquote>
+<div><p>Note that this is read-only; appending to this list will not affect the SequenceErrorFunction,
+use <a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_error_function" title="pymomentum.solver2.SequenceSolverFunction.add_error_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_error_function()</span></code></a> instead.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.SequenceSolverFunction.get_sequence_error_functions">
+<span class="sig-name descname"><span class="pre">get_sequence_error_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction" title="pymomentum.solver2.SequenceSolverFunction"><span class="pre">pymomentum.solver2.SequenceSolverFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.solver2.SequenceErrorFunction" title="pymomentum.solver2.SequenceErrorFunction"><span class="pre">pymomentum.solver2.SequenceErrorFunction</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.solver2.SequenceSolverFunction.get_sequence_error_functions" title="Link to this definition"></a></dt>
+<dd><p>Returns the sequence error functions.</p>
+<blockquote>
+<div><p>Note that this is read-only; appending to this list will not affect the SequenceErrorFunction,
+use <a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function" title="pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_sequence_error_function()</span></code></a> instead.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
