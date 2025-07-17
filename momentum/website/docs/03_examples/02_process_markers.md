@@ -15,6 +15,14 @@ The Momentum ecosystem implicitly operates in *centimeter*. If you are working w
 
 :::
 
+<FbInternalOnly>
+
+:::note
+The buck mode `@arvr/mode/win/opt` is for Windows. Use `@arvr/mode/mac-arm/opt` for macOS or `@arvr/mode/platform010/opt` for Linux.
+:::
+
+</FbInternalOnly>
+
 ## Example use cases
 
 Get the full list of options for each application with `-h` or `--help` argument. `02_01.c3d` is an example input file used by the default config files. Note that a config file can be used together with command line options. The command line overwrites values in the config file.
@@ -25,17 +33,17 @@ The first step in tracking a marker file is to calibrate the subject's proportio
 
 Use a config file:
 
-<FbInternalOnly>
-```
-buck2 run @arvr/mode/win/opt :process_markers_app -- -c process_markers_calib.config
-```
-</FbInternalOnly>
-
 <OssOnly>
 ```
 pixi run process_markers -c process_markers_calib.config
 ```
 </OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt process_markers_app -- -c process_markers_calib.config
+```
+</FbInternalOnly>
 
 Setting the `calibrate` option to true will first calibrate the skeleton and the marker layout, then use the calibrated model for motion tracking.
 <FbInternalOnly>
@@ -48,28 +56,28 @@ The tracking result from the above calibration step contains the calibrated mode
 
 Use a config file:
 
-<FbInternalOnly>
-```
-buck2 run @arvr/mode/win/opt :process_markers_app -- -c process_markers_tracking.config
-```
-</FbInternalOnly>
-
 <OssOnly>
 ```
 pixi run process_markers -c process_markers_tracking.config
 ```
 </OssOnly>
 
-Use cli arguments:
-
 <FbInternalOnly>
 ```
-buck2 run :process_markers_app -- -i input.c3d -o tracked.glb --model calibrated_model.glb --calibrate false
+buck run @arvr/mode/win/opt process_markers_app -- -c process_markers_tracking.config
 ```
 </FbInternalOnly>
+
+Use cli arguments:
 
 <OssOnly>
 ```
 pixi run process_markers -i input.c3d -o tracked.glb --model calibrated_model.glb --calibrate false
 ```
 </OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt process_markers_app -- -i input.c3d -o tracked.glb --model calibrated_model.glb --calibrate false
+```
+</FbInternalOnly>
