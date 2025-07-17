@@ -6,6 +6,14 @@ sidebar_position: 4
 
 The input marker data may be noisy or contain missing data in a few frames. We can run a smoothing step on the entire sequence to fill in gaps and smooth out noise.
 
+<FbInternalOnly>
+
+:::note
+The buck mode `@arvr/mode/win/opt` is for Windows. Use `@arvr/mode/mac-arm/opt` for macOS or `@arvr/mode/platform010/opt` for Linux.
+:::
+
+</FbInternalOnly>
+
 Use a config file:
 
 <OssOnly>
@@ -16,7 +24,7 @@ pixi run refine_motion -c refine_motion.config
 
 <FbInternalOnly>
 ```
-buck run @<mode> refine_motion -- -c refine_motion.config
+buck run @arvr/mode/win/opt refine_motion -- -c refine_motion.config
 ```
 </FbInternalOnly>
 
@@ -30,6 +38,6 @@ pixi run refine_motion -c refine_motion.config -i track.glb -o refined.glb --smo
 
 <FbInternalOnly>
 ```
-buck run @<mode> refine_motion -- -c refine_motion.config -i track.glb -o refined.glb --smoothing 2.5
+buck run @arvr/mode/win/opt refine_motion -- -c refine_motion.config -i track.glb -o refined.glb --smoothing 2.5
 ```
 </FbInternalOnly>

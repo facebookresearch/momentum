@@ -149,6 +149,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_error_function"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.add_error_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.add_sequence_error_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function_all_frames"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.add_sequence_error_function_all_frames()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction.set_enabled_parameters"><code class="docutils literal notranslate"><span class="pre">SequenceSolverFunction.set_enabled_parameters()</span></code></a></li>
 </ul>
 </li>
@@ -1197,6 +1198,17 @@ This is useful for camera-based constraints where you want to match a 3D point t
 <li><p><strong>frame_idx</strong> – The frame index to add the error function to.</p></li>
 <li><p><strong>error_function</strong> – The error function to add.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function_all_frames">
+<span class="sig-name descname"><span class="pre">add_sequence_error_function_all_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SequenceSolverFunction" title="pymomentum.solver2.SequenceSolverFunction"><span class="pre">pymomentum.solver2.SequenceSolverFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SequenceErrorFunction" title="pymomentum.solver2.SequenceErrorFunction"><span class="pre">pymomentum.solver2.SequenceErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.SequenceSolverFunction.add_sequence_error_function_all_frames" title="Link to this definition"></a></dt>
+<dd><p>Adds an error function that spans all frames in the solver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>error_function</strong> – The error function to add.</p>
 </dd>
 </dl>
 </dd></dl>
