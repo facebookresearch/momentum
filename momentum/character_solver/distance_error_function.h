@@ -60,6 +60,10 @@ class DistanceErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
     return constraints_.size();
   }
 
+  [[nodiscard]] const std::vector<DistanceConstraintDataT<T>>& getConstraints() const {
+    return constraints_;
+  }
+
  protected:
   // TODO: what should we use here?
   const T kDistanceWeight = 1.0f;
