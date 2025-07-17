@@ -322,6 +322,16 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           py::arg("frame_idx"),
           py::arg("error_function"))
       .def(
+          "add_sequence_error_function_all_frames",
+          [](mm::SequenceSolverFunction& self,
+             std::shared_ptr<mm::SequenceErrorFunction> errorFunction) {
+            self.addSequenceErrorFunction(mm::kAllFrames, errorFunction);
+          },
+          R"(Adds an error function that spans all frames in the solver.
+
+:param error_function: The error function to add.)",
+          py::arg("error_function"))
+      .def(
           "set_enabled_parameters",
           [](mm::SequenceSolverFunction& self,
              const py::array_t<bool>& activeParams) {
