@@ -288,6 +288,10 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           [](mm::SequenceSolverFunction& self,
              int iFrame,
              std::shared_ptr<mm::SkeletonErrorFunction> errorFunction) {
+            if (iFrame < 0 || iFrame >= self.getNumFrames()) {
+              throw py::index_error(
+                  fmt::format("Invalid frame index {}", iFrame));
+            }
             self.addErrorFunction(iFrame, errorFunction);
           },
           R"(Adds an error function that applies to a single frame to the solver.
@@ -313,6 +317,10 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           [](mm::SequenceSolverFunction& self,
              int iFrame,
              std::shared_ptr<mm::SequenceErrorFunction> errorFunction) {
+            if (iFrame < 0 || iFrame >= self.getNumFrames()) {
+              throw py::index_error(
+                  fmt::format("Invalid frame index {}", iFrame));
+            }
             self.addSequenceErrorFunction(iFrame, errorFunction);
           },
           R"(Adds an error function that spans multiple frames in the solver.
@@ -341,7 +349,35 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           R"(Sets the active model parameters for the solver.  The array should be of size `character.parameter_transform.size()` and applies to every frame of the solve.
 
 :param active_parameters: Numpy array of length num of model params.)",
-          py::arg("active_parameters"));
+          py::arg("active_parameters"))
+      .def(
+          "get_error_functions",
+          [](const mm::SequenceSolverFunction& self, int frameIdx) {
+            if (frameIdx < 0 || frameIdx >= self.getNumFrames()) {
+              throw py::index_error(
+                  fmt::format("Invalid frame index {}", frameIdx));
+            }
+            return self.getErrorFunctions(frameIdx);
+          },
+          R"(Returns the per-frame error functions for a given frame.
+          
+          Note that this is read-only; appending to this list will not affect the SequenceErrorFunction,
+          use :func:`add_error_function` instead.)",
+          py::arg("frame_idx"))
+      .def(
+          "get_sequence_error_functions",
+          [](const mm::SequenceSolverFunction& self, int frameIdx) {
+            if (frameIdx < 0 || frameIdx >= self.getNumFrames()) {
+              throw py::index_error(
+                  fmt::format("Invalid frame index {}", frameIdx));
+            }
+            return self.getSequenceErrorFunctions(frameIdx);
+          },
+          R"(Returns the sequence error functions.
+          
+          Note that this is read-only; appending to this list will not affect the SequenceErrorFunction,
+          use :func:`add_sequence_error_function` instead.)",
+          py::arg("frame_idx"));
 
   // Solver options:
   py::class_<mm::SolverOptions, std::shared_ptr<mm::SolverOptions>>(
