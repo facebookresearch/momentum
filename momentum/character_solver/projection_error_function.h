@@ -71,6 +71,10 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
     constraints_ = std::move(constraints);
   }
 
+  [[nodiscard]] const std::vector<ProjectionConstraintDataT<T>>& getConstraints() const {
+    return constraints_;
+  }
+
  protected:
   std::vector<ProjectionConstraintDataT<T>> constraints_;
 

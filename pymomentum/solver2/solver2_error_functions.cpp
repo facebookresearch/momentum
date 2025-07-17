@@ -81,6 +81,10 @@ void defAimErrorFunction(
           py::arg("alpha") = 2.0f,
           py::arg("c") = 1.0f,
           py::arg("weight") = 1.0f)
+      .def_property_readonly(
+          "constraints",
+          [](const AimErrorFunctionT& self) { return self.getConstraints(); },
+          "Returns the list of aim constraints.")
       .def(
           "add_constraint",
           [](AimErrorFunctionT& self,
@@ -248,6 +252,12 @@ void defFixedAxisError(
           py::arg("parent"),
           py::arg("weight") = 1.0f,
           py::arg("name") = std::string{})
+      .def_property_readonly(
+          "constraints",
+          [](const FixedAxisErrorFunctionT& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of fixed axis constraints.")
       .def(
           "add_constraints",
           [](FixedAxisErrorFunctionT& self,
@@ -310,6 +320,42 @@ void defFixedAxisError(
 }
 
 void defNormalErrorFunction(py::module_& m) {
+  py::class_<mm::NormalDataT<float>>(m, "NormalData")
+      .def(
+          "__repr__",
+          [](const mm::NormalDataT<float>& self) {
+            return fmt::format(
+                "NormalData(parent={}, weight={}, local_point=[{:.3f}, {:.3f}, {:.3f}], local_normal=[{:.3f}, {:.3f}, {:.3f}], global_point=[{:.3f}, {:.3f}, {:.3f}])",
+                self.parent,
+                self.weight,
+                self.localPoint.x(),
+                self.localPoint.y(),
+                self.localPoint.z(),
+                self.localNormal.x(),
+                self.localNormal.y(),
+                self.localNormal.z(),
+                self.globalPoint.x(),
+                self.globalPoint.y(),
+                self.globalPoint.z());
+          })
+      .def_readonly(
+          "parent", &mm::NormalDataT<float>::parent, "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::NormalDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "local_point",
+          &mm::NormalDataT<float>::localPoint,
+          "The local point in parent space")
+      .def_readonly(
+          "local_normal",
+          &mm::NormalDataT<float>::localNormal,
+          "The local normal in parent space")
+      .def_readonly(
+          "global_point",
+          &mm::NormalDataT<float>::globalPoint,
+          "The global point");
   py::class_<
       mm::NormalErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
@@ -382,6 +428,12 @@ plane defined by a local point and a local normal vector.)")
           py::arg("local_point") = std::nullopt,
           py::arg("weight") = 1.0f,
           py::arg("name") = std::string{})
+      .def_property_readonly(
+          "constraints",
+          [](const mm::NormalErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of normal constraints.")
       .def(
           "add_constraints",
           [](mm::NormalErrorFunctionT<float>& self,
@@ -457,6 +509,43 @@ plane defined by a local point and a local normal vector.)")
 }
 
 void defDistanceErrorFunction(py::module_& m) {
+  py::class_<mm::DistanceConstraintDataT<float>>(m, "DistanceData")
+      .def(
+          "__repr__",
+          [](const mm::DistanceConstraintDataT<float>& self) {
+            return fmt::format(
+                "DistanceData(parent={}, weight={}, offset=[{:.3f}, {:.3f}, {:.3f}], origin=[{:.3f}, {:.3f}, {:.3f}], target={:.3f})",
+                self.parent,
+                self.weight,
+                self.offset.x(),
+                self.offset.y(),
+                self.offset.z(),
+                self.origin.x(),
+                self.origin.y(),
+                self.origin.z(),
+                self.target);
+          })
+      .def_readonly(
+          "parent",
+          &mm::DistanceConstraintDataT<float>::parent,
+          "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::DistanceConstraintDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "offset",
+          &mm::DistanceConstraintDataT<float>::offset,
+          "The offset in parent space")
+      .def_readonly(
+          "origin",
+          &mm::DistanceConstraintDataT<float>::origin,
+          "The origin point in world space")
+      .def_readonly(
+          "target",
+          &mm::DistanceConstraintDataT<float>::target,
+          "The target distance");
+
   py::class_<
       mm::DistanceErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
@@ -585,10 +674,48 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
       .def(
           "num_constraints",
           &mm::DistanceErrorFunctionT<float>::numConstraints,
-          "Returns the number of constraints.");
+          "Returns the number of constraints.")
+      .def_property_readonly(
+          "constraints",
+          &mm::DistanceErrorFunctionT<float>::getConstraints,
+          "Returns the list of distance constraints.");
 }
 
 void defProjectionErrorFunction(py::module_& m) {
+  py::class_<mm::ProjectionConstraintDataT<float>>(m, "ProjectionConstraint")
+      .def(
+          "__repr__",
+          [](const mm::ProjectionConstraintDataT<float>& self) {
+            return fmt::format(
+                "ProjectionConstraint(parent={}, weight={}, offset=[{:.3f}, {:.3f}, {:.3f}], target=[{:.3f}, {:.3f}])",
+                self.parent,
+                self.weight,
+                self.offset.x(),
+                self.offset.y(),
+                self.offset.z(),
+                self.target.x(),
+                self.target.y());
+          })
+      .def_readonly(
+          "parent",
+          &mm::ProjectionConstraintDataT<float>::parent,
+          "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::ProjectionConstraintDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "offset",
+          &mm::ProjectionConstraintDataT<float>::offset,
+          "The offset in parent space")
+      .def_readonly(
+          "target",
+          &mm::ProjectionConstraintDataT<float>::target,
+          "The target 2D position")
+      .def_readonly(
+          "projection",
+          &mm::ProjectionConstraintDataT<float>::projection,
+          "The 3x4 projection matrix");
   py::class_<
       mm::ProjectionErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
@@ -748,7 +875,11 @@ This is useful for camera-based constraints where you want to match a 3D point t
       .def(
           "num_constraints",
           &mm::ProjectionErrorFunctionT<float>::numConstraints,
-          "Returns the number of constraints.");
+          "Returns the number of constraints.")
+      .def_property_readonly(
+          "constraints",
+          &mm::ProjectionErrorFunctionT<float>::getConstraints,
+          "Returns the list of projection constraints.");
 }
 
 void defVertexProjectionErrorFunction(py::module_& m) {
@@ -914,6 +1045,39 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
 }
 
 void defPlaneErrorFunction(py::module_& m) {
+  py::class_<mm::PlaneDataT<float>>(m, "PlaneData")
+      .def(
+          "__repr__",
+          [](const mm::PlaneDataT<float>& self) {
+            return fmt::format(
+                "PlaneData(parent={}, weight={}, offset=[{:.3f}, {:.3f}, {:.3f}], normal=[{:.3f}, {:.3f}, {:.3f}], d={:.3f})",
+                self.parent,
+                self.weight,
+                self.offset.x(),
+                self.offset.y(),
+                self.offset.z(),
+                self.normal.x(),
+                self.normal.y(),
+                self.normal.z(),
+                self.d);
+          })
+      .def_readonly(
+          "parent", &mm::PlaneDataT<float>::parent, "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::PlaneDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "offset",
+          &mm::PlaneDataT<float>::offset,
+          "The offset in parent space")
+      .def_readonly(
+          "normal", &mm::PlaneDataT<float>::normal, "The normal of the plane")
+      .def_readonly(
+          "d",
+          &mm::PlaneDataT<float>::d,
+          "The d parameter in the plane equation");
+
   py::class_<
       mm::PlaneErrorFunction,
       mm::SkeletonErrorFunction,
@@ -985,6 +1149,12 @@ distance is greater than zero (ie. the point being above).)")
           py::arg("parent"),
           py::arg("weight") = 1.0f,
           py::arg("name") = std::string{})
+      .def_property_readonly(
+          "constraints",
+          [](const mm::PlaneErrorFunction& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of plane constraints.")
       .def(
           "add_constraints",
           [](mm::PlaneErrorFunction& self,
@@ -1144,6 +1314,34 @@ void addErrorFunctions(py::module_& m) {
           py::arg("target_parameters"),
           py::arg("weights") = std::optional<py::array_t<float>>{});
 
+  py::class_<mm::PositionDataT<float>>(m, "PositionData")
+      .def(
+          "__repr__",
+          [](const mm::PositionDataT<float>& self) {
+            return fmt::format(
+                "PositionData(parent={}, weight={}, offset=[{:.3f}, {:.3f}, {:.3f}], target=[{:.3f}, {:.3f}, {:.3f}])",
+                self.parent,
+                self.weight,
+                self.offset.x(),
+                self.offset.y(),
+                self.offset.z(),
+                self.target.x(),
+                self.target.y(),
+                self.target.z());
+          })
+      .def_readonly(
+          "parent", &mm::PositionDataT<float>::parent, "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::PositionDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "offset",
+          &mm::PositionDataT<float>::offset,
+          "The offset in parent space")
+      .def_readonly(
+          "target", &mm::PositionDataT<float>::target, "The target position");
+
   py::class_<
       mm::PositionErrorFunction,
       mm::SkeletonErrorFunction,
@@ -1215,6 +1413,12 @@ Uses a generalized loss function that support various forms of losses such as L1
           py::arg("offset") = std::nullopt,
           py::arg("weight") = 1.0f,
           py::arg("name") = std::string{})
+      .def_property_readonly(
+          "constraints",
+          [](const mm::PositionErrorFunction& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of position constraints.")
       .def(
           "add_constraints",
           [](mm::PositionErrorFunction& errf,
@@ -1281,6 +1485,43 @@ Uses a generalized loss function that support various forms of losses such as L1
           py::arg("name") = std::optional<std::vector<std::string>>{});
 
   // Aim error functions
+  py::class_<mm::AimDataT<float>>(m, "AimData")
+      .def(
+          "__repr__",
+          [](const mm::AimDataT<float>& self) {
+            return fmt::format(
+                "AimData(parent={}, weight={}, local_point=[{:.3f}, {:.3f}, {:.3f}], local_dir=[{:.3f}, {:.3f}, {:.3f}], global_target=[{:.3f}, {:.3f}, {:.3f}])",
+                self.parent,
+                self.weight,
+                self.localPoint.x(),
+                self.localPoint.y(),
+                self.localPoint.z(),
+                self.localDir.x(),
+                self.localDir.y(),
+                self.localDir.z(),
+                self.globalTarget.x(),
+                self.globalTarget.y(),
+                self.globalTarget.z());
+          })
+      .def_readonly(
+          "parent", &mm::AimDataT<float>::parent, "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::AimDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "local_point",
+          &mm::AimDataT<float>::localPoint,
+          "The origin of the local ray")
+      .def_readonly(
+          "local_dir",
+          &mm::AimDataT<float>::localDir,
+          "The direction of the local ray")
+      .def_readonly(
+          "global_target",
+          &mm::AimDataT<float>::globalTarget,
+          "The global aim target");
+
   defAimErrorFunction<mm::AimDistErrorFunctionT<float>>(
       m,
       "AimDistErrorFunction",
@@ -1298,6 +1539,38 @@ world-space target point.  If the vector has near-zero length, the residual is s
 avoid divide-by-zero. )");
 
   // Fixed axis error functions.
+  py::class_<mm::FixedAxisDataT<float>>(m, "FixedAxisData")
+      .def(
+          "__repr__",
+          [](const mm::FixedAxisDataT<float>& self) {
+            return fmt::format(
+                "FixedAxisData(parent={}, weight={}, local_axis=[{:.3f}, {:.3f}, {:.3f}], global_axis=[{:.3f}, {:.3f}, {:.3f}])",
+                self.parent,
+                self.weight,
+                self.localAxis.x(),
+                self.localAxis.y(),
+                self.localAxis.z(),
+                self.globalAxis.x(),
+                self.globalAxis.y(),
+                self.globalAxis.z());
+          })
+      .def_readonly(
+          "parent",
+          &mm::FixedAxisDataT<float>::parent,
+          "The parent joint index")
+      .def_readonly(
+          "weight",
+          &mm::FixedAxisDataT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "local_axis",
+          &mm::FixedAxisDataT<float>::localAxis,
+          "The local axis in parent space")
+      .def_readonly(
+          "global_axis",
+          &mm::FixedAxisDataT<float>::globalAxis,
+          "The global axis");
+
   defFixedAxisError<mm::FixedAxisDiffErrorFunctionT<float>>(
       m,
       "FixedAxisDiffErrorFunction",
