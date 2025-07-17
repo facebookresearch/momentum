@@ -756,6 +756,16 @@ void defVertexProjectionErrorFunction(py::module_& m) {
       m,
       "VertexProjectionConstraint",
       "Read-only access to a vertex projection constraint.")
+      .def(
+          "__repr__",
+          [](const mm::VertexProjectionConstraint& self) {
+            return fmt::format(
+                "VertexProjectionConstraint(vertex_index={}, weight={}, target_position=[{:.3f}, {:.3f}])",
+                self.vertexIndex,
+                self.weight,
+                self.targetPosition.x(),
+                self.targetPosition.y());
+          })
       .def_readonly(
           "vertex_index",
           &mm::VertexProjectionConstraint::vertexIndex,
@@ -841,8 +851,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           [](const mm::VertexProjectionErrorFunctionT<float>& self) {
             return self.getConstraints();
           },
-          "Returns the list of vertex projection constraints.",
-          py::return_value_policy::reference_internal)
+          "Returns the list of vertex projection constraints.")
       .def(
           "add_constraints",
           [](mm::VertexProjectionErrorFunctionT<float>& self,
@@ -1423,6 +1432,17 @@ avoid divide-by-zero. )");
           "Point-to-plane using a 50/50 mix of source and target normal");
 
   py::class_<mm::VertexConstraint>(m, "VertexConstraint")
+      .def(
+          "__repr__",
+          [](const mm::VertexConstraint& self) {
+            return fmt::format(
+                "VertexConstraint(vertex_index={}, weight={}, target_position=[{:.3f}, {:.3f}, {:.3f}])",
+                self.vertexIndex,
+                self.weight,
+                self.targetPosition.x(),
+                self.targetPosition.y(),
+                self.targetPosition.z());
+          })
       .def_readonly(
           "vertex_index",
           &mm::VertexConstraint::vertexIndex,
