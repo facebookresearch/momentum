@@ -307,3 +307,48 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
   EXPECT_NEAR(err_single, err_multi, Eps<T>(1e-7f, 1e-15));
   EXPECT_LE(err_single, err_gn + Eps<T>(5e-7f, 1e-14));
 }
+
+TYPED_TEST(SequenceSolverTest, OnlySharedParams) {
+  using T = typename TestFixture::Type;
+
+  // Solving a multi-frame system where only the shared parameters are enabled should produce the
+  // same result as solving a single frame system with all the error functions from all the frames,
+  // since in the first case we'll have the same parameters at every frame and hence all the error
+  // functions will be summed.
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  const size_t nFrames = 5;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  SequenceSolverFunctionT<T> sequenceSolverFunction(
+      &character.skeleton, &castedCharacterParameterTransform, universalParams, nFrames);
+  momentum::ParameterTransformT<T> parameterTransform = character.parameterTransform.cast<T>();
+  SkeletonSolverFunctionT<T> basicSolverFunction(&character.skeleton, &parameterTransform);
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    sequenceSolverFunction.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+    sequenceSolverFunction.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+
+    basicSolverFunction.addErrorFunction(problem.positionErrors[iFrame]);
+    basicSolverFunction.addErrorFunction(problem.orientErrors[iFrame]);
+  }
+
+  SequenceSolverT<T> solver_mp(test::defaultSolverOptions(), &sequenceSolverFunction);
+  solver_mp.setEnabledParameters(universalParams);
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunction.getJoinedParameterVector();
+  test::checkAndTimeSolver<T>(sequenceSolverFunction, solver_mp, parametersInit, universalParams);
+  const auto modelParamsSequence = sequenceSolverFunction.getUniversalParameters();
+
+  GaussNewtonSolverQRT<T> solver_gn(test::defaultSolverOptions(), &basicSolverFunction);
+  solver_gn.setEnabledParameters(universalParams);
+  momentum::ModelParametersT<T> basicModelParams =
+      momentum::ModelParametersT<T>::Zero(character.parameterTransform.numAllModelParameters());
+  solver_gn.solve(basicModelParams.v);
+
+  ASSERT_LT((modelParamsSequence.v - basicModelParams.v).norm(), 1e-4);
+}
