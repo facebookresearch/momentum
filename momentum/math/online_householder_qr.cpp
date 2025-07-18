@@ -448,7 +448,10 @@ OnlineBandedHouseholderQR<T>::OnlineBandedHouseholderQR(
       R_common_{Eigen::MatrixX<T>::Zero(n_band + n_common, n_common)},
       R_band_{Eigen::MatrixX<T>::Zero(bandwidth, n_band)},
       y_{Eigen::VectorX<T>::Zero(n_band + n_common)} {
-  MT_CHECK(bandwidth > 0);
+  // Bandwidth is only allowed to be zero if there are no parameters in the banded part,
+  // in which case it falls back to behaving the same as a regular Householder QR (for
+  // the common part).
+  MT_CHECK(n_band == 0 || bandwidth > 0);
 
   initializeDiagonal();
 }
@@ -613,14 +616,16 @@ typename OnlineBandedHouseholderQR<T>::VectorType OnlineBandedHouseholderQR<T>::
             y_.tail(n_common));
   }
 
-  for (Eigen::Index iRow = n_band - 1; iRow >= 0; --iRow) {
-    T dotProd = n_common > 0 ? R_common_.row(iRow).dot(result.tail(n_common)) : T(0);
+  if (n_band > 0) {
+    for (Eigen::Index iRow = n_band - 1; iRow >= 0; --iRow) {
+      T dotProd = n_common > 0 ? R_common_.row(iRow).dot(result.tail(n_common)) : T(0);
 
-    const Eigen::Index bandwidth_cur = std::min(bandwidth, n_band - iRow);
-    for (Eigen::Index jColOffset = 1; jColOffset < bandwidth_cur; ++jColOffset) {
-      dotProd += R_band_entry(iRow, iRow + jColOffset) * result(iRow + jColOffset);
+      const Eigen::Index bandwidth_cur = std::min(bandwidth, n_band - iRow);
+      for (Eigen::Index jColOffset = 1; jColOffset < bandwidth_cur; ++jColOffset) {
+        dotProd += R_band_entry(iRow, iRow + jColOffset) * result(iRow + jColOffset);
+      }
+      result(iRow) = (y_(iRow) - dotProd) / R_band_entry(iRow, iRow);
     }
-    result(iRow) = (y_(iRow) - dotProd) / R_band_entry(iRow, iRow);
   }
 
   return result;

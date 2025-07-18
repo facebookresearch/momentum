@@ -1086,6 +1086,50 @@ TEST(OnlineBandedQR, WithColumnIndices) {
   EXPECT_LT(residual.norm(), 2.0);
 }
 
+// Test OnlineBandedQR with zero bandwidth
+TEST(OnlineBandedQR, ZeroBandwidth) {
+  std::mt19937 rng(42); // Fixed seed for reproducibility
+
+  // Create test data
+  const int n_band = 0;
+  const int n_common = 3;
+  const int bandwidth = 0;
+  const int n_rows = 5;
+
+  // Create a random matrix for the common part
+  Eigen::VectorXd b = makeRandomMatrix<double>(n_rows, 1, rng);
+
+  // Create a banded QR solver with zero bandwidth
+  OnlineBandedHouseholderQR<double> banded_qr(n_band, n_common, bandwidth);
+  OnlineHouseholderQR<double> dense_qr(n_common);
+
+  // Add the data
+  Eigen::VectorXd Atb_gt = Eigen::VectorXd::Zero(n_common);
+  for (int i = 0; i < n_band; ++i) {
+    Eigen::MatrixXd A_band(bandwidth, n_band);
+    Eigen::MatrixXd A_common = makeRandomMatrix<double>(n_rows, n_common, rng);
+    banded_qr.add(i, A_band, A_common, b);
+    dense_qr.add(A_common, b);
+    Atb_gt += A_common.transpose() * b;
+  }
+
+  // Create a regular QR solver for comparison
+
+  // Compare results
+  Eigen::VectorXd x_banded = banded_qr.x_dense();
+  Eigen::VectorXd x_dense = dense_qr.result();
+
+  // The results should be identical
+  ASSERT_LT((x_banded - x_dense).lpNorm<Eigen::Infinity>(), 1e-10);
+
+  // Check At_times_b
+  Eigen::VectorXd Atb_banded = banded_qr.At_times_b();
+  Eigen::VectorXd Atb_dense = dense_qr.At_times_b();
+
+  ASSERT_LT((Atb_banded - Atb_gt).squaredNorm(), 1e-10);
+  ASSERT_LT((Atb_dense - Atb_gt).squaredNorm(), 1e-10);
+}
+
 TEST(OnlineBandedQR, RandomMatrix) {
   std::mt19937 rng;
 
