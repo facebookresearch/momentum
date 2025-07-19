@@ -16,6 +16,7 @@
 #include "momentum/character_solver/transform_pose.h"
 #include "momentum/character_solver/trust_region_qr.h"
 #include "momentum/math/fmt_eigen.h"
+#include "momentum/math/random.h"
 #include "momentum/math/types.h"
 #include "momentum/solver/gauss_newton_solver.h"
 #include "momentum/solver/subset_gauss_newton_solver.h"
@@ -292,6 +293,7 @@ TYPED_TEST_SUITE(TransformPoseTest, Types);
 
 TYPED_TEST(TransformPoseTest, ValidateTransformSimple) {
   using T = typename TestFixture::Type;
+  Random<> rng{12345};
 
   const Character character = createTestCharacter();
   ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
@@ -300,7 +302,7 @@ TYPED_TEST(TransformPoseTest, ValidateTransformSimple) {
   SkeletonState initialBodySkeletonState(character.parameterTransform.zero(), skeleton);
 
   ModelParametersT<T> randomParams_init =
-      VectorX<T>::Random(character.parameterTransform.numAllModelParameters());
+      rng.uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1.0, 1.0);
 
   std::vector<TransformT<T>> transforms;
   transforms.emplace_back(
@@ -336,6 +338,7 @@ TYPED_TEST(TransformPoseTest, ValidateTransformSimple) {
 
 TYPED_TEST(TransformPoseTest, ValidateTransformDividedRoot) {
   using T = typename TestFixture::Type;
+  Random<> rng{12345};
 
   const Character character = createDividedRootCharacter();
   ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
@@ -344,7 +347,7 @@ TYPED_TEST(TransformPoseTest, ValidateTransformDividedRoot) {
   SkeletonState initialBodySkeletonState(character.parameterTransform.zero(), skeleton);
 
   ModelParametersT<T> randomParams_init =
-      VectorX<T>::Random(character.parameterTransform.numAllModelParameters());
+      rng.uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1.0, 1.0);
 
   std::vector<TransformT<T>> transforms;
   transforms.emplace_back(
@@ -383,6 +386,7 @@ TYPED_TEST(TransformPoseTest, ValidateTransformDividedRoot) {
 
 TYPED_TEST(TransformPoseTest, ValidateTransformsContinuous) {
   using T = typename TestFixture::Type;
+  Random<> rng{12345};
 
   const Character character = createDividedRootCharacter();
   ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
@@ -400,7 +404,7 @@ TYPED_TEST(TransformPoseTest, ValidateTransformsContinuous) {
   std::vector<ModelParametersT<T>> modelParams_init;
   {
     ModelParametersT<T> randomParams_init =
-        VectorX<T>::Random(character.parameterTransform.numAllModelParameters());
+        rng.uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1.0, 1.0);
     // 100 frames ensures we go around several times.
     for (size_t iFrame = 0; iFrame < 100; ++iFrame) {
       modelParams_init.push_back(randomParams_init);
