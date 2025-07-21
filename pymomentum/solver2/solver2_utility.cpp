@@ -15,7 +15,6 @@
 #include <pymomentum/solver2/solver2_utility.h>
 
 #include <pybind11/eigen.h>
-#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <Eigen/Core>
