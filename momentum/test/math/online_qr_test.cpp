@@ -84,8 +84,9 @@ TEST(OnlineQR, Basic) {
   {
     // Try adding the rows in random combinations at once:
     OnlineHouseholderQR<double> qr2(A.cols());
-    for (int i = 0; i < A.rows(); ++i)
+    for (int i = 0; i < A.rows(); ++i) {
       qr2.add(A.row(i), b.row(i));
+    }
     const Eigen::Vector3d x3 = qr2.result();
     ASSERT_LT((x1 - x3).squaredNorm(), 1e-10);
   }
