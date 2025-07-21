@@ -56,8 +56,9 @@ TYPED_TEST(BlendShapesTest, Skinning) {
                                                   // Character is templatized
   {
     const auto vertices = characterBlend.blendShape->computeShape(blendWeights);
-    for (auto i = 0; i < vertices.size(); ++i)
+    for (auto i = 0; i < vertices.size(); ++i) {
       restMesh.vertices[i] = vertices[i].template cast<T>();
+    }
   }
 
   MeshT<T> posedMesh = characterBlend.mesh->cast<T>();
