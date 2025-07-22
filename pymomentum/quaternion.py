@@ -385,6 +385,8 @@ def slerp(q0: torch.Tensor, q1: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
 
     # Compute the cosine of the angle between the two quaternions
     cos_theta = torch.einsum("...x,...x", q0, q1)[..., None]
+    # Clamp for numerical stability
+    cos_theta = torch.clamp(cos_theta, -1.0, 1.0)
 
     # If the dot product is negative, the quaternions have opposite handed-ness
     # and slerp won't take the shorter path. Fix by reversing one quaternion.
@@ -392,7 +394,7 @@ def slerp(q0: torch.Tensor, q1: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     cos_theta = torch.abs(cos_theta)
 
     # Use linear interpolation for very close quaternions to avoid division by zero
-    lerp_result = normalize(q1 + t * (q1 - q0))
+    lerp_result = normalize(q0 + t * (q1 - q0))
 
     # Calculate the angle and the sin of the angle
     eps = 1e-4
