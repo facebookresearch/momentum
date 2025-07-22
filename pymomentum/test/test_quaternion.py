@@ -271,6 +271,9 @@ class TestQuaternion(unittest.TestCase):
         nMat = 5
         q1 = generateRandomQuats(nMat)
         q2 = generateRandomQuats(nMat)
+        # Add another edge case for very close quaternions
+        q1 = torch.cat((q1, torch.tensor([[-0.9662, -0.1052, -0.0235, 0.2343]])), dim=0)
+        q2 = torch.cat((q2, torch.tensor([[-0.9684, -0.1252, -0.0175, 0.2151]])), dim=0)
 
         # Test slerp at t=0 should return q1
         q_slerp_0 = quaternion.slerp(q1, q2, torch.tensor([0.0]))
