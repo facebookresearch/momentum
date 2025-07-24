@@ -150,7 +150,7 @@ variable_list XYZEulerToQuaternionFunction<T>::backward(
     Eigen::Map<Eigen::VectorX<T>> d_xyzEuler_map =
         toEigenMap<T>(d_xyzEuler_cur);
 
-    typedef ceres::Jet<T, 3> JetType;
+    using JetType = ceres::Jet<T, 3>;
 
     for (Eigen::Index k = 0; k < nEuler; ++k) {
       d_xyzEuler_map.template segment<3>(3 * k) =

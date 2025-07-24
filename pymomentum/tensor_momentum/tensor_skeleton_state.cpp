@@ -73,7 +73,7 @@ void computeSkelStateBackward(
       momentum::JointParametersT<T>(jointParameters), skeleton);
 
   for (size_t iJoint = 0; iJoint < skeleton.joints.size(); ++iJoint) {
-    typedef ceres::Jet<T, 1> JetType;
+    using JetType = ceres::Jet<T, 1>;
 
     // If the dot product with dLoss_dSkelState would be zero, we can skip.
     // This is definitely worth doing because there are many cases where we'll
