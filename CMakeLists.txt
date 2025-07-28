@@ -356,6 +356,19 @@ mt_library(
 if(MOMENTUM_BUILD_WITH_FBXSDK)
   set(io_fbx_sources_var io_fbx_sources)
   find_package(FbxSdk MODULE REQUIRED)
+
+  # Fix FBX SDK header typos for Clang 19 compatibility
+  set(_fbx_header "${FBXSDK_INCLUDE_DIR}/fbxsdk/core/base/fbxredblacktree.h")
+  if(EXISTS "${_fbx_header}")
+    file(READ "${_fbx_header}" _content)
+    string(REPLACE "mLefttChild" "mLeftChild" _content "${_content}")
+    string(REPLACE "mRighttChild" "mRightChild" _content "${_content}")
+    set(_patched_header "${CMAKE_BINARY_DIR}/fbxsdk_patched/fbxsdk/core/base/fbxredblacktree.h")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/fbxsdk_patched/fbxsdk/core/base")
+    file(WRITE "${_patched_header}" "${_content}")
+    target_include_directories(fbxsdk::fbxsdk BEFORE INTERFACE "${CMAKE_BINARY_DIR}/fbxsdk_patched")
+  endif()
+
   set(io_fbx_private_link_libraries fbxsdk::fbxsdk)
 else()
   set(io_fbx_sources_var io_fbx_sources_unsupported)

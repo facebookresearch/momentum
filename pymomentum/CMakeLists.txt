@@ -59,10 +59,6 @@ endif()
 # Build PyMomentum
 #===============================================================================
 
-if(WIN32)
-  set(python_deps ${Python3_LIBRARIES})
-endif()
-
 mt_library(
   NAME tensor_utility
   PYMOMENTUM_HEADERS_VARS tensor_utility_public_headers
@@ -73,7 +69,7 @@ mt_library(
   PUBLIC_LINK_LIBRARIES
     Eigen3::Eigen
     pybind11::pybind11_headers
-    ${python_deps}
+    Python3::Module
     ${TORCH_LIBRARIES}
   PRIVATE_LINK_LIBRARIES
     momentum
@@ -247,7 +243,9 @@ if(MOMENTUM_BUILD_TESTING)
   mt_test(
     NAME tensor_utility_test
     PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
-    LINK_LIBRARIES tensor_utility
+    LINK_LIBRARIES
+      tensor_utility
+      Python3::Python
   )
 
   mt_test(
@@ -257,7 +255,7 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       tensor_ik
       tensor_utility
-      ${python_deps}
+      Python3::Python
   )
 endif()
 
