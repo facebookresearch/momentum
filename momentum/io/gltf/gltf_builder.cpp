@@ -108,7 +108,7 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
   // Add vertices to mesh
   std::vector<Vector3f> verts = mesh.vertices;
   fromMomentumVec3f(verts);
-  MT_CHECK((verts.size() > 0) && (verts[0].size() > 0));
+  MT_CHECK((!verts.empty()) && (verts[0].size() > 0));
   prim.attributes["POSITION"] = createAccessorBuffer<const Vector3f>(model, verts, true);
   setBufferView(model, prim.attributes["POSITION"], fx::gltf::BufferView::TargetType::ArrayBuffer);
 
@@ -129,7 +129,7 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
   }
 
   // add texcoord attribute
-  if (mesh.texcoords.size() > 0) {
+  if (!mesh.texcoords.empty()) {
     // we have to switch texcoord_faces ordering to match faces/vertices indexing
     std::vector<Vector2f> ordered_coords(mesh.vertices.size(), Vector2f::Zero());
     for (size_t i = 0; i < mesh.faces.size(); i++) {
@@ -796,7 +796,7 @@ void saveDocument(
         // so we need to provide exported with a uri name relative to json root.
         filesystem::path new_filename = filename;
         new_filename.replace_extension(filesystem::path("glbin"));
-        if (model.buffers.size() > 0) {
+        if (!model.buffers.empty()) {
           model.buffers.front().uri = new_filename.filename().string();
         }
 
