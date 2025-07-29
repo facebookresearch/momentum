@@ -208,7 +208,7 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
   // the other one can be merged to the same root.
   for (auto skinId = 0; skinId < model.skins.size(); skinId++) {
     MT_CHECK(
-        skinSkeletonRoots[skinId].size() > 0,
+        !skinSkeletonRoots[skinId].empty(),
         "id: {}, size: {}",
         skinId,
         skinSkeletonRoots[skinId].size());
@@ -221,7 +221,7 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
       bool isIndependent = true;
       for (auto checkId = 0; checkId < model.skins.size(); checkId++) {
         MT_CHECK(
-            skinSkeletonRoots[checkId].size() > 0,
+            !skinSkeletonRoots[checkId].empty(),
             "id: {}, size: {}",
             checkId,
             skinSkeletonRoots[checkId].size());
@@ -563,13 +563,13 @@ std::tuple<Mesh_u, SkinWeights_u> loadSkinnedMesh(
   }
 
   MT_LOGW_IF(
-      skinnedNodes.size() > 0 && unskinnedNodes.size() > 0,
+      !skinnedNodes.empty() && !unskinnedNodes.empty(),
       "Found both skinned meshes {} and meshes without skinning {}. Unskinned meshes will be ignored.",
       skinnedNodes.size(),
       unskinnedNodes.size());
   auto resultMesh = std::make_unique<Mesh>();
   auto skinWeights = std::make_unique<SkinWeights>();
-  if (skinnedNodes.size() > 0) {
+  if (!skinnedNodes.empty()) {
     for (auto nodeId : skinnedNodes) {
       // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
       const auto& node = model.nodes[nodeId];
@@ -585,7 +585,7 @@ std::tuple<Mesh_u, SkinWeights_u> loadSkinnedMesh(
             skinWeights->index.rows());
       }
     }
-  } else if (unskinnedNodes.size() > 0) {
+  } else if (!unskinnedNodes.empty()) {
     for (auto nodeId : unskinnedNodes) {
       // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
       const auto& node = model.nodes[nodeId];
@@ -1108,7 +1108,7 @@ fx::gltf::Document makeCharacterDocument(
   }
   // Add potential motion or offsets, even if the character is empty
   // (it could be a motion database for example)
-  if ((std::get<0>(motion).size() > 0) || (std::get<0>(offsets).size() > 0)) {
+  if ((!std::get<0>(motion).empty()) || (!std::get<0>(offsets).empty())) {
     fileBuilder.addMotion(character, fps, motion, offsets, kAddExtensions);
   }
   if (!markerSequence.empty()) {
