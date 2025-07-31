@@ -38,6 +38,18 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCalibratedModel(
 std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIdentity(
     const ModelOptions& modelFiles);
 
+/// Save the given character and motion to a GLB or FBX file.
+///
+/// @param[in] outFile The GLB/FBX file to save to
+/// @param[in] character The GLB/FBX file to save to
+/// @param[in] identity The identity parameters used for the character
+/// @param[in] finalMotion The motion save to the file. (Note: this may be modified to remove
+/// scaling parameters if saveScaleToMotion is false)
+/// @param[in] markerData Marker data to save to the file
+/// @param[in] fps Framerate of the motion
+/// @param[in] saveMarkerMesh (optional) Whether to save a visible cube mesh for the markers
+/// @param[in] saveScaleToMotion (optional) Whether to save the scale parameters to the motion or
+/// identity parameter vectors (saving to motion is preferred)
 void saveMotion(
     const std::string& outFile,
     const momentum::Character& character,
@@ -45,6 +57,7 @@ void saveMotion(
     Eigen::MatrixXf& finalMotion,
     gsl::span<const std::vector<momentum::Marker>> markerData,
     double fps,
-    bool saveMarkerMesh = true);
+    bool saveMarkerMesh = true,
+    bool saveScaleToMotion = true);
 
 } // namespace momentum

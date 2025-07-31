@@ -188,15 +188,21 @@ void saveMotion(
     Eigen::MatrixXf& finalMotion,
     gsl::span<const std::vector<momentum::Marker>> markerData,
     const double fps,
-    const bool saveMarkerMesh) {
+    const bool saveMarkerMesh,
+    const bool saveScaleToMotion) {
+  const filesystem::path output(outFile);
+  const auto ext = output.extension();
+
   ModelParameters id =
       extractParameters(identity, character.parameterTransform.getScalingParameters());
+
+  if (saveScaleToMotion) {
+    id = ModelParameters::Zero(character.parameterTransform.numAllModelParameters());
+  }
   // gltf io assumes the identity info is removed from the motion matrix
   removeIdentity(character.parameterTransform.getScalingParameters(), id, finalMotion);
   const VectorXf idVec = character.parameterTransform.apply(id).v;
 
-  const filesystem::path output(outFile);
-  const auto ext = output.extension();
   if (ext == ".fbx") {
     saveFbx(output, character, finalMotion, idVec, fps, saveMarkerMesh);
   } else if (ext == ".glb" || ext == ".gltf") {
