@@ -19,6 +19,7 @@ namespace momentum {
 enum class CharacterFormat : uint8_t {
   Fbx, ///< FBX file format.
   Gltf, ///< glTF file format.
+  Usd, ///< USD file format.
   Unknown ///< Unknown or unsupported file format.
 };
 

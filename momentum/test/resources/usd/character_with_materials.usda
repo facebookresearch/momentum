@@ -1,0 +1,180 @@
+#usda 1.0
+(
+    defaultPrim = "SkelRoot"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def SkelRoot "SkelRoot"
+{
+    def Skeleton "Skeleton"
+    {
+        uniform token[] joints = ["root", "spine1", "spine2", "neck", "head", "left_shoulder", "left_elbow", "left_wrist", "right_shoulder", "right_elbow", "right_wrist", "left_hip", "left_knee", "left_ankle", "right_hip", "right_knee", "right_ankle"]
+        uniform matrix4d[] bindTransforms = [
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0.5, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.0, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.5, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.8, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.3, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.6, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.9, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.3, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.6, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.9, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, -0.1, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, -0.6, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, -1.1, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, -0.1, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, -0.6, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, -1.1, 0, 1) )
+        ]
+        uniform matrix4d[] restTransforms = [
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0.5, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.0, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.5, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.8, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.3, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.6, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.9, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.3, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.6, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.9, 1.4, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, -0.1, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, -0.6, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, -1.1, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, -0.1, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, -0.6, 0, 1) ),
+            ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, -1.1, 0, 1) )
+        ]
+    }
+
+    def Mesh "Body" (
+        prepend apiSchemas = ["SkelBindingAPI", "MaterialBindingAPI"]
+    )
+    {
+        int[] faceVertexCounts = [4, 4, 4, 4, 4, 4]
+        int[] faceVertexIndices = [0, 1, 5, 4, 1, 2, 6, 5, 2, 3, 7, 6, 3, 0, 4, 7, 4, 5, 6, 7, 0, 3, 2, 1]
+        point3f[] points = [
+            (-0.3, -0.2, -0.2), (-0.3, -0.2, 0.2), (0.3, -0.2, 0.2), (0.3, -0.2, -0.2),
+            (-0.3, 1.6, -0.2), (-0.3, 1.6, 0.2), (0.3, 1.6, 0.2), (0.3, 1.6, -0.2)
+        ]
+        texCoord2f[] primvars:st = [
+            (0, 0), (0.25, 0), (0.5, 0), (0.75, 0),
+            (0, 1), (0.25, 1), (0.5, 1), (0.75, 1)
+        ] (
+            interpolation = "vertex"
+        )
+
+        # Skinning data
+        int[] primvars:skel:jointIndices = [
+            0, 1, 0, 0,  # vertex 0
+            0, 1, 0, 0,  # vertex 1
+            0, 1, 0, 0,  # vertex 2
+            0, 1, 0, 0,  # vertex 3
+            1, 2, 3, 0,  # vertex 4
+            1, 2, 3, 0,  # vertex 5
+            1, 2, 3, 0,  # vertex 6
+            1, 2, 3, 0   # vertex 7
+        ] (
+            elementSize = 4
+            interpolation = "vertex"
+        )
+        float[] primvars:skel:jointWeights = [
+            0.9, 0.1, 0, 0,    # vertex 0
+            0.9, 0.1, 0, 0,    # vertex 1
+            0.9, 0.1, 0, 0,    # vertex 2
+            0.9, 0.1, 0, 0,    # vertex 3
+            0.2, 0.4, 0.4, 0,  # vertex 4
+            0.2, 0.4, 0.4, 0,  # vertex 5
+            0.2, 0.4, 0.4, 0,  # vertex 6
+            0.2, 0.4, 0.4, 0   # vertex 7
+        ] (
+            elementSize = 4
+            interpolation = "vertex"
+        )
+
+        rel skel:skeleton = </SkelRoot/Skeleton>
+        rel material:binding = </Materials/BodyMaterial>
+    }
+
+    def Mesh "Head" (
+        prepend apiSchemas = ["SkelBindingAPI", "MaterialBindingAPI"]
+    )
+    {
+        int[] faceVertexCounts = [3, 3, 3, 3, 3, 3, 3, 3]
+        int[] faceVertexIndices = [0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 5, 2, 1, 5, 3, 2, 5, 4, 3, 5, 1, 4]
+        point3f[] points = [
+            (0, 1.8, 0),      # top
+            (-0.15, 1.65, 0.15), # front-left
+            (0.15, 1.65, 0.15),  # front-right
+            (0.15, 1.65, -0.15), # back-right
+            (-0.15, 1.65, -0.15), # back-left
+            (0, 1.5, 0)       # bottom
+        ]
+        texCoord2f[] primvars:st = [
+            (0.5, 1), (0, 0.5), (1, 0.5), (1, 0), (0, 0), (0.5, 0)
+        ] (
+            interpolation = "vertex"
+        )
+
+        # Skinning data - all vertices bound to head joint
+        int[] primvars:skel:jointIndices = [
+            4, 3, 0, 0,  # vertex 0
+            4, 3, 0, 0,  # vertex 1
+            4, 3, 0, 0,  # vertex 2
+            4, 3, 0, 0,  # vertex 3
+            4, 3, 0, 0,  # vertex 4
+            4, 3, 0, 0   # vertex 5
+        ] (
+            elementSize = 4
+            interpolation = "vertex"
+        )
+        float[] primvars:skel:jointWeights = [
+            0.9, 0.1, 0, 0,  # vertex 0
+            0.9, 0.1, 0, 0,  # vertex 1
+            0.9, 0.1, 0, 0,  # vertex 2
+            0.9, 0.1, 0, 0,  # vertex 3
+            0.9, 0.1, 0, 0,  # vertex 4
+            0.9, 0.1, 0, 0   # vertex 5
+        ] (
+            elementSize = 4
+            interpolation = "vertex"
+        )
+
+        rel skel:skeleton = </SkelRoot/Skeleton>
+        rel material:binding = </Materials/HeadMaterial>
+    }
+}
+
+def Scope "Materials"
+{
+    def Material "BodyMaterial"
+    {
+        token outputs:surface.connect = </Materials/BodyMaterial/Surface.outputs:surface>
+
+        def Shader "Surface"
+        {
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor = (0.8, 0.6, 0.4)
+            float inputs:metallic = 0.0
+            float inputs:roughness = 0.8
+            token outputs:surface
+        }
+    }
+
+    def Material "HeadMaterial"
+    {
+        token outputs:surface.connect = </Materials/HeadMaterial/Surface.outputs:surface>
+
+        def Shader "Surface"
+        {
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor = (0.9, 0.7, 0.5)
+            float inputs:metallic = 0.0
+            float inputs:roughness = 0.6
+            token outputs:surface
+        }
+    }
+}

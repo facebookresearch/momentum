@@ -1,0 +1,29 @@
+#usda 1.0
+(
+    defaultPrim = "Mesh"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Mesh "Mesh"
+{
+    int[] faceVertexCounts = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    int[] faceVertexIndices = [
+        0, 1, 2, 0, 2, 3,  # bottom face
+        4, 7, 6, 4, 6, 5,  # top face
+        0, 4, 5, 0, 5, 1,  # front face
+        2, 6, 7, 2, 7, 3,  # back face
+        0, 3, 7, 0, 7, 4,  # left face
+        1, 5, 6, 1, 6, 2   # right face
+    ]
+    point3f[] points = [
+        (-1, 0, -1), (-1, 0, 1), (1, 0, 1), (1, 0, -1),  # bottom vertices
+        (-1, 2, -1), (-1, 2, 1), (1, 2, 1), (1, 2, -1)   # top vertices
+    ]
+    texCoord2f[] primvars:st = [
+        (0, 0), (0, 1), (1, 1), (1, 0),  # bottom UVs
+        (0, 0), (0, 1), (1, 1), (1, 0)   # top UVs
+    ] (
+        interpolation = "vertex"
+    )
+}
