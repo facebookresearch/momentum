@@ -15,6 +15,9 @@
 #include "momentum/io/skeleton/mppca_io.h"
 #include "momentum/io/skeleton/parameter_transform_io.h"
 #include "momentum/io/skeleton/parameters_io.h"
+#ifdef MOMENTUM_IO_WITH_USD
+#include "momentum/io/usd/usd_io.h"
+#endif
 #include "momentum/math/fwd.h"
 
 #include <algorithm>
@@ -39,6 +42,8 @@ namespace {
     return CharacterFormat::Gltf;
   } else if (ext == ".fbx") {
     return CharacterFormat::Fbx;
+  } else if ((ext == ".usd") || (ext == ".usda") || (ext == ".usdc")) {
+    return CharacterFormat::Usd;
   } else {
     return CharacterFormat::Unknown;
   }
@@ -51,6 +56,12 @@ namespace {
     return loadGltfCharacter(filepath);
   } else if (format == CharacterFormat::Fbx) {
     return loadFbxCharacter(filepath, KeepLocators::Yes);
+  } else if (format == CharacterFormat::Usd) {
+#ifdef MOMENTUM_IO_WITH_USD
+    return loadUsdCharacter(filepath);
+#else
+    MT_THROW("USD format is not supported in this build");
+#endif
   } else {
     return {};
   }
@@ -63,6 +74,12 @@ namespace {
     return loadGltfCharacter(fileBuffer);
   } else if (format == CharacterFormat::Fbx) {
     return loadFbxCharacter(fileBuffer, KeepLocators::Yes);
+  } else if (format == CharacterFormat::Usd) {
+#ifdef MOMENTUM_IO_WITH_USD
+    return loadUsdCharacter(fileBuffer);
+#else
+    MT_THROW("USD format is not supported in this build");
+#endif
   } else {
     return {};
   }

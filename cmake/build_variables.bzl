@@ -449,6 +449,18 @@ io_gltf_test_sources = [
     "test/io/io_gltf_test.cpp",
 ]
 
+io_usd_public_headers = [
+    "io/usd/usd_io.h",
+]
+
+io_usd_sources = [
+    "io/usd/usd_io.cpp",
+]
+
+io_usd_test_sources = [
+    "test/io/io_usd_test.cpp",
+]
+
 io_urdf_public_headers = [
     "io/urdf/urdf_io.h",
 ]
@@ -627,6 +639,10 @@ fbx_viewer_sources = [
 
 urdf_viewer_sources = [
     "examples/urdf_viewer/urdf_viewer.cpp",
+]
+
+usd_viewer_sources = [
+    "examples/usd_viewer/usd_viewer.cpp",
 ]
 
 c3d_viewer_sources = [
