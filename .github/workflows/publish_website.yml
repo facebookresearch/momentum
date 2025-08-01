@@ -79,6 +79,6 @@ jobs:
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@releases/v4
       with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.BYPASS_TOKEN }}
           BRANCH: gh-pages
           FOLDER: momentum/website/build
