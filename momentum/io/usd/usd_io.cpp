@@ -41,6 +41,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <memory>
 #include <mutex>
@@ -101,8 +102,23 @@ void initializeUsdWithSuppressedWarnings() {
   g_suppressor = std::make_unique<ResolverWarningsSuppressor>();
   TfDiagnosticMgr::GetInstance().AddDelegate(g_suppressor.get());
 
-  g_usdPluginInit =
-      std::make_unique<UsdPluginInit>(filesystem::temp_directory_path() / "usd_plugin");
+  // Create a unique temporary directory for USD plugins to avoid conflicts
+  // Use thread ID and timestamp to ensure uniqueness across concurrent tests
+  auto tempDir = filesystem::temp_directory_path();
+  auto uniqueDir = tempDir /
+      ("usd_plugin_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
+       "_" + std::to_string(std::time(nullptr)));
+
+  // Ensure the directory exists and is writable
+  std::error_code ec;
+  filesystem::create_directories(uniqueDir, ec);
+  if (ec) {
+    // If we can't create the directory, fall back to default temp directory
+    // This allows USD to handle its own plugin initialization
+    g_usdPluginInit = std::make_unique<UsdPluginInit>();
+  } else {
+    g_usdPluginInit = std::make_unique<UsdPluginInit>(uniqueDir);
+  }
 
   g_usdInitialized = true;
 }
