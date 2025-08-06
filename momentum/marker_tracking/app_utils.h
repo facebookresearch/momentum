@@ -57,7 +57,6 @@ void saveMotion(
     Eigen::MatrixXf& finalMotion,
     gsl::span<const std::vector<momentum::Marker>> markerData,
     double fps,
-    bool saveMarkerMesh = true,
-    bool saveScaleToMotion = true);
+    bool saveMarkerMesh = true);
 
 } // namespace momentum

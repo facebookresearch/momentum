@@ -47,6 +47,12 @@ void fillIdentity(
     const momentum::ModelParameters& identity,
     Eigen::MatrixXf& motion);
 
+// convert from joint to model parameters using only the parameters active in idSet
+ModelParameters jointIdentityToModelIdentity(
+    const Character& c,
+    const ParameterSet& idSet,
+    const JointParameters& jointIdentity);
+
 void removeIdentity(
     const momentum::ParameterSet& idSet,
     const momentum::ModelParameters& identity,
