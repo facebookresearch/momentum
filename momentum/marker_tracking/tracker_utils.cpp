@@ -8,6 +8,7 @@
 #include "momentum/marker_tracking/tracker_utils.h"
 
 #include "momentum/character/character.h"
+#include "momentum/character/inverse_parameter_transform.h"
 #include "momentum/character/parameter_limits.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/position_error_function.h"
@@ -264,6 +265,27 @@ void removeIdentity(
       motionWithId(iParam, jFrame) -= identity.v(iParam);
     }
   }
+}
+
+ModelParameters jointIdentityToModelIdentity(
+    const Character& c,
+    const ParameterSet& idSet,
+    const JointParameters& jointIdentity) {
+  // convert from joint to model parameters using only the parameters active in idSet
+  auto scalingTransform = c.parameterTransform.simplify(idSet);
+  momentum::ModelParameters scaleParameters =
+      InverseParameterTransform(scalingTransform).apply(jointIdentity).pose;
+  momentum::ModelParameters identity =
+      ModelParameters::Zero(c.parameterTransform.numAllModelParameters());
+  size_t iScale = 0;
+  for (size_t iParam = 0; iParam < c.parameterTransform.numAllModelParameters(); iParam++) {
+    if (idSet.test(iParam)) {
+      identity[iParam] = scaleParameters[iScale];
+      ++iScale;
+    }
+  }
+
+  return identity;
 }
 
 std::vector<std::vector<Marker>> extractMarkersFromMotion(

@@ -149,7 +149,12 @@ void addRefineOptions(CLI::App& app, std::shared_ptr<RefineConfig> config) {
 std::tuple<momentum::Character, momentum::ModelParameters> loadCalibratedModel(
     const std::string& modelFile) {
   auto [c, m, id, fps] = loadCharacterWithMotion(modelFile);
-  return {c, InverseParameterTransform(c.parameterTransform).apply(id).pose};
+
+  // make sure we actually only convert joint id back to scale id parameters
+  const ModelParameters identity =
+      jointIdentityToModelIdentity(c, c.parameterTransform.getScalingParameters(), id);
+
+  return {c, identity};
 }
 
 std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIdentity(
@@ -164,7 +169,7 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIden
     auto [c, m, id, fps] = loadCharacterWithMotion(modelFiles.model);
     character = c;
     if (id.size() > 0) {
-      identity = InverseParameterTransform(character.parameterTransform).apply(id).pose;
+      identity = jointIdentityToModelIdentity(c, c.parameterTransform.getScalingParameters(), id);
     } else {
       identity = ModelParameters::Zero(character.parameterTransform.numAllModelParameters());
     }
@@ -188,17 +193,13 @@ void saveMotion(
     Eigen::MatrixXf& finalMotion,
     gsl::span<const std::vector<momentum::Marker>> markerData,
     const double fps,
-    const bool saveMarkerMesh,
-    const bool saveScaleToMotion) {
+    const bool saveMarkerMesh) {
   const filesystem::path output(outFile);
   const auto ext = output.extension();
 
   ModelParameters id =
       extractParameters(identity, character.parameterTransform.getScalingParameters());
 
-  if (saveScaleToMotion) {
-    id = ModelParameters::Zero(character.parameterTransform.numAllModelParameters());
-  }
   // gltf io assumes the identity info is removed from the motion matrix
   removeIdentity(character.parameterTransform.getScalingParameters(), id, finalMotion);
   const VectorXf idVec = character.parameterTransform.apply(id).v;
