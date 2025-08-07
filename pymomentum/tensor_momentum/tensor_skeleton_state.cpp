@@ -662,7 +662,7 @@ at::Tensor localSkeletonStateToJointParameters(
   translationOffsets = translationOffsets.expand_as(localTranslation);
   at::Tensor translationJointParams = localTranslation - translationOffsets;
 
-  // For rotatation joint parameters, we need to first remove the
+  // For rotation joint parameters, we need to first remove the
   // pre-rotation, and then convert to Euler angles.
   //    local_skel_state =  prerot * local_rot
   //    local_rot = pre_rot.inverse() * local_skel_state
