@@ -3544,6 +3544,7 @@ Enumerations</h2></td></tr>
 <tr class="separator:af5403533c7c0442dcd5af35800c619e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f4912f0cc8069c889ee81f140254d76" id="r_a3f4912f0cc8069c889ee81f140254d76"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76">CharacterFormat</a> : uint8_t { <a class="el" href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76a34e912e18a9d9f90a0448e84b943af20">Fbx</a>
 , <a class="el" href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76ae8d5895cb2d3f8672b94967f6920c790">Gltf</a>
+, <a class="el" href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76aa2e705777f09e57ac94eb1d206aaaa84">Usd</a>
 , <a class="el" href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76a88183b946cc5f0e8c96b2e66e1c74a7e">Unknown</a>
  }</td></tr>
 <tr class="memdesc:a3f4912f0cc8069c889ee81f140254d76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents the supported character formats.  <a href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76">More...</a><br /></td></tr>
@@ -4402,6 +4403,15 @@ Functions</h2></td></tr>
 <tr class="separator:a7f6b6cd639265b24c0ee86dfef388e9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ff5a408ce1a2bed112a02de93428bbf" id="r_a8ff5a408ce1a2bed112a02de93428bbf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">template</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a8ff5a408ce1a2bed112a02de93428bbf">loadUrdfCharacter</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>)</td></tr>
 <tr class="separator:a8ff5a408ce1a2bed112a02de93428bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92772fd591cc0c5fc3c7d934eb1a6260" id="r_a92772fd591cc0c5fc3c7d934eb1a6260"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a92772fd591cc0c5fc3c7d934eb1a6260">loadUsdCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputPath</a>)</td></tr>
+<tr class="memdesc:a92772fd591cc0c5fc3c7d934eb1a6260"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a USD character from a local file path.  <br /></td></tr>
+<tr class="separator:a92772fd591cc0c5fc3c7d934eb1a6260"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ca3ed94716088afceb78c7767a0b9a3" id="r_a7ca3ed94716088afceb78c7767a0b9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7ca3ed94716088afceb78c7767a0b9a3">loadUsdCharacter</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>)</td></tr>
+<tr class="memdesc:a7ca3ed94716088afceb78c7767a0b9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a USD character from a buffer.  <br /></td></tr>
+<tr class="separator:a7ca3ed94716088afceb78c7767a0b9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0eab2884ae866d71746c202ae61f32f" id="r_aa0eab2884ae866d71746c202ae61f32f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aa0eab2884ae866d71746c202ae61f32f">saveUsd</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
+<tr class="memdesc:aa0eab2884ae866d71746c202ae61f32f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save a character to a USD file.  <br /></td></tr>
+<tr class="separator:aa0eab2884ae866d71746c202ae61f32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7596a23543cd8d93653461ac6611c1f8" id="r_a7596a23543cd8d93653461ac6611c1f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7596a23543cd8d93653461ac6611c1f8">logMesh</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> rerun::RecordingStream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rec</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">streamName</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a> &amp;mesh, std::optional&lt; rerun::Color &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">color</a>)</td></tr>
 <tr class="separator:a7596a23543cd8d93653461ac6611c1f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50891faf75ecdc715dd02f3a2027be53" id="r_a50891faf75ecdc715dd02f3a2027be53"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a50891faf75ecdc715dd02f3a2027be53">logJoints</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> rerun::RecordingStream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rec</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">streamName</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="parameter__limits__io_8cpp.html#ada778489ae2a13019d0156bc37013fbf">skeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aa52a8becf3a530c31a11bcf971a4080d">JointStateList</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointStates</a>)</td></tr>
@@ -4443,8 +4453,9 @@ Functions</h2></td></tr>
 <tr class="separator:a1dc2f6bbb861ab198e98f3c896da1a31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1b607021b082409d115104fc93687e3" id="r_ad1b607021b082409d115104fc93687e3"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a>, <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ad1b607021b082409d115104fc93687e3">loadCharacterWithIdentity</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelOptions.html">ModelOptions</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelFiles</a>)</td></tr>
 <tr class="separator:ad1b607021b082409d115104fc93687e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaad4bbdfe4fc3c99e47c7b7fe248d058" id="r_aaad4bbdfe4fc3c99e47c7b7fe248d058"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aaad4bbdfe4fc3c99e47c7b7fe248d058">saveMotion</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">outFile</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;identity, Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">finalMotion</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> fps, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">saveMarkerMesh</a>)</td></tr>
-<tr class="separator:aaad4bbdfe4fc3c99e47c7b7fe248d058"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ae14a246de7e1f817d02d5677999796" id="r_a1ae14a246de7e1f817d02d5677999796"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a1ae14a246de7e1f817d02d5677999796">saveMotion</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">outFile</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;identity, Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">finalMotion</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> fps, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">saveMarkerMesh</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>)</td></tr>
+<tr class="memdesc:a1ae14a246de7e1f817d02d5677999796"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the given character and motion to a GLB or FBX file.  <br /></td></tr>
+<tr class="separator:a1ae14a246de7e1f817d02d5677999796"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07155e35da82336ae1369bbad951cc03" id="r_a07155e35da82336ae1369bbad951cc03"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a07155e35da82336ae1369bbad951cc03">sampleFrames</a> (<a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameStride</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numSamples</a>)</td></tr>
 <tr class="separator:a07155e35da82336ae1369bbad951cc03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adaf2716fdfc839d44127bf0a5cf674b2" id="r_adaf2716fdfc839d44127bf0a5cf674b2"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#adaf2716fdfc839d44127bf0a5cf674b2">trackSequence</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">globalParams</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">initialMotion</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1TrackingConfig.html">TrackingConfig</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> regularizer, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameStride</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> enforceFloorInFirstFrame, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;firstFramePoseConstraintSet)</td></tr>
@@ -4506,6 +4517,8 @@ Functions</h2></td></tr>
 <tr class="separator:a73e44695fb092ba7863259c1affa8283"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8babd568c031639522dc41c963d46f0a" id="r_a8babd568c031639522dc41c963d46f0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a8babd568c031639522dc41c963d46f0a">removeIdentity</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">idSet</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;identity, Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">motionWithId</a>)</td></tr>
 <tr class="separator:a8babd568c031639522dc41c963d46f0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ea114b0a31b9c28d6780db87accc6cc" id="r_a9ea114b0a31b9c28d6780db87accc6cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a9ea114b0a31b9c28d6780db87accc6cc">jointIdentityToModelIdentity</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">c</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">idSet</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a6cf8e7f472a97049d401906c944fe153">JointParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointIdentity</a>)</td></tr>
+<tr class="separator:a9ea114b0a31b9c28d6780db87accc6cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee30644797806d49da39dcf46fc5d69b" id="r_aee30644797806d49da39dcf46fc5d69b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aee30644797806d49da39dcf46fc5d69b">extractMarkersFromMotion</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">motion</a>)</td></tr>
 <tr class="separator:aee30644797806d49da39dcf46fc5d69b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a6d0360ce650fc04d70048da8f15fa6" id="r_a0a6d0360ce650fc04d70048da8f15fa6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#abd3bad3f97e71e223ba6ba71492bed3c">momentum::PositionData</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a0a6d0360ce650fc04d70048da8f15fa6">createConstraintData</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerData</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">momentum::LocatorList</a> &amp;locators)</td></tr>
@@ -28419,6 +28432,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </td></tr>
 <tr><td class="fieldname"><a id="a3f4912f0cc8069c889ee81f140254d76ae8d5895cb2d3f8672b94967f6920c790" name="a3f4912f0cc8069c889ee81f140254d76ae8d5895cb2d3f8672b94967f6920c790"></a>Gltf&#160;</td><td class="fielddoc"><p>glTF file format. </p>
 </td></tr>
+<tr><td class="fieldname"><a id="a3f4912f0cc8069c889ee81f140254d76aa2e705777f09e57ac94eb1d206aaaa84" name="a3f4912f0cc8069c889ee81f140254d76aa2e705777f09e57ac94eb1d206aaaa84"></a>Usd&#160;</td><td class="fielddoc"><p>USD file format. </p>
+</td></tr>
 <tr><td class="fieldname"><a id="a3f4912f0cc8069c889ee81f140254d76a88183b946cc5f0e8c96b2e66e1c74a7e" name="a3f4912f0cc8069c889ee81f140254d76a88183b946cc5f0e8c96b2e66e1c74a7e"></a>Unknown&#160;</td><td class="fielddoc"><p>Unknown or unsupported file format. </p>
 </td></tr>
 </table>
@@ -29928,7 +29943,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l00854">854</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00055">createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00149">extractLocatorsFromCharacter()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="marker__tracker_8h_source.html#l00019">momentum::BaseConfig::minVisPercent</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">sampleFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00511">trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00350">trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00151">trackSequence()</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00056">createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00150">extractLocatorsFromCharacter()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="marker__tracker_8h_source.html#l00019">momentum::BaseConfig::minVisPercent</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">sampleFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00511">trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00350">trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00151">trackSequence()</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="process__markers_8cpp_source.html#l00023">processMarkers()</a>.</p>
 
@@ -30025,7 +30040,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l00646">646</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00055">createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00220">extractIdAndLocatorsFromParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00019">momentum::ParameterTransformT&lt; T &gt;::getParameterIdByName()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="marker__tracker_8h_source.html#l00019">momentum::BaseConfig::minVisPercent</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">sampleFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00511">trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00350">trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00151">trackSequence()</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00056">createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00221">extractIdAndLocatorsFromParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00019">momentum::ParameterTransformT&lt; T &gt;::getParameterIdByName()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="marker__tracker_8h_source.html#l00019">momentum::BaseConfig::minVisPercent</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00032">sampleFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00511">trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00350">trackPosesPerframe()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00151">trackSequence()</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="process__markers_8cpp_source.html#l00023">processMarkers()</a>.</p>
 
@@ -30821,7 +30836,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00020">20</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00021">21</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00511">trackPosesForFrames()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00350">trackPosesPerframe()</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00180">trackSequence()</a>.</p>
 
@@ -31027,7 +31042,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00055">55</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00056">56</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="parameter__limits_8h_source.html#l00113">momentum::ParameterLimit::data</a>, <a class="el" href="character_8h_source.html#l00061">momentum::CharacterT&lt; T &gt;::inverseBindPose</a>, <a class="el" href="parameter__limits_8h_source.html#l00041">momentum::LimitMinMaxJoint::jointIndex</a>, <a class="el" href="parameter__limits_8h_source.html#l00042">momentum::LimitMinMaxJoint::jointParameter</a>, <a class="el" href="math_2types_8h_source.html#l00401">kMaxModelParams</a>, <a class="el" href="character_2types_8h_source.html#l00025">kParametersPerJoint</a>, <a class="el" href="parameter__limits_8h_source.html#l00043">momentum::LimitMinMaxJoint::limits</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="parameter__limits_8h_source.html#l00022">MinMaxJoint</a>, <a class="el" href="parameter__limits_8h_source.html#l00093">momentum::LimitData::minMaxJoint</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="character_8h_source.html#l00037">momentum::CharacterT&lt; T &gt;::parameterLimits</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, <a class="el" href="urdf__io_8cpp_source.html#l00024">triplets</a>, <a class="el" href="parameter__limits_8h_source.html#l00114">momentum::ParameterLimit::type</a>, and <a class="el" href="parameter__limits_8h_source.html#l00115">momentum::ParameterLimit::weight</a>.</p>
 
@@ -32328,9 +32343,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00220">220</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00221">221</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00149">extractLocatorsFromCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00209">extractParameters()</a>, and <a class="el" href="character_2types_8h_source.html#l00176">momentum::CharacterParametersT&lt; T &gt;::pose</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00150">extractLocatorsFromCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00210">extractParameters()</a>, and <a class="el" href="character_2types_8h_source.html#l00176">momentum::CharacterParametersT&lt; T &gt;::pose</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00646">calibrateModel()</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00948">refineMotion()</a>.</p>
 
@@ -32362,11 +32377,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00149">149</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00150">150</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="log_8h_source.html#l00125">MT_LOGW</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00854">calibrateLocators()</a>, and <a class="el" href="tracker__utils_8cpp_source.html#l00220">extractIdAndLocatorsFromParams()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00854">calibrateLocators()</a>, and <a class="el" href="tracker__utils_8cpp_source.html#l00221">extractIdAndLocatorsFromParams()</a>.</p>
 
 </div>
 </div>
@@ -32396,7 +32411,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00269">269</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00291">291</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="marker_8h_source.html#l00020">momentum::Marker::name</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
 
@@ -32428,9 +32443,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00209">209</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00210">210</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="tracker__utils_8cpp_source.html#l00220">extractIdAndLocatorsFromParams()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00184">saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="tracker__utils_8cpp_source.html#l00221">extractIdAndLocatorsFromParams()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00189">saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -32630,7 +32645,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00233">233</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00234">234</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
@@ -33961,6 +33976,46 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
+<a id="a9ea114b0a31b9c28d6780db87accc6cc" name="a9ea114b0a31b9c28d6780db87accc6cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ea114b0a31b9c28d6780db87accc6cc">&#9670;&#160;</a></span>jointIdentityToModelIdentity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> momentum::jointIdentityToModelIdentity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>idSet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a6cf8e7f472a97049d401906c944fe153">JointParameters</a> &amp;&#160;</td>
+          <td class="paramname"><em>jointIdentity</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00270">270</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00096">momentum::EigenStrongType&lt; Derived, EigenType &gt;::Zero()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00149">loadCalibratedModel()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00160">loadCharacterWithIdentity()</a>.</p>
+
+</div>
+</div>
 <a id="a713f315a8dc55ec7d74448ae1911472a" name="a713f315a8dc55ec7d74448ae1911472a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a713f315a8dc55ec7d74448ae1911472a">&#9670;&#160;</a></span>ln2()</h2>
 
@@ -34253,7 +34308,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00149">149</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l01053">loadCharacterWithMotion()</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00270">jointIdentityToModelIdentity()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l01053">loadCharacterWithMotion()</a>.</p>
 
 </div>
 </div>
@@ -34273,9 +34328,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00155">155</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00160">160</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l01053">loadCharacterWithMotion()</a>, <a class="el" href="character__io_8cpp_source.html#l00073">loadFullCharacter()</a>, <a class="el" href="locator__io_8cpp_source.html#l00088">loadLocators()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, and <a class="el" href="character_2types_8h_source.html#l00096">momentum::EigenStrongType&lt; Derived, EigenType &gt;::Zero()</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00270">jointIdentityToModelIdentity()</a>, <a class="el" href="gltf__io_8cpp_source.html#l01053">loadCharacterWithMotion()</a>, <a class="el" href="character__io_8cpp_source.html#l00090">loadFullCharacter()</a>, <a class="el" href="locator__io_8cpp_source.html#l00088">loadLocators()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, and <a class="el" href="character_2types_8h_source.html#l00096">momentum::EigenStrongType&lt; Derived, EigenType &gt;::Zero()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="process__markers_8cpp_source.html#l00068">processMarkerFile()</a>.</p>
 
@@ -34309,7 +34364,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l01053">1053</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00149">loadCalibratedModel()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00155">loadCharacterWithIdentity()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00149">loadCalibratedModel()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00160">loadCharacterWithIdentity()</a>.</p>
 
 </div>
 </div>
@@ -34581,11 +34636,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <dl class="section return"><dt>Returns</dt><dd>The loaded Character object.</dd></dl>
 <p>Currently, only supports .glb and .fbx. If you want to parse from a non-local path, you may need to parse it using your favorite resource retriever into a buffer and use the buffer version of this function. </p>
 
-<p class="definition">Definition at line <a class="el" href="character__io_8cpp_source.html#l00073">73</a> of file <a class="el" href="character__io_8cpp_source.html">character_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="character__io_8cpp_source.html#l00090">90</a> of file <a class="el" href="character__io_8cpp_source.html">character_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="locator__io_8cpp_source.html#l00088">loadLocators()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00196">loadMomentumModel()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">loadParameters()</a>, <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>, and <a class="el" href="namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76a88183b946cc5f0e8c96b2e66e1c74a7e">Unknown</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00155">loadCharacterWithIdentity()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00160">loadCharacterWithIdentity()</a>.</p>
 
 </div>
 </div>
@@ -34639,7 +34694,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The loaded Character object. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="character__io_8cpp_source.html#l00101">101</a> of file <a class="el" href="character__io_8cpp_source.html">character_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="character__io_8cpp_source.html#l00118">118</a> of file <a class="el" href="character__io_8cpp_source.html">character_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="locator__io_8cpp_source.html#l00107">loadLocatorsFromBuffer()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00206">loadMomentumModelFromBuffer()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">loadParameters()</a>, and <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>.</p>
 
@@ -34741,7 +34796,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="reference">References <a class="el" href="locator__io_8cpp_source.html#l00107">loadLocatorsFromBuffer()</a>, <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00155">loadCharacterWithIdentity()</a>, and <a class="el" href="character__io_8cpp_source.html#l00073">loadFullCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00160">loadCharacterWithIdentity()</a>, and <a class="el" href="character__io_8cpp_source.html#l00090">loadFullCharacter()</a>.</p>
 
 </div>
 </div>
@@ -34781,7 +34836,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00130">momentum::ParameterTransformT&lt; T &gt;::bindPose()</a>, <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00200">kInvalidIndex</a>, <a class="el" href="log_8h_source.html#l00125">MT_LOGW</a>, <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00216">parameterTransform</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>, <a class="el" href="string_8cpp_source.html#l00042">tokenize()</a>, and <a class="el" href="string_8cpp_source.html#l00016">trim()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00101">loadFullCharacterFromBuffer()</a>, and <a class="el" href="locator__io_8cpp_source.html#l00088">loadLocators()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00118">loadFullCharacterFromBuffer()</a>, and <a class="el" href="locator__io_8cpp_source.html#l00088">loadLocators()</a>.</p>
 
 </div>
 </div>
@@ -35067,7 +35122,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00073">loadFullCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00090">loadFullCharacter()</a>.</p>
 
 </div>
 </div>
@@ -35089,7 +35144,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="parameter__transform__io_8cpp_source.html#l00206">206</a> of file <a class="el" href="parameter__transform__io_8cpp_source.html">parameter_transform_io.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00101">loadFullCharacterFromBuffer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00118">loadFullCharacterFromBuffer()</a>.</p>
 
 </div>
 </div>
@@ -35446,7 +35501,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="reference">References <a class="el" href="character_8cpp_source.html#l00558">momentum::CharacterT&lt; T &gt;::initParameterTransform()</a>, <a class="el" href="character_8h_source.html#l00037">momentum::CharacterT&lt; T &gt;::parameterLimits</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00612">parseParameterLimits()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00299">parseParameterSets()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00216">parseParameterTransform()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00346">parsePoseConstraints()</a>, <a class="el" href="parameter__transform_8h_source.html#l00081">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00073">loadFullCharacter()</a>, and <a class="el" href="character__io_8cpp_source.html#l00101">loadFullCharacterFromBuffer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00090">loadFullCharacter()</a>, and <a class="el" href="character__io_8cpp_source.html#l00118">loadFullCharacterFromBuffer()</a>.</p>
 
 </div>
 </div>
@@ -35622,6 +35677,68 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a92772fd591cc0c5fc3c7d934eb1a6260" name="a92772fd591cc0c5fc3c7d934eb1a6260"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92772fd591cc0c5fc3c7d934eb1a6260">&#9670;&#160;</a></span>loadUsdCharacter() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> momentum::loadUsdCharacter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;&#160;</td>
+          <td class="paramname"><em>inputPath</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Load a USD character from a local file path. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputPath</td><td>The path to the USD character file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The loaded Character object. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00405">405</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>.</p>
+
+</div>
+</div>
+<a id="a7ca3ed94716088afceb78c7767a0b9a3" name="a7ca3ed94716088afceb78c7767a0b9a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ca3ed94716088afceb78c7767a0b9a3">&#9670;&#160;</a></span>loadUsdCharacter() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> momentum::loadUsdCharacter </td>
+          <td>(</td>
+          <td class="paramtype">gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt;&#160;</td>
+          <td class="paramname"><em>inputSpan</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Load a USD character from a buffer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputSpan</td><td>The buffer containing the USD character data. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The loaded Character object. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00415">415</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>.</p>
 
 </div>
 </div>
@@ -37873,7 +37990,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="process__markers_8cpp_source.html#l00068">68</a> of file <a class="el" href="process__markers_8cpp_source.html">process_markers.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="app__utils_8cpp_source.html#l00155">loadCharacterWithIdentity()</a>, <a class="el" href="marker__io_8cpp_source.html#l00050">loadMarkersForMainSubject()</a>, <a class="el" href="log_8h_source.html#l00126">MT_LOGE</a>, <a class="el" href="log_8h_source.html#l00124">MT_LOGI</a>, <a class="el" href="process__markers_8cpp_source.html#l00023">processMarkers()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00184">saveMotion()</a>.</p>
+<p class="reference">References <a class="el" href="app__utils_8cpp_source.html#l00160">loadCharacterWithIdentity()</a>, <a class="el" href="marker__io_8cpp_source.html#l00050">loadMarkersForMainSubject()</a>, <a class="el" href="log_8h_source.html#l00126">MT_LOGE</a>, <a class="el" href="log_8h_source.html#l00124">MT_LOGI</a>, <a class="el" href="process__markers_8cpp_source.html#l00023">processMarkers()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00189">saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -38401,7 +38518,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l00948">948</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00055">createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00220">extractIdAndLocatorsFromParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00151">trackSequence()</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00056">createLocatorCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00221">extractIdAndLocatorsFromParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00151">trackSequence()</a>.</p>
 
 </div>
 </div>
@@ -38437,11 +38554,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00252">252</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00253">253</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00184">saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="app__utils_8cpp_source.html#l00189">saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -39392,7 +39509,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00130">momentum::ParameterTransformT&lt; T &gt;::bindPose()</a>, <a class="el" href="parameter__transform_8h_source.html#l00152">momentum::ParameterTransformT&lt; T &gt;::numJointParameters()</a>, <a class="el" href="character_2types_8h_source.html#l00180">momentum::CharacterParametersT&lt; T &gt;::offsets</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="character__state_8cpp_source.html#l00071">momentum::CharacterStateT&lt; T &gt;::set()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io_8cpp_source.html#l00639">saveFbxModel()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00184">saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io_8cpp_source.html#l00639">saveFbxModel()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00189">saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -39732,8 +39849,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
-<a id="aaad4bbdfe4fc3c99e47c7b7fe248d058" name="aaad4bbdfe4fc3c99e47c7b7fe248d058"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaad4bbdfe4fc3c99e47c7b7fe248d058">&#9670;&#160;</a></span>saveMotion()</h2>
+<a id="a1ae14a246de7e1f817d02d5677999796" name="a1ae14a246de7e1f817d02d5677999796"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ae14a246de7e1f817d02d5677999796">&#9670;&#160;</a></span>saveMotion()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -39771,14 +39888,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td>
           <td class="paramname"><em>fps</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td>
-          <td class="paramname"><em>saveMarkerMesh</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td>
+          <td class="paramname"><em>saveMarkerMesh</em> = <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -39788,9 +39905,24 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00184">184</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
+<p>Save the given character and motion to a GLB or FBX file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">outFile</td><td>The GLB/FBX file to save to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">character</td><td>The GLB/FBX file to save to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">identity</td><td>The identity parameters used for the character </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">finalMotion</td><td>The motion save to the file. (Note: this may be modified to remove scaling parameters if saveScaleToMotion is false) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">markerData</td><td><a class="el" href="structmomentum_1_1Marker.html" title="Marker represents a motion capture marker that defines an active marker during motion capture.">Marker</a> data to save to the file </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fps</td><td>Framerate of the motion </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">saveMarkerMesh</td><td>(optional) Whether to save a visible cube mesh for the markers </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">saveScaleToMotion</td><td>(optional) Whether to save the scale parameters to the motion or identity parameter vectors (saving to motion is preferred) </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00956">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00085">momentum::ParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00209">extractParameters()</a>, <a class="el" href="skeleton_8cpp_source.html#l00034">momentum::SkeletonT&lt; T &gt;::getJointNames()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="classmomentum_1_1GltfBuilder.html#aa56c094d7cb75845f8c7460f525a31b4a6adf97f83acf6453d4a6a4b1070f3754">momentum::GltfBuilder::None</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00252">removeIdentity()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00580">saveFbx()</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, <a class="el" href="classmomentum_1_1GltfBuilder.html#aa56c094d7cb75845f8c7460f525a31b4a9d91aa74b959d8473008602fc9322311">momentum::GltfBuilder::UnitCube</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
+<p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00189">189</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00956">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00085">momentum::ParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00210">extractParameters()</a>, <a class="el" href="skeleton_8cpp_source.html#l00034">momentum::SkeletonT&lt; T &gt;::getJointNames()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00136">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="classmomentum_1_1GltfBuilder.html#aa56c094d7cb75845f8c7460f525a31b4a6adf97f83acf6453d4a6a4b1070f3754">momentum::GltfBuilder::None</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00253">removeIdentity()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00580">saveFbx()</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, <a class="el" href="classmomentum_1_1GltfBuilder.html#aa56c094d7cb75845f8c7460f525a31b4a9d91aa74b959d8473008602fc9322311">momentum::GltfBuilder::UnitCube</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="process__markers_8cpp_source.html#l00068">processMarkerFile()</a>.</p>
 
@@ -39825,6 +39957,47 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p class="definition">Definition at line <a class="el" href="mppca__io_8cpp_source.html#l00084">84</a> of file <a class="el" href="mppca__io_8cpp_source.html">mppca_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+
+</div>
+</div>
+<a id="aa0eab2884ae866d71746c202ae61f32f" name="aa0eab2884ae866d71746c202ae61f32f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0eab2884ae866d71746c202ae61f32f">&#9670;&#160;</a></span>saveUsd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> momentum::saveUsd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Save a character to a USD file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>The path to save the USD file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">character</td><td>The Character object to save. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00446">446</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_8h_source.html#l00043">momentum::CharacterT&lt; T &gt;::mesh</a>, <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>, <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00217">skeleton</a>, and <a class="el" href="character_8h_source.html#l00046">momentum::CharacterT&lt; T &gt;::skinWeights</a>.</p>
 
 </div>
 </div>
@@ -41480,7 +41653,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l00511">511</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00020">createConstraintData()</a>, <a class="el" href="namespacemomentum.html#af7d4720300440ea3e81c4d7723305040">createFloorConstraints&lt; float &gt;()</a>, <a class="el" href="plane__error__function_8h_source.html#l00087">momentum::PlaneErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="position__error__function_8h_source.html#l00064">momentum::PositionErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="solver_8h_source.html#l00024">momentum::SolverOptions::maxIterations</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00124">MT_LOGI</a>, <a class="el" href="log_8h_source.html#l00125">MT_LOGW</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00021">createConstraintData()</a>, <a class="el" href="namespacemomentum.html#af7d4720300440ea3e81c4d7723305040">createFloorConstraints&lt; float &gt;()</a>, <a class="el" href="plane__error__function_8h_source.html#l00087">momentum::PlaneErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="position__error__function_8h_source.html#l00064">momentum::PositionErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="solver_8h_source.html#l00024">momentum::SolverOptions::maxIterations</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00124">MT_LOGI</a>, <a class="el" href="log_8h_source.html#l00125">MT_LOGW</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00854">calibrateLocators()</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00646">calibrateModel()</a>.</p>
 
@@ -41591,7 +41764,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l00350">350</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00020">createConstraintData()</a>, <a class="el" href="namespacemomentum.html#af7d4720300440ea3e81c4d7723305040">createFloorConstraints&lt; float &gt;()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00163">momentum::ParameterTransformT&lt; T &gt;::getPoseParameters()</a>, <a class="el" href="plane__error__function_8h_source.html#l00087">momentum::PlaneErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="position__error__function_8h_source.html#l00064">momentum::PositionErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="solver_8h_source.html#l00024">momentum::SolverOptions::maxIterations</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00124">MT_LOGI</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="log_8h_source.html#l00125">MT_LOGW</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00021">createConstraintData()</a>, <a class="el" href="namespacemomentum.html#af7d4720300440ea3e81c4d7723305040">createFloorConstraints&lt; float &gt;()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00163">momentum::ParameterTransformT&lt; T &gt;::getPoseParameters()</a>, <a class="el" href="plane__error__function_8h_source.html#l00087">momentum::PlaneErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="position__error__function_8h_source.html#l00064">momentum::PositionErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="solver_8h_source.html#l00024">momentum::SolverOptions::maxIterations</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00124">MT_LOGI</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="log_8h_source.html#l00125">MT_LOGW</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00854">calibrateLocators()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00646">calibrateModel()</a>, and <a class="el" href="process__markers_8cpp_source.html#l00023">processMarkers()</a>.</p>
 
@@ -41726,7 +41899,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l00180">180</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00020">createConstraintData()</a>, <a class="el" href="namespacemomentum.html#af7d4720300440ea3e81c4d7723305040">createFloorConstraints&lt; float &gt;()</a>, <a class="el" href="parameter__limits_8cpp_source.html#l00065">getPoseConstraintParameterLimits()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00163">momentum::ParameterTransformT&lt; T &gt;::getPoseParameters()</a>, <a class="el" href="sequence__solver__function_8h_source.html#l00021">kAllFrames</a>, <a class="el" href="plane__error__function_8h_source.html#l00087">momentum::PlaneErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="position__error__function_8h_source.html#l00064">momentum::PositionErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="solver_8h_source.html#l00024">momentum::SolverOptions::maxIterations</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="parameter__transform_8h_source.html#l00081">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="character_8h_source.html#l00052">momentum::CharacterT&lt; T &gt;::collision</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00021">createConstraintData()</a>, <a class="el" href="namespacemomentum.html#af7d4720300440ea3e81c4d7723305040">createFloorConstraints&lt; float &gt;()</a>, <a class="el" href="parameter__limits_8cpp_source.html#l00065">getPoseConstraintParameterLimits()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00163">momentum::ParameterTransformT&lt; T &gt;::getPoseParameters()</a>, <a class="el" href="sequence__solver__function_8h_source.html#l00021">kAllFrames</a>, <a class="el" href="plane__error__function_8h_source.html#l00087">momentum::PlaneErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="position__error__function_8h_source.html#l00064">momentum::PositionErrorFunctionT&lt; T &gt;::kLegacyWeight</a>, <a class="el" href="character_8h_source.html#l00040">momentum::CharacterT&lt; T &gt;::locators</a>, <a class="el" href="solver_8h_source.html#l00024">momentum::SolverOptions::maxIterations</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00130">MT_LOGI_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00147">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_8h_source.html#l00030">momentum::CharacterT&lt; T &gt;::parameterTransform</a>, <a class="el" href="parameter__transform_8h_source.html#l00081">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, and <a class="el" href="character_8h_source.html#l00027">momentum::CharacterT&lt; T &gt;::skeleton</a>.</p>
 
 </div>
 </div>
@@ -43286,7 +43459,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="math_2types_8h_source.html#l00401">401</a> of file <a class="el" href="math_2types_8h_source.html">types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="tracker__utils_8cpp_source.html#l00055">createLocatorCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="tracker__utils_8cpp_source.html#l00056">createLocatorCharacter()</a>.</p>
 
 </div>
 </div>
@@ -43312,7 +43485,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00025">25</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__limits_8cpp_source.html#l00039">applyPassiveJointParameterLimits()</a>, <a class="el" href="character_8cpp_source.html#l00550">momentum::CharacterT&lt; T &gt;::bindPose()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00055">createLocatorCharacter()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00187">momentum::CollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00121">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getError()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00039">momentum::LimitErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00235">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00075">momentum::StateErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00119">momentum::StateErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00180">momentum::LimitErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00239">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00169">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00283">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00105">momentum::StateSequenceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00417">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00338">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00475">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00232">momentum::StateErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00423">momentum::LimitErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00235">momentum::StateSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::identity()</a>, <a class="el" href="character_8cpp_source.html#l00558">momentum::CharacterT&lt; T &gt;::initParameterTransform()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00249">loadMmo()</a>, <a class="el" href="logger_8cpp_source.html#l00233">logJointParams()</a>, <a class="el" href="character__utility_8cpp_source.html#l00718">mapIdentityToCharacter()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00169">mapMotionToCharacter()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00174">mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00290">parameterLimitsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00102">parameterTransformFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00080">parameterTransformToJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00216">parseParameterTransform()</a>, <a class="el" href="character__utility_8cpp_source.html#l00600">removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00439">replaceSkeletonHierarchy()</a>, <a class="el" href="locator__io_8cpp_source.html#l00214">saveLocators()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">saveMmo()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00113">saveMmo()</a>, <a class="el" href="character_8cpp_source.html#l00641">momentum::CharacterT&lt; float &gt;::withFaceExpressionBlendShape()</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00693">writeParameterLimits()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__limits_8cpp_source.html#l00039">applyPassiveJointParameterLimits()</a>, <a class="el" href="character_8cpp_source.html#l00550">momentum::CharacterT&lt; T &gt;::bindPose()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00056">createLocatorCharacter()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00187">momentum::CollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00121">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getError()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00039">momentum::LimitErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00235">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00075">momentum::StateErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00165">momentum::SimdNormalErrorFunction::getGradient()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00119">momentum::StateErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00180">momentum::LimitErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00239">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00169">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00283">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00105">momentum::StateSequenceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00417">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00338">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00475">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00232">momentum::StateErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00423">momentum::LimitErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00235">momentum::StateSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::identity()</a>, <a class="el" href="character_8cpp_source.html#l00558">momentum::CharacterT&lt; T &gt;::initParameterTransform()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00249">loadMmo()</a>, <a class="el" href="logger_8cpp_source.html#l00233">logJointParams()</a>, <a class="el" href="character__utility_8cpp_source.html#l00718">mapIdentityToCharacter()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00169">mapMotionToCharacter()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00174">mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00290">parameterLimitsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00102">parameterTransformFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00080">parameterTransformToJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00216">parseParameterTransform()</a>, <a class="el" href="character__utility_8cpp_source.html#l00600">removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00439">replaceSkeletonHierarchy()</a>, <a class="el" href="locator__io_8cpp_source.html#l00214">saveLocators()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">saveMmo()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00113">saveMmo()</a>, <a class="el" href="character_8cpp_source.html#l00641">momentum::CharacterT&lt; float &gt;::withFaceExpressionBlendShape()</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00693">writeParameterLimits()</a>.</p>
 
 </div>
 </div>
@@ -43422,7 +43595,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li>
-    <li class="footer">Generated on Tue Jul 29 2025 15:28:23 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Aug 7 2025 20:37:52 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
