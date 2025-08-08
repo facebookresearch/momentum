@@ -165,4 +165,17 @@ TransformT<T> transformAtoB(
     const Skeleton& referenceSkeleton,
     const SkeletonStateT<T>& skelState);
 
+/// Invert the skeleton state (global transforms in world space) back to joint parameters (Euler
+/// angles in local space).  Note that this conversion is not unique due to the non-uniqueness of
+/// Euler angle conversion.
+template <typename T>
+[[nodiscard]] JointParametersT<T> skeletonStateToJointParameters(
+    const SkeletonStateT<T>& state,
+    const Skeleton& skeleton);
+
+template <typename T>
+[[nodiscard]] JointParametersT<T> skeletonStateToJointParameters(
+    const TransformListT<T>& state,
+    const Skeleton& skeleton);
+
 } // namespace momentum
