@@ -32,7 +32,6 @@
 #include <pxr/usd/usdSkel/skeleton.h>
 #include <pxr/usd/usdSkel/skeletonQuery.h>
 #include <pxr/usd/usdSkel/skinningQuery.h>
-#include <iostream>
 
 #include <tbb/global_control.h>
 #include <tbb/task_scheduler_init.h>
@@ -41,14 +40,13 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <thread>
-
-#ifdef _WIN32
-#include <cstdlib>
-#endif
+#include <vector>
 
 namespace momentum {
 
@@ -101,8 +99,29 @@ void initializeUsdWithSuppressedWarnings() {
   g_suppressor = std::make_unique<ResolverWarningsSuppressor>();
   TfDiagnosticMgr::GetInstance().AddDelegate(g_suppressor.get());
 
-  g_usdPluginInit =
-      std::make_unique<UsdPluginInit>(filesystem::temp_directory_path() / "usd_plugin");
+  auto tempDir = filesystem::temp_directory_path();
+
+  // Try a few fixed paths to avoid accumulating many plugin folders
+  std::vector<std::string> fixedPaths = {"usd_plugin", "usd_momentum_plugin"};
+
+  bool pluginDirCreated = false;
+  filesystem::path pluginDir;
+
+  for (const auto& pathName : fixedPaths) {
+    pluginDir = tempDir / pathName;
+    std::error_code ec;
+    filesystem::create_directories(pluginDir, ec);
+    if (!ec) {
+      pluginDirCreated = true;
+      break;
+    }
+  }
+
+  if (pluginDirCreated) {
+    g_usdPluginInit = std::make_unique<UsdPluginInit>(pluginDir);
+  } else {
+    g_usdPluginInit = std::make_unique<UsdPluginInit>();
+  }
 
   g_usdInitialized = true;
 }

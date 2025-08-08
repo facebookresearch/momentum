@@ -18,6 +18,9 @@
 
 #include <filesystem>
 #include <fstream>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 using namespace momentum;
 
@@ -104,21 +107,19 @@ TEST_F(UsdIoTest, LoadCharacterWithMaterials) {
 }
 
 TEST_F(UsdIoTest, SaveAndLoadRoundTrip) {
-  // Create a temporary file for testing
-  auto tempFile = temporaryFile("test_usd", ".usda");
+  auto tempFile = temporaryFile("momentum_usd_roundtrip", ".usda");
 
-  // Save the test character
   saveUsd(tempFile.path(), testCharacter);
 
-  // Load it back
+  ASSERT_TRUE(filesystem::exists(tempFile.path()))
+      << "USD file was not created at: " << tempFile.path();
+
   const auto loadedCharacter = loadUsdCharacter(tempFile.path());
 
-  // Verify the loaded character matches the original
   EXPECT_EQ(loadedCharacter.skeleton.joints.size(), testCharacter.skeleton.joints.size());
   EXPECT_EQ(loadedCharacter.mesh->vertices.size(), testCharacter.mesh->vertices.size());
   EXPECT_EQ(loadedCharacter.mesh->faces.size(), testCharacter.mesh->faces.size());
 
-  // Verify joint names are preserved
   for (size_t i = 0; i < testCharacter.skeleton.joints.size(); ++i) {
     EXPECT_EQ(loadedCharacter.skeleton.joints[i].name, testCharacter.skeleton.joints[i].name);
   }
