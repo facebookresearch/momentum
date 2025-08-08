@@ -1392,8 +1392,8 @@ Uses a generalized loss function that support various forms of losses such as L1
              const std::string& name) {
             validateJointIndex(parent, "parent", errf.getSkeleton());
             errf.addConstraint(mm::PositionData(
-                target,
                 offset.value_or(Eigen::Vector3f::Zero()),
+                target,
                 parent,
                 weight,
                 name));
@@ -1418,6 +1418,10 @@ Uses a generalized loss function that support various forms of losses such as L1
             return self.getConstraints();
           },
           "Returns the list of position constraints.")
+      .def(
+          "clear_constraints",
+          [](mm::PositionErrorFunction& self) { self.clearConstraints(); },
+          "Clears all constraints from the error function.")
       .def(
           "add_constraints",
           [](mm::PositionErrorFunction& errf,
