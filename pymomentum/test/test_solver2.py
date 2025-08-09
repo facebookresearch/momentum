@@ -43,6 +43,24 @@ class TestSolver(unittest.TestCase):
         )
 
         pos_error = pym_solver2.PositionErrorFunction(character)
+
+        pos_error.add_constraint(
+            parent=0,
+            offset=np.array([1.0, 0.0, 0.0]),
+            target=np.array([10.0, 0.0, 0.0]),
+            weight=1.0,
+        )
+        self.assertTrue(len(pos_error.constraints) == 1)
+        self.assertTrue(
+            np.isclose(pos_error.constraints[0].offset, [1.0, 0.0, 0.0]).all()
+        )
+        self.assertTrue(
+            np.isclose(pos_error.constraints[0].target, [10.0, 0.0, 0.0]).all()
+        )
+
+        pos_error.clear_constraints()
+        self.assertTrue(len(pos_error.constraints) == 0)
+
         pos_error.add_constraints(
             parent=np.arange(n_joints), target=skel_state_target[:, :3].numpy()
         )
