@@ -26,7 +26,7 @@ TEST(ExceptionTest, ThrowImplNoArguments) {
   try {
     detail::throwImpl<std::bad_array_new_length>();
     FAIL() << "Expected std::bad_array_new_length";
-  } catch (const std::bad_array_new_length& e) {
+  } catch (const std::bad_array_new_length&) {
     EXPECT_TRUE(true) << "std::bad_array_new_length thrown as expected";
   } catch (...) {
     FAIL() << "Caught unexpected exception type";
