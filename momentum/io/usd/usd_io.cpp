@@ -110,8 +110,8 @@ void initializeUsdWithSuppressedWarnings() {
   for (const auto& pathName : fixedPaths) {
     pluginDir = tempDir / pathName;
     std::error_code ec;
-    filesystem::create_directories(pluginDir, ec);
-    if (!ec) {
+    // Use create_directory (not create_directories) to fail if directory exists
+    if (filesystem::create_directory(pluginDir, ec) && !ec) {
       pluginDirCreated = true;
       break;
     }
