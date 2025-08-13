@@ -23,6 +23,7 @@ def _build_blend_shape_basis(
     base_shape = c.mesh.vertices
     n_pts = base_shape.shape[0]
     n_blend = 4
+    np.random.seed(0)
     shape_vectors = np.random.rand(n_blend, n_pts, 3)
     blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
     return blend_shape
