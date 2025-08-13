@@ -670,6 +670,7 @@ class TestSolver(unittest.TestCase):
 
         # Ensure repeatability in the rng:
         torch.manual_seed(0)
+        np.random.seed(0)
         model_params_init = torch.zeros(n_params, dtype=torch.float32)
 
         def _normalize_vec(vec: npt.NDArray) -> npt.NDArray:
@@ -735,6 +736,7 @@ class TestSolver(unittest.TestCase):
 
         # Ensure repeatability in the rng:
         torch.manual_seed(0)
+        np.random.seed(0)
         model_params_init = torch.zeros(n_params, dtype=torch.float32)
 
         # Define local and global axes
@@ -940,6 +942,7 @@ class TestSolver(unittest.TestCase):
 
         # Ensure repeatability in the rng:
         torch.manual_seed(0)
+        np.random.seed(0)
         model_params_init = torch.zeros(n_params, dtype=torch.float32)
 
         # Define offset and target quaternions
