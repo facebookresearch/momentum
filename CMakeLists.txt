@@ -462,6 +462,7 @@ if(MOMENTUM_BUILD_WITH_USD)
       sdf
       tf
       TBB::tbb
+      Python3::Python
   )
   set(io_usd_target io_usd)
 else()
