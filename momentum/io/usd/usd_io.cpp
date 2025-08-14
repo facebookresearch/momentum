@@ -22,9 +22,12 @@
 #include <pxr/base/plug/registry.h>
 #include <pxr/base/tf/diagnosticMgr.h>
 #include <pxr/base/tf/errorMark.h>
+#include <pxr/base/tf/token.h>
 #include <pxr/base/vt/array.h>
+#include <pxr/base/vt/value.h>
 #include <pxr/pxr.h>
 #include <pxr/usd/ar/resolver.h>
+#include <pxr/usd/sdf/path.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
 #include <pxr/usd/usdGeom/mesh.h>
@@ -37,6 +40,23 @@
 #include <pxr/usd/usdSkel/skinningQuery.h>
 
 #include <tbb/global_control.h>
+
+// TBB version compatibility:
+// - TBB 2019 and older: uses task_scheduler_init.h
+// - TBB 2020.3 and newer: uses global_control.h only (task_scheduler_init is deprecated)
+// - TBB 2021 and newer: task_scheduler_init.h completely removed
+#ifdef TBB_INTERFACE_VERSION
+  #if TBB_INTERFACE_VERSION < 12000  // TBB 2020.3 has interface version 12000
+    #include <tbb/task_scheduler_init.h>
+    #define MOMENTUM_USE_TBB_TASK_SCHEDULER_INIT 1
+  #endif
+#else
+  // Try to include the header and define if successful
+  #if __has_include(<tbb/task_scheduler_init.h>)
+    #include <tbb/task_scheduler_init.h>
+    #define MOMENTUM_USE_TBB_TASK_SCHEDULER_INIT 1
+  #endif
+#endif
 
 // Conditional include for internal Meta environment vs open source
 // In open source builds, this header won't exist and MOMENTUM_WITH_USD_PLUGIN_INIT will be
@@ -54,6 +74,9 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+
+// Import USD namespace
+PXR_NAMESPACE_USING_DIRECTIVE
 
 namespace momentum {
 
@@ -95,6 +118,11 @@ std::unique_ptr<UsdPluginInit> g_usdPluginInit;
 #endif
 std::unique_ptr<tbb::global_control> g_tbbControl;
 
+// TBB compatibility variables for older versions
+#ifdef MOMENTUM_USE_TBB_TASK_SCHEDULER_INIT
+std::unique_ptr<tbb::task_scheduler_init> g_tbbTaskScheduler;
+#endif
+
 void initializeUsdWithSuppressedWarnings() {
   std::lock_guard<std::mutex> lock(g_usdInitMutex);
 
@@ -102,8 +130,15 @@ void initializeUsdWithSuppressedWarnings() {
     return;
   }
 
+  // Initialize TBB with the appropriate method based on version
+#ifdef MOMENTUM_USE_TBB_TASK_SCHEDULER_INIT
+  // Use legacy task_scheduler_init for older TBB versions
+  g_tbbTaskScheduler = std::make_unique<tbb::task_scheduler_init>(1);
+#else
+  // Use modern global_control for newer TBB versions
   g_tbbControl =
       std::make_unique<tbb::global_control>(tbb::global_control::max_allowed_parallelism, 1);
+#endif
 
   g_suppressor = std::make_unique<ResolverWarningsSuppressor>();
   TfDiagnosticMgr::GetInstance().AddDelegate(g_suppressor.get());
