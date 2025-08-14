@@ -37,7 +37,6 @@
 #include <pxr/usd/usdSkel/skinningQuery.h>
 
 #include <tbb/global_control.h>
-#include <tbb/task_scheduler_init.h>
 
 // Conditional include for internal Meta environment vs open source
 // In open source builds, this header won't exist and MOMENTUM_WITH_USD_PLUGIN_INIT will be
