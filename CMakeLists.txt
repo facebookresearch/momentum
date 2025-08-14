@@ -108,7 +108,6 @@ find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
 
-# USD support (optional)
 if(MOMENTUM_BUILD_WITH_USD)
   find_package(pxr CONFIG REQUIRED)
   find_package(TBB CONFIG REQUIRED)
@@ -445,35 +444,29 @@ mt_library(
     ezc3d
 )
 
-# USD I/O library (optional)
 if(MOMENTUM_BUILD_WITH_USD)
-  set(io_usd_sources_var io_usd_sources)
-  set(io_usd_private_link_libraries
-    pxr::usd
-    pxr::usdGeom
-    pxr::usdSkel
-    pxr::sdf
-    pxr::tf
-    TBB::tbb
+  mt_library(
+    NAME io_usd
+    HEADERS_VARS
+      io_usd_public_headers
+    SOURCES_VARS
+      io_usd_sources
+    PUBLIC_LINK_LIBRARIES
+      character
+      io_common
+      io_skeleton
+    PRIVATE_LINK_LIBRARIES
+      usd
+      usdGeom
+      usdSkel
+      sdf
+      tf
+      TBB::tbb
   )
+  set(io_usd_target io_usd)
 else()
-  set(io_usd_sources_var io_usd_sources_unsupported)
-  set(io_usd_private_link_libraries )
+  set(io_usd_target )
 endif()
-
-mt_library(
-  NAME io_usd
-  HEADERS_VARS
-    io_usd_public_headers
-  SOURCES_VARS
-    ${io_usd_sources_var}
-  PUBLIC_LINK_LIBRARIES
-    character
-    io_common
-    io_skeleton
-  PRIVATE_LINK_LIBRARIES
-    ${io_usd_private_link_libraries}
-)
 
 mt_library(
   NAME io
@@ -487,7 +480,7 @@ mt_library(
     io_marker
     io_shape
     io_skeleton
-    io_usd
+    ${io_usd_target}
 )
 
 mt_library(
