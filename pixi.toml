@@ -21,7 +21,6 @@ rerun-sdk = ">=0.22.1,<0.23"
 pip = ">=25.2,<26"
 pybind11 = ">=3.0.0,<4"
 pytest = ">=8.4.1,<9"
-python = "3.12.*"
 scipy = ">=1.15.2,<2"
 setuptools = ">=80.9.0,<81"
 sphinx = ">=8.1.3,<9"
@@ -406,13 +405,20 @@ system-requirements = { cuda = "12" }
 build-dependencies = { cuda-toolkit = ">=12.6.3,<13", nvtx-c = ">=3.1.1", cuda-version = "12.8.*" }
 dependencies = { python = "3.12.*", pytorch-gpu = ">=2.6.0,<3" }
 
+[feature.py313-cuda126]
+platforms = ["linux-64", "win-64"]
+system-requirements = { cuda = "12" }
+build-dependencies = { cuda-toolkit = ">=12.6.3,<13", nvtx-c = ">=3.1.1", cuda-version = "12.8.*" }
+dependencies = { python = "3.13.*", pytorch-gpu = ">=2.6.0,<3" }
+
 #==============
 # Environments
 #==============
 
 [environments]
 py312-cuda126 = ["py312-cuda126"]
+py313-cuda126 = ["py313-cuda126"]
 
-gpu = ["py312-cuda126"]
+gpu = ["py313-cuda126"]
 cpu = ["cpu"]
 default = ["cpu"]
