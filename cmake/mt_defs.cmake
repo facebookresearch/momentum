@@ -556,10 +556,25 @@ function(mt_install_pymomentum)
     DESTINATION pymomentum
   )
 
-  # Install Python modules
+  # Install Python modules - filter out non-existent files to handle platform differences
   get_property(pymomentum_python_libraries_to_install GLOBAL PROPERTY PYMOMENTUM_PYTHON_LIBRARIES_TO_INSTALL)
-  install(
-    FILES ${pymomentum_python_libraries_to_install}
-    DESTINATION pymomentum
-  )
+
+  # Filter out non-existent files and directories
+  set(filtered_libraries_to_install "")
+  foreach(item ${pymomentum_python_libraries_to_install})
+    if(EXISTS "${item}")
+      list(APPEND filtered_libraries_to_install "${item}")
+    else()
+      message(STATUS "Skipping non-existent pymomentum file: ${item}")
+    endif()
+  endforeach()
+
+  if(filtered_libraries_to_install)
+    install(
+      FILES ${filtered_libraries_to_install}
+      DESTINATION pymomentum
+    )
+  else()
+    message(STATUS "No Python libraries to install for pymomentum")
+  endif()
 endfunction()
