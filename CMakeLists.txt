@@ -60,6 +60,7 @@ include(GNUInstallDirs)
 
 mt_option(BUILD_SHARED_LIBS "Build as shared libraries" ON)
 mt_option(MOMENTUM_BUILD_WITH_FBXSDK "Build with IO FBX" OFF)
+mt_option(MOMENTUM_BUILD_WITH_USD "Build with IO USD" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
@@ -106,6 +107,11 @@ find_package(openfbx CONFIG REQUIRED)
 find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
+
+if(MOMENTUM_BUILD_WITH_USD)
+  find_package(pxr CONFIG REQUIRED)
+  find_package(TBB CONFIG REQUIRED)
+endif()
 
 if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
   find_package(rerun_sdk CONFIG REQUIRED)
@@ -438,6 +444,31 @@ mt_library(
     ezc3d
 )
 
+if(MOMENTUM_BUILD_WITH_USD)
+  mt_library(
+    NAME io_usd
+    HEADERS_VARS
+      io_usd_public_headers
+    SOURCES_VARS
+      io_usd_sources
+    PUBLIC_LINK_LIBRARIES
+      character
+      io_common
+      io_skeleton
+    PRIVATE_LINK_LIBRARIES
+      usd
+      usdGeom
+      usdSkel
+      sdf
+      tf
+      TBB::tbb
+      Python3::Python
+  )
+  set(io_usd_target io_usd)
+else()
+  set(io_usd_target )
+endif()
+
 mt_library(
   NAME io
   HEADERS_VARS io_public_headers
@@ -450,6 +481,7 @@ mt_library(
     io_marker
     io_shape
     io_skeleton
+    ${io_usd_target}
 )
 
 mt_library(
@@ -726,6 +758,19 @@ if(MOMENTUM_BUILD_TESTING)
       io_motion
       io_test_helper
   )
+
+  if(MOMENTUM_BUILD_WITH_USD)
+    mt_test(
+      NAME io_usd_test
+      SOURCES_VARS io_usd_test_sources
+      LINK_LIBRARIES
+        character_test_helpers
+        io_test_helper
+        io_usd
+      ENV
+        "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
+    )
+  endif()
 endif()
 
 #===============================================================================
@@ -786,6 +831,18 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
       rerun_sdk
   )
+
+  if(MOMENTUM_BUILD_WITH_USD)
+    mt_executable(
+      NAME usd_viewer
+      SOURCES_VARS usd_viewer_sources
+      LINK_LIBRARIES
+        io_usd
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
+  endif()
 
   mt_executable(
     NAME animate_shapes

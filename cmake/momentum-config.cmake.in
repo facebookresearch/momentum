@@ -28,6 +28,11 @@ find_dependency(re2 MODULE)
 find_dependency(spdlog CONFIG)
 find_dependency(urdfdom CONFIG)
 
+if(@MOMENTUM_BUILD_WITH_USD@)
+  find_dependency(pxr CONFIG)
+  find_dependency(TBB CONFIG)
+endif()
+
 if(@MOMENTUM_ENABLE_PROFILING@)
   find_dependency(Tracy CONFIG)
 endif()

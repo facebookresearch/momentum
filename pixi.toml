@@ -10,42 +10,44 @@ homepage = "https://facebookresearch.github.io/momentum/"
 repository = "https://github.com/facebookresearch/momentum"
 
 [build-dependencies]
-boost = ">=1.85.0,<2"
-c-compiler = ">=1.9.0,<2"
-clang-format = ">=20.1.3,<21"
-cmake = ">=4.0.1,<5"
-cxx-compiler = ">=1.9.0,<2"
-gtest = ">=1.16.0,<2"
-ninja = ">=1.12.1,<2"
+libboost-devel = ">=1.88.0,<2"
+c-compiler = ">=1.11.0,<2"
+clang-format = ">=20.1.8,<21"
+cmake = ">=4.1.0,<5"
+cxx-compiler = ">=1.11.0,<2"
+gtest = ">=1.17.0,<2"
+ninja = ">=1.13.1,<2"
 rerun-sdk = ">=0.22.1,<0.23"
-pip = ">=25.0.1,<26"
-pybind11 = ">=2.13.6,<3"
-pytest = ">=8.3.5,<9"
+pip = ">=25.2,<26"
+pybind11 = ">=3.0.0,<4"
+pytest = ">=8.4.1,<9"
 scipy = ">=1.15.2,<2"
-setuptools = ">=75.8.2,<79"
+setuptools = ">=80.9.0,<81"
 sphinx = ">=8.1.3,<9"
 sphinx-rtd-theme = ">=3.0.1,<4"
 tracy-profiler-gui = ">=0.11.1,<0.12"
 
 [dependencies]
-blas = ">=2.131,<3"
+blas = ">=2.134,<3"
 ceres-solver = ">=2.2.0,<3"
 cli11 = ">=2.5.0,<3"
 dispenso = ">=1.4.0,<2"
 eigen = ">=3.4.0,<4"
-ezc3d = ">=1.5.18,<2"
+ezc3d = ">=1.5.19,<2"
 drjit-cpp = ">=1.0.5,<2"
-fmt = ">=11.1.4,<12"
+fmt = ">=11.2.0,<12"
 fx-gltf = ">=2.0.0,<3"
 indicators = ">=2.3,<3"
 librerun-sdk = ">=0.22.1,<0.23"
 ms-gsl = ">=4.2.0,<5"
 nlohmann_json = ">=3.12.0,<4"
 openfbx = ">=0.9,<0.10"
-openssl = ">=3.5.0,<4"
-pytorch = ">=2.6.0,<3"
-re2 = ">=2024.7.2,<2025"
+openssl = ">=3.5.2,<4"
+openusd = ">=25.5.1,<26"
+pytorch = ">=2.7.1,<3"
+re2 = ">=2025.6.26,<2026"
 spdlog = ">=1.15.3,<2"
+tbb-devel = ">=2021.13.0,<2022"
 tracy-profiler-client = ">=0.11.1,<0.12"
 urdfdom = ">=4.0.1,<5"
 zlib = ">=1.3.1,<2"
@@ -66,6 +68,7 @@ config = { cmd = """
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
+        -DMOMENTUM_BUILD_WITH_USD=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -85,6 +88,7 @@ config_dev = { cmd = """
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
+        -DMOMENTUM_BUILD_WITH_USD=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -132,6 +136,9 @@ glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/glb_viewer", depe
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/urdf_viewer", depends-on = [
     "build",
 ], description = "Run URDF file viewer" }
+usd_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/usd_viewer", depends-on = [
+    "build",
+], description = "Run USD file viewer" }
 process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/process_markers_app", depends-on = [
     "build",
 ], description = "Run marker processing application" }
@@ -189,6 +196,7 @@ config = { cmd = """
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
+        -DMOMENTUM_BUILD_WITH_USD=ON \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -312,6 +320,7 @@ config = { cmd = """
         -DBUILD_SHARED_LIBS=OFF \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
+        -DMOMENTUM_BUILD_WITH_USD=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_ENABLE_PROFILING=ON \
@@ -355,6 +364,9 @@ glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/glb_viewer.exe", 
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/urdf_viewer.exe", depends-on = [
     "build",
 ] }
+usd_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/usd_viewer.exe", depends-on = [
+    "build",
+] }
 process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/process_markers_app.exe", depends-on = [
     "build",
 ] }
@@ -393,17 +405,11 @@ system-requirements = { cuda = "12" }
 build-dependencies = { cuda-toolkit = ">=12.6.3,<13", nvtx-c = ">=3.1.1", cuda-version = "12.8.*" }
 dependencies = { python = "3.12.*", pytorch-gpu = ">=2.6.0,<3" }
 
-[feature.py311-cuda126]
+[feature.py313-cuda126]
 platforms = ["linux-64", "win-64"]
 system-requirements = { cuda = "12" }
 build-dependencies = { cuda-toolkit = ">=12.6.3,<13", nvtx-c = ">=3.1.1", cuda-version = "12.8.*" }
-dependencies = { python = "3.11.*", pytorch-gpu = ">=2.6.0,<3" }
-
-[feature.py310-cuda126]
-platforms = ["linux-64", "win-64"]
-system-requirements = { cuda = "12" }
-build-dependencies = { cuda-toolkit = ">=12.6.3,<13", nvtx-c = ">=3.1.1", cuda-version = "12.8.*" }
-dependencies = { python = "3.10.*", pytorch-gpu = ">=2.6.0,<3" }
+dependencies = { python = "3.13.*", pytorch-gpu = ">=2.6.0,<3" }
 
 #==============
 # Environments
@@ -411,8 +417,8 @@ dependencies = { python = "3.10.*", pytorch-gpu = ">=2.6.0,<3" }
 
 [environments]
 py312-cuda126 = ["py312-cuda126"]
-py311-cuda126 = ["py311-cuda126"]
-py310-cuda126 = ["py310-cuda126"]
-gpu = ["py312-cuda126"]
+py313-cuda126 = ["py313-cuda126"]
+
+gpu = ["py313-cuda126"]
 cpu = ["cpu"]
 default = ["cpu"]
