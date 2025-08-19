@@ -33,7 +33,7 @@ jobs:
           sudo installer -pkg fbx202037_fbxsdk_clang_macos.pkg -target /
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.8.14
+        uses: prefix-dev/setup-pixi@v0.9.0
         with:
           cache: true
 
@@ -69,7 +69,7 @@ jobs:
           sudo installer -pkg fbx202037_fbxsdk_clang_macos.pkg -target /
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.8.14
+        uses: prefix-dev/setup-pixi@v0.9.0
         with:
           cache: true
 
