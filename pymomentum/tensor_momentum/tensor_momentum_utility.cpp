@@ -11,8 +11,6 @@
 
 #include <momentum/math/mesh.h>
 
-#include <c10/core/ScalarType.h>
-
 namespace pymomentum {
 
 void checkValidBoneIndex(
