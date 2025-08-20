@@ -38,7 +38,7 @@ jobs:
     # 2) Build Docusaurus site with C++ docs (using Doxygen)
     - uses: actions/setup-node@v4
       with:
-          node-version: 18
+          node-version: 20
           cache: yarn
           cache-dependency-path: ./momentum/website/yarn.lock
 
