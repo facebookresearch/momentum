@@ -600,21 +600,24 @@ CharacterParameters CharacterT<T>::splitParameters(
 
 template <typename T>
 CharacterT<T> CharacterT<T>::withBlendShape(
-    BlendShape_p blendShape_in,
-    Eigen::Index maxBlendShapes,
-    const bool overwriteBaseShape) const {
+    BlendShape_const_p blendShape_in,
+    Eigen::Index maxBlendShapes) const {
   CharacterT<T> result = *this;
-  result.addBlendShape(blendShape_in, maxBlendShapes, overwriteBaseShape);
+  result.addBlendShape(blendShape_in, maxBlendShapes);
   return result;
 }
 
 template <typename T>
 void CharacterT<T>::addBlendShape(
-    const BlendShape_p& blendShape_in,
-    Eigen::Index maxBlendShapes,
-    const bool overwriteBaseShape) {
+    const BlendShape_const_p& blendShape_in,
+    Eigen::Index maxBlendShapes) {
   MT_CHECK(this->mesh);
-  MT_CHECK(blendShape_in);
+  if (!blendShape_in) {
+    std::tie(parameterTransform, parameterLimits) =
+        addBlendShapeParameters(parameterTransform, parameterLimits, 0);
+    this->blendShape.reset();
+    return;
+  }
 
   // TODO should we accommodate passing in a BlendShape with "extra" vertices (for the
   // higher subdivision levels)?
@@ -623,12 +626,6 @@ void CharacterT<T>::addBlendShape(
       "{} is not {}",
       blendShape_in->modelSize(),
       this->mesh->vertices.size());
-
-  if (overwriteBaseShape) {
-    // We need to use the base shape from the mesh rather than the one that's stored in the file.
-    // TODO (fbogo): Check if this operation is actually meaningful.
-    blendShape_in->setBaseShape(this->mesh->vertices);
-  }
 
   blendShape = blendShape_in;
 
