@@ -414,11 +414,6 @@ SkinWeights CharacterT<T>::remapSkinWeights(
 
   SkinWeights result = inSkinWeights;
 
-  // create bind states for both source and target skeleton
-  const SkeletonState sourceBindState(
-      originalCharacter.parameterTransform.bindPose(), originalCharacter.skeleton, false);
-  const SkeletonState targetBindState(parameterTransform.bindPose(), skeleton, false);
-
   // go over all vertices
   for (int v = 0; v < result.index.rows(); v++) {
     // remap the parent bones according to the map
