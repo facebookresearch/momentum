@@ -204,12 +204,10 @@ struct CharacterT {
   ///
   /// @param blendShape_in Blend shapes to add to the character
   /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
-  /// @param overwriteBaseShape Whether to set the blend shape base to the character's mesh
   /// @return A new character with the specified blend shapes
   [[nodiscard]] CharacterT withBlendShape(
-      BlendShape_p blendShape_in,
-      Eigen::Index maxBlendShapes,
-      bool overwriteBaseShape = true) const;
+      BlendShape_const_p blendShape_in,
+      Eigen::Index maxBlendShapes) const;
 
   /// Creates a new character with the specified face expression blend shapes
   ///
@@ -224,11 +222,7 @@ struct CharacterT {
   ///
   /// @param blendShape_in Blend shapes to add to the character
   /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
-  /// @param overwriteBaseShape Whether to set the blend shape base to the character's mesh
-  void addBlendShape(
-      const BlendShape_p& blendShape_in,
-      Eigen::Index maxBlendShapes,
-      bool overwriteBaseShape = true);
+  void addBlendShape(const BlendShape_const_p& blendShape_in, Eigen::Index maxBlendShapes);
 
   /// Adds face expression blend shapes to this character
   ///
