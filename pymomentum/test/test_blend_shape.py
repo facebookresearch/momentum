@@ -20,10 +20,10 @@ from pymomentum.solver import ErrorFunctionType
 def _build_blend_shape_basis(
     c: pym_geometry.Character,
 ) -> pym_geometry.BlendShape:
-    base_shape = c.mesh.vertices
-    n_pts = base_shape.shape[0]
-    n_blend = 4
     np.random.seed(0)
+    n_pts = c.mesh.n_vertices
+    base_shape = np.random.rand(n_pts, 3)
+    n_blend = 4
     shape_vectors = np.random.rand(n_blend, n_pts, 3)
     blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
     return blend_shape
@@ -75,6 +75,17 @@ class TestBlendShape(unittest.TestCase):
         bp1 = params[c2.parameter_transform.blend_shape_parameters]
         bp2 = pym_geometry.model_parameters_to_blend_shape_coefficients(c2, params)
         self.assertTrue(bp1.allclose(bp2))
+
+        blend_shape_2 = c2.blend_shape
+        self.assertTrue(blend_shape_2 is not None)
+        self.assertTrue(
+            np.allclose(blend_shape_2.shape_vectors, blend_shape.shape_vectors)
+        )
+        self.assertTrue(np.allclose(blend_shape_2.base_shape, blend_shape.base_shape))
+
+        c3 = c.with_blend_shape(None)
+        self.assertTrue(c3.blend_shape is None)
+        self.assertTrue(torch.sum(c3.parameter_transform.blend_shape_parameters) == 0)
 
     def test_save_and_load(self) -> None:
         torch.manual_seed(0)  # ensure repeatability

@@ -135,7 +135,7 @@ PYBIND11_MODULE(geometry, m) {
   // - joint_parameter_limits
   // - [constructor](name, skeleton, parameter_transform, locators)
   // - with_mesh_and_skin_weights(mesh, skin_weights)
-  // - with_blend_shape(blend_shape, n_shapes, overwrite_base_shape)
+  // - with_blend_shape(blend_shape, n_shapes)
   //
   // [memeber methods]
   // - pose_mesh(jointParams)
@@ -350,24 +350,20 @@ PYBIND11_MODULE(geometry, m) {
       .def(
           "with_blend_shape",
           [](const mm::Character& c,
-             std::shared_ptr<mm::BlendShape> blendShape,
-             int nShapes,
-             bool overwriteBaseShape) {
+             const std::optional<mm::BlendShape_const_p>& blendShape,
+             int nShapes) {
             return c.withBlendShape(
-                blendShape,
-                nShapes < 0 ? INT_MAX : nShapes,
-                overwriteBaseShape);
+                blendShape.value_or(mm::BlendShape_const_p{}),
+                nShapes < 0 ? INT_MAX : nShapes);
           },
           R"(Returns a character that uses the parameter transform to control the passed-in blend shape basis.
 It can be used to solve for shapes and pose simultaneously.
 
 :param blend_shape: Blend shape basis.
 :param n_shapes: Max blend shapes to retain.  Pass -1 to keep all of them (but warning: the default allgender basis is quite large with hundreds of shapes).
-:param overwrite_base_shape: Whether to overwrite the base shape with the rest mesh of the character.
 )",
           py::arg("blend_shape"),
-          py::arg("n_shapes") = -1,
-          py::arg("overwrite_base_shape") = true)
+          py::arg("n_shapes") = -1)
       .def(
           "with_collision_geometry",
           [](const mm::Character& c,

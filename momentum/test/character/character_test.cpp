@@ -884,8 +884,7 @@ TYPED_TEST(CharacterTest, WithBlendShape) {
   // Note: The implementation doesn't set the second parameter to -1, it's still 0
   // EXPECT_EQ(characterWithLimitedBlendShape.parameterTransform.blendShapeParameters(1), -1);
 
-  // Test with overwriteBaseShape = false
-  CharacterType characterWithoutOverwrite = this->character.withBlendShape(blendShape, 2, false);
+  CharacterType characterWithoutOverwrite = this->character.withBlendShape(blendShape, 2);
 
   // Check that the blend shape was set correctly
   EXPECT_TRUE(characterWithoutOverwrite.blendShape);
@@ -950,9 +949,8 @@ TYPED_TEST(CharacterTest, AddBlendShape) {
   // Note: The implementation doesn't set the second parameter to -1, it's still 0
   // EXPECT_EQ(modifiedCharacter2.parameterTransform.blendShapeParameters(1), -1);
 
-  // Test with overwriteBaseShape = false
   CharacterType modifiedCharacter3 = this->character;
-  modifiedCharacter3.addBlendShape(blendShape, 2, false);
+  modifiedCharacter3.addBlendShape(blendShape, 2);
 
   // Check that the blend shape was set correctly
   EXPECT_TRUE(modifiedCharacter3.blendShape);
