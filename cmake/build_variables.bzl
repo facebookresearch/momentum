@@ -167,6 +167,7 @@ character_public_headers = [
     "character/locator.h",
     "character/marker.h",
     "character/pose_shape.h",
+    "character/skinned_locator.h",
     "character/skin_weights.h",
 ]
 
