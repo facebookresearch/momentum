@@ -259,7 +259,8 @@ momentum::Character loadConfigFromFile(
       character.blendShape,
       character.faceExpressionBlendShape,
       character.name,
-      character.inverseBindPose);
+      character.inverseBindPose,
+      character.skinnedLocators);
 }
 
 momentum::Character loadFBXCharacterFromBytes(
@@ -288,7 +289,8 @@ momentum::Character loadConfigFromBytes(
       character.blendShape,
       character.faceExpressionBlendShape,
       character.name,
-      character.inverseBindPose);
+      character.inverseBindPose,
+      character.skinnedLocators);
 }
 
 momentum::Character loadLocatorsFromBytes(
@@ -457,7 +459,9 @@ momentum::Character replaceRestMesh(
       character.poseShapes.get(),
       character.blendShape,
       character.faceExpressionBlendShape,
-      character.name);
+      character.name,
+      character.inverseBindPose,
+      character.skinnedLocators);
 }
 
 at::Tensor uniformRandomToModelParameters(

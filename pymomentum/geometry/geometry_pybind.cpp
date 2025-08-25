@@ -229,7 +229,8 @@ PYBIND11_MODULE(geometry, m) {
                 character.blendShape,
                 character.faceExpressionBlendShape,
                 character.name,
-                character.inverseBindPose);
+                character.inverseBindPose,
+                character.skinnedLocators);
           },
           "Adds mesh and skin weight to the character and return a new character instance",
           py::arg("mesh"),
@@ -282,7 +283,8 @@ PYBIND11_MODULE(geometry, m) {
                 character.blendShape,
                 character.faceExpressionBlendShape,
                 character.name,
-                character.inverseBindPose);
+                character.inverseBindPose,
+                character.skinnedLocators);
           },
           R"(Returns a new character with the passed-in locators.  If 'replace' is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.
 

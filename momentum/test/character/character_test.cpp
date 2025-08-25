@@ -780,6 +780,80 @@ TYPED_TEST(CharacterTest, RemapLocators) {
   EXPECT_EQ(remappedLocators[2].parent, 1);
 }
 
+// Test remapSkinnedLocators method
+TYPED_TEST(CharacterTest, RemapSkinnedLocators) {
+  using CharacterType = typename TestFixture::CharacterType;
+
+  // Create a simplified character with a subset of joints
+  std::vector<bool> activeJoints(this->character.skeleton.joints.size(), false);
+  activeJoints[0] = true; // root is active
+  activeJoints[2] = true; // joint2 is active
+  CharacterType simplifiedCharacter = this->character.simplifySkeleton(activeJoints);
+
+  // Create a list of skinned locators
+  SkinnedLocatorList skinnedLocators;
+
+  // Add a skinned locator with weights for multiple joints
+  SkinnedLocator locator1;
+  locator1.name = "skinned_locator1";
+  locator1.parents = Eigen::Matrix<uint32_t, kMaxSkinJoints, 1>::Zero();
+  locator1.skinWeights = Eigen::Matrix<float, kMaxSkinJoints, 1>::Zero();
+  locator1.parents(0) = 0; // root joint
+  locator1.parents(1) = 1; // joint1
+  locator1.skinWeights(0) = 0.7f;
+  locator1.skinWeights(1) = 0.3f;
+  locator1.position = Vector3f(1, 0, 0);
+  locator1.weight = 1.0f;
+  skinnedLocators.push_back(locator1);
+
+  // Add a skinned locator with weights for joints that will be remapped to the same joint
+  SkinnedLocator locator2;
+  locator2.name = "skinned_locator2";
+  locator2.parents = Eigen::Matrix<uint32_t, kMaxSkinJoints, 1>::Zero();
+  locator2.skinWeights = Eigen::Matrix<float, kMaxSkinJoints, 1>::Zero();
+  locator2.parents(0) = 1; // joint1 (will be remapped to root)
+  locator2.parents(1) = 3; // joint3 (will be remapped to joint2)
+  locator2.parents(2) = 4; // joint4 (will be remapped to joint2)
+  locator2.skinWeights(0) = 0.4f;
+  locator2.skinWeights(1) = 0.3f;
+  locator2.skinWeights(2) = 0.3f;
+  locator2.position = Vector3f(0, 1, 0);
+  locator2.weight = 0.8f;
+  skinnedLocators.push_back(locator2);
+
+  // Remap the skinned locators
+  SkinnedLocatorList remappedLocators =
+      simplifiedCharacter.remapSkinnedLocators(skinnedLocators, this->character);
+
+  // Check that the remapped locators have the correct size
+  EXPECT_EQ(remappedLocators.size(), 2);
+
+  // Check that the first locator was remapped correctly
+  EXPECT_EQ(remappedLocators[0].name, "skinned_locator1");
+  EXPECT_EQ(remappedLocators[0].parents(0), 0); // root joint stays as root
+  EXPECT_FLOAT_EQ(remappedLocators[0].skinWeights(0), 1.0f);
+  for (int i = 1; i < kMaxSkinJoints; ++i) {
+    EXPECT_FLOAT_EQ(remappedLocators[0].skinWeights(i), 0.0f);
+  }
+  EXPECT_FLOAT_EQ(remappedLocators[0].skinWeights(1), 0.0f);
+  EXPECT_TRUE(remappedLocators[0].position.isApprox(Vector3f(1, 0, 0)));
+  EXPECT_FLOAT_EQ(remappedLocators[0].weight, 1.0f);
+
+  // Check that the second locator was remapped correctly
+  EXPECT_EQ(remappedLocators[1].name, "skinned_locator2");
+
+  // Check that the parents were remapped correctly
+  EXPECT_EQ(remappedLocators[1].parents(0), 1); // joint3-4 is remapped to root
+  EXPECT_EQ(remappedLocators[1].parents(1), 0); // joint1 is remapped to joint2
+
+  // Check that the weights are still correct
+  EXPECT_FLOAT_EQ(remappedLocators[1].skinWeights(0), 0.6f);
+  EXPECT_FLOAT_EQ(remappedLocators[1].skinWeights(1), 0.4f);
+
+  EXPECT_TRUE(remappedLocators[1].position.isApprox(Vector3f(0, 1, 0)));
+  EXPECT_FLOAT_EQ(remappedLocators[1].weight, 0.8f);
+}
+
 // Test splitParameters method
 TYPED_TEST(CharacterTest, SplitParameters) {
   using CharacterType = typename TestFixture::CharacterType;
