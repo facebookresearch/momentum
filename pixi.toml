@@ -393,26 +393,12 @@ system-requirements = { cuda = "12" }
 build-dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*" }
 dependencies = { python = "3.12.*", pytorch-gpu = ">=2.6.0,<3" }
 
-[feature.py311-cuda129]
-platforms = ["linux-64", "win-64"]
-system-requirements = { cuda = "12" }
-build-dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*" }
-dependencies = { python = "3.11.*", pytorch-gpu = ">=2.6.0,<3" }
-
-[feature.py310-cuda129]
-platforms = ["linux-64", "win-64"]
-system-requirements = { cuda = "12" }
-build-dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*" }
-dependencies = { python = "3.10.*", pytorch-gpu = ">=2.6.0,<3" }
-
 #==============
 # Environments
 #==============
 
 [environments]
 py312-cuda129 = ["py312-cuda129"]
-py311-cuda129 = ["py311-cuda129"]
-py310-cuda129 = ["py310-cuda129"]
 gpu = ["py312-cuda129"]
 cpu = ["cpu"]
 default = ["cpu"]
