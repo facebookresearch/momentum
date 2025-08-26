@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character/parameter_transform.h>
+#include <momentum/character/types.h>
 #include <momentum/math/utility.h>
 
 namespace momentum {

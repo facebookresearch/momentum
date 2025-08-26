@@ -51,6 +51,15 @@ using SkinWeights_const_p = ::std::shared_ptr<const SkinWeights>;
 using SkinWeights_const_u = ::std::unique_ptr<const SkinWeights>;
 using SkinWeights_const_w = ::std::weak_ptr<const SkinWeights>;
 
+struct SkinnedLocator;
+
+using SkinnedLocator_p = ::std::shared_ptr<SkinnedLocator>;
+using SkinnedLocator_u = ::std::unique_ptr<SkinnedLocator>;
+using SkinnedLocator_w = ::std::weak_ptr<SkinnedLocator>;
+using SkinnedLocator_const_p = ::std::shared_ptr<const SkinnedLocator>;
+using SkinnedLocator_const_u = ::std::unique_ptr<const SkinnedLocator>;
+using SkinnedLocator_const_w = ::std::weak_ptr<const SkinnedLocator>;
+
 template <typename T>
 struct CharacterT;
 using Character = CharacterT<float>;
