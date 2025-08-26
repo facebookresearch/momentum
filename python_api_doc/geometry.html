@@ -2512,7 +2512,7 @@ The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">joint_parameters_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.joint_parameters_to_local_skeleton_state" title="Link to this definition"></a></dt>
 <dd><p>Map from the 7*nJoints jointParameters (representing transforms to the parent joint) to the 8*nJoints local skeleton state.</p>
 <p>The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint’s local space to its parent joint space.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)</p>
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2521,7 +2521,7 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy’s skeleton state representation.</p>
+<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format’s skeleton state representation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2553,7 +2553,7 @@ function is provided as a convenience because motion read from external files ge
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">joint_parameters_to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.joint_parameters_to_skeleton_state" title="Link to this definition"></a></dt>
 <dd><p>Map from the 7*nJoints jointParameters to the 8*nJoints global skeleton state.</p>
 <p>The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint’s local space to worldspace.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)</p>
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2562,7 +2562,7 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy’s skeleton state representation.</p>
+<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format’s skeleton state representation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2704,7 +2704,7 @@ required to call <cite>meth:BlendShape.compute_shape</cite>.</p>
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">model_parameters_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.model_parameters_to_local_skeleton_state" title="Link to this definition"></a></dt>
 <dd><p>Map from the k modelParameters to the 8*nJoints local skeleton state.</p>
 <p>The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint’s local space to its parent joint space.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)</p>
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2713,7 +2713,7 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy’s skeleton state representation.</p>
+<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format’s skeleton state representation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2745,7 +2745,7 @@ sparsity in the model and therefore can be made somewhat faster.</p>
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">model_parameters_to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.model_parameters_to_skeleton_state" title="Link to this definition"></a></dt>
 <dd><p>Map from the k modelParameters to the 8*nJoints global skeleton state.</p>
 <p>The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint’s local space to worldspace.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)</p>
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2754,7 +2754,7 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy’s skeleton state representation.</p>
+<dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format’s skeleton state representation.</p>
 </dd>
 </dl>
 </dd></dl>
