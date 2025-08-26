@@ -2564,13 +2564,13 @@ function is provided as a convenience because motion read from external files ge
       R"(Map from the k modelParameters to the 8*nJoints global skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to worldspace.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
 :type character: Union[Character, List[Character]]
 :param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy's skeleton state representation.)",
+:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
       py::arg("character"),
       py::arg("model_parameters"));
 
@@ -2581,13 +2581,13 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
       R"(Map from the k modelParameters to the 8*nJoints local skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
 :type character: Union[Character, List[Character]]
 :param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy's skeleton state representation.)",
+:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
       py::arg("character"),
       py::arg("model_parameters"));
 
@@ -2598,13 +2598,13 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
       R"(Map from the 7*nJoints jointParameters to the 8*nJoints global skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to worldspace.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
 :type character: Union[Character, List[Character]]
 :param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy's skeleton state representation.)",
+:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
       py::arg("character"),
       py::arg("joint_parameters"));
 
@@ -2615,13 +2615,13 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
       R"(Map from the 7*nJoints jointParameters (representing transforms to the parent joint) to the 8*nJoints local skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in mopy.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
 :type character: Union[Character, List[Character]]
 :param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with mopy's skeleton state representation.)",
+:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
       py::arg("character"),
       py::arg("joint_parameters"));
 
