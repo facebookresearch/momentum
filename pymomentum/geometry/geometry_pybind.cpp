@@ -26,6 +26,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/io/fbx/fbx_io.h>
+#include <momentum/io/legacy_json/legacy_json_io.h>
 #include <momentum/io/shape/blend_shape_io.h>
 #include <momentum/math/intersection.h>
 #include <momentum/math/mesh.h>
@@ -750,6 +751,73 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("joint_params") = std::optional<const Eigen::MatrixXf>{},
           py::arg("coord_system_info") =
               std::optional<mm::FBXCoordSystemInfo>{})
+      // Legacy JSON I/O methods
+      .def_static(
+          "load_legacy_json",
+          [](const std::string& jsonPath) {
+            return mm::loadCharacterFromLegacyJson(jsonPath);
+          },
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from a legacy JSON file.
+
+This function directly converts from the deprecated JSON format to momentum::Character,
+this is a legacy format that has historically been used in mopy but should be considered deprecated.
+
+:parameter json_path: Path to the legacy JSON file.
+:return: A valid Character.)",
+          py::arg("json_path"))
+      .def_static(
+          "load_legacy_json_from_bytes",
+          [](const py::bytes& jsonBytes) {
+            std::string jsonString(jsonBytes);
+            gsl::span<const std::byte> buffer(
+                reinterpret_cast<const std::byte*>(jsonString.data()),
+                jsonString.size());
+            return mm::loadCharacterFromLegacyJsonBuffer(buffer);
+          },
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from legacy JSON bytes.
+
+:parameter json_bytes: A bytes object containing the legacy JSON data.
+:return: A valid Character.)",
+          py::arg("json_bytes"))
+      .def_static(
+          "load_legacy_json_from_string",
+          [](const std::string& jsonString) {
+            return mm::loadCharacterFromLegacyJsonString(jsonString);
+          },
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from a legacy JSON string.
+
+:parameter json_string: String containing the legacy JSON data.
+:return: A valid Character.)",
+          py::arg("json_string"))
+      .def_static(
+          "save_legacy_json",
+          [](const mm::Character& character, const std::string& jsonPath) {
+            mm::saveCharacterToLegacyJson(character, jsonPath);
+          },
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character to legacy JSON format.
+
+This function converts a momentum::Character back to the legacy JSON format
+for compatibility with existing tools and workflows.
+
+:parameter character: The Character to save.
+:parameter json_path: Path where to save the legacy JSON file.)",
+          py::arg("character"),
+          py::arg("json_path"))
+      .def_static(
+          "to_legacy_json_string",
+          [](const mm::Character& character) {
+            return mm::characterToLegacyJsonString(character);
+          },
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Convert a character to legacy JSON string.
+
+:parameter character: The Character to convert.
+:return: String containing the legacy JSON representation.)",
+          py::arg("character"))
       .def(
           "simplify",
           [](const momentum::Character& character,

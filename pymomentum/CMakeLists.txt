@@ -150,6 +150,7 @@ mt_python_binding(
     character_test_helpers
     io_fbx
     io_gltf
+    io_legacy_json
     io_marker
     io_shape
     io_skeleton
