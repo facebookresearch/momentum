@@ -7,6 +7,7 @@
 
 #include "momentum/character_solver/skinning_weight_iterator.h"
 
+#include <momentum/character/skinned_locator.h>
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
@@ -22,7 +23,7 @@ SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
     const MeshT<T>& restMesh,
     const SkeletonStateT<T>& skelState,
     int vertexIndex)
-    : character(character), restMesh(restMesh) {
+    : character(character) {
   const auto& skinWeights = *character.skinWeights;
   nBoneWeights = 0;
   {
@@ -46,6 +47,32 @@ SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
         boneWeights.begin(), boneWeights.begin() + nBoneWeights, std::greater<BoneWeightT<T>>());
   }
   checkInvariants();
+}
+
+template <typename T>
+SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
+    const Character& character,
+    const SkinnedLocator& locator,
+    const Eigen::Vector3<T>& locatorPosition,
+    const SkeletonStateT<T>& skelState)
+    : character(character) {
+  nBoneWeights = 0;
+  for (uint32_t i = 0; i < kMaxSkinJoints; ++i) {
+    const auto w = locator.skinWeights[i];
+    const auto parentBone = locator.parents[i];
+    if (w > 0 && parentBone < character.inverseBindPose.size() &&
+        parentBone < skelState.jointState.size()) {
+      boneWeights[nBoneWeights++] = {
+          parentBone,
+          w,
+          T(w) *
+              (skelState.jointState[parentBone].transformation *
+               (character.inverseBindPose[parentBone].template cast<T>() *
+                locatorPosition.template cast<T>()))};
+    }
+  }
+  std::sort(
+      boneWeights.begin(), boneWeights.begin() + nBoneWeights, std::greater<BoneWeightT<T>>());
 }
 
 template <typename T>
