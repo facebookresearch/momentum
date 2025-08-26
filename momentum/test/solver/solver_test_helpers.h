@@ -18,7 +18,7 @@ SolverOptions defaultSolverOptions() {
   result.minIterations = 4;
   result.maxIterations = 40;
   result.threshold = 1000.f;
-  result.verbose = true;
+  result.verbose = false;
   return result;
 }
 
@@ -42,7 +42,7 @@ T checkAndTimeSolver(
   size_t iterCount = size_t(iterCountIterator->second(0, 0) + 0.5);
 
   const auto err = solverFunction.getError(parameters);
-  MT_LOGI(
+  MT_LOGD(
       "Solver {:20}; elapsed: {:3}us; nIter: {:2}; solver.error: {:.6}",
       solver.getName(),
       std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(),
