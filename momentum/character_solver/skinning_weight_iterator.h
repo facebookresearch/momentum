@@ -56,6 +56,13 @@ class SkinningWeightIteratorT {
       const MeshT<T>& restMesh,
       const SkeletonStateT<T>& skelState,
       int vertexIndex);
+
+  SkinningWeightIteratorT(
+      const Character& character,
+      const SkinnedLocator& locator,
+      const Eigen::Vector3<T>& locatorPosition,
+      const SkeletonStateT<T>& skelState);
+
   [[nodiscard]] bool finished() const;
 
   // Returns the tuple <parent bone index, bone weight, vertex position in world space wrt the
@@ -68,7 +75,6 @@ class SkinningWeightIteratorT {
   std::array<BoneWeightT<T>, kMaxSkinJoints> boneWeights;
   int nBoneWeights;
   const Character& character;
-  const MeshT<T>& restMesh;
 };
 
 } // namespace momentum

@@ -53,11 +53,12 @@ template_structs = [
     "FixedAxisData",
     "NormalData",
     "OrientationData",
+    "PointTriangleVertexConstraint",
     "PlaneData",
     "PositionData",
+    "SkinnedLocatorConstraint",
     "VertexConstraint",
     "VertexProjectionConstraint",
-    "PointTriangleVertexConstraint",
 ]
 classes = [
     "SimdNormalErrorFunction",
@@ -89,6 +90,7 @@ template_classes = [
     "SimdCollisionErrorFunction",
     "SkeletonErrorFunction",
     "SkeletonSolverFunction",
+    "SkinnedLocatorErrorFunction",
     "StateErrorFunction",
     "TrustRegionQR",
     "VertexErrorFunction",
