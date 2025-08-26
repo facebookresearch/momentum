@@ -57,6 +57,7 @@ template_structs = [
     "PlaneData",
     "PositionData",
     "SkinnedLocatorConstraint",
+    "SkinnedLocatorTriangleConstraint",
     "VertexConstraint",
     "VertexProjectionConstraint",
 ]
@@ -91,6 +92,7 @@ template_classes = [
     "SkeletonErrorFunction",
     "SkeletonSolverFunction",
     "SkinnedLocatorErrorFunction",
+    "SkinnedLocatorTriangleErrorFunction",
     "StateErrorFunction",
     "TrustRegionQR",
     "VertexErrorFunction",

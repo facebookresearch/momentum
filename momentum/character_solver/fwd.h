@@ -218,6 +218,31 @@ using SkinnedLocatorConstraintd_const_u = ::std::unique_ptr<const SkinnedLocator
 using SkinnedLocatorConstraintd_const_w = ::std::weak_ptr<const SkinnedLocatorConstraintd>;
 
 template <typename T>
+struct SkinnedLocatorTriangleConstraintT;
+using SkinnedLocatorTriangleConstraint = SkinnedLocatorTriangleConstraintT<float>;
+using SkinnedLocatorTriangleConstraintd = SkinnedLocatorTriangleConstraintT<double>;
+
+using SkinnedLocatorTriangleConstraint_p = ::std::shared_ptr<SkinnedLocatorTriangleConstraint>;
+using SkinnedLocatorTriangleConstraint_u = ::std::unique_ptr<SkinnedLocatorTriangleConstraint>;
+using SkinnedLocatorTriangleConstraint_w = ::std::weak_ptr<SkinnedLocatorTriangleConstraint>;
+using SkinnedLocatorTriangleConstraint_const_p =
+    ::std::shared_ptr<const SkinnedLocatorTriangleConstraint>;
+using SkinnedLocatorTriangleConstraint_const_u =
+    ::std::unique_ptr<const SkinnedLocatorTriangleConstraint>;
+using SkinnedLocatorTriangleConstraint_const_w =
+    ::std::weak_ptr<const SkinnedLocatorTriangleConstraint>;
+
+using SkinnedLocatorTriangleConstraintd_p = ::std::shared_ptr<SkinnedLocatorTriangleConstraintd>;
+using SkinnedLocatorTriangleConstraintd_u = ::std::unique_ptr<SkinnedLocatorTriangleConstraintd>;
+using SkinnedLocatorTriangleConstraintd_w = ::std::weak_ptr<SkinnedLocatorTriangleConstraintd>;
+using SkinnedLocatorTriangleConstraintd_const_p =
+    ::std::shared_ptr<const SkinnedLocatorTriangleConstraintd>;
+using SkinnedLocatorTriangleConstraintd_const_u =
+    ::std::unique_ptr<const SkinnedLocatorTriangleConstraintd>;
+using SkinnedLocatorTriangleConstraintd_const_w =
+    ::std::weak_ptr<const SkinnedLocatorTriangleConstraintd>;
+
+template <typename T>
 struct VertexConstraintT;
 using VertexConstraint = VertexConstraintT<float>;
 using VertexConstraintd = VertexConstraintT<double>;
@@ -734,6 +759,36 @@ using SkinnedLocatorErrorFunctiond_w = ::std::weak_ptr<SkinnedLocatorErrorFuncti
 using SkinnedLocatorErrorFunctiond_const_p = ::std::shared_ptr<const SkinnedLocatorErrorFunctiond>;
 using SkinnedLocatorErrorFunctiond_const_u = ::std::unique_ptr<const SkinnedLocatorErrorFunctiond>;
 using SkinnedLocatorErrorFunctiond_const_w = ::std::weak_ptr<const SkinnedLocatorErrorFunctiond>;
+
+template <typename T>
+class SkinnedLocatorTriangleErrorFunctionT;
+using SkinnedLocatorTriangleErrorFunction = SkinnedLocatorTriangleErrorFunctionT<float>;
+using SkinnedLocatorTriangleErrorFunctiond = SkinnedLocatorTriangleErrorFunctionT<double>;
+
+using SkinnedLocatorTriangleErrorFunction_p =
+    ::std::shared_ptr<SkinnedLocatorTriangleErrorFunction>;
+using SkinnedLocatorTriangleErrorFunction_u =
+    ::std::unique_ptr<SkinnedLocatorTriangleErrorFunction>;
+using SkinnedLocatorTriangleErrorFunction_w = ::std::weak_ptr<SkinnedLocatorTriangleErrorFunction>;
+using SkinnedLocatorTriangleErrorFunction_const_p =
+    ::std::shared_ptr<const SkinnedLocatorTriangleErrorFunction>;
+using SkinnedLocatorTriangleErrorFunction_const_u =
+    ::std::unique_ptr<const SkinnedLocatorTriangleErrorFunction>;
+using SkinnedLocatorTriangleErrorFunction_const_w =
+    ::std::weak_ptr<const SkinnedLocatorTriangleErrorFunction>;
+
+using SkinnedLocatorTriangleErrorFunctiond_p =
+    ::std::shared_ptr<SkinnedLocatorTriangleErrorFunctiond>;
+using SkinnedLocatorTriangleErrorFunctiond_u =
+    ::std::unique_ptr<SkinnedLocatorTriangleErrorFunctiond>;
+using SkinnedLocatorTriangleErrorFunctiond_w =
+    ::std::weak_ptr<SkinnedLocatorTriangleErrorFunctiond>;
+using SkinnedLocatorTriangleErrorFunctiond_const_p =
+    ::std::shared_ptr<const SkinnedLocatorTriangleErrorFunctiond>;
+using SkinnedLocatorTriangleErrorFunctiond_const_u =
+    ::std::unique_ptr<const SkinnedLocatorTriangleErrorFunctiond>;
+using SkinnedLocatorTriangleErrorFunctiond_const_w =
+    ::std::weak_ptr<const SkinnedLocatorTriangleErrorFunctiond>;
 
 template <typename T>
 class StateErrorFunctionT;
