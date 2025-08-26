@@ -14,7 +14,9 @@
 #include "momentum/character/locator.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
+#include "momentum/character/skinned_locator.h"
 #include "momentum/common/checks.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/mppca.h"
@@ -58,6 +60,29 @@ Eigen::MatrixX<T> randomMatrix(Eigen::Index nRows, Eigen::Index nCols) {
     loc.parent = i;
     loc.offset = Eigen::Vector3f::Random();
     loc.name = "l" + std::to_string(i);
+    result.push_back(loc);
+  }
+  return result;
+}
+
+[[nodiscard]] SkinnedLocatorList createDefaultSkinnedLocatorList(const Skeleton& skeleton) {
+  SkinnedLocatorList result;
+  const SkeletonState skelState(
+      JointParameters::Zero(skeleton.joints.size() * kParametersPerJoint), skeleton);
+  momentum::Random<> rng(10002);
+  for (int i = 0; (i + 1) < skeleton.joints.size(); ++i) {
+    SkinnedLocator loc;
+    loc.parents[0] = i;
+    loc.parents[1] = i + 1;
+
+    loc.skinWeights[0] = rng.uniform<float>(0.0f, 1.0f);
+    loc.skinWeights[1] = 1.0f - loc.skinWeights[0];
+
+    loc.position =
+        0.5f * (skelState.jointState[i].translation() + skelState.jointState[i + 1].translation()) +
+        rng.normal<Eigen::Vector3f>(0, 1);
+
+    loc.name = "sl" + std::to_string(i);
     result.push_back(loc);
   }
   return result;
@@ -196,14 +221,21 @@ CharacterT<T> createTestCharacter(size_t numJoints) {
   MT_CHECK(numJoints >= 3, "The number of joints '{}' should be equal to 3 or greater.", numJoints);
   auto [mesh, skin] = createDefaultMesh(static_cast<int>(numJoints));
   auto collisionGeometry = createDefaultCollisionGeometry(numJoints);
+  const auto skeleton = createDefaultSkeleton(numJoints);
   return CharacterT<T>(
-      createDefaultSkeleton(numJoints),
+      skeleton,
       createDefaultParameterTransform(numJoints),
       createDefaultParameterLimits(),
       createDefaultLocatorList(numJoints),
       &mesh,
       &skin,
-      &collisionGeometry);
+      &collisionGeometry,
+      nullptr,
+      BlendShape_const_p{},
+      BlendShapeBase_const_p{},
+      std::string("test character"),
+      momentum::TransformationList{},
+      createDefaultSkinnedLocatorList(skeleton));
 }
 
 template CharacterT<float> createTestCharacter(size_t numJoints);

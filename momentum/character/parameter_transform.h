@@ -88,6 +88,14 @@ struct ParameterTransformT {
   /// the parameter that controls the 0th face expression parameter, etc.
   VectorXi faceExpressionParameters;
 
+  /// Parameters that control the rest-space positions of the skinned locators.
+  /// This array will be either empty or have the same size as the number of
+  /// skinned locators.  Each entry maps from a skinned locator index to the
+  /// first of the three (x,y,z) parameters that control its position.  Skinned
+  /// locators that aren't controlled by the paramete transform will have
+  /// skinnedLocatorParameters[i] = -1.
+  VectorXi skinnedLocatorParameters;
+
   /// Return a ParameterTransform object with no model parameters. The model can still perform FK
   /// with JointParameters, but it does not have any degrees of freedom for IK.
   [[nodiscard]] static ParameterTransformT<T> empty(size_t nJointParameters);
@@ -130,6 +138,9 @@ struct ParameterTransformT {
   /// Get a list of face expression parameters.
   [[nodiscard]] ParameterSet getFaceExpressionParameters() const;
 
+  /// Get a list of skinned locator parameters
+  [[nodiscard]] ParameterSet getSkinnedLocatorParameters() const;
+
   /// Get a parameter set, if allowMissing is set then it will return an empty parameter set if no
   /// such parameterset is found in the file.
   [[nodiscard]] ParameterSet getParameterSet(
@@ -154,20 +165,20 @@ struct ParameterTransformT {
   }
 
   /// Dimension of identity blendshape parameters.
-  [[nodiscard]] Eigen::Index numBlendShapeParameters() const {
-    return blendShapeParameters.size();
-  }
+  [[nodiscard]] Eigen::Index numBlendShapeParameters() const;
 
   /// Dimension of facial expression parameters.
-  [[nodiscard]] Eigen::Index numFaceExpressionParameters() const {
-    return faceExpressionParameters.size();
-  }
+  [[nodiscard]] Eigen::Index numFaceExpressionParameters() const;
+
+  /// Dimension of facial expression parameters.
+  [[nodiscard]] Eigen::Index numSkinnedLocatorParameters() const;
 
   /// Dimension of skeletal model parameters, including pose parameters,
   /// scaling parameters, locator joint parameters etc. basically everything
   /// but blendshapes (ids and expressions).
   [[nodiscard]] Eigen::Index numSkeletonParameters() const {
-    return numAllModelParameters() - numBlendShapeParameters() - numFaceExpressionParameters();
+    return numAllModelParameters() - numBlendShapeParameters() - numFaceExpressionParameters() -
+        numSkinnedLocatorParameters();
   }
 
   [[nodiscard]] inline bool isApprox(const ParameterTransformT<T>& parameterTransform) const {
@@ -223,5 +234,17 @@ template <typename T>
     ParameterTransform paramTransform,
     ParameterLimits paramLimits,
     Eigen::Index nFaceExpressionBlendShapes);
+
+/// Add a set of parameters that control the rest-space positions of the skinned locators.
+/// This function will add 3 parameters for each locator, one for each of the x, y, and z
+/// components of the locator position.  The parameters are added to the end of the
+/// parameter transform.  The parameter transform is returned along with the updated
+/// list of parameter limits.  Note that you pass in the locator names rather than the
+/// actual SkinnedLocator objects because this avoids a circular dependency.
+[[nodiscard]] std::tuple<ParameterTransform, ParameterLimits> addSkinnedLocatorParameters(
+    ParameterTransform paramTransform,
+    ParameterLimits paramLimits,
+    const std::vector<bool>& activeLocators,
+    const std::vector<std::string>& locatorNames = {});
 
 } // namespace momentum

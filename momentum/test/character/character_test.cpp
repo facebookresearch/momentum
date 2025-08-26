@@ -1278,3 +1278,158 @@ TYPED_TEST(CharacterTest, Bake) {
   // Check that the scaling parameters were removed
   EXPECT_EQ(bakedScalesOnly.parameterTransform.getScalingParameters().count(), 0);
 }
+
+// Test addSkinnedLocatorParameters function
+TYPED_TEST(CharacterTest, AddSkinnedLocatorParameters) {
+  // Create a basic parameter transform
+  ParameterTransform paramTransform;
+  paramTransform.name = {"root_tx", "root_ty", "root_tz", "root_rx", "root_ry", "root_rz"};
+  paramTransform.offsets = VectorXf::Zero(kParametersPerJoint);
+  paramTransform.transform.resize(kParametersPerJoint, 6);
+
+  // Set up identity transform for the basic parameters
+  std::vector<Eigen::Triplet<float>> triplets;
+  triplets.reserve(6);
+  for (int i = 0; i < 6; ++i) {
+    triplets.emplace_back(i, i, 1.0f);
+  }
+  paramTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
+  paramTransform.activeJointParams = paramTransform.computeActiveJointParams();
+
+  // Create basic parameter limits
+  ParameterLimits paramLimits;
+
+  // Test with 4 locators, where only locators 0, 2, and 3 are active
+  std::vector<bool> activeLocators = {true, false, true, true};
+  std::vector<std::string> locatorNames = {"head", "unused", "hand", "foot"};
+
+  // Call addSkinnedLocatorParameters
+  auto [updatedTransform, updatedLimits] =
+      addSkinnedLocatorParameters(paramTransform, paramLimits, activeLocators, locatorNames);
+
+  // Verify that the parameter transform was updated correctly
+  EXPECT_EQ(updatedTransform.name.size(), 6 + 9); // 6 original + 3 locators * 3 params each
+  EXPECT_EQ(updatedTransform.transform.cols(), 15); // 6 original + 9 new parameters
+  EXPECT_EQ(updatedTransform.skinnedLocatorParameters.size(), 4); // Same as number of locators
+
+  // Verify skinnedLocatorParameters array
+  EXPECT_EQ(updatedTransform.skinnedLocatorParameters(0), 6); // head locator starts at param 6
+  EXPECT_EQ(updatedTransform.skinnedLocatorParameters(1), -1); // unused locator is inactive
+  EXPECT_EQ(updatedTransform.skinnedLocatorParameters(2), 9); // hand locator starts at param 9
+  EXPECT_EQ(updatedTransform.skinnedLocatorParameters(3), 12); // foot locator starts at param 12
+
+  // Verify parameter names
+  EXPECT_EQ(updatedTransform.name[6], "locator_head_x");
+  EXPECT_EQ(updatedTransform.name[7], "locator_head_y");
+  EXPECT_EQ(updatedTransform.name[8], "locator_head_z");
+  EXPECT_EQ(updatedTransform.name[9], "locator_hand_x");
+  EXPECT_EQ(updatedTransform.name[10], "locator_hand_y");
+  EXPECT_EQ(updatedTransform.name[11], "locator_hand_z");
+  EXPECT_EQ(updatedTransform.name[12], "locator_foot_x");
+  EXPECT_EQ(updatedTransform.name[13], "locator_foot_y");
+  EXPECT_EQ(updatedTransform.name[14], "locator_foot_z");
+
+  // Verify that getSkinnedLocatorParameters returns the correct parameter set
+  ParameterSet skinnedLocatorParams = updatedTransform.getSkinnedLocatorParameters();
+  EXPECT_TRUE(skinnedLocatorParams.test(6)); // head_x
+  EXPECT_TRUE(skinnedLocatorParams.test(7)); // head_y
+  EXPECT_TRUE(skinnedLocatorParams.test(8)); // head_z
+  EXPECT_TRUE(skinnedLocatorParams.test(9)); // hand_x
+  EXPECT_TRUE(skinnedLocatorParams.test(10)); // hand_y
+  EXPECT_TRUE(skinnedLocatorParams.test(11)); // hand_z
+  EXPECT_TRUE(skinnedLocatorParams.test(12)); // foot_x
+  EXPECT_TRUE(skinnedLocatorParams.test(13)); // foot_y
+  EXPECT_TRUE(skinnedLocatorParams.test(14)); // foot_z
+
+  // Verify that non-skinned-locator parameters are not included
+  for (int i = 0; i < 6; ++i) {
+    EXPECT_FALSE(skinnedLocatorParams.test(i));
+  }
+
+  // Verify that the "skinnedLocators" parameter set was created
+  ParameterSet skinnedLocatorSet = updatedTransform.getParameterSet("skinnedLocators");
+  EXPECT_EQ(skinnedLocatorSet.count(), 9); // 3 active locators * 3 params each
+  for (int i = 6; i < 15; ++i) {
+    EXPECT_TRUE(skinnedLocatorSet.test(i));
+  }
+
+  // Verify numSkinnedLocatorParameters
+  EXPECT_EQ(updatedTransform.numSkinnedLocatorParameters(), 9); // 3 active locators * 3 params
+
+  // Test subsetParameterTransform with skinned locators
+  // Create a parameter set that includes some original parameters and some skinned locator
+  // parameters
+  ParameterSet subsetParams;
+  subsetParams.set(0); // root_tx
+  subsetParams.set(3); // root_rx
+  subsetParams.set(6); // head_x
+  subsetParams.set(7); // head_y
+  subsetParams.set(8); // head_z
+  subsetParams.set(12); // foot_x
+  subsetParams.set(13); // foot_y
+  subsetParams.set(14); // foot_z
+
+  auto [subsetTransform, subsetLimits] =
+      subsetParameterTransform(updatedTransform, updatedLimits, subsetParams);
+
+  // Verify that the subset transform has the correct number of parameters
+  EXPECT_EQ(subsetTransform.name.size(), 8); // 2 original + 6 skinned locator params
+
+  // Verify that the parameter names are correct
+  EXPECT_EQ(subsetTransform.name[0], "root_tx");
+  EXPECT_EQ(subsetTransform.name[1], "root_rx");
+  EXPECT_EQ(subsetTransform.name[2], "locator_head_x");
+  EXPECT_EQ(subsetTransform.name[3], "locator_head_y");
+  EXPECT_EQ(subsetTransform.name[4], "locator_head_z");
+  EXPECT_EQ(subsetTransform.name[5], "locator_foot_x");
+  EXPECT_EQ(subsetTransform.name[6], "locator_foot_y");
+  EXPECT_EQ(subsetTransform.name[7], "locator_foot_z");
+
+  // Verify that skinnedLocatorParameters was updated correctly
+  EXPECT_EQ(subsetTransform.skinnedLocatorParameters.size(), 4); // Same number of locators
+  EXPECT_EQ(subsetTransform.skinnedLocatorParameters(0), 2); // head locator now starts at param 2
+  EXPECT_EQ(subsetTransform.skinnedLocatorParameters(1), -1); // unused locator is still inactive
+  EXPECT_EQ(
+      subsetTransform.skinnedLocatorParameters(2), -1); // hand locator was not included in subset
+  EXPECT_EQ(subsetTransform.skinnedLocatorParameters(3), 5); // foot locator now starts at param 5
+
+  // Verify that getSkinnedLocatorParameters works correctly on the subset
+  ParameterSet subsetSkinnedParams = subsetTransform.getSkinnedLocatorParameters();
+  EXPECT_EQ(subsetSkinnedParams.count(), 6); // 2 active locators * 3 params each
+  EXPECT_TRUE(subsetSkinnedParams.test(2)); // head_x
+  EXPECT_TRUE(subsetSkinnedParams.test(3)); // head_y
+  EXPECT_TRUE(subsetSkinnedParams.test(4)); // head_z
+  EXPECT_TRUE(subsetSkinnedParams.test(5)); // foot_x
+  EXPECT_TRUE(subsetSkinnedParams.test(6)); // foot_y
+  EXPECT_TRUE(subsetSkinnedParams.test(7)); // foot_z
+
+  // Test with empty locator names (should use indices as names)
+  std::vector<bool> activeLocators2 = {true, false, true};
+  std::vector<std::string> emptyNames = {};
+
+  auto [updatedTransform2, updatedLimits2] =
+      addSkinnedLocatorParameters(paramTransform, paramLimits, activeLocators2, emptyNames);
+
+  // Verify parameter names use indices when names are not provided
+  EXPECT_EQ(updatedTransform2.name[6], "locator_0_x");
+  EXPECT_EQ(updatedTransform2.name[7], "locator_0_y");
+  EXPECT_EQ(updatedTransform2.name[8], "locator_0_z");
+  EXPECT_EQ(updatedTransform2.name[9], "locator_2_x");
+  EXPECT_EQ(updatedTransform2.name[10], "locator_2_y");
+  EXPECT_EQ(updatedTransform2.name[11], "locator_2_z");
+
+  // Test idempotency - calling addSkinnedLocatorParameters twice should give the same result
+  auto [idempotentTransform, idempotentLimits] =
+      addSkinnedLocatorParameters(updatedTransform, updatedLimits, activeLocators, locatorNames);
+
+  EXPECT_EQ(idempotentTransform.name.size(), updatedTransform.name.size());
+  EXPECT_EQ(idempotentTransform.transform.cols(), updatedTransform.transform.cols());
+  EXPECT_EQ(
+      idempotentTransform.skinnedLocatorParameters.size(),
+      updatedTransform.skinnedLocatorParameters.size());
+
+  // Verify that the parameter names are the same
+  for (size_t i = 0; i < updatedTransform.name.size(); ++i) {
+    EXPECT_EQ(idempotentTransform.name[i], updatedTransform.name[i]);
+  }
+}
