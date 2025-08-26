@@ -13,6 +13,7 @@
 #include <momentum/character/parameter_limits.h>
 #include <momentum/character/parameter_transform.h>
 #include <momentum/character/skeleton.h>
+#include <momentum/character/skinned_locator.h>
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
 
@@ -38,6 +39,9 @@ struct CharacterT {
 
   /// Points of interest attached to joints
   LocatorList locators;
+
+  /// Points of interest attached to joints, with skinning weights
+  SkinnedLocatorList skinnedLocators;
 
   /// 3D mesh representing the character's surface
   Mesh_u mesh;
@@ -100,7 +104,8 @@ struct CharacterT {
       BlendShape_const_p blendShapes = {},
       BlendShapeBase_const_p faceExpressionBlendShapes = {},
       const std::string& nameIn = "",
-      const momentum::TransformationList& inverseBindPose = {});
+      const momentum::TransformationList& inverseBindPose = {},
+      const SkinnedLocatorList& skinnedLocators = {});
 
   /// Copy constructor
   CharacterT(const CharacterT& c);
@@ -157,6 +162,10 @@ struct CharacterT {
   /// @return Remapped locators for the simplified character
   [[nodiscard]] LocatorList remapLocators(
       const LocatorList& locs,
+      const CharacterT& originalCharacter) const;
+
+  [[nodiscard]] SkinnedLocatorList remapSkinnedLocators(
+      const SkinnedLocatorList& locs,
       const CharacterT& originalCharacter) const;
 
   /// Determines which joints are affected by the specified parameters
