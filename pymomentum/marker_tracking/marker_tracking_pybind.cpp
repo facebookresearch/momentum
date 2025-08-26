@@ -19,6 +19,36 @@
 
 namespace py = pybind11;
 
+namespace {
+
+// Helper function to convert a vector of floats to string representation
+std::string vectorToString(const Eigen::VectorXf& vec) {
+  std::ostringstream ss;
+  if (vec.size() > 0) {
+    ss << "[";
+    for (int i = 0; i < std::min(3, (int)vec.size()); i++) {
+      ss << vec[i];
+      if (i < std::min(2, (int)vec.size() - 1)) {
+        ss << ", ";
+      }
+    }
+    if (vec.size() > 3) {
+      ss << ", ...";
+    }
+    ss << "]";
+  } else {
+    ss << "[]";
+  }
+  return ss.str();
+}
+
+// Helper function to convert a boolean to Python-style string representation
+std::string boolToString(bool value) {
+  return value ? "True" : "False";
+}
+
+} // namespace
+
 // Python bindings for marker tracking APIs defined under:
 // //arvr/libraries/momentum/marker_tracking
 
@@ -36,6 +66,16 @@ PYBIND11_MODULE(marker_tracking, m) {
       m, "BaseConfig", "Represents base config class");
 
   baseConfig.def(py::init<>())
+      .def(
+          "__repr__",
+          [](const momentum::BaseConfig& self) {
+            std::ostringstream ss;
+            ss << "BaseConfig(min_vis_percent=" << self.minVisPercent
+               << ", loss_alpha=" << self.lossAlpha
+               << ", max_iter=" << self.maxIter
+               << ", debug=" << boolToString(self.debug) << ")";
+            return ss.str();
+          })
       .def(
           py::init<float, float, size_t, bool>(),
           py::arg("min_vis_percent") = 0.0,
@@ -63,6 +103,25 @@ PYBIND11_MODULE(marker_tracking, m) {
 
   // Default values are set from the configured values in marker_tracker.h
   calibrationConfig.def(py::init<>())
+      .def(
+          "__repr__",
+          [](const momentum::CalibrationConfig& self) {
+            std::ostringstream ss;
+            ss << "CalibrationConfig(min_vis_percent=" << self.minVisPercent
+               << ", loss_alpha=" << self.lossAlpha
+               << ", max_iter=" << self.maxIter
+               << ", debug=" << boolToString(self.debug)
+               << ", calib_frames=" << self.calibFrames
+               << ", major_iter=" << self.majorIter
+               << ", global_scale_only=" << boolToString(self.globalScaleOnly)
+               << ", locators_only=" << boolToString(self.locatorsOnly)
+               << ", greedy_sampling=" << self.greedySampling
+               << ", enforce_floor_in_first_frame="
+               << boolToString(self.enforceFloorInFirstFrame)
+               << ", first_frame_pose_constraint_set=\""
+               << self.firstFramePoseConstraintSet << "\"" << ")";
+            return ss.str();
+          })
       .def(
           py::init<
               float,
@@ -122,6 +181,20 @@ PYBIND11_MODULE(marker_tracking, m) {
 
   trackingConfig.def(py::init<>())
       .def(
+          "__repr__",
+          [](const momentum::TrackingConfig& self) {
+            std::ostringstream ss;
+            ss << "TrackingConfig(min_vis_percent=" << self.minVisPercent
+               << ", loss_alpha=" << self.lossAlpha
+               << ", max_iter=" << self.maxIter
+               << ", debug=" << boolToString(self.debug)
+               << ", smoothing=" << self.smoothing
+               << ", collision_error_weight=" << self.collisionErrorWeight
+               << ", smoothing_weights="
+               << vectorToString(self.smoothingWeights) << ")";
+            return ss.str();
+          })
+      .def(
           py::init<float, float, size_t, bool, float, float, Eigen::VectorXf>(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
@@ -149,6 +222,24 @@ PYBIND11_MODULE(marker_tracking, m) {
           m, "RefineConfig", "Config for refining a tracked motion.");
 
   refineConfig.def(py::init<>())
+      .def(
+          "__repr__",
+          [](const momentum::RefineConfig& self) {
+            std::ostringstream ss;
+            ss << "RefineConfig(min_vis_percent=" << self.minVisPercent
+               << ", loss_alpha=" << self.lossAlpha
+               << ", max_iter=" << self.maxIter
+               << ", debug=" << boolToString(self.debug)
+               << ", smoothing=" << self.smoothing
+               << ", collision_error_weight=" << self.collisionErrorWeight
+               << ", smoothing_weights="
+               << vectorToString(self.smoothingWeights)
+               << ", regularizer=" << self.regularizer
+               << ", calib_id=" << boolToString(self.calibId)
+               << ", calib_locators=" << boolToString(self.calibLocators)
+               << ")";
+            return ss.str();
+          })
       .def(
           py::init<
               float,
@@ -190,6 +281,15 @@ PYBIND11_MODULE(marker_tracking, m) {
       "Model options to specify the template model, parameter transform and locator mappings");
 
   modelOptions.def(py::init<>())
+      .def(
+          "__repr__",
+          [](const momentum::ModelOptions& self) {
+            std::ostringstream ss;
+            ss << "ModelOptions(model=\"" << self.model << "\", parameters=\""
+               << self.parameters << "\", locators=\"" << self.locators
+               << "\")";
+            return ss.str();
+          })
       .def(py::init<
            const std::string&,
            const std::string&,
