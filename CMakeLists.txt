@@ -419,6 +419,17 @@ mt_library(
 )
 
 mt_library(
+  NAME io_legacy_json
+  HEADERS_VARS io_legacy_json_public_headers
+  SOURCES_VARS io_legacy_json_sources
+  PUBLIC_LINK_LIBRARIES
+    character
+    io_common
+    io_skeleton
+    nlohmann_json::nlohmann_json
+)
+
+mt_library(
   NAME io_motion
   HEADERS_VARS io_motion_public_headers
   SOURCES_VARS io_motion_sources
@@ -446,6 +457,7 @@ mt_library(
     io_common
     io_fbx
     io_gltf
+    io_legacy_json
     io_motion
     io_marker
     io_shape
@@ -725,6 +737,17 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       io_motion
       io_test_helper
+  )
+
+  mt_test(
+    NAME io_legacy_json_test
+    SOURCES_VARS io_legacy_json_test_sources
+    LINK_LIBRARIES
+      character_test_helpers
+      io_legacy_json
+      io_test_helper
+    ENV
+      "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
   )
 endif()
 
