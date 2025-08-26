@@ -63,10 +63,10 @@ jobs:
 
       - name: Install CUDA Toolkit
         if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: Jimver/cuda-toolkit@v0.2.23
+        uses: Jimver/cuda-toolkit@v0.2.24
         id: cuda-toolkit
         with:
-          # Available versions: https://github.com/Jimver/cuda-toolkit/blob/v0.2.23/src/links/linux-links.ts
+          # Available versions: https://github.com/Jimver/cuda-toolkit/blob/v0.2.24/src/links/linux-links.ts
           cuda: ${{ matrix.cuda_version }}
 
       - name: Check CUDA Version
