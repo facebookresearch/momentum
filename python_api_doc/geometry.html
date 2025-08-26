@@ -78,6 +78,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_skel_states()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_skel_states_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_legacy_json"><code class="docutils literal notranslate"><span class="pre">Character.load_legacy_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_legacy_json_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_legacy_json_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_legacy_json_from_string"><code class="docutils literal notranslate"><span class="pre">Character.load_legacy_json_from_string()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_locators"><code class="docutils literal notranslate"><span class="pre">Character.load_locators()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_locators_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_locators_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_model_definition"><code class="docutils literal notranslate"><span class="pre">Character.load_model_definition()</span></code></a></li>
@@ -97,6 +100,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_fbx_with_joint_params"><code class="docutils literal notranslate"><span class="pre">Character.save_fbx_with_joint_params()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_gltf"><code class="docutils literal notranslate"><span class="pre">Character.save_gltf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_gltf_from_skel_states"><code class="docutils literal notranslate"><span class="pre">Character.save_gltf_from_skel_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_legacy_json"><code class="docutils literal notranslate"><span class="pre">Character.save_legacy_json()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.scaled"><code class="docutils literal notranslate"><span class="pre">Character.scaled()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.simplify"><code class="docutils literal notranslate"><span class="pre">Character.simplify()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.simplify_parameter_transform"><code class="docutils literal notranslate"><span class="pre">Character.simplify_parameter_transform()</span></code></a></li>
@@ -105,6 +109,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_points"><code class="docutils literal notranslate"><span class="pre">Character.skin_points()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_weights"><code class="docutils literal notranslate"><span class="pre">Character.skin_weights</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.to_gltf"><code class="docutils literal notranslate"><span class="pre">Character.to_gltf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.to_legacy_json_string"><code class="docutils literal notranslate"><span class="pre">Character.to_legacy_json_string()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.transformed"><code class="docutils literal notranslate"><span class="pre">Character.transformed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_blend_shape"><code class="docutils literal notranslate"><span class="pre">Character.with_blend_shape()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_collision_geometry"><code class="docutils literal notranslate"><span class="pre">Character.with_collision_geometry()</span></code></a></li>
@@ -742,6 +747,50 @@ support the proprietary momentum motion format for storing model parameters in G
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_legacy_json">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_legacy_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_legacy_json" title="Link to this definition"></a></dt>
+<dd><p>Load a character from a legacy JSON file.</p>
+<p>This function directly converts from the deprecated JSON format to momentum::Character,
+this is a legacy format that has historically been used in mopy but should be considered deprecated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_path</strong> – Path to the legacy JSON file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A valid Character.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_legacy_json_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_legacy_json_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_legacy_json_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load a character from legacy JSON bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_bytes</strong> – A bytes object containing the legacy JSON data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A valid Character.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_legacy_json_from_string">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_legacy_json_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_legacy_json_from_string" title="Link to this definition"></a></dt>
+<dd><p>Load a character from a legacy JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_string</strong> – String containing the legacy JSON data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A valid Character.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_locators">
 <span class="sig-name descname"><span class="pre">load_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_locators" title="Link to this definition"></a></dt>
 <dd><p>Load locators from a .locators file.</p>
@@ -968,6 +1017,22 @@ support the proprietary momentum motion format for storing model parameters in G
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.save_legacy_json">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_legacy_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.save_legacy_json" title="Link to this definition"></a></dt>
+<dd><p>Save a character to legacy JSON format.</p>
+<p>This function converts a momentum::Character back to the legacy JSON format
+for compatibility with existing tools and workflows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The Character to save.</p></li>
+<li><p><strong>json_path</strong> – Path where to save the legacy JSON file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.scaled">
 <span class="sig-name descname"><span class="pre">scaled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.scaled" title="Link to this definition"></a></dt>
 <dd><p>Scale the character (mesh and skeleton) by the desired amount.</p>
@@ -1060,6 +1125,20 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a GLTF representation of Character with motion</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.to_legacy_json_string">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_legacy_json_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.to_legacy_json_string" title="Link to this definition"></a></dt>
+<dd><p>Convert a character to legacy JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>character</strong> – The Character to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String containing the legacy JSON representation.</p>
 </dd>
 </dl>
 </dd></dl>
