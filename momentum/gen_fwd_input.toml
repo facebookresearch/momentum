@@ -23,7 +23,8 @@ structs = [
     "BlendShape",
     "BlendShapeBase",
     "PoseShape",
-    "SkinWeights"
+    "SkinWeights",
+    "Locator",
 ]
 template_structs = [
     "Character",

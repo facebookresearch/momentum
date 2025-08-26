@@ -473,6 +473,18 @@ io_urdf_test_sources = [
     "test/io/io_urdf_test.cpp",
 ]
 
+io_legacy_json_public_headers = [
+    "io/legacy_json/legacy_json_io.h",
+]
+
+io_legacy_json_sources = [
+    "io/legacy_json/legacy_json_io.cpp",
+]
+
+io_legacy_json_test_sources = [
+    "test/io/io_legacy_json_test.cpp",
+]
+
 io_motion_public_headers = [
     "io/motion/mmo_io.h",
 ]
