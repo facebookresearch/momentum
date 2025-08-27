@@ -37,11 +37,13 @@ CharacterT<T>::CharacterT(
     BlendShape_const_p blendShapes,
     BlendShapeBase_const_p faceExpressionBlendShapes,
     const std::string& nameIn,
-    const momentum::TransformationList& inverseBindPose_in)
+    const momentum::TransformationList& inverseBindPose_in,
+    const SkinnedLocatorList& skinnedLocators)
     : skeleton(s),
       parameterTransform(pt),
       parameterLimits(pl),
       locators(l),
+      skinnedLocators(skinnedLocators),
       blendShape(std::move(blendShapes)),
       faceExpressionBlendShape(std::move(faceExpressionBlendShapes)),
       inverseBindPose(inverseBindPose_in),
@@ -80,6 +82,7 @@ CharacterT<T>::CharacterT(const CharacterT& c)
       parameterTransform(c.parameterTransform),
       parameterLimits(c.parameterLimits),
       locators(c.locators),
+      skinnedLocators(c.skinnedLocators),
       blendShape(c.blendShape),
       faceExpressionBlendShape(c.faceExpressionBlendShape),
       inverseBindPose(c.inverseBindPose),
@@ -123,6 +126,7 @@ CharacterT<T>& CharacterT<T>::operator=(const CharacterT& rhs) {
   std::swap(parameterTransform, tmp.parameterTransform);
   std::swap(parameterLimits, tmp.parameterLimits);
   std::swap(locators, tmp.locators);
+  std::swap(skinnedLocators, tmp.skinnedLocators);
   std::swap(inverseBindPose, tmp.inverseBindPose);
   std::swap(jointMap, tmp.jointMap);
   std::swap(mesh, tmp.mesh);
@@ -328,6 +332,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   //  remap the locators if we have any
   // -------------------------------------------------------------------
   result.locators = result.remapLocators(locators, *this);
+  result.skinnedLocators = result.remapSkinnedLocators(skinnedLocators, *this);
 
   // -------------------------------------------------------------------
   //  remap the mesh and skinning if present
@@ -379,7 +384,9 @@ CharacterT<T> CharacterT<T>::simplifyParameterTransform(const ParameterSet& para
       poseShapes.get(),
       blendShape,
       faceExpressionBlendShape,
-      name);
+      name,
+      inverseBindPose,
+      skinnedLocators);
 }
 
 template <typename T>
@@ -500,6 +507,62 @@ ParameterLimits CharacterT<T>::remapParameterLimits(
       const auto sourceEllipsoid = sourceBindState.jointState[sourceEllipsoidParent].transformation;
       data.ellipsoid = targetEllipsoidInverse * sourceEllipsoid * data.ellipsoid;
       data.ellipsoidInv = data.ellipsoid.inverse();
+    }
+  }
+
+  return result;
+}
+
+template <typename T>
+SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
+    const SkinnedLocatorList& locs,
+    const CharacterT& originalCharacter) const {
+  MT_CHECK(
+      originalCharacter.parameterTransform.numAllModelParameters() ==
+          parameterTransform.numAllModelParameters(),
+      "{} is not {}",
+      originalCharacter.parameterTransform.numAllModelParameters(),
+      parameterTransform.numAllModelParameters());
+  MT_CHECK(
+      jointMap.size() == originalCharacter.skeleton.joints.size(),
+      "{} is not {}",
+      jointMap.size(),
+      originalCharacter.skeleton.joints.size());
+
+  SkinnedLocatorList result = locs;
+
+  // create bind states for both source and target skeleton
+  const SkeletonState sourceBindState(
+      originalCharacter.parameterTransform.bindPose(), originalCharacter.skeleton, false);
+  const SkeletonState targetBindState(parameterTransform.bindPose(), skeleton, false);
+
+  // go over each skinned locator and remap its joint indices
+  for (auto& sl : result) {
+    // remap the joint indices according to the map
+    for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
+      sl.parents(i) = gsl::narrow<uint32_t>(jointMap[sl.parents(i)]);
+    }
+
+    // join together all weights with the same joint
+    for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
+      const auto& joint = sl.parents(i);
+      for (int j = i + 1; j < gsl::narrow_cast<int>(kMaxSkinJoints); j++) {
+        // if we have the same joint multiple times, add weights up
+        if (sl.parents(j) == joint) {
+          sl.skinWeights(i) += sl.skinWeights(j);
+          sl.skinWeights(j) = 0.0f;
+        }
+      }
+    }
+
+    // sort by weight, largest first
+    for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
+      for (int j = i + 1; j < gsl::narrow_cast<int>(kMaxSkinJoints); j++) {
+        if (sl.skinWeights(i) < sl.skinWeights(j)) {
+          std::swap(sl.skinWeights(i), sl.skinWeights(j));
+          std::swap(sl.parents(i), sl.parents(j));
+        }
+      }
     }
   }
 
