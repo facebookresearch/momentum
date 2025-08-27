@@ -32,6 +32,7 @@
 #include "momentum/character_solver/pose_prior_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/projection_error_function.h"
+#include "momentum/character_solver/skinned_locator_error_function.h"
 #include "momentum/character_solver/state_error_function.h"
 #include "momentum/character_solver/vertex_error_function.h"
 #include "momentum/character_solver/vertex_projection_error_function.h"
@@ -463,6 +464,62 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
         transform,
         Eps<T>(5e-1f, 1e-9),
         Eps<T>(5e-5f, 5e-6));
+  }
+}
+
+namespace {
+
+Character getSkinnedLocatorTestCharacter() {
+  Character character = createTestCharacter(4);
+
+  std::vector<bool> activeLocators(character.skinnedLocators.size(), true);
+  activeLocators[1] = false;
+  const auto [transform, limits] = addSkinnedLocatorParameters(
+      character.parameterTransform, character.parameterLimits, activeLocators);
+
+  return {
+      character.skeleton,
+      transform,
+      limits,
+      character.locators,
+      character.mesh.get(),
+      character.skinWeights.get(),
+      character.collision.get(),
+      character.poseShapes.get(),
+      character.blendShape,
+      character.faceExpressionBlendShape,
+      character.name,
+      character.inverseBindPose,
+      character.skinnedLocators};
+}
+
+} // namespace
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobians) {
+  using T = typename TestFixture::Type;
+
+  // Create a test character with skinned locators
+  const Character character = getSkinnedLocatorTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  // Verify that the character has skinned locators
+  ASSERT_GT(character.skinnedLocators.size(), 2);
+
+  // Create the error function
+  SkinnedLocatorErrorFunctionT<T> errorFunction(character);
+
+  // Add constraints for some of the skinned locators
+  const T TEST_WEIGHT_VALUE = 4.5;
+  for (int i = 0; i < std::min(3, static_cast<int>(character.skinnedLocators.size())); ++i) {
+    errorFunction.addConstraint(
+        i, TEST_WEIGHT_VALUE, uniform<Vector3<T>>(-1, 1)); // Random target position
+  }
+
+  // Test with random parameters
+  for (size_t i = 0; i < 10; i++) {
+    ModelParametersT<T> parameters = uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-2f, 5e-6));
   }
 }
 

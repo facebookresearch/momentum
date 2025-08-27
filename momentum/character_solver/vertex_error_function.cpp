@@ -15,6 +15,7 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
+#include "momentum/character_solver/error_function_utils.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
@@ -111,51 +112,6 @@ double VertexErrorFunctionT<T>::getError(
 
   // return error
   return error * this->weight_;
-}
-
-template <typename T>
-void gradient_jointParams_to_modelParams(
-    const T grad_jointParams,
-    const Eigen::Index iJointParam,
-    const ParameterTransform& parameterTransform,
-    Eigen::Ref<Eigen::VectorX<T>> gradient) {
-  // explicitly multiply with the parameter transform to generate parameter space gradients
-  for (auto index = parameterTransform.transform.outerIndexPtr()[iJointParam];
-       index < parameterTransform.transform.outerIndexPtr()[iJointParam + 1];
-       ++index) {
-    gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-        grad_jointParams * parameterTransform.transform.valuePtr()[index];
-  }
-}
-
-template <typename T>
-void jacobian_jointParams_to_modelParams(
-    const Eigen::Ref<const Eigen::VectorX<T>> jacobian_jointParams,
-    const Eigen::Index iJointParam,
-    const ParameterTransform& parameterTransform,
-    Eigen::Ref<Eigen::MatrixX<T>> jacobian) {
-  // explicitly multiply with the parameter transform to generate parameter space gradients
-  for (auto index = parameterTransform.transform.outerIndexPtr()[iJointParam];
-       index < parameterTransform.transform.outerIndexPtr()[iJointParam + 1];
-       ++index) {
-    jacobian.col(parameterTransform.transform.innerIndexPtr()[index]) +=
-        jacobian_jointParams * parameterTransform.transform.valuePtr()[index];
-  }
-}
-
-template <typename T>
-void jacobian_jointParams_to_modelParams(
-    const T jacobian_jointParams,
-    const Eigen::Index iJointParam,
-    const ParameterTransform& parameterTransform,
-    Eigen::Ref<Eigen::MatrixX<T>> jacobian) {
-  // explicitly multiply with the parameter transform to generate parameter space gradients
-  for (auto index = parameterTransform.transform.outerIndexPtr()[iJointParam];
-       index < parameterTransform.transform.outerIndexPtr()[iJointParam + 1];
-       ++index) {
-    jacobian(0, parameterTransform.transform.innerIndexPtr()[index]) +=
-        jacobian_jointParams * parameterTransform.transform.valuePtr()[index];
-  }
 }
 
 template <typename T>
