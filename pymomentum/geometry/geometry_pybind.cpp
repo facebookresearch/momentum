@@ -88,39 +88,118 @@ PYBIND11_MODULE(geometry, m) {
       m,
       "Character",
       "A complete momentum character including its skeleton and mesh.");
-  auto parameterTransformClass =
-      py::class_<mm::ParameterTransform>(m, "ParameterTransform");
-  auto inverseParameterTransformClass =
-      py::class_<mm::InverseParameterTransform>(m, "InverseParameterTransform");
-  auto meshClass = py::class_<mm::Mesh>(m, "Mesh");
-  auto jointClass = py::class_<mm::Joint>(m, "Joint");
-  auto skeletonClass = py::class_<mm::Skeleton>(m, "Skeleton");
-  auto skinWeightsClass = py::class_<mm::SkinWeights>(m, "SkinWeights");
-  auto locatorClass = py::class_<mm::Locator>(m, "Locator");
-  auto blendShapeClass =
-      py::class_<mm::BlendShape, std::shared_ptr<mm::BlendShape>>(
-          m, "BlendShape");
-  auto capsuleClass = py::class_<mm::TaperedCapsule>(m, "TaperedCapsule");
-  auto markerClass = py::class_<mm::Marker>(m, "Marker");
-  auto markerSequenceClass =
-      py::class_<mm::MarkerSequence>(m, "MarkerSequence");
-  auto fbxCoordSystemInfoClass =
-      py::class_<mm::FBXCoordSystemInfo>(m, "FBXCoordSystemInfo");
-  auto parameterLimitClass =
-      py::class_<mm::ParameterLimit>(m, "ParameterLimit");
-  auto parameterLimitDataClass = py::class_<mm::LimitData>(m, "LimitData");
-  auto parameterLimitMinMaxClass =
-      py::class_<mm::LimitMinMax>(m, "LimitMinMax");
-  auto parameterLimitMinMaxJointClass =
-      py::class_<mm::LimitMinMaxJoint>(m, "LimitMinMaxJoint");
-  auto parameterLimitLinearClass =
-      py::class_<mm::LimitLinear>(m, "LimitLinear");
-  auto parameterLimitLinearJointClass =
-      py::class_<mm::LimitLinearJoint>(m, "LimitLinearJoint");
-  auto parameterLimitHalfPlaneClass =
-      py::class_<mm::LimitHalfPlane>(m, "LimitHalfPlane");
-  auto parameterLimitEllipsoidClass =
-      py::class_<mm::LimitEllipsoid>(m, "LimitEllipsoid");
+  auto parameterTransformClass = py::class_<mm::ParameterTransform>(
+      m,
+      "ParameterTransform",
+      "Maps reduced model parameters to full joint parameters for character animation. "
+      "This class handles the transformation from a compact set of model parameters "
+      "(typically ~50) used in optimization to the full 7*nJoints parameters needed "
+      "for skeleton posing.");
+  auto inverseParameterTransformClass = py::class_<
+      mm::InverseParameterTransform>(
+      m,
+      "InverseParameterTransform",
+      "Inverse parameter transform that maps from full joint parameters back to "
+      "reduced model parameters. Used for fitting model parameters to existing "
+      "joint parameter data.");
+  auto meshClass = py::class_<mm::Mesh>(
+      m,
+      "Mesh",
+      "A 3D mesh containing vertices, faces, normals, and optional texture coordinates. "
+      "Supports triangular meshes with additional data like vertex colors, confidence values, "
+      "and line segments for wireframe rendering.");
+  auto jointClass = py::class_<mm::Joint>(
+      m,
+      "Joint",
+      "A single joint in a character skeleton. Contains the joint's name, parent relationship, "
+      "pre-rotation, and translation offset from its parent joint.");
+  auto skeletonClass = py::class_<mm::Skeleton>(
+      m,
+      "Skeleton",
+      "A hierarchical skeleton structure containing joints with parent-child relationships. "
+      "Each joint has a name, parent index, pre-rotation, and translation offset. "
+      "Used for character animation and forward kinematics.");
+  auto skinWeightsClass = py::class_<mm::SkinWeights>(
+      m,
+      "SkinWeights",
+      "Linear blend skinning weights that define how mesh vertices are influenced by skeleton joints. "
+      "Contains weight values and joint indices for each vertex, enabling smooth deformation "
+      "of the mesh during character animation.");
+  auto locatorClass = py::class_<mm::Locator>(
+      m,
+      "Locator",
+      "A 3D point attached to a skeleton joint used for inverse kinematics constraints. "
+      "Locators define target positions that the character should reach during pose optimization, "
+      "with configurable weights and axis locks for fine-grained control.");
+  auto blendShapeClass = py::class_<
+      mm::BlendShape,
+      std::shared_ptr<mm::BlendShape>>(
+      m,
+      "BlendShape",
+      "A blend shape basis for facial expressions and corrective shapes. "
+      "Contains a base mesh and a set of shape vectors that can be linearly "
+      "combined to create different facial expressions or body shape variations.");
+  auto capsuleClass = py::class_<mm::TaperedCapsule>(
+      m,
+      "TaperedCapsule",
+      "A tapered capsule primitive used for collision detection and physics simulation. "
+      "Represents a capsule with potentially different radii at each end, attached to a skeleton joint.");
+  auto markerClass = py::class_<mm::Marker>(
+      m,
+      "Marker",
+      "A 3D marker used in motion capture systems. Contains position data and occlusion status "
+      "for tracking points on subjects during motion capture recording.");
+  auto markerSequenceClass = py::class_<mm::MarkerSequence>(
+      m,
+      "MarkerSequence",
+      "A sequence of motion capture marker data over time. Contains marker positions "
+      "and occlusion status for each frame, along with frame rate information.");
+  auto fbxCoordSystemInfoClass = py::class_<mm::FBXCoordSystemInfo>(
+      m,
+      "FBXCoordSystemInfo",
+      "FBX coordinate system information containing up vector, front vector, and handedness. "
+      "Used when importing/exporting FBX files to ensure proper coordinate system conversion.");
+  auto parameterLimitClass = py::class_<mm::ParameterLimit>(
+      m,
+      "ParameterLimit",
+      "A constraint on model or joint parameters used to enforce realistic poses. "
+      "Supports various limit types including min/max bounds, linear relationships, "
+      "ellipsoid constraints, and half-plane constraints.");
+  auto parameterLimitDataClass = py::class_<mm::LimitData>(
+      m,
+      "LimitData",
+      "Data container for parameter limits. Contains the specific constraint data "
+      "for different limit types (MinMax, Linear, Ellipsoid, etc.).");
+  auto parameterLimitMinMaxClass = py::class_<mm::LimitMinMax>(
+      m,
+      "LimitMinMax",
+      "Min/max constraint data for model parameters. Contains the parameter index "
+      "and the minimum and maximum allowed values.");
+  auto parameterLimitMinMaxJointClass = py::class_<mm::LimitMinMaxJoint>(
+      m,
+      "LimitMinMaxJoint",
+      "Min/max constraint data for joint parameters. Contains the joint index, "
+      "joint parameter index, and the minimum and maximum allowed values.");
+  auto parameterLimitLinearClass = py::class_<mm::LimitLinear>(
+      m,
+      "LimitLinear",
+      "Linear constraint data for model parameters. Enforces a linear relationship "
+      "between two parameters of the form: p0 = scale * p1 + offset.");
+  auto parameterLimitLinearJointClass = py::class_<mm::LimitLinearJoint>(
+      m,
+      "LimitLinearJoint",
+      "Linear constraint data for joint parameters. Enforces a linear relationship "
+      "between two joint parameters of the form: p0 = scale * p1 + offset.");
+  auto parameterLimitHalfPlaneClass = py::class_<mm::LimitHalfPlane>(
+      m,
+      "LimitHalfPlane",
+      "Half-plane constraint data for model parameters. Enforces that parameters "
+      "lie on one side of a plane defined by a normal vector and offset.");
+  auto parameterLimitEllipsoidClass = py::class_<mm::LimitEllipsoid>(
+      m,
+      "LimitEllipsoid",
+      "Ellipsoid constraint data for model parameters. Enforces that parameters "
+      "lie within an ellipsoid defined by a transformation matrix and offset.");
 
   // =====================================================
   // momentum::Character
@@ -289,32 +368,36 @@ PYBIND11_MODULE(geometry, m) {
           },
           R"(Returns a new character with the passed-in locators.  If 'replace' is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.
 
-          :parameter locators: The locators to add to the character.
-          :parameter replace: If true, replace the existing locators with the passed-in ones.  Otherwise, append the new locators to the existing ones.  Defaults to false.
+          :param locators: The locators to add to the character.
+          :param replace: If true, replace the existing locators with the passed-in ones.  Otherwise, append the new locators to the existing ones.  Defaults to false.
           )",
           py::arg("locators"),
           py::arg("replace") = false)
       .def_readonly("name", &mm::Character::name, "The character's name.")
       .def_readonly(
-          "skeleton", &mm::Character::skeleton, "The character's skeleton.")
+          "skeleton",
+          &mm::Character::skeleton,
+          "The character's skeleton. See :class:`Skeleton`.")
       .def_readonly(
           "parameter_limits",
           &mm::Character::parameterLimits,
-          "The character's parameter limits.")
+          "The character's parameter limits. See :class:`ParameterLimit`.")
       .def_readonly(
           "parameter_transform",
           &mm::Character::parameterTransform,
           "Maps the reduced k-dimensional modelParameters that are used in the IK solve "
-          "to the full 7*n-dimensional parameters used in the skeleton.")
+          "to the full 7*n-dimensional parameters used in the skeleton. See :class:`ParameterTransform`.")
       .def_readonly(
-          "locators", &mm::Character::locators, "List of locators on the mesh.")
+          "locators",
+          &mm::Character::locators,
+          "List of locators on the mesh. See :class:`Locator`.")
       .def_property_readonly(
           "mesh",
           [](const mm::Character& c) -> std::unique_ptr<mm::Mesh> {
             return (c.mesh) ? std::make_unique<mm::Mesh>(*c.mesh)
                             : mm::Mesh_u();
           },
-          ":return: The character's mesh, or None if not present.")
+          ":return: The character's :class:`Mesh`, or None if not present.")
       .def_property_readonly(
           "has_mesh",
           [](const mm::Character& c) -> bool {
@@ -328,7 +411,7 @@ PYBIND11_MODULE(geometry, m) {
                 ? std::make_unique<mm::SkinWeights>(*c.skinWeights)
                 : mm::SkinWeights_u();
           },
-          "The character's skinning weights.")
+          "The character's skinning weights. See :class:`SkinWeights`.")
       .def_property_readonly(
           "blend_shape",
           [](const mm::Character& c)
@@ -399,7 +482,6 @@ It can be used to solve for shapes and pose simultaneously.
           &pymomentum::skinPoints,
           R"(Skins the points using the character's linear blend skinning.
 
-:param character: A :class:`Character` with both a rest mesh and skinning weights.
 :param skel_state: A torch.Tensor containing either a [nBatch x nJoints x 8] skeleton state or a [nBatch x nJoints x 4 x 4] transforms.
 :param rest_vertices: An optional torch.Tensor containing the rest points; if not passed, the ones stored inside the character are used.
 :return: The vertex positions in worldspace.
@@ -485,8 +567,8 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
 
-:parameter gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
-:return: a valid Character.
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: a valid :class:`Character`.
       )",
           py::arg("gltf_bytes"))
       .def_static(
@@ -495,8 +577,8 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
 
-  :parameter gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
-  :return: a valid Character.
+  :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+  :return: a valid :class:`Character`.
         )",
           py::arg("gltf_bytes"))
       // toGLTF(character, fps, motion)
@@ -506,10 +588,10 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Serialize a character as a GLTF using dictionary form.
 
-:parameter character: A valid character.
-:parameter fps: Frames per second for describing the motion.
-:parameter motion: tuple of vector of parameter names and a P X T matrix. P is number of parameters, T is number of frames.
-:parameter offsets: tuple of vector of joint names and a Vector of size J * 7 (Parameters per joint). Eg. for 3 joints, you would have 21 params.
+:param character: A valid character.
+:param fps: Frames per second for describing the motion.
+:param motion: tuple of vector of parameter names and a P X T matrix. P is number of parameters, T is number of frames.
+:param offsets: tuple of vector of joint names and a Vector of size J * 7 (Parameters per joint). Eg. for 3 joints, you would have 21 params.
 :return: a GLTF representation of Character with motion
       )",
           py::arg("character"))
@@ -520,10 +602,11 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from an FBX file.  Optionally pass in a separate model definition and locators file.
 
-:parameter fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
-:parameter model_filename: Configuration file that defines the parameter mappings and joint limits; e.g. character.cfg.
-:parameter locators_filename: File containing the locators, e.g. character.locators.
-:return: A valid Character.)",
+:param fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
+:param model_filename: Configuration file that defines the parameter mappings and joint limits; e.g. character.cfg.
+:param locators_filename: File containing the locators, e.g. character.locators.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`.)",
           py::arg("fbx_filename"),
           py::arg("model_filename") = std::optional<std::string>{},
           py::arg("locators_filename") = std::optional<std::string>{},
@@ -536,8 +619,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and animation curves from an FBX file.
 
-:parameter fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
-:return: A valid Character, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
+:param fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
           py::arg("fbx_filename"),
           py::arg("permissive") = false)
 
@@ -547,8 +631,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and animation curves from an FBX file.
 
-:parameter fbx_bytes: A Python bytes that is an .fbx file containing the skeleton and skinned mesh.
-:return: A valid Character, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
+:param fbx_bytes: A Python bytes that is an .fbx file containing the skeleton and skinned mesh.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false)
 
@@ -559,8 +644,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from byte array for an FBX file.
 
-:parameter fbx_bytes: An array of bytes in FBX format.
-:return: A valid Character.)",
+:param fbx_bytes: An array of bytes in FBX format.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false)
       // loadLocatorsFromFile(character, locatorFile)
@@ -570,20 +656,20 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load locators from a .locators file.
 
-:parameter character: The character to map the locators onto.
-:parameter filename: Filename for the locators.
-:return: A valid Character.)",
+:param character: The character to map the locators onto.
+:param filename: Filename for the locators.
+:return: A valid :class:`Character`.)",
           py::arg("filename"))
       // loadLocatorsFromBytes(character, locatorBytes)
       .def(
           "load_locators_from_bytes",
           &pymomentum::loadLocatorsFromBytes,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load locators from a .locators file.
+          R"(Load locators from a byte array containing .locators file data.
 
-:parameter character: The character to map the locators onto.
-:parameter locator_bytes: A byte array containing the locators.
-:return: A valid Character.)",
+:param character: The character to map the locators onto.
+:param locator_bytes: A byte array containing the locators.
+:return: A valid :class:`Character`.)",
           py::arg("locator_bytes"))
       // localModelDefinitionFromFile(character, modelFile)
       .def(
@@ -592,9 +678,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a model definition from a .model file.  This defines the parameter transform, model parameters, and joint limits.
 
-:parameter character: The character containing a valid skeleton.
-:parameter filename: Filename for the model definition.
-:return: A valid Character.)",
+:param character: The character containing a valid skeleton.
+:param filename: Filename for the model definition.
+:return: A valid :class:`Character`.)",
           py::arg("filename"))
       // localModelDefinitionFromBytes(character, modelBytes)
       .def(
@@ -603,9 +689,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a model definition from a .model file.  This defines the parameter transform, model parameters, and joint limits.
 
-:parameter character: The character containing a valid skeleton.
-:parameter model_bytes: Bytes array containing the model definition.
-:return: A valid Character.)",
+:param character: The character containing a valid skeleton.
+:param model_bytes: Bytes array containing the model definition.
+:return: A valid :class:`Character`.)",
           py::arg("model_bytes"))
       // loadCharacterWithMotion(gltfFilename)
       .def_static(
@@ -616,7 +702,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use
 :meth:`load_gltf_with_skel_states`.
 
-:parameter gltfFilename: A .gltf file; e.g. character_s0.glb.
+:param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.
       )",
           py::arg("gltf_filename"))
@@ -628,7 +714,7 @@ saved using momentum, which stores model parameters in a custom extension.  For 
 and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
 
-:parameter gltf_bytes: The bytes of a gltf file.
+:param gltf_bytes: The bytes of a gltf file.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
         )",
           py::arg("gltf_bytes"))
@@ -640,7 +726,7 @@ support the proprietary momentum motion format for storing model parameters in G
 and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
 
-:parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
+:param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
           )",
           py::arg("gltf_filename"))
@@ -652,7 +738,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf file.
 
-:parameter path: A .gltf file; e.g. character_s0.glb.
+:param path: A .gltf file; e.g. character_s0.glb.
       )",
           py::arg("path"))
       // loadURDFCharacterFromFile(urdfPath)
@@ -662,7 +748,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a urdf file.
 
-:parameter urdf_filename: A .urdf file; e.g. character.urdf.
+:param urdf_filename: A .urdf file; e.g. character.urdf.
       )",
           py::arg("urdf_filename"))
       // loadURDFCharacterFromBytes(urdfBytes)
@@ -672,7 +758,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from urdf bytes.
 
-:parameter urdf_bytes: Bytes array containing the urdf definition.
+:param urdf_bytes: Bytes array containing the urdf definition.
       )",
           py::arg("urdf_bytes"))
       // saveGLTFCharacterToFile(filename, character)
@@ -682,12 +768,12 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to a gltf file.
 
-:parameter path: A .gltf export filename.
-:parameter character: A Character to be saved to the output file.
-:parameter fps: Frequency in frames per second
-:parameter motion: Pose array in [n_frames x n_parameters]
-:parameter offsets: Offset array in [n_joints x n_parameters_per_joint]
-:parameter markers: Additional marker (3d positions) data in [n_frames][n_markers]
+:param path: A .gltf export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second
+:param motion: Pose array in [n_frames x n_parameters]
+:param offsets: Offset array in [n_joints x n_parameters_per_joint]
+:param markers: Additional marker (3d positions) data in [n_frames][n_markers]
       )",
           py::arg("path"),
           py::arg("character"),
@@ -2494,9 +2580,9 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 This is functionally identical to :meth:`ParameterTransform.apply` except that it allows
 batching on the character.
 
-:parameter character: A character or list of characters.
+:param character: A character or list of characters.
 :type character: Union[Character, List[Character]]
-:parameter modelParameters: A [nBatch x nParams] tensor of model parameters.
+:param model_parameters: A [nBatch x nParams] tensor of model parameters.
 
 :return: a tensor of joint parameters.)",
       py::arg("character"),
