@@ -97,6 +97,8 @@ PYBIND11_MODULE(geometry, m) {
   auto skeletonClass = py::class_<mm::Skeleton>(m, "Skeleton");
   auto skinWeightsClass = py::class_<mm::SkinWeights>(m, "SkinWeights");
   auto locatorClass = py::class_<mm::Locator>(m, "Locator");
+  auto skinnedLocatorClass =
+      py::class_<mm::SkinnedLocator>(m, "SkinnedLocator");
   auto blendShapeClass =
       py::class_<mm::BlendShape, std::shared_ptr<mm::BlendShape>>(
           m, "BlendShape");
@@ -294,6 +296,57 @@ PYBIND11_MODULE(geometry, m) {
           )",
           py::arg("locators"),
           py::arg("replace") = false)
+      .def(
+          "with_skinned_locators",
+          [](const mm::Character& character,
+             const momentum::SkinnedLocatorList& skinnedLocators,
+             bool replace = false) {
+            for (const auto& skinnedLocator : skinnedLocators) {
+              for (Eigen::Index i = 0; i < skinnedLocator.parents.size(); ++i) {
+                if (skinnedLocator.parents[i] >=
+                    character.skeleton.joints.size()) {
+                  throw py::index_error(fmt::format(
+                      "Skinned locator {} has parent index {} which is out of range (there are only {} joints).",
+                      skinnedLocator.name,
+                      skinnedLocator.parents[i],
+                      character.skeleton.joints.size()));
+                }
+              }
+            }
+
+            momentum::SkinnedLocatorList combinedSkinnedLocators;
+            if (!replace) {
+              std::copy(
+                  character.skinnedLocators.begin(),
+                  character.skinnedLocators.end(),
+                  std::back_inserter(combinedSkinnedLocators));
+            }
+            std::copy(
+                skinnedLocators.begin(),
+                skinnedLocators.end(),
+                std::back_inserter(combinedSkinnedLocators));
+            return momentum::Character(
+                character.skeleton,
+                character.parameterTransform,
+                character.parameterLimits,
+                character.locators,
+                character.mesh.get(),
+                character.skinWeights.get(),
+                character.collision.get(),
+                character.poseShapes.get(),
+                character.blendShape,
+                character.faceExpressionBlendShape,
+                character.name,
+                character.inverseBindPose,
+                combinedSkinnedLocators);
+          },
+          R"(Returns a new character with the passed-in skinned locators.  If 'replace' is true, the existing skinned locators are replaced, otherwise (the default) the new skinned locators are appended to the existing ones.
+
+          :parameter skinned_locators: The skinned locators to add to the character.
+          :parameter replace: If true, replace the existing skinned locators with the passed-in ones.  Otherwise, append the new skinned locators to the existing ones.  Defaults to false.
+          )",
+          py::arg("skinned_locators"),
+          py::arg("replace") = false)
       .def_readonly("name", &mm::Character::name, "The character's name.")
       .def_readonly(
           "skeleton", &mm::Character::skeleton, "The character's skeleton.")
@@ -308,6 +361,10 @@ PYBIND11_MODULE(geometry, m) {
           "to the full 7*n-dimensional parameters used in the skeleton.")
       .def_readonly(
           "locators", &mm::Character::locators, "List of locators on the mesh.")
+      .def_readonly(
+          "skinned_locators",
+          &mm::Character::skinnedLocators,
+          "List of skinned locators on the mesh.")
       .def_property_readonly(
           "mesh",
           [](const mm::Character& c) -> std::unique_ptr<mm::Mesh> {
@@ -995,8 +1052,8 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           "joint_parents",
           [](const mm::Skeleton& skel) -> std::vector<int64_t> {
             // For the root joint, we'll use -1 as the reported parent; this
-            // just makes a lot more sense in a Python context where it would be
-            // hard to compare against SIZE_MAX (and you're relying on the
+            // just makes a lot more sense in a Python context where it would
+            // be hard to compare against SIZE_MAX (and you're relying on the
             // typesystem to keep it as a uint64_t instead of an int64_t which
             // seems unreliable).
             std::vector<int64_t> result(skel.joints.size(), -1);
@@ -1475,6 +1532,90 @@ The resulting shape is equal to the base shape plus a linear combination of the 
         std::ostringstream oss;
         oss << "[" << l.name << "; parent: " << l.parent
             << "; offset: " << l.offset.transpose() << "]";
+        return oss.str();
+      });
+
+  // ==============================================>>>>>>> REPLACE
+  // momentum::SkinnedLocator
+  // - name
+  // - parents
+  // - skinWeights
+  // - position
+  // - weight
+  // =====================================================
+  skinnedLocatorClass
+      .def(
+          py::init([](const std::string& name,
+                      const Eigen::VectorXi& parents,
+                      const Eigen::VectorXf& skinWeights,
+                      const std::optional<Eigen::Vector3f>& position,
+                      float weight) {
+            if (parents.size() != skinWeights.size()) {
+              throw std::runtime_error(
+                  "parents and skin_weights must have the same size");
+            }
+
+            if (parents.size() > mm::kMaxSkinJoints) {
+              throw std::runtime_error(fmt::format(
+                  "parents and skin_weights must have at most {} elements",
+                  mm::kMaxSkinJoints));
+            }
+
+            Eigen::Matrix<uint32_t, mm::kMaxSkinJoints, 1> parentsTmp =
+                Eigen::Matrix<uint32_t, mm::kMaxSkinJoints, 1>::Zero();
+            Eigen::Matrix<float, mm::kMaxSkinJoints, 1> skinWeightsTmp =
+                Eigen::Matrix<float, mm::kMaxSkinJoints, 1>::Zero();
+
+            for (size_t i = 0; i < parents.size(); ++i) {
+              if (parents(i) < 0) {
+                throw std::runtime_error(
+                    "parents must be non-negative, but got " +
+                    std::to_string(parents(i)));
+              }
+
+              if (skinWeights(i) < 0) {
+                throw std::runtime_error(
+                    "skin_weights must be non-negative, but got " +
+                    std::to_string(skinWeights(i)));
+              }
+              parentsTmp(i) = parents(i);
+              skinWeightsTmp(i) = skinWeights(i);
+            }
+
+            return mm::SkinnedLocator(
+                name,
+                parentsTmp,
+                skinWeightsTmp,
+                position.value_or(Eigen::Vector3f::Zero()),
+                weight);
+          }),
+          py::arg("name"),
+          py::arg("parents"),
+          py::arg("skin_weights"),
+          py::arg("position") = std::nullopt,
+          py::arg("weight") = 1.0f)
+      .def_readonly(
+          "name", &mm::SkinnedLocator::name, "The skinned locator's name.")
+      .def_property_readonly(
+          "parents",
+          [](const mm::SkinnedLocator& locator) { return locator.parents; },
+          "Indices of the parent joints in the skeleton.")
+      .def_property_readonly(
+          "skin_weights",
+          [](const mm::SkinnedLocator& locator) { return locator.skinWeights; },
+          "Skinning weights for the parent joints.")
+      .def_readonly(
+          "position",
+          &mm::SkinnedLocator::position,
+          "Position relative to rest pose of the character.")
+      .def_readonly(
+          "weight",
+          &mm::SkinnedLocator::weight,
+          "Influence weight of this locator when used in constraints.")
+      .def("__repr__", [](const mm::SkinnedLocator& l) {
+        std::ostringstream oss;
+        oss << "[" << l.name << "; position: " << l.position.transpose()
+            << "; weight: " << l.weight << "]";
         return oss.str();
       });
 
