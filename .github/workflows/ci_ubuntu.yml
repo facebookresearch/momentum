@@ -15,6 +15,7 @@ on:
 
 jobs:
   momentum:
+    if: false # Temporarily disabled to reduce CI cost
     name: cpp${{ matrix.simd == 'ON' && '-simd' || '' }}-${{ matrix.mode == '' && 'opt' || 'dev' }}-ubuntu
     runs-on: ubuntu-latest
     strategy:
@@ -51,6 +52,7 @@ jobs:
           pixi run cmake --build momentum/examples/hello_world/build
 
   pymomentum:
+    if: false # Temporarily disabled to reduce CI cost
     name: py-${{ matrix.pixi_env }}-ubuntu
     runs-on: ubuntu-latest
     strategy:

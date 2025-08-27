@@ -15,6 +15,7 @@ on:
 
 jobs:
   momentum:
+    if: false # Temporarily disabled to reduce CI cost
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-win
     runs-on: windows-latest
     strategy:
@@ -46,6 +47,7 @@ jobs:
             --parallel
 
   pymomentum:
+    if: false # Temporarily disabled to reduce CI cost
     name: py-${{ matrix.pixi_env }}-win
     runs-on: windows-latest
     strategy:
