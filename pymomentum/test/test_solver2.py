@@ -1283,3 +1283,167 @@ class TestSolver(unittest.TestCase):
             np.allclose(projected_2d, target_2d, rtol=1e-3, atol=1e-3),
             f"Projected vertex {projected_2d} is not close to target {target_2d}",
         )
+
+    def test_vertex_sequence_error_function(self) -> None:
+        """Test VertexSequenceErrorFunction to ensure vertex velocities match target velocities."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+        n_frames = 2  # VertexSequenceErrorFunction works with 2 frames
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        # Initialize model parameters for both frames
+        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+
+        # Set up different poses for the two frames to create motion
+        model_params_frame0 = torch.zeros(n_params, dtype=torch.float32)
+        model_params_frame1 = torch.zeros(n_params, dtype=torch.float32)
+
+        # Create some motion by changing translation parameters
+        model_params_frame1[0] = 1.0  # Move in x direction
+        model_params_frame1[1] = 0.5  # Move in y direction
+
+        model_params_init[0] = model_params_frame0
+        model_params_init[1] = model_params_frame1
+
+        # Create VertexSequenceErrorFunction
+        vertex_sequence_error = pym_solver2.VertexSequenceErrorFunction(character)
+        self.assertEqual(vertex_sequence_error.num_constraints, 0)
+
+        # Define target velocities for specific vertices
+        vertex_indices = [0, 1, 2]  # Test with first 3 vertices
+        target_velocities = np.array(
+            [
+                [1.0, 0.5, 0.0],  # Vertex 0: move in x and y
+                [0.5, 1.0, 0.0],  # Vertex 1: move in y primarily
+                [0.0, 0.0, 0.5],  # Vertex 2: move in z
+            ],
+            dtype=np.float32,
+        )
+        weights = np.array([1.0, 1.0, 1.0], dtype=np.float32)
+
+        # Add constraints using the batch method
+        vertex_sequence_error.add_constraints(
+            vertex_index=np.array(vertex_indices, dtype=np.int32),
+            weight=weights,
+            target_velocity=target_velocities,
+        )
+        self.assertEqual(vertex_sequence_error.num_constraints, 3)
+
+        # Test individual constraint addition as well
+        vertex_sequence_error.add_constraint(
+            vertex_index=3,
+            weight=1.0,
+            target_velocity=np.array([0.2, 0.3, 0.1], dtype=np.float32),
+        )
+        self.assertEqual(vertex_sequence_error.num_constraints, 4)
+
+        # Verify constraints were added correctly
+        constraints = vertex_sequence_error.constraints
+        self.assertEqual(len(constraints), 4)
+        self.assertEqual(constraints[0].vertex_index, 0)
+        self.assertTrue(np.allclose(constraints[0].target_velocity, [1.0, 0.5, 0.0]))
+        self.assertAlmostEqual(constraints[0].weight, 1.0)
+
+        # Create SequenceSolverFunction
+        solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
+
+        # Add the vertex sequence error function
+        solver_function.add_sequence_error_function(0, vertex_sequence_error)
+
+        # Set solver options
+        solver_options = pym_solver2.SequenceSolverOptions()
+        solver_options.max_iterations = 50
+        solver_options.regularization = 1e-5
+
+        # Solve the sequence
+        model_params_final = pym_solver2.solve_sequence(
+            solver_function, model_params_init.numpy(), solver_options
+        )
+
+        # Convert final model parameters to skeleton states
+        skel_state_frame0 = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final[0])
+        )
+        skel_state_frame1 = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final[1])
+        )
+
+        # Compute final meshes for both frames
+        mesh_frame0 = character.skin_points(skel_state_frame0)
+        mesh_frame1 = character.skin_points(skel_state_frame1)
+
+        # Verify that vertex velocities match target velocities
+        for i, vertex_idx in enumerate(vertex_indices):
+            # Compute actual velocity (difference between frames)
+            actual_velocity = mesh_frame1[vertex_idx, :3] - mesh_frame0[vertex_idx, :3]
+            expected_velocity = target_velocities[i]
+
+            # Assert that actual velocity is close to target velocity
+            self.assertTrue(
+                torch.allclose(
+                    actual_velocity,
+                    torch.from_numpy(expected_velocity),
+                    rtol=1e-3,  # Allow some tolerance due to optimization
+                    atol=1e-3,
+                ),
+                f"Vertex {vertex_idx}: actual velocity {actual_velocity.numpy()} "
+                f"does not match target {expected_velocity}",
+            )
+
+        # Test with zero target velocities (stationary constraint)
+        vertex_sequence_error.clear_constraints()
+        self.assertEqual(vertex_sequence_error.num_constraints, 0)
+
+        # Add zero velocity constraints
+        zero_velocities = np.zeros((2, 3), dtype=np.float32)
+        vertex_sequence_error.add_constraints(
+            vertex_index=np.array([0, 1], dtype=np.int32),
+            weight=np.array([2.0, 2.0], dtype=np.float32),
+            target_velocity=zero_velocities,
+        )
+
+        # Solve again with zero velocity constraints
+        model_params_final_zero = pym_solver2.solve_sequence(
+            solver_function, model_params_init.numpy(), solver_options
+        )
+
+        # Convert to skeleton states
+        skel_state_frame0_zero = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final_zero[0])
+        )
+        skel_state_frame1_zero = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final_zero[1])
+        )
+
+        # Compute meshes
+        mesh_frame0_zero = character.skin_points(skel_state_frame0_zero)
+        mesh_frame1_zero = character.skin_points(skel_state_frame1_zero)
+
+        # Verify that constrained vertices have minimal motion
+        for vertex_idx in [0, 1]:
+            actual_velocity = (
+                mesh_frame1_zero[vertex_idx, :3] - mesh_frame0_zero[vertex_idx, :3]
+            )
+            velocity_magnitude = torch.norm(actual_velocity).item()
+
+            # Assert that velocity is close to zero
+            self.assertLess(
+                velocity_magnitude,
+                1e-4,  # Small tolerance for numerical precision
+                f"Vertex {vertex_idx} should be stationary but has velocity magnitude {velocity_magnitude}",
+            )
+
+        # Test error function properties
+        self.assertEqual(vertex_sequence_error.character, character)
+        self.assertGreater(vertex_sequence_error.weight, 0.0)
+
+        # Test string representation
+        repr_str = repr(vertex_sequence_error)
+        self.assertIn("VertexSequenceErrorFunction", repr_str)
+        self.assertIn("num_constraints=2", repr_str)
