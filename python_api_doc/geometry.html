@@ -108,6 +108,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skeleton"><code class="docutils literal notranslate"><span class="pre">Character.skeleton</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_points"><code class="docutils literal notranslate"><span class="pre">Character.skin_points()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_weights"><code class="docutils literal notranslate"><span class="pre">Character.skin_weights</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skinned_locators"><code class="docutils literal notranslate"><span class="pre">Character.skinned_locators</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.to_gltf"><code class="docutils literal notranslate"><span class="pre">Character.to_gltf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.to_legacy_json_string"><code class="docutils literal notranslate"><span class="pre">Character.to_legacy_json_string()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.transformed"><code class="docutils literal notranslate"><span class="pre">Character.transformed()</span></code></a></li>
@@ -116,6 +117,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_locators"><code class="docutils literal notranslate"><span class="pre">Character.with_locators()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_mesh_and_skin_weights"><code class="docutils literal notranslate"><span class="pre">Character.with_mesh_and_skin_weights()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_parameter_limits"><code class="docutils literal notranslate"><span class="pre">Character.with_parameter_limits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_skinned_locators"><code class="docutils literal notranslate"><span class="pre">Character.with_skinned_locators()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem</span></code></a><ul>
@@ -322,6 +324,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.SkinWeights"><code class="docutils literal notranslate"><span class="pre">SkinWeights</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.index"><code class="docutils literal notranslate"><span class="pre">SkinWeights.index</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.weight"><code class="docutils literal notranslate"><span class="pre">SkinWeights.weight</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.name"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.parents"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.parents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.position"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.skin_weights"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.skin_weights</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.weight"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.weight</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule</span></code></a><ul>
@@ -1110,6 +1120,12 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 <dd><p>The character’s skinning weights.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.skinned_locators">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">skinned_locators</span></span><a class="headerlink" href="#pymomentum.geometry.Character.skinned_locators" title="Link to this definition"></a></dt>
+<dd><p>List of skinned locators on the mesh.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.to_gltf">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_gltf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.to_gltf" title="Link to this definition"></a></dt>
@@ -1209,6 +1225,22 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.with_parameter_limits">
 <span class="sig-name descname"><span class="pre">with_parameter_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.ParameterLimit" title="pymomentum.geometry.ParameterLimit"><span class="pre">pymomentum.geometry.ParameterLimit</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.with_parameter_limits" title="Link to this definition"></a></dt>
 <dd><p>Returns a new character with the parameter limits set to the passed-in limits.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.with_skinned_locators">
+<span class="sig-name descname"><span class="pre">with_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skinned_locators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator" title="pymomentum.geometry.SkinnedLocator"><span class="pre">pymomentum.geometry.SkinnedLocator</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.with_skinned_locators" title="Link to this definition"></a></dt>
+<dd><p>Returns a new character with the passed-in skinned locators.  If ‘replace’ is true, the existing skinned locators are replaced, otherwise (the default) the new skinned locators are appended to the existing ones.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">parameter skinned_locators<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The skinned locators to add to the character.</p>
+</dd>
+<dt class="field-even">parameter replace<span class="colon">:</span></dt>
+<dd class="field-even"><p>If true, replace the existing skinned locators with the passed-in ones.  Otherwise, append the new skinned locators to the existing ones.  Defaults to false.</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>
@@ -2337,6 +2369,42 @@ isAncestor(id, id) returns true.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.weight">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.weight" title="Link to this definition"></a></dt>
 <dd><p>Returns the skinning weights.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">SkinnedLocator</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.name" title="Link to this definition"></a></dt>
+<dd><p>The skinned locator’s name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.parents">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parents</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.parents" title="Link to this definition"></a></dt>
+<dd><p>Indices of the parent joints in the skeleton.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.position">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.position" title="Link to this definition"></a></dt>
+<dd><p>Position relative to rest pose of the character.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.skin_weights">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">skin_weights</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.skin_weights" title="Link to this definition"></a></dt>
+<dd><p>Skinning weights for the parent joints.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.weight" title="Link to this definition"></a></dt>
+<dd><p>Influence weight of this locator when used in constraints.</p>
 </dd></dl>
 
 </dd></dl>
