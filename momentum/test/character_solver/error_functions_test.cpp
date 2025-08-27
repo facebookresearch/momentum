@@ -33,6 +33,7 @@
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/projection_error_function.h"
 #include "momentum/character_solver/skinned_locator_error_function.h"
+#include "momentum/character_solver/skinned_locator_triangle_error_function.h"
 #include "momentum/character_solver/state_error_function.h"
 #include "momentum/character_solver/vertex_error_function.h"
 #include "momentum/character_solver/vertex_projection_error_function.h"
@@ -470,7 +471,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
 namespace {
 
 Character getSkinnedLocatorTestCharacter() {
-  Character character = createTestCharacter(4);
+  Character character = withTestBlendShapes(createTestCharacter(4));
 
   std::vector<bool> activeLocators(character.skinnedLocators.size(), true);
   activeLocators[1] = false;
@@ -520,6 +521,45 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobian
     ModelParametersT<T> parameters = uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
     TEST_GRADIENT_AND_JACOBIAN(
         T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-2f, 5e-6));
+  }
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_GradientsAndJacobians) {
+  using T = typename TestFixture::Type;
+
+  // Create a test character with skinned locators
+  const Character character = getSkinnedLocatorTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // Verify that the character has skinned locators
+  ASSERT_GT(character.skinnedLocators.size(), 0);
+
+  // Create the error function with Plane constraint
+  for (const auto vertexConstraintType :
+       {VertexConstraintType::Plane, VertexConstraintType::Position}) {
+    SkinnedLocatorTriangleErrorFunctionT<T> errorFunction(character, vertexConstraintType);
+
+    // Add constraints for some of the skinned locators
+    const T TEST_WEIGHT_VALUE = 5.0;
+    for (int i = 0; i < character.skinnedLocators.size(); ++i) {
+      // Create a simple triangle constraint
+      Eigen::Vector3i triangleIndices =
+          character.mesh->faces[uniform<int>(0, character.mesh->faces.size() - 1)];
+      auto triangleBaryCoords = uniform<Vector3<T>>(0, 1);
+      triangleBaryCoords /= triangleBaryCoords.sum();
+      T depth = 0.5;
+
+      errorFunction.addConstraint(i, triangleIndices, triangleBaryCoords, depth, TEST_WEIGHT_VALUE);
+    }
+
+    // Test with random parameters
+    for (size_t i = 0; i < 10; i++) {
+      ModelParametersT<T> parameters =
+          0.25 * uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
+      TEST_GRADIENT_AND_JACOBIAN(
+          T, &errorFunction, parameters, skeleton, transform, Eps<T>(0.03, 5e-4), true, true);
+    }
   }
 }
 
