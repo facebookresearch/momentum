@@ -159,9 +159,41 @@ ParameterSet ParameterTransformT<T>::getRigidParameters() const {
   return result;
 }
 
+namespace {
+
+Eigen::Index countNonNegative(const Eigen::VectorXi& v) {
+  Eigen::Index result = 0;
+  for (Eigen::Index i = 0; i < v.size(); ++i) {
+    if (v(i) >= 0) {
+      ++result;
+    }
+  }
+
+  return result;
+}
+
+} // namespace
+
+template <typename T>
+Eigen::Index ParameterTransformT<T>::numBlendShapeParameters() const {
+  return countNonNegative(blendShapeParameters);
+}
+
+template <typename T>
+Eigen::Index ParameterTransformT<T>::numFaceExpressionParameters() const {
+  return countNonNegative(faceExpressionParameters);
+}
+
+template <typename T>
+Eigen::Index ParameterTransformT<T>::numSkinnedLocatorParameters() const {
+  // 3 parameters for each (x,y,z).
+  return 3 * countNonNegative(skinnedLocatorParameters);
+}
+
 template <typename T>
 ParameterSet ParameterTransformT<T>::getPoseParameters() const {
-  return ~getScalingParameters() & ~getBlendShapeParameters() & ~getFaceExpressionParameters();
+  return ~getScalingParameters() & ~getBlendShapeParameters() & ~getFaceExpressionParameters() &
+      ~getSkinnedLocatorParameters();
 }
 
 template <typename T>
@@ -322,6 +354,37 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
     }
   }
 
+  paramTransformNew.skinnedLocatorParameters =
+      Eigen::VectorXi::Constant(paramTransformOld.skinnedLocatorParameters.size(), -1);
+  for (Eigen::Index iSkinnedLocator = 0;
+       iSkinnedLocator < paramTransformOld.skinnedLocatorParameters.size();
+       ++iSkinnedLocator) {
+    auto paramOld = paramTransformOld.skinnedLocatorParameters(iSkinnedLocator);
+    if (paramOld < 0) {
+      continue;
+    }
+
+    bool anyMapped = false;
+    for (int k = 0; k < 3; ++k) {
+      anyMapped = anyMapped || (oldParamToNewParam[paramOld + k] != kInvalidIndex);
+    }
+
+    if (anyMapped) {
+      auto paramNew = oldParamToNewParam[paramOld];
+      for (int k = 0; k < 3; ++k) {
+        if (oldParamToNewParam[paramOld + k] != paramNew + k) {
+          throw std::runtime_error(fmt::format(
+              "When mapping skinned locator parameters, must retain all 3 parameters for each locator. Locator {} is missing parameter {} ({}).",
+              iSkinnedLocator,
+              paramOld + k,
+              paramTransformOld.name[paramOld + k]));
+        }
+      }
+
+      paramTransformNew.skinnedLocatorParameters(iSkinnedLocator) = gsl::narrow_cast<int>(paramNew);
+    }
+  }
+
   for (const auto& paramSetOld : paramTransformOld.parameterSets) {
     ParameterSet paramSetNew;
     paramSetNew.reset();
@@ -416,6 +479,20 @@ ParameterSet ParameterTransformT<T>::getBlendShapeParameters() const {
 }
 
 template <typename T>
+ParameterSet ParameterTransformT<T>::getSkinnedLocatorParameters() const {
+  ParameterSet result;
+  for (Eigen::Index i = 0; i < skinnedLocatorParameters.size(); ++i) {
+    if (skinnedLocatorParameters(i) >= 0) {
+      for (int k = 0; k < 3; ++k) {
+        result.set(skinnedLocatorParameters(i) + k);
+      }
+    }
+  }
+
+  return result;
+}
+
+template <typename T>
 ParameterSet ParameterTransformT<T>::getFaceExpressionParameters() const {
   ParameterSet result;
   for (Eigen::Index i = 0; i < faceExpressionParameters.size(); ++i) {
@@ -470,6 +547,50 @@ std::tuple<ParameterTransform, ParameterLimits> addFaceExpressionParameters(
     paramTransform.name.push_back(oss.str());
   }
 
+  paramTransform.transform.conservativeResize(
+      paramTransform.transform.rows(), paramTransform.name.size());
+  paramTransform.transform.makeCompressed();
+
+  return {paramTransform, paramLimits};
+}
+
+std::tuple<ParameterTransform, ParameterLimits> addSkinnedLocatorParameters(
+    ParameterTransform paramTransform,
+    ParameterLimits paramLimits,
+    const std::vector<bool>& activeLocators,
+    const std::vector<std::string>& locatorNames) {
+  // First, strip out any existing blend shape parameters, to make sure this
+  // operation is idempotent.
+  std::tie(paramTransform, paramLimits) = subsetParameterTransform(
+      paramTransform, paramLimits, ~paramTransform.getSkinnedLocatorParameters());
+
+  const auto nLocators = activeLocators.size();
+  MT_CHECK(locatorNames.empty() || locatorNames.size() == nLocators);
+  paramTransform.skinnedLocatorParameters.resize(nLocators);
+  paramTransform.skinnedLocatorParameters.setConstant(-1);
+
+  ParameterSet paramSet;
+
+  // Now add in the additional parameters:
+  for (size_t iLocator = 0; iLocator < activeLocators.size(); ++iLocator) {
+    if (!activeLocators[iLocator]) {
+      continue;
+    }
+
+    paramTransform.skinnedLocatorParameters(iLocator) = (int)paramTransform.name.size();
+
+    auto locatorName =
+        iLocator < locatorNames.size() ? locatorNames[iLocator] : std::to_string(iLocator);
+    std::array<const char*, 3> dirNames{"x", "y", "z"};
+    for (const auto& d : dirNames) {
+      paramSet.set(paramTransform.name.size());
+      std::ostringstream oss;
+      oss << "locator_" << locatorName << "_" << d;
+      paramTransform.name.push_back(oss.str());
+    }
+  }
+
+  paramTransform.parameterSets["skinnedLocators"] = paramSet;
   paramTransform.transform.conservativeResize(
       paramTransform.transform.rows(), paramTransform.name.size());
   paramTransform.transform.makeCompressed();
