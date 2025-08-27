@@ -1529,10 +1529,13 @@ The resulting shape is equal to the base shape plus a linear combination of the 
           &mm::Locator::limitOrigin,
           "Defines how close an unlocked locator should stay to it's original position")
       .def("__repr__", [](const mm::Locator& l) {
-        std::ostringstream oss;
-        oss << "[" << l.name << "; parent: " << l.parent
-            << "; offset: " << l.offset.transpose() << "]";
-        return oss.str();
+        return fmt::format(
+            "Locator(name={}, parent={}, offset=[{}, {}, {}])",
+            l.name,
+            l.parent,
+            l.offset.x(),
+            l.offset.y(),
+            l.offset.z());
       });
 
   // ==============================================>>>>>>> REPLACE
@@ -1613,10 +1616,13 @@ The resulting shape is equal to the base shape plus a linear combination of the 
           &mm::SkinnedLocator::weight,
           "Influence weight of this locator when used in constraints.")
       .def("__repr__", [](const mm::SkinnedLocator& l) {
-        std::ostringstream oss;
-        oss << "[" << l.name << "; position: " << l.position.transpose()
-            << "; weight: " << l.weight << "]";
-        return oss.str();
+        return fmt::format(
+            "SkinnedLocator(name={}, position=[{}, {}, {}], weight={})",
+            l.name,
+            l.position.x(),
+            l.position.y(),
+            l.position.z(),
+            l.weight);
       });
 
   parameterLimitClass
