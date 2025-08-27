@@ -162,30 +162,36 @@ $(document).ready(function(){initNavTree('skinning__weight__iterator_8h_source.h
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <a class="code hl_class" href="classmomentum_1_1SkinningWeightIteratorT.html">SkinningWeightIteratorT</a>(</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>      <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character,</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshT&lt;T&gt;</a>&amp; restMesh,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshT&lt;T&gt;</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">restMesh</a>,</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>      <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SkeletonStateT&lt;T&gt;</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelState</a>,</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>      <span class="keywordtype">int</span> vertexIndex);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmomentum_1_1SkinningWeightIteratorT.html#ab712e5ce55b926ec6e50ee9a3a091845">finished</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="comment">// Returns the tuple &lt;parent bone index, bone weight, vertex position in world space wrt the</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="comment">// current bone&gt;</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  std::tuple&lt;size_t, T, Eigen::Vector3&lt;T&gt;&gt; <a class="code hl_function" href="classmomentum_1_1SkinningWeightIteratorT.html#a87314123cc607d9165067bd572dc0d93">next</a>();</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keywordtype">void</span> checkInvariants();</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <a class="code hl_class" href="classmomentum_1_1SkinningWeightIteratorT.html">SkinningWeightIteratorT</a>(</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>      <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>      <span class="keyword">const</span> <a class="code hl_struct" href="structmomentum_1_1SkinnedLocator.html">SkinnedLocator</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>,</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      <span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locatorPosition</a>,</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SkeletonStateT&lt;T&gt;</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelState</a>);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  [[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nodiscard</a>]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classmomentum_1_1SkinningWeightIteratorT.html#ab712e5ce55b926ec6e50ee9a3a091845">finished</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  std::array&lt;BoneWeightT&lt;T&gt;, kMaxSkinJoints&gt; boneWeights;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="keywordtype">int</span> nBoneWeights;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshT&lt;T&gt;</a>&amp; restMesh;</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>};</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="comment">// Returns the tuple &lt;parent bone index, bone weight, vertex position in world space wrt the</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="comment">// current bone&gt;</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  std::tuple&lt;size_t, T, Eigen::Vector3&lt;T&gt;&gt; <a class="code hl_function" href="classmomentum_1_1SkinningWeightIteratorT.html#a87314123cc607d9165067bd572dc0d93">next</a>();</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="keywordtype">void</span> checkInvariants();</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  std::array&lt;BoneWeightT&lt;T&gt;, kMaxSkinJoints&gt; boneWeights;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keywordtype">int</span> nBoneWeights;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>};</div>
 </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter_2fwd_8h_html"><div class="ttname"><a href="character_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1SkinningWeightIteratorT_html"><div class="ttname"><a href="classmomentum_1_1SkinningWeightIteratorT.html">momentum::SkinningWeightIteratorT</a></div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8h_source.html#l00052">skinning_weight_iterator.h:52</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1SkinningWeightIteratorT_html_a87314123cc607d9165067bd572dc0d93"><div class="ttname"><a href="classmomentum_1_1SkinningWeightIteratorT.html#a87314123cc607d9165067bd572dc0d93">momentum::SkinningWeightIteratorT::next</a></div><div class="ttdeci">std::tuple&lt; size_t, T, Eigen::Vector3&lt; T &gt; &gt; next()</div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8cpp_source.html#l00059">skinning_weight_iterator.cpp:59</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1SkinningWeightIteratorT_html_ab712e5ce55b926ec6e50ee9a3a091845"><div class="ttname"><a href="classmomentum_1_1SkinningWeightIteratorT.html#ab712e5ce55b926ec6e50ee9a3a091845">momentum::SkinningWeightIteratorT::finished</a></div><div class="ttdeci">bool finished() const</div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8cpp_source.html#l00052">skinning_weight_iterator.cpp:52</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkinningWeightIteratorT_html_a87314123cc607d9165067bd572dc0d93"><div class="ttname"><a href="classmomentum_1_1SkinningWeightIteratorT.html#a87314123cc607d9165067bd572dc0d93">momentum::SkinningWeightIteratorT::next</a></div><div class="ttdeci">std::tuple&lt; size_t, T, Eigen::Vector3&lt; T &gt; &gt; next()</div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8cpp_source.html#l00086">skinning_weight_iterator.cpp:86</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1SkinningWeightIteratorT_html_ab712e5ce55b926ec6e50ee9a3a091845"><div class="ttname"><a href="classmomentum_1_1SkinningWeightIteratorT.html#ab712e5ce55b926ec6e50ee9a3a091845">momentum::SkinningWeightIteratorT::finished</a></div><div class="ttdeci">bool finished() const</div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8cpp_source.html#l00079">skinning_weight_iterator.cpp:79</a></div></div>
 <div class="ttc" id="amath_2fwd_8h_html"><div class="ttname"><a href="math_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
@@ -198,13 +204,14 @@ $(document).ready(function(){initNavTree('skinning__weight__iterator_8h_source.h
 <div class="ttc" id="astructmomentum_1_1BoneWeightT_html_a9c2bd4880207ddcc011873c5c2b227ef"><div class="ttname"><a href="structmomentum_1_1BoneWeightT.html#a9c2bd4880207ddcc011873c5c2b227ef">momentum::BoneWeightT::weightedWorldSpacePoint</a></div><div class="ttdeci">Eigen::Vector3&lt; T &gt; weightedWorldSpacePoint</div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8h_source.html#l00020">skinning_weight_iterator.h:20</a></div></div>
 <div class="ttc" id="astructmomentum_1_1BoneWeightT_html_ad0c559537ea98ffb3163d3f162603bc1"><div class="ttname"><a href="structmomentum_1_1BoneWeightT.html#ad0c559537ea98ffb3163d3f162603bc1">momentum::BoneWeightT::operator+=</a></div><div class="ttdeci">BoneWeightT&lt; T &gt; &amp; operator+=(const BoneWeightT&lt; T &gt; &amp;rhs)</div><div class="ttdef"><b>Definition</b> <a href="skinning__weight__iterator_8h_source.html#l00030">skinning_weight_iterator.h:30</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
+<div class="ttc" id="astructmomentum_1_1SkinnedLocator_html"><div class="ttname"><a href="structmomentum_1_1SkinnedLocator.html">momentum::SkinnedLocator</a></div><div class="ttdoc">A skinned locator is a locator which can be attached to multiple bones.</div><div class="ttdef"><b>Definition</b> <a href="skinned__locator_8h_source.html#l00028">skinned_locator.h:28</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skinning__weight__iterator_8h.html">skinning_weight_iterator.h</a></li>
-    <li class="footer">Generated on Wed Aug 27 2025 05:34:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Aug 27 2025 07:46:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
