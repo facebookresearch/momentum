@@ -18,6 +18,7 @@
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
 #include "momentum/character_sequence_solver/state_sequence_error_function.h"
+#include "momentum/character_sequence_solver/vertex_sequence_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/random.h"
@@ -300,6 +301,50 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
     testGradientAndJacobian<double>(
         errorFunction, zeroModelParameters(character, 2), skeleton, transform);
     for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(
+          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  // create constraints
+  VertexSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Motion Test");
+
+    // Add some vertex velocity constraints
+    errorFunction.addConstraint(0, 1.0, Eigen::Vector3d(0.1, 0.0, 0.0)); // vertex 0 moving in x
+    errorFunction.addConstraint(1, 2.0, Eigen::Vector3d(0.0, 0.1, 0.0)); // vertex 1 moving in y
+    errorFunction.addConstraint(2, 0.5, Eigen::Vector3d(0.0, 0.0, 0.1)); // vertex 2 moving in z
+
+    testGradientAndJacobian<double>(
+        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(
+          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+    }
+  }
+
+  {
+    SCOPED_TRACE("Zero Velocity Test");
+    // Test with zero target velocities
+    errorFunction.clearConstraints();
+    errorFunction.addConstraint(0, 1.0, Eigen::Vector3d::Zero());
+    errorFunction.addConstraint(1, 1.0, Eigen::Vector3d::Zero());
+
+    testGradientAndJacobian<double>(
+        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+
+    for (size_t i = 0; i < 5; i++) {
       auto parameters = randomModelParameters(character, 2);
       testGradientAndJacobian<double>(
           errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);

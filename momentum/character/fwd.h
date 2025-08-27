@@ -33,6 +33,15 @@ using BlendShapeBase_const_p = ::std::shared_ptr<const BlendShapeBase>;
 using BlendShapeBase_const_u = ::std::unique_ptr<const BlendShapeBase>;
 using BlendShapeBase_const_w = ::std::weak_ptr<const BlendShapeBase>;
 
+struct Locator;
+
+using Locator_p = ::std::shared_ptr<Locator>;
+using Locator_u = ::std::unique_ptr<Locator>;
+using Locator_w = ::std::weak_ptr<Locator>;
+using Locator_const_p = ::std::shared_ptr<const Locator>;
+using Locator_const_u = ::std::unique_ptr<const Locator>;
+using Locator_const_w = ::std::weak_ptr<const Locator>;
+
 struct PoseShape;
 
 using PoseShape_p = ::std::shared_ptr<PoseShape>;

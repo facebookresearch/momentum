@@ -304,6 +304,7 @@ character_sequence_solver_public_headers = [
     "character_sequence_solver/sequence_solver_function.h",
     "character_sequence_solver/sequence_solver.h",
     "character_sequence_solver/state_sequence_error_function.h",
+    "character_sequence_solver/vertex_sequence_error_function.h",
 ]
 
 character_sequence_solver_sources = [
@@ -313,6 +314,7 @@ character_sequence_solver_sources = [
     "character_sequence_solver/sequence_solver_function.cpp",
     "character_sequence_solver/sequence_solver.cpp",
     "character_sequence_solver/state_sequence_error_function.cpp",
+    "character_sequence_solver/vertex_sequence_error_function.cpp",
 ]
 
 character_sequence_solver_test_sources = [
