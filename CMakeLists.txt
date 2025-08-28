@@ -60,6 +60,7 @@ include(GNUInstallDirs)
 
 mt_option(BUILD_SHARED_LIBS "Build as shared libraries" ON)
 mt_option(MOMENTUM_BUILD_WITH_FBXSDK "Build with IO FBX" OFF)
+mt_option(MOMENTUM_BUILD_WITH_USD "Build with IO USD" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
@@ -106,6 +107,12 @@ find_package(openfbx CONFIG REQUIRED)
 find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
+
+# USD support (optional)
+if(MOMENTUM_BUILD_WITH_USD)
+  find_package(pxr CONFIG REQUIRED)
+  find_package(TBB CONFIG REQUIRED)
+endif()
 
 if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
   find_package(rerun_sdk CONFIG REQUIRED)
@@ -449,6 +456,36 @@ mt_library(
     ezc3d
 )
 
+# USD I/O library (optional)
+if(MOMENTUM_BUILD_WITH_USD)
+  set(io_usd_sources_var io_usd_sources)
+  set(io_usd_private_link_libraries
+    pxr::usd
+    pxr::usdGeom
+    pxr::usdSkel
+    pxr::sdf
+    pxr::tf
+    TBB::tbb
+  )
+else()
+  set(io_usd_sources_var io_usd_sources_unsupported)
+  set(io_usd_private_link_libraries )
+endif()
+
+mt_library(
+  NAME io_usd
+  HEADERS_VARS
+    io_usd_public_headers
+  SOURCES_VARS
+    ${io_usd_sources_var}
+  PUBLIC_LINK_LIBRARIES
+    character
+    io_common
+    io_skeleton
+  PRIVATE_LINK_LIBRARIES
+    ${io_usd_private_link_libraries}
+)
+
 mt_library(
   NAME io
   HEADERS_VARS io_public_headers
@@ -462,6 +499,7 @@ mt_library(
     io_marker
     io_shape
     io_skeleton
+    io_usd
 )
 
 mt_library(
@@ -739,6 +777,20 @@ if(MOMENTUM_BUILD_TESTING)
       io_test_helper
   )
 
+  if(MOMENTUM_BUILD_WITH_USD)
+    mt_test(
+      NAME io_usd_test
+      SOURCES_VARS io_usd_test_sources
+      LINK_LIBRARIES
+        character_test_helpers
+        io_test_helper
+        io_usd
+        Python3::Python
+      ENV
+        "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
+    )
+  endif()
+
   mt_test(
     NAME io_legacy_json_test
     SOURCES_VARS io_legacy_json_test_sources
@@ -809,6 +861,18 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
       rerun_sdk
   )
+
+  if(MOMENTUM_BUILD_WITH_USD)
+    mt_executable(
+      NAME usd_viewer
+      SOURCES_VARS usd_viewer_sources
+      LINK_LIBRARIES
+        io_usd
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
+  endif()
 
   mt_executable(
     NAME animate_shapes
