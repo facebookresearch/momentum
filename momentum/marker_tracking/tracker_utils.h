@@ -26,6 +26,17 @@ momentum::Character createLocatorCharacter(
     const momentum::Character& sourceCharacter,
     const std::string& prefix);
 
+/// Convert locators to skinned locators by finding the closest point on the mesh surface that
+/// matches the correct bone index and using the skinned weights from that point.  Does not add
+/// parameters for the skinned locators, however, that should be a separate step if you are planning
+/// to solve for their locations.
+/// @param sourceCharacter Character with locators to convert
+/// @param maxDistance Maximum distance to search for the closest point on the mesh surface.  If the
+/// locator is further than this distance, it will not be converted.
+momentum::Character locatorsToSkinnedLocators(
+    const momentum::Character& sourceCharacter,
+    float maxDistance = 3.0f);
+
 // Extract locator offsets from a LocatorCharacter for a normal Character given input calibrated
 // parameters
 momentum::LocatorList extractLocatorsFromCharacter(
