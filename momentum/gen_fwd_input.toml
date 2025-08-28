@@ -114,6 +114,7 @@ template_classes = [
     "SequenceSolver",
     "SequenceSolverFunction",
     "StateSequenceErrorFunction",
+    "VertexSequenceErrorFunction",
 ]
 
 [[fwd]]

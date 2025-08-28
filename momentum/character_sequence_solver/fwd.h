@@ -178,4 +178,23 @@ using StateSequenceErrorFunctiond_const_p = ::std::shared_ptr<const StateSequenc
 using StateSequenceErrorFunctiond_const_u = ::std::unique_ptr<const StateSequenceErrorFunctiond>;
 using StateSequenceErrorFunctiond_const_w = ::std::weak_ptr<const StateSequenceErrorFunctiond>;
 
+template <typename T>
+class VertexSequenceErrorFunctionT;
+using VertexSequenceErrorFunction = VertexSequenceErrorFunctionT<float>;
+using VertexSequenceErrorFunctiond = VertexSequenceErrorFunctionT<double>;
+
+using VertexSequenceErrorFunction_p = ::std::shared_ptr<VertexSequenceErrorFunction>;
+using VertexSequenceErrorFunction_u = ::std::unique_ptr<VertexSequenceErrorFunction>;
+using VertexSequenceErrorFunction_w = ::std::weak_ptr<VertexSequenceErrorFunction>;
+using VertexSequenceErrorFunction_const_p = ::std::shared_ptr<const VertexSequenceErrorFunction>;
+using VertexSequenceErrorFunction_const_u = ::std::unique_ptr<const VertexSequenceErrorFunction>;
+using VertexSequenceErrorFunction_const_w = ::std::weak_ptr<const VertexSequenceErrorFunction>;
+
+using VertexSequenceErrorFunctiond_p = ::std::shared_ptr<VertexSequenceErrorFunctiond>;
+using VertexSequenceErrorFunctiond_u = ::std::unique_ptr<VertexSequenceErrorFunctiond>;
+using VertexSequenceErrorFunctiond_w = ::std::weak_ptr<VertexSequenceErrorFunctiond>;
+using VertexSequenceErrorFunctiond_const_p = ::std::shared_ptr<const VertexSequenceErrorFunctiond>;
+using VertexSequenceErrorFunctiond_const_u = ::std::unique_ptr<const VertexSequenceErrorFunctiond>;
+using VertexSequenceErrorFunctiond_const_w = ::std::weak_ptr<const VertexSequenceErrorFunctiond>;
+
 } // namespace momentum
