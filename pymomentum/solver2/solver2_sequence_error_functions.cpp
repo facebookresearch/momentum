@@ -41,6 +41,12 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
                  const std::optional<py::array_t<float>>& jointPositionWeights,
                  const std::optional<py::array_t<float>>&
                      jointRotationWeights) {
+                validateWeight(weight, "weight");
+                validateWeight(positionWeight, "position_weight");
+                validateWeight(rotationWeight, "rotation_weight");
+                validateWeights(jointPositionWeights, "joint_position_weights");
+                validateWeights(jointRotationWeights, "joint_rotation_weights");
+
                 auto result =
                     std::make_shared<mm::StateSequenceErrorFunction>(character);
                 result->setWeight(weight);
@@ -115,6 +121,9 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
           py::init<>([](const mm::Character& character,
                         float weight,
                         const std::optional<Eigen::VectorXf>& targetWeights) {
+            validateWeight(weight, "weight");
+            validateWeights(targetWeights, "target_weights");
+
             auto result =
                 std::make_shared<mm::ModelParametersSequenceErrorFunction>(
                     character);
@@ -185,6 +194,7 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
           })
       .def(
           py::init<>([](const mm::Character& character, float weight) {
+            validateWeight(weight, "weight");
             auto result =
                 std::make_shared<mm::VertexSequenceErrorFunctionT<float>>(
                     character);
@@ -211,6 +221,7 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
              const Eigen::Vector3f& targetVelocity) {
             validateVertexIndex(
                 vertexIndex, "vertex_index", self.getCharacter());
+            validateWeight(weight, "weight");
             self.addConstraint(vertexIndex, weight, targetVelocity);
           },
           R"(Adds a vertex velocity constraint to the error function.

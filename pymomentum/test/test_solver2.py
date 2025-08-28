@@ -1447,3 +1447,68 @@ class TestSolver(unittest.TestCase):
         repr_str = repr(vertex_sequence_error)
         self.assertIn("VertexSequenceErrorFunction", repr_str)
         self.assertIn("num_constraints=2", repr_str)
+
+    def test_weight_validation(self) -> None:
+        """Test that error functions throw ValueError when negative weights are passed."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        # Test scalar weight validation in constructor
+        with self.assertRaises(ValueError) as context:
+            pym_solver2.PositionErrorFunction(character, weight=-1.0)
+        self.assertIn("weight must be non-negative", str(context.exception))
+
+        # Test scalar weight validation in property setter
+        pos_error = pym_solver2.PositionErrorFunction(character, weight=1.0)
+        with self.assertRaises(ValueError) as context:
+            pos_error.weight = -0.5
+        self.assertIn("weight must be non-negative", str(context.exception))
+
+        # Test scalar weight validation in add_constraint
+        with self.assertRaises(ValueError) as context:
+            pos_error.add_constraint(
+                parent=0,
+                target=np.array([1.0, 0.0, 0.0]),
+                weight=-2.0,
+            )
+        self.assertIn("weight must be non-negative", str(context.exception))
+
+        # Test array weight validation in add_constraints
+        with self.assertRaises(ValueError) as context:
+            pos_error.add_constraints(
+                parent=np.array([0, 1], dtype=np.int32),
+                target=np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], dtype=np.float32),
+                weight=np.array(
+                    [1.0, -1.5], dtype=np.float32
+                ),  # Second weight is negative
+            )
+        self.assertIn("all weights must be non-negative", str(context.exception))
+        self.assertIn("index 1", str(context.exception))
+
+        # Test array weight validation in ModelParametersErrorFunction
+        with self.assertRaises(ValueError) as context:
+            pym_solver2.ModelParametersErrorFunction(
+                character,
+                weights=np.array([1.0, -0.1, 2.0]),  # Second weight is negative
+            )
+        self.assertIn("all weights must be non-negative", str(context.exception))
+        self.assertIn("index 1", str(context.exception))
+
+        # Test that valid weights work correctly
+        pos_error_valid = pym_solver2.PositionErrorFunction(character, weight=2.0)
+        self.assertEqual(pos_error_valid.weight, 2.0)
+
+        pos_error_valid.add_constraint(
+            parent=0,
+            target=np.array([1.0, 0.0, 0.0]),
+            weight=1.5,
+        )
+        self.assertEqual(len(pos_error_valid.constraints), 1)
+
+        pos_error_valid.add_constraints(
+            parent=np.array([1, 2], dtype=np.int32),
+            target=np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], dtype=np.float32),
+            weight=np.array([0.5, 2.5], dtype=np.float32),
+        )
+        self.assertEqual(len(pos_error_valid.constraints), 3)

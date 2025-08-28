@@ -95,6 +95,20 @@ void validateVertexIndex(
     const char* name,
     const momentum::Character& character);
 
+void validateWeight(float weight, const char* name);
+
+void validateWeights(const pybind11::array_t<float>& weights, const char* name);
+
+void validateWeights(
+    const std::optional<pybind11::array_t<float>>& weights,
+    const char* name);
+
+void validateWeights(const Eigen::VectorXf& weights, const char* name);
+
+void validateWeights(
+    const std::optional<Eigen::VectorXf>& weights,
+    const char* name);
+
 void validateErrorFunctionMatchesCharacter(
     const momentum::SkeletonSolverFunction& solverFunction,
     const momentum::SkeletonErrorFunction& errorFunction);
