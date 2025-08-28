@@ -66,6 +66,7 @@ config = { cmd = """
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
+        -DMOMENTUM_BUILD_WITH_USD=$MOMENTUM_BUILD_WITH_USD \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -76,7 +77,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Release build" }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_BUILD_WITH_USD = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Release build" }
 config_dev = { cmd = """
     cmake \
         -S . \
@@ -85,6 +86,7 @@ config_dev = { cmd = """
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
+        -DMOMENTUM_BUILD_WITH_USD=$MOMENTUM_BUILD_WITH_USD \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -95,7 +97,7 @@ config_dev = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Debug build" }
+    """, env = { MOMENTUM_BUILD_WITH_FBXSDK = "OFF", MOMENTUM_BUILD_WITH_USD = "ON", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Debug build" }
 build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target all", depends-on = [
     "config",
 ], description = "Build Release version" }
@@ -132,6 +134,9 @@ glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/glb_viewer", depe
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/urdf_viewer", depends-on = [
     "build",
 ], description = "Run URDF file viewer" }
+usd_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/usd_viewer", depends-on = [
+    "build",
+], description = "Run USD file viewer" }
 process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/process_markers_app", depends-on = [
     "build",
 ], description = "Run marker processing application" }
@@ -189,6 +194,7 @@ config = { cmd = """
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
+        -DMOMENTUM_BUILD_WITH_USD=OFF \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \

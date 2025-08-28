@@ -18,10 +18,13 @@
 
 #include <pxr/base/gf/matrix4d.h>
 #include <pxr/base/gf/vec3f.h>
+#include <pxr/base/plug/plugin.h>
+#include <pxr/base/plug/registry.h>
 #include <pxr/base/tf/diagnosticMgr.h>
 #include <pxr/base/tf/errorMark.h>
 #include <pxr/base/vt/array.h>
 #include <pxr/pxr.h>
+#include <pxr/usd/ar/resolver.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
 #include <pxr/usd/usdGeom/mesh.h>
@@ -36,7 +39,12 @@
 #include <tbb/global_control.h>
 #include <tbb/task_scheduler_init.h>
 
+// Conditional include for internal Meta environment vs open source
+// In open source builds, this header won't exist and MOMENTUM_WITH_USD_PLUGIN_INIT will be
+// undefined
+#ifdef MOMENTUM_WITH_USD_PLUGIN_INIT
 #include <UsdPluginInit.h>
+#endif
 
 #include <cstdio>
 #include <cstdlib>
@@ -83,7 +91,9 @@ std::mutex g_usdInitMutex;
 std::mutex g_usdOperationMutex;
 bool g_usdInitialized = false;
 std::unique_ptr<ResolverWarningsSuppressor> g_suppressor;
+#ifdef MOMENTUM_WITH_USD_PLUGIN_INIT
 std::unique_ptr<UsdPluginInit> g_usdPluginInit;
+#endif
 std::unique_ptr<tbb::global_control> g_tbbControl;
 
 void initializeUsdWithSuppressedWarnings() {
@@ -99,6 +109,8 @@ void initializeUsdWithSuppressedWarnings() {
   g_suppressor = std::make_unique<ResolverWarningsSuppressor>();
   TfDiagnosticMgr::GetInstance().AddDelegate(g_suppressor.get());
 
+#ifdef MOMENTUM_WITH_USD_PLUGIN_INIT
+  // Internal Meta environment: Use UsdPluginInit for embedded plugins
   auto tempDir = filesystem::temp_directory_path();
 
   // Try a few fixed paths to avoid accumulating many plugin folders
@@ -122,6 +134,48 @@ void initializeUsdWithSuppressedWarnings() {
   } else {
     g_usdPluginInit = std::make_unique<UsdPluginInit>();
   }
+#else
+  // Open source environment: Use standard USD plugin discovery
+  // Set the preferred resolver to ensure ArDefaultResolver is used
+  ArSetPreferredResolver("ArDefaultResolver");
+
+  // Force plugin discovery from standard USD installation paths
+  // and PXR_PLUGINPATH_NAME environment variable
+  auto& pluginRegistry = PlugRegistry::GetInstance();
+  pluginRegistry.RegisterPlugins(std::vector<std::string>{});
+
+  // Check for optional format plugin support
+  auto allPlugins = pluginRegistry.GetAllPlugins();
+  bool hasFbxSupport = false;
+  bool hasGltfSupport = false;
+
+  for (const auto& plugin : allPlugins) {
+    std::string pluginName = plugin->GetName();
+    if (pluginName.find("usdFbx") != std::string::npos) {
+      hasFbxSupport = true;
+    }
+    if (pluginName.find("usdGltf") != std::string::npos) {
+      hasGltfSupport = true;
+    }
+  }
+
+  // Log initialization status with helpful guidance
+  if (!hasFbxSupport || !hasGltfSupport) {
+    std::string missingFormats;
+    if (!hasFbxSupport)
+      missingFormats += "FBX ";
+    if (!hasGltfSupport)
+      missingFormats += "GLTF ";
+
+    MT_LOGI(
+        "USD I/O initialized with ArDefaultResolver. Missing optional format plugins: {}. "
+        "Core USD formats (.usd, .usda, .usdc) are fully supported. "
+        "To enable additional formats, install USD with format plugins and set PXR_PLUGINPATH_NAME.",
+        missingFormats);
+  } else {
+    MT_LOGI("USD I/O initialized with full format support (USD, FBX, GLTF).");
+  }
+#endif
 
   g_usdInitialized = true;
 }
