@@ -12,6 +12,7 @@
 #include <momentum/math/mesh.h>
 
 #include <dispenso/parallel_for.h> // @manual
+#include <fmt/format.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -115,16 +116,14 @@ PYBIND11_MODULE(solver, m) {
           &SolverOptions::lineSearch,
           "Whether or not to use a line search; note that only the QR solver actually uses this (default: true).")
       .def("__repr__", [](const SolverOptions& options) {
-        std::ostringstream oss;
-        oss << "SolverOptions(";
-        oss << "linear_solver=LinearSolverType."
-            << toString(options.linearSolverType) << ", ";
-        oss << "levmar_lambda=" << options.levmar_lambda << ", ";
-        oss << "min_iter=" << options.minIter << ", ";
-        oss << "max_iter=" << options.maxIter << ", ";
-        oss << "threshold=" << options.threshold << ", ";
-        oss << "line_search=" << (options.lineSearch ? "True" : "False") << ")";
-        return oss.str();
+        return fmt::format(
+            "SolverOptions(linear_solver=LinearSolverType.{}, levmar_lambda={}, min_iter={}, max_iter={}, threshold={}, line_search={})",
+            toString(options.linearSolverType),
+            options.levmar_lambda,
+            options.minIter,
+            options.maxIter,
+            options.threshold,
+            (options.lineSearch ? "True" : "False"));
       });
 
   m.def(

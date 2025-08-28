@@ -15,6 +15,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <fmt/format.h>
+#include <sstream>
 #include <string>
 
 namespace py = pybind11;
@@ -33,7 +35,7 @@ std::string vectorToString(const Eigen::VectorXf& vec) {
       }
     }
     if (vec.size() > 3) {
-      ss << ", ...";
+      ss << ", ... (" << vec.size() << " total)";
     }
     ss << "]";
   } else {
@@ -69,12 +71,12 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def(
           "__repr__",
           [](const momentum::BaseConfig& self) {
-            std::ostringstream ss;
-            ss << "BaseConfig(min_vis_percent=" << self.minVisPercent
-               << ", loss_alpha=" << self.lossAlpha
-               << ", max_iter=" << self.maxIter
-               << ", debug=" << boolToString(self.debug) << ")";
-            return ss.str();
+            return fmt::format(
+                "BaseConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={})",
+                self.minVisPercent,
+                self.lossAlpha,
+                self.maxIter,
+                boolToString(self.debug));
           })
       .def(
           py::init<float, float, size_t, bool>(),
@@ -106,21 +108,19 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def(
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
-            std::ostringstream ss;
-            ss << "CalibrationConfig(min_vis_percent=" << self.minVisPercent
-               << ", loss_alpha=" << self.lossAlpha
-               << ", max_iter=" << self.maxIter
-               << ", debug=" << boolToString(self.debug)
-               << ", calib_frames=" << self.calibFrames
-               << ", major_iter=" << self.majorIter
-               << ", global_scale_only=" << boolToString(self.globalScaleOnly)
-               << ", locators_only=" << boolToString(self.locatorsOnly)
-               << ", greedy_sampling=" << self.greedySampling
-               << ", enforce_floor_in_first_frame="
-               << boolToString(self.enforceFloorInFirstFrame)
-               << ", first_frame_pose_constraint_set=\""
-               << self.firstFramePoseConstraintSet << "\"" << ")";
-            return ss.str();
+            return fmt::format(
+                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\")",
+                self.minVisPercent,
+                self.lossAlpha,
+                self.maxIter,
+                boolToString(self.debug),
+                self.calibFrames,
+                self.majorIter,
+                boolToString(self.globalScaleOnly),
+                boolToString(self.locatorsOnly),
+                self.greedySampling,
+                boolToString(self.enforceFloorInFirstFrame),
+                self.firstFramePoseConstraintSet);
           })
       .def(
           py::init<
@@ -183,16 +183,15 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def(
           "__repr__",
           [](const momentum::TrackingConfig& self) {
-            std::ostringstream ss;
-            ss << "TrackingConfig(min_vis_percent=" << self.minVisPercent
-               << ", loss_alpha=" << self.lossAlpha
-               << ", max_iter=" << self.maxIter
-               << ", debug=" << boolToString(self.debug)
-               << ", smoothing=" << self.smoothing
-               << ", collision_error_weight=" << self.collisionErrorWeight
-               << ", smoothing_weights="
-               << vectorToString(self.smoothingWeights) << ")";
-            return ss.str();
+            return fmt::format(
+                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={})",
+                self.minVisPercent,
+                self.lossAlpha,
+                self.maxIter,
+                boolToString(self.debug),
+                self.smoothing,
+                self.collisionErrorWeight,
+                vectorToString(self.smoothingWeights));
           })
       .def(
           py::init<float, float, size_t, bool, float, float, Eigen::VectorXf>(),
@@ -225,20 +224,18 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def(
           "__repr__",
           [](const momentum::RefineConfig& self) {
-            std::ostringstream ss;
-            ss << "RefineConfig(min_vis_percent=" << self.minVisPercent
-               << ", loss_alpha=" << self.lossAlpha
-               << ", max_iter=" << self.maxIter
-               << ", debug=" << boolToString(self.debug)
-               << ", smoothing=" << self.smoothing
-               << ", collision_error_weight=" << self.collisionErrorWeight
-               << ", smoothing_weights="
-               << vectorToString(self.smoothingWeights)
-               << ", regularizer=" << self.regularizer
-               << ", calib_id=" << boolToString(self.calibId)
-               << ", calib_locators=" << boolToString(self.calibLocators)
-               << ")";
-            return ss.str();
+            return fmt::format(
+                "RefineConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={}, regularizer={}, calib_id={}, calib_locators={})",
+                self.minVisPercent,
+                self.lossAlpha,
+                self.maxIter,
+                boolToString(self.debug),
+                self.smoothing,
+                self.collisionErrorWeight,
+                vectorToString(self.smoothingWeights),
+                self.regularizer,
+                boolToString(self.calibId),
+                boolToString(self.calibLocators));
           })
       .def(
           py::init<
@@ -284,11 +281,11 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def(
           "__repr__",
           [](const momentum::ModelOptions& self) {
-            std::ostringstream ss;
-            ss << "ModelOptions(model=\"" << self.model << "\", parameters=\""
-               << self.parameters << "\", locators=\"" << self.locators
-               << "\")";
-            return ss.str();
+            return fmt::format(
+                "ModelOptions(model=\"{}\", parameters=\"{}\", locators=\"{}\")",
+                self.model,
+                self.parameters,
+                self.locators);
           })
       .def(py::init<
            const std::string&,
