@@ -450,6 +450,30 @@ It can be used to solve for shapes and pose simultaneously.
           },
           "Returns a new :class:`Character` with the collision geometry replaced.")
       .def(
+          "bake_blend_shape",
+          [](const mm::Character& c, const py::array_t<float>& blendWeights) {
+            // Convert array to BlendWeights
+            MT_THROW_IF(
+                blendWeights.ndim() != 1,
+                "blend_weights must be a 1D array, got {}D array",
+                blendWeights.ndim());
+
+            auto unchecked = blendWeights.unchecked<1>();
+
+            // Create BlendWeights from the array data
+            mm::BlendWeights weights(blendWeights.shape(0));
+            for (int k = 0; k < blendWeights.shape(0); ++k) {
+              weights.v(k) = unchecked(k);
+            }
+
+            return c.bakeBlendShape(weights);
+          },
+          R"(Returns a new :class:`Character` with blend shapes baked into the mesh.
+
+:param blend_weights: A 1D array of blend shape weights to apply.
+:return: A new :class:`Character` with the blend shapes baked into the mesh and blend shape parameters removed from the parameter transform.)",
+          py::arg("blend_weights"))
+      .def(
           "pose_mesh",
           &pymomentum::getPosedMesh,
           R"(Poses the mesh
