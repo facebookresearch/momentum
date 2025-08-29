@@ -259,6 +259,12 @@ PYBIND11_MODULE(geometry, m) {
           "Returns a new character with the parameter limits set to the passed-in limits.",
           py::arg("parameter_limits"))
       .def(
+          "clone",
+          [](const mm::Character& character) {
+            return mm::Character{character};
+          },
+          "Performs a deep-copy of the character.")
+      .def(
           "with_locators",
           [](const mm::Character& character,
              const momentum::LocatorList& locators,
