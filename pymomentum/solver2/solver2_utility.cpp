@@ -14,6 +14,7 @@
 #include <momentum/math/mesh.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
+#include <fmt/format.h>
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -80,18 +81,21 @@ void ArrayShapeValidator::validate(
     const std::vector<int>& expectedShape,
     const std::vector<std::string>& expectedNames) {
   if (array.ndim() != expectedShape.size()) {
-    throw std::runtime_error(
-        "Invalid shape for " + name + ": expected " +
-        getDimStr(expectedShape, expectedNames) + ", got " + getDimStr(array));
+    throw std::runtime_error(fmt::format(
+        "Invalid shape for {}: expected {}, got {}",
+        name,
+        getDimStr(expectedShape, expectedNames),
+        getDimStr(array)));
   }
 
   for (size_t i = 0; i < expectedShape.size(); ++i) {
     if (expectedShape[i] >= 0) {
       if (array.shape(i) != expectedShape[i]) {
-        throw std::runtime_error(
-            "Invalid shape for " + name + ": expected " +
-            getDimStr(expectedShape, expectedNames) + ", got " +
-            getDimStr(array));
+        throw std::runtime_error(fmt::format(
+            "Invalid shape for {}: expected {}, got {}",
+            name,
+            getDimStr(expectedShape, expectedNames),
+            getDimStr(array)));
       }
     } else if (expectedShape[i] < 0) {
       auto bindingIdx = expectedShape[i];
@@ -99,14 +103,15 @@ void ArrayShapeValidator::validate(
       if (itr == boundShapes_.end()) {
         boundShapes_.emplace(bindingIdx, array.shape(i));
       } else if (itr->second != array.shape(i)) {
-        throw std::runtime_error(
-            "Invalid shape for " + name + ": expected " +
-            getDimStr(expectedShape, expectedNames) + ", got " +
-            getDimStr(array));
+        throw std::runtime_error(fmt::format(
+            "Invalid shape for {}: expected {}, got {}",
+            name,
+            getDimStr(expectedShape, expectedNames),
+            getDimStr(array)));
       }
     }
   }
-};
+}
 
 mm::ParameterSet arrayToParameterSet(
     const py::array_t<bool>& array,
@@ -131,10 +136,10 @@ mm::ParameterSet arrayToParameterSet(
   }
 
   if (array.shape(0) != nParameters) {
-    throw std::runtime_error(
-        "Parameter set size does not match parameter transform, expected " +
-        std::to_string(nParameters) + " but got " +
-        std::to_string(array.shape(0)));
+    throw std::runtime_error(fmt::format(
+        "Parameter set size does not match parameter transform, expected {} but got {}",
+        nParameters,
+        array.shape(0)));
   }
 
   auto a = array.unchecked<1>();
@@ -150,15 +155,16 @@ Eigen::VectorXf arrayToVec(
     py::ssize_t expectedSize,
     const char* parameterName) {
   if (array.ndim() != 1) {
-    throw std::runtime_error(
-        "Expected a 1D array for " + std::string(parameterName) + "; got " +
-        getDimStr(array));
+    throw std::runtime_error(fmt::format(
+        "Expected a 1D array for {}; got {}", parameterName, getDimStr(array)));
   }
 
   if (expectedSize >= 0 && array.shape(0) != expectedSize) {
-    throw std::runtime_error(
-        "Invalid size for " + std::string(parameterName) + "; expected " +
-        std::to_string(expectedSize) + " but got " + getDimStr(array));
+    throw std::runtime_error(fmt::format(
+        "Invalid size for {}; expected {} but got {}",
+        parameterName,
+        expectedSize,
+        getDimStr(array)));
   }
 
   auto a = array.unchecked<1>();
@@ -211,10 +217,12 @@ void validateIndexArray(
     size_t maxIndex) {
   auto validateIndex = [&](int idx) {
     if (idx < 0 || idx >= maxIndex) {
-      throw std::runtime_error(
-          "Invalid " + std::string(type) + " for " + name + ": " +
-          std::to_string(idx) + "; expected a value between 0 and " +
-          std::to_string(maxIndex));
+      throw std::runtime_error(fmt::format(
+          "Invalid {} for {}: {}; expected a value between 0 and {}",
+          type,
+          name,
+          idx,
+          maxIndex));
     }
   };
 
@@ -231,9 +239,10 @@ void validateIndexArray(
       }
     }
   } else {
-    throw std::runtime_error(
-        "Invalid " + std::string(name) +
-        " array; expected 1D or 2D array, got " + getDimStr(indexArray));
+    throw std::runtime_error(fmt::format(
+        "Invalid {} array; expected 1D or 2D array, got {}",
+        name,
+        getDimStr(indexArray)));
   }
 }
 
@@ -243,15 +252,15 @@ void validateJointIndex(
     const mm::Skeleton& skeleton) {
   if (jointIndex < 0) {
     throw std::runtime_error(
-        std::string("Invalid ") + name +
-        " index: " + std::to_string(jointIndex));
+        fmt::format("Invalid {} index: {}", name, jointIndex));
   }
 
   if (jointIndex >= static_cast<int>(skeleton.joints.size())) {
-    throw std::runtime_error(
-        std::string("Invalid ") + name +
-        " index: " + std::to_string(jointIndex) + "; skeleton has only " +
-        std::to_string(skeleton.joints.size()) + " joints");
+    throw std::runtime_error(fmt::format(
+        "Invalid {} index: {}; skeleton has only {} joints",
+        name,
+        jointIndex,
+        skeleton.joints.size()));
   }
 }
 
@@ -274,15 +283,16 @@ void validateVertexIndex(
     const char* name,
     const momentum::Character& character) {
   if (!character.mesh) {
-    throw std::runtime_error(
-        "Character does not have a mesh; cannot validate " + std::string(name));
+    throw std::runtime_error(fmt::format(
+        "Character does not have a mesh; cannot validate {}", name));
   }
 
   if (vertexIndex < 0 || vertexIndex >= character.mesh->vertices.size()) {
-    throw std::runtime_error(
-        "Invalid " + std::string(name) + " index: " +
-        std::to_string(vertexIndex) + "; expected a value between 0 and " +
-        std::to_string(character.mesh->vertices.size()));
+    throw std::runtime_error(fmt::format(
+        "Invalid {} index: {}; expected a value between 0 and {}",
+        name,
+        vertexIndex,
+        character.mesh->vertices.size()));
   }
 }
 
@@ -291,8 +301,8 @@ void validateVertexIndex(
     const char* name,
     const momentum::Character& character) {
   if (!character.mesh) {
-    throw std::runtime_error(
-        "Character does not have a mesh; cannot validate " + std::string(name));
+    throw std::runtime_error(fmt::format(
+        "Character does not have a mesh; cannot validate {}", name));
   }
 
   validateIndexArray(
@@ -301,9 +311,9 @@ void validateVertexIndex(
 
 mm::TransformList toTransformList(const py::array_t<float>& array) {
   if (array.ndim() != 2 || array.shape(1) != 8) {
-    throw std::runtime_error(
-        "Expected (nJoints x 8) skeleton state tensor; got " +
-        getDimStr(array));
+    throw std::runtime_error(fmt::format(
+        "Expected (nJoints x 8) skeleton state tensor; got {}",
+        getDimStr(array)));
   }
 
   const auto nTransforms = array.shape(0);
@@ -329,17 +339,17 @@ momentum::ModelParameters toModelParameters(
     const py::array_t<float>& array,
     const mm::ParameterTransform& pt) {
   if (array.ndim() != 1) {
-    throw std::runtime_error(
-        "Expected a 1D array for model parameters; got " + getDimStr(array));
+    throw std::runtime_error(fmt::format(
+        "Expected a 1D array for model parameters; got {}", getDimStr(array)));
   }
 
   const auto nParams = array.shape(0);
 
   if (nParams != pt.numAllModelParameters()) {
-    throw std::runtime_error(
-        "Invalid size for model parameters; expected " +
-        std::to_string(pt.numAllModelParameters()) + " but got " +
-        getDimStr(array));
+    throw std::runtime_error(fmt::format(
+        "Invalid size for model parameters; expected {} but got {}",
+        pt.numAllModelParameters(),
+        getDimStr(array)));
   }
 
   auto a = array.unchecked<1>();

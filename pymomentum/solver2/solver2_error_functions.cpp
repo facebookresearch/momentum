@@ -1461,9 +1461,10 @@ Uses a generalized loss function that support various forms of losses such as L1
             validateWeights(weight, "weight");
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(
-                  "Invalid names; expected " + std::to_string(parent.shape(0)) +
-                  " names but got " + std::to_string(name->size()));
+              throw std::runtime_error(fmt::format(
+                  "Invalid names; expected {} names but got {}",
+                  parent.shape(0),
+                  name->size()));
             }
 
             auto parent_acc = parent.unchecked<1>();
@@ -2131,9 +2132,10 @@ rotation matrix to a target rotation.)")
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(
-                  "Invalid names; expected " + std::to_string(parent.shape(0)) +
-                  " names but got " + std::to_string(name->size()));
+              throw std::runtime_error(fmt::format(
+                  "Invalid names; expected {} names but got {}",
+                  parent.shape(0),
+                  name->size()));
             }
 
             auto offsetAcc = offset.has_value()

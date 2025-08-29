@@ -98,10 +98,10 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
 
             const auto targetTransforms = toTransformList(targetStateArray);
             if (targetTransforms.size() != self.getSkeleton().joints.size()) {
-              throw std::runtime_error(
-                  "Expected target state array of shape (njoints, 8) where nJoints=" +
-                  std::to_string(self.getSkeleton().joints.size()) +
-                  " but got " + getDimStr(targetStateArray) + ".");
+              throw std::runtime_error(fmt::format(
+                  "Expected target state array of shape (njoints, 8) where nJoints={} but got {}.",
+                  self.getSkeleton().joints.size(),
+                  getDimStr(targetStateArray)));
             }
 
             self.setTargetState(targetTransforms);
