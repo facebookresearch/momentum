@@ -457,4 +457,29 @@ PYBIND11_MODULE(marker_tracking, m) {
       py::arg("motion"),
       py::arg("marker_data"),
       py::arg("refine_config"));
+
+  m.def(
+      "convert_locators_to_skinned_locators",
+      &momentum::locatorsToSkinnedLocators,
+      R"(Convert regular locators to skinned locators based on mesh proximity.
+
+This function converts locators attached to specific joints into skinned locators
+that are weighted across multiple joints based on the underlying mesh skin weights.
+For each locator, it:
+
+1. Computes the locator's world space position using the rest skeleton state
+2. Finds the closest point on the character's mesh surface that is skinned to the same
+   bone as the locator (this is to avoid skinning the locator to the wrong bone)
+3. If the distance is within max_distance, converts the locator to a skinned locator
+   with bone weights interpolated from the closest mesh triangle
+4. Otherwise, keeps the original locator unchanged
+
+The resulting skinned locators maintain the same world space position but are now
+influenced by multiple joints through skin weights.
+
+:param character: Character with mesh, skin weights, and locators to convert
+:param max_distance: Maximum distance from mesh surface to convert a locator (default: 3.0)
+:return: New character with converted skinned locators and remaining regular locators)",
+      py::arg("character"),
+      py::arg("max_distance") = 3.0f);
 }

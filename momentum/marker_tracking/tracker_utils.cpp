@@ -12,7 +12,11 @@
 #include "momentum/character/parameter_limits.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/position_error_function.h"
+#include "momentum/math/mesh.h"
+
 #include "momentum/common/log.h"
+
+#include "axel/math/PointTriangleProjectionDefinitions.h"
 
 using namespace momentum;
 
@@ -51,6 +55,158 @@ std::vector<std::vector<PositionData>> createConstraintData(
   }
 
   return results;
+}
+
+std::pair<Eigen::Vector<uint32_t, kMaxSkinJoints>, Eigen::Vector<float, kMaxSkinJoints>>
+averageTriangleSkinWeights(
+    const Character& character,
+    int triangleIndex,
+    const Eigen::Vector3f& barycentric) {
+  Eigen::VectorXf skinWeights = Eigen::VectorXf::Zero(character.skeleton.joints.size());
+
+  const auto& mesh = *character.mesh;
+  const auto& skin = *character.skinWeights;
+
+  // get the triangle
+  const auto& triangle = mesh.faces[triangleIndex];
+  for (int kTriVert = 0; kTriVert < 3; ++kTriVert) {
+    for (int kSkinWeight = 0; kSkinWeight < skin.index.cols(); ++kSkinWeight) {
+      const auto& skinIndex = skin.index(triangle(kTriVert), kSkinWeight);
+      const auto& skinWeight = skin.weight(triangle(kTriVert), kSkinWeight);
+      skinWeights[skinIndex] += skinWeight * barycentric[kTriVert];
+    }
+  }
+
+  std::vector<std::pair<float, uint32_t>> sortedWeights;
+  for (int i = 0; i < skinWeights.size(); ++i) {
+    if (skinWeights[i] > 0.0f) {
+      sortedWeights.emplace_back(skinWeights[i], i);
+    }
+  }
+  std::sort(sortedWeights.begin(), sortedWeights.end(), std::greater<>());
+
+  Eigen::Vector<float, kMaxSkinJoints> resultWeights = Eigen::Vector<float, kMaxSkinJoints>::Zero();
+  Eigen::Vector<uint32_t, kMaxSkinJoints> resultIndices =
+      Eigen::Vector<uint32_t, kMaxSkinJoints>::Zero();
+  for (int i = 0; i < kMaxSkinJoints; ++i) {
+    if (i < sortedWeights.size()) {
+      resultWeights[i] = sortedWeights[i].first;
+      resultIndices[i] = sortedWeights[i].second;
+    }
+  }
+
+  resultWeights /= resultWeights.sum();
+
+  return {resultIndices, resultWeights};
+}
+
+namespace {
+
+struct ClosestPointOnMeshResult {
+  bool valid = false;
+  size_t triangleIdx = kInvalidIndex;
+  Eigen::Vector3f baryCoords = Eigen::Vector3f::Zero();
+  float distance = std::numeric_limits<float>::max();
+};
+
+} // namespace
+
+ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
+    const momentum::Mesh& mesh,
+    const momentum::SkinWeights& skin,
+    const Eigen::Vector3f& p_world,
+    uint32_t parentIdx,
+    float cutoffWeight = 0.1) {
+  ClosestPointOnMeshResult result;
+  for (size_t iTri = 0; iTri < mesh.faces.size(); ++iTri) {
+    const auto& f = mesh.faces[iTri];
+
+    float skinWeight = 0;
+    for (int kTriVert = 0; kTriVert < 3; ++kTriVert) {
+      for (int kSkinWeight = 0; kSkinWeight < skin.index.cols(); ++kSkinWeight) {
+        if (skin.index(f(kTriVert), kSkinWeight) == parentIdx) {
+          skinWeight += skin.weight(f(kTriVert), kSkinWeight);
+        }
+      }
+    }
+    skinWeight /= 3.0f;
+
+    if (skinWeight < cutoffWeight) {
+      continue;
+    }
+
+    // Note: the return value from the does _not_ have anything to do with
+    // whether the projection is valid, it just indicates whether the projection is
+    // inside the triangle or not, so we can ignore it and just use the projected point directly.
+    Eigen::Vector3f p_tri;
+    Eigen::Vector3f bary;
+    axel::projectOnTriangle(
+        p_world, mesh.vertices[f(0)], mesh.vertices[f(1)], mesh.vertices[f(2)], p_tri, &bary);
+    const float dist = (p_tri - p_world).norm();
+    if (!result.valid || dist < result.distance) {
+      result = {true, iTri, bary, dist};
+    }
+  }
+
+  return result;
+}
+
+momentum::Character locatorsToSkinnedLocators(
+    const momentum::Character& sourceCharacter,
+    float maxDistance) {
+  if (!sourceCharacter.mesh || !sourceCharacter.skinWeights) {
+    return sourceCharacter;
+  }
+
+  const JointParameters restJointParams =
+      JointParameters::Zero(sourceCharacter.parameterTransform.numJointParameters());
+  const SkeletonState restState(restJointParams, sourceCharacter.skeleton);
+
+  SkinnedLocatorList skinnedLocators;
+  LocatorList locators;
+  for (size_t i = 0; i < sourceCharacter.locators.size(); ++i) {
+    const auto& locator = sourceCharacter.locators[i];
+    const auto& offset = locator.offset;
+    const auto& parent = locator.parent;
+    const Eigen::Vector3f p_world = restState.jointState[parent].transformation * offset;
+
+    // Find the closest point on the mesh to the locator.
+    const auto closestPointResult = closestPointOnMeshMatchingParent(
+        *sourceCharacter.mesh,
+        *sourceCharacter.skinWeights,
+        p_world,
+        gsl::narrow_cast<uint32_t>(parent));
+    if (!closestPointResult.valid || closestPointResult.distance > maxDistance) {
+      locators.push_back(locator);
+      continue;
+    }
+
+    SkinnedLocator skinnedLocator;
+    skinnedLocator.name = locator.name;
+    skinnedLocator.position = p_world;
+    skinnedLocator.weight = locator.weight;
+
+    // Set the locator's parent to the closest face.
+    std::tie(skinnedLocator.parents, skinnedLocator.skinWeights) = averageTriangleSkinWeights(
+        sourceCharacter, closestPointResult.triangleIdx, closestPointResult.baryCoords);
+    skinnedLocators.push_back(skinnedLocator);
+  }
+
+  // Strip out regular locators and replace with skinned locators:
+  return {
+      sourceCharacter.skeleton,
+      sourceCharacter.parameterTransform,
+      sourceCharacter.parameterLimits,
+      locators,
+      sourceCharacter.mesh.get(),
+      sourceCharacter.skinWeights.get(),
+      sourceCharacter.collision.get(),
+      sourceCharacter.poseShapes.get(),
+      sourceCharacter.blendShape,
+      sourceCharacter.faceExpressionBlendShape,
+      sourceCharacter.name,
+      sourceCharacter.inverseBindPose,
+      skinnedLocators};
 }
 
 Character createLocatorCharacter(const Character& sourceCharacter, const std::string& prefix) {
