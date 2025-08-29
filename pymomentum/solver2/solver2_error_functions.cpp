@@ -63,6 +63,7 @@ void defAimErrorFunction(
                  float lossAlpha,
                  float lossC,
                  float weight) -> std::shared_ptr<AimErrorFunctionT> {
+                validateWeight(weight, "weight");
                 auto result = std::make_shared<AimErrorFunctionT>(
                     character, lossAlpha, lossC);
                 result->setWeight(weight);
@@ -94,6 +95,7 @@ void defAimErrorFunction(
              float weight,
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             self.addConstraint(mm::AimDataT<float>(
                 localPoint, localDir, globalTarget, parent, weight, name));
           },
@@ -210,6 +212,7 @@ void defFixedAxisError(
                  float lossAlpha,
                  float lossC,
                  float weight) -> std::shared_ptr<FixedAxisErrorFunctionT> {
+                validateWeight(weight, "weight");
                 auto result = std::make_shared<FixedAxisErrorFunctionT>(
                     character, lossAlpha, lossC);
                 result->setWeight(weight);
@@ -236,6 +239,7 @@ void defFixedAxisError(
              float weight,
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             self.addConstraint(mm::FixedAxisDataT<float>(
                 localAxis, globalAxis, parent, weight, name));
           },
@@ -378,6 +382,7 @@ plane defined by a local point and a local normal vector.)")
                  float lossC,
                  float weight)
                   -> std::shared_ptr<mm::NormalErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
                 auto result = std::make_shared<mm::NormalErrorFunctionT<float>>(
                     character, lossAlpha, lossC);
                 result->setWeight(weight);
@@ -405,6 +410,7 @@ plane defined by a local point and a local normal vector.)")
              float weight,
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             self.addConstraint(mm::NormalDataT<float>(
                 localPoint.value_or(Eigen::Vector3f::Zero()),
                 localNormal,
@@ -565,6 +571,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
           py::init<>(
               [](const mm::Character& character, float weight)
                   -> std::shared_ptr<mm::DistanceErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
                 auto result =
                     std::make_shared<mm::DistanceErrorFunctionT<float>>(
                         character.skeleton, character.parameterTransform);
@@ -588,6 +595,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
              const Eigen::Vector3f& offset,
              float weight) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             mm::DistanceConstraintDataT<float> constraint;
             constraint.origin = origin;
             constraint.target = target;
@@ -735,6 +743,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
           py::init<>(
               [](const mm::Character& character, float nearClip, float weight)
                   -> std::shared_ptr<mm::ProjectionErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
                 auto result =
                     std::make_shared<mm::ProjectionErrorFunctionT<float>>(
                         character.skeleton,
@@ -762,6 +771,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
              const std::optional<Eigen::Vector3f>& offset,
              float weight) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             mm::ProjectionConstraintDataT<float> constraint;
             constraint.projection = projection;
             constraint.parent = parent;
@@ -936,6 +946,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
                  float weight)
                   -> std::shared_ptr<
                       mm::VertexProjectionErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
                 auto result =
                     std::make_shared<mm::VertexProjectionErrorFunctionT<float>>(
                         character, maxThreads);
@@ -960,6 +971,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
              const Eigen::Matrix<float, 3, 4>& projection) {
             validateVertexIndex(
                 vertexIndex, "vertex_index", self.getCharacter());
+            validateWeight(weight, "weight");
             self.addConstraint(vertexIndex, weight, targetPosition, projection);
           },
           R"(Adds a vertex projection constraint to the error function.
@@ -1102,6 +1114,7 @@ distance is greater than zero (ie. the point being above).)")
                  float lossAlpha,
                  float lossC,
                  float weight) -> std::shared_ptr<mm::PlaneErrorFunction> {
+                validateWeight(weight, "weight");
                 auto result = std::make_shared<mm::PlaneErrorFunction>(
                     character, above, lossAlpha, lossC);
                 result->setWeight(weight);
@@ -1131,6 +1144,7 @@ distance is greater than zero (ie. the point being above).)")
              float weight,
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             self.addConstraint(
                 mm::PlaneDataT<float>(offset, normal, d, parent, weight, name));
           },
@@ -1242,6 +1256,7 @@ void addErrorFunctions(py::module_& m) {
           })
       .def(
           py::init<>([](const mm::Character& character, float weight) {
+            validateWeight(weight, "weight");
             auto result = std::make_shared<mm::LimitErrorFunction>(character);
             result->setWeight(weight);
             return result;
@@ -1269,6 +1284,8 @@ void addErrorFunctions(py::module_& m) {
                         const std::optional<py::array_t<float>>& targetParams,
                         const std::optional<py::array_t<float>>& weights,
                         float weight) {
+            validateWeight(weight, "weight");
+            validateWeights(weights, "weights");
             auto result =
                 std::make_shared<mm::ModelParametersErrorFunction>(character);
             result->setWeight(weight);
@@ -1365,6 +1382,7 @@ Uses a generalized loss function that support various forms of losses such as L1
                  float lossAlpha,
                  float lossC,
                  float weight) -> std::shared_ptr<mm::PositionErrorFunction> {
+                validateWeight(weight, "weight");
                 auto result = std::make_shared<mm::PositionErrorFunction>(
                     character, lossAlpha, lossC);
                 result->setWeight(weight);
@@ -1391,6 +1409,7 @@ Uses a generalized loss function that support various forms of losses such as L1
              float weight,
              const std::string& name) {
             validateJointIndex(parent, "parent", errf.getSkeleton());
+            validateWeight(weight, "weight");
             errf.addConstraint(mm::PositionData(
                 offset.value_or(Eigen::Vector3f::Zero()),
                 target,
@@ -1438,7 +1457,8 @@ Uses a generalized loss function that support various forms of losses such as L1
                 offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(
                 target, "target", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(weight, "weights", {nConsIdx}, {"n_cons"});
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+            validateWeights(weight, "weight");
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(
@@ -1610,6 +1630,12 @@ avoid divide-by-zero. )");
                             jointPositionWeights,
                         const std::optional<py::array_t<float>>&
                             jointRotationWeights) {
+            validateWeight(weight, "weight");
+            validateWeight(positionWeight, "position_weight");
+            validateWeight(rotationWeight, "rotation_weight");
+            validateWeights(jointPositionWeights, "joint_position_weights");
+            validateWeights(jointRotationWeights, "joint_rotation_weights");
+
             auto result = std::make_shared<mm::StateErrorFunction>(character);
             result->setWeight(weight);
             result->setWeights(positionWeight, rotationWeight);
@@ -1753,6 +1779,7 @@ avoid divide-by-zero. )");
                         mm::VertexConstraintType constraintType,
                         float weight,
                         size_t maxThreads) {
+            validateWeight(weight, "weight");
             auto result = std::make_shared<mm::VertexErrorFunction>(
                 character, constraintType, maxThreads);
             result->setWeight(weight);
@@ -1776,6 +1803,7 @@ avoid divide-by-zero. )");
              const Eigen::Vector3f& targetNormal) {
             validateVertexIndex(
                 vertexIndex, "vertex_index", self.getCharacter());
+            validateWeight(weight, "weight");
             self.addConstraint(
                 vertexIndex, weight, targetPosition, targetNormal);
           },
@@ -1818,6 +1846,9 @@ avoid divide-by-zero. )");
             auto target_position_acc = targetPosition.unchecked<2>();
             auto target_normal_acc = targetNormal.unchecked<2>();
             auto weight_acc = weight.unchecked<1>();
+
+            // Validate weights
+            validateWeights(weight, "weight");
 
             py::gil_scoped_release release;
 
@@ -1974,6 +2005,7 @@ avoid divide-by-zero. )");
           py::init<>([](const mm::Character& character,
                         std::shared_ptr<const mm::Mppca> posePrior,
                         float weight) {
+            validateWeight(weight, "weight");
             auto result = std::make_shared<mm::PosePriorErrorFunction>(
                 character, posePrior);
             result->setWeight(weight);
@@ -2031,6 +2063,7 @@ rotation matrix to a target rotation.)")
                  float lossC,
                  float weight)
                   -> std::shared_ptr<mm::OrientationErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
                 auto result =
                     std::make_shared<mm::OrientationErrorFunctionT<float>>(
                         character, lossAlpha, lossC);
@@ -2058,6 +2091,7 @@ rotation matrix to a target rotation.)")
              float weight,
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
             self.addConstraint(mm::OrientationDataT<float>(
                 offset.has_value() ? toQuaternion(*offset)
                                    : Eigen::Quaternionf::Identity(),
@@ -2159,6 +2193,7 @@ rotation matrix to a target rotation.)")
           })
       .def(
           py::init<>([](const mm::Character& character, float weight) {
+            validateWeight(weight, "weight");
             auto result =
                 std::make_shared<mm::CollisionErrorFunction>(character);
             result->setWeight(weight);
