@@ -354,6 +354,54 @@ Eigen::Quaternionf toQuaternion(const Eigen::Vector4f& q) {
   return Eigen::Quaternionf(q(3), q(0), q(1), q(2)).normalized();
 }
 
+void validateWeight(float weight, const char* name) {
+  if (weight < 0.0f) {
+    throw py::value_error(fmt::format(
+        "Invalid {}: {}; weight must be non-negative", name, weight));
+  }
+}
+
+void validateWeights(const py::array_t<float>& weights, const char* name) {
+  auto weightsAcc = weights.unchecked<1>();
+  for (py::ssize_t i = 0; i < weights.shape(0); ++i) {
+    if (weightsAcc(i) < 0.0f) {
+      throw py::value_error(fmt::format(
+          "Invalid {} at index {}: {}; all weights must be non-negative",
+          name,
+          i,
+          weightsAcc(i)));
+    }
+  }
+}
+
+void validateWeights(
+    const std::optional<py::array_t<float>>& weights,
+    const char* name) {
+  if (weights.has_value()) {
+    validateWeights(weights.value(), name);
+  }
+}
+
+void validateWeights(const Eigen::VectorXf& weights, const char* name) {
+  for (int i = 0; i < weights.size(); ++i) {
+    if (weights(i) < 0.0f) {
+      throw py::value_error(fmt::format(
+          "Invalid {} at index {}: {}; all weights must be non-negative",
+          name,
+          i,
+          weights(i)));
+    }
+  }
+}
+
+void validateWeights(
+    const std::optional<Eigen::VectorXf>& weights,
+    const char* name) {
+  if (weights.has_value()) {
+    validateWeights(weights.value(), name);
+  }
+}
+
 void validateErrorFunctionMatchesCharacter(
     const momentum::SkeletonSolverFunction& solverFunction,
     const momentum::SkeletonErrorFunction& errorFunction) {

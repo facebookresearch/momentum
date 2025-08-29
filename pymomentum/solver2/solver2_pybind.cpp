@@ -59,7 +59,10 @@ PYBIND11_MODULE(solver2, m) {
       .def_property(
           "weight",
           &mm::SkeletonErrorFunction::getWeight,
-          &mm::SkeletonErrorFunction::setWeight)
+          [](mm::SkeletonErrorFunction& self, float weight) {
+            validateWeight(weight, "weight");
+            self.setWeight(weight);
+          })
       .def(
           "get_error",
           [](mm::SkeletonErrorFunction& self,
