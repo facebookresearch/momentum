@@ -211,6 +211,75 @@ class TestBlendShape(unittest.TestCase):
         test_posed_shape = c.skin_points(test_skel_state, test_rest_shape)
         self.assertTrue(test_posed_shape.allclose(gt_posed_shape, rtol=1e-3, atol=1e-2))
 
+    def test_bake_blend_shape(self) -> None:
+        """Test the bake_blend_shape method with numpy arrays."""
+        torch.manual_seed(0)  # ensure repeatability
+        np.random.seed(0)
+
+        # Create test character with blend shapes
+        c = pym_geometry.create_test_character()
+        blend_shape = _build_blend_shape_basis(c)
+        c_with_blend = c.with_blend_shape(blend_shape)
+
+        # Create test blend weights as numpy array
+        n_blend_shapes = blend_shape.n_shapes
+        blend_weights = np.random.rand(n_blend_shapes).astype(np.float32)
+
+        # Test bake_blend_shape method
+        c_baked = c_with_blend.bake_blend_shape(blend_weights)
+
+        # Verify the character structure is preserved
+        self.assertEqual(c_baked.skeleton.size, c_with_blend.skeleton.size)
+        self.assertEqual(c_baked.name, c_with_blend.name)
+        self.assertTrue(c_baked.mesh is not None)
+        self.assertTrue(c_baked.skin_weights is not None)
+
+        # Verify blend shape parameters are removed from parameter transform
+        # Original character should have blend shape parameters
+        self.assertGreater(
+            torch.sum(c_with_blend.parameter_transform.blend_shape_parameters).item(), 0
+        )
+        # Baked character should have no blend shape parameters
+        self.assertEqual(
+            torch.sum(c_baked.parameter_transform.blend_shape_parameters).item(), 0
+        )
+
+        # The parameter transform should be smaller (no blend shape parameters)
+        self.assertLess(
+            c_baked.parameter_transform.size, c_with_blend.parameter_transform.size
+        )
+
+        # Verify the baked mesh matches the expected blend shape result
+        expected_mesh_vertices = blend_shape.compute_shape(
+            torch.from_numpy(blend_weights).unsqueeze(0)
+        ).squeeze(0)
+        baked_mesh_vertices = torch.from_numpy(c_baked.mesh.vertices)
+        self.assertTrue(
+            baked_mesh_vertices.allclose(expected_mesh_vertices, rtol=1e-5, atol=1e-6)
+        )
+
+        # Test with different array types and shapes
+        # Test float64 array
+        blend_weights_double = blend_weights.astype(np.float64)
+        c_baked_double = c_with_blend.bake_blend_shape(blend_weights_double)
+        baked_vertices_double = torch.from_numpy(c_baked_double.mesh.vertices)
+        self.assertTrue(
+            baked_vertices_double.allclose(expected_mesh_vertices, rtol=1e-5, atol=1e-6)
+        )
+
+        # Test error handling - should raise exception for non-1D array
+        with self.assertRaises(RuntimeError):
+            c_with_blend.bake_blend_shape(np.random.rand(2, n_blend_shapes))
+
+        # Test zero blend weights (should result in base shape)
+        zero_weights = np.zeros(n_blend_shapes, dtype=np.float32)
+        c_baked_zero = c_with_blend.bake_blend_shape(zero_weights)
+        expected_base_vertices = torch.from_numpy(blend_shape.base_shape)
+        baked_base_vertices = torch.from_numpy(c_baked_zero.mesh.vertices)
+        self.assertTrue(
+            baked_base_vertices.allclose(expected_base_vertices, rtol=1e-5, atol=1e-6)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
