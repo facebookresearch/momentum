@@ -4,38 +4,24 @@ sidebar_position: 1
 
 # Getting Started
 
-This page guides you through the process of building Momentum and running the examples.
+This page guides you through the process of building Momentum (C++ library) and running the examples.
 
-## Installing Momentum and PyMomentum
+## Installing Momentum
 
-Momentum binary builds are available for Windows, macOS, and Linux via [Pixi](https://prefix.dev/) or the Conda package manager.
+Momentum C++ binary builds are available for Windows, macOS, and Linux via [Pixi](https://prefix.dev/) or the Conda package manager.
 
 For Windows, please install [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or greater.
 
 ### [Pixi](https://prefix.dev/channels/conda-forge/packages/momentum)
 
 ```
-# C++ only
 pixi add momentum-cpp
-
-# Python only (auto-detects GPU/CPU)
-pixi add pymomentum
-
-# Python with specific backend
-pixi add pymomentum-gpu  # or pymomentum-cpu
-
-# Both C++ and Python
-pixi add momentum
 ```
 
 ### [Conda](https://anaconda.org/conda-forge/momentum)
 
 ```
-# Replace 'pixi add' with 'conda install -c conda-forge'
 conda install -c conda-forge momentum-cpp
-conda install -c conda-forge pymomentum
-conda install -c conda-forge pymomentum-gpu  # or pymomentum-cpu
-conda install -c conda-forge momentum
 ```
 
 ## Building Momentum from Source
@@ -97,7 +83,7 @@ To run other examples:
 pixi run glb_viewer --help
 ```
 
-For more examples, please refer to the [Examples](https://facebookresearch.github.io/momentum/docs/examples/viewers) page.
+For more examples, please refer to the [Examples](../examples/viewers) page.
 
 ### Clean Up
 

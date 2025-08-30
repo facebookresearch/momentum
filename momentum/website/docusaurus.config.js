@@ -32,6 +32,8 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
       /** @type {import('docusaurus-plugin-internaldocs-fb').PresetOptions} */
       ({
         docs: {
+          path: 'docs_cpp',
+          routeBasePath: 'docs',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: fbContent({
             internal:
@@ -55,6 +57,24 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'pymomentum',
+        path: 'docs_python',
+        routeBasePath: 'pymomentum',
+        sidebarPath: require.resolve('./sidebars.js'),
+        editUrl: fbContent({
+          internal:
+            'https://www.internalfb.com/code/fbsource/arvr/libraries/momentum/website',
+          external:
+            'https://github.com/facebookresearch/momentum/edit/main/momentum/website',
+        }),
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -69,7 +89,7 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
             type: 'doc',
             docId: 'user_guide/getting_started',
             position: 'left',
-            label: 'Docs',
+            label: 'C++ Docs',
           },
           {
             href: 'pathname:///doxygen/index.html',
@@ -77,10 +97,14 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
             label: 'C++ API',
           },
           {
-            href: fbContent({
-              internal: 'https://facebookresearch.github.io/momentum/python_api_doc/index.html',
-              external: 'pathname:///python_api_doc/index.html',
-            }),
+            type: 'doc',
+            docsPluginId: 'pymomentum',
+            docId: 'user_guide/getting_started',
+            position: 'left',
+            label: 'Python Docs',
+          },
+          {
+            href: 'https://facebookresearch.github.io/momentum/python_api_doc/index.html',
             position: 'left',
             label: 'Python API',
           },
@@ -95,7 +119,7 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Momentum',
             items: [
               {
                 label: 'Getting Started',
@@ -108,6 +132,23 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
               {
                 label: 'Developer Guide',
                 to: '/docs/developer_guide/development_environment',
+              },
+            ],
+          },
+          {
+            title: 'PyMomentum',
+            items: [
+              {
+                label: 'Getting Started',
+                to: '/pymomentum/user_guide/getting_started',
+              },
+              {
+                label: 'Examples',
+                to: '/pymomentum/examples/python_basics',
+              },
+              {
+                label: 'Developer Guide',
+                to: '/pymomentum/developer_guide/development_environment',
               },
             ],
           },
