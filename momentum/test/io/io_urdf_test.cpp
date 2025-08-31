@@ -28,7 +28,6 @@ TEST(IoUrdfTest, LoadCharacter) {
   auto urdfPath = getTestFilePath("character.urdf");
   if (!urdfPath.has_value()) {
     GTEST_SKIP() << "Environment variable 'TEST_MOMENTUM_MODELS_PATH' is not set.";
-    return;
   }
 
   const auto& character = loadUrdfCharacter(*urdfPath);

@@ -50,7 +50,6 @@ TEST_F(UsdIoTest, LoadSimpleCharacter) {
   auto usdPath = getTestResourcePath("simple_character.usda");
   if (!usdPath.has_value()) {
     GTEST_SKIP() << "Environment variable 'TEST_RESOURCES_PATH' is not set.";
-    return;
   }
 
   if (!filesystem::exists(*usdPath)) {
@@ -71,7 +70,6 @@ TEST_F(UsdIoTest, LoadSimpleMesh) {
   auto usdPath = getTestResourcePath("simple_mesh.usda");
   if (!usdPath.has_value()) {
     GTEST_SKIP() << "Environment variable 'TEST_RESOURCES_PATH' is not set.";
-    return;
   }
 
   if (!filesystem::exists(*usdPath)) {
@@ -89,7 +87,6 @@ TEST_F(UsdIoTest, LoadCharacterWithMaterials) {
   auto usdPath = getTestResourcePath("character_with_materials.usda");
   if (!usdPath.has_value()) {
     GTEST_SKIP() << "Environment variable 'TEST_RESOURCES_PATH' is not set.";
-    return;
   }
 
   if (!filesystem::exists(*usdPath)) {
@@ -129,7 +126,6 @@ TEST_F(UsdIoTest, LoadFromBuffer) {
   auto usdPath = getTestResourcePath("simple_character.usda");
   if (!usdPath.has_value()) {
     GTEST_SKIP() << "Environment variable 'TEST_RESOURCES_PATH' is not set.";
-    return;
   }
 
   if (!filesystem::exists(*usdPath)) {
