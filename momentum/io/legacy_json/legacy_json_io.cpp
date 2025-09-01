@@ -20,7 +20,6 @@
 #include <momentum/math/mesh.h>
 #include <momentum/math/transform.h>
 #include <momentum/math/types.h>
-
 #include <fstream>
 #include <sstream>
 
@@ -105,6 +104,19 @@ TransformT<T> jsonToTransform(const nlohmann::json& j) {
   return transform;
 }
 
+/// Helper function to find field names with multiple possible variants
+nlohmann::json::const_iterator findFieldNames(
+    const nlohmann::json& json,
+    const std::initializer_list<const char*>& names) {
+  for (const auto& name : names) {
+    auto itr = json.find(name);
+    if (itr != json.end()) {
+      return itr;
+    }
+  }
+  return json.end();
+}
+
 Skeleton legacySkeletonToMomentum(const nlohmann::json& legacySkeleton) {
   MT_THROW_IF(!legacySkeleton.contains("Bones"), "Legacy skeleton JSON missing 'Bones' field");
 
@@ -180,74 +192,108 @@ std::pair<Mesh, SkinWeights> legacySkinnedModelToMomentum(
   Mesh mesh;
   SkinWeights skinWeights;
 
-  // Extract vertices
-  if (legacySkinnedModel.contains("vertices")) {
-    const auto& vertices = legacySkinnedModel["vertices"];
+  // Extract vertices - support multiple naming variants
+  auto verticesItr = findFieldNames(legacySkinnedModel, {"RestPositions", "vertices"});
+  if (verticesItr != legacySkinnedModel.end()) {
+    const auto& vertices = *verticesItr;
     mesh.vertices.reserve(vertices.size());
     for (const auto& vertex : vertices) {
       mesh.vertices.push_back(jsonArrayToEigenVector3<float>(vertex));
     }
   }
 
-  // Extract normals
-  if (legacySkinnedModel.contains("normals")) {
-    const auto& normals = legacySkinnedModel["normals"];
+  // Extract normals - support multiple naming variants
+  auto normalsItr = findFieldNames(legacySkinnedModel, {"RestVertexNormals", "normals"});
+  if (normalsItr != legacySkinnedModel.end()) {
+    const auto& normals = *normalsItr;
     mesh.normals.reserve(normals.size());
     for (const auto& normal : normals) {
       mesh.normals.push_back(jsonArrayToEigenVector3<float>(normal));
     }
   }
 
-  // Extract faces
-  if (legacySkinnedModel.contains("faces")) {
-    const auto& faces = legacySkinnedModel["faces"];
-    mesh.faces.reserve(faces.size());
-    for (const auto& face : faces) {
-      MT_THROW_IF(face.size() != 3, "Expected triangular faces");
-      mesh.faces.emplace_back(face[0].get<int>(), face[1].get<int>(), face[2].get<int>());
+  // Extract faces - support multiple naming variants and triangulate if needed
+  auto facesItr = findFieldNames(legacySkinnedModel, {"Faces", "faces"});
+  if (facesItr != legacySkinnedModel.end()) {
+    const auto& facesObj = *facesItr;
+    // Expecting "Indices", optional "TextureIndices", and "Offsets"
+    MT_THROW_IF(!facesObj.contains("Indices"), "Faces object missing 'Indices' field");
+    MT_THROW_IF(!facesObj.contains("Offsets"), "Faces object missing 'Offsets' field");
+
+    const auto& indices = facesObj["Indices"];
+    const auto& offsets = facesObj["Offsets"];
+    // Optional texture indices
+    const auto* texIndicesPtr =
+        facesObj.contains("TextureIndices") ? &facesObj["TextureIndices"] : nullptr;
+
+    size_t numFaces = offsets.size() - 1;
+    mesh.faces.reserve(numFaces * 2); // Conservative estimate for triangulation
+
+    for (size_t faceIdx = 0; faceIdx < numFaces; ++faceIdx) {
+      size_t start = offsets[faceIdx].get<size_t>();
+      size_t end = offsets[faceIdx + 1].get<size_t>();
+      size_t faceSize = end - start;
+
+      // Triangulate face (ngon) using fan triangulation
+      if (faceSize < 3) {
+        MT_THROW_IF(true, "Face must have at least 3 vertices");
+      } else {
+        int v0 = indices[start].get<int>();
+        for (size_t i = 1; i < faceSize - 1; ++i) {
+          int v1 = indices[start + i].get<int>();
+          int v2 = indices[start + i + 1].get<int>();
+          mesh.faces.emplace_back(v0, v1, v2);
+        }
+        if (texIndicesPtr && texIndicesPtr->is_array()) {
+          int t0 = (*texIndicesPtr)[start].get<int>();
+          for (size_t i = 1; i < faceSize - 1; ++i) {
+            int t1 = (*texIndicesPtr)[start + i].get<int>();
+            int t2 = (*texIndicesPtr)[start + i + 1].get<int>();
+            mesh.texcoord_faces.emplace_back(t0, t1, t2);
+          }
+        }
+      }
     }
+
+    // Shrink to actual size after triangulation
+    mesh.faces.shrink_to_fit();
+    mesh.texcoord_faces.shrink_to_fit();
   }
 
-  // Extract texture coordinates
-  if (legacySkinnedModel.contains("texcoords")) {
-    const auto& texcoords = legacySkinnedModel["texcoords"];
+  // Extract texture coordinates - support multiple naming variants
+  auto texcoordsItr = findFieldNames(legacySkinnedModel, {"TextureCoordinates", "texcoords"});
+  if (texcoordsItr != legacySkinnedModel.end()) {
+    const auto& texcoords = *texcoordsItr;
     mesh.texcoords.reserve(texcoords.size());
     for (const auto& texcoord : texcoords) {
       mesh.texcoords.push_back(jsonArrayToEigenVector2<float>(texcoord));
     }
   }
 
-  // Extract texture coordinate faces
-  if (legacySkinnedModel.contains("texcoord_faces")) {
-    const auto& texcoordFaces = legacySkinnedModel["texcoord_faces"];
-    mesh.texcoord_faces.reserve(texcoordFaces.size());
-    for (const auto& face : texcoordFaces) {
-      MT_THROW_IF(face.size() != 3, "Expected triangular texture coordinate faces");
-      mesh.texcoord_faces.emplace_back(face[0].get<int>(), face[1].get<int>(), face[2].get<int>());
-    }
-  }
+  // Try Trinity rig format with separate SkinningWeights and SkinningOffsets
+  auto skinningWeightsItr = findFieldNames(legacySkinnedModel, {"SkinningWeights"});
+  auto skinningOffsetsItr = findFieldNames(legacySkinnedModel, {"SkinningOffsets"});
 
-  // Extract skin weights
-  if (legacySkinnedModel.contains("skinWeights")) {
-    const auto& skinWeightsJson = legacySkinnedModel["skinWeights"];
+  if (skinningWeightsItr != legacySkinnedModel.end() &&
+      skinningOffsetsItr != legacySkinnedModel.end()) {
+    const auto& skinningWeights = *skinningWeightsItr;
+    const auto& skinningOffsets = *skinningOffsetsItr;
 
-    if (skinWeightsJson.contains("indices") && skinWeightsJson.contains("weights")) {
-      const auto& indices = skinWeightsJson["indices"];
-      const auto& weights = skinWeightsJson["weights"];
-
-      const size_t numVertices = indices.size();
+    if (skinningWeights.is_array() && skinningOffsets.is_array()) {
+      const size_t numVertices = skinningOffsets.size() - 1;
       skinWeights.index = IndexMatrix::Zero(numVertices, kMaxSkinJoints);
       skinWeights.weight = WeightMatrix::Zero(numVertices, kMaxSkinJoints);
 
       for (size_t i = 0; i < numVertices; ++i) {
-        const auto& vertexIndices = indices[i];
-        const auto& vertexWeights = weights[i];
+        size_t start = skinningOffsets[i].get<size_t>();
+        size_t end = skinningOffsets[i + 1].get<size_t>();
+        size_t numInfluences = std::min(end - start, static_cast<size_t>(kMaxSkinJoints));
 
-        const size_t numInfluences =
-            std::min(vertexIndices.size(), static_cast<size_t>(kMaxSkinJoints));
         for (size_t j = 0; j < numInfluences; ++j) {
-          skinWeights.index(i, j) = vertexIndices[j].get<uint32_t>();
-          skinWeights.weight(i, j) = vertexWeights[j].get<float>();
+          const auto& pair = skinningWeights[start + j];
+          // Each pair is [joint index, skinning weight]
+          skinWeights.index(i, j) = pair[0].get<uint32_t>();
+          skinWeights.weight(i, j) = pair[1].get<float>();
         }
       }
     }
@@ -260,69 +306,82 @@ nlohmann::json momentumSkinnedModelToLegacy(const Mesh& mesh, const SkinWeights&
   nlohmann::json legacySkinnedModel;
 
   // Convert vertices
-  nlohmann::json vertices = nlohmann::json::array();
+  nlohmann::json restPositions = nlohmann::json::array();
   for (const auto& vertex : mesh.vertices) {
-    vertices.push_back(eigenToJsonArray(vertex));
+    restPositions.push_back(eigenToJsonArray(vertex));
   }
-  legacySkinnedModel["vertices"] = vertices;
+  legacySkinnedModel["RestPositions"] = restPositions;
 
   // Convert normals
   if (!mesh.normals.empty()) {
-    nlohmann::json normals = nlohmann::json::array();
+    nlohmann::json restVertexNormals = nlohmann::json::array();
     for (const auto& normal : mesh.normals) {
-      normals.push_back(eigenToJsonArray(normal));
+      restVertexNormals.push_back(eigenToJsonArray(normal));
     }
-    legacySkinnedModel["normals"] = normals;
+    legacySkinnedModel["RestVertexNormals"] = restVertexNormals;
   }
 
-  // Convert faces
-  nlohmann::json faces = nlohmann::json::array();
-  for (const auto& face : mesh.faces) {
-    faces.push_back(nlohmann::json::array({face.x(), face.y(), face.z()}));
+  // Convert faces (legacy expects an object with Indices, Offsets, and optionally TextureIndices)
+  nlohmann::json facesObj;
+  nlohmann::json indices = nlohmann::json::array();
+  nlohmann::json offsets = nlohmann::json::array();
+  nlohmann::json textureIndices = nlohmann::json::array();
+
+  // To reconstruct offsets, we need to group triangles into faces.
+  // But since we only have triangles, we treat each triangle as a face.
+  size_t numFaces = mesh.faces.size();
+  offsets.push_back(0);
+  for (size_t i = 0; i < numFaces; ++i) {
+    const auto& face = mesh.faces[i];
+    indices.push_back(face.x());
+    indices.push_back(face.y());
+    indices.push_back(face.z());
+    offsets.push_back((i + 1) * 3);
+    // If texcoord_faces exist, add them as TextureIndices
+    if (!mesh.texcoord_faces.empty()) {
+      const auto& tface = mesh.texcoord_faces[i];
+      textureIndices.push_back(tface.x());
+      textureIndices.push_back(tface.y());
+      textureIndices.push_back(tface.z());
+    }
   }
-  legacySkinnedModel["faces"] = faces;
+  facesObj["Indices"] = indices;
+  facesObj["Offsets"] = offsets;
+  if (!textureIndices.empty()) {
+    facesObj["TextureIndices"] = textureIndices;
+  }
+  legacySkinnedModel["Faces"] = facesObj;
 
   // Convert texture coordinates
   if (!mesh.texcoords.empty()) {
-    nlohmann::json texcoords = nlohmann::json::array();
+    nlohmann::json textureCoordinates = nlohmann::json::array();
     for (const auto& texcoord : mesh.texcoords) {
-      texcoords.push_back(eigenToJsonArray(texcoord));
+      textureCoordinates.push_back(eigenToJsonArray(texcoord));
     }
-    legacySkinnedModel["texcoords"] = texcoords;
+    legacySkinnedModel["TextureCoordinates"] = textureCoordinates;
   }
 
-  // Convert texture coordinate faces
-  if (!mesh.texcoord_faces.empty()) {
-    nlohmann::json texcoordFaces = nlohmann::json::array();
-    for (const auto& face : mesh.texcoord_faces) {
-      texcoordFaces.push_back(nlohmann::json::array({face.x(), face.y(), face.z()}));
-    }
-    legacySkinnedModel["texcoord_faces"] = texcoordFaces;
-  }
-
-  // Convert skin weights
-  nlohmann::json skinWeightsJson;
-  nlohmann::json indices = nlohmann::json::array();
-  nlohmann::json weights = nlohmann::json::array();
-
+  // Convert skin weights to Trinity format: SkinningWeights and SkinningOffsets
+  nlohmann::json skinningWeights = nlohmann::json::array();
+  nlohmann::json skinningOffsets = nlohmann::json::array();
+  size_t runningIndex = 0;
+  skinningOffsets.push_back(runningIndex);
   for (int i = 0; i < skinWeights.index.rows(); ++i) {
-    nlohmann::json vertexIndices = nlohmann::json::array();
-    nlohmann::json vertexWeights = nlohmann::json::array();
-
+    int influences = 0;
     for (int j = 0; j < skinWeights.index.cols(); ++j) {
       if (skinWeights.weight(i, j) > 0.0f) {
-        vertexIndices.push_back(skinWeights.index(i, j));
-        vertexWeights.push_back(skinWeights.weight(i, j));
+        nlohmann::json pair = nlohmann::json::array();
+        pair.push_back(skinWeights.index(i, j));
+        pair.push_back(skinWeights.weight(i, j));
+        skinningWeights.push_back(pair);
+        ++influences;
       }
     }
-
-    indices.push_back(vertexIndices);
-    weights.push_back(vertexWeights);
+    runningIndex += influences;
+    skinningOffsets.push_back(runningIndex);
   }
-
-  skinWeightsJson["indices"] = indices;
-  skinWeightsJson["weights"] = weights;
-  legacySkinnedModel["skinWeights"] = skinWeightsJson;
+  legacySkinnedModel["SkinningWeights"] = skinningWeights;
+  legacySkinnedModel["SkinningOffsets"] = skinningOffsets;
 
   return legacySkinnedModel;
 }
@@ -436,19 +495,6 @@ nlohmann::json momentumLocatorsToLegacy(const LocatorList& locators) {
   }
 
   return legacyLocators;
-}
-
-/// Helper function to find field names with multiple possible variants
-nlohmann::json::const_iterator findFieldNames(
-    const nlohmann::json& json,
-    const std::initializer_list<const char*>& names) {
-  for (const auto& name : names) {
-    auto itr = json.find(name);
-    if (itr != json.end()) {
-      return itr;
-    }
-  }
-  return json.end();
 }
 
 } // namespace
