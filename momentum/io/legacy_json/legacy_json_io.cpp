@@ -270,7 +270,7 @@ std::pair<Mesh, SkinWeights> legacySkinnedModelToMomentum(
     }
   }
 
-  // Try Trinity rig format with separate SkinningWeights and SkinningOffsets
+  // Try momentum model rig format with separate SkinningWeights and SkinningOffsets
   auto skinningWeightsItr = findFieldNames(legacySkinnedModel, {"SkinningWeights"});
   auto skinningOffsetsItr = findFieldNames(legacySkinnedModel, {"SkinningOffsets"});
 
@@ -361,7 +361,7 @@ nlohmann::json momentumSkinnedModelToLegacy(const Mesh& mesh, const SkinWeights&
     legacySkinnedModel["TextureCoordinates"] = textureCoordinates;
   }
 
-  // Convert skin weights to Trinity format: SkinningWeights and SkinningOffsets
+  // Convert skin weights to momentum model format: SkinningWeights and SkinningOffsets
   nlohmann::json skinningWeights = nlohmann::json::array();
   nlohmann::json skinningOffsets = nlohmann::json::array();
   size_t runningIndex = 0;
