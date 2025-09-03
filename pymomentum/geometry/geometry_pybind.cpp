@@ -297,8 +297,8 @@ PYBIND11_MODULE(geometry, m) {
           },
           R"(Returns a new character with the passed-in locators.  If 'replace' is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.
 
-          :parameter locators: The locators to add to the character.
-          :parameter replace: If true, replace the existing locators with the passed-in ones.  Otherwise, append the new locators to the existing ones.  Defaults to false.
+          :param locators: The locators to add to the character.
+          :param replace: If true, replace the existing locators with the passed-in ones.  Otherwise, append the new locators to the existing ones.  Defaults to false.
           )",
           py::arg("locators"),
           py::arg("replace") = false)
@@ -355,18 +355,22 @@ PYBIND11_MODULE(geometry, m) {
           py::arg("replace") = false)
       .def_readonly("name", &mm::Character::name, "The character's name.")
       .def_readonly(
-          "skeleton", &mm::Character::skeleton, "The character's skeleton.")
+          "skeleton",
+          &mm::Character::skeleton,
+          "The character's skeleton. See :class:`Skeleton`.")
       .def_readonly(
           "parameter_limits",
           &mm::Character::parameterLimits,
-          "The character's parameter limits.")
+          "The character's parameter limits. See :class:`ParameterLimit`.")
       .def_readonly(
           "parameter_transform",
           &mm::Character::parameterTransform,
           "Maps the reduced k-dimensional modelParameters that are used in the IK solve "
-          "to the full 7*n-dimensional parameters used in the skeleton.")
+          "to the full 7*n-dimensional parameters used in the skeleton. See :class:`ParameterTransform`.")
       .def_readonly(
-          "locators", &mm::Character::locators, "List of locators on the mesh.")
+          "locators",
+          &mm::Character::locators,
+          "List of locators on the mesh. See :class:`Locator`.")
       .def_readonly(
           "skinned_locators",
           &mm::Character::skinnedLocators,
@@ -377,7 +381,7 @@ PYBIND11_MODULE(geometry, m) {
             return (c.mesh) ? std::make_unique<mm::Mesh>(*c.mesh)
                             : mm::Mesh_u();
           },
-          ":return: The character's mesh, or None if not present.")
+          ":return: The character's :class:`Mesh`, or None if not present.")
       .def_property_readonly(
           "has_mesh",
           [](const mm::Character& c) -> bool {
@@ -391,7 +395,7 @@ PYBIND11_MODULE(geometry, m) {
                 ? std::make_unique<mm::SkinWeights>(*c.skinWeights)
                 : mm::SkinWeights_u();
           },
-          "The character's skinning weights.")
+          "The character's skinning weights. See :class:`SkinWeights`.")
       .def_property_readonly(
           "blend_shape",
           [](const mm::Character& c)
@@ -486,7 +490,6 @@ It can be used to solve for shapes and pose simultaneously.
           &pymomentum::skinPoints,
           R"(Skins the points using the character's linear blend skinning.
 
-:param character: A :class:`Character` with both a rest mesh and skinning weights.
 :param skel_state: A torch.Tensor containing either a [nBatch x nJoints x 8] skeleton state or a [nBatch x nJoints x 4 x 4] transforms.
 :param rest_vertices: An optional torch.Tensor containing the rest points; if not passed, the ones stored inside the character are used.
 :return: The vertex positions in worldspace.
@@ -572,8 +575,8 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
 
-:parameter gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
-:return: a valid Character.
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: a valid :class:`Character`.
       )",
           py::arg("gltf_bytes"))
       .def_static(
@@ -582,8 +585,8 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
 
-  :parameter gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
-  :return: a valid Character.
+  :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+  :return: a valid :class:`Character`.
         )",
           py::arg("gltf_bytes"))
       // toGLTF(character, fps, motion)
@@ -593,10 +596,10 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Serialize a character as a GLTF using dictionary form.
 
-:parameter character: A valid character.
-:parameter fps: Frames per second for describing the motion.
-:parameter motion: tuple of vector of parameter names and a P X T matrix. P is number of parameters, T is number of frames.
-:parameter offsets: tuple of vector of joint names and a Vector of size J * 7 (Parameters per joint). Eg. for 3 joints, you would have 21 params.
+:param character: A valid character.
+:param fps: Frames per second for describing the motion.
+:param motion: tuple of vector of parameter names and a P X T matrix. P is number of parameters, T is number of frames.
+:param offsets: tuple of vector of joint names and a Vector of size J * 7 (Parameters per joint). Eg. for 3 joints, you would have 21 params.
 :return: a GLTF representation of Character with motion
       )",
           py::arg("character"))
@@ -607,10 +610,11 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from an FBX file.  Optionally pass in a separate model definition and locators file.
 
-:parameter fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
-:parameter model_filename: Configuration file that defines the parameter mappings and joint limits; e.g. character.cfg.
-:parameter locators_filename: File containing the locators, e.g. character.locators.
-:return: A valid Character.)",
+:param fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
+:param model_filename: Configuration file that defines the parameter mappings and joint limits; e.g. character.cfg.
+:param locators_filename: File containing the locators, e.g. character.locators.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`.)",
           py::arg("fbx_filename"),
           py::arg("model_filename") = std::optional<std::string>{},
           py::arg("locators_filename") = std::optional<std::string>{},
@@ -623,8 +627,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and animation curves from an FBX file.
 
-:parameter fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
-:return: A valid Character, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
+:param fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
           py::arg("fbx_filename"),
           py::arg("permissive") = false)
 
@@ -634,8 +639,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and animation curves from an FBX file.
 
-:parameter fbx_bytes: A Python bytes that is an .fbx file containing the skeleton and skinned mesh.
-:return: A valid Character, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
+:param fbx_bytes: A Python bytes that is an .fbx file containing the skeleton and skinned mesh.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false)
 
@@ -646,8 +652,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from byte array for an FBX file.
 
-:parameter fbx_bytes: An array of bytes in FBX format.
-:return: A valid Character.)",
+:param fbx_bytes: An array of bytes in FBX format.
+:param permissive: If true, ignore certain errors during loading.
+:return: A valid :class:`Character`.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false)
       // loadLocatorsFromFile(character, locatorFile)
@@ -657,20 +664,20 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load locators from a .locators file.
 
-:parameter character: The character to map the locators onto.
-:parameter filename: Filename for the locators.
-:return: A valid Character.)",
+:param character: The character to map the locators onto.
+:param filename: Filename for the locators.
+:return: A valid :class:`Character`.)",
           py::arg("filename"))
       // loadLocatorsFromBytes(character, locatorBytes)
       .def(
           "load_locators_from_bytes",
           &pymomentum::loadLocatorsFromBytes,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load locators from a .locators file.
+          R"(Load locators from a byte array containing .locators file data.
 
-:parameter character: The character to map the locators onto.
-:parameter locator_bytes: A byte array containing the locators.
-:return: A valid Character.)",
+:param character: The character to map the locators onto.
+:param locator_bytes: A byte array containing the locators.
+:return: A valid :class:`Character`.)",
           py::arg("locator_bytes"))
       // localModelDefinitionFromFile(character, modelFile)
       .def(
@@ -679,9 +686,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a model definition from a .model file.  This defines the parameter transform, model parameters, and joint limits.
 
-:parameter character: The character containing a valid skeleton.
-:parameter filename: Filename for the model definition.
-:return: A valid Character.)",
+:param character: The character containing a valid skeleton.
+:param filename: Filename for the model definition.
+:return: A valid :class:`Character`.)",
           py::arg("filename"))
       // localModelDefinitionFromBytes(character, modelBytes)
       .def(
@@ -690,9 +697,9 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a model definition from a .model file.  This defines the parameter transform, model parameters, and joint limits.
 
-:parameter character: The character containing a valid skeleton.
-:parameter model_bytes: Bytes array containing the model definition.
-:return: A valid Character.)",
+:param character: The character containing a valid skeleton.
+:param model_bytes: Bytes array containing the model definition.
+:return: A valid :class:`Character`.)",
           py::arg("model_bytes"))
       // loadCharacterWithMotion(gltfFilename)
       .def_static(
@@ -703,7 +710,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use
 :meth:`load_gltf_with_skel_states`.
 
-:parameter gltfFilename: A .gltf file; e.g. character_s0.glb.
+:param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.
       )",
           py::arg("gltf_filename"))
@@ -715,7 +722,7 @@ saved using momentum, which stores model parameters in a custom extension.  For 
 and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
 
-:parameter gltf_bytes: The bytes of a gltf file.
+:param gltf_bytes: The bytes of a gltf file.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
         )",
           py::arg("gltf_bytes"))
@@ -727,7 +734,7 @@ support the proprietary momentum motion format for storing model parameters in G
 and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
 
-:parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
+:param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
           )",
           py::arg("gltf_filename"))
@@ -739,7 +746,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf file.
 
-:parameter path: A .gltf file; e.g. character_s0.glb.
+:param path: A .gltf file; e.g. character_s0.glb.
       )",
           py::arg("path"))
       // loadURDFCharacterFromFile(urdfPath)
@@ -749,7 +756,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a urdf file.
 
-:parameter urdf_filename: A .urdf file; e.g. character.urdf.
+:param urdf_filename: A .urdf file; e.g. character.urdf.
       )",
           py::arg("urdf_filename"))
       // loadURDFCharacterFromBytes(urdfBytes)
@@ -759,7 +766,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from urdf bytes.
 
-:parameter urdf_bytes: Bytes array containing the urdf definition.
+:param urdf_bytes: Bytes array containing the urdf definition.
       )",
           py::arg("urdf_bytes"))
       // saveGLTFCharacterToFile(filename, character)
@@ -769,12 +776,12 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to a gltf file.
 
-:parameter path: A .gltf export filename.
-:parameter character: A Character to be saved to the output file.
-:parameter fps: Frequency in frames per second
-:parameter motion: Pose array in [n_frames x n_parameters]
-:parameter offsets: Offset array in [n_joints x n_parameters_per_joint]
-:parameter markers: Additional marker (3d positions) data in [n_frames][n_markers]
+:param path: A .gltf export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second
+:param motion: Pose array in [n_frames x n_parameters]
+:param offsets: Offset array in [n_joints x n_parameters_per_joint]
+:param markers: Additional marker (3d positions) data in [n_frames][n_markers]
       )",
           py::arg("path"),
           py::arg("character"),
@@ -2671,9 +2678,9 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 This is functionally identical to :meth:`ParameterTransform.apply` except that it allows
 batching on the character.
 
-:parameter character: A character or list of characters.
+:param character: A character or list of characters.
 :type character: Union[Character, List[Character]]
-:parameter modelParameters: A [nBatch x nParams] tensor of model parameters.
+:param model_parameters: A [nBatch x nParams] tensor of model parameters.
 
 :return: a tensor of joint parameters.)",
       py::arg("character"),
