@@ -14,6 +14,25 @@ For simplicity, we have built individual viewers for each file format. Each view
 The buck mode `@arvr/mode/win/opt` is for Windows. Use `@arvr/mode/mac-arm/opt` for macOS or `@arvr/mode/platform010/opt` for Linux.
 :::
 
+## Troubleshooting
+
+If you haven't installed the rerun viewer on your system before running the viewer examples, you may encounter the following error:
+
+```
+[2025-09-03T17:30:10Z WARN  rerun_c::error] Error message was too long for C error description buffer. Full message
+    Failed to find Rerun Viewer executable in PATH.
+```
+
+To resolve this issue, you have two options:
+
+**Option 1:** Install the rerun viewer on your system:
+
+```
+pixi global install rerun-sdk==<same_rerun_sdk_version>
+```
+
+**Option 2:** Run `buck run rerun` before running the viewer examples.
+
 </FbInternalOnly>
 
 ## GLB Viewer
