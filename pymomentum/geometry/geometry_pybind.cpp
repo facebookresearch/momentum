@@ -2445,7 +2445,11 @@ The resulting tensors are as follows:
   //    pos
   //    occluded
   markerClass.def(py::init())
-      .def(py::init<const std::string&, const Eigen::Vector3d&, const bool>())
+      .def(
+          py::init<const std::string&, const Eigen::Vector3d&, const bool>(),
+          py::arg("name"),
+          py::arg("pos"),
+          py::arg("occluded"))
       .def_readwrite("name", &mm::Marker::name, "Name of the marker")
       .def_readwrite("pos", &mm::Marker::pos, "Marker 3d position")
       .def_readwrite(
