@@ -9,6 +9,14 @@ extensions = [
     "sphinx.ext.autodoc",
 ]
 
+# Configure autodoc to include constructors and other special methods
+autodoc_default_options = {
+    "special-members": "__init__",
+    "show-inheritance": True,
+    "members": True,
+    "undoc-members": True,
+}
+
 exclude_patterns = [
     ".pixi",
     "build",
