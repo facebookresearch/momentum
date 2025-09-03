@@ -88,41 +88,120 @@ PYBIND11_MODULE(geometry, m) {
       m,
       "Character",
       "A complete momentum character including its skeleton and mesh.");
-  auto parameterTransformClass =
-      py::class_<mm::ParameterTransform>(m, "ParameterTransform");
-  auto inverseParameterTransformClass =
-      py::class_<mm::InverseParameterTransform>(m, "InverseParameterTransform");
-  auto meshClass = py::class_<mm::Mesh>(m, "Mesh");
-  auto jointClass = py::class_<mm::Joint>(m, "Joint");
-  auto skeletonClass = py::class_<mm::Skeleton>(m, "Skeleton");
-  auto skinWeightsClass = py::class_<mm::SkinWeights>(m, "SkinWeights");
-  auto locatorClass = py::class_<mm::Locator>(m, "Locator");
+  auto parameterTransformClass = py::class_<mm::ParameterTransform>(
+      m,
+      "ParameterTransform",
+      "Maps reduced model parameters to full joint parameters for character animation. "
+      "This class handles the transformation from a compact set of model parameters "
+      "(typically ~50) used in optimization to the full 7*nJoints parameters needed "
+      "for skeleton posing.");
+  auto inverseParameterTransformClass = py::class_<
+      mm::InverseParameterTransform>(
+      m,
+      "InverseParameterTransform",
+      "Inverse parameter transform that maps from full joint parameters back to "
+      "reduced model parameters. Used for fitting model parameters to existing "
+      "joint parameter data.");
+  auto meshClass = py::class_<mm::Mesh>(
+      m,
+      "Mesh",
+      "A 3D mesh containing vertices, faces, normals, and optional texture coordinates. "
+      "Supports triangular meshes with additional data like vertex colors, confidence values, "
+      "and line segments for wireframe rendering.");
+  auto jointClass = py::class_<mm::Joint>(
+      m,
+      "Joint",
+      "A single joint in a character skeleton. Contains the joint's name, parent relationship, "
+      "pre-rotation, and translation offset from its parent joint.");
+  auto skeletonClass = py::class_<mm::Skeleton>(
+      m,
+      "Skeleton",
+      "A hierarchical skeleton structure containing joints with parent-child relationships. "
+      "Each joint has a name, parent index, pre-rotation, and translation offset. "
+      "Used for character animation and forward kinematics.");
+  auto skinWeightsClass = py::class_<mm::SkinWeights>(
+      m,
+      "SkinWeights",
+      "Linear blend skinning weights that define how mesh vertices are influenced by skeleton joints. "
+      "Contains weight values and joint indices for each vertex, enabling smooth deformation "
+      "of the mesh during character animation.");
+  auto locatorClass = py::class_<mm::Locator>(
+      m,
+      "Locator",
+      "A 3D point attached to a skeleton joint used for inverse kinematics constraints. "
+      "Locators define target positions that the character should reach during pose optimization, "
+      "with configurable weights and axis locks for fine-grained control.");
   auto skinnedLocatorClass =
       py::class_<mm::SkinnedLocator>(m, "SkinnedLocator");
-  auto blendShapeClass =
-      py::class_<mm::BlendShape, std::shared_ptr<mm::BlendShape>>(
-          m, "BlendShape");
-  auto capsuleClass = py::class_<mm::TaperedCapsule>(m, "TaperedCapsule");
-  auto markerClass = py::class_<mm::Marker>(m, "Marker");
-  auto markerSequenceClass =
-      py::class_<mm::MarkerSequence>(m, "MarkerSequence");
-  auto fbxCoordSystemInfoClass =
-      py::class_<mm::FBXCoordSystemInfo>(m, "FBXCoordSystemInfo");
-  auto parameterLimitClass =
-      py::class_<mm::ParameterLimit>(m, "ParameterLimit");
-  auto parameterLimitDataClass = py::class_<mm::LimitData>(m, "LimitData");
-  auto parameterLimitMinMaxClass =
-      py::class_<mm::LimitMinMax>(m, "LimitMinMax");
-  auto parameterLimitMinMaxJointClass =
-      py::class_<mm::LimitMinMaxJoint>(m, "LimitMinMaxJoint");
-  auto parameterLimitLinearClass =
-      py::class_<mm::LimitLinear>(m, "LimitLinear");
-  auto parameterLimitLinearJointClass =
-      py::class_<mm::LimitLinearJoint>(m, "LimitLinearJoint");
-  auto parameterLimitHalfPlaneClass =
-      py::class_<mm::LimitHalfPlane>(m, "LimitHalfPlane");
-  auto parameterLimitEllipsoidClass =
-      py::class_<mm::LimitEllipsoid>(m, "LimitEllipsoid");
+  auto blendShapeClass = py::class_<
+      mm::BlendShape,
+      std::shared_ptr<mm::BlendShape>>(
+      m,
+      "BlendShape",
+      "A blend shape basis for facial expressions and corrective shapes. "
+      "Contains a base mesh and a set of shape vectors that can be linearly "
+      "combined to create different facial expressions or body shape variations.");
+  auto capsuleClass = py::class_<mm::TaperedCapsule>(
+      m,
+      "TaperedCapsule",
+      "A tapered capsule primitive used for collision detection and physics simulation. "
+      "Represents a capsule with potentially different radii at each end, attached to a skeleton joint.");
+  auto markerClass = py::class_<mm::Marker>(
+      m,
+      "Marker",
+      "A 3D marker used in motion capture systems. Contains position data and occlusion status "
+      "for tracking points on subjects during motion capture recording.");
+  auto markerSequenceClass = py::class_<mm::MarkerSequence>(
+      m,
+      "MarkerSequence",
+      "A sequence of motion capture marker data over time. Contains marker positions "
+      "and occlusion status for each frame, along with frame rate information.");
+  auto fbxCoordSystemInfoClass = py::class_<mm::FBXCoordSystemInfo>(
+      m,
+      "FBXCoordSystemInfo",
+      "FBX coordinate system information containing up vector, front vector, and handedness. "
+      "Used when importing/exporting FBX files to ensure proper coordinate system conversion.");
+  auto parameterLimitClass = py::class_<mm::ParameterLimit>(
+      m,
+      "ParameterLimit",
+      "A constraint on model or joint parameters used to enforce realistic poses. "
+      "Supports various limit types including min/max bounds, linear relationships, "
+      "ellipsoid constraints, and half-plane constraints.");
+  auto parameterLimitDataClass = py::class_<mm::LimitData>(
+      m,
+      "LimitData",
+      "Data container for parameter limits. Contains the specific constraint data "
+      "for different limit types (MinMax, Linear, Ellipsoid, etc.).");
+  auto parameterLimitMinMaxClass = py::class_<mm::LimitMinMax>(
+      m,
+      "LimitMinMax",
+      "Min/max constraint data for model parameters. Contains the parameter index "
+      "and the minimum and maximum allowed values.");
+  auto parameterLimitMinMaxJointClass = py::class_<mm::LimitMinMaxJoint>(
+      m,
+      "LimitMinMaxJoint",
+      "Min/max constraint data for joint parameters. Contains the joint index, "
+      "joint parameter index, and the minimum and maximum allowed values.");
+  auto parameterLimitLinearClass = py::class_<mm::LimitLinear>(
+      m,
+      "LimitLinear",
+      "Linear constraint data for model parameters. Enforces a linear relationship "
+      "between two parameters of the form: p0 = scale * p1 + offset.");
+  auto parameterLimitLinearJointClass = py::class_<mm::LimitLinearJoint>(
+      m,
+      "LimitLinearJoint",
+      "Linear constraint data for joint parameters. Enforces a linear relationship "
+      "between two joint parameters of the form: p0 = scale * p1 + offset.");
+  auto parameterLimitHalfPlaneClass = py::class_<mm::LimitHalfPlane>(
+      m,
+      "LimitHalfPlane",
+      "Half-plane constraint data for model parameters. Enforces that parameters "
+      "lie on one side of a plane defined by a normal vector and offset.");
+  auto parameterLimitEllipsoidClass = py::class_<mm::LimitEllipsoid>(
+      m,
+      "LimitEllipsoid",
+      "Ellipsoid constraint data for model parameters. Enforces that parameters "
+      "lie within an ellipsoid defined by a transformation matrix and offset.");
 
   // =====================================================
   // momentum::Character
