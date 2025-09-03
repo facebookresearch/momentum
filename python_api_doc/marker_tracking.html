@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.marker_tracking</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig"><code class="docutils literal notranslate"><span class="pre">BaseConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.__init__"><code class="docutils literal notranslate"><span class="pre">BaseConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.debug"><code class="docutils literal notranslate"><span class="pre">BaseConfig.debug</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.loss_alpha"><code class="docutils literal notranslate"><span class="pre">BaseConfig.loss_alpha</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.max_iter"><code class="docutils literal notranslate"><span class="pre">BaseConfig.max_iter</span></code></a></li>
@@ -57,6 +58,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.__init__"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.calib_frames</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.enforce_floor_in_first_frame</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.first_frame_pose_constraint_set</span></code></a></li>
@@ -67,18 +69,21 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions"><code class="docutils literal notranslate"><span class="pre">ModelOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.__init__"><code class="docutils literal notranslate"><span class="pre">ModelOptions.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.locators"><code class="docutils literal notranslate"><span class="pre">ModelOptions.locators</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.model"><code class="docutils literal notranslate"><span class="pre">ModelOptions.model</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.parameters"><code class="docutils literal notranslate"><span class="pre">ModelOptions.parameters</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig"><code class="docutils literal notranslate"><span class="pre">RefineConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.__init__"><code class="docutils literal notranslate"><span class="pre">RefineConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.calib_id"><code class="docutils literal notranslate"><span class="pre">RefineConfig.calib_id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.calib_locators"><code class="docutils literal notranslate"><span class="pre">RefineConfig.calib_locators</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.regularizer"><code class="docutils literal notranslate"><span class="pre">RefineConfig.regularizer</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig"><code class="docutils literal notranslate"><span class="pre">TrackingConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.__init__"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.collision_error_weight"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.collision_error_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.smoothing"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.smoothing</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.smoothing_weights"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.smoothing_weights</span></code></a></li>
@@ -125,6 +130,16 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">BaseConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Represents base config class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.BaseConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.BaseConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, debug: bool = False) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.debug">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.debug" title="Link to this definition"></a></dt>
@@ -156,6 +171,16 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">CalibrationConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig" title="pymomentum.marker_tracking.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></a></p>
 <p>Config for the body scale calibration step</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.calib_frames">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames" title="Link to this definition"></a></dt>
@@ -205,6 +230,16 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">ModelOptions</span></span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Model options to specify the template model, parameter transform and locator mappings</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.ModelOptions) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.ModelOptions, arg0: str, arg1: str, arg2: str) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions.locators">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">locators</span></span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions.locators" title="Link to this definition"></a></dt>
@@ -230,6 +265,16 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">RefineConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig" title="pymomentum.marker_tracking.TrackingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrackingConfig</span></code></a></p>
 <p>Config for refining a tracked motion.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.RefineConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.RefineConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, debug: bool = False, smoothing: float = 0.0, collision_error_weight: float = 0.0, smoothing_weights: numpy.ndarray[numpy.float32[m, 1]] = array([], dtype=float32), regularizer: float = 0.0, calib_id: bool = False, calib_locators: bool = False) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig.calib_id">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_id</span></span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig.calib_id" title="Link to this definition"></a></dt>
@@ -255,6 +300,16 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">TrackingConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig" title="pymomentum.marker_tracking.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></a></p>
 <p>Config for the tracking optimization step</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.TrackingConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.TrackingConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, debug: bool = False, smoothing: float = 0.0, collision_error_weight: float = 0.0, smoothing_weights: numpy.ndarray[numpy.float32[m, 1]] = array([], dtype=float32)) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.collision_error_weight">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collision_error_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.collision_error_weight" title="Link to this definition"></a></dt>

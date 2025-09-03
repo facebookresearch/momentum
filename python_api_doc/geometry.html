@@ -46,6 +46,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.geometry</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.BlendShape"><code class="docutils literal notranslate"><span class="pre">BlendShape</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.__init__"><code class="docutils literal notranslate"><span class="pre">BlendShape.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.base_shape"><code class="docutils literal notranslate"><span class="pre">BlendShape.base_shape</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.compute_shape"><code class="docutils literal notranslate"><span class="pre">BlendShape.compute_shape()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.from_bytes"><code class="docutils literal notranslate"><span class="pre">BlendShape.from_bytes()</span></code></a></li>
@@ -59,6 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Character"><code class="docutils literal notranslate"><span class="pre">Character</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.__init__"><code class="docutils literal notranslate"><span class="pre">Character.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.apply_model_param_limits"><code class="docutils literal notranslate"><span class="pre">Character.apply_model_param_limits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.bake_blend_shape"><code class="docutils literal notranslate"><span class="pre">Character.bake_blend_shape()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.bind_pose"><code class="docutils literal notranslate"><span class="pre">Character.bind_pose</span></code></a></li>
@@ -125,11 +127,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem.LeftHanded"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem.LeftHanded</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem.RightHanded"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem.RightHanded</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem.__init__"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem.name"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem.value"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystem.value</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystemInfo"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystemInfo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystemInfo.__init__"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystemInfo.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystemInfo.coordSystem"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystemInfo.coordSystem</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystemInfo.frontVector"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystemInfo.frontVector</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystemInfo.upVector"><code class="docutils literal notranslate"><span class="pre">FBXCoordSystemInfo.upVector</span></code></a></li>
@@ -138,6 +142,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector"><code class="docutils literal notranslate"><span class="pre">FBXFrontVector</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector.ParityEven"><code class="docutils literal notranslate"><span class="pre">FBXFrontVector.ParityEven</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector.ParityOdd"><code class="docutils literal notranslate"><span class="pre">FBXFrontVector.ParityOdd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector.__init__"><code class="docutils literal notranslate"><span class="pre">FBXFrontVector.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector.name"><code class="docutils literal notranslate"><span class="pre">FBXFrontVector.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector.value"><code class="docutils literal notranslate"><span class="pre">FBXFrontVector.value</span></code></a></li>
 </ul>
@@ -146,15 +151,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.XAxis"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.XAxis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.YAxis"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.YAxis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.ZAxis"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.ZAxis</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.__init__"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.name"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.value"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.value</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.InverseParameterTransform"><code class="docutils literal notranslate"><span class="pre">InverseParameterTransform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.InverseParameterTransform.__init__"><code class="docutils literal notranslate"><span class="pre">InverseParameterTransform.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.InverseParameterTransform.apply"><code class="docutils literal notranslate"><span class="pre">InverseParameterTransform.apply()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Joint"><code class="docutils literal notranslate"><span class="pre">Joint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Joint.__init__"><code class="docutils literal notranslate"><span class="pre">Joint.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Joint.name"><code class="docutils literal notranslate"><span class="pre">Joint.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Joint.parent"><code class="docutils literal notranslate"><span class="pre">Joint.parent</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Joint.pre_rotation"><code class="docutils literal notranslate"><span class="pre">Joint.pre_rotation</span></code></a></li>
@@ -163,6 +171,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitData"><code class="docutils literal notranslate"><span class="pre">LimitData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitData.__init__"><code class="docutils literal notranslate"><span class="pre">LimitData.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitData.ellipsoid"><code class="docutils literal notranslate"><span class="pre">LimitData.ellipsoid</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitData.halfplane"><code class="docutils literal notranslate"><span class="pre">LimitData.halfplane</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitData.linear"><code class="docutils literal notranslate"><span class="pre">LimitData.linear</span></code></a></li>
@@ -172,6 +181,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitEllipsoid"><code class="docutils literal notranslate"><span class="pre">LimitEllipsoid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitEllipsoid.__init__"><code class="docutils literal notranslate"><span class="pre">LimitEllipsoid.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitEllipsoid.ellipsoid"><code class="docutils literal notranslate"><span class="pre">LimitEllipsoid.ellipsoid</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitEllipsoid.ellipsoid_inv"><code class="docutils literal notranslate"><span class="pre">LimitEllipsoid.ellipsoid_inv</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitEllipsoid.ellipsoid_parent"><code class="docutils literal notranslate"><span class="pre">LimitEllipsoid.ellipsoid_parent</span></code></a></li>
@@ -180,6 +190,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitHalfPlane"><code class="docutils literal notranslate"><span class="pre">LimitHalfPlane</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitHalfPlane.__init__"><code class="docutils literal notranslate"><span class="pre">LimitHalfPlane.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitHalfPlane.normal"><code class="docutils literal notranslate"><span class="pre">LimitHalfPlane.normal</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitHalfPlane.offset"><code class="docutils literal notranslate"><span class="pre">LimitHalfPlane.offset</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitHalfPlane.param1_index"><code class="docutils literal notranslate"><span class="pre">LimitHalfPlane.param1_index</span></code></a></li>
@@ -187,6 +198,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitLinear"><code class="docutils literal notranslate"><span class="pre">LimitLinear</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinear.__init__"><code class="docutils literal notranslate"><span class="pre">LimitLinear.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinear.offset"><code class="docutils literal notranslate"><span class="pre">LimitLinear.offset</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinear.range_max"><code class="docutils literal notranslate"><span class="pre">LimitLinear.range_max</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinear.range_min"><code class="docutils literal notranslate"><span class="pre">LimitLinear.range_min</span></code></a></li>
@@ -196,6 +208,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitLinearJoint"><code class="docutils literal notranslate"><span class="pre">LimitLinearJoint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinearJoint.__init__"><code class="docutils literal notranslate"><span class="pre">LimitLinearJoint.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinearJoint.offset"><code class="docutils literal notranslate"><span class="pre">LimitLinearJoint.offset</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinearJoint.range_max"><code class="docutils literal notranslate"><span class="pre">LimitLinearJoint.range_max</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitLinearJoint.range_min"><code class="docutils literal notranslate"><span class="pre">LimitLinearJoint.range_min</span></code></a></li>
@@ -207,12 +220,14 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitMinMax"><code class="docutils literal notranslate"><span class="pre">LimitMinMax</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMax.__init__"><code class="docutils literal notranslate"><span class="pre">LimitMinMax.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMax.max"><code class="docutils literal notranslate"><span class="pre">LimitMinMax.max</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMax.min"><code class="docutils literal notranslate"><span class="pre">LimitMinMax.min</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMax.model_parameter_index"><code class="docutils literal notranslate"><span class="pre">LimitMinMax.model_parameter_index</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LimitMinMaxJoint"><code class="docutils literal notranslate"><span class="pre">LimitMinMaxJoint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMaxJoint.__init__"><code class="docutils literal notranslate"><span class="pre">LimitMinMaxJoint.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMaxJoint.joint_index"><code class="docutils literal notranslate"><span class="pre">LimitMinMaxJoint.joint_index</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMaxJoint.joint_parameter_index"><code class="docutils literal notranslate"><span class="pre">LimitMinMaxJoint.joint_parameter_index</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitMinMaxJoint.max"><code class="docutils literal notranslate"><span class="pre">LimitMinMaxJoint.max</span></code></a></li>
@@ -227,11 +242,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitType.MinMax"><code class="docutils literal notranslate"><span class="pre">LimitType.MinMax</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitType.MinMaxJoint"><code class="docutils literal notranslate"><span class="pre">LimitType.MinMaxJoint</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitType.MinMaxJointPassive"><code class="docutils literal notranslate"><span class="pre">LimitType.MinMaxJointPassive</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitType.__init__"><code class="docutils literal notranslate"><span class="pre">LimitType.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitType.name"><code class="docutils literal notranslate"><span class="pre">LimitType.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LimitType.value"><code class="docutils literal notranslate"><span class="pre">LimitType.value</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Locator"><code class="docutils literal notranslate"><span class="pre">Locator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Locator.__init__"><code class="docutils literal notranslate"><span class="pre">Locator.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Locator.limit_origin"><code class="docutils literal notranslate"><span class="pre">Locator.limit_origin</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Locator.limit_weight"><code class="docutils literal notranslate"><span class="pre">Locator.limit_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Locator.locked"><code class="docutils literal notranslate"><span class="pre">Locator.locked</span></code></a></li>
@@ -242,18 +259,21 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Marker"><code class="docutils literal notranslate"><span class="pre">Marker</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.__init__"><code class="docutils literal notranslate"><span class="pre">Marker.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.name"><code class="docutils literal notranslate"><span class="pre">Marker.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.occluded"><code class="docutils literal notranslate"><span class="pre">Marker.occluded</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.pos"><code class="docutils literal notranslate"><span class="pre">Marker.pos</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.MarkerSequence"><code class="docutils literal notranslate"><span class="pre">MarkerSequence</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.MarkerSequence.__init__"><code class="docutils literal notranslate"><span class="pre">MarkerSequence.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.MarkerSequence.fps"><code class="docutils literal notranslate"><span class="pre">MarkerSequence.fps</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.MarkerSequence.frames"><code class="docutils literal notranslate"><span class="pre">MarkerSequence.frames</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.MarkerSequence.name"><code class="docutils literal notranslate"><span class="pre">MarkerSequence.name</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mesh.__init__"><code class="docutils literal notranslate"><span class="pre">Mesh.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mesh.colors"><code class="docutils literal notranslate"><span class="pre">Mesh.colors</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mesh.confidence"><code class="docutils literal notranslate"><span class="pre">Mesh.confidence</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mesh.faces"><code class="docutils literal notranslate"><span class="pre">Mesh.faces</span></code></a></li>
@@ -270,6 +290,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Mppca"><code class="docutils literal notranslate"><span class="pre">Mppca</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.__init__"><code class="docutils literal notranslate"><span class="pre">Mppca.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.from_bytes"><code class="docutils literal notranslate"><span class="pre">Mppca.from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.get_mixture"><code class="docutils literal notranslate"><span class="pre">Mppca.get_mixture()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.load"><code class="docutils literal notranslate"><span class="pre">Mppca.load()</span></code></a></li>
@@ -281,6 +302,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit"><code class="docutils literal notranslate"><span class="pre">ParameterLimit</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit.__init__"><code class="docutils literal notranslate"><span class="pre">ParameterLimit.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit.create_ellipsoid"><code class="docutils literal notranslate"><span class="pre">ParameterLimit.create_ellipsoid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit.create_halfplane"><code class="docutils literal notranslate"><span class="pre">ParameterLimit.create_halfplane()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit.create_linear"><code class="docutils literal notranslate"><span class="pre">ParameterLimit.create_linear()</span></code></a></li>
@@ -293,6 +315,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform"><code class="docutils literal notranslate"><span class="pre">ParameterTransform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.__init__"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.all_parameters"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.all_parameters</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.apply"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.apply()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.blend_shape_parameters"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.blend_shape_parameters</span></code></a></li>
@@ -310,6 +333,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Skeleton"><code class="docutils literal notranslate"><span class="pre">Skeleton</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Skeleton.__init__"><code class="docutils literal notranslate"><span class="pre">Skeleton.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Skeleton.get_child_joints"><code class="docutils literal notranslate"><span class="pre">Skeleton.get_child_joints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Skeleton.get_parent"><code class="docutils literal notranslate"><span class="pre">Skeleton.get_parent()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Skeleton.is_ancestor"><code class="docutils literal notranslate"><span class="pre">Skeleton.is_ancestor()</span></code></a></li>
@@ -324,11 +348,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.SkinWeights"><code class="docutils literal notranslate"><span class="pre">SkinWeights</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.__init__"><code class="docutils literal notranslate"><span class="pre">SkinWeights.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.index"><code class="docutils literal notranslate"><span class="pre">SkinWeights.index</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.weight"><code class="docutils literal notranslate"><span class="pre">SkinWeights.weight</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.__init__"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.name"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.parents"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.parents</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator.position"><code class="docutils literal notranslate"><span class="pre">SkinnedLocator.position</span></code></a></li>
@@ -337,6 +363,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule.__init__"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule.length"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule.length</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule.parent"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule.parent</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule.radius"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule.radius</span></code></a></li>
@@ -409,6 +436,11 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">BlendShape</span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A blend shape basis for facial expressions and corrective shapes. Contains a base mesh and a set of shape vectors that can be linearly combined to create different facial expressions or body shape variations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.BlendShape.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.base_shape">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">base_shape</span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.base_shape" title="Link to this definition"></a></dt>
@@ -528,6 +560,11 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Character</span></span><a class="headerlink" href="#pymomentum.geometry.Character" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A complete momentum character including its skeleton and mesh.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><span class="pre">pymomentum.geometry.Skeleton</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">locators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Locator" title="pymomentum.geometry.Locator"><span class="pre">pymomentum.geometry.Locator</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.apply_model_param_limits">
 <span class="sig-name descname"><span class="pre">apply_model_param_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.apply_model_param_limits" title="Link to this definition"></a></dt>
@@ -1294,6 +1331,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <span class="sig-name descname"><span class="pre">RightHanded</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FBXCoordSystem.RightHanded:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystem.RightHanded" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FBXCoordSystem.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem" title="pymomentum.geometry.FBXCoordSystem"><span class="pre">pymomentum.geometry.FBXCoordSystem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystem.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXCoordSystem.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystem.name" title="Link to this definition"></a></dt>
@@ -1311,6 +1353,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">FBXCoordSystemInfo</span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystemInfo" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>FBX coordinate system information containing up vector, front vector, and handedness. Used when importing/exporting FBX files to ensure proper coordinate system conversion.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FBXCoordSystemInfo.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystemInfo" title="pymomentum.geometry.FBXCoordSystemInfo"><span class="pre">pymomentum.geometry.FBXCoordSystemInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upVector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector" title="pymomentum.geometry.FBXUpVector"><span class="pre">pymomentum.geometry.FBXUpVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frontVector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector" title="pymomentum.geometry.FBXFrontVector"><span class="pre">pymomentum.geometry.FBXFrontVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordSystem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXCoordSystem" title="pymomentum.geometry.FBXCoordSystem"><span class="pre">pymomentum.geometry.FBXCoordSystem</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystemInfo.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXCoordSystemInfo.coordSystem">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordSystem</span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystemInfo.coordSystem" title="Link to this definition"></a></dt>
@@ -1348,6 +1395,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <span class="sig-name descname"><span class="pre">ParityOdd</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FBXFrontVector.ParityOdd:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.FBXFrontVector.ParityOdd" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FBXFrontVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXFrontVector" title="pymomentum.geometry.FBXFrontVector"><span class="pre">pymomentum.geometry.FBXFrontVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FBXFrontVector.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXFrontVector.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.FBXFrontVector.name" title="Link to this definition"></a></dt>
@@ -1383,6 +1435,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <span class="sig-name descname"><span class="pre">ZAxis</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FBXUpVector.ZAxis:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.FBXUpVector.ZAxis" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FBXUpVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector" title="pymomentum.geometry.FBXUpVector"><span class="pre">pymomentum.geometry.FBXUpVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FBXUpVector.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXUpVector.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.FBXUpVector.name" title="Link to this definition"></a></dt>
@@ -1400,6 +1457,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">InverseParameterTransform</span></span><a class="headerlink" href="#pymomentum.geometry.InverseParameterTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Inverse parameter transform that maps from full joint parameters back to reduced model parameters. Used for fitting model parameters to existing joint parameter data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.InverseParameterTransform.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.InverseParameterTransform.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.InverseParameterTransform.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.InverseParameterTransform" title="pymomentum.geometry.InverseParameterTransform"><span class="pre">pymomentum.geometry.InverseParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.InverseParameterTransform.apply" title="Link to this definition"></a></dt>
@@ -1422,6 +1484,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Joint</span></span><a class="headerlink" href="#pymomentum.geometry.Joint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A single joint in a character skeleton. Contains the joint’s name, parent relationship, pre-rotation, and translation offset from its parent joint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Joint.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Joint" title="pymomentum.geometry.Joint"><span class="pre">pymomentum.geometry.Joint</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translation_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Joint.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Joint.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.Joint.name" title="Link to this definition"></a></dt>
@@ -1458,6 +1525,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitData</span></span><a class="headerlink" href="#pymomentum.geometry.LimitData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Data container for parameter limits. Contains the specific constraint data for different limit types (MinMax, Linear, Ellipsoid, etc.).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitData.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitData.ellipsoid">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ellipsoid</span></span><a class="headerlink" href="#pymomentum.geometry.LimitData.ellipsoid" title="Link to this definition"></a></dt>
@@ -1501,6 +1573,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitEllipsoid</span></span><a class="headerlink" href="#pymomentum.geometry.LimitEllipsoid" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Ellipsoid constraint data for model parameters. Enforces that parameters lie within an ellipsoid defined by a transformation matrix and offset.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitEllipsoid.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitEllipsoid.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitEllipsoid.ellipsoid">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ellipsoid</span></span><a class="headerlink" href="#pymomentum.geometry.LimitEllipsoid.ellipsoid" title="Link to this definition"></a></dt>
@@ -1533,6 +1610,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitHalfPlane</span></span><a class="headerlink" href="#pymomentum.geometry.LimitHalfPlane" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Half-plane constraint data for model parameters. Enforces that parameters lie on one side of a plane defined by a normal vector and offset.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitHalfPlane.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitHalfPlane.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitHalfPlane.normal">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normal</span></span><a class="headerlink" href="#pymomentum.geometry.LimitHalfPlane.normal" title="Link to this definition"></a></dt>
@@ -1560,6 +1642,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitLinear</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinear" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Linear constraint data for model parameters. Enforces a linear relationship between two parameters of the form: p0 = scale * p1 + offset.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitLinear.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitLinear.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitLinear.offset">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinear.offset" title="Link to this definition"></a></dt>
@@ -1601,6 +1688,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitLinearJoint</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinearJoint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Linear constraint data for joint parameters. Enforces a linear relationship between two joint parameters of the form: p0 = scale * p1 + offset.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitLinearJoint.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitLinearJoint.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitLinearJoint.offset">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinearJoint.offset" title="Link to this definition"></a></dt>
@@ -1654,6 +1746,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitMinMax</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMax" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Min/max constraint data for model parameters. Contains the parameter index and the minimum and maximum allowed values.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMax.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitMinMax.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMax.max">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMax.max" title="Link to this definition"></a></dt>
@@ -1679,6 +1776,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitMinMaxJoint</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMaxJoint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Min/max constraint data for joint parameters. Contains the joint index, joint parameter index, and the minimum and maximum allowed values.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMaxJoint.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.LimitMinMaxJoint.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMaxJoint.joint_index">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint_index</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMaxJoint.joint_index" title="Link to this definition"></a></dt>
@@ -1755,6 +1857,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <span class="sig-name descname"><span class="pre">MinMaxJointPassive</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LimitType.MinMaxJointPassive:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LimitType.MinMaxJointPassive" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LimitType.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.LimitType" title="pymomentum.geometry.LimitType"><span class="pre">pymomentum.geometry.LimitType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.LimitType.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitType.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.LimitType.name" title="Link to this definition"></a></dt>
@@ -1772,6 +1879,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Locator</span></span><a class="headerlink" href="#pymomentum.geometry.Locator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A 3D point attached to a skeleton joint used for inverse kinematics constraints. Locators define target positions that the character should reach during pose optimization, with configurable weights and axis locks for fine-grained control.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Locator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Locator" title="pymomentum.geometry.Locator"><span class="pre">pymomentum.geometry.Locator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'uninitialized'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">18446744073709551615</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.,</span> <span class="pre">0.],</span> <span class="pre">dtype=float32)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([0,</span> <span class="pre">0,</span> <span class="pre">0],</span> <span class="pre">dtype=int32)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.,</span> <span class="pre">0.],</span> <span class="pre">dtype=float32)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.,</span> <span class="pre">0.],</span> <span class="pre">dtype=float32)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Locator.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Locator.limit_origin">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">limit_origin</span></span><a class="headerlink" href="#pymomentum.geometry.Locator.limit_origin" title="Link to this definition"></a></dt>
@@ -1821,6 +1933,16 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><a class="headerlink" href="#pymomentum.geometry.Marker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A 3D marker used in motion capture systems. Contains position data and occlusion status for tracking points on subjects during motion capture recording.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Marker.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.Marker.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.geometry.Marker) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.geometry.Marker, arg0: str, arg1: numpy.ndarray[numpy.float64[3, 1]], arg2: bool) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Marker.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.Marker.name" title="Link to this definition"></a></dt>
@@ -1846,6 +1968,11 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">MarkerSequence</span></span><a class="headerlink" href="#pymomentum.geometry.MarkerSequence" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A sequence of motion capture marker data over time. Contains marker positions and occlusion status for each frame, along with frame rate information.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.MarkerSequence.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.MarkerSequence" title="pymomentum.geometry.MarkerSequence"><span class="pre">pymomentum.geometry.MarkerSequence</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.MarkerSequence.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.MarkerSequence.fps">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fps</span></span><a class="headerlink" href="#pymomentum.geometry.MarkerSequence.fps" title="Link to this definition"></a></dt>
@@ -1871,6 +1998,26 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><a class="headerlink" href="#pymomentum.geometry.Mesh" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A 3D mesh containing vertices, faces, normals, and optional texture coordinates. Supports triangular meshes with additional data like vertex colors, confidence values, and line segments for wireframe rendering.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Mesh.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texcoords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texcoord_faces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texcoord_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Mesh.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> – n x 3 array of vertex locations.</p></li>
+<li><p><strong>faces</strong> – n x 3 array of triangles.</p></li>
+<li><p><strong>normals</strong> – Optional n x 3 array of vertex normals.  If not passed in, vertex normals will be computed automatically.</p></li>
+<li><p><strong>lines</strong> – Optional list of lines, where each line is a list of vertex indices.</p></li>
+<li><p><strong>colors</strong> – Optional n x 3 array of vertex colors.</p></li>
+<li><p><strong>confidence</strong> – Optional n x 1 array of vertex confidence values.</p></li>
+<li><p><strong>texcoords</strong> – Optional n x 2 array of texture coordinates.</p></li>
+<li><p><strong>texcoord_faces</strong> – Optional n x 3 array of triangles in the texture map.  Each triangle corresponds to a triangle on the mesh, but indices should refer to the texcoord array.</p></li>
+<li><p><strong>texcoord_lines</strong> – Optional list of lines, where each line is a list of texture coordinate indices.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Mesh.colors">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">colors</span></span><a class="headerlink" href="#pymomentum.geometry.Mesh.colors" title="Link to this definition"></a></dt>
@@ -1982,6 +2129,22 @@ It can be used to solve for shapes and pose simultaneously.</p>
 Currently contains a mixture of probabilistic PCA models.</p>
 <p>Each PPCA model is a Gaussian with mean mu and covariance (sigma^2*I + W*W^T).</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Mppca.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.Mppca.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.geometry.Mppca) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.geometry.Mppca, pi: numpy.ndarray[numpy.float64[m, 1]], mu: numpy.ndarray[numpy.float64[m, n]], W: numpy.ndarray[numpy.float64], sigma: numpy.ndarray[numpy.float64[m, 1]], names: list[str]) -&gt; None</p></li>
+</ol>
+<p>Construct an Mppca model from numpy arrays.
+:param pi: The (nModels) mixture weights
+:param mu: The (nModels x dimension) mean vectors.
+:param W: The (nModels x dimension x nParams) weight matrices.
+:param sigma2: The (nModels) squared sigma uniform variance parameters.
+:param names: The (nDimension) names of the affected parameters.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Mppca.from_bytes">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mppca_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Mppca" title="pymomentum.geometry.Mppca"><span class="pre">pymomentum.geometry.Mppca</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Mppca.from_bytes" title="Link to this definition"></a></dt>
 <dd><p>Load a mixture PCA model (e.g. poseprior.mppca).</p>
@@ -2055,6 +2218,11 @@ where q is the dimensionality of the PCA subspace.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">ParameterLimit</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterLimit" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A constraint on model or joint parameters used to enforce realistic poses. Supports various limit types including min/max bounds, linear relationships, ellipsoid constraints, and half-plane constraints.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.ParameterLimit.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.ParameterLimit.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterLimit.create_ellipsoid">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_ellipsoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ellipsoid_parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ellipsoid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit" title="pymomentum.geometry.ParameterLimit"><span class="pre">pymomentum.geometry.ParameterLimit</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterLimit.create_ellipsoid" title="Link to this definition"></a></dt>
@@ -2186,6 +2354,11 @@ where q is the dimensionality of the PCA subspace.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">ParameterTransform</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Maps reduced model parameters to full joint parameters for character animation. This class handles the transformation from a compact set of model parameters (typically ~50) used in optimization to the full 7*nJoints parameters needed for skeleton posing.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><span class="pre">pymomentum.geometry.Skeleton</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">scipy.sparse.csr_matrix</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.all_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.all_parameters" title="Link to this definition"></a></dt>
@@ -2302,6 +2475,11 @@ can be used to enable/disable finger motion in the character model.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A hierarchical skeleton structure containing joints with parent-child relationships. Each joint has a name, parent index, pre-rotation, and translation offset. Used for character animation and forward kinematics.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Skeleton.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><span class="pre">pymomentum.geometry.Skeleton</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Joint" title="pymomentum.geometry.Joint"><span class="pre">pymomentum.geometry.Joint</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Skeleton.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Skeleton.get_child_joints">
 <span class="sig-name descname"><span class="pre">get_child_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><span class="pre">pymomentum.geometry.Skeleton</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_joint_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Skeleton.get_child_joints" title="Link to this definition"></a></dt>
 <dd><p>Find all joints parented under the given joint.</p>
@@ -2409,6 +2587,11 @@ isAncestor(id, id) returns true.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">SkinWeights</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>Linear blend skinning weights that define how mesh vertices are influenced by skeleton joints. Contains weight values and joint indices for each vertex, enabling smooth deformation of the mesh during character animation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SkinWeights" title="pymomentum.geometry.SkinWeights"><span class="pre">pymomentum.geometry.SkinWeights</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.index">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">index</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.index" title="Link to this definition"></a></dt>
@@ -2427,6 +2610,11 @@ isAncestor(id, id) returns true.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">SkinnedLocator</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SkinnedLocator" title="pymomentum.geometry.SkinnedLocator"><span class="pre">pymomentum.geometry.SkinnedLocator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinnedLocator.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.SkinnedLocator.name" title="Link to this definition"></a></dt>
@@ -2464,6 +2652,22 @@ isAncestor(id, id) returns true.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">TaperedCapsule</span></span><a class="headerlink" href="#pymomentum.geometry.TaperedCapsule" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
 <p>A tapered capsule primitive used for collision detection and physics simulation. Represents a capsule with potentially different radii at each end, attached to a skeleton joint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.TaperedCapsule.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule" title="pymomentum.geometry.TaperedCapsule"><span class="pre">pymomentum.geometry.TaperedCapsule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.TaperedCapsule.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a capsule using its transformation, radius, parent and length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transformation</strong> – Transformation defining the orientation and starting point relative to the parent coordinate system.</p></li>
+<li><p><strong>radius</strong> – Start and end radius for the capsule.</p></li>
+<li><p><strong>parent</strong> – Parent joint to which the capsule is attached.</p></li>
+<li><p><strong>length</strong> – Length of the capsule in local space.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.TaperedCapsule.length">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pymomentum.geometry.TaperedCapsule.length" title="Link to this definition"></a></dt>
