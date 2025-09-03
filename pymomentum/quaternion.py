@@ -3,6 +3,66 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+"""
+Quaternion Utilities
+===================
+
+This module provides comprehensive utilities for working with quaternions in PyMomentum.
+
+Quaternions are a mathematical representation of rotations in 3D space that offer several
+advantages over other rotation representations like Euler angles or rotation matrices:
+
+- **No gimbal lock**: Unlike Euler angles, quaternions don't suffer from singularities
+- **Compact representation**: Only 4 components vs 9 for rotation matrices
+- **Efficient composition**: Quaternion multiplication is faster than matrix multiplication
+- **Smooth interpolation**: SLERP provides natural rotation interpolation
+
+Quaternion Format
+-----------------
+This module uses the (x, y, z, w) format where:
+
+- **(x, y, z)**: Vector part representing the rotation axis scaled by sin(θ/2)
+- **w**: Scalar part representing cos(θ/2), where θ is the rotation angle
+
+The identity quaternion is (0, 0, 0, 1), representing no rotation.
+
+Core Operations
+---------------
+The module provides functions for:
+
+- **Basic operations**: :func:`multiply`, :func:`conjugate`, :func:`inverse`, :func:`normalize`
+- **Conversions**: :func:`from_axis_angle`, :func:`euler_xyz_to_quaternion`,
+  :func:`from_rotation_matrix`, :func:`to_rotation_matrix`
+- **Vector operations**: :func:`rotate_vector`, :func:`from_two_vectors`
+- **Interpolation**: :func:`slerp`, :func:`blend`
+- **Utilities**: :func:`check`, :func:`split`, :func:`identity`
+
+Example:
+    Basic quaternion operations::
+
+        import torch
+        from pymomentum import quaternion
+
+        # Create identity quaternion
+        q_identity = quaternion.identity()
+
+        # Create quaternion from axis-angle
+        axis_angle = torch.tensor([0.0, 0.0, 1.57])  # 90° rotation around Z
+        q_rot = quaternion.from_axis_angle(axis_angle)
+
+        # Rotate a vector
+        vector = torch.tensor([1.0, 0.0, 0.0])
+        rotated = quaternion.rotate_vector(q_rot, vector)
+
+        # Interpolate between quaternions
+        q_interp = quaternion.slerp(q_identity, q_rot, 0.5)
+
+Note:
+    All functions expect quaternions as PyTorch tensors with the last dimension
+    having size 4, following the (x, y, z, w) format. Most functions support
+    batched operations for efficient processing of multiple quaternions.
+"""
+
 from typing import Sequence
 
 import torch
