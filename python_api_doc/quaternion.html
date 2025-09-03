@@ -46,6 +46,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.quaternion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quaternion-utilities">Quaternion Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#quaternion-format">Quaternion Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-operations">Core Operations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.check_and_normalize_weights"><code class="docutils literal notranslate"><span class="pre">check_and_normalize_weights()</span></code></a></li>
@@ -97,6 +102,65 @@
              
   <section id="module-pymomentum.quaternion">
 <span id="pymomentum-quaternion"></span><h1>pymomentum.quaternion<a class="headerlink" href="#module-pymomentum.quaternion" title="Link to this heading"></a></h1>
+<section id="quaternion-utilities">
+<h2>Quaternion Utilities<a class="headerlink" href="#quaternion-utilities" title="Link to this heading"></a></h2>
+<p>This module provides comprehensive utilities for working with quaternions in PyMomentum.</p>
+<p>Quaternions are a mathematical representation of rotations in 3D space that offer several
+advantages over other rotation representations like Euler angles or rotation matrices:</p>
+<ul class="simple">
+<li><p><strong>No gimbal lock</strong>: Unlike Euler angles, quaternions don’t suffer from singularities</p></li>
+<li><p><strong>Compact representation</strong>: Only 4 components vs 9 for rotation matrices</p></li>
+<li><p><strong>Efficient composition</strong>: Quaternion multiplication is faster than matrix multiplication</p></li>
+<li><p><strong>Smooth interpolation</strong>: SLERP provides natural rotation interpolation</p></li>
+</ul>
+<section id="quaternion-format">
+<h3>Quaternion Format<a class="headerlink" href="#quaternion-format" title="Link to this heading"></a></h3>
+<p>This module uses the (x, y, z, w) format where:</p>
+<ul class="simple">
+<li><p><strong>(x, y, z)</strong>: Vector part representing the rotation axis scaled by sin(θ/2)</p></li>
+<li><p><strong>w</strong>: Scalar part representing cos(θ/2), where θ is the rotation angle</p></li>
+</ul>
+<p>The identity quaternion is (0, 0, 0, 1), representing no rotation.</p>
+</section>
+<section id="core-operations">
+<h3>Core Operations<a class="headerlink" href="#core-operations" title="Link to this heading"></a></h3>
+<p>The module provides functions for:</p>
+<ul class="simple">
+<li><p><strong>Basic operations</strong>: <a class="reference internal" href="#pymomentum.quaternion.multiply" title="pymomentum.quaternion.multiply"><code class="xref py py-func docutils literal notranslate"><span class="pre">multiply()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.conjugate" title="pymomentum.quaternion.conjugate"><code class="xref py py-func docutils literal notranslate"><span class="pre">conjugate()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.inverse" title="pymomentum.quaternion.inverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">inverse()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.normalize" title="pymomentum.quaternion.normalize"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize()</span></code></a></p></li>
+<li><p><strong>Conversions</strong>: <a class="reference internal" href="#pymomentum.quaternion.from_axis_angle" title="pymomentum.quaternion.from_axis_angle"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_axis_angle()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.euler_xyz_to_quaternion" title="pymomentum.quaternion.euler_xyz_to_quaternion"><code class="xref py py-func docutils literal notranslate"><span class="pre">euler_xyz_to_quaternion()</span></code></a>,
+<a class="reference internal" href="#pymomentum.quaternion.from_rotation_matrix" title="pymomentum.quaternion.from_rotation_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_rotation_matrix()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.to_rotation_matrix" title="pymomentum.quaternion.to_rotation_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_rotation_matrix()</span></code></a></p></li>
+<li><p><strong>Vector operations</strong>: <a class="reference internal" href="#pymomentum.quaternion.rotate_vector" title="pymomentum.quaternion.rotate_vector"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate_vector()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.from_two_vectors" title="pymomentum.quaternion.from_two_vectors"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_two_vectors()</span></code></a></p></li>
+<li><p><strong>Interpolation</strong>: <a class="reference internal" href="#pymomentum.quaternion.slerp" title="pymomentum.quaternion.slerp"><code class="xref py py-func docutils literal notranslate"><span class="pre">slerp()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.blend" title="pymomentum.quaternion.blend"><code class="xref py py-func docutils literal notranslate"><span class="pre">blend()</span></code></a></p></li>
+<li><p><strong>Utilities</strong>: <a class="reference internal" href="#pymomentum.quaternion.check" title="pymomentum.quaternion.check"><code class="xref py py-func docutils literal notranslate"><span class="pre">check()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.split" title="pymomentum.quaternion.split"><code class="xref py py-func docutils literal notranslate"><span class="pre">split()</span></code></a>, <a class="reference internal" href="#pymomentum.quaternion.identity" title="pymomentum.quaternion.identity"><code class="xref py py-func docutils literal notranslate"><span class="pre">identity()</span></code></a></p></li>
+</ul>
+<dl>
+<dt>Example:</dt><dd><p>Basic quaternion operations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymomentum</span><span class="w"> </span><span class="kn">import</span> <span class="n">quaternion</span>
+
+<span class="c1"># Create identity quaternion</span>
+<span class="n">q_identity</span> <span class="o">=</span> <span class="n">quaternion</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
+
+<span class="c1"># Create quaternion from axis-angle</span>
+<span class="n">axis_angle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.57</span><span class="p">])</span>  <span class="c1"># 90° rotation around Z</span>
+<span class="n">q_rot</span> <span class="o">=</span> <span class="n">quaternion</span><span class="o">.</span><span class="n">from_axis_angle</span><span class="p">(</span><span class="n">axis_angle</span><span class="p">)</span>
+
+<span class="c1"># Rotate a vector</span>
+<span class="n">vector</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">rotated</span> <span class="o">=</span> <span class="n">quaternion</span><span class="o">.</span><span class="n">rotate_vector</span><span class="p">(</span><span class="n">q_rot</span><span class="p">,</span> <span class="n">vector</span><span class="p">)</span>
+
+<span class="c1"># Interpolate between quaternions</span>
+<span class="n">q_interp</span> <span class="o">=</span> <span class="n">quaternion</span><span class="o">.</span><span class="n">slerp</span><span class="p">(</span><span class="n">q_identity</span><span class="p">,</span> <span class="n">q_rot</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Note:</dt><dd><p>All functions expect quaternions as PyTorch tensors with the last dimension
+having size 4, following the (x, y, z, w) format. Most functions support
+batched operations for efficient processing of multiple quaternions.</p>
+</dd>
+</dl>
+</section>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.quaternion.blend">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">blend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quaternions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.blend" title="Link to this definition"></a></dt>
