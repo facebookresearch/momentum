@@ -361,7 +361,7 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    }</div>
 <div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>  }</div>
 <div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>  <span class="comment">// Try Trinity rig format with separate SkinningWeights and SkinningOffsets</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>  <span class="comment">// Try momentum model rig format with separate SkinningWeights and SkinningOffsets</span></div>
 <div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>  <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinningWeightsItr</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">findFieldNames</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacySkinnedModel</a>, {<span class="stringliteral">&quot;SkinningWeights&quot;</span>});</div>
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>  <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinningOffsetsItr</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">findFieldNames</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacySkinnedModel</a>, {<span class="stringliteral">&quot;SkinningOffsets&quot;</span>});</div>
 <div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
@@ -452,7 +452,7 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacySkinnedModel</a>[<span class="stringliteral">&quot;TextureCoordinates&quot;</span>] = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">textureCoordinates</a>;</div>
 <div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  }</div>
 <div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>  <span class="comment">// Convert skin weights to Trinity format: SkinningWeights and SkinningOffsets</span></div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>  <span class="comment">// Convert skin weights to momentum model format: SkinningWeights and SkinningOffsets</span></div>
 <div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>  nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinningWeights</a> = nlohmann::json::array();</div>
 <div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>  nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinningOffsets</a> = nlohmann::json::array();</div>
 <div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>  <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">runningIndex</a> = 0;</div>
@@ -760,7 +760,7 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_2bf28622ec42ff0c0285c7a4d596986b.html">legacy_json</a></li><li class="navelem"><a class="el" href="legacy__json__io_8cpp.html">legacy_json_io.cpp</a></li>
-    <li class="footer">Generated on Tue Sep 2 2025 17:34:21 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Sep 3 2025 05:11:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -408,6 +408,7 @@
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShape">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">BlendShape</span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A blend shape basis for facial expressions and corrective shapes. Contains a base mesh and a set of shape vectors that can be linearly combined to create different facial expressions or body shape variations.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.base_shape">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">base_shape</span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.base_shape" title="Link to this definition"></a></dt>
@@ -611,7 +612,7 @@
 <dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a valid Character.</p>
+<dd class="field-even"><p>a valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -622,11 +623,11 @@
 <dd><p>Load a character from a gltf byte array.</p>
 <blockquote>
 <div><dl class="field-list simple">
-<dt class="field-odd">parameter gltf_bytes<span class="colon">:</span></dt>
+<dt class="field-odd">param gltf_bytes<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
 </dd>
 <dt class="field-even">return<span class="colon">:</span></dt>
-<dd class="field-even"><p>a valid Character.</p>
+<dd class="field-even"><p>a valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -667,10 +668,11 @@
 <li><p><strong>fbx_filename</strong> – .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.</p></li>
 <li><p><strong>model_filename</strong> – Configuration file that defines the parameter mappings and joint limits; e.g. character.cfg.</p></li>
 <li><p><strong>locators_filename</strong> – File containing the locators, e.g. character.locators.</p></li>
+<li><p><strong>permissive</strong> – If true, ignore certain errors during loading.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -681,10 +683,13 @@
 <dd><p>Load a character from byte array for an FBX file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fbx_bytes</strong> – An array of bytes in FBX format.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_bytes</strong> – An array of bytes in FBX format.</p></li>
+<li><p><strong>permissive</strong> – If true, ignore certain errors during loading.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -695,10 +700,13 @@
 <dd><p>Load a character and animation curves from an FBX file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fbx_filename</strong> – .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_filename</strong> – .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.</p></li>
+<li><p><strong>permissive</strong> – If true, ignore certain errors during loading.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -709,10 +717,13 @@
 <dd><p>Load a character and animation curves from an FBX file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fbx_bytes</strong> – A Python bytes that is an .fbx file containing the skeleton and skinned mesh.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_bytes</strong> – A Python bytes that is an .fbx file containing the skeleton and skinned mesh.</p></li>
+<li><p><strong>permissive</strong> – If true, ignore certain errors during loading.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -736,7 +747,7 @@ saved using momentum, which stores model parameters in a custom extension.  For 
 <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_skel_states()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>gltfFilename</strong> – A .gltf file; e.g. character_s0.glb.</p>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.</p>
@@ -834,7 +845,7 @@ this is a legacy format that has historically been used in mopy but should be co
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -842,7 +853,7 @@ this is a legacy format that has historically been used in mopy but should be co
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_locators_from_bytes">
 <span class="sig-name descname"><span class="pre">load_locators_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_locators_from_bytes" title="Link to this definition"></a></dt>
-<dd><p>Load locators from a .locators file.</p>
+<dd><p>Load locators from a byte array containing .locators file data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -851,7 +862,7 @@ this is a legacy format that has historically been used in mopy but should be co
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -868,7 +879,7 @@ this is a legacy format that has historically been used in mopy but should be co
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -885,7 +896,7 @@ this is a legacy format that has historically been used in mopy but should be co
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A valid Character.</p>
+<dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -915,7 +926,7 @@ this is a legacy format that has historically been used in mopy but should be co
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.locators">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">locators</span></span><a class="headerlink" href="#pymomentum.geometry.Character.locators" title="Link to this definition"></a></dt>
-<dd><p>List of locators on the mesh.</p>
+<dd><p>List of locators on the mesh. See <a class="reference internal" href="#pymomentum.geometry.Locator" title="pymomentum.geometry.Locator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Locator</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -923,7 +934,7 @@ this is a legacy format that has historically been used in mopy but should be co
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mesh</span></span><a class="headerlink" href="#pymomentum.geometry.Character.mesh" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The character’s mesh, or None if not present.</p>
+<dd class="field-odd"><p>The character’s <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a>, or None if not present.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -943,13 +954,13 @@ this is a legacy format that has historically been used in mopy but should be co
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.parameter_limits">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_limits</span></span><a class="headerlink" href="#pymomentum.geometry.Character.parameter_limits" title="Link to this definition"></a></dt>
-<dd><p>The character’s parameter limits.</p>
+<dd><p>The character’s parameter limits. See <a class="reference internal" href="#pymomentum.geometry.ParameterLimit" title="pymomentum.geometry.ParameterLimit"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterLimit</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.parameter_transform">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_transform</span></span><a class="headerlink" href="#pymomentum.geometry.Character.parameter_transform" title="Link to this definition"></a></dt>
-<dd><p>Maps the reduced k-dimensional modelParameters that are used in the IK solve to the full 7*n-dimensional parameters used in the skeleton.</p>
+<dd><p>Maps the reduced k-dimensional modelParameters that are used in the IK solve to the full 7*n-dimensional parameters used in the skeleton. See <a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterTransform</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1115,7 +1126,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.skeleton">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">skeleton</span></span><a class="headerlink" href="#pymomentum.geometry.Character.skeleton" title="Link to this definition"></a></dt>
-<dd><p>The character’s skeleton.</p>
+<dd><p>The character’s skeleton. See <a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><code class="xref py py-class docutils literal notranslate"><span class="pre">Skeleton</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1125,7 +1136,6 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>character</strong> – A <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a> with both a rest mesh and skinning weights.</p></li>
 <li><p><strong>skel_state</strong> – A torch.Tensor containing either a [nBatch x nJoints x 8] skeleton state or a [nBatch x nJoints x 4 x 4] transforms.</p></li>
 <li><p><strong>rest_vertices</strong> – An optional torch.Tensor containing the rest points; if not passed, the ones stored inside the character are used.</p></li>
 </ul>
@@ -1139,7 +1149,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.skin_weights">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">skin_weights</span></span><a class="headerlink" href="#pymomentum.geometry.Character.skin_weights" title="Link to this definition"></a></dt>
-<dd><p>The character’s skinning weights.</p>
+<dd><p>The character’s skinning weights. See <a class="reference internal" href="#pymomentum.geometry.SkinWeights" title="pymomentum.geometry.SkinWeights"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkinWeights</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1227,10 +1237,10 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dd><p>Returns a new character with the passed-in locators.  If ‘replace’ is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.</p>
 <blockquote>
 <div><dl class="field-list simple">
-<dt class="field-odd">parameter locators<span class="colon">:</span></dt>
+<dt class="field-odd">param locators<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The locators to add to the character.</p>
 </dd>
-<dt class="field-even">parameter replace<span class="colon">:</span></dt>
+<dt class="field-even">param replace<span class="colon">:</span></dt>
 <dd class="field-even"><p>If true, replace the existing locators with the passed-in ones.  Otherwise, append the new locators to the existing ones.  Defaults to false.</p>
 </dd>
 </dl>
@@ -1300,6 +1310,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXCoordSystemInfo">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">FBXCoordSystemInfo</span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystemInfo" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>FBX coordinate system information containing up vector, front vector, and handedness. Used when importing/exporting FBX files to ensure proper coordinate system conversion.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXCoordSystemInfo.coordSystem">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordSystem</span></span><a class="headerlink" href="#pymomentum.geometry.FBXCoordSystemInfo.coordSystem" title="Link to this definition"></a></dt>
@@ -1388,6 +1399,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.InverseParameterTransform">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">InverseParameterTransform</span></span><a class="headerlink" href="#pymomentum.geometry.InverseParameterTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Inverse parameter transform that maps from full joint parameters back to reduced model parameters. Used for fitting model parameters to existing joint parameter data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.InverseParameterTransform.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.InverseParameterTransform" title="pymomentum.geometry.InverseParameterTransform"><span class="pre">pymomentum.geometry.InverseParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.InverseParameterTransform.apply" title="Link to this definition"></a></dt>
@@ -1409,6 +1421,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Joint">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Joint</span></span><a class="headerlink" href="#pymomentum.geometry.Joint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A single joint in a character skeleton. Contains the joint’s name, parent relationship, pre-rotation, and translation offset from its parent joint.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Joint.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.Joint.name" title="Link to this definition"></a></dt>
@@ -1444,6 +1457,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitData">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitData</span></span><a class="headerlink" href="#pymomentum.geometry.LimitData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Data container for parameter limits. Contains the specific constraint data for different limit types (MinMax, Linear, Ellipsoid, etc.).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitData.ellipsoid">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ellipsoid</span></span><a class="headerlink" href="#pymomentum.geometry.LimitData.ellipsoid" title="Link to this definition"></a></dt>
@@ -1486,6 +1500,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitEllipsoid">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitEllipsoid</span></span><a class="headerlink" href="#pymomentum.geometry.LimitEllipsoid" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Ellipsoid constraint data for model parameters. Enforces that parameters lie within an ellipsoid defined by a transformation matrix and offset.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitEllipsoid.ellipsoid">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ellipsoid</span></span><a class="headerlink" href="#pymomentum.geometry.LimitEllipsoid.ellipsoid" title="Link to this definition"></a></dt>
@@ -1517,6 +1532,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitHalfPlane">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitHalfPlane</span></span><a class="headerlink" href="#pymomentum.geometry.LimitHalfPlane" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Half-plane constraint data for model parameters. Enforces that parameters lie on one side of a plane defined by a normal vector and offset.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitHalfPlane.normal">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normal</span></span><a class="headerlink" href="#pymomentum.geometry.LimitHalfPlane.normal" title="Link to this definition"></a></dt>
@@ -1543,6 +1559,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitLinear">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitLinear</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinear" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Linear constraint data for model parameters. Enforces a linear relationship between two parameters of the form: p0 = scale * p1 + offset.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitLinear.offset">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinear.offset" title="Link to this definition"></a></dt>
@@ -1583,6 +1600,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitLinearJoint">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitLinearJoint</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinearJoint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Linear constraint data for joint parameters. Enforces a linear relationship between two joint parameters of the form: p0 = scale * p1 + offset.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitLinearJoint.offset">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#pymomentum.geometry.LimitLinearJoint.offset" title="Link to this definition"></a></dt>
@@ -1635,6 +1653,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMax">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitMinMax</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMax" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Min/max constraint data for model parameters. Contains the parameter index and the minimum and maximum allowed values.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMax.max">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMax.max" title="Link to this definition"></a></dt>
@@ -1659,6 +1678,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMaxJoint">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LimitMinMaxJoint</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMaxJoint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Min/max constraint data for joint parameters. Contains the joint index, joint parameter index, and the minimum and maximum allowed values.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.LimitMinMaxJoint.joint_index">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint_index</span></span><a class="headerlink" href="#pymomentum.geometry.LimitMinMaxJoint.joint_index" title="Link to this definition"></a></dt>
@@ -1751,6 +1771,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Locator">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Locator</span></span><a class="headerlink" href="#pymomentum.geometry.Locator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A 3D point attached to a skeleton joint used for inverse kinematics constraints. Locators define target positions that the character should reach during pose optimization, with configurable weights and axis locks for fine-grained control.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Locator.limit_origin">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">limit_origin</span></span><a class="headerlink" href="#pymomentum.geometry.Locator.limit_origin" title="Link to this definition"></a></dt>
@@ -1799,6 +1820,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Marker">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><a class="headerlink" href="#pymomentum.geometry.Marker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A 3D marker used in motion capture systems. Contains position data and occlusion status for tracking points on subjects during motion capture recording.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Marker.name">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.Marker.name" title="Link to this definition"></a></dt>
@@ -1823,6 +1845,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.MarkerSequence">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">MarkerSequence</span></span><a class="headerlink" href="#pymomentum.geometry.MarkerSequence" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A sequence of motion capture marker data over time. Contains marker positions and occlusion status for each frame, along with frame rate information.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.MarkerSequence.fps">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fps</span></span><a class="headerlink" href="#pymomentum.geometry.MarkerSequence.fps" title="Link to this definition"></a></dt>
@@ -1847,6 +1870,7 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Mesh">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><a class="headerlink" href="#pymomentum.geometry.Mesh" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A 3D mesh containing vertices, faces, normals, and optional texture coordinates. Supports triangular meshes with additional data like vertex colors, confidence values, and line segments for wireframe rendering.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.Mesh.colors">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">colors</span></span><a class="headerlink" href="#pymomentum.geometry.Mesh.colors" title="Link to this definition"></a></dt>
@@ -2030,6 +2054,7 @@ where q is the dimensionality of the PCA subspace.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterLimit">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">ParameterLimit</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterLimit" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A constraint on model or joint parameters used to enforce realistic poses. Supports various limit types including min/max bounds, linear relationships, ellipsoid constraints, and half-plane constraints.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterLimit.create_ellipsoid">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_ellipsoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ellipsoid_parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ellipsoid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit" title="pymomentum.geometry.ParameterLimit"><span class="pre">pymomentum.geometry.ParameterLimit</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterLimit.create_ellipsoid" title="Link to this definition"></a></dt>
@@ -2160,6 +2185,7 @@ where q is the dimensionality of the PCA subspace.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">ParameterTransform</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Maps reduced model parameters to full joint parameters for character animation. This class handles the transformation from a compact set of model parameters (typically ~50) used in optimization to the full 7*nJoints parameters needed for skeleton posing.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.all_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.all_parameters" title="Link to this definition"></a></dt>
@@ -2274,6 +2300,7 @@ can be used to enable/disable finger motion in the character model.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Skeleton">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Skeleton</span></span><a class="headerlink" href="#pymomentum.geometry.Skeleton" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A hierarchical skeleton structure containing joints with parent-child relationships. Each joint has a name, parent index, pre-rotation, and translation offset. Used for character animation and forward kinematics.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Skeleton.get_child_joints">
 <span class="sig-name descname"><span class="pre">get_child_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><span class="pre">pymomentum.geometry.Skeleton</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_joint_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Skeleton.get_child_joints" title="Link to this definition"></a></dt>
@@ -2381,6 +2408,7 @@ isAncestor(id, id) returns true.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">SkinWeights</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Linear blend skinning weights that define how mesh vertices are influenced by skeleton joints. Contains weight values and joint indices for each vertex, enabling smooth deformation of the mesh during character animation.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.index">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">index</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.index" title="Link to this definition"></a></dt>
@@ -2435,6 +2463,7 @@ isAncestor(id, id) returns true.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.TaperedCapsule">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">TaperedCapsule</span></span><a class="headerlink" href="#pymomentum.geometry.TaperedCapsule" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A tapered capsule primitive used for collision detection and physics simulation. Represents a capsule with potentially different radii at each end, attached to a skeleton joint.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.TaperedCapsule.length">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pymomentum.geometry.TaperedCapsule.length" title="Link to this definition"></a></dt>
@@ -2470,7 +2499,7 @@ batching on the character.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> (<em>Union</em><em>[</em><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><em>Character</em></a><em>, </em><em>List</em><em>[</em><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><em>Character</em></a><em>]</em><em>]</em>) – A character or list of characters.</p></li>
-<li><p><strong>modelParameters</strong> – A [nBatch x nParams] tensor of model parameters.</p></li>
+<li><p><strong>model_parameters</strong> – A [nBatch x nParams] tensor of model parameters.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
