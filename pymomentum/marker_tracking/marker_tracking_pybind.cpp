@@ -287,10 +287,14 @@ PYBIND11_MODULE(marker_tracking, m) {
                 self.parameters,
                 self.locators);
           })
-      .def(py::init<
-           const std::string&,
-           const std::string&,
-           const std::string&>())
+      .def(
+          py::init<
+              const std::string&,
+              const std::string&,
+              const std::string&>(),
+          py::arg("model"),
+          py::arg("parameters"),
+          py::arg("locators"))
       .def_readwrite(
           "model",
           &momentum::ModelOptions::model,
