@@ -18,6 +18,10 @@ std::vector<std::vector<momentum::PositionData>> createConstraintData(
     gsl::span<const std::vector<momentum::Marker>> markerData,
     const momentum::LocatorList& locators);
 
+std::vector<std::vector<momentum::SkinnedLocatorConstraint>> createSkinnedConstraintData(
+    gsl::span<const std::vector<momentum::Marker>> markerData,
+    const momentum::SkinnedLocatorList& locators);
+
 // TODO: remove the one in momentum
 
 // Create a LocatorCharacter where each locator is a bone in its skeleton. This character is used
@@ -48,7 +52,8 @@ momentum::ModelParameters extractParameters(
     const momentum::ModelParameters& params,
     const momentum::ParameterSet& parameterSet);
 
-std::tuple<Eigen::VectorXf, momentum::LocatorList> extractIdAndLocatorsFromParams(
+std::tuple<Eigen::VectorXf, momentum::LocatorList, momentum::SkinnedLocatorList>
+extractIdAndLocatorsFromParams(
     const momentum::ModelParameters& param,
     const momentum::Character& sourceCharacter,
     const momentum::Character& targetCharacter);

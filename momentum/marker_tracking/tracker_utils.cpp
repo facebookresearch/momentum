@@ -12,6 +12,7 @@
 #include "momentum/character/parameter_limits.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/position_error_function.h"
+#include "momentum/character_solver/skinned_locator_error_function.h"
 #include "momentum/math/mesh.h"
 
 #include "momentum/common/log.h"
@@ -51,6 +52,41 @@ std::vector<std::vector<PositionData>> createConstraintData(
           jMarker.pos.cast<float>(),
           locators.at(locatorIdx).parent,
           locators.at(locatorIdx).weight));
+    }
+  }
+
+  return results;
+}
+
+std::vector<std::vector<SkinnedLocatorConstraint>> createSkinnedConstraintData(
+    const gsl::span<const std::vector<Marker>> markerData,
+    const SkinnedLocatorList& locators) {
+  std::vector<std::vector<SkinnedLocatorConstraint>> results(markerData.size());
+
+  // map locator name to its index
+  std::map<std::string, size_t> locatorLookup;
+  for (size_t i = 0; i < locators.size(); i++) {
+    locatorLookup[locators[i].name] = i;
+  }
+
+  // create a list of position constraints per frame
+  for (size_t iFrame = 0; iFrame < markerData.size(); ++iFrame) {
+    const auto& markerList = markerData[iFrame];
+    for (const auto& jMarker : markerList) {
+      if (jMarker.occluded) {
+        continue;
+      }
+      auto query = locatorLookup.find(jMarker.name);
+      if (query == locatorLookup.end()) {
+        continue;
+      }
+      size_t locatorIdx = query->second;
+
+      SkinnedLocatorConstraint skinnedConstraint;
+      skinnedConstraint.locatorIndex = gsl::narrow_cast<int>(locatorIdx);
+      skinnedConstraint.targetPosition = jMarker.pos.cast<float>();
+      skinnedConstraint.weight = locators[locatorIdx].weight;
+      results.at(iFrame).push_back(skinnedConstraint);
     }
   }
 
@@ -363,6 +399,29 @@ LocatorList extractLocatorsFromCharacter(
   return result;
 }
 
+SkinnedLocatorList extractSkinnedLocatorsFromCharacter(
+    const Character& locatorCharacter,
+    const CharacterParameters& calibParams) {
+  const SkeletonState state(
+      locatorCharacter.parameterTransform.apply(calibParams), locatorCharacter.skeleton);
+  const SkinnedLocatorList& skinnedLocators = locatorCharacter.skinnedLocators;
+  const auto& pt = locatorCharacter.parameterTransform;
+
+  SkinnedLocatorList result = skinnedLocators;
+
+  for (size_t i = 0; i < skinnedLocators.size(); i++) {
+    if (i < pt.skinnedLocatorParameters.size()) {
+      auto paramIdx = pt.skinnedLocatorParameters[i];
+      for (int k = 0; k < 3; ++k) {
+        result.at(i).position(k) += calibParams.pose[paramIdx + k];
+      }
+    }
+  }
+  // return
+
+  return result;
+}
+
 ModelParameters extractParameters(const ModelParameters& params, const ParameterSet& parameterSet) {
   ModelParameters newParams = params;
   for (size_t iParam = 0; iParam < newParams.size(); ++iParam) {
@@ -374,7 +433,7 @@ ModelParameters extractParameters(const ModelParameters& params, const Parameter
   return newParams;
 }
 
-std::tuple<Eigen::VectorXf, LocatorList> extractIdAndLocatorsFromParams(
+std::tuple<Eigen::VectorXf, LocatorList, SkinnedLocatorList> extractIdAndLocatorsFromParams(
     const ModelParameters& param,
     const Character& sourceCharacter,
     const Character& targetCharacter) {
@@ -383,8 +442,13 @@ std::tuple<Eigen::VectorXf, LocatorList> extractIdAndLocatorsFromParams(
   CharacterParameters fullParams;
   fullParams.pose = param;
   LocatorList locators = extractLocatorsFromCharacter(sourceCharacter, fullParams);
+  SkinnedLocatorList skinnedLocators =
+      extractSkinnedLocatorsFromCharacter(sourceCharacter, fullParams);
 
-  return {idParam.v.head(targetCharacter.parameterTransform.numAllModelParameters()), locators};
+  return {
+      idParam.v.head(targetCharacter.parameterTransform.numAllModelParameters()),
+      locators,
+      skinnedLocators};
 }
 
 void fillIdentity(
