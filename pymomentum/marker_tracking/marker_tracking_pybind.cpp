@@ -72,17 +72,19 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::BaseConfig& self) {
             return fmt::format(
-                "BaseConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={})",
+                "BaseConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
+                self.regularization,
                 boolToString(self.debug));
           })
       .def(
-          py::init<float, float, size_t, bool>(),
+          py::init<float, float, size_t, float, bool>(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
+          py::arg("regularization") = 0.05f,
           py::arg("debug") = false)
       .def_readwrite(
           "min_vis_percent",
@@ -109,10 +111,11 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
             return fmt::format(
-                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\")",
+                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\")",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
+                self.regularization,
                 boolToString(self.debug),
                 self.calibFrames,
                 self.majorIter,
@@ -127,6 +130,7 @@ PYBIND11_MODULE(marker_tracking, m) {
               float,
               float,
               size_t,
+              float,
               bool,
               size_t,
               size_t,
@@ -138,6 +142,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
+          py::arg("regularization") = 0.05f,
           py::arg("debug") = false,
           py::arg("calib_frames") = 100,
           py::arg("major_iter") = 3,
@@ -184,20 +189,30 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::TrackingConfig& self) {
             return fmt::format(
-                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={})",
+                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
+                self.regularization,
                 boolToString(self.debug),
                 self.smoothing,
                 self.collisionErrorWeight,
                 vectorToString(self.smoothingWeights));
           })
       .def(
-          py::init<float, float, size_t, bool, float, float, Eigen::VectorXf>(),
+          py::init<
+              float,
+              float,
+              size_t,
+              float,
+              bool,
+              float,
+              float,
+              Eigen::VectorXf>(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
+          py::arg("regularization") = 0.05f,
           py::arg("debug") = false,
           py::arg("smoothing") = 0.0,
           py::arg("collision_error_weight") = 0.0,
@@ -225,10 +240,11 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::RefineConfig& self) {
             return fmt::format(
-                "RefineConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={}, regularizer={}, calib_id={}, calib_locators={})",
+                "RefineConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={}, regularizer={}, calib_id={}, calib_locators={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
+                self.regularization,
                 boolToString(self.debug),
                 self.smoothing,
                 self.collisionErrorWeight,
@@ -242,6 +258,7 @@ PYBIND11_MODULE(marker_tracking, m) {
               float,
               float,
               size_t,
+              float,
               bool,
               float,
               float,
@@ -252,6 +269,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
+          py::arg("regularization") = 0.05f,
           py::arg("debug") = false,
           py::arg("smoothing") = 0.0,
           py::arg("collision_error_weight") = 0.0,

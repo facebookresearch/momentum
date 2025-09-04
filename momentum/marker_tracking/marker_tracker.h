@@ -22,6 +22,8 @@ struct BaseConfig {
   float lossAlpha = 2.0;
   /// Max number of solver iterations to run.
   size_t maxIter = 30;
+  /// Regularization parameter (lambda) for Levenberg-Marquardt solver.
+  float regularization = 0.05f;
   /// True to print and save debug information.
   bool debug = false;
 };

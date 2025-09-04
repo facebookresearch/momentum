@@ -324,7 +324,7 @@ Eigen::MatrixXf trackSequence(
   solverOptions.multithreaded = true;
   solverOptions.verbose = config.debug;
   solverOptions.threshold = 1.f;
-  solverOptions.regularization = 0.05f;
+  solverOptions.regularization = config.regularization;
 
   // solve the problem
   SequenceSolver solver = SequenceSolver(solverOptions, &solverFunc);
@@ -379,7 +379,7 @@ Eigen::MatrixXf trackPosesPerframe(
   solverOptions.doLineSearch = false;
   solverOptions.verbose = config.debug;
   solverOptions.threshold = 1.f;
-  solverOptions.regularization = 0.05f;
+  solverOptions.regularization = config.regularization;
   auto solver = GaussNewtonSolver(solverOptions, &solverFunc);
   solver.setEnabledParameters(poseParams);
 
@@ -543,7 +543,7 @@ Eigen::MatrixXf trackPosesForFrames(
   solverOptions.doLineSearch = false;
   solverOptions.verbose = config.debug;
   solverOptions.threshold = 1.f;
-  solverOptions.regularization = 0.05f;
+  solverOptions.regularization = config.regularization;
   auto solver = GaussNewtonSolver(solverOptions, &solverFunc);
   solver.setEnabledParameters(poseParams);
 
@@ -680,7 +680,9 @@ void calibrateModel(
 
   // special trackingConfig for initialization: zero out smoothness and collision
   TrackingConfig trackingConfig{
-      {config.minVisPercent, config.lossAlpha, config.maxIter, config.debug}, 0.0, 0.0};
+      {config.minVisPercent, config.lossAlpha, config.maxIter, config.regularization, config.debug},
+      0.0,
+      0.0};
 
   // only keep one motion; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
@@ -876,7 +878,9 @@ void calibrateLocators(
 
   // special trackingConfig for initialization: zero out smoothness and collision
   TrackingConfig trackingConfig{
-      {config.minVisPercent, config.lossAlpha, config.maxIter, config.debug}, 0.0, 0.0};
+      {config.minVisPercent, config.lossAlpha, config.maxIter, config.regularization, config.debug},
+      0.0,
+      0.0};
 
   // only keep one motion for both character and solvingCharacter; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
