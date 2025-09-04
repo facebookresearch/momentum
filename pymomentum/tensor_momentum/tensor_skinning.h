@@ -8,6 +8,7 @@
 #pragma once
 
 #include <ATen/ATen.h>
+#include <momentum/character/fwd.h>
 #include <pybind11/pybind11.h>
 
 #include <optional>
@@ -20,5 +21,10 @@ at::Tensor skinPoints(
     std::optional<at::Tensor> restPoints);
 
 at::Tensor computeVertexNormals(at::Tensor positions, at::Tensor triangles);
+
+at::Tensor skinSkinnedLocators(
+    const momentum::Character& character,
+    at::Tensor skel_state,
+    const std::optional<at::Tensor>& restPositions = std::nullopt);
 
 } // namespace pymomentum
