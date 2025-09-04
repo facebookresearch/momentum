@@ -14,6 +14,7 @@
 
 #include <momentum/character/linear_skinning.h>
 #include <momentum/character/skin_weights.h>
+#include <momentum/character/skinned_locator.h>
 #include <momentum/math/mesh.h>
 
 #include <dispenso/parallel_for.h> // @manual
@@ -397,6 +398,159 @@ at::Tensor computeVertexNormals(
   return torch::nn::functional::normalize(
       vertex_normals,
       torch::nn::functional::NormalizeFuncOptions().p(2).dim(-1));
+}
+
+at::Tensor skinSkinnedLocators(
+    const momentum::Character& character,
+    at::Tensor skel_state,
+    const std::optional<at::Tensor>& restPositions) {
+  if (character.skinnedLocators.empty()) {
+    // Return empty tensor if no locators provided
+    return at::zeros({0, 3}, skel_state.scalar_type());
+  }
+
+  const int64_t nLocators = character.skinnedLocators.size();
+  const int64_t nJoints = character.skeleton.joints.size();
+
+  // Use TensorChecker for validation
+  TensorChecker checker("skinSkinnedLocators");
+
+  bool squeezeSkel = false;
+  skel_state = checker.validateAndFixTensor(
+      skel_state,
+      "skel_state",
+      {static_cast<int>(nJoints), 8},
+      {"nJoints", "skeleton_state"},
+      skel_state.scalar_type(),
+      true, // allow batching
+      false, // not optional
+      &squeezeSkel);
+
+  const int64_t batchSize = checker.getBatchSize();
+
+  // Validate and process rest positions
+  at::Tensor restPos;
+  if (restPositions.has_value() && !isEmpty(restPositions.value())) {
+    bool squeezeRest = false;
+    restPos = checker.validateAndFixTensor(
+        restPositions.value(),
+        "rest_positions",
+        {static_cast<int>(nLocators), 3},
+        {"nLocators", "xyz"},
+        skel_state.scalar_type(),
+        true, // allow batching
+        false, // not optional since it was provided
+        &squeezeRest);
+  } else {
+    // Create rest positions tensor from locator data
+    std::vector<float> restPositionData(nLocators * 3);
+    for (int64_t i = 0; i < nLocators; ++i) {
+      const auto& locator = character.skinnedLocators[i];
+      restPositionData[i * 3 + 0] = locator.position[0];
+      restPositionData[i * 3 + 1] = locator.position[1];
+      restPositionData[i * 3 + 2] = locator.position[2];
+    }
+    restPos =
+        torch::from_blob(restPositionData.data(), {nLocators, 3}, at::kFloat)
+            .clone()
+            .to(skel_state.scalar_type());
+
+    // Expand to match batch size
+    restPos = restPos.unsqueeze(0).expand({batchSize, nLocators, 3});
+  }
+
+  // Create single tensors for all skinning data
+  std::vector<int> allParentData(nLocators * momentum::kMaxSkinJoints);
+  std::vector<float> allWeightData(nLocators * momentum::kMaxSkinJoints);
+
+  for (int64_t i = 0; i < nLocators; ++i) {
+    const auto& locator = character.skinnedLocators[i];
+    for (int64_t j = 0; j < momentum::kMaxSkinJoints; ++j) {
+      allParentData[i * momentum::kMaxSkinJoints + j] =
+          static_cast<int>(locator.parents[j]);
+      allWeightData[i * momentum::kMaxSkinJoints + j] = locator.skinWeights[j];
+    }
+  }
+
+  at::Tensor allParents = torch::from_blob(
+                              allParentData.data(),
+                              {nLocators, momentum::kMaxSkinJoints},
+                              torch::TensorOptions().dtype(at::kInt))
+                              .clone();
+
+  at::Tensor allWeights = torch::from_blob(
+                              allWeightData.data(),
+                              {nLocators, momentum::kMaxSkinJoints},
+                              torch::TensorOptions().dtype(at::kFloat))
+                              .clone()
+                              .to(skel_state.scalar_type());
+
+  // Convert inverse bind poses to tensors for efficient computation
+  std::vector<float> inverseBindPoseData(nJoints * 12); // 3x4 linear part only
+  for (int64_t jointIdx = 0; jointIdx < nJoints; ++jointIdx) {
+    const auto& invBindPose = character.inverseBindPose.at(jointIdx);
+    // Store the 3x4 linear part (rotation + translation)
+    for (int row = 0; row < 3; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        inverseBindPoseData[jointIdx * 12 + row * 4 + col] =
+            invBindPose(row, col);
+      }
+    }
+  }
+
+  at::Tensor inverseBindPoses = torch::from_blob(
+                                    inverseBindPoseData.data(),
+                                    {nJoints, 3, 4},
+                                    torch::TensorOptions().dtype(at::kFloat))
+                                    .clone()
+                                    .to(skel_state.scalar_type());
+
+  // Initialize result tensor
+  at::Tensor result =
+      at::zeros({batchSize, nLocators, 3}, skel_state.scalar_type());
+
+  // Apply skinning for each influence per locator
+  for (int64_t influence = 0; influence < momentum::kMaxSkinJoints;
+       ++influence) {
+    // Get parent indices and weights for this influence
+    at::Tensor parentIndices = allParents.select(1, influence); // [nLocators]
+    at::Tensor weights = allWeights.select(1, influence); // [nLocators]
+
+    // Get inverse bind poses for the parent joints
+    at::Tensor parentInverseBindPoses =
+        inverseBindPoses.index_select(0, parentIndices); // [nLocators, 3, 4]
+
+    // Transform rest positions to local joint space using inverse bind pose
+    at::Tensor linearPart =
+        parentInverseBindPoses.slice(2, 0, 3); // [nLocators, 3, 3]
+    at::Tensor translationPart =
+        parentInverseBindPoses.slice(2, 3, 4).squeeze(2); // [nLocators, 3]
+
+    // restPos: [nBatch, nLocators, 3]
+    at::Tensor localRestPos =
+        at::einsum("lij,...lj->...li", {linearPart, restPos}) +
+        translationPart.unsqueeze(0);
+
+    // Get skeleton states for the parent joints
+    at::Tensor parentSkelStates =
+        skel_state.index_select(-2, parentIndices); // [nBatch, nLocators, 8]
+
+    // Transform local positions using skeleton states
+    at::Tensor transformedPos = transformPointsWithSkeletonState(
+        parentSkelStates, localRestPos); // [nBatch, nLocators, 3]
+
+    // Apply weights and accumulate
+    at::Tensor weightedPos =
+        transformedPos * weights.unsqueeze(0).unsqueeze(-1);
+    result += weightedPos;
+  }
+
+  // Remove batch dimension if input wasn't batched
+  if (squeezeSkel) {
+    result = result.squeeze(0);
+  }
+
+  return result;
 }
 
 } // namespace pymomentum
