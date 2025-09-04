@@ -19,6 +19,7 @@
 #include "momentum/character_solver/plane_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/skeleton_solver_function.h"
+#include "momentum/character_solver/skinned_locator_error_function.h"
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/tracker_utils.h"
@@ -210,11 +211,10 @@ Eigen::MatrixXf trackSequence(
   // we want to solve for. globalParams is either a subset or all of universalParams.
   ParameterSet poseParams = pt.getPoseParameters();
   ParameterSet universalParams = pt.getScalingParameters();
-  const auto locatorSet = pt.parameterSets.find("locators");
-  if (locatorSet != pt.parameterSets.end()) {
-    poseParams &= ~locatorSet->second;
-    universalParams |= locatorSet->second;
-  }
+  const auto locatorSet =
+      pt.getParameterSet("locators", true) | pt.getParameterSet("skinnedLocators", true);
+  poseParams &= ~locatorSet;
+  universalParams |= locatorSet;
 
   // set up the solver function
   std::vector<size_t> sortedFrames = frames;
@@ -233,20 +233,32 @@ Eigen::MatrixXf trackSequence(
 
   // marker constraints
   const auto constrData = createConstraintData(markerData, character.locators);
+  const auto skinnedConstData = createSkinnedConstraintData(markerData, character.skinnedLocators);
 
   // add per-frame constraint data to the solver
   for (size_t solverFrame = 0; solverFrame < solvedFrames; ++solverFrame) {
     const size_t& iFrame = sortedFrames[solverFrame];
-    if (constrData.at(iFrame).size() > numMarkers * config.minVisPercent) {
-      // prepare positional constraints
-      auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
-      posConstrFunc->setConstraints(constrData.at(iFrame));
+    if ((constrData.at(iFrame).size() + skinnedConstData.at(iFrame).size()) >
+        numMarkers * config.minVisPercent) {
+      auto posConstrWeight = PositionErrorFunction::kLegacyWeight;
       if (solverFrame == 0 && (enforceFloorInFirstFrame || !firstFramePoseConstraintSet.empty())) {
-        posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight * solvedFrames);
-      } else {
-        posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
+        posConstrWeight *= solvedFrames;
       }
-      solverFunc.addErrorFunction(solverFrame, posConstrFunc);
+
+      // prepare positional constraints
+      if (!constrData.at(iFrame).empty()) {
+        auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
+        posConstrFunc->setConstraints(constrData.at(iFrame));
+        posConstrFunc->setWeight(posConstrWeight);
+        solverFunc.addErrorFunction(solverFrame, posConstrFunc);
+      }
+
+      if (!skinnedConstData.at(iFrame).empty()) {
+        auto skinnedConstrFunc = std::make_shared<SkinnedLocatorErrorFunction>(character);
+        skinnedConstrFunc->setConstraints(skinnedConstData.at(iFrame));
+        skinnedConstrFunc->setWeight(posConstrWeight);
+        solverFunc.addErrorFunction(solverFrame, skinnedConstrFunc);
+      }
 
       // prepare floor constraints
       if (!floorConstraints.empty()) {
@@ -393,6 +405,11 @@ Eigen::MatrixXf trackPosesPerframe(
   posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
   solverFunc.addErrorFunction(posConstrFunc);
 
+  std::shared_ptr<SkinnedLocatorErrorFunction> skinnedLocatorPosConstrFunc =
+      std::make_shared<SkinnedLocatorErrorFunction>(character);
+  skinnedLocatorPosConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
+  solverFunc.addErrorFunction(skinnedLocatorPosConstrFunc);
+
   // floor penetration constraint data; we assume the world is y-up and floor is y=0 for mocap data.
   const auto& floorConstraints = createFloorConstraints<float>(
       "Floor_",
@@ -407,6 +424,7 @@ Eigen::MatrixXf trackPosesPerframe(
 
   // marker constraint data
   auto constrData = createConstraintData(markerData, character.locators);
+  auto skinnedConstrData = createSkinnedConstraintData(markerData, character.skinnedLocators);
 
   // smoothness constraint only for the joints and exclude global dofs because the global transform
   // needs to be accurate (may not matter in practice?)
@@ -451,10 +469,14 @@ Eigen::MatrixXf trackPosesPerframe(
         dof = globalParams.v;
       }
 
-      if (constrData.at(iFrame).size() > numMarkers * config.minVisPercent) {
+      if ((constrData.at(iFrame).size() + skinnedConstrData.at(iFrame).size()) >
+          config.minVisPercent * numMarkers) {
         // add positional constraints
         posConstrFunc->clearConstraints(); // clear constraint data from the previous frame
         posConstrFunc->setConstraints(constrData.at(iFrame));
+
+        skinnedLocatorPosConstrFunc->clearConstraints();
+        skinnedLocatorPosConstrFunc->setConstraints(skinnedConstrData.at(iFrame));
 
         // initialization
         // TODO: run on first frame or tracking failure
@@ -557,6 +579,10 @@ Eigen::MatrixXf trackPosesForFrames(
   posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
   solverFunc.addErrorFunction(posConstrFunc);
 
+  auto skinnedLocatorPosConstrFunc = std::make_shared<SkinnedLocatorErrorFunction>(character);
+  skinnedLocatorPosConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
+  solverFunc.addErrorFunction(skinnedLocatorPosConstrFunc);
+
   // floor penetration constraint data; we assume the world is y-up and floor is y=0 for mocap data.
   const auto& floorConstraints = createFloorConstraints<float>(
       "Floor_",
@@ -571,6 +597,7 @@ Eigen::MatrixXf trackPosesForFrames(
 
   // marker constraint data
   auto constrData = createConstraintData(markerData, character.locators);
+  auto skinnedConstrData = createSkinnedConstraintData(markerData, character.skinnedLocators);
 
   // add collision error
   std::shared_ptr<CollisionErrorFunction> collisionErrorFunction;
@@ -596,10 +623,14 @@ Eigen::MatrixXf trackPosesForFrames(
       const size_t& iFrame = sortedFrames[fi];
       dof = initialMotion.col(iFrame);
 
-      if (constrData.at(iFrame).size() > numMarkers * config.minVisPercent) {
+      if ((constrData.at(iFrame).size() + skinnedConstrData.at(iFrame).size()) >
+          numMarkers * config.minVisPercent) {
         // add positional constraints
         posConstrFunc->clearConstraints(); // clear constraint data from the previous frame
         posConstrFunc->setConstraints(constrData.at(iFrame));
+
+        skinnedLocatorPosConstrFunc->clearConstraints();
+        skinnedLocatorPosConstrFunc->setConstraints(skinnedConstrData.at(iFrame));
 
         // initialization
         solverOptions.maxIterations = 50; // make sure it converges
@@ -643,6 +674,21 @@ Eigen::MatrixXf trackPosesForFrames(
   return outMotion;
 }
 
+Character addSkinnedLocatorParametersToTransform(Character character) {
+  if (character.skinnedLocators.empty()) {
+    return character;
+  }
+
+  std::vector<bool> activeSkinnedLocators(character.skinnedLocators.size(), true);
+  std::vector<std::string> locatorNames;
+  for (const auto& sl : character.skinnedLocators) {
+    locatorNames.push_back(sl.name);
+  }
+  std::tie(character.parameterTransform, character.parameterLimits) = addSkinnedLocatorParameters(
+      character.parameterTransform, character.parameterLimits, activeSkinnedLocators, locatorNames);
+  return character;
+}
+
 void calibrateModel(
     const gsl::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
@@ -660,14 +706,19 @@ void calibrateModel(
   frameStride = std::max(size_t(1), frameStride);
 
   // create a solving character with markers as bones
-  Character solvingCharacter = createLocatorCharacter(character, "locator_");
+  Character solvingCharacter = character;
+  solvingCharacter = createLocatorCharacter(solvingCharacter, "locator_");
+  if (!solvingCharacter.skinnedLocators.empty()) {
+    solvingCharacter = addSkinnedLocatorParametersToTransform(solvingCharacter);
+  }
 
   // Extended quantities are for the solvingCharacter, which includes locators as bones
   // w/o Extended quantities are for character with fixed locators
   const ParameterTransform& transformExtended = solvingCharacter.parameterTransform;
   const ParameterTransform& transform = character.parameterTransform;
 
-  ParameterSet locatorSet = transformExtended.parameterSets.find("locators")->second;
+  ParameterSet locatorSet = transformExtended.getParameterSet("locators", true) |
+      transformExtended.getParameterSet("skinnedLocators", true);
   ParameterSet calibBodySetExtended;
   ParameterSet calibBodySet;
   if (config.globalScaleOnly) {
@@ -716,7 +767,7 @@ void calibrateModel(
           0.0,
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet); // still solving a subset
-      std::tie(identity.v, character.locators) =
+      std::tie(identity.v, character.locators, character.skinnedLocators) =
           extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
       // track sequence with selected stride. we need to sample at least config.calibFrames frames
@@ -799,7 +850,7 @@ void calibrateModel(
     }
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
-    std::tie(identity.v, character.locators) =
+    std::tie(identity.v, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
     // The sequence solve above could get stuck with euler singularity but per-frame solve could get
@@ -846,7 +897,7 @@ void calibrateModel(
         config.enforceFloorInFirstFrame,
         config.firstFramePoseConstraintSet);
   }
-  std::tie(identity.v, character.locators) =
+  std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
   // TODO: A hack to return the solved first frame as initialization for tracking later.
@@ -990,7 +1041,7 @@ MatrixXf refineMotion(
     newMotion = trackSequence(
         markerData, solvingCharacter, calibrationSet, motionExtended, config, config.regularizer);
 
-    std::tie(std::ignore, character.locators) =
+    std::tie(std::ignore, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(newMotion.col(0), solvingCharacter, character);
     newMotion.conservativeResize(numParams, Eigen::NoChange_t::NoChange);
   }
