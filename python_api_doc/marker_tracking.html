@@ -138,6 +138,23 @@
 <li><p>__init__(self: pymomentum.marker_tracking.BaseConfig) -&gt; None</p></li>
 <li><p>__init__(self: pymomentum.marker_tracking.BaseConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False) -&gt; None</p></li>
 </ol>
+<p>Create a BaseConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py property">
@@ -179,6 +196,44 @@
 <li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig) -&gt; None</p></li>
 <li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’) -&gt; None</p></li>
 </ol>
+<p>Create a CalibrationConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+<dt class="field-odd">param calib_frames<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of frames used for model calibration</p>
+</dd>
+<dt class="field-even">param major_iter<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of calibration loops to run</p>
+</dd>
+<dt class="field-odd">param global_scale_only<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Calibrate only the global scale and not all proportions</p>
+</dd>
+<dt class="field-even">param locators_only<span class="colon">:</span></dt>
+<dd class="field-even"><p>Calibrate only the locator offsets</p>
+</dd>
+<dt class="field-odd">param greedy_sampling<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Enable greedy frame sampling with the given stride</p>
+</dd>
+<dt class="field-even">param enforce_floor_in_first_frame<span class="colon">:</span></dt>
+<dd class="field-even"><p>Force floor contact in first frame</p>
+</dd>
+<dt class="field-odd">param first_frame_pose_constraint_set<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Name of pose constraint set to use in first frame</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py property">
@@ -236,8 +291,22 @@
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
 <li><p>__init__(self: pymomentum.marker_tracking.ModelOptions) -&gt; None</p></li>
-<li><p>__init__(self: pymomentum.marker_tracking.ModelOptions, arg0: str, arg1: str, arg2: str) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.ModelOptions, model: str, parameters: str, locators: str) -&gt; None</p></li>
 </ol>
+<p>Create ModelOptions with specified file paths.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to template model file with locators e.g. character.glb</p>
+</dd>
+<dt class="field-even">param parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path of parameter transform model file e.g. character.model</p>
+</dd>
+<dt class="field-odd">param locators<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to locator mapping file e.g. character.locators</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py property">
@@ -273,6 +342,41 @@
 <li><p>__init__(self: pymomentum.marker_tracking.RefineConfig) -&gt; None</p></li>
 <li><p>__init__(self: pymomentum.marker_tracking.RefineConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, smoothing: float = 0.0, collision_error_weight: float = 0.0, smoothing_weights: numpy.ndarray[numpy.float32[m, 1]] = array([], dtype=float32), regularizer: float = 0.0, calib_id: bool = False, calib_locators: bool = False) -&gt; None</p></li>
 </ol>
+<p>Create a RefineConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+<dt class="field-odd">param smoothing<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Smoothing weight; 0 to disable</p>
+</dd>
+<dt class="field-even">param collision_error_weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>Collision error weight; 0 to disable</p>
+</dd>
+<dt class="field-odd">param smoothing_weights<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Smoothing weights per model parameter</p>
+</dd>
+<dt class="field-even">param regularizer<span class="colon">:</span></dt>
+<dd class="field-even"><p>Regularize the time-invariant parameters to prevent large changes</p>
+</dd>
+<dt class="field-odd">param calib_id<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Calibrate identity parameters</p>
+</dd>
+<dt class="field-even">param calib_locators<span class="colon">:</span></dt>
+<dd class="field-even"><p>Calibrate locator offsets</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py property">
@@ -308,6 +412,32 @@
 <li><p>__init__(self: pymomentum.marker_tracking.TrackingConfig) -&gt; None</p></li>
 <li><p>__init__(self: pymomentum.marker_tracking.TrackingConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, smoothing: float = 0.0, collision_error_weight: float = 0.0, smoothing_weights: numpy.ndarray[numpy.float32[m, 1]] = array([], dtype=float32)) -&gt; None</p></li>
 </ol>
+<p>Create a TrackingConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+<dt class="field-odd">param smoothing<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Smoothing weight; 0 to disable</p>
+</dd>
+<dt class="field-even">param collision_error_weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>Collision error weight; 0 to disable</p>
+</dd>
+<dt class="field-odd">param smoothing_weights<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Smoothing weights per model parameter</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py property">
