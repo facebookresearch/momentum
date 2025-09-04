@@ -111,6 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.simplify_skeleton"><code class="docutils literal notranslate"><span class="pre">Character.simplify_skeleton()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skeleton"><code class="docutils literal notranslate"><span class="pre">Character.skeleton</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_points"><code class="docutils literal notranslate"><span class="pre">Character.skin_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_skinned_locators"><code class="docutils literal notranslate"><span class="pre">Character.skin_skinned_locators()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skin_weights"><code class="docutils literal notranslate"><span class="pre">Character.skin_weights</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.skinned_locators"><code class="docutils literal notranslate"><span class="pre">Character.skinned_locators</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.to_gltf"><code class="docutils literal notranslate"><span class="pre">Character.to_gltf()</span></code></a></li>
@@ -1179,6 +1180,25 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The vertex positions in worldspace.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.skin_skinned_locators">
+<span class="sig-name descname"><span class="pre">skin_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.skin_skinned_locators" title="Link to this definition"></a></dt>
+<dd><p>Apply linear blend skinning to compute the world-space positions of the character’s skinned locators.</p>
+<p>This function uses the character’s built-in skinned locators and applies linear blend skinning
+to compute their world-space positions given a skeleton state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_state</strong> – Skeleton state tensor with shape [nJoints x 8] or [nBatch x nJoints x 8].</p></li>
+<li><p><strong>rest_positions</strong> – Optional rest positions tensor with shape [nLocators x 3] or [nBatch x nLocators x 3]. If not provided, uses the position stored in each SkinnedLocator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor of shape [nLocators x 3] or [nBatch x nLocators x 3] containing the world-space positions of the skinned locators.</p>
 </dd>
 </dl>
 </dd></dl>
