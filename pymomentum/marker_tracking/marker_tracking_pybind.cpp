@@ -81,6 +81,13 @@ PYBIND11_MODULE(marker_tracking, m) {
           })
       .def(
           py::init<float, float, size_t, float, bool>(),
+          R"(Create a BaseConfig with specified parameters.
+
+          :param min_vis_percent: Minimum percentage of visible markers to be used
+          :param loss_alpha: Parameter to control the loss function
+          :param max_iter: Maximum number of iterations
+          :param debug: Whether to output debugging info
+          )",
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -139,6 +146,20 @@ PYBIND11_MODULE(marker_tracking, m) {
               size_t,
               bool,
               std::string>(),
+          R"(Create a CalibrationConfig with specified parameters.
+
+          :param min_vis_percent: Minimum percentage of visible markers to be used
+          :param loss_alpha: Parameter to control the loss function
+          :param max_iter: Maximum number of iterations
+          :param debug: Whether to output debugging info
+          :param calib_frames: Number of frames used for model calibration
+          :param major_iter: Number of calibration loops to run
+          :param global_scale_only: Calibrate only the global scale and not all proportions
+          :param locators_only: Calibrate only the locator offsets
+          :param greedy_sampling: Enable greedy frame sampling with the given stride
+          :param enforce_floor_in_first_frame: Force floor contact in first frame
+          :param first_frame_pose_constraint_set: Name of pose constraint set to use in first frame
+          )",
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -209,6 +230,16 @@ PYBIND11_MODULE(marker_tracking, m) {
               float,
               float,
               Eigen::VectorXf>(),
+          R"(Create a TrackingConfig with specified parameters.
+
+          :param min_vis_percent: Minimum percentage of visible markers to be used
+          :param loss_alpha: Parameter to control the loss function
+          :param max_iter: Maximum number of iterations
+          :param debug: Whether to output debugging info
+          :param smoothing: Smoothing weight; 0 to disable
+          :param collision_error_weight: Collision error weight; 0 to disable
+          :param smoothing_weights: Smoothing weights per model parameter
+          )",
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -266,6 +297,19 @@ PYBIND11_MODULE(marker_tracking, m) {
               float,
               bool,
               bool>(),
+          R"(Create a RefineConfig with specified parameters.
+
+          :param min_vis_percent: Minimum percentage of visible markers to be used
+          :param loss_alpha: Parameter to control the loss function
+          :param max_iter: Maximum number of iterations
+          :param debug: Whether to output debugging info
+          :param smoothing: Smoothing weight; 0 to disable
+          :param collision_error_weight: Collision error weight; 0 to disable
+          :param smoothing_weights: Smoothing weights per model parameter
+          :param regularizer: Regularize the time-invariant parameters to prevent large changes
+          :param calib_id: Calibrate identity parameters
+          :param calib_locators: Calibrate locator offsets
+          )",
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -310,6 +354,12 @@ PYBIND11_MODULE(marker_tracking, m) {
               const std::string&,
               const std::string&,
               const std::string&>(),
+          R"(Create ModelOptions with specified file paths.
+
+          :param model: Path to template model file with locators e.g. character.glb
+          :param parameters: Path of parameter transform model file e.g. character.model
+          :param locators: Path to locator mapping file e.g. character.locators
+          )",
           py::arg("model"),
           py::arg("parameters"),
           py::arg("locators"))
