@@ -576,6 +576,24 @@ It can be used to solve for shapes and pose simultaneously.
           py::arg("skel_state"),
           py::arg("rest_vertices") = std::optional<at::Tensor>{})
       .def(
+          "skin_skinned_locators",
+          [](const momentum::Character& character,
+             const at::Tensor& skel_state,
+             const std::optional<at::Tensor>& rest_positions) {
+            return skinSkinnedLocators(character, skel_state, rest_positions);
+          },
+          R"(Apply linear blend skinning to compute the world-space positions of the character's skinned locators.
+
+This function uses the character's built-in skinned locators and applies linear blend skinning
+to compute their world-space positions given a skeleton state.
+
+:param skel_state: Skeleton state tensor with shape [nJoints x 8] or [nBatch x nJoints x 8].
+:param rest_positions: Optional rest positions tensor with shape [nLocators x 3] or [nBatch x nLocators x 3]. If not provided, uses the position stored in each SkinnedLocator.
+:return: Tensor of shape [nLocators x 3] or [nBatch x nLocators x 3] containing the world-space positions of the skinned locators.
+)",
+          py::arg("skel_state"),
+          py::arg("rest_positions") = std::optional<at::Tensor>())
+      .def(
           "scaled",
           &momentum::scaleCharacter,
           R"(Scale the character (mesh and skeleton) by the desired amount.
