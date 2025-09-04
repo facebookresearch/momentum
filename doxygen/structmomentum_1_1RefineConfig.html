@@ -145,6 +145,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a2a37d3b6bcd083aef06d7fbc5cd1c510 inherit pub_attribs_structmomentum_1_1BaseConfig" id="r_a2a37d3b6bcd083aef06d7fbc5cd1c510"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BaseConfig.html#a2a37d3b6bcd083aef06d7fbc5cd1c510">maxIter</a> = 30</td></tr>
 <tr class="memdesc:a2a37d3b6bcd083aef06d7fbc5cd1c510 inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max number of solver iterations to run.  <br /></td></tr>
 <tr class="separator:a2a37d3b6bcd083aef06d7fbc5cd1c510 inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13757f2c6cca0db3c3ae24d4f4a82f9e inherit pub_attribs_structmomentum_1_1BaseConfig" id="r_a13757f2c6cca0db3c3ae24d4f4a82f9e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BaseConfig.html#a13757f2c6cca0db3c3ae24d4f4a82f9e">regularization</a> = 0.05<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
+<tr class="memdesc:a13757f2c6cca0db3c3ae24d4f4a82f9e inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regularization parameter (lambda) for Levenberg-Marquardt solver.  <br /></td></tr>
+<tr class="separator:a13757f2c6cca0db3c3ae24d4f4a82f9e inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7476bd3f045226d0ff610abe19e929e8 inherit pub_attribs_structmomentum_1_1BaseConfig" id="r_a7476bd3f045226d0ff610abe19e929e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BaseConfig.html#a7476bd3f045226d0ff610abe19e929e8">debug</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
 <tr class="memdesc:a7476bd3f045226d0ff610abe19e929e8 inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">True to print and save debug information.  <br /></td></tr>
 <tr class="separator:a7476bd3f045226d0ff610abe19e929e8 inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,7 +156,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>Configuration for refining an already tracked motion, eg. </p>
 <p>add smoothing and/or collision handling; improve residuals with extra dofs etc. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00061">61</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00063">63</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a2556017544547cdf04af11cfce1dd7a4" name="a2556017544547cdf04af11cfce1dd7a4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2556017544547cdf04af11cfce1dd7a4">&#9670;&#160;</a></span>calibId</h2>
@@ -169,7 +172,7 @@ Public Attributes</h2></td></tr>
 
 <p>Calibrate identity parameters when refining the motion. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00066">66</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00068">68</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -187,7 +190,7 @@ Public Attributes</h2></td></tr>
 
 <p>Calibrate locators when refining the motion. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00068">68</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00070">70</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -205,7 +208,7 @@ Public Attributes</h2></td></tr>
 
 <p>Minimize changes to calibration parameters when in calibration mode, by regularizing towards the input value with this regularizer weight. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00064">64</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00066">66</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -218,7 +221,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1RefineConfig.html">RefineConfig</a></li>
-    <li class="footer">Generated on Wed Sep 3 2025 19:46:40 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Sep 4 2025 02:52:56 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
