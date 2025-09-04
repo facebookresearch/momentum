@@ -2533,6 +2533,12 @@ The resulting tensors are as follows:
   markerClass.def(py::init())
       .def(
           py::init<const std::string&, const Eigen::Vector3d&, const bool>(),
+          R"(Create a marker with the specified properties.
+
+          :param name: The name of the marker
+          :param pos: The 3D position of the marker
+          :param occluded: Whether the marker is occluded with no position info
+          )",
           py::arg("name"),
           py::arg("pos"),
           py::arg("occluded"))
