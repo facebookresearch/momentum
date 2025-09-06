@@ -29,13 +29,13 @@ namespace {
 
 /// Helper function to convert Vector3 to JSON array
 template <typename T>
-nlohmann::json eigenToJsonArray(const Eigen::Matrix<T, 3, 1>& vec) {
+nlohmann::json eigenToJsonArray(const Eigen::Vector3<T>& vec) {
   return nlohmann::json::array({vec.x(), vec.y(), vec.z()});
 }
 
 /// Helper function to convert Vector2 to JSON array
 template <typename T>
-nlohmann::json eigenToJsonArray(const Eigen::Matrix<T, 2, 1>& vec) {
+nlohmann::json eigenToJsonArray(const Eigen::Vector2<T>& vec) {
   return nlohmann::json::array({vec.x(), vec.y()});
 }
 
@@ -64,16 +64,16 @@ nlohmann::json transformToJson(const TransformT<T>& transform) {
 
 /// Helper function to convert JSON array to Vector3
 template <typename T>
-Eigen::Matrix<T, 3, 1> jsonArrayToEigenVector3(const nlohmann::json& j) {
+Eigen::Vector3<T> jsonArrayToEigenVector3(const nlohmann::json& j) {
   MT_THROW_IF(j.size() != 3, "Expected array of size 3 for Vector3");
-  return Eigen::Matrix<T, 3, 1>(j[0].get<T>(), j[1].get<T>(), j[2].get<T>());
+  return Eigen::Vector3<T>(j[0].get<T>(), j[1].get<T>(), j[2].get<T>());
 }
 
 /// Helper function to convert JSON array to Vector2
 template <typename T>
-Eigen::Matrix<T, 2, 1> jsonArrayToEigenVector2(const nlohmann::json& j) {
+Eigen::Vector2<T> jsonArrayToEigenVector2(const nlohmann::json& j) {
   MT_THROW_IF(j.size() != 2, "Expected array of size 2 for Vector2");
-  return Eigen::Matrix<T, 2, 1>(j[0].get<T>(), j[1].get<T>());
+  return Eigen::Vector2<T>(j[0].get<T>(), j[1].get<T>());
 }
 
 /// Helper function to convert JSON array to Quaternion (w, x, y, z)

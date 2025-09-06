@@ -110,9 +110,9 @@ const char* propertyTypeStr(ofbx::IElementProperty::Type type) {
 
 template <typename T>
 Eigen::Quaternion<T> computeEulerRotation(
-    const Eigen::Matrix<T, 3, 1>& angles,
+    const Eigen::Vector3<T>& angles,
     ofbx::RotationOrder order) {
-  using VecType = Eigen::Matrix<T, 3, 1>;
+  using VecType = Eigen::Vector3<T>;
   using QuaternionType = Eigen::Quaternion<T>;
 
   if (order == ofbx::RotationOrder::SPHERIC_XYZ) {

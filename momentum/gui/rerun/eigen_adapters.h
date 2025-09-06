@@ -52,15 +52,15 @@ struct CollectionAdapter<TElement, std::vector<Eigen::Vector4<T>>> {
 
 // Adapter for converting a vector of Eigen::Vector3b to a vector of rerun::Color
 template <>
-struct CollectionAdapter<Color, std::vector<Eigen::Matrix<uint8_t, 3, 1>>> {
-  Collection<Color> operator()(const std::vector<Eigen::Matrix<uint8_t, 3, 1>>& container) {
+struct CollectionAdapter<Color, std::vector<Eigen::Vector3<uint8_t>>> {
+  Collection<Color> operator()(const std::vector<Eigen::Vector3<uint8_t>>& container) {
     std::vector<rerun::Color> colors;
     colors.reserve(container.size());
     std::transform(
         container.cbegin(),
         container.cend(),
         std::back_inserter(colors),
-        [](const Eigen::Matrix<uint8_t, 3, 1>& vertexColor) {
+        [](const Eigen::Vector3<uint8_t>& vertexColor) {
           return rerun::Color(vertexColor[0], vertexColor[1], vertexColor[2]);
         });
     return Collection<Color>::take_ownership(std::move(colors));

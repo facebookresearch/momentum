@@ -234,7 +234,7 @@ template <typename T>
 /// @param v Input vector
 /// @return 3×3 skew-symmetric matrix
 template <typename T>
-Eigen::Matrix<T, 3, 3> crossProductMatrix(const Eigen::Matrix<T, 3, 1>& v) {
+Eigen::Matrix<T, 3, 3> crossProductMatrix(const Eigen::Vector3<T>& v) {
   Eigen::Matrix<T, 3, 3> result;
   result << T(0), -v.z(), v.y(), v.z(), T(0), -v.x(), -v.y(), v.x(), T(0);
   return result;

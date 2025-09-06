@@ -33,7 +33,7 @@
 //------------------------------------------------------------------------------
 
 namespace Eigen {
-using Vector3b = Matrix<uint8_t, 3, 1>;
+using Vector3b = Vector3<uint8_t>;
 }
 
 namespace momentum {

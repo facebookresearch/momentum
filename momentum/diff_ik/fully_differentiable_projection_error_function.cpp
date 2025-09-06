@@ -58,7 +58,7 @@ template <typename JetType>
   //    (dError/dJointParameter[jFullBodyDOF] *
   //       dJointParameter[jFullBodyDOF]/dModelParametersT<T>)^JetType * v
   auto add_gradient_dot = [&](const size_t jFullBodyDOF,
-                              const Eigen::Matrix<JetType, 3, 1>& d_p_world_cm) {
+                              const Eigen::Vector3<JetType>& d_p_world_cm) {
     const Eigen::Vector3<JetType> d_p_projected =
         (projection_cons.template topLeftCorner<3, 3>() * d_p_world_cm).eval();
     const JetType& dx = d_p_projected(0);
