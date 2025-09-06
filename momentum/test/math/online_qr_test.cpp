@@ -467,7 +467,7 @@ TEST(OnlineBlockQR, Basic) {
   Eigen::Matrix<double, 3, 2> A_diag;
   A_diag << 1, 3, 4, 2, 1, 4;
 
-  Eigen::Matrix<double, 3, 1> A_common;
+  Eigen::Vector3<double> A_common;
   A_common << 1, 4, 2;
 
   const Eigen::MatrixXd A_dense = assembleBlockMatrix<double>({A_diag}, {A_common}, 1);
@@ -506,13 +506,13 @@ TEST(OnlineBlockQR, TwoBlocks) {
   Eigen::Matrix<double, 3, 2> A1_diag;
   A1_diag << 1, 3, 4, 2, 1, 4;
 
-  Eigen::Matrix<double, 3, 1> A1_common;
+  Eigen::Vector3<double> A1_common;
   A1_common << 1, 4, 2;
 
   Eigen::Matrix<double, 3, 2> A2_diag;
   A2_diag << 2, 4, 7, -1, -4, 4;
 
-  Eigen::Matrix<double, 3, 1> A2_common;
+  Eigen::Vector3<double> A2_common;
   A2_common << -3, 5, -2;
 
   const Eigen::MatrixXd A_dense =

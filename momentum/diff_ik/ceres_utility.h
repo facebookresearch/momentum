@@ -16,17 +16,13 @@
 namespace momentum {
 
 template <typename T, typename T2>
-Eigen::Matrix<T, 3, 1> getRotationDerivative(
-    const JointStateT<T2>& js,
-    const size_t index,
-    const Eigen::Matrix<T, 3, 1>& ref) {
+Eigen::Vector3<T>
+getRotationDerivative(const JointStateT<T2>& js, const size_t index, const Eigen::Vector3<T>& ref) {
   return js.rotationAxis.col(index).cross(ref);
 }
 
 template <typename T, typename T2>
-Eigen::Matrix<T, 3, 1> getScaleDerivative(
-    const JointStateT<T2>& js,
-    const Eigen::Matrix<T, 3, 1>& ref) {
+Eigen::Vector3<T> getScaleDerivative(const JointStateT<T2>& js, const Eigen::Vector3<T>& ref) {
   (void)js;
   return ref * ln2<T2>();
 }
