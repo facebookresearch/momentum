@@ -4680,6 +4680,7 @@ packages:
   depends:
   - blas-devel 3.9.0 35*_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 17002
   timestamp: 1757003140805
 - conda: https://conda.anaconda.org/conda-forge/osx-64/blas-2.135-openblas.conda
@@ -4689,6 +4690,7 @@ packages:
   depends:
   - blas-devel 3.9.0 35*_openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17234
   timestamp: 1757003814986
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/blas-2.135-openblas.conda
@@ -4698,6 +4700,7 @@ packages:
   depends:
   - blas-devel 3.9.0 35*_openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17304
   timestamp: 1757003706407
 - conda: https://conda.anaconda.org/conda-forge/win-64/blas-2.135-mkl.conda
@@ -4707,6 +4710,7 @@ packages:
   depends:
   - blas-devel 3.9.0 35*_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 17416
   timestamp: 1757003644896
 - conda: https://conda.anaconda.org/conda-forge/linux-64/blas-devel-3.9.0-35_hcf00494_mkl.conda
@@ -4721,6 +4725,7 @@ packages:
   - mkl >=2024.2.2,<2025.0a0
   - mkl-devel 2024.2.*
   license: BSD-3-Clause
+  license_family: BSD
   size: 16754
   timestamp: 1757003012435
 - conda: https://conda.anaconda.org/conda-forge/osx-64/blas-devel-3.9.0-35_hbf4f893_openblas.conda
@@ -4734,6 +4739,7 @@ packages:
   - liblapacke 3.9.0 35_h85686d2_openblas
   - openblas 0.3.30.*
   license: BSD-3-Clause
+  license_family: BSD
   size: 17103
   timestamp: 1757003667017
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/blas-devel-3.9.0-35_h11c0a38_openblas.conda
@@ -4747,6 +4753,7 @@ packages:
   - liblapacke 3.9.0 35_hbb7bcf8_openblas
   - openblas 0.3.30.*
   license: BSD-3-Clause
+  license_family: BSD
   size: 17140
   timestamp: 1757003669017
 - conda: https://conda.anaconda.org/conda-forge/win-64/blas-devel-3.9.0-35_h85df5b5_mkl.conda
@@ -4761,6 +4768,7 @@ packages:
   - mkl >=2024.2.2,<2025.0a0
   - mkl-devel 2024.2.*
   license: BSD-3-Clause
+  license_family: BSD
   size: 17193
   timestamp: 1757003590262
 - conda: https://conda.anaconda.org/conda-forge/linux-64/boost-1.85.0-h9cebb41_4.conda
@@ -5201,6 +5209,7 @@ packages:
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   license: MIT
+  license_family: MIT
   size: 295227
   timestamp: 1756808421998
 - conda: https://conda.anaconda.org/conda-forge/osx-64/cffi-1.17.1-py312hc05cdf7_1.conda
@@ -5213,6 +5222,7 @@ packages:
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   license: MIT
+  license_family: MIT
   size: 288317
   timestamp: 1756808571109
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cffi-1.17.1-py312h429097b_1.conda
@@ -5226,6 +5236,7 @@ packages:
   - python >=3.12,<3.13.0a0 *_cpython
   - python_abi 3.12.* *_cp312
   license: MIT
+  license_family: MIT
   size: 287170
   timestamp: 1756808571913
 - conda: https://conda.anaconda.org/conda-forge/win-64/cffi-1.17.1-py312he06e257_1.conda
@@ -5239,6 +5250,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
+  license_family: MIT
   size: 291041
   timestamp: 1756808860538
 - conda: https://conda.anaconda.org/conda-forge/noarch/charset-normalizer-3.4.3-pyhd8ed1ab_0.conda
@@ -5677,6 +5689,7 @@ packages:
   depends:
   - gcc_impl_linux-64 >=14.3.0,<14.3.1.0a0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 33254
   timestamp: 1757039288773
 - conda: https://conda.anaconda.org/conda-forge/linux-64/console_bridge-1.0.2-h924138e_1.tar.bz2
@@ -7174,6 +7187,7 @@ packages:
   depends:
   - python >=3.10
   license: BSD-3-Clause
+  license_family: BSD
   size: 145678
   timestamp: 1756908673345
 - conda: https://conda.anaconda.org/conda-forge/linux-64/fx-gltf-2.0.0-h5888daf_2.conda
@@ -7227,6 +7241,7 @@ packages:
   - conda-gcc-specs
   - gcc_impl_linux-64 14.3.0.*
   license: BSD-3-Clause
+  license_family: BSD
   size: 31031
   timestamp: 1757039421021
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc_impl_linux-64-14.3.0-hd9e9e21_5.conda
@@ -7241,6 +7256,7 @@ packages:
   - libstdcxx >=14.3.0
   - sysroot_linux-64
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 71625160
   timestamp: 1757039160514
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc_linux-64-14.3.0-h1382650_11.conda
@@ -7536,6 +7552,7 @@ packages:
   - gcc 14.3.0.*
   - gxx_impl_linux-64 14.3.0.*
   license: BSD-3-Clause
+  license_family: BSD
   size: 30293
   timestamp: 1757039456662
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gxx_impl_linux-64-14.3.0-he663afc_5.conda
@@ -7547,6 +7564,7 @@ packages:
   - sysroot_linux-64
   - tzdata
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 14734843
   timestamp: 1757039390196
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gxx_linux-64-14.3.0-ha7acb78_11.conda
@@ -8600,6 +8618,7 @@ packages:
   track_features:
   - blas_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 17387
   timestamp: 1757002960950
 - conda: https://conda.anaconda.org/conda-forge/osx-64/libblas-3.9.0-35_h7f60823_openblas.conda
@@ -8616,6 +8635,7 @@ packages:
   - blas 2.135   openblas
   - mkl <2025
   license: BSD-3-Clause
+  license_family: BSD
   size: 17151
   timestamp: 1757003585301
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libblas-3.9.0-35_h10e41b3_openblas.conda
@@ -8632,6 +8652,7 @@ packages:
   - mkl <2025
   - blas 2.135   openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17191
   timestamp: 1757003619794
 - conda: https://conda.anaconda.org/conda-forge/win-64/libblas-3.9.0-35_h5709861_mkl.conda
@@ -8646,6 +8667,7 @@ packages:
   - libcblas   3.9.0   35*_mkl
   - liblapacke 3.9.0   35*_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 66044
   timestamp: 1757003486248
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libboost-1.85.0-h0ccab89_4.conda
@@ -9178,6 +9200,7 @@ packages:
   track_features:
   - blas_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 17021
   timestamp: 1757002973897
 - conda: https://conda.anaconda.org/conda-forge/osx-64/libcblas-3.9.0-35_hff6cab4_openblas.conda
@@ -9191,6 +9214,7 @@ packages:
   - liblapack  3.9.0   35*_openblas
   - liblapacke 3.9.0   35*_openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17132
   timestamp: 1757003606725
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcblas-3.9.0-35_hb3479ef_openblas.conda
@@ -9204,6 +9228,7 @@ packages:
   - blas 2.135   openblas
   - liblapack  3.9.0   35*_openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17163
   timestamp: 1757003634172
 - conda: https://conda.anaconda.org/conda-forge/win-64/libcblas-3.9.0-35_h2a3cdd5_mkl.conda
@@ -9217,6 +9242,7 @@ packages:
   - liblapack  3.9.0   35*_mkl
   - liblapacke 3.9.0   35*_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 66398
   timestamp: 1757003514529
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libccolamd-3.3.4-hf02c80a_7100101.conda
@@ -10317,6 +10343,7 @@ packages:
   - libgomp 15.1.0 h767d61c_5
   - libgcc-ng ==15.1.0=*_5
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 824191
   timestamp: 1757042543820
 - conda: https://conda.anaconda.org/conda-forge/win-64/libgcc-15.1.0-h1383e82_5.conda
@@ -10330,6 +10357,7 @@ packages:
   - msys2-conda-epoch <0.0a0
   - libgcc-ng ==15.1.0=*_5
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 668284
   timestamp: 1757042801517
 - conda: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-64-14.3.0-h85bb3a7_105.conda
@@ -10338,6 +10366,7 @@ packages:
   depends:
   - __unix
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 2732190
   timestamp: 1757038947822
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcc-ng-15.1.0-h69a702a_5.conda
@@ -10346,6 +10375,7 @@ packages:
   depends:
   - libgcc 15.1.0 h767d61c_5
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29187
   timestamp: 1757042549554
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcrypt-lib-1.11.1-hb9d3cd8_0.conda
@@ -10366,6 +10396,7 @@ packages:
   constrains:
   - libgfortran-ng ==15.1.0=*_5
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29169
   timestamp: 1757042575979
 - conda: https://conda.anaconda.org/conda-forge/osx-64/libgfortran-15.1.0-h5f6db21_1.conda
@@ -10395,6 +10426,7 @@ packages:
   constrains:
   - libgfortran 15.1.0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 1564589
   timestamp: 1757042559498
 - conda: https://conda.anaconda.org/conda-forge/osx-64/libgfortran5-15.1.0-hfa3c126_1.conda
@@ -10465,6 +10497,7 @@ packages:
   depends:
   - __glibc >=2.17,<3.0.a0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 447215
   timestamp: 1757042483384
 - conda: https://conda.anaconda.org/conda-forge/win-64/libgomp-15.1.0-h1383e82_5.conda
@@ -10475,6 +10508,7 @@ packages:
   constrains:
   - msys2-conda-epoch <0.0a0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 535560
   timestamp: 1757042749206
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libgoogle-cloud-2.39.0-hdb79228_0.conda
@@ -10939,6 +10973,7 @@ packages:
   track_features:
   - blas_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 17011
   timestamp: 1757002986706
 - conda: https://conda.anaconda.org/conda-forge/osx-64/liblapack-3.9.0-35_h236ab99_openblas.conda
@@ -10952,6 +10987,7 @@ packages:
   - libcblas   3.9.0   35*_openblas
   - liblapacke 3.9.0   35*_openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17155
   timestamp: 1757003625275
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/liblapack-3.9.0-35_hc9a63f6_openblas.conda
@@ -10965,6 +11001,7 @@ packages:
   - libcblas   3.9.0   35*_openblas
   - blas 2.135   openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17166
   timestamp: 1757003647724
 - conda: https://conda.anaconda.org/conda-forge/win-64/liblapack-3.9.0-35_hf9ab0e9_mkl.conda
@@ -10978,6 +11015,7 @@ packages:
   - libcblas   3.9.0   35*_mkl
   - liblapacke 3.9.0   35*_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 78485
   timestamp: 1757003541803
 - conda: https://conda.anaconda.org/conda-forge/linux-64/liblapacke-3.9.0-35_hbc6e62b_mkl.conda
@@ -10993,6 +11031,7 @@ packages:
   track_features:
   - blas_mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 17031
   timestamp: 1757002999615
 - conda: https://conda.anaconda.org/conda-forge/osx-64/liblapacke-3.9.0-35_h85686d2_openblas.conda
@@ -11006,6 +11045,7 @@ packages:
   constrains:
   - blas 2.135   openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17157
   timestamp: 1757003649628
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/liblapacke-3.9.0-35_hbb7bcf8_openblas.conda
@@ -11019,6 +11059,7 @@ packages:
   constrains:
   - blas 2.135   openblas
   license: BSD-3-Clause
+  license_family: BSD
   size: 17173
   timestamp: 1757003660199
 - conda: https://conda.anaconda.org/conda-forge/win-64/liblapacke-3.9.0-35_h3ae206f_mkl.conda
@@ -11032,6 +11073,7 @@ packages:
   constrains:
   - blas 2.135   mkl
   license: BSD-3-Clause
+  license_family: BSD
   size: 82889
   timestamp: 1757003569605
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libldl-3.3.2-hf02c80a_7100101.conda
@@ -12078,6 +12120,7 @@ packages:
   - libgcc >=14.3.0
   - libstdcxx >=14.3.0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 5133195
   timestamp: 1757039097894
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libspex-3.2.3-h9226d62_7100101.conda
@@ -12299,6 +12342,7 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc 15.1.0 h767d61c_5
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 3896432
   timestamp: 1757042571458
 - conda: https://conda.anaconda.org/conda-forge/noarch/libstdcxx-devel_linux-64-14.3.0-h85bb3a7_105.conda
@@ -12307,6 +12351,7 @@ packages:
   depends:
   - __unix
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 14584026
   timestamp: 1757038976267
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-ng-15.1.0-h4852527_5.conda
@@ -12315,6 +12360,7 @@ packages:
   depends:
   - libstdcxx 15.1.0 h8f9b012_5
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29233
   timestamp: 1757042603319
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libsuitesparseconfig-7.10.1-h901830b_7100101.conda
@@ -14668,6 +14714,7 @@ packages:
   constrains:
   - pytest-faulthandler >=2
   license: MIT
+  license_family: MIT
   size: 276734
   timestamp: 1757011891753
 - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.12.11-h9e4cc4f_0_cpython.conda
@@ -16354,6 +16401,7 @@ packages:
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   license: BSD-2-Clause
+  license_family: BSD
   size: 64608
   timestamp: 1756851740646
 - conda: https://conda.anaconda.org/conda-forge/osx-64/wrapt-1.17.3-py312h2f459f6_1.conda
@@ -16364,6 +16412,7 @@ packages:
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   license: BSD-2-Clause
+  license_family: BSD
   size: 60710
   timestamp: 1756851817591
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/wrapt-1.17.3-py312h163523d_1.conda
@@ -16375,6 +16424,7 @@ packages:
   - python >=3.12,<3.13.0a0 *_cpython
   - python_abi 3.12.* *_cp312
   license: BSD-2-Clause
+  license_family: BSD
   size: 61948
   timestamp: 1756851912789
 - conda: https://conda.anaconda.org/conda-forge/win-64/wrapt-1.17.3-py312he06e257_1.conda
@@ -16387,6 +16437,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: BSD-2-Clause
+  license_family: BSD
   size: 63012
   timestamp: 1756852490793
 - conda: https://conda.anaconda.org/conda-forge/linux-64/xcb-util-0.4.1-h4f16b4b_2.conda
@@ -16886,6 +16937,7 @@ packages:
   - zstd >=1.5.7,<1.5.8.0a0
   - zstd >=1.5.7,<1.6.0a0
   license: BSD-3-Clause
+  license_family: BSD
   size: 424205
   timestamp: 1756841111538
 - conda: https://conda.anaconda.org/conda-forge/osx-64/zstandard-0.24.0-py312hcfdedb4_1.conda
@@ -16899,6 +16951,7 @@ packages:
   - zstd >=1.5.7,<1.5.8.0a0
   - zstd >=1.5.7,<1.6.0a0
   license: BSD-3-Clause
+  license_family: BSD
   size: 414810
   timestamp: 1756841333043
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.24.0-py312h26de6b3_1.conda
@@ -16913,6 +16966,7 @@ packages:
   - zstd >=1.5.7,<1.5.8.0a0
   - zstd >=1.5.7,<1.6.0a0
   license: BSD-3-Clause
+  license_family: BSD
   size: 345168
   timestamp: 1756841514802
 - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.24.0-py312ha680012_1.conda
@@ -16928,6 +16982,7 @@ packages:
   - zstd >=1.5.7,<1.5.8.0a0
   - zstd >=1.5.7,<1.6.0a0
   license: BSD-3-Clause
+  license_family: BSD
   size: 346385
   timestamp: 1756841280773
 - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.7-hb8e6e7a_2.conda

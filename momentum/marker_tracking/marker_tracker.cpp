@@ -1110,7 +1110,7 @@ std::pair<float, float> getLocatorError(
       error += frameError / validMarkers;
     }
   }
-  return {error / numFrames, maxError};
+  return {static_cast<float>(error / numFrames), static_cast<float>(maxError)};
 }
 
 } // namespace momentum

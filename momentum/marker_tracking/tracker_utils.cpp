@@ -114,9 +114,9 @@ averageTriangleSkinWeights(
   }
 
   std::vector<std::pair<float, uint32_t>> sortedWeights;
-  for (int i = 0; i < skinWeights.size(); ++i) {
+  for (Eigen::Index i = 0; i < skinWeights.size(); ++i) {
     if (skinWeights[i] > 0.0f) {
-      sortedWeights.emplace_back(skinWeights[i], i);
+      sortedWeights.emplace_back(skinWeights[i], static_cast<uint32_t>(i));
     }
   }
   std::sort(sortedWeights.begin(), sortedWeights.end(), std::greater<>());
@@ -124,7 +124,7 @@ averageTriangleSkinWeights(
   Eigen::Vector<float, kMaxSkinJoints> resultWeights = Eigen::Vector<float, kMaxSkinJoints>::Zero();
   Eigen::Vector<uint32_t, kMaxSkinJoints> resultIndices =
       Eigen::Vector<uint32_t, kMaxSkinJoints>::Zero();
-  for (int i = 0; i < kMaxSkinJoints; ++i) {
+  for (size_t i = 0; i < kMaxSkinJoints; ++i) {
     if (i < sortedWeights.size()) {
       resultWeights[i] = sortedWeights[i].first;
       resultIndices[i] = sortedWeights[i].second;
