@@ -1229,7 +1229,7 @@ $(document).ready(function(){initNavTree('marker__tracker_8cpp_source.html','');
 <div class="line"><a id="l01110" name="l01110"></a><span class="lineno"> 1110</span>      error += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">frameError</a> / <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">validMarkers</a>;</div>
 <div class="line"><a id="l01111" name="l01111"></a><span class="lineno"> 1111</span>    }</div>
 <div class="line"><a id="l01112" name="l01112"></a><span class="lineno"> 1112</span>  }</div>
-<div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span>  <span class="keywordflow">return</span> {error / numFrames, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxError</a>};</div>
+<div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span>  <span class="keywordflow">return</span> {<span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(error / numFrames), <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxError</a>)};</div>
 <div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span>}</div>
 </div>
 <div class="line"><a id="l01115" name="l01115"></a><span class="lineno"> 1115</span> </div>
@@ -1321,7 +1321,7 @@ $(document).ready(function(){initNavTree('marker__tracker_8cpp_source.html','');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_da9a4e26ab0cde1b62bca67c124a4985.html">marker_tracking</a></li><li class="navelem"><a class="el" href="marker__tracker_8cpp.html">marker_tracker.cpp</a></li>
-    <li class="footer">Generated on Sat Sep 6 2025 06:11:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sat Sep 6 2025 06:39:40 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
