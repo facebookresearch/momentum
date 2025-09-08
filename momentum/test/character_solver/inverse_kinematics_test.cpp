@@ -58,8 +58,9 @@ void testSimpleTargets(const SolverOptionsT& options) {
   // generate rest state and constraints
   SkeletonStateT<T> state(castedCharacterParameterTransform.apply(parameters), skeleton);
   std::vector<PositionDataT<T>> constraints;
-  constraints.push_back(PositionDataT<T>(
-      Vector3<T>::UnitY(), state.jointState[2].transformation * Vector3<T>::UnitY(), 2, 1.0));
+  constraints.push_back(
+      PositionDataT<T>(
+          Vector3<T>::UnitY(), state.jointState[2].transformation * Vector3<T>::UnitY(), 2, 1.0));
 
   {
     SCOPED_TRACE("Checking restpose");

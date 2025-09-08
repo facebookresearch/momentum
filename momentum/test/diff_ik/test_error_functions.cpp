@@ -497,12 +497,13 @@ TEST(ErrorFunction, ProjectionErrorFunction) {
   Eigen::Matrix4<T> projection = Eigen::Matrix4<T>::Identity();
   projection(2, 3) = 10;
   for (int i = 0; i < 5; ++i) {
-    errorFunction.addConstraint(ProjectionConstraintDataT<T>{
-        (projection + rng.uniformAffine3<T>().matrix()).topRows(3),
-        rng.uniform<size_t>(size_t(0), size_t(2)),
-        rng.normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
-        rng.uniform<T>(0.1, 2.0),
-        rng.normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
+    errorFunction.addConstraint(
+        ProjectionConstraintDataT<T>{
+            (projection + rng.uniformAffine3<T>().matrix()).topRows(3),
+            rng.uniform<size_t>(size_t(0), size_t(2)),
+            rng.normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
+            rng.uniform<T>(0.1, 2.0),
+            rng.normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
   }
 
   testConstraintDerivs<double>(skeleton, parameterTransform, errorFunction, true);

@@ -725,8 +725,9 @@ std::string writeParameterLimits(
           if (itr->data.linear.rangeMax == kPositiveInfinity) {
             oss << vecToString(Eigen::Vector2f(itr->data.linear.scale, itr->data.linear.offset));
           } else {
-            oss << vecToString(Eigen::Vector3f(
-                itr->data.linear.scale, itr->data.linear.offset, itr->data.linear.rangeMax));
+            oss << vecToString(
+                Eigen::Vector3f(
+                    itr->data.linear.scale, itr->data.linear.offset, itr->data.linear.rangeMax));
           }
 
           prevRangeMax = itr->data.linear.rangeMax;
@@ -764,10 +765,11 @@ std::string writeParameterLimits(
             oss << vecToString(
                 Eigen::Vector2f(itr->data.linearJoint.scale, itr->data.linearJoint.offset));
           } else {
-            oss << vecToString(Eigen::Vector3f(
-                itr->data.linearJoint.scale,
-                itr->data.linearJoint.offset,
-                itr->data.linearJoint.rangeMax));
+            oss << vecToString(
+                Eigen::Vector3f(
+                    itr->data.linearJoint.scale,
+                    itr->data.linearJoint.offset,
+                    itr->data.linearJoint.rangeMax));
           }
 
           prevRangeMax = itr->data.linearJoint.rangeMax;

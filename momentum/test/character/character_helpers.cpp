@@ -134,8 +134,9 @@ CollisionGeometry createDefaultCollisionGeometry(size_t numJoints) {
   triplets.push_back(Eigen::Triplet<float>(1 * kParametersPerJoint + 5, 8, 0.5f)); // shared_rz
   triplets.push_back(Eigen::Triplet<float>(2 * kParametersPerJoint + 5, 8, 0.5f)); // shared_rz
   for (size_t iJoint = 2; iJoint < numJoints; ++iJoint) {
-    triplets.push_back(Eigen::Triplet<float>(
-        iJoint * kParametersPerJoint + 3, rxStart + iJoint - 2, 1.0f)); // joint1_rx
+    triplets.push_back(
+        Eigen::Triplet<float>(
+            iJoint * kParametersPerJoint + 3, rxStart + iJoint - 2, 1.0f)); // joint1_rx
   }
 
   result.transform.setFromTriplets(triplets.begin(), triplets.end());
