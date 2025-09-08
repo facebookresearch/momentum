@@ -57,7 +57,7 @@ clean = { cmd = """
     && rm pixi.lock
     """, description = "Clean all build artifacts and pixi cache" }
 lint = { cmd = "clang-format -i axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Format C++ code using clang-format" }
-check-format = { cmd = "clang-format --dry-run --Werror axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Check if code is properly formatted without modifying files" }
+lint-check = { cmd = "clang-format --dry-run --Werror axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Check if code is properly formatted without modifying files" }
 config = { cmd = """
     cmake \
         -S . \
