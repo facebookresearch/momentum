@@ -87,18 +87,16 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
     SkeletonStateT<T> skelState_cur(
         castedCharacterParameterTransform.apply(randomParams_cur), character.skeleton);
     for (size_t iJoint = 0; iJoint < skelState_cur.jointState.size(); ++iJoint) {
-      positionErrorFunction->addConstraint(
-          PositionDataT<T>(
-              Eigen::Vector3<T>::Zero(),
-              skelState_cur.jointState[iJoint].translation().template cast<T>(),
-              iJoint,
-              1.0));
-      orientErrorFunction->addConstraint(
-          OrientationDataT<T>(
-              Eigen::Quaternion<T>::Identity(),
-              skelState_cur.jointState[iJoint].rotation().template cast<T>(),
-              iJoint,
-              1.0));
+      positionErrorFunction->addConstraint(PositionDataT<T>(
+          Eigen::Vector3<T>::Zero(),
+          skelState_cur.jointState[iJoint].translation().template cast<T>(),
+          iJoint,
+          1.0));
+      orientErrorFunction->addConstraint(OrientationDataT<T>(
+          Eigen::Quaternion<T>::Identity(),
+          skelState_cur.jointState[iJoint].rotation().template cast<T>(),
+          iJoint,
+          1.0));
     }
 
     solverFunction.addErrorFunction(positionErrorFunction);
@@ -195,18 +193,16 @@ TYPED_TEST(TrustRegionTest, SanityCheck) {
     SkeletonStateT<T> skelState_cur(
         castedCharacterParameterTransform.apply(randomParams_cur), character.skeleton);
     for (size_t iJoint = 0; iJoint < skelState_cur.jointState.size(); ++iJoint) {
-      positionErrorFunction->addConstraint(
-          PositionDataT<T>(
-              Eigen::Vector3<T>::Zero(),
-              skelState_cur.jointState[iJoint].translation().template cast<T>(),
-              iJoint,
-              1.0));
-      orientErrorFunction->addConstraint(
-          OrientationDataT<T>(
-              Eigen::Quaternion<T>::Identity(),
-              skelState_cur.jointState[iJoint].rotation().template cast<T>(),
-              iJoint,
-              1.0));
+      positionErrorFunction->addConstraint(PositionDataT<T>(
+          Eigen::Vector3<T>::Zero(),
+          skelState_cur.jointState[iJoint].translation().template cast<T>(),
+          iJoint,
+          1.0));
+      orientErrorFunction->addConstraint(OrientationDataT<T>(
+          Eigen::Quaternion<T>::Identity(),
+          skelState_cur.jointState[iJoint].rotation().template cast<T>(),
+          iJoint,
+          1.0));
     }
 
     solverFunction.addErrorFunction(positionErrorFunction);

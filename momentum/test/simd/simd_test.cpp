@@ -169,21 +169,17 @@ TEST(SimdTest, Utilities) {
   const Vector3fP crossProd1 = momentum::cross(eigenVec1, vec1);
   const Vector3fP crossProd2 = momentum::cross(vec1, eigenVec1);
   for (auto i = 0u; i < kSimdPacketSize; ++i) {
-    EXPECT_TRUE(
-        Eigen::Vector3f(crossProd1.x()[i], crossProd1.y()[i], crossProd1.z()[i])
-            .isApprox(eigenVec1.cross(Eigen::Vector3f(pX1[i], pY1[i], pZ1[i]))));
-    EXPECT_TRUE(
-        Eigen::Vector3f(crossProd2.x()[i], crossProd2.y()[i], crossProd2.z()[i])
-            .isApprox(Eigen::Vector3f(pX1[i], pY1[i], pZ1[i]).cross(eigenVec1)));
+    EXPECT_TRUE(Eigen::Vector3f(crossProd1.x()[i], crossProd1.y()[i], crossProd1.z()[i])
+                    .isApprox(eigenVec1.cross(Eigen::Vector3f(pX1[i], pY1[i], pZ1[i]))));
+    EXPECT_TRUE(Eigen::Vector3f(crossProd2.x()[i], crossProd2.y()[i], crossProd2.z()[i])
+                    .isApprox(Eigen::Vector3f(pX1[i], pY1[i], pZ1[i]).cross(eigenVec1)));
   }
 
   // Cross product of two Vector3fP-s
   const Vector3fP crossProd3 = cross(vec1, vec2);
   for (auto i = 0u; i < kSimdPacketSize; ++i) {
-    EXPECT_TRUE(
-        Eigen::Vector3f(crossProd3.x()[i], crossProd3.y()[i], crossProd3.z()[i])
-            .isApprox(
-                Eigen::Vector3f(pX1[i], pY1[i], pZ1[i])
-                    .cross(Eigen::Vector3f(pX2[i], pY2[i], pZ2[i]))));
+    EXPECT_TRUE(Eigen::Vector3f(crossProd3.x()[i], crossProd3.y()[i], crossProd3.z()[i])
+                    .isApprox(Eigen::Vector3f(pX1[i], pY1[i], pZ1[i])
+                                  .cross(Eigen::Vector3f(pX2[i], pY2[i], pZ2[i]))));
   }
 }

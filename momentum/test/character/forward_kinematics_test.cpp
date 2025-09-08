@@ -142,10 +142,9 @@ TYPED_TEST(Momentum_ForwardKinematicsTest, RelativeTransform) {
 
   for (size_t iJoint = 0; iJoint < skeleton.joints.size(); ++iJoint) {
     // A-to-world:
-    EXPECT_TRUE(
-        transformAtoB<T>(iJoint, kInvalidIndex, skeleton, state)
-            .toAffine3()
-            .isApprox(state.jointState[iJoint].transformation, Eps<T>(1e-8f, 1e-8)));
+    EXPECT_TRUE(transformAtoB<T>(iJoint, kInvalidIndex, skeleton, state)
+                    .toAffine3()
+                    .isApprox(state.jointState[iJoint].transformation, Eps<T>(1e-8f, 1e-8)));
 
     // world-to-B:
     EXPECT_TRUE(
