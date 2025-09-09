@@ -143,7 +143,7 @@ double SimdNormalErrorFunction::getError(
           drjit::load<FloatP>(&constraints_->offsetX[constraintOffsetIndex]),
           drjit::load<FloatP>(&constraints_->offsetY[constraintOffsetIndex]),
           drjit::load<FloatP>(&constraints_->offsetZ[constraintOffsetIndex])};
-      const Vector3fP pos_world = jointState.transformation * offset;
+      const Vector3fP pos_world = jointState.transform * offset;
 
       const Vector3fP normal{
           drjit::load<FloatP>(&constraints_->normalX[constraintOffsetIndex]),
@@ -185,7 +185,7 @@ double SimdNormalErrorFunction::getGradient(
           drjit::load<FloatP>(&constraints_->offsetX[constraintOffsetIndex]),
           drjit::load<FloatP>(&constraints_->offsetY[constraintOffsetIndex]),
           drjit::load<FloatP>(&constraints_->offsetZ[constraintOffsetIndex])};
-      const Vector3fP pos_world = jointState_cons.transformation * offset;
+      const Vector3fP pos_world = jointState_cons.transform * offset;
 
       const Vector3fP normal{
           drjit::load<FloatP>(&constraints_->normalX[constraintOffsetIndex]),
@@ -322,7 +322,7 @@ double SimdNormalErrorFunction::getJacobian(
               drjit::load<FloatP>(&constraints_->offsetX[constraintOffsetIndex]),
               drjit::load<FloatP>(&constraints_->offsetY[constraintOffsetIndex]),
               drjit::load<FloatP>(&constraints_->offsetZ[constraintOffsetIndex])};
-          const Vector3fP pos_world = jointState_cons.transformation * offset;
+          const Vector3fP pos_world = jointState_cons.transform * offset;
 
           const Vector3fP normal{
               drjit::load<FloatP>(&constraints_->normalX[constraintOffsetIndex]),
@@ -472,7 +472,7 @@ double SimdNormalErrorFunctionAVX::getJacobian(
         const auto offset = jacobianOffset_[jointId] + addressOffset;
 
         // pre-load some joint specific values
-        const auto& transformation = state.jointState[jointId].transformation;
+        const auto transformation = state.jointState[jointId].transform.toMatrix();
 
         __m256 posx;
         __m256 posy;
