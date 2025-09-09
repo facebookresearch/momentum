@@ -28,7 +28,7 @@ double DistanceErrorFunctionT<T>::getError(
 
   for (const auto& cons : constraints_) {
     const auto& js = jointState[cons.parent];
-    const Eigen::Vector3<T> p_world_cm = js.transformation * cons.offset;
+    const Eigen::Vector3<T> p_world_cm = js.transform * cons.offset;
     const Eigen::Vector3<T> diff_vec = p_world_cm - cons.origin;
 
     const T distance = diff_vec.norm();
@@ -49,7 +49,7 @@ double DistanceErrorFunctionT<T>::getGradient(
     const auto& cons = constraints_[iCons];
 
     const auto& jsCons = skeletonState.jointState[cons.parent];
-    const Eigen::Vector3<T> p_world_cm = jsCons.transformation * cons.offset;
+    const Eigen::Vector3<T> p_world_cm = jsCons.transform * cons.offset;
     const Eigen::Vector3<T> diff_vec = p_world_cm - cons.origin;
 
     const T distance = diff_vec.norm();
@@ -127,7 +127,7 @@ double DistanceErrorFunctionT<T>::getJacobian(
     const auto& cons = constraints_[iCons];
 
     const auto& jsCons = skeletonState.jointState[cons.parent];
-    const Eigen::Vector3<T> p_world_cm = jsCons.transformation * cons.offset;
+    const Eigen::Vector3<T> p_world_cm = jsCons.transform * cons.offset;
     const Eigen::Vector3<T> diff_vec = p_world_cm - cons.origin;
 
     const T distance = diff_vec.norm();

@@ -74,11 +74,6 @@ Affine3<T> TransformT<T>::toAffine3() const {
 }
 
 template <typename T>
-Vector3<T> TransformT<T>::transformPoint(const Vector3<T>& pt) const {
-  return translation + rotation * (scale * pt).eval();
-}
-
-template <typename T>
 Vector3<T> TransformT<T>::rotate(const Vector3<T>& vec) const {
   return rotation * vec;
 }
