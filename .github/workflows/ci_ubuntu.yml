@@ -15,7 +15,6 @@ on:
 
 jobs:
   momentum:
-    if: false # Temporarily disabled to reduce CI cost
     name: cpp${{ matrix.simd == 'ON' && '-simd' || '' }}-${{ matrix.mode == '' && 'opt' || 'dev' }}-ubuntu
     runs-on: ubuntu-latest
     strategy:
@@ -33,6 +32,10 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.9.0
         with:
           cache: true
+
+      - name: Check code formatting
+        run: |
+          pixi run lint-check
 
       - name: Build and test Momentum
         run: |
