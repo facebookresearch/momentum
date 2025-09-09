@@ -16,6 +16,16 @@ Momentum adheres to the following upstream standards, except when explicitly men
 Momentum adheres to specific coding conventions and style guidelines that are based on internal standards developed by Meta. While these specific documents are not publicly accessible, we encourage external developers to follow general best practices in C++ programming to ensure code quality and maintainability.
 </OssOnly>
 
+## Code Formatting
+
+To format your code, run:
+
+```bash
+pixi run lint
+```
+
+This uses `clang-format` with the specific version defined in `pixi.toml` to ensure consistent formatting across all C++ source files.
+
 ## Error Handling
 
 Momentum uses exceptions for handling unrecoverable errors, which is essential for a lower-level library like this. Throwing exceptions allows error detection mechanisms to have visibility into these errors and prevents silent failures, which may lead to more severe bugs. By choosing exceptions as the primary method for error handling in Momentum, we ensure that unrecoverable errors are easily detectable, and the Momentum library remains user-friendly for developers interacting with the application layer.
