@@ -136,7 +136,7 @@ void SkinnedLocatorErrorFunctionT<T>::calculateDWorldPos(
       // Use the full transformation matrix to be consistent with calculateSkinnedLocatorPosition
       d_worldPos += weight *
           ((jointState.transform * character_.inverseBindPose[boneIndex].template cast<T>())
-               .linear() *
+               .toLinear() *
            d_restPos);
     }
   }

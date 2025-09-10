@@ -79,13 +79,11 @@ std::unique_ptr<CollisionGeometry> scale(
   return result;
 }
 
-TransformationList scaleInverseBindPose(
-    const TransformationList& transformations,
-    const float scale) {
-  TransformationList result = transformations;
+TransformList scaleInverseBindPose(const TransformList& transformations, const float scale) {
+  TransformList result = transformations;
   MT_CHECK(scale > 0.0f);
   for (auto& t : result) {
-    t.translation() *= scale;
+    t.translation *= scale;
   }
   return result;
 }
@@ -326,16 +324,16 @@ Character scaleCharacter(const Character& character, float s) {
 
 namespace {
 
-Skeleton transformSkeleton(const Skeleton& skeleton, const Eigen::Affine3f& xform) {
-  const Eigen::Vector3f singularValues = xform.linear().jacobiSvd().singularValues();
+Skeleton transformSkeleton(const Skeleton& skeleton, const Transform& xform) {
+  const Eigen::Vector3f singularValues = xform.toLinear().jacobiSvd().singularValues();
   for (Eigen::Index i = 0; i < 3; ++i) {
     MT_CHECK(
         singularValues(i) > 0.99 && singularValues(i) < 1.01,
         "Transform should not include scale or shear.");
   }
 
-  const Eigen::Quaternionf rotation(xform.linear());
-  const Eigen::Vector3f translation(xform.translation());
+  const Eigen::Quaternionf rotation(xform.toLinear());
+  const Eigen::Vector3f translation(xform.translation);
 
   Skeleton result(skeleton);
   MT_CHECK(!result.joints.empty());
@@ -389,7 +387,7 @@ BlendShape_const_p transformBlendShape(
   return blendShapeTransformed;
 }
 
-std::unique_ptr<Mesh> transformMesh(const std::unique_ptr<Mesh>& mesh, const Eigen::Affine3f& xf) {
+std::unique_ptr<Mesh> transformMesh(const std::unique_ptr<Mesh>& mesh, const Transform& xf) {
   if (!mesh) {
     return {};
   }
@@ -400,18 +398,16 @@ std::unique_ptr<Mesh> transformMesh(const std::unique_ptr<Mesh>& mesh, const Eig
   }
 
   for (auto& v : result->normals) {
-    v = xf.linear() * v;
+    v = xf.toLinear() * v;
   }
 
   return result;
 }
 
-TransformationList transformInverseBindPose(
-    const TransformationList& inverseBindPose,
-    const Eigen::Affine3f& xf) {
-  TransformationList result;
+TransformList transformInverseBindPose(const TransformList& inverseBindPose, const Transform& xf) {
+  TransformList result;
   result.reserve(inverseBindPose.size());
-  const Eigen::Affine3f xfInv = xf.inverse();
+  const Transform xfInv = xf.inverse();
   for (const auto& m : inverseBindPose) {
     result.push_back(m * xfInv);
   }
@@ -420,7 +416,7 @@ TransformationList transformInverseBindPose(
 
 } // namespace
 
-Character transformCharacter(const Character& character, const Affine3f& xform) {
+Character transformCharacter(const Character& character, const Transform& xform) {
   return {
       transformSkeleton(character.skeleton, xform),
       character.parameterTransform,
@@ -430,7 +426,7 @@ Character transformCharacter(const Character& character, const Affine3f& xform) 
       character.skinWeights.get(),
       character.collision.get(),
       character.poseShapes.get(),
-      transformBlendShape(character.blendShape, xform),
+      transformBlendShape(character.blendShape, xform.toAffine3()),
       character.faceExpressionBlendShape,
       character.name,
       transformInverseBindPose(character.inverseBindPose, xform)};

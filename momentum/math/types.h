@@ -387,11 +387,6 @@ using Affine3 = Eigen::Transform<T, 3, Eigen::Affine>;
 using Affine3f = Affine3<float>;
 using Affine3d = Affine3<double>;
 
-// Some aligned arrays
-using TransformationList = std::vector<Affine3f>;
-template <typename T>
-using TransformationListT = std::vector<Affine3<T>>;
-
 using VertexArray = Matrix3Xf;
 using NormalArray = Matrix3Xf;
 using TriangleArray = Matrix3Xi;

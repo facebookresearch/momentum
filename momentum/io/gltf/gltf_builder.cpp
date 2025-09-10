@@ -416,8 +416,8 @@ size_t addMeshToModel(
     std::vector<Matrix4f> ibm;
     for (const auto& mat : character.inverseBindPose) {
       auto data = mat;
-      data.translation() = fromMomentumVec3f(data.translation());
-      ibm.emplace_back(data.matrix());
+      data.translation = fromMomentumVec3f(data.translation);
+      ibm.emplace_back(data.toMatrix());
     }
     sk.inverseBindMatrices = createAccessorBuffer<const Matrix4f>(model, ibm);
 

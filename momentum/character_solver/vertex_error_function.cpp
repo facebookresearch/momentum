@@ -128,7 +128,7 @@ void VertexErrorFunctionT<T>::calculateDWorldPos(
     if (w > 0) {
       d_worldPos += w *
           (state.jointState[parentBone].transform.toLinear() *
-           (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
+           (character_.inverseBindPose[parentBone].toLinear().template cast<T>() * d_restPos));
     }
   }
 }
@@ -440,7 +440,7 @@ double VertexErrorFunctionT<T>::calculateNormalGradient(
         if (w > 0) {
           d_worldPos += w *
               (state.jointState[parentBone].transform.toLinear() *
-               (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
+               (character_.inverseBindPose[parentBone].toLinear().template cast<T>() * d_restPos));
         }
       }
 
@@ -548,7 +548,7 @@ double VertexErrorFunctionT<T>::calculateNormalJacobian(
       if (w > 0) {
         d_worldPos += w *
             (state.jointState[parentBone].transform.toLinear() *
-             (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
+             (character_.inverseBindPose[parentBone].toLinear().template cast<T>() * d_restPos));
       }
     }
 
@@ -763,8 +763,15 @@ void VertexErrorFunctionT<T>::updateMeshes(
     this->restMesh_->updateNormals();
   }
 
+  // Manually cast the transform list since TransformT doesn't have a Scalar typedef
+  TransformListT<T> castedInverseBindPose;
+  castedInverseBindPose.reserve(character_.inverseBindPose.size());
+  for (const auto& transform : character_.inverseBindPose) {
+    castedInverseBindPose.push_back(transform.template cast<T>());
+  }
+
   applySSD(
-      cast<T>(character_.inverseBindPose),
+      castedInverseBindPose,
       *this->character_.skinWeights,
       *this->restMesh_,
       state,

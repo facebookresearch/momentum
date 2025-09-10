@@ -87,19 +87,16 @@ void VertexSequenceErrorFunctionT<T>::updateMeshes(
   }
 
   // Apply skinning for both frames using the same rest mesh
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *character_.skinWeights,
-      *restMesh_,
-      skelStates[0],
-      *posedMesh0_);
+  // Manually cast the transform list since TransformT doesn't have a Scalar typedef
+  TransformListT<T> castedInverseBindPose;
+  castedInverseBindPose.reserve(character_.inverseBindPose.size());
+  for (const auto& transform : character_.inverseBindPose) {
+    castedInverseBindPose.push_back(transform.template cast<T>());
+  }
 
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *character_.skinWeights,
-      *restMesh_,
-      skelStates[1],
-      *posedMesh1_);
+  applySSD(castedInverseBindPose, *character_.skinWeights, *restMesh_, skelStates[0], *posedMesh0_);
+
+  applySSD(castedInverseBindPose, *character_.skinWeights, *restMesh_, skelStates[1], *posedMesh1_);
 }
 
 template <typename T>

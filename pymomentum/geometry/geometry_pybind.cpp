@@ -31,6 +31,7 @@
 #include <momentum/math/intersection.h>
 #include <momentum/math/mesh.h>
 #include <momentum/math/mppca.h>
+#include <momentum/math/transform.h>
 #include <momentum/test/character/character_helpers.h>
 
 #include <pybind11/eigen.h>
@@ -611,7 +612,7 @@ simply want to apply an identity-specific scale to the character, you should use
           [](const momentum::Character& character,
              const Eigen::Matrix4f& xform) {
             return momentum::transformCharacter(
-                character, Eigen::Affine3f(xform));
+                character, momentum::Transform(Eigen::Affine3f(xform)));
           },
           R"(Transform the character (mesh and skeleton) by the desired transformation matrix.
 
@@ -2494,13 +2495,13 @@ The resulting tensors are as follows:
                         const std::optional<Eigen::Matrix4f>& transformation,
                         const std::optional<Eigen::Vector2f>& radius,
                         float length) {
-            mm::TaperedCapsule capsule;
-            capsule.transformation =
-                transformation.value_or(Eigen::Matrix4f::Identity());
-            capsule.radius = radius.value_or(Eigen::Vector2f::Ones());
-            capsule.parent = parent;
-            capsule.length = length;
-            return capsule;
+    mm::TaperedCapsule capsule;
+    capsule.transformation =
+        transformation.value_or(Eigen::Matrix4f::Identity());
+    capsule.radius = radius.value_or(Eigen::Vector2f::Ones());
+    capsule.parent = parent;
+    capsule.length = length;
+    return capsule;
           }),
           R"(Create a capsule using its transformation, radius, parent and length.
 
@@ -2515,178 +2516,181 @@ The resulting tensors are as follows:
       .def_property_readonly(
           "transformation",
           [](const mm::TaperedCapsule& capsule) -> Eigen::Matrix4f {
-            return capsule.transformation.toMatrix();
+    return capsule.transformation.toMatrix();
           },
+});
+return capsule.transformation.toMatrix();
+},
           "Transformation defining the orientation and starting point relative to the parent coordinate system")
       .def_property_readonly(
           "radius",
           [](const mm::TaperedCapsule& capsule) -> Eigen::Vector2f {
-            return capsule.radius;
+  return capsule.radius;
           },
           "Start and end radius for the capsule.")
       .def_property_readonly(
           "parent",
           [](const mm::TaperedCapsule& capsule) -> int {
-            return capsule.parent;
+  return capsule.parent;
           },
           "Parent joint to which the capsule is attached.")
       .def_property_readonly(
           "length",
           [](const mm::TaperedCapsule& capsule) -> float {
-            return capsule.length;
+  return capsule.length;
           })
       .def("__repr__", [](const mm::TaperedCapsule& tc) {
-        return fmt::format(
-            "TaperedCapsule(parent={}, length={}, radius=[{}, {}])",
-            tc.parent,
-            tc.length,
-            tc.radius[0],
-            tc.radius[1]);
+  return fmt::format(
+      "TaperedCapsule(parent={}, length={}, radius=[{}, {}])",
+      tc.parent,
+      tc.length,
+      tc.radius[0],
+      tc.radius[1]);
       });
 
-  // Class Marker, defining the properties:
-  //    name
-  //    pos
-  //    occluded
-  markerClass.def(py::init())
-      .def(
-          py::init<const std::string&, const Eigen::Vector3d&, const bool>(),
-          R"(Create a marker with the specified properties.
+// Class Marker, defining the properties:
+//    name
+//    pos
+//    occluded
+markerClass.def(py::init())
+    .def(
+        py::init<const std::string&, const Eigen::Vector3d&, const bool>(),
+        R"(Create a marker with the specified properties.
 
           :param name: The name of the marker
           :param pos: The 3D position of the marker
           :param occluded: Whether the marker is occluded with no position info
           )",
-          py::arg("name"),
-          py::arg("pos"),
-          py::arg("occluded"))
-      .def_readwrite("name", &mm::Marker::name, "Name of the marker")
-      .def_readwrite("pos", &mm::Marker::pos, "Marker 3d position")
-      .def_readwrite(
-          "occluded",
-          &mm::Marker::occluded,
-          "True if the marker is occluded with no position info")
-      .def("__repr__", [](const mm::Marker& m) {
-        return fmt::format(
-            "Marker(name='{}', pos=[{} {} {}], occluded={})",
-            m.name,
-            m.pos.x(),
-            m.pos.y(),
-            m.pos.z(),
-            m.occluded ? "True" : "False");
-      });
+        py::arg("name"),
+        py::arg("pos"),
+        py::arg("occluded"))
+    .def_readwrite("name", &mm::Marker::name, "Name of the marker")
+    .def_readwrite("pos", &mm::Marker::pos, "Marker 3d position")
+    .def_readwrite(
+        "occluded",
+        &mm::Marker::occluded,
+        "True if the marker is occluded with no position info")
+    .def("__repr__", [](const mm::Marker& m) {
+      return fmt::format(
+          "Marker(name='{}', pos=[{} {} {}], occluded={})",
+          m.name,
+          m.pos.x(),
+          m.pos.y(),
+          m.pos.z(),
+          m.occluded ? "True" : "False");
+    });
 
-  // Class MarkerSequence, defining the properties:
-  //    name
-  //    frames
-  //    fps
-  markerSequenceClass.def(py::init())
-      .def_readwrite("name", &mm::MarkerSequence::name, "Name of the subject")
-      .def_readwrite(
-          "frames",
-          &mm::MarkerSequence::frames,
-          "Marker data in [nframes][nMarkers]")
-      .def_readwrite("fps", &mm::MarkerSequence::fps, "Frame rate")
-      .def("__repr__", [](const mm::MarkerSequence& ms) {
-        return fmt::format(
-            "MarkerSequence(name='{}', frames={}, fps={})",
-            ms.name,
-            ms.frames.size(),
-            ms.fps);
-      });
+// Class MarkerSequence, defining the properties:
+//    name
+//    frames
+//    fps
+markerSequenceClass.def(py::init())
+    .def_readwrite("name", &mm::MarkerSequence::name, "Name of the subject")
+    .def_readwrite(
+        "frames",
+        &mm::MarkerSequence::frames,
+        "Marker data in [nframes][nMarkers]")
+    .def_readwrite("fps", &mm::MarkerSequence::fps, "Frame rate")
+    .def("__repr__", [](const mm::MarkerSequence& ms) {
+      return fmt::format(
+          "MarkerSequence(name='{}', frames={}, fps={})",
+          ms.name,
+          ms.frames.size(),
+          ms.fps);
+    });
 
-  // =====================================================
-  // momentum::FBXCoordSystemInfo
-  // - upVector
-  // - frontVector
-  // - coordSystem
+// =====================================================
+// momentum::FBXCoordSystemInfo
+// - upVector
+// - frontVector
+// - coordSystem
 
-  // =====================================================
+// =====================================================
 
-  fbxCoordSystemInfoClass
-      .def(
-          py::init([](const momentum::FBXUpVector upVector,
-                      const momentum::FBXFrontVector frontVector,
-                      const momentum::FBXCoordSystem coordSystem) {
-            return momentum::FBXCoordSystemInfo{
-                upVector, frontVector, coordSystem};
-          }),
-          py::arg("upVector"),
-          py::arg("frontVector"),
-          py::arg("coordSystem"))
-      .def_property_readonly(
-          "upVector",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
-            return coordSystemInfo.upVector;
-          },
-          "Returns the up vector.")
-      .def_property_readonly(
-          "frontVector",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
-            return coordSystemInfo.frontVector;
-          },
-          "Returns the front vector.")
-      .def_property_readonly(
-          "coordSystem",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
-            return coordSystemInfo.coordSystem;
-          },
-          "Returns the coordinate system.")
-      .def("__repr__", [](const mm::FBXCoordSystemInfo& info) {
-        std::string upVectorStr;
-        switch (info.upVector) {
-          case mm::FBXUpVector::XAxis:
-            upVectorStr = "XAxis";
-            break;
-          case mm::FBXUpVector::YAxis:
-            upVectorStr = "YAxis";
-            break;
-          case mm::FBXUpVector::ZAxis:
-            upVectorStr = "ZAxis";
-            break;
-          default:
-            upVectorStr = "Unknown";
-            break;
-        }
+fbxCoordSystemInfoClass
+    .def(
+        py::init([](const momentum::FBXUpVector upVector,
+                    const momentum::FBXFrontVector frontVector,
+                    const momentum::FBXCoordSystem coordSystem) {
+          return momentum::FBXCoordSystemInfo{
+              upVector, frontVector, coordSystem};
+        }),
+        py::arg("upVector"),
+        py::arg("frontVector"),
+        py::arg("coordSystem"))
+    .def_property_readonly(
+        "upVector",
+        [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
+          return coordSystemInfo.upVector;
+        },
+        "Returns the up vector.")
+    .def_property_readonly(
+        "frontVector",
+        [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
+          return coordSystemInfo.frontVector;
+        },
+        "Returns the front vector.")
+    .def_property_readonly(
+        "coordSystem",
+        [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
+          return coordSystemInfo.coordSystem;
+        },
+        "Returns the coordinate system.")
+    .def("__repr__", [](const mm::FBXCoordSystemInfo& info) {
+      std::string upVectorStr;
+      switch (info.upVector) {
+        case mm::FBXUpVector::XAxis:
+          upVectorStr = "XAxis";
+          break;
+        case mm::FBXUpVector::YAxis:
+          upVectorStr = "YAxis";
+          break;
+        case mm::FBXUpVector::ZAxis:
+          upVectorStr = "ZAxis";
+          break;
+        default:
+          upVectorStr = "Unknown";
+          break;
+      }
 
-        std::string frontVectorStr;
-        switch (info.frontVector) {
-          case mm::FBXFrontVector::ParityEven:
-            frontVectorStr = "ParityEven";
-            break;
-          case mm::FBXFrontVector::ParityOdd:
-            frontVectorStr = "ParityOdd";
-            break;
-          default:
-            frontVectorStr = "Unknown";
-            break;
-        }
+      std::string frontVectorStr;
+      switch (info.frontVector) {
+        case mm::FBXFrontVector::ParityEven:
+          frontVectorStr = "ParityEven";
+          break;
+        case mm::FBXFrontVector::ParityOdd:
+          frontVectorStr = "ParityOdd";
+          break;
+        default:
+          frontVectorStr = "Unknown";
+          break;
+      }
 
-        std::string coordSystemStr;
-        switch (info.coordSystem) {
-          case mm::FBXCoordSystem::RightHanded:
-            coordSystemStr = "RightHanded";
-            break;
-          case mm::FBXCoordSystem::LeftHanded:
-            coordSystemStr = "LeftHanded";
-            break;
-          default:
-            coordSystemStr = "Unknown";
-            break;
-        }
+      std::string coordSystemStr;
+      switch (info.coordSystem) {
+        case mm::FBXCoordSystem::RightHanded:
+          coordSystemStr = "RightHanded";
+          break;
+        case mm::FBXCoordSystem::LeftHanded:
+          coordSystemStr = "LeftHanded";
+          break;
+        default:
+          coordSystemStr = "Unknown";
+          break;
+      }
 
-        return fmt::format(
-            "FBXCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
-            upVectorStr,
-            frontVectorStr,
-            coordSystemStr);
-      });
+      return fmt::format(
+          "FBXCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
+          upVectorStr,
+          frontVectorStr,
+          coordSystemStr);
+    });
 
-  // loadMotion(gltfFilename)
-  m.def(
-      "load_motion",
-      &loadMotion,
-      R"(Load a motion sequence from a gltf file.
+// loadMotion(gltfFilename)
+m.def(
+    "load_motion",
+    &loadMotion,
+    R"(Load a motion sequence from a gltf file.
 
 Unless you can guarantee that the parameters in the motion files match your existing character,
 you will likely want to retarget the parameters using the :meth:`mapParameters` function.
@@ -2694,30 +2698,30 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 :parameter gltfFilename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [motionData, motionParameterNames, identityData, identityParameterNames].
       )",
-      py::arg("gltf_filename"));
+    py::arg("gltf_filename"));
 
-  // loadMarkersFromFile(path, mainSubjectOnly)
-  // TODO(T138941756): Expose the loadMarker and
-  // loadMarkersForMainSubject APIs separately from markerIO.h
-  // loadMarkersFromFile(path, mainSubjectOnly)
-  m.def(
-      "load_markers",
-      &loadMarkersFromFile,
-      R"(Load 3d mocap marker data from file.
+// loadMarkersFromFile(path, mainSubjectOnly)
+// TODO(T138941756): Expose the loadMarker and
+// loadMarkersForMainSubject APIs separately from markerIO.h
+// loadMarkersFromFile(path, mainSubjectOnly)
+m.def(
+    "load_markers",
+    &loadMarkersFromFile,
+    R"(Load 3d mocap marker data from file.
 
 :param path: A marker data file: .c3d, .gltf, or .trc.
 :param mainSubjectOnly: True to load only one subject's data.
 :return: an array of MarkerSequence, one per subject in the file.
       )",
-      py::arg("path"),
-      py::arg("main_subject_only") = true);
+    py::arg("path"),
+    py::arg("main_subject_only") = true);
 
-  // mapModelParameters_names(motionData, sourceParameterNames,
-  // targetCharacter)
-  m.def(
-      "map_model_parameters",
-      &mapModelParameters_names,
-      R"(Remap model parameters from one character to another.
+// mapModelParameters_names(motionData, sourceParameterNames,
+// targetCharacter)
+m.def(
+    "map_model_parameters",
+    &mapModelParameters_names,
+    R"(Remap model parameters from one character to another.
 
 :param motionData: The source motion data as a nFrames x nParams torch.Tensor.
 :param sourceParameterNames: The source parameter names as a list of strings (e.g. c.parameterTransform.name).
@@ -2725,16 +2729,16 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 
 :return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
       )",
-      py::arg("motion_data"),
-      py::arg("source_parameter_names"),
-      py::arg("target_character"),
-      py::arg("verbose") = false);
+    py::arg("motion_data"),
+    py::arg("source_parameter_names"),
+    py::arg("target_character"),
+    py::arg("verbose") = false);
 
-  // mapModelParameters(motionData, sourceCharacter, targetCharacter)
-  m.def(
-      "map_model_parameters",
-      &mapModelParameters,
-      R"(Remap model parameters from one character to another.
+// mapModelParameters(motionData, sourceCharacter, targetCharacter)
+m.def(
+    "map_model_parameters",
+    &mapModelParameters,
+    R"(Remap model parameters from one character to another.
 
 :param motionData: The source motion data as a nFrames x nParams torch.Tensor.
 :param sourceCharacter: The source character.
@@ -2743,16 +2747,16 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 
 :return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
       )",
-      py::arg("motion_data"),
-      py::arg("source_character"),
-      py::arg("target_character"),
-      py::arg("verbose") = true);
+    py::arg("motion_data"),
+    py::arg("source_character"),
+    py::arg("target_character"),
+    py::arg("verbose") = true);
 
-  // mapJointParameters(motionData, sourceCharacter, targetCharacter)
-  m.def(
-      "map_joint_parameters",
-      &mapJointParameters,
-      R"(Remap joint parameters from one character to another.
+// mapJointParameters(motionData, sourceCharacter, targetCharacter)
+m.def(
+    "map_joint_parameters",
+    &mapJointParameters,
+    R"(Remap joint parameters from one character to another.
 
 :param motionData: The source motion data as a [nFrames x (nBones * 7)] torch.Tensor.
 :param sourceCharacter: The source character.
@@ -2760,28 +2764,28 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 
 :return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
       )",
-      py::arg("motion_data"),
-      py::arg("source_character"),
-      py::arg("target_character"));
+    py::arg("motion_data"),
+    py::arg("source_character"),
+    py::arg("target_character"));
 
-  // uniformRandomToModelParameters(character, unifNoise)
-  m.def(
-      "uniform_random_to_model_parameters",
-      &uniformRandomToModelParameters,
-      R"(Convert a uniform noise vector into a valid body pose.
+// uniformRandomToModelParameters(character, unifNoise)
+m.def(
+    "uniform_random_to_model_parameters",
+    &uniformRandomToModelParameters,
+    R"(Convert a uniform noise vector into a valid body pose.
 
 :parameter character: The character to use.
 :parameter unifNoise: A uniform noise tensor, with dimensions (nBatch x nModelParams).
 :return: A torch.Tensor with dimensions (nBatch x nModelParams).)",
-      py::arg("character"),
-      py::arg("unif_noise"));
+    py::arg("character"),
+    py::arg("unif_noise"));
 
-  m.def(
-      "apply_parameter_transform",
-      [](py::object character, at::Tensor modelParameters) {
-        return applyParamTransform(character, modelParameters);
-      },
-      R"(Apply the parameter transform to a [nBatch x nParams] tensor of model parameters.
+m.def(
+    "apply_parameter_transform",
+    [](py::object character, at::Tensor modelParameters) {
+      return applyParamTransform(character, modelParameters);
+    },
+    R"(Apply the parameter transform to a [nBatch x nParams] tensor of model parameters.
 This is functionally identical to :meth:`ParameterTransform.apply` except that it allows
 batching on the character.
 
@@ -2790,28 +2794,28 @@ batching on the character.
 :param model_parameters: A [nBatch x nParams] tensor of model parameters.
 
 :return: a tensor of joint parameters.)",
-      py::arg("character"),
-      py::arg("model_parameters"));
+    py::arg("character"),
+    py::arg("model_parameters"));
 
-  m.def(
-      "model_parameters_to_blend_shape_coefficients",
-      &modelParametersToBlendShapeCoefficients,
-      R"(Extract the model parameters that correspond to the blend shape coefficients, in the order
+m.def(
+    "model_parameters_to_blend_shape_coefficients",
+    &modelParametersToBlendShapeCoefficients,
+    R"(Extract the model parameters that correspond to the blend shape coefficients, in the order
 required to call `meth:BlendShape.compute_shape`.
 
 :param character: A character.
 :parameter model_parameters: A [nBatch x nParams] tensor of model parameters.
 
 :return: A [nBatch x nBlendShape] torch.Tensor of blend shape coefficients.)",
-      py::arg("character"),
-      py::arg("model_parameters"));
+    py::arg("character"),
+    py::arg("model_parameters"));
 
-  // modelParametersToPositions(character, modelParameters, parents,
-  // offsets)
-  m.def(
-      "model_parameters_to_positions",
-      &modelParametersToPositions,
-      R"(Convert model parameters to 3D positions relative to skeleton joints using forward kinematics.  You can use this (for example) to
+// modelParametersToPositions(character, modelParameters, parents,
+// offsets)
+m.def(
+    "model_parameters_to_positions",
+    &modelParametersToPositions,
+    R"(Convert model parameters to 3D positions relative to skeleton joints using forward kinematics.  You can use this (for example) to
 supervise a model to produce the correct 3D ground truth.
 
 Working directly from modelParameters is preferable to mapping to jointParameters first because it does a better job exploiting the
@@ -2824,17 +2828,17 @@ sparsity in the model and therefore can be made somewhat faster.
 :param offsets: 3-d offset in each joint's local space.
 :return: Tensor of size (nBatch x nParents x 3), representing the world-space position of each point.
 )",
-      py::arg("character"),
-      py::arg("model_parameters"),
-      py::arg("parents"),
-      py::arg("offsets"));
+    py::arg("character"),
+    py::arg("model_parameters"),
+    py::arg("parents"),
+    py::arg("offsets"));
 
-  // jointParametersToPositions(character, jointParameters, parents,
-  // offsets)
-  m.def(
-      "joint_parameters_to_positions",
-      &jointParametersToPositions,
-      R"(Convert joint parameters to 3D positions relative to skeleton joints using forward kinematics.  You can use this (for example) to
+// jointParametersToPositions(character, jointParameters, parents,
+// offsets)
+m.def(
+    "joint_parameters_to_positions",
+    &jointParametersToPositions,
+    R"(Convert joint parameters to 3D positions relative to skeleton joints using forward kinematics.  You can use this (for example) to
 supervise a model to produce the correct 3D ground truth.
 
 You should prefer :meth:`model_parameters_to_positions` when working from modelParameters because it is better able to exploit sparsity; this
@@ -2847,16 +2851,16 @@ function is provided as a convenience because motion read from external files ge
 :param offsets: 3-d offset in each joint's local space.
 :return: Tensor of size (nBatch x nParents x 3), representing the world-space position of each point.
 )",
-      py::arg("character"),
-      py::arg("joint_parameters"),
-      py::arg("parents"),
-      py::arg("offsets"));
+    py::arg("character"),
+    py::arg("joint_parameters"),
+    py::arg("parents"),
+    py::arg("offsets"));
 
-  // modelParametersToSkeletonState(characters, modelParameters)
-  m.def(
-      "model_parameters_to_skeleton_state",
-      &modelParametersToSkeletonState,
-      R"(Map from the k modelParameters to the 8*nJoints global skeleton state.
+// modelParametersToSkeletonState(characters, modelParameters)
+m.def(
+    "model_parameters_to_skeleton_state",
+    &modelParametersToSkeletonState,
+    R"(Map from the k modelParameters to the 8*nJoints global skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to worldspace.
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
@@ -2866,14 +2870,14 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 :param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
-      py::arg("character"),
-      py::arg("model_parameters"));
+    py::arg("character"),
+    py::arg("model_parameters"));
 
-  // modelParametersToLocalSkeletonState(characters, modelParameters)
-  m.def(
-      "model_parameters_to_local_skeleton_state",
-      &modelParametersToLocalSkeletonState,
-      R"(Map from the k modelParameters to the 8*nJoints local skeleton state.
+// modelParametersToLocalSkeletonState(characters, modelParameters)
+m.def(
+    "model_parameters_to_local_skeleton_state",
+    &modelParametersToLocalSkeletonState,
+    R"(Map from the k modelParameters to the 8*nJoints local skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
@@ -2883,14 +2887,14 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 :param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
-      py::arg("character"),
-      py::arg("model_parameters"));
+    py::arg("character"),
+    py::arg("model_parameters"));
 
-  // jointParametersToSkeletonState(character, jointParameters)
-  m.def(
-      "joint_parameters_to_skeleton_state",
-      &jointParametersToSkeletonState,
-      R"(Map from the 7*nJoints jointParameters to the 8*nJoints global skeleton state.
+// jointParametersToSkeletonState(character, jointParameters)
+m.def(
+    "joint_parameters_to_skeleton_state",
+    &jointParametersToSkeletonState,
+    R"(Map from the 7*nJoints jointParameters to the 8*nJoints global skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to worldspace.
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
@@ -2900,14 +2904,14 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 :param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
-      py::arg("character"),
-      py::arg("joint_parameters"));
+    py::arg("character"),
+    py::arg("joint_parameters"));
 
-  // jointParametersToLocalSkeletonState(character, jointParameters)
-  m.def(
-      "joint_parameters_to_local_skeleton_state",
-      &jointParametersToLocalSkeletonState,
-      R"(Map from the 7*nJoints jointParameters (representing transforms to the parent joint) to the 8*nJoints local skeleton state.
+// jointParametersToLocalSkeletonState(character, jointParameters)
+m.def(
+    "joint_parameters_to_local_skeleton_state",
+    &jointParametersToLocalSkeletonState,
+    R"(Map from the 7*nJoints jointParameters (representing transforms to the parent joint) to the 8*nJoints local skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
@@ -2917,14 +2921,14 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 :param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
-      py::arg("character"),
-      py::arg("joint_parameters"));
+    py::arg("character"),
+    py::arg("joint_parameters"));
 
-  // localSkeletonStateToJointParameters(character, skelState)
-  m.def(
-      "skeleton_state_to_joint_parameters",
-      &skeletonStateToJointParameters,
-      R"(Map from the 8*nJoints skeleton state (representing transforms to world-space) to the 7*nJoints jointParameters.  This performs the following operations:
+// localSkeletonStateToJointParameters(character, skelState)
+m.def(
+    "skeleton_state_to_joint_parameters",
+    &skeletonStateToJointParameters,
+    R"(Map from the 8*nJoints skeleton state (representing transforms to world-space) to the 7*nJoints jointParameters.  This performs the following operations:
 
 * Removing the translation offset.
 * Inverting out the pre-rotation.
@@ -2937,14 +2941,14 @@ The joint parameters are stored (tx, ty, tz; ry, rz, ry; s) where rotations are 
 :param skel_state: torch.Tensor containing the ([nBatch] x nJoints x 8) skeleton state.
 
 :return: torch.Tensor of size ([nBatch] x nJoints x 7) containing the joint parameters.)",
-      py::arg("character"),
-      py::arg("skel_state"));
+    py::arg("character"),
+    py::arg("skel_state"));
 
-  // localSkeletonStateToJointParameters(character, skelState)
-  m.def(
-      "local_skeleton_state_to_joint_parameters",
-      &localSkeletonStateToJointParameters,
-      R"(Map from the 8*nJoints local skeleton state to the 7*nJoints jointParameters.  This performs the following operations:
+// localSkeletonStateToJointParameters(character, skelState)
+m.def(
+    "local_skeleton_state_to_joint_parameters",
+    &localSkeletonStateToJointParameters,
+    R"(Map from the 8*nJoints local skeleton state to the 7*nJoints jointParameters.  This performs the following operations:
 
 * Removing the translation offset.
 * Inverting out the pre-rotation.
@@ -2957,49 +2961,49 @@ The joint parameters are stored (tx, ty, tz; ry, rz, ry; s) where rotations are 
 :param local_skel_state: torch.Tensor containing the ([nBatch] x nJoints x 8) skeleton state.
 
 :return: torch.Tensor of size ([nBatch] x nJoints x 7) containing the joint parameters.)",
-      py::arg("character"),
-      py::arg("local_skel_state"));
+    py::arg("character"),
+    py::arg("local_skel_state"));
 
-  // stripLowerBodyVertices(character)
-  m.def(
-      "strip_lower_body_vertices",
-      &stripLowerBodyVertices,
-      R"(Returns a character where all vertices below the waist have been stripped out (without modifying the skeleton).
+// stripLowerBodyVertices(character)
+m.def(
+    "strip_lower_body_vertices",
+    &stripLowerBodyVertices,
+    R"(Returns a character where all vertices below the waist have been stripped out (without modifying the skeleton).
 This can be useful for visualization if you don't want the legs to distract.
 
 :param character: Full-body character.
 :return: A new character with only the upper body visible.)",
-      py::arg("character"));
+    py::arg("character"));
 
-  m.def(
-      "strip_joints",
-      [](const momentum::Character& c,
-         const std::vector<std::string>& joints_in) {
-        std::vector<size_t> joints;
-        for (const auto& j : joints_in) {
-          const auto idx = c.skeleton.getJointIdByName(j);
-          MT_THROW_IF(
-              idx == momentum::kInvalidIndex,
-              "Trying to remove nonexistent joint '{}' from skeleton.",
-              j);
-          joints.push_back(idx);
-        }
+m.def(
+    "strip_joints",
+    [](const momentum::Character& c,
+       const std::vector<std::string>& joints_in) {
+      std::vector<size_t> joints;
+      for (const auto& j : joints_in) {
+        const auto idx = c.skeleton.getJointIdByName(j);
+        MT_THROW_IF(
+            idx == momentum::kInvalidIndex,
+            "Trying to remove nonexistent joint '{}' from skeleton.",
+            j);
+        joints.push_back(idx);
+      }
 
-        return momentum::removeJoints(c, joints);
-      },
-      R"(Returns a character where the passed-in joints and all joints parented underneath them have been removed.
+      return momentum::removeJoints(c, joints);
+    },
+    R"(Returns a character where the passed-in joints and all joints parented underneath them have been removed.
 
 :param character: Full-body character.
 :param joint_names: Names of the joints to remove.
 :return: A new character with only the upper body visible.)",
-      py::arg("character"),
-      py::arg("joint_names"));
+    py::arg("character"),
+    py::arg("joint_names"));
 
-  // replace_skeleton_recursive(character, activeParameters)
-  m.def(
-      "replace_skeleton_hierarchy",
-      momentum::replaceSkeletonHierarchy,
-      R"(Replaces the part of target_character's skeleton rooted at target_root with the part of
+// replace_skeleton_recursive(character, activeParameters)
+m.def(
+    "replace_skeleton_hierarchy",
+    momentum::replaceSkeletonHierarchy,
+    R"(Replaces the part of target_character's skeleton rooted at target_root with the part of
 source_character's skeleton rooted at source_root.
 This is used e.g. to swap one character's hand skeleton with another.
 
@@ -3010,30 +3014,30 @@ This is used e.g. to swap one character's hand skeleton with another.
 :return: A new skeleton that is identical to tgt_skeleton except that everything under target_root
    has been replaced by the part of source_character rooted at source_root.
     )",
-      py::arg("source_character"),
-      py::arg("target_character"),
-      py::arg("source_root"),
-      py::arg("target_root"));
+    py::arg("source_character"),
+    py::arg("target_character"),
+    py::arg("source_root"),
+    py::arg("target_root"));
 
-  // reduceToSelectedModelParameters(character, activeParameters)
-  m.def(
-      "reduce_to_selected_model_parameters",
-      [](const momentum::Character& character, at::Tensor activeParameters) {
-        return character.simplifyParameterTransform(tensorToParameterSet(
-            character.parameterTransform, activeParameters));
-      },
-      R"(Strips out unused parameters from the parameter transform.
+// reduceToSelectedModelParameters(character, activeParameters)
+m.def(
+    "reduce_to_selected_model_parameters",
+    [](const momentum::Character& character, at::Tensor activeParameters) {
+      return character.simplifyParameterTransform(
+          tensorToParameterSet(character.parameterTransform, activeParameters));
+    },
+    R"(Strips out unused parameters from the parameter transform.
 
 :param character: Full-body character.
 :param activeParameters: A boolean tensor marking which parameters should be retained.
 :return: A new character whose parameter transform only includes the marked parameters.)",
-      py::arg("character"),
-      py::arg("active_parameters"));
+    py::arg("character"),
+    py::arg("active_parameters"));
 
-  m.def(
-      "find_closest_points",
-      &findClosestPoints,
-      R"(For each point in the points_source tensor, find the closest point in the points_target tensor.  This version of find_closest points supports both 2- and 3-dimensional point sets.
+m.def(
+    "find_closest_points",
+    &findClosestPoints,
+    R"(For each point in the points_source tensor, find the closest point in the points_target tensor.  This version of find_closest points supports both 2- and 3-dimensional point sets.
 
 :param points_source: [nBatch x nPoints x dim] tensor of source points (dim must be 2 or 3).
 :param points_target: [nBatch x nPoints x dim] tensor of target points (dim must be 2 or 3).
@@ -3042,14 +3046,14 @@ This is used e.g. to swap one character's hand skeleton with another.
          The second is [nBatch x nPoints] and contains the index of each closest point in the target set (or -1 if none).
          The third is [nBatch x nPoints] and is a boolean tensor indicating whether a valid closest point was found for each source point.
       )",
-      py::arg("points_source"),
-      py::arg("points_target"),
-      py::arg("max_dist") = std::numeric_limits<float>::max());
+    py::arg("points_source"),
+    py::arg("points_target"),
+    py::arg("max_dist") = std::numeric_limits<float>::max());
 
-  m.def(
-      "find_closest_points",
-      &findClosestPointsWithNormals,
-      R"(For each point in the points_source tensor, find the closest point in the points_target tensor whose normal is compatible (n_source . n_target > max_normal_dot).
+m.def(
+    "find_closest_points",
+    &findClosestPointsWithNormals,
+    R"(For each point in the points_source tensor, find the closest point in the points_target tensor whose normal is compatible (n_source . n_target > max_normal_dot).
 Using the normal is a good way to avoid certain kinds of bad matches, such as matching the front of the body against depth values from the back of the body.
 
 :param points_source: [nBatch x nPoints x 3] tensor of source points.
@@ -3062,17 +3066,17 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
          The second is [nBatch x nPoints] and contains the index of each closest point in the target set (or -1 if none).
          The third is [nBatch x nPoints] and is a boolean tensor indicating whether a valid closest point was found for each source point.
       )",
-      py::arg("points_source"),
-      py::arg("normals_source"),
-      py::arg("points_target"),
-      py::arg("normals_target"),
-      py::arg("max_dist") = std::numeric_limits<float>::max(),
-      py::arg("max_normal_dot") = 0.0f);
+    py::arg("points_source"),
+    py::arg("normals_source"),
+    py::arg("points_target"),
+    py::arg("normals_target"),
+    py::arg("max_dist") = std::numeric_limits<float>::max(),
+    py::arg("max_normal_dot") = 0.0f);
 
-  m.def(
-      "find_closest_points_on_mesh",
-      &findClosestPointsOnMesh,
-      R"(For each point in the points_source tensor, find the closest point in the target mesh.
+m.def(
+    "find_closest_points_on_mesh",
+    &findClosestPointsOnMesh,
+    R"(For each point in the points_source tensor, find the closest point in the target mesh.
 
   :param points_source: [nBatch x nPoints x 3] tensor of source points.
   :param vertices_target: [nBatch x nPoints x 3] tensor of target vertices.
@@ -3082,39 +3086,39 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
            The third is [nBatch x nPoints] and contains the index of the closest face (or -1 if invalid).
            The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).
         )",
-      py::arg("points_source"),
-      py::arg("vertices_target"),
-      py::arg("faces_target"));
+    py::arg("points_source"),
+    py::arg("vertices_target"),
+    py::arg("faces_target"));
 
-  m.def(
-      "replace_rest_mesh",
-      &replaceRestMesh,
-      R"(Return a new :class:`Character` with the rest mesh positions replaced by the passed-in positions.
+m.def(
+    "replace_rest_mesh",
+    &replaceRestMesh,
+    R"(Return a new :class:`Character` with the rest mesh positions replaced by the passed-in positions.
         Can be used to e.g. bake the blend shapes into the character's mesh.  Does not allow changing the topology.
 
 :param rest_vertex_positions: nVert x 3 numpy array of vertex positions.
         )",
-      py::arg("character"),
-      py::arg("rest_vertex_positions"));
+    py::arg("character"),
+    py::arg("rest_vertex_positions"));
 
-  m.def(
-      "compute_vertex_normals",
-      &computeVertexNormals,
-      R"(
+m.def(
+    "compute_vertex_normals",
+    &computeVertexNormals,
+    R"(
 Computes vertex normals for a triangle mesh given its positions.
 
 :param vertex_positions: [nBatch] x nVert x 3 Tensor of vertex positions.
 :param triangles: nTriangles x 3 Tensor of triangle indices.
 :return: Smooth per-vertex normals.
     )",
-      py::arg("vertex_positions"),
-      py::arg("triangles"));
+    py::arg("vertex_positions"),
+    py::arg("triangles"));
 
-  // createTestCharacter()
-  m.def(
-      "create_test_character",
-      &momentum::createTestCharacter<float>,
-      R"(Create a simple 3-joint test character.  This is useful for writing confidence tests that
+// createTestCharacter()
+m.def(
+    "create_test_character",
+    &momentum::createTestCharacter<float>,
+    R"(Create a simple 3-joint test character.  This is useful for writing confidence tests that
 execute quickly and don't rely on outside files.
 
 The mesh is made by a few vertices on the line segment from (1,0,0) to (1,1,0) and a few dummy
@@ -3125,13 +3129,13 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.
 :parameter numJoints: The number of joints in the resulting character.
 :return: A simple character with 3 joints and 10 model parameters.
       )",
-      py::arg("num_joints") = 3);
+    py::arg("num_joints") = 3);
 
-  // createTestPosePrior()
-  m.def(
-      "create_test_mppca",
-      &momentum::createDefaultPosePrior<float>,
-      R"(Create a pose prior that acts on the simple 3-joint test character.
+// createTestPosePrior()
+m.def(
+    "create_test_mppca",
+    &momentum::createDefaultPosePrior<float>,
+    R"(Create a pose prior that acts on the simple 3-joint test character.
 
 :return: A simple pose prior.)");
 }

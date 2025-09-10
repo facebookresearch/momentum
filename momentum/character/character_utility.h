@@ -32,7 +32,7 @@ namespace momentum {
 /// @param[in] character Character to be transformed
 /// @param[in] xform Transformation to apply
 /// @return A new Character object that has been transformed
-[[nodiscard]] Character transformCharacter(const Character& character, const Affine3f& xform);
+[[nodiscard]] Character transformCharacter(const Character& character, const Transform& xform);
 
 /// Replaces the part of target_character's skeleton rooted at target_root with the part of
 /// source_character's skeleton rooted at source_root.

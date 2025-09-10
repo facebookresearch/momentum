@@ -585,9 +585,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
   PositionErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   SkeletonStateT<T> bindState(transform.apply(parameters), skeleton);
   SkeletonStateT<T> state(transform.apply(parameters), skeleton);
-  TransformationListT<T> bindpose;
+  TransformListT<T> bindpose;
   for (const auto& js : bindState.jointState) {
-    bindpose.push_back(js.transform.inverse().toAffine3());
+    bindpose.push_back(js.transform.inverse());
   }
 
   {
@@ -698,7 +698,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     const Skeleton& skeleton = character_orig.skeleton;
     const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
-    momentum::TransformationListT<T> ibp;
+    momentum::TransformListT<T> ibp;
     for (const auto& js : character_orig.inverseBindPose) {
       ibp.push_back(js.cast<T>());
     }
@@ -767,7 +767,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     const Skeleton& skeleton = character_blend.skeleton;
     const ParameterTransformT<T> transform = character_blend.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
-    momentum::TransformationListT<T> ibp;
+    momentum::TransformListT<T> ibp;
     for (const auto& js : character_blend.inverseBindPose) {
       ibp.push_back(js.cast<T>());
     }
@@ -824,7 +824,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
   const Skeleton& skeleton = character_orig.skeleton;
   const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
   const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
-  momentum::TransformationListT<T> ibp;
+  momentum::TransformListT<T> ibp;
   for (const auto& js : character_orig.inverseBindPose) {
     ibp.push_back(js.cast<T>());
   }
@@ -900,7 +900,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     const Skeleton& skeleton = character_orig.skeleton;
     const ParameterTransformT<T> transform = character_orig.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
-    momentum::TransformationListT<T> ibp;
+    momentum::TransformListT<T> ibp;
     for (const auto& js : character_orig.inverseBindPose) {
       ibp.push_back(js.cast<T>());
     }
@@ -950,7 +950,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     const Skeleton& skeleton = character_blend.skeleton;
     const ParameterTransformT<T> transform = character_blend.parameterTransform.cast<T>();
     const momentum::SkeletonStateT<T> skelState(transform.apply(modelParamsTarget), skeleton);
-    momentum::TransformationListT<T> ibp;
+    momentum::TransformListT<T> ibp;
     for (const auto& js : character_blend.inverseBindPose) {
       ibp.push_back(js.cast<T>());
     }

@@ -84,8 +84,8 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
   EXPECT_EQ(scaledCharacter.inverseBindPose.size(), this->character.inverseBindPose.size());
   for (size_t i = 0; i < this->character.inverseBindPose.size(); ++i) {
     EXPECT_EQ(
-        scaledCharacter.inverseBindPose[i].translation(),
-        this->character.inverseBindPose[i].translation() * scale);
+        scaledCharacter.inverseBindPose[i].translation,
+        this->character.inverseBindPose[i].translation * scale);
   }
 
   // Test with scale = 1.0 (should be identity operation)
@@ -112,12 +112,6 @@ std::shared_ptr<momentum::Mesh> toSkinnedMesh(
 }
 
 void testTransformCharacter(const Character& character) {
-  // Create a rotation matrix (90 degrees around Y axis)
-  Quaternionf rotation = Quaternionf(Eigen::AngleAxis<float>(pi() / 2, Vector3f::UnitY()));
-  Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-  transform.linear() = rotation.toRotationMatrix();
-  transform.translation() = Vector3f(1, 2, 3);
-
   momentum::ModelParameters modelParams(character.parameterTransform.numAllModelParameters());
   modelParams.v.setZero();
 
@@ -131,6 +125,12 @@ void testTransformCharacter(const Character& character) {
   Vector3f originalVertex = meshOriginal->vertices[0];
   Vector3f originalNormal = meshOriginal->normals[0];
 
+  // Create a transformation
+  Transform transform;
+  transform.translation = Vector3f(1.0f, 2.0f, 3.0f);
+  transform.rotation = Quaternionf(Eigen::AngleAxisf(M_PI / 4, Vector3f::UnitY()));
+  transform.scale = 1.0f;
+
   // Transform the character
   Character transformedCharacter = transformCharacter(character, transform);
 
@@ -138,12 +138,12 @@ void testTransformCharacter(const Character& character) {
   EXPECT_EQ(transformedCharacter.skeleton.joints.size(), character.skeleton.joints.size());
 
   // Check that the root joint's pre-rotation was updated
-  Quaternionf expectedRootRotation = rotation * character.skeleton.joints[0].preRotation;
+  Quaternionf expectedRootRotation = transform.rotation * character.skeleton.joints[0].preRotation;
   EXPECT_TRUE(transformedCharacter.skeleton.joints[0].preRotation.isApprox(expectedRootRotation));
 
   // Check that the root joint's translation offset was updated
   Vector3f expectedRootTranslation =
-      rotation * character.skeleton.joints[0].translationOffset + transform.translation();
+      transform.rotation * character.skeleton.joints[0].translationOffset + transform.translation;
   EXPECT_TRUE(
       transformedCharacter.skeleton.joints[0].translationOffset.isApprox(expectedRootTranslation));
 
@@ -156,27 +156,28 @@ void testTransformCharacter(const Character& character) {
 
   // Check that mesh normals were transformed (only by the rotation part)
   EXPECT_EQ(meshTransformed->normals.size(), character.mesh->normals.size());
-  Vector3f expectedNormal = transform.linear() * originalNormal;
+  Vector3f expectedNormal = transform.toLinear() * originalNormal;
   EXPECT_TRUE(meshTransformed->normals[0].isApprox(expectedNormal));
 
   // Check that inverse bind pose was transformed
   EXPECT_EQ(transformedCharacter.inverseBindPose.size(), character.inverseBindPose.size());
   for (size_t i = 0; i < character.inverseBindPose.size(); ++i) {
-    Eigen::Affine3f expectedInverseBindPose = character.inverseBindPose[i] * transform.inverse();
+    Transform expectedInverseBindPose = character.inverseBindPose[i] * transform.inverse();
     EXPECT_TRUE(transformedCharacter.inverseBindPose[i].isApprox(expectedInverseBindPose));
   }
 
   // Test with identity transform (should be identity operation)
-  Character identityTransformedCharacter =
-      transformCharacter(character, Eigen::Affine3f::Identity());
+  Character identityTransformedCharacter = transformCharacter(character, Transform());
 
   const auto identityMeshTransformed = toSkinnedMesh(identityTransformedCharacter, modelParams);
   EXPECT_TRUE(identityMeshTransformed->vertices[0].isApprox(originalVertex));
-  EXPECT_TRUE(identityMeshTransformed->normals[0].isApprox(originalNormal));
+  EXPECT_TRUE(identityMeshTransformed->normals[0].isApprox(meshOriginal->normals[0]));
 
   // Test with a transform that includes scale (should cause a fatal error)
-  Eigen::Affine3f scaleTransform = Eigen::Affine3f::Identity();
-  scaleTransform.linear() = 2.0f * Eigen::Matrix3f::Identity();
+  Transform scaleTransform;
+  scaleTransform.translation = Vector3f::Zero();
+  scaleTransform.rotation = Quaternionf::Identity();
+  scaleTransform.scale = 2.0f; // This should cause error since scale != 1
   MOMENTUM_EXPECT_DEATH(
       static_cast<void>(transformCharacter(character, scaleTransform)),
       "singularValues\\(i\\) > 0.99 && singularValues\\(i\\) < 1.01");
@@ -448,8 +449,7 @@ TEST_F(CharacterUtilityTest, NullHandling) {
   EXPECT_FALSE(scaledNullMeshCharacter.mesh);
 
   // Transform the character with null mesh
-  Character transformedNullMeshCharacter =
-      transformCharacter(nullMeshCharacter, Eigen::Affine3f::Identity());
+  Character transformedNullMeshCharacter = transformCharacter(nullMeshCharacter, Transform());
   EXPECT_FALSE(transformedNullMeshCharacter.mesh);
 
   // Create a character with null collision geometry

@@ -215,6 +215,9 @@ using TransformListT =
     std::vector<TransformT<T>>; // structure describing a the state of all joints in a skeleton
 
 using Transform = TransformT<float>;
+using Transformd = TransformT<double>;
+
 using TransformList = TransformListT<float>;
+using TransformListd = TransformListT<double>;
 
 } // namespace momentum

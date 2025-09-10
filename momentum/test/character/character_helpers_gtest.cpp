@@ -197,9 +197,9 @@ void compareChars(const Character& refChar, const Character& character, const bo
     EXPECT_TRUE(refChar.inverseBindPose[i].isApprox(character.inverseBindPose[i], 1e-4f))
         << "InverseBindPose " << i << " is not equal:\n"
         << "- Expected:\n"
-        << refChar.inverseBindPose[i].matrix() << "\n"
+        << refChar.inverseBindPose[i].toMatrix() << "\n"
         << "- Actual  :\n"
-        << character.inverseBindPose[i].matrix() << std::endl;
+        << character.inverseBindPose[i].toMatrix() << std::endl;
   }
   EXPECT_EQ(refChar.jointMap, character.jointMap);
 

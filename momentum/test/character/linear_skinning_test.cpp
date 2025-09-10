@@ -71,7 +71,7 @@ class LinearSkinningTest : public ::testing::Test {
 
   Character character;
   SkeletonState skeletonState;
-  TransformationList inverseBindPose;
+  TransformList inverseBindPose;
   SkinWeights skin;
 };
 
@@ -130,7 +130,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsDouble) {
       Vector3d(1.0, 0.0, 0.0), Vector3d(0.0, 1.0, 0.0), Vector3d(0.0, 0.0, 1.0)};
 
   // Create double versions of the transforms
-  TransformationListT<double> inverseBindPoseDouble;
+  TransformListT<double> inverseBindPoseDouble;
   inverseBindPoseDouble.resize(inverseBindPose.size());
   for (size_t i = 0; i < inverseBindPoseDouble.size(); ++i) {
     inverseBindPoseDouble[i] = inverseBindPose[i].cast<double>();
@@ -257,7 +257,7 @@ TEST_F(LinearSkinningTest, ApplySSDMeshDouble) {
   MeshT<double> outputMesh = mesh;
 
   // Create double versions of the transforms
-  TransformationListT<double> inverseBindPoseDouble;
+  TransformListT<double> inverseBindPoseDouble;
   inverseBindPoseDouble.resize(inverseBindPose.size());
   for (size_t i = 0; i < inverseBindPoseDouble.size(); ++i) {
     inverseBindPoseDouble[i] = inverseBindPose[i].cast<double>();
@@ -562,8 +562,9 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
       Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f)};
 
   // Set up non-identity inverse bind pose
-  inverseBindPose[0].translate(Vector3f(-0.5f, -1.0f, -0.5f));
-  inverseBindPose[1].rotate(Eigen::AngleAxisf(pi() / 3, Vector3f::UnitX())); // 60 degrees around X
+  inverseBindPose[0].translation = Vector3f(-0.5f, -1.0f, -0.5f);
+  inverseBindPose[1].rotation =
+      Quaternionf(Eigen::AngleAxisf(pi() / 3, Vector3f::UnitX())); // 60 degrees around X
 
   // Apply identity transforms to joints
   for (auto& jointState : skeletonState.jointState) {

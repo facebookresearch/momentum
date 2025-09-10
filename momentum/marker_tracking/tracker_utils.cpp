@@ -274,7 +274,7 @@ Character createLocatorCharacter(const Character& sourceCharacter, const std::st
     // insert joint
     const size_t id = newSkel.joints.size();
     newSkel.joints.push_back(joint);
-    newInvBindPose.push_back(Affine3f::Identity());
+    newInvBindPose.push_back(Transform());
 
     // create parameter for the added joint
     static const std::array<std::string, 3> tNames{"_tx", "_ty", "_tz"};

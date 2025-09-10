@@ -37,7 +37,7 @@ CharacterT<T>::CharacterT(
     BlendShape_const_p blendShapes,
     BlendShapeBase_const_p faceExpressionBlendShapes,
     const std::string& nameIn,
-    const momentum::TransformationList& inverseBindPose_in,
+    const momentum::TransformList& inverseBindPose_in,
     const SkinnedLocatorList& skinnedLocators)
     : skeleton(s),
       parameterTransform(pt),
@@ -635,7 +635,7 @@ void CharacterT<T>::initInverseBindPose() {
   }
   inverseBindPose.reserve(bindState.jointState.size());
   for (const auto& t : bindState.jointState) {
-    inverseBindPose.push_back(t.transform.inverse().toAffine3());
+    inverseBindPose.push_back(t.transform.inverse());
   }
 }
 

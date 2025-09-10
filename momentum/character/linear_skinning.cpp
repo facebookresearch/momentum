@@ -19,7 +19,7 @@ namespace momentum {
 
 template <typename T>
 std::vector<Vector3<T>> applySSD(
-    const TransformationListT<T>& inverseBindPose,
+    const TransformListT<T>& inverseBindPose,
     const SkinWeights& skin,
     typename DeduceSpanType<const Vector3<T>>::type points,
     const SkeletonStateT<T>& state) {
@@ -47,7 +47,7 @@ std::vector<Vector3<T>> applySSD(
   // first create a list of transformations from bindpose to final output pose
   std::vector<Matrix4<T>> transformations(state.jointState.size());
   for (size_t i = 0; i < state.jointState.size(); i++) {
-    transformations[i] = (state.jointState[i].transform * inverseBindPose[i]).matrix();
+    transformations[i] = (state.jointState[i].transform * inverseBindPose[i]).toMatrix();
   }
 
   // go over all vertices and perform transformation
@@ -90,7 +90,7 @@ std::vector<Vector3<T>> applySSD(
 
 template <typename T>
 void applySSD(
-    const TransformationListT<T>& inverseBindPose,
+    const TransformListT<T>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<T>& mesh,
     const SkeletonStateT<T>& state,
@@ -100,7 +100,7 @@ void applySSD(
 
 template <typename T>
 void applySSD(
-    const TransformationListT<T>& inverseBindPose,
+    const TransformListT<T>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<T>& mesh,
     const JointStateListT<T>& jointState,
@@ -142,7 +142,7 @@ void applySSD(
   // first create a list of transformations from bindpose to final output pose
   std::vector<Eigen::Matrix4<T>> transformations(inverseBindPose.size());
   for (size_t i = 0; i < inverseBindPose.size(); i++) {
-    transformations[i].noalias() = (jointState[i].transform * inverseBindPose[i]).matrix();
+    transformations[i].noalias() = (jointState[i].transform * inverseBindPose[i]).toMatrix();
   }
 
   // go over all vertices and perform transformation
@@ -190,7 +190,7 @@ void applySSD(
 }
 
 Affine3f getInverseSSDTransformation(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     const SkeletonState& state,
     const size_t index) {
@@ -229,14 +229,14 @@ Affine3f getInverseSSDTransformation(
         state.jointState[jointIndex].transform * inverseBindPose[jointIndex];
 
     // add up transforms
-    transform.matrix().noalias() += transformation.matrix() * weight;
+    transform.matrix().noalias() += transformation.toMatrix() * weight;
   }
 
   return transform.inverse();
 }
 
 void applyInverseSSD(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     gsl::span<const Vector3f> points,
     const SkeletonState& state,
@@ -248,7 +248,7 @@ void applyInverseSSD(
 }
 
 std::vector<Vector3f> applyInverseSSD(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     gsl::span<const Vector3f> points,
     const SkeletonState& state) {
@@ -271,7 +271,7 @@ std::vector<Vector3f> applyInverseSSD(
   std::vector<Vector3f> res(points.size());
 
   // first create a list of transformations from bindpose to final output pose
-  TransformationList transformations(state.jointState.size());
+  TransformList transformations(state.jointState.size());
   for (size_t i = 0; i < state.jointState.size(); i++) {
     transformations[i] = state.jointState[i].transform * inverseBindPose[i];
   }
@@ -303,7 +303,7 @@ std::vector<Vector3f> applyInverseSSD(
       const auto& transformation = transformations[skin.index(i, j)];
 
       // add up transforms
-      transform.matrix().noalias() += transformation.matrix() * weight;
+      transform.matrix().noalias() += transformation.toMatrix() * weight;
     }
 
     // store in new mesh
@@ -314,37 +314,37 @@ std::vector<Vector3f> applyInverseSSD(
 }
 
 template std::vector<Vector3f> applySSD<float>(
-    const TransformationListT<float>& inverseBindPose,
+    const TransformListT<float>& inverseBindPose,
     const SkinWeights& skin,
     typename DeduceSpanType<const Vector3<float>>::type points,
     const SkeletonStateT<float>& state);
 template std::vector<Vector3d> applySSD<double>(
-    const TransformationListT<double>& inverseBindPose,
+    const TransformListT<double>& inverseBindPose,
     const SkinWeights& skin,
     typename DeduceSpanType<const Vector3<double>>::type points,
     const SkeletonStateT<double>& state);
 
 template void applySSD<float>(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<float>& mesh,
     const SkeletonStateT<float>& jointState,
     MeshT<float>& outputMesh);
 template void applySSD<double>(
-    const TransformationListT<double>& inverseBindPose,
+    const TransformListT<double>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<double>& mesh,
     const SkeletonStateT<double>& jointState,
     MeshT<double>& outputMesh);
 
 template void applySSD<float>(
-    const TransformationListT<float>& inverseBindPose,
+    const TransformListT<float>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<float>& mesh,
     const JointStateListT<float>& jointState,
     MeshT<float>& outputMesh);
 template void applySSD<double>(
-    const TransformationListT<double>& inverseBindPose,
+    const TransformListT<double>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<double>& mesh,
     const JointStateListT<double>& jointState,

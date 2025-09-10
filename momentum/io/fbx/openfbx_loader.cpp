@@ -353,7 +353,7 @@ void parseSkeleton(
       capsule.parent = parent;
       capsule.length = length;
       capsule.radius = {rad_a, rad_b};
-      capsule.transformation = toEigen(xf).cast<float>();
+      capsule.transformation = Transform(toEigen(xf).cast<float>());
       capsules.push_back(capsule);
     } else if (parent != kInvalidIndex) {
       // It's a locator if it has a parent joint
@@ -476,7 +476,7 @@ void parseSkinnedModel(
     const std::vector<const ofbx::Object*>& boneFbxNodes,
     Mesh& mesh,
     std::unique_ptr<SkinWeights>& skinWeights,
-    TransformationList& inverseBindPoseTransforms,
+    TransformList& inverseBindPoseTransforms,
     bool permissive) {
   enum EMapping {
     MappingUnknown,
@@ -973,13 +973,13 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   const auto [skeleton, jointFbxNodes, locators, collision] =
       parseSkeleton(scene->getRoot(), {}, permissive);
 
-  TransformationList inverseBindPoseTransforms;
+  TransformList inverseBindPoseTransforms;
   for (const auto& j : jointFbxNodes) {
     Eigen::Affine3d mat = Eigen::Affine3d::Identity();
     if (j) {
       mat = toEigen(j->getGlobalTransform());
     }
-    inverseBindPoseTransforms.push_back(mat.inverse().cast<float>());
+    inverseBindPoseTransforms.push_back(Transform(mat.inverse().cast<float>()));
   }
 
   Mesh mesh;
