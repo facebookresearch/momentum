@@ -10,6 +10,7 @@
 #include <momentum/character/types.h>
 #include <momentum/common/memory.h>
 #include <momentum/math/constants.h>
+#include <momentum/math/transform.h>
 #include <momentum/math/utility.h>
 
 namespace momentum {
@@ -24,7 +25,7 @@ struct TaperedCapsuleT {
 
   /// Transformation defining the orientation and starting point relative to the parent coordinate
   /// system.
-  Affine3<S> transformation;
+  TransformT<S> transformation;
 
   /// Radii at the two endpoints of the capsule.
   Vector2<S> radius;
@@ -36,7 +37,7 @@ struct TaperedCapsuleT {
   S length;
 
   TaperedCapsuleT()
-      : transformation(Affine3<S>::Identity()),
+      : transformation(TransformT<S>()),
         radius(Vector2<S>::Zero()),
         parent(kInvalidIndex),
         length(S(0)) {
