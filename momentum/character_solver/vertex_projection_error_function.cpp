@@ -104,7 +104,7 @@ void VertexProjectionErrorFunctionT<T>::calculateDWorldPos(
     const auto parentBone = skinWeights.index(constr.vertexIndex, i);
     if (w > 0) {
       d_worldPos += w *
-          (state.jointState[parentBone].transformation.linear() *
+          (state.jointState[parentBone].transform.toLinear() *
            (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
     }
   }

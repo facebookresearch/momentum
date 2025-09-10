@@ -25,13 +25,12 @@ class LinearSkinningTest : public ::testing::Test {
 
     // Initialize joint states with identity transforms
     for (auto& jointState : skeletonState.jointState) {
-      jointState.localRotation() = Quaternionf::Identity();
+      jointState.localRotation().setIdentity();
       jointState.localTranslation().setZero();
       jointState.localScale() = 1.0f;
-      jointState.transform.rotation = Quaternionf::Identity();
-      jointState.transform.translation.setZero();
-      jointState.transform.scale = 1.0f;
-      jointState.transformation = Eigen::Affine3f::Identity();
+      jointState.rotation().setIdentity();
+      jointState.translation().setZero();
+      jointState.scale() = 1.0f;
     }
 
     // Create inverse bind pose transformations
@@ -91,7 +90,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsFloat) {
   EXPECT_TRUE(result[2].isApprox(Vector3f(0.0f, 0.0f, 1.0f)));
 
   // Apply translation to joint 0
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
 
   result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
 
@@ -109,7 +108,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsFloat) {
   EXPECT_NEAR(result[2].z(), 1.75f, 1e-3f);
 
   // Apply translation to joint 1
-  skeletonState.jointState[1].transformation.translate(Vector3f(2.0f, 0.0f, 1.0f));
+  skeletonState.jointState[1].transform.translation += Vector3f(2.0f, 0.0f, 1.0f);
 
   result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
 
@@ -141,8 +140,8 @@ TEST_F(LinearSkinningTest, ApplySSDPointsDouble) {
   SkeletonStateT<double> skeletonStateDouble;
   skeletonStateDouble.jointState.resize(skeletonState.jointState.size());
   for (size_t i = 0; i < skeletonStateDouble.jointState.size(); ++i) {
-    skeletonStateDouble.jointState[i].transformation =
-        skeletonState.jointState[i].transformation.cast<double>();
+    skeletonStateDouble.jointState[i].transform =
+        skeletonState.jointState[i].transform.template cast<double>();
   }
 
   // Apply identity transforms - points should remain the same
@@ -155,7 +154,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsDouble) {
   EXPECT_TRUE(result[2].isApprox(Vector3d(0.0, 0.0, 1.0)));
 
   // Apply translation to joint 0
-  skeletonStateDouble.jointState[0].transformation.translate(Vector3d(1.0, 2.0, 3.0));
+  skeletonStateDouble.jointState[0].transform.translation += Vector3d(1.0, 2.0, 3.0);
 
   result =
       applySSD(inverseBindPoseDouble, skin, gsl::span<const Vector3d>(points), skeletonStateDouble);
@@ -198,7 +197,7 @@ TEST_F(LinearSkinningTest, ApplySSDMeshFloat) {
   // Apply rotation to joint 0 (90 degrees around Y)
   Eigen::Affine3f rotation = Eigen::Affine3f::Identity();
   rotation.rotate(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY()));
-  skeletonState.jointState[0].transformation = rotation;
+  skeletonState.jointState[0].transform = TransformT<float>(rotation);
 
   applySSD(inverseBindPose, skin, mesh, skeletonState, outputMesh);
 
@@ -231,7 +230,7 @@ TEST_F(LinearSkinningTest, ApplySSDMeshJointStateFloat) {
   EXPECT_TRUE(outputMesh.vertices[2].isApprox(Vector3f(0.0f, 0.0f, 1.0f)));
 
   // Apply translation to joint 1
-  skeletonState.jointState[1].transformation.translate(Vector3f(2.0f, 3.0f, 4.0f));
+  skeletonState.jointState[1].transform.translation += Vector3f(2.0f, 3.0f, 4.0f);
 
   applySSD(inverseBindPose, skin, mesh, skeletonState.jointState, outputMesh);
 
@@ -268,8 +267,8 @@ TEST_F(LinearSkinningTest, ApplySSDMeshDouble) {
   SkeletonStateT<double> skeletonStateDouble;
   skeletonStateDouble.jointState.resize(skeletonState.jointState.size());
   for (size_t i = 0; i < skeletonStateDouble.jointState.size(); ++i) {
-    skeletonStateDouble.jointState[i].transformation =
-        skeletonState.jointState[i].transformation.cast<double>();
+    skeletonStateDouble.jointState[i].transform =
+        skeletonState.jointState[i].transform.template cast<double>();
   }
 
   // Apply identity transforms - mesh should remain the same
@@ -289,18 +288,18 @@ TEST_F(LinearSkinningTest, GetInverseSSDTransformation) {
   EXPECT_TRUE(inverseTransform.matrix().isApprox(Eigen::Matrix4f::Identity()));
 
   // Apply translation to joint 0
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
 
   // For vertex 0 (100% influenced by joint 0), the inverse transform should be the inverse of joint
   // 0's transform
   inverseTransform = getInverseSSDTransformation(inverseBindPose, skin, skeletonState, 0);
-  Affine3f expectedInverse = skeletonState.jointState[0].transformation.inverse();
+  Affine3f expectedInverse = skeletonState.jointState[0].transform.inverse().toAffine3();
 
   EXPECT_TRUE(inverseTransform.matrix().isApprox(expectedInverse.matrix()));
 
   // For vertex 1 (50% joint 0, 50% joint 1), the inverse is more complex
   // Apply translation to joint 1
-  skeletonState.jointState[1].transformation.translate(Vector3f(2.0f, 0.0f, 1.0f));
+  skeletonState.jointState[1].transform.translation += Vector3f(2.0f, 0.0f, 1.0f);
 
   inverseTransform = getInverseSSDTransformation(inverseBindPose, skin, skeletonState, 1);
 
@@ -347,7 +346,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDPoints) {
   EXPECT_TRUE(result[2].isApprox(Vector3f(0.0f, 0.0f, 1.0f)));
 
   // Apply translation to joint 0
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
 
   // First apply forward skinning to get transformed points
   auto transformedPoints =
@@ -374,7 +373,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDMesh) {
   mesh.faces = {Vector3i(0, 1, 2)};
 
   // Apply translation to joint 0
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
 
   // First apply forward skinning to get transformed points
   std::vector<Vector3f> transformedPoints =
@@ -533,14 +532,14 @@ TEST_F(LinearSkinningTest, ComplexTransformations) {
   Eigen::Affine3f transform0 = Eigen::Affine3f::Identity();
   transform0.rotate(Eigen::AngleAxisf(pi() / 4, Vector3f::UnitY())); // 45 degrees around Y
   transform0.translate(Vector3f(1.0f, 2.0f, 3.0f));
-  skeletonState.jointState[0].transformation = transform0;
+  skeletonState.jointState[0].transform = TransformT<float>(transform0);
 
   // Joint 1: Rotation + Translation + Scale
   Eigen::Affine3f transform1 = Eigen::Affine3f::Identity();
   transform1.rotate(Eigen::AngleAxisf(pi() / 6, Vector3f::UnitZ())); // 30 degrees around Z
   transform1.translate(Vector3f(2.0f, 1.0f, -1.0f));
   transform1.scale(1.5f);
-  skeletonState.jointState[1].transformation = transform1;
+  skeletonState.jointState[1].transform = TransformT<float>(transform1);
 
   // Apply SSD
   auto result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
@@ -568,7 +567,7 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
 
   // Apply identity transforms to joints
   for (auto& jointState : skeletonState.jointState) {
-    jointState.transformation = Eigen::Affine3f::Identity();
+    jointState.transform = TransformT<float>();
   }
 
   // Apply SSD
@@ -584,8 +583,9 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
   EXPECT_NEAR(result[0].z(), -0.5f, 1e-2f);
 
   // Apply joint transformations
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
-  skeletonState.jointState[1].transformation.rotate(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY()));
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
+  skeletonState.jointState[1].transform.rotation =
+      Quaternionf(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY()));
 
   // Apply SSD again
   result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
@@ -613,8 +613,8 @@ TEST_F(LinearSkinningTest, ZeroWeights) {
   zeroSkin.weight(1, 1) = 0.0f;
 
   // Apply transformations to joints
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
-  skeletonState.jointState[1].transformation.translate(Vector3f(2.0f, 0.0f, 1.0f));
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
+  skeletonState.jointState[1].transform.translation += Vector3f(2.0f, 0.0f, 1.0f);
 
   // Apply SSD
   auto result =
