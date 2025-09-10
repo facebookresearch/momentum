@@ -2515,7 +2515,7 @@ The resulting tensors are as follows:
       .def_property_readonly(
           "transformation",
           [](const mm::TaperedCapsule& capsule) -> Eigen::Matrix4f {
-            return capsule.transformation.matrix();
+            return capsule.transformation.toMatrix();
           },
           "Transformation defining the orientation and starting point relative to the parent coordinate system")
       .def_property_readonly(
@@ -2697,9 +2697,9 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
       py::arg("gltf_filename"));
 
   // loadMarkersFromFile(path, mainSubjectOnly)
-  // TODO(T138941756): Expose the loadMarker and loadMarkersForMainSubject
-  // APIs separately from markerIO.h loadMarkersFromFile(path,
-  // mainSubjectOnly)
+  // TODO(T138941756): Expose the loadMarker and
+  // loadMarkersForMainSubject APIs separately from markerIO.h
+  // loadMarkersFromFile(path, mainSubjectOnly)
   m.def(
       "load_markers",
       &loadMarkersFromFile,
@@ -2806,7 +2806,8 @@ required to call `meth:BlendShape.compute_shape`.
       py::arg("character"),
       py::arg("model_parameters"));
 
-  // modelParametersToPositions(character, modelParameters, parents, offsets)
+  // modelParametersToPositions(character, modelParameters, parents,
+  // offsets)
   m.def(
       "model_parameters_to_positions",
       &modelParametersToPositions,
@@ -2828,7 +2829,8 @@ sparsity in the model and therefore can be made somewhat faster.
       py::arg("parents"),
       py::arg("offsets"));
 
-  // jointParametersToPositions(character, jointParameters, parents, offsets)
+  // jointParametersToPositions(character, jointParameters, parents,
+  // offsets)
   m.def(
       "joint_parameters_to_positions",
       &jointParametersToPositions,

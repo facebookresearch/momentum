@@ -59,9 +59,9 @@ nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
 TaperedCapsule createCollisionCapsule(const fx::gltf::Node& node, const nlohmann::json& extension) {
   TaperedCapsule tc;
   tc.parent = kInvalidIndex;
-  tc.transformation = Affine3f::Identity();
-  tc.transformation.linear() = toMomentumQuaternionf(node.rotation).toRotationMatrix();
-  tc.transformation.translation() = toMomentumVec3f(node.translation);
+  tc.transformation = Transform();
+  tc.transformation.rotation = toMomentumQuaternionf(node.rotation);
+  tc.transformation.translation = toMomentumVec3f(node.translation);
 
   try {
     tc.length = extension["length"];

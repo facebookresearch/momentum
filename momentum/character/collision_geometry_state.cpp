@@ -26,9 +26,9 @@ void CollisionGeometryStateT<T>::update(
   for (size_t i = 0; i < numElements; ++i) {
     const auto& tc = collisionGeometry[i];
     const auto& js = skeletonState.jointState[tc.parent];
-    const Affine3<T> transform = js.transform.toAffine3() * tc.transformation.cast<T>();
-    origin[i] = transform.translation();
-    direction[i].noalias() = transform.linear().col(0) * tc.length;
+    const TransformT<T> transform = js.transform * tc.transformation.cast<T>();
+    origin[i] = transform.translation;
+    direction[i].noalias() = transform.getAxisX() * transform.scale * tc.length;
     radius[i].noalias() = tc.radius.cast<T>() * js.transform.scale;
     delta[i] = radius[i][1] - radius[i][0];
   }

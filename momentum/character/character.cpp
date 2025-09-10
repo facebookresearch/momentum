@@ -356,8 +356,9 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
     for (auto&& c : *result.collision) {
       const auto oldParent = c.parent;
       c.parent = result.jointMap[c.parent];
-      c.transformation = targetBindState.jointState[c.parent].transform.inverse().toAffine3() *
-          sourceBindState.jointState[oldParent].transform.toAffine3() * c.transformation;
+      c.transformation =
+          (targetBindState.jointState[c.parent].transform.inverse() *
+           sourceBindState.jointState[oldParent].transform * c.transformation);
     }
   }
 

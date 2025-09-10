@@ -134,11 +134,11 @@ void createCollisionGeometryNodes(
         .Set(collision.radius[1]);
 
     collisionNode->LclTranslation.Set(FbxVector4(
-        collision.transformation.translation().x(),
-        collision.transformation.translation().y(),
-        collision.transformation.translation().z()));
+        collision.transformation.translation.x(),
+        collision.transformation.translation.y(),
+        collision.transformation.translation.z()));
     const Vector3f rot = rotationMatrixToEulerXYZ<float>(
-        collision.transformation.rotation(), EulerConvention::Extrinsic);
+        collision.transformation.rotation.toRotationMatrix(), EulerConvention::Extrinsic);
     collisionNode->LclRotation.Set(FbxDouble3(toDeg(rot.x()), toDeg(rot.y()), toDeg(rot.z())));
     collisionNode->LclScaling.Set(FbxDouble3(1));
 
