@@ -71,7 +71,7 @@ std::unique_ptr<CollisionGeometry> scale(
 
   auto result = std::make_unique<CollisionGeometry>(*geom);
   for (auto& capsule : (*result)) {
-    capsule.transformation.translation() *= scale;
+    capsule.transformation.translation *= scale;
     capsule.radius *= scale;
     capsule.length *= scale;
   }

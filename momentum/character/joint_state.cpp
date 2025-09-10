@@ -38,7 +38,7 @@ void JointStateT<T>::set(
   // calculate state based on parameters and parent transform
   if (computeDeriv) {
     if (parentState != nullptr) {
-      translationAxis = parentState->transformation.linear();
+      translationAxis = parentState->transform.toLinear();
     } else {
       translationAxis.setIdentity();
     }
@@ -65,9 +65,6 @@ void JointStateT<T>::set(
 
   // set global transformation
   transform = parent * localTransform;
-
-  // TODO: Remove
-  transformation = transform.toAffine3();
 }
 
 template <typename T>
@@ -90,9 +87,6 @@ Vector3<T> JointStateT<T>::getScaleDerivative(const Vector3<T>& ref) const noexc
 template <typename T>
 template <typename T2>
 void JointStateT<T>::set(const JointStateT<T2>& rhs) {
-  // TODO: Remove
-  transformation = rhs.transformation.template cast<T>();
-
   localTransform = rhs.localTransform.template cast<T>();
   transform = rhs.transform.template cast<T>();
 

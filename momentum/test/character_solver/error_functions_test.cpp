@@ -50,6 +50,34 @@ using Types = testing::Types<float, double>;
 
 TYPED_TEST_SUITE(Momentum_ErrorFunctionsTest, Types);
 
+namespace {
+
+Character getSkinnedLocatorTestCharacter() {
+  Character character = withTestBlendShapes(createTestCharacter(4));
+
+  std::vector<bool> activeLocators(character.skinnedLocators.size(), true);
+  activeLocators[1] = false;
+  const auto [transform, limits] = addSkinnedLocatorParameters(
+      character.parameterTransform, character.parameterLimits, activeLocators);
+
+  return {
+      character.skeleton,
+      transform,
+      limits,
+      character.locators,
+      character.mesh.get(),
+      character.skinWeights.get(),
+      character.collision.get(),
+      character.poseShapes.get(),
+      character.blendShape,
+      character.faceExpressionBlendShape,
+      character.name,
+      character.inverseBindPose,
+      character.skinnedLocators};
+}
+
+} // namespace
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
 
@@ -468,34 +496,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
   }
 }
 
-namespace {
-
-Character getSkinnedLocatorTestCharacter() {
-  Character character = withTestBlendShapes(createTestCharacter(4));
-
-  std::vector<bool> activeLocators(character.skinnedLocators.size(), true);
-  activeLocators[1] = false;
-  const auto [transform, limits] = addSkinnedLocatorParameters(
-      character.parameterTransform, character.parameterLimits, activeLocators);
-
-  return {
-      character.skeleton,
-      transform,
-      limits,
-      character.locators,
-      character.mesh.get(),
-      character.skinWeights.get(),
-      character.collision.get(),
-      character.poseShapes.get(),
-      character.blendShape,
-      character.faceExpressionBlendShape,
-      character.name,
-      character.inverseBindPose,
-      character.skinnedLocators};
-}
-
-} // namespace
-
 TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
 
@@ -587,7 +587,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
   SkeletonStateT<T> state(transform.apply(parameters), skeleton);
   TransformationListT<T> bindpose;
   for (const auto& js : bindState.jointState) {
-    bindpose.push_back(js.transformation.inverse());
+    bindpose.push_back(js.transform.inverse().toAffine3());
   }
 
   {
@@ -633,7 +633,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
             continue;
           }
           const auto parent = skin.index(vi, si);
-          const Vector3<T> offset = state.jointState[parent].transformation.inverse() * v[vi];
+          const Vector3<T> offset = state.jointState[parent].transform.inverse() * v[vi];
           cl.push_back(PositionDataT<T>(offset, target, parent, skin.weight(vi, si)));
         }
         errorFunction.setConstraints(cl);

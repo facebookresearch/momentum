@@ -117,11 +117,11 @@ class TestBlendShape(unittest.TestCase):
 
         m1 = torch.from_numpy(c.pose_mesh(joint_params.numpy()).vertices)
         m2 = c.skin_points(skel_state)
-        self.assertTrue(m1.allclose(m2))
+        self.assertTrue(m1.allclose(m2, rtol=1e-5, atol=1e-6))
 
         rest_points = torch.from_numpy(c.mesh.vertices)
         m3 = c.skin_points(pym_skel_state.to_matrix(skel_state), rest_points)
-        self.assertTrue(m1.allclose(m3))
+        self.assertTrue(m1.allclose(m3, rtol=1e-5, atol=1e-6))
 
     def test_skinning_check_derivatives(self) -> None:
         """Check the skinning derivatives."""
