@@ -62,12 +62,14 @@ TYPED_TEST(BlendShapesTest, Skinning) {
   }
 
   MeshT<T> posedMesh = characterBlend.mesh->cast<T>();
-  applySSD(
-      cast<T>(characterBlend.inverseBindPose),
-      *characterBlend.skinWeights,
-      restMesh,
-      skelState,
-      posedMesh);
+  // Manually cast the transform list since TransformT doesn't have a Scalar typedef
+  TransformListT<T> castedInverseBindPose;
+  castedInverseBindPose.reserve(characterBlend.inverseBindPose.size());
+  for (const auto& transform : characterBlend.inverseBindPose) {
+    castedInverseBindPose.push_back(transform.template cast<T>());
+  }
+
+  applySSD(castedInverseBindPose, *characterBlend.skinWeights, restMesh, skelState, posedMesh);
 
   MeshT<T> posedMesh2 = characterBlend.mesh->cast<T>();
   skinWithBlendShapes(characterBlend, skelState, blendWeights, posedMesh2);

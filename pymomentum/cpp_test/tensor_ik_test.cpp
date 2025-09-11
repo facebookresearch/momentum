@@ -104,7 +104,7 @@ void addPositionConstraints(
       const auto parent = iJoint;
       const Eigen::Vector3<T> offset = 3.0f * randomVec3().template cast<T>();
       const Eigen::Vector3<T> target =
-          state.jointState[jCons].transformation.template cast<T>() * offset +
+          state.jointState[jCons].transform.template cast<T>() * offset +
           randomVec3().template cast<T>();
       const float weight = 1.0f + unif(rng);
       func.addConstraint(

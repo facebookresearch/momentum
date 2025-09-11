@@ -59,12 +59,12 @@ void testSimpleTargets(const SolverOptionsT& options) {
   SkeletonStateT<T> state(castedCharacterParameterTransform.apply(parameters), skeleton);
   std::vector<PositionDataT<T>> constraints;
   constraints.push_back(PositionDataT<T>(
-      Vector3<T>::UnitY(), state.jointState[2].transformation * Vector3<T>::UnitY(), 2, 1.0));
+      Vector3<T>::UnitY(), state.jointState[2].transform * Vector3<T>::UnitY(), 2, 1.0));
 
   {
     SCOPED_TRACE("Checking restpose");
     Vector3<T> diff =
-        state.jointState[2].transformation * constraints[0].offset - Vector3<T>(0.0, 3.0, 0.0);
+        state.jointState[2].transform * constraints[0].offset - Vector3<T>(0.0, 3.0, 0.0);
     EXPECT_LE(diff.norm(), Eps<T>(1e-7f, 1e-15));
   }
 
@@ -76,7 +76,7 @@ void testSimpleTargets(const SolverOptionsT& options) {
     EXPECT_LE(error, Eps<T>(1e-7f, 1e-15));
     EXPECT_LE((parameters - optimizedParameters).norm(), Eps<T>(1e-7f, 1e-15));
     Vector3<T> diff =
-        state.jointState[2].transformation * constraints[0].offset - Vector3<T>(0.0, 3.0, 0.0);
+        state.jointState[2].transform * constraints[0].offset - Vector3<T>(0.0, 3.0, 0.0);
     EXPECT_LE(diff.norm(), Eps<T>(1e-7f, 1e-15));
   }
 
@@ -90,7 +90,7 @@ void testSimpleTargets(const SolverOptionsT& options) {
       EXPECT_LE(error, Eps<T>(5e-7f, 1e-8));
       EXPECT_GE((parameters - optimizedParameters).norm(), Eps<T>(1e-7f, 1e-15));
       Vector3<T> diff =
-          state.jointState[2].transformation * constraints[0].offset - constraints[0].target;
+          state.jointState[2].transform * constraints[0].offset - constraints[0].target;
       EXPECT_LE(diff.norm(), Eps<T>(5e-5f, 1e-5));
     }
   }

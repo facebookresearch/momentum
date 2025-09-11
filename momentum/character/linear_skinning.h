@@ -10,6 +10,7 @@
 #include <momentum/character/fwd.h>
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
+#include <momentum/math/transform.h>
 #include <momentum/math/types.h>
 
 namespace momentum {
@@ -46,7 +47,7 @@ namespace momentum {
 /// @return Vector of transformed points
 template <typename T>
 std::vector<Vector3<T>> applySSD(
-    const TransformationListT<T>& inverseBindPose,
+    const TransformListT<T>& inverseBindPose,
     const SkinWeights& skin,
     typename DeduceSpanType<const Vector3<T>>::type points,
     const SkeletonStateT<T>& state);
@@ -63,7 +64,7 @@ std::vector<Vector3<T>> applySSD(
 /// @param outputMesh Output mesh to store the transformed result
 template <typename T>
 void applySSD(
-    const TransformationListT<T>& inverseBindPose,
+    const TransformListT<T>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<T>& mesh,
     const SkeletonStateT<T>& state,
@@ -81,7 +82,7 @@ void applySSD(
 /// @param outputMesh Output mesh to store the transformed result
 template <typename T>
 void applySSD(
-    const TransformationListT<T>& inverseBindPose,
+    const TransformListT<T>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<T>& mesh,
     const JointStateListT<T>& state,
@@ -98,7 +99,7 @@ void applySSD(
 /// @param index Index of the vertex to compute inverse transformation for
 /// @return Inverse transformation matrix for the specified vertex
 Affine3f getInverseSSDTransformation(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     const SkeletonState& state,
     size_t index);
@@ -114,7 +115,7 @@ Affine3f getInverseSSDTransformation(
 /// @param state Current skeleton state containing joint transformations
 /// @return Vector of transformed points in bind pose space
 std::vector<Vector3f> applyInverseSSD(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     gsl::span<const Vector3f> points,
     const SkeletonState& state);
@@ -130,7 +131,7 @@ std::vector<Vector3f> applyInverseSSD(
 /// @param state Current skeleton state containing joint transformations
 /// @param mesh Output mesh to store the transformed vertices
 void applyInverseSSD(
-    const TransformationList& inverseBindPose,
+    const TransformList& inverseBindPose,
     const SkinWeights& skin,
     gsl::span<const Vector3f> points,
     const SkeletonState& state,

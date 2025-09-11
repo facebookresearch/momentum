@@ -202,8 +202,8 @@ Eigen::Vector3<T> calculateDWorldPos(
     const auto parentBone = skinWeights.index(vertexIndex, i);
     if (w > 0) {
       d_worldPos += w *
-          (state.jointState[parentBone].transformation.linear() *
-           (character.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
+          (state.jointState[parentBone].transform.toLinear() *
+           (character.inverseBindPose[parentBone].toLinear().template cast<T>() * d_restPos));
     }
   }
 
@@ -952,8 +952,15 @@ void PointTriangleVertexErrorFunctionT<T>::updateMeshes(
     this->restMesh_->updateNormals();
   }
 
+  // Manually cast the transform list since TransformT doesn't have a Scalar typedef
+  TransformListT<T> castedInverseBindPose;
+  castedInverseBindPose.reserve(character_.inverseBindPose.size());
+  for (const auto& transform : character_.inverseBindPose) {
+    castedInverseBindPose.push_back(transform.template cast<T>());
+  }
+
   applySSD(
-      cast<T>(character_.inverseBindPose),
+      castedInverseBindPose,
       *this->character_.skinWeights,
       *this->restMesh_,
       state,

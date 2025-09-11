@@ -135,8 +135,8 @@ void compareCollisionGeometry(
         return l1.radius.x() != l2.radius.x() ? l1.radius.x() < l2.radius.x()
                                               : l1.radius.y() < l2.radius.y();
       }
-      const auto t1 = l1.transformation.matrix();
-      const auto t2 = l2.transformation.matrix();
+      const auto t1 = l1.transformation.toMatrix();
+      const auto t2 = l2.transformation.toMatrix();
       EXPECT_EQ(t1.size(), t2.size());
       for (auto i = 0; i < t1.size(); i++) {
         if (std::abs(t1.data()[i] - t2.data()[i]) > std::numeric_limits<float>::epsilon()) {
@@ -158,14 +158,14 @@ void compareCollisionGeometry(
                                          << "  - length   : " << collA.length << "\n"
                                          << "  - parent   : " << collA.parent << "\n"
                                          << "  - transform:\n"
-                                         << collA.transformation.matrix() << "\n"
+                                         << collA.transformation.toMatrix() << "\n"
                                          << "- collision:\n"
                                          << "  - radius_0 : " << collB.radius.x() << "\n"
                                          << "  - radius_1 : " << collB.radius.y() << "\n"
                                          << "  - length   : " << collB.length << "\n"
                                          << "  - parent   : " << collB.parent << "\n"
                                          << "  - transform:\n"
-                                         << collB.transformation.matrix() << std::endl;
+                                         << collB.transformation.toMatrix() << std::endl;
     }
   }
 }
@@ -197,9 +197,9 @@ void compareChars(const Character& refChar, const Character& character, const bo
     EXPECT_TRUE(refChar.inverseBindPose[i].isApprox(character.inverseBindPose[i], 1e-4f))
         << "InverseBindPose " << i << " is not equal:\n"
         << "- Expected:\n"
-        << refChar.inverseBindPose[i].matrix() << "\n"
+        << refChar.inverseBindPose[i].toMatrix() << "\n"
         << "- Actual  :\n"
-        << character.inverseBindPose[i].matrix() << std::endl;
+        << character.inverseBindPose[i].toMatrix() << std::endl;
   }
   EXPECT_EQ(refChar.jointMap, character.jointMap);
 

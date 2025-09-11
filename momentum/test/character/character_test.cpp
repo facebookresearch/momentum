@@ -490,11 +490,14 @@ TYPED_TEST(CharacterTest, InitInverseBindPose) {
 
   // Check that the inverse bind pose is correct
   // The bind pose should be identity for the root and a translation for joint1
-  EXPECT_TRUE(testCharacter.inverseBindPose[0].isApprox(Eigen::Affine3f::Identity()));
+  EXPECT_TRUE(testCharacter.inverseBindPose[0].isApprox(Transform()));
 
-  // The inverse of a translation by (1,0,0) is a translation by (-1,0,0)
-  Eigen::Affine3f expectedInverse = Eigen::Affine3f::Identity();
-  expectedInverse.translation() = Vector3f(-1, 0, 0);
+  // Create expected inverse bind pose for joint 1
+  Transform expectedInverse;
+  expectedInverse.translation =
+      Eigen::Vector3f(-1, 0, 0); // Inverse translation offset (inverse of (1,0,0))
+  expectedInverse.rotation = Eigen::Quaternionf::Identity();
+  expectedInverse.scale = 1.0f;
   EXPECT_TRUE(testCharacter.inverseBindPose[1].isApprox(expectedInverse));
 }
 

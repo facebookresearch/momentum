@@ -62,7 +62,7 @@ struct CharacterT {
   BlendShapeBase_const_p faceExpressionBlendShape;
 
   /// Inverse of the bind pose transformations for each joint
-  TransformationList inverseBindPose;
+  TransformList inverseBindPose;
 
   /// Maps from original joint indices to simplified joint indices
   std::vector<size_t> jointMap;
@@ -104,7 +104,7 @@ struct CharacterT {
       BlendShape_const_p blendShapes = {},
       BlendShapeBase_const_p faceExpressionBlendShapes = {},
       const std::string& nameIn = "",
-      const momentum::TransformationList& inverseBindPose = {},
+      const momentum::TransformList& inverseBindPose = {},
       const SkinnedLocatorList& skinnedLocators = {});
 
   /// Copy constructor
