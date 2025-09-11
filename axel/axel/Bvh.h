@@ -186,7 +186,7 @@ class Bvh final : public BvhBase<S> {
       uint32_t nodeIdx,
       const Eigen::Vector3<S>& query,
       const ClosestSurfacePointFunc& func,
-      S distSqHi,
+      S sqrDist,
       ClosestSurfacePointResult<S>& result) const;
 
   std::vector<BvhFlatNode<S>> flatTree_;
