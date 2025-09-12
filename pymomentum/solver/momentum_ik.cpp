@@ -744,12 +744,12 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
   // Then comes dLoss_dModelParams_init, then insert 1 for:
   //    const std::vector<ErrorFunctionType>& activeErrorFunctions,
   variable_list result;
-  result.push_back(at::Tensor()); // character
-  result.push_back(at::Tensor()); // activeParams
-  result.push_back(at::Tensor()); // sharedParams
-  result.push_back(at::Tensor()); // solverOptions
+  result.emplace_back(); // character
+  result.emplace_back(); // activeParams
+  result.emplace_back(); // sharedParams
+  result.emplace_back(); // solverOptions
   result.push_back(grad_modelParams);
-  result.push_back(at::Tensor()); // activeErrorFunctions
+  result.emplace_back(); // activeErrorFunctions
   result.push_back(grad_errorFunctionWeights);
   std::copy(grad_inputs.begin(), grad_inputs.end(), std::back_inserter(result));
 
