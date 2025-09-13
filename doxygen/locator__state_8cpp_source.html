@@ -133,7 +133,7 @@ $(document).ready(function(){initNavTree('locator__state_8cpp_source.html',''); 
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parentId</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>.<a class="code hl_variable" href="structmomentum_1_1Locator.html#a3622c131f78231a6b4c4245fa0cbe704">parent</a>;</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// transform each locator by its parents transformation and store it in the locator state</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    position[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locatorID</a>] = jointState[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parentId</a>].transform * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>.offset;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    position[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locatorID</a>] = jointState[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parentId</a>].transformation * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>.offset;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  }</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>}</div>
 </div>
@@ -154,7 +154,7 @@ $(document).ready(function(){initNavTree('locator__state_8cpp_source.html',''); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="locator__state_8cpp.html">locator_state.cpp</a></li>
-    <li class="footer">Generated on Fri Sep 12 2025 23:36:48 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sat Sep 13 2025 14:48:50 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
