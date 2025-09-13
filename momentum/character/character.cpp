@@ -262,7 +262,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
       }
       // calculate the new offset of the joint in the new parent space
       if (sIndex != kInvalidIndex) {
-        offset = referenceState.jointState[sIndex].transform.inverse() *
+        offset = referenceState.jointState[sIndex].transformation.inverse() *
             referenceState.jointState[aIndex].translation();
       } else {
         offset = referenceState.jointState[aIndex].translation();
@@ -356,8 +356,8 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
     for (auto&& c : *result.collision) {
       const auto oldParent = c.parent;
       c.parent = result.jointMap[c.parent];
-      c.transformation = targetBindState.jointState[c.parent].transform.inverse().toAffine3() *
-          sourceBindState.jointState[oldParent].transform.toAffine3() * c.transformation;
+      c.transformation = targetBindState.jointState[c.parent].transformation.inverse() *
+          sourceBindState.jointState[oldParent].transformation * c.transformation;
     }
   }
 
@@ -496,15 +496,15 @@ ParameterLimits CharacterT<T>::remapParameterLimits(
       data.parent = targetParent;
 
       const auto targetTransformationInverse =
-          targetBindState.jointState[targetParent].transform.inverse();
-      const auto sourceTransformation = sourceBindState.jointState[sourceParent].transform;
+          targetBindState.jointState[targetParent].transformation.inverse();
+      const auto sourceTransformation = sourceBindState.jointState[sourceParent].transformation;
       data.offset = targetTransformationInverse * sourceTransformation * data.offset;
 
       const auto sourceEllipsoidParent = data.ellipsoidParent;
       data.ellipsoidParent = jointMap[data.ellipsoidParent];
       const auto targetEllipsoidInverse =
-          targetBindState.jointState[data.ellipsoidParent].transform.inverse();
-      const auto sourceEllipsoid = sourceBindState.jointState[sourceEllipsoidParent].transform;
+          targetBindState.jointState[data.ellipsoidParent].transformation.inverse();
+      const auto sourceEllipsoid = sourceBindState.jointState[sourceEllipsoidParent].transformation;
       data.ellipsoid = targetEllipsoidInverse * sourceEllipsoid * data.ellipsoid;
       data.ellipsoidInv = data.ellipsoid.inverse();
     }
@@ -597,8 +597,8 @@ LocatorList CharacterT<T>::remapLocators(
     result.emplace_back(sourceLocator);
     auto& loc = result.back();
     loc.parent = jointMap[loc.parent];
-    loc.offset = targetBindState.jointState[loc.parent].transform.inverse() *
-        sourceBindState.jointState[sourceLocator.parent].transform * sourceLocator.offset;
+    loc.offset = targetBindState.jointState[loc.parent].transformation.inverse() *
+        sourceBindState.jointState[sourceLocator.parent].transformation * sourceLocator.offset;
   }
 
   return result;
@@ -634,7 +634,7 @@ void CharacterT<T>::initInverseBindPose() {
   }
   inverseBindPose.reserve(bindState.jointState.size());
   for (const auto& t : bindState.jointState) {
-    inverseBindPose.push_back(t.transform.inverse().toAffine3());
+    inverseBindPose.push_back(t.transformation.inverse());
   }
 }
 

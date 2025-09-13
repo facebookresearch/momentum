@@ -86,7 +86,7 @@ Eigen::Vector3<T> SkinnedLocatorErrorFunctionT<T>::calculateSkinnedLocatorPositi
     const auto& jointState = state.jointState[boneIndex];
 
     worldPos += weight *
-        (jointState.transform *
+        (jointState.transformation *
          (character_.inverseBindPose[boneIndex].template cast<T>() * locatorRestPos))
             .template cast<T>();
     weightSum += weight;
@@ -135,7 +135,7 @@ void SkinnedLocatorErrorFunctionT<T>::calculateDWorldPos(
     if (weight > 0) {
       // Use the full transformation matrix to be consistent with calculateSkinnedLocatorPosition
       d_worldPos += weight *
-          ((jointState.transform * character_.inverseBindPose[boneIndex].template cast<T>())
+          ((jointState.transformation * character_.inverseBindPose[boneIndex].template cast<T>())
                .linear() *
            d_restPos);
     }

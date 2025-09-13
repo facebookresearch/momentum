@@ -86,9 +86,8 @@ TYPED_TEST(JointStateTest, SetWithoutParent) {
   EXPECT_TRUE(state.transform.rotation.isApprox(state.localTransform.rotation));
   EXPECT_FLOAT_EQ(state.transform.scale, state.localTransform.scale);
 
-  // Check that global transform matches local transform (since no parent)
-  EXPECT_TRUE(
-      state.transform.toAffine3().matrix().isApprox(state.localTransform.toAffine3().matrix()));
+  // Check that transformation matrix is set correctly
+  EXPECT_TRUE(state.transformation.matrix().isApprox(state.transform.toAffine3().matrix()));
 
   // Check that translation axes are identity (no parent)
   Matrix3<TypeParam> identity = Matrix3<TypeParam>::Identity();
@@ -144,12 +143,12 @@ TYPED_TEST(JointStateTest, SetWithParent) {
       parentState.transform.scale * childState.localTransform.scale,
       1e-5);
 
-  // Check that global transform matches expected calculation
-  EXPECT_TRUE(childState.transform.toAffine3().matrix().isApprox(
-      childState.transform.toAffine3().matrix()));
+  // Check that transformation matrix is set correctly
+  EXPECT_TRUE(
+      childState.transformation.matrix().isApprox(childState.transform.toAffine3().matrix()));
 
   // Check that translation axes are set from parent
-  EXPECT_TRUE(childState.translationAxis.isApprox(parentState.transform.toLinear()));
+  EXPECT_TRUE(childState.translationAxis.isApprox(parentState.transformation.linear()));
 }
 
 // Test set method without computing derivatives
