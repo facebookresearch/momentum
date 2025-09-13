@@ -23,13 +23,12 @@ class CollisionGeometryStateTest : public ::testing::Test {
 
     // Initialize joint states with identity transforms
     for (auto& jointState : skeletonState.jointState) {
-      jointState.localRotation() = Quaternionf::Identity();
+      jointState.localRotation().setIdentity();
       jointState.localTranslation().setZero();
       jointState.localScale() = 1.0f;
-      jointState.transform.rotation = Quaternionf::Identity();
+      jointState.transform.rotation.setIdentity();
       jointState.transform.translation.setZero();
       jointState.transform.scale = 1.0f;
-      jointState.transformation = Eigen::Affine3f::Identity();
     }
 
     // Create a simple collision geometry
@@ -90,13 +89,13 @@ TEST_F(CollisionGeometryStateTest, Update) {
 // Test the update method with transformed joints
 TEST_F(CollisionGeometryStateTest, UpdateWithTransformedJoints) {
   // Apply transformations to the joints
-  skeletonState.jointState[0].transformation.translate(Vector3f(1.0f, 2.0f, 3.0f));
-  skeletonState.jointState[0].transformation.rotate(
-      Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY())); // 90 degrees around Y
-  skeletonState.jointState[0].scale() = 2.0f;
+  skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
+  skeletonState.jointState[0].transform.rotation =
+      Quaternionf(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY())); // 90 degrees around Y
+  skeletonState.jointState[0].transform.scale = 2.0f;
 
-  skeletonState.jointState[1].transformation.translate(Vector3f(0.0f, 1.0f, 0.0f));
-  skeletonState.jointState[1].scale() = 1.5f;
+  skeletonState.jointState[1].transform.translation += Vector3f(0.0f, 1.0f, 0.0f);
+  skeletonState.jointState[1].transform.scale = 1.5f;
 
   // Create a collision geometry state
   CollisionGeometryState collisionState;
@@ -107,20 +106,22 @@ TEST_F(CollisionGeometryStateTest, UpdateWithTransformedJoints) {
   // Check the values for the first capsule (attached to joint 0)
   // Origin should be at the joint's position
   EXPECT_TRUE(collisionState.origin[0].isApprox(Vector3f(1.0f, 2.0f, 3.0f)));
-  // Direction should be rotated 90 degrees around Y (1,0,0) -> (0,0,-1)
-  EXPECT_TRUE(collisionState.direction[0].isApprox(Vector3f(0.0f, 0.0f, -1.0f)));
+  // Direction should be rotated 90 degrees around Y and scaled by length*scale: (1,0,0) -> (0,0,-2)
+  // (length=1.0, scale=2.0)
+  EXPECT_TRUE(collisionState.direction[0].isApprox(Vector3f(0.0f, 0.0f, -2.0f)));
   // Radius should be scaled by the joint's scale
   EXPECT_TRUE(collisionState.radius[0].isApprox(Vector2f(1.0f, 0.6f))); // 0.5*2, 0.3*2
   EXPECT_FLOAT_EQ(collisionState.delta[0], -0.4f); // 0.6 - 1.0 = -0.4
 
   // Check the values for the second capsule (attached to joint 1)
   // Origin should be at joint 1's position plus the capsule's offset
-  Vector3f expectedOrigin = skeletonState.jointState[1].transformation.translation() +
-      skeletonState.jointState[1].transformation.linear() *
+  Vector3f expectedOrigin = skeletonState.jointState[1].transform.translation +
+      skeletonState.jointState[1].transform.toLinear() *
           collisionGeometry[1].transformation.translation();
   EXPECT_TRUE(collisionState.origin[1].isApprox(expectedOrigin));
-  // Direction should be scaled by the joint's scale and the capsule's length
-  EXPECT_NEAR(collisionState.direction[1].norm(), 1.5f, 1e-5f);
+  // Direction should be scaled by the joint's scale and the capsule's length: length=1.5, scale=1.5
+  // -> norm = 2.25
+  EXPECT_NEAR(collisionState.direction[1].norm(), 2.25f, 1e-5f);
   // Radius should be scaled by the joint's scale
   EXPECT_TRUE(collisionState.radius[1].isApprox(Vector2f(0.6f, 0.3f))); // 0.4*1.5, 0.2*1.5
   EXPECT_FLOAT_EQ(collisionState.delta[1], -0.3f); // 0.3 - 0.6 = -0.3
@@ -325,8 +326,6 @@ TEST_F(CollisionGeometryStateTest, DoublePrecision) {
 
   // Convert the skeleton state to double precision
   for (size_t i = 0; i < skeletonState.jointState.size(); ++i) {
-    skeletonStated.jointState[i].transformation =
-        skeletonState.jointState[i].transformation.cast<double>();
     skeletonStated.jointState[i].localRotation() =
         skeletonState.jointState[i].localRotation().cast<double>();
     skeletonStated.jointState[i].localTranslation() =

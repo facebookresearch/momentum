@@ -59,8 +59,8 @@ TEST(Simplify, SimplifyParameterTransform) {
   ASSERT_EQ(skelState_new.jointState.size(), skelState_orig.jointState.size());
   for (size_t i = 0; i < skelState_orig.jointState.size(); ++i) {
     ASSERT_LE(
-        (skelState_new.jointState[i].transformation.matrix() -
-         skelState_orig.jointState[i].transformation.matrix())
+        (skelState_new.jointState[i].transform.toAffine3().matrix() -
+         skelState_orig.jointState[i].transform.toAffine3().matrix())
             .norm(),
         1e-5f);
   }
@@ -109,9 +109,9 @@ TEST(Simplify, SimplifySkeleton) {
     ASSERT_NE(character_new.locators.end(), l_new_itr);
 
     const Eigen::Vector3f p_orig =
-        skelState_orig.jointState[l_orig.parent].transformation * l_orig.offset;
+        skelState_orig.jointState[l_orig.parent].transform * l_orig.offset;
     const Eigen::Vector3f p_new =
-        skelState_new.jointState[l_new_itr->parent].transformation * l_new_itr->offset;
+        skelState_new.jointState[l_new_itr->parent].transform * l_new_itr->offset;
     ASSERT_LE((p_new - p_orig).norm(), 1e-4f);
   }
 

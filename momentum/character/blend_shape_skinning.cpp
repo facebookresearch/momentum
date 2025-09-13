@@ -88,8 +88,7 @@ void skinWithBlendShapes(
   // first create a list of transformations from bindpose to final output pose
   std::vector<Eigen::Matrix4<T>> transformations(state.jointState.size());
   for (size_t i = 0; i < state.jointState.size(); i++) {
-    transformations[i] =
-        (state.jointState[i].transformation * inverseBindPose[i].cast<T>()).matrix();
+    transformations[i] = (state.jointState[i].transform * inverseBindPose[i].cast<T>()).matrix();
   }
 
   MT_CHECK(

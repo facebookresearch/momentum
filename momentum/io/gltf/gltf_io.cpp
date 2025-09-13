@@ -1011,7 +1011,6 @@ loadCharacterWithSkeletonStatesCommon(
         parentTransform = s.jointState[parentJoint].transform;
       }
       s.jointState[iJoint].transform = parentTransform * s.jointState[iJoint].localTransform;
-      s.jointState[iJoint].transformation = s.jointState[iJoint].transform.toAffine3();
     }
   }
 
