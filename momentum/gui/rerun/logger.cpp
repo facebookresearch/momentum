@@ -350,7 +350,7 @@ void logCollisionGeometry(
   for (const auto& cg : collisionGeometry) {
     const auto& js = skeletonState.jointState.at(cg.parent);
 
-    const Affine3f tf = js.transform.toAffine3() * cg.transformation;
+    const Affine3f tf = js.transformation * cg.transformation;
     // Rerun capsule's axis is along the Z-axis while Momentum's is along the X-axis, so we need to
     // rotate 90 degrees around the Y-axis to align the axes.
     const Quaternionf q =

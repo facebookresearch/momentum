@@ -23,12 +23,13 @@ class LocatorStateTest : public ::testing::Test {
 
     // Initialize joint states with identity transforms
     for (auto& jointState : skeletonState.jointState) {
-      jointState.localRotation().setIdentity();
+      jointState.localRotation() = Quaternionf::Identity();
       jointState.localTranslation().setZero();
       jointState.localScale() = 1.0f;
-      jointState.rotation().setIdentity();
-      jointState.translation().setZero();
-      jointState.scale() = 1.0f;
+      jointState.transform.rotation = Quaternionf::Identity();
+      jointState.transform.translation.setZero();
+      jointState.transform.scale = 1.0f;
+      jointState.transformation = Eigen::Affine3f::Identity();
     }
   }
 
@@ -80,6 +81,12 @@ TEST_F(LocatorStateTest, UpdateTransformed) {
   skeletonState.jointState[0].transform.translation = Vector3f(2.0f, 3.0f, 4.0f);
   skeletonState.jointState[0].transform.rotation =
       Quaternionf(0.7071f, 0.0f, 0.7071f, 0.0f); // 90 degrees around Y
+
+  // Set the transformation matrix directly
+  Eigen::Affine3f transformation = Eigen::Affine3f::Identity();
+  transformation.translate(Vector3f(2.0f, 3.0f, 4.0f));
+  transformation.rotate(Quaternionf(0.7071f, 0.0f, 0.7071f, 0.0f));
+  skeletonState.jointState[0].transformation = transformation;
 
   // Create a locator state and update it
   LocatorState locatorState;

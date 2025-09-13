@@ -31,7 +31,7 @@ double ProjectionErrorFunctionT<T>::getError(
   for (size_t iCons = 0; iCons < nCons; ++iCons) {
     const auto& cons = constraints_[iCons];
     const auto& js = jointState[cons.parent];
-    const Eigen::Vector3<T> p_world_cm = js.transform * cons.offset;
+    const Eigen::Vector3<T> p_world_cm = js.transformation * cons.offset;
     const Eigen::Vector3<T> p_projected_cm =
         constraints_[iCons].projection * p_world_cm.homogeneous();
 
@@ -63,7 +63,7 @@ double ProjectionErrorFunctionT<T>::getGradient(
     const auto& cons = constraints_[iCons];
 
     const auto& jsCons = skeletonState.jointState[cons.parent];
-    const Eigen::Vector3<T> p_world_cm = jsCons.transform * cons.offset;
+    const Eigen::Vector3<T> p_world_cm = jsCons.transformation * cons.offset;
     const Eigen::Vector3<T> p_projected_cm = cons.projection * p_world_cm.homogeneous();
 
     // Behind camera:
@@ -146,7 +146,7 @@ double ProjectionErrorFunctionT<T>::getJacobian(
     const auto& cons = constraints_[iCons];
 
     const auto& jsCons = skeletonState.jointState[cons.parent];
-    const Eigen::Vector3<T> p_world_cm = jsCons.transform * cons.offset;
+    const Eigen::Vector3<T> p_world_cm = jsCons.transformation * cons.offset;
     const Eigen::Vector3<T> p_projected_cm = cons.projection * p_world_cm.homogeneous();
 
     // Behind camera:

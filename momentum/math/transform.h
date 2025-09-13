@@ -159,9 +159,7 @@ struct TransformT {
   }
 
   /// Applies full transform to a point
-  [[nodiscard]] Vector3<T> transformPoint(const Vector3<T>& pt) const {
-    return translation + rotation * (scale * pt).eval();
-  }
+  [[nodiscard]] Vector3<T> transformPoint(const Vector3<T>& pt) const;
 
   /// Applies only rotation to a vector
   [[nodiscard]] Vector3<T> rotate(const Vector3<T>& vec) const;

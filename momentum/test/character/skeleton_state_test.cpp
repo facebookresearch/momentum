@@ -525,8 +525,7 @@ TYPED_TEST(SkeletonStateTest, SkeletonStateToJointParameters) {
 
   for (size_t i = 0; i < state.jointState.size(); ++i) {
     EXPECT_LE(
-        (state.jointState[i].transform.toAffine3().matrix() -
-         state2.jointState[i].transform.toAffine3().matrix())
+        (state.jointState[i].transformation.matrix() - state2.jointState[i].transformation.matrix())
             .norm(),
         1e-5);
   }

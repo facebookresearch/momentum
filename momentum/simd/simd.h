@@ -8,7 +8,6 @@
 #pragma once
 
 #include <momentum/common/exception.h>
-#include <momentum/math/transform.h>
 
 #include <drjit/array.h>
 #include <drjit/array_router.h>
@@ -149,15 +148,6 @@ Vector3P<S> operator-(const Vector3P<S>& v1, const Eigen::MatrixBase<Derived>& v
   return {v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z()};
 }
 
-/// Calculates multiplication of quaternion and each 3x1 vector in packet
-///
-/// @param[in] q A quaternion.
-/// @param[in] vec A 3-vector of packets.
-template <typename S>
-Vector3P<S> operator*(const Eigen::Quaternion<S>& q, const Vector3P<S>& vec) {
-  return q * vec;
-}
-
 /// Calculates multiplication of 3x3 matrix and each 3x1 vector in packet
 ///
 /// @tparam Derived A derived class of Eigen::MatrixBase, which should be compatible with
@@ -177,15 +167,6 @@ Vector3P<S> operator*(const Eigen::MatrixBase<Derived>& xf, const Vector3P<S>& v
 template <typename S>
 Vector3P<S> operator*(const Eigen::Transform<S, 3, Eigen::Affine>& xf, const Vector3P<S>& vec) {
   return momentum::operator+(momentum::operator*(xf.linear(), vec), xf.translation());
-}
-
-/// Calculates transformation on each 3x1 vector in packet using momentum::Transform
-///
-/// @param[in] xf A momentum transform.
-/// @param[in] vec A 3-vector of packets.
-template <typename S>
-Vector3P<S> operator*(const TransformT<S>& xf, const Vector3P<S>& vec) {
-  return momentum::operator+(momentum::operator*(xf.toLinear(), vec), xf.translation);
 }
 
 /// Calculates cross product of Eigen::Vector3f and Vector3P

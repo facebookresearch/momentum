@@ -227,7 +227,7 @@ config_dev = { cmd = """
     """, env = { FBXSDK_PATH = ".deps/fbxsdk", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, depends-on = [
     "install_deps",
 ] }
-build_py = { cmd = "pip install . -v", env = { FBXSDK_PATH = ".deps/fbxsdk", CMAKE_ARGS = """
+build_py = { cmd = "pip install . -vv", env = { FBXSDK_PATH = ".deps/fbxsdk", CMAKE_ARGS = """
     -DMOMENTUM_BUILD_WITH_FBXSDK=ON \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
@@ -256,7 +256,7 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 [target.osx.dependencies]
 
 [target.osx.tasks]
-build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
+build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
@@ -284,7 +284,7 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 [target.osx-arm64.dependencies]
 
 [target.osx-arm64.tasks]
-build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
+build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
@@ -372,7 +372,7 @@ install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --target insta
     "build",
 ] }
 tracy = { cmd = "tracy-profiler.exe" }
-build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
+build_py = { cmd = "pip install . -vv", env = { CMAKE_ARGS = """
     -DMOMENTUM_BUILD_WITH_FBXSDK=$MOMENTUM_BUILD_WITH_FBXSDK \
     -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \

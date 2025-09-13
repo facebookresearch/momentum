@@ -81,7 +81,7 @@ TYPED_TEST(Momentum_ForwardKinematicsTest, Kinematics) {
           pi<T>(), -pi<T>();
       state.set(castedCharactorParameterTransform.apply(parameters), skeleton);
 
-      const Vector3<T> pos = state.jointState[2].transform * Vector3<T>(1, 1, 1);
+      const Vector3<T> pos = state.jointState[2].transformation * Vector3<T>(1, 1, 1);
       EXPECT_LE(
           (pos - Vector3<T>(-1.14354682, 3.14354706, -0.0717732906)).norm(), Eps<T>(1e-6f, 5e-7));
     }
@@ -144,21 +144,19 @@ TYPED_TEST(Momentum_ForwardKinematicsTest, RelativeTransform) {
     // A-to-world:
     EXPECT_TRUE(transformAtoB<T>(iJoint, kInvalidIndex, skeleton, state)
                     .toAffine3()
-                    .isApprox(state.jointState[iJoint].transform.toAffine3(), Eps<T>(1e-8f, 1e-8)));
+                    .isApprox(state.jointState[iJoint].transformation, Eps<T>(1e-8f, 1e-8)));
 
     // world-to-B:
     EXPECT_TRUE(
         transformAtoB<T>(kInvalidIndex, iJoint, skeleton, state)
             .toAffine3()
-            .isApprox(
-                state.jointState[iJoint].transform.inverse().toAffine3(), Eps<T>(1e-8f, 1e-8)));
+            .isApprox(state.jointState[iJoint].transformation.inverse(), Eps<T>(1e-8f, 1e-8)));
   }
 
   for (size_t jointA = 0; jointA < skeleton.joints.size(); ++jointA) {
     for (size_t jointB = 0; jointB < skeleton.joints.size(); ++jointB) {
-      const Affine3<T> AtoB =
-          (state.jointState[jointB].transform.inverse() * state.jointState[jointA].transform)
-              .toAffine3();
+      const Affine3<T> AtoB = state.jointState[jointB].transformation.inverse() *
+          state.jointState[jointA].transformation;
       const Affine3<T> AtoB2 = transformAtoB<T>(jointA, jointB, skeleton, state).toAffine3();
       EXPECT_TRUE(AtoB.isApprox(AtoB2, Eps<T>(1e-7f, 1e-8)));
     }

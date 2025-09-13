@@ -38,7 +38,8 @@ void PositionConstraintStateT<T>::update(
     const size_t& parentId = constraint.parent;
 
     // transform each locator by its parents transformation and store it in the locator state
-    position[constraintID] = jointState[parentId].transform * constraint.offset.template cast<T>();
+    position[constraintID] =
+        jointState[parentId].transformation * constraint.offset.template cast<T>();
   }
 }
 
@@ -381,7 +382,7 @@ JetType FullyDifferentiablePositionErrorFunctionT<T>::calculatePositionGradient_
   JetType result;
 
   const Eigen::Vector3<JetType> pos =
-      state.jointState[constrParent].transform.toAffine3().template cast<JetType>() * constr_offset;
+      state.jointState[constrParent].transformation.template cast<T>() * constr_offset;
 
   // calculate the difference between target and position and error
   const Eigen::Vector3<JetType> diff = pos - constr_target;
