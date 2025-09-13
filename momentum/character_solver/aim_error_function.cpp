@@ -24,7 +24,7 @@ void AimDistErrorFunctionT<T>::evalFunction(
   MT_PROFILE_FUNCTION();
 
   const AimDataT<T>& constr = this->constraints_[constrIndex];
-  const Vector3<T> point = state.transform * constr.localPoint;
+  const Vector3<T> point = state.transformation * constr.localPoint;
   const Vector3<T> srcDir = state.rotation() * constr.localDir;
   const Vector3<T> tgtVec = constr.globalTarget - point;
   const T projLength = srcDir.dot(tgtVec);
@@ -55,7 +55,7 @@ void AimDirErrorFunctionT<T>::evalFunction(
   MT_PROFILE_FUNCTION();
 
   const AimDataT<T>& constr = this->constraints_[constrIndex];
-  const Vector3<T> point = state.transform * constr.localPoint;
+  const Vector3<T> point = state.transformation * constr.localPoint;
   const Vector3<T> srcDir = state.rotation() * constr.localDir;
   const Vector3<T> tgtVec = constr.globalTarget - point;
   const T tgtNorm = tgtVec.norm();

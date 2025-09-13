@@ -196,12 +196,12 @@ void testGradientAndJacobian(
 
 } // namespace
 
-static std::vector<ModelParametersd> zeroModelParameters(const Character& c, size_t nFrames) {
+std::vector<ModelParametersd> zeroModelParameters(const Character& c, size_t nFrames) {
   return std::vector<ModelParametersd>(
       nFrames, Eigen::VectorXd::Zero(c.parameterTransform.numAllModelParameters()));
 }
 
-static std::vector<ModelParametersd> randomModelParameters(const Character& c, size_t nFrames) {
+std::vector<ModelParametersd> randomModelParameters(const Character& c, size_t nFrames) {
   std::vector<ModelParametersd> result;
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     result.push_back(VectorXd::Random(c.parameterTransform.numAllModelParameters()) * 0.25f);

@@ -34,12 +34,13 @@ struct BlendShapeSkinningTest : testing::Test {
     // Set up skeleton state
     skeletonState.jointState.resize(character.skeleton.joints.size());
     for (auto& jointState : skeletonState.jointState) {
-      jointState.localRotation().setIdentity();
+      jointState.localRotation() = Eigen::Quaternion<T>::Identity();
       jointState.localTranslation().setZero();
       jointState.localScale() = T(1);
-      jointState.rotation().setIdentity();
-      jointState.translation().setZero();
-      jointState.scale() = T(1);
+      jointState.transform.rotation = Eigen::Quaternion<T>::Identity();
+      jointState.transform.translation.setZero();
+      jointState.transform.scale = T(1);
+      jointState.transformation = Affine3<T>::Identity();
     }
 
     // Set up blend weights
@@ -239,11 +240,12 @@ TYPED_TEST(BlendShapeSkinningTest, SkinWithBlendShapesAndJointTransformations) {
 
   // Apply joint transformations
   // Rotate first joint around Y axis by 90 degrees
-  this->skeletonState.jointState[0].transform.rotation =
-      Quaternion<T>(Eigen::AngleAxis<T>(pi<T>() / 2, Eigen::Vector3<T>::UnitY()));
+  this->skeletonState.jointState[0].transformation =
+      Affine3<T>::Identity() * Eigen::AngleAxis<T>(pi<T>() / 2, Eigen::Vector3<T>::UnitY());
 
   // Translate second joint
-  this->skeletonState.jointState[1].transform.translation = Eigen::Vector3<T>(1, 2, 3);
+  this->skeletonState.jointState[1].transformation = Affine3<T>::Identity();
+  this->skeletonState.jointState[1].transformation.translate(Eigen::Vector3<T>(1, 2, 3));
 
   // Store original vertices for comparison
   MeshT<T> originalMesh;
@@ -278,8 +280,8 @@ TYPED_TEST(BlendShapeSkinningTest, SkinWithZeroBlendWeights) {
 
   // Apply joint transformations
   // Rotate first joint around Y axis by 90 degrees
-  this->skeletonState.jointState[0].transform.rotation =
-      Quaternion<T>(Eigen::AngleAxis<T>(pi<T>() / 2, Eigen::Vector3<T>::UnitY()));
+  this->skeletonState.jointState[0].transformation =
+      Affine3<T>::Identity() * Eigen::AngleAxis<T>(pi<T>() / 2, Eigen::Vector3<T>::UnitY());
 
   // Store original vertices for comparison
   MeshT<T> originalMesh;
@@ -344,8 +346,8 @@ TYPED_TEST(BlendShapeSkinningTest, SkinWithNoBlendShapes) {
   this->blendWeights.v = Eigen::VectorX<T>::Ones(this->blendWeights.v.size()) * T(0.5);
 
   // Apply joint transformations
-  this->skeletonState.jointState[0].transform.rotation =
-      Quaternion<T>(Eigen::AngleAxis<T>(pi<T>() / 2, Eigen::Vector3<T>::UnitY()));
+  this->skeletonState.jointState[0].transformation =
+      Affine3<T>::Identity() * Eigen::AngleAxis<T>(pi<T>() / 2, Eigen::Vector3<T>::UnitY());
 
   // Store original vertices for comparison
   MeshT<T> originalMesh;

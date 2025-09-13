@@ -28,6 +28,11 @@ namespace momentum {
 /// Each joint has 7 parameters: 3 translation, 3 rotation, and 1 scale.
 template <typename T>
 struct JointStateT {
+  using Affine3 = Eigen::Transform<T, 3, Eigen::Affine>;
+
+  /// Complete transformation matrix from local to global space (legacy, to be removed)
+  Affine3 transformation; // TODO: Remove
+
   /// Local transformation relative to parent joint
   ///
   /// Defined by the joint parameters (translation, rotation, scale)
