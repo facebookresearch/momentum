@@ -37,7 +37,7 @@ SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
               parentBone,
               w,
               T(w) *
-                  (skelState.jointState[parentBone].transformation *
+                  (skelState.jointState[parentBone].transform *
                    (character.inverseBindPose[parentBone].template cast<T>() *
                     restMesh.vertices[vertexIndex]))};
         }
@@ -66,7 +66,7 @@ SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
           parentBone,
           w,
           T(w) *
-              (skelState.jointState[parentBone].transformation *
+              (skelState.jointState[parentBone].transform *
                (character.inverseBindPose[parentBone].template cast<T>() *
                 locatorPosition.template cast<T>()))};
     }

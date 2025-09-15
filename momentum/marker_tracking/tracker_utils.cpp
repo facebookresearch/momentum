@@ -204,7 +204,7 @@ momentum::Character locatorsToSkinnedLocators(
     const auto& locator = sourceCharacter.locators[i];
     const auto& offset = locator.offset;
     const auto& parent = locator.parent;
-    const Eigen::Vector3f p_world = restState.jointState[parent].transformation * offset;
+    const Eigen::Vector3f p_world = restState.jointState[parent].transform * offset;
 
     // Find the closest point on the mesh to the locator.
     const auto closestPointResult = closestPointOnMeshMatchingParent(
@@ -374,7 +374,7 @@ LocatorList extractLocatorsFromCharacter(
     }
 
     // get global locator position
-    const Vector3f pos = state.jointState[jointId].transformation * locators[i].offset;
+    const Vector3f pos = state.jointState[jointId].transform * locators[i].offset;
 
     // change attachment to original joint
     result[i].parent = skeleton.joints[jointId].parent;
@@ -389,7 +389,7 @@ LocatorList extractLocatorsFromCharacter(
     }
 
     // calculate new offset
-    const Vector3f offset = state.jointState[result[i].parent].transformation.inverse() * pos;
+    const Vector3f offset = state.jointState[result[i].parent].transform.inverse() * pos;
 
     // change offset to current state
     result[i].offset = offset;
@@ -519,7 +519,7 @@ std::vector<std::vector<Marker>> extractMarkersFromMotion(
 
     std::vector<Marker>& markers = result.at(iFrame);
     for (const auto& loc : character.locators) {
-      const Vector3d pos = (states.at(loc.parent).transformation * loc.offset).cast<double>();
+      const Vector3d pos = (states.at(loc.parent).transform * loc.offset).cast<double>();
       markers.emplace_back(Marker{loc.name, pos, false});
     }
   }
