@@ -95,12 +95,14 @@ tensor_ik_test_sources = [
 geometry_public_headers = [
     "geometry/momentum_geometry.h",
     "geometry/momentum_io.h",
+    "geometry/gltf_builder_pybind.h",
 ]
 
 geometry_sources = [
     "geometry/geometry_pybind.cpp",
     "geometry/momentum_geometry.cpp",
     "geometry/momentum_io.cpp",
+    "geometry/gltf_builder_pybind.cpp",
 ]
 
 solver_public_headers = [
