@@ -40,36 +40,9 @@ momentum::MotionParameters transpose(
   return {parameters, poses.transpose()};
 }
 
-void saveGLTFCharacterToFile(
-    const std::string& path,
-    const momentum::Character& character,
-    const float fps,
-    std::optional<const momentum::MotionParameters> motion,
-    std::optional<const momentum::IdentityParameters> offsets,
-    std::optional<const std::vector<std::vector<momentum::Marker>>> markers) {
-  if (motion.has_value()) {
-    const auto& [parameters, poses] = motion.value();
-    MT_THROW_IF(
-        poses.cols() != parameters.size(),
-        "Expected cols of motion parameters to be {} but got {}",
-        parameters.size(),
-        poses.cols());
-  }
-  momentum::saveCharacter(
-      path,
-      character,
-      fps,
-      transpose(motion.value_or(momentum::MotionParameters{})),
-      offsets.value_or(momentum::IdentityParameters{}),
-      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
-}
-
-void saveGLTFCharacterToFileFromSkelStates(
-    const std::string& path,
-    const momentum::Character& character,
-    const float fps,
+std::vector<momentum::SkeletonState> arrayToSkeletonStates(
     const pybind11::array_t<float>& skel_states,
-    std::optional<const std::vector<std::vector<momentum::Marker>>> markers) {
+    const momentum::Character& character) {
   MT_THROW_IF(
       skel_states.ndim() != 3,
       "Expected skel_states to have size n_frames x n_joints x 8, but got {}",
@@ -80,14 +53,8 @@ void saveGLTFCharacterToFileFromSkelStates(
   const int numElements = skel_states.shape(2);
 
   MT_THROW_IF(
-      markers.has_value() && markers->size() != numFrames,
-      "The number of frames of the skeleton states array {} does not coincide with the number of frames of the markers {}",
-      skel_states.size(),
-      markers->size());
-
-  MT_THROW_IF(
       numElements != 8,
-      "Expecting size 8 (3 translation + 4 rotation + sale) for last dimension of the skel_states, but got {}",
+      "Expecting size 8 (3 translation + 4 rotation + scale) for last dimension of the skel_states, but got {}",
       numElements);
   MT_THROW_IF(
       numJoints != character.skeleton.joints.size(),
@@ -133,6 +100,54 @@ void saveGLTFCharacterToFileFromSkelStates(
           parentTransform.inverse() * transform;
     }
   }
+  return skeletonStates;
+}
+
+void saveGLTFCharacterToFile(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    const std::optional<const momentum::MotionParameters>& motion,
+    const std::optional<const momentum::IdentityParameters>& offsets,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
+        markers) {
+  if (motion.has_value()) {
+    const auto& [parameters, poses] = motion.value();
+    MT_THROW_IF(
+        poses.cols() != parameters.size(),
+        "Expected motion parameters to be n_frames x {}, but got {} x {}",
+        parameters.size(),
+        poses.rows(),
+        poses.cols());
+  }
+  momentum::saveCharacter(
+      path,
+      character,
+      fps,
+      transpose(motion.value_or(momentum::MotionParameters{})),
+      offsets.value_or(momentum::IdentityParameters{}),
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
+}
+
+void saveGLTFCharacterToFileFromSkelStates(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    const pybind11::array_t<float>& skel_states,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
+        markers) {
+  const auto numFrames = skel_states.shape(0);
+
+  MT_THROW_IF(
+      markers.has_value() && markers->size() != numFrames,
+      "The number of frames of the skeleton states array {} does not coincide with the number of frames of the markers {}",
+      skel_states.size(),
+      markers->size());
+
+  // Use the shared utility function for conversion
+  std::vector<momentum::SkeletonState> skeletonStates =
+      arrayToSkeletonStates(skel_states, character);
+
   momentum::saveCharacter(
       path,
       character,

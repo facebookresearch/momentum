@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "pymomentum/geometry/gltf_builder_pybind.h"
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
 #include "pymomentum/tensor_momentum/tensor_blend_shape.h"
@@ -832,7 +833,7 @@ and doesn't require that the Character have a valid parameter transform.  Unlike
 support the proprietary momentum motion format for storing model parameters in GLB.
 
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
-:return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
+:return: a tuple [Character, skel_states, timestamps], where skel_states is the tensor [n_frames x n_joints x 8] and timestamps is [n_frames]
           )",
           py::arg("gltf_filename"))
 
@@ -3132,4 +3133,7 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.
       R"(Create a pose prior that acts on the simple 3-joint test character.
 
 :return: A simple pose prior.)");
+
+  // Register GltfBuilder bindings
+  registerGltfBuilderBindings(m);
 }
