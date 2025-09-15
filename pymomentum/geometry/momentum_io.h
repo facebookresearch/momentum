@@ -32,20 +32,26 @@ using RowMatrixf =
 momentum::Character loadGLTFCharacterFromFile(const std::string& path);
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes);
 
+/// Utility function to transpose motion parameters for C++ internal format
+momentum::MotionParameters transpose(
+    const momentum::MotionParameters& motionParameters);
+
 void saveGLTFCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
-    std::optional<const momentum::MotionParameters> motion,
-    std::optional<const momentum::IdentityParameters> offsets,
-    std::optional<const std::vector<std::vector<momentum::Marker>>> markers);
+    const std::optional<const momentum::MotionParameters>& motion,
+    const std::optional<const momentum::IdentityParameters>& offsets,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
+        markers);
 
 void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
     const pybind11::array_t<float>& skel_states,
-    std::optional<const std::vector<std::vector<momentum::Marker>>> markers);
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
+        markers);
 
 void saveFBXCharacterToFile(
     const std::string& path,
@@ -86,5 +92,12 @@ loadMotion(const std::string& gltfFilename);
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     const std::string& path,
     const bool mainSubjectOnly = true);
+
+/// Utility function to convert pybind11::array_t<float> to SkeletonState vector
+/// This is shared between saveGLTFCharacterToFileFromSkelStates and
+/// GltfBuilder::addSkeletonStates
+std::vector<momentum::SkeletonState> arrayToSkeletonStates(
+    const pybind11::array_t<float>& skel_states,
+    const momentum::Character& character);
 
 } // namespace pymomentum
