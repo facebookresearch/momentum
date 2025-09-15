@@ -235,7 +235,7 @@ PYBIND11_MODULE(geometry, m) {
   // - load_model_definition_from_bytes(model_bytes)
   //
   // [static methods for io]
-  // - from_gltf_bytes(gltf_btyes)
+  // - load_gltf_from_bytes(gltf_btyes)
   // - to_gltf(character, fps, motion, offsets)
   // - load_fbx(fbxFilename, modelFilename, locatorsFilename)
   // - load_fbx_from_bytes(fbx_bytes, permissive)
@@ -668,7 +668,7 @@ Note that not all parameters will have limits; for those parameters (such as glo
 
 Note: In practice, most limits are enforced on the model parameters, but momentum's joint limit functionality permits applying limits to joint parameters also as a conveninence.  )")
       .def_static(
-          "from_gltf_bytes",
+          "load_gltf_from_bytes",
           &loadGLTFCharacterFromBytes,
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
