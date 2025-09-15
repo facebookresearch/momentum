@@ -678,10 +678,10 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
       )",
           py::arg("gltf_bytes"))
       .def_static(
-          "from_gltf_bytes_with_motion",
+          "load_gltf_with_motion_from_bytes",
           &loadGLTFCharacterWithMotionFromBytes,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load a character from a gltf byte array.
+          R"(Load a character and motion from a gltf byte array.
 
   :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
   :return: a valid :class:`Character`.
