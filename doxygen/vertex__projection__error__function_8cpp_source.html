@@ -212,7 +212,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keyword">const</span> <span class="keyword">auto</span> parentBone = skinWeights.index(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constr</a>.vertexIndex, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>);</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">w</a> &gt; 0) {</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">d_worldPos</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">w</a> *</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>          (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>.jointState[parentBone].transformation.linear() *</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>          (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>.jointState[parentBone].transform.toLinear() *</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>           (character_.inverseBindPose[parentBone].linear().template <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">cast&lt;T&gt;</a>() * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">d_restPos</a>));</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    }</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  }</div>
@@ -665,7 +665,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="vertex__projection__error__function_8cpp.html">vertex_projection_error_function.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 15 2025 22:30:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Sep 16 2025 13:24:27 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
