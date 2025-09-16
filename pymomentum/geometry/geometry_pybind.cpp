@@ -2516,7 +2516,7 @@ The resulting tensors are as follows:
       .def_property_readonly(
           "transformation",
           [](const mm::TaperedCapsule& capsule) -> Eigen::Matrix4f {
-            return capsule.transformation.matrix();
+            return capsule.transformation.toMatrix();
           },
           "Transformation defining the orientation and starting point relative to the parent coordinate system")
       .def_property_readonly(

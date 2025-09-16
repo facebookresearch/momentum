@@ -714,9 +714,8 @@ void addCollisionsToModel(
       // add values for the tapered capsule
       node.name = character.skeleton.joints.at(col.parent).name + "_col";
 
-      const Quaternionf rot(col.transformation.linear());
-      node.rotation = fromMomentumQuaternionf(rot);
-      const auto translation = fromMomentumVec3f(col.transformation.translation());
+      node.rotation = fromMomentumQuaternionf(col.transformation.rotation);
+      const auto translation = fromMomentumVec3f(col.transformation.translation);
       node.translation = {translation[0], translation[1], translation[2]};
 
       // add extra properties
