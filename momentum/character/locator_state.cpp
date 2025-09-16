@@ -32,7 +32,7 @@ void LocatorState::update(
     const size_t& parentId = locator.parent;
 
     // transform each locator by its parents transformation and store it in the locator state
-    position[locatorID] = jointState[parentId].transformation * locator.offset;
+    position[locatorID] = jointState[parentId].transform * locator.offset;
   }
 }
 

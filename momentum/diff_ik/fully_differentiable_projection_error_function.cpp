@@ -36,7 +36,8 @@ template <typename JetType>
   auto result = JetType();
 
   const auto& jsCons = skelState.jointState[parentJointIndex_cons];
-  const Eigen::Vector3<JetType> p_world_cm = (jsCons.transformation * offset_cons).eval();
+  const Eigen::Vector3<JetType> p_world_cm =
+      (jsCons.transform.toAffine3().template cast<T>() * offset_cons).eval();
   const Eigen::Vector3<JetType> p_projected_cm =
       (projection_cons * p_world_cm.homogeneous()).eval();
 

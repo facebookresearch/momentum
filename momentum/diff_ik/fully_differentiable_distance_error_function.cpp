@@ -34,7 +34,7 @@ JetType FullyDifferentiableDistanceErrorFunctionT<T>::constraintGradient_dot(
 
   const auto& jsCons = skelState.jointState[parentJointIndex_cons];
   const Eigen::Vector3<JetType> p_world_cm =
-      (jsCons.transformation * offset_cons).template cast<JetType>();
+      jsCons.transform.toAffine3().template cast<T>() * offset_cons;
 
   const Eigen::Vector3<JetType> diff_vec = p_world_cm - origin_cons;
   const JetType distance = diff_vec.norm();

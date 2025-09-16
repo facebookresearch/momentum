@@ -202,7 +202,7 @@ Eigen::Vector3<T> calculateDWorldPos(
     const auto parentBone = skinWeights.index(vertexIndex, i);
     if (w > 0) {
       d_worldPos += w *
-          (state.jointState[parentBone].transformation.linear() *
+          (state.jointState[parentBone].transform.toLinear() *
            (character.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
     }
   }

@@ -141,11 +141,11 @@ double LimitErrorFunctionT<T>::getError(
 
         // get the constraint position in global space
         const Eigen::Vector3<T> position =
-            state.jointState[ct.parent].transformation * ct.offset.template cast<T>();
+            state.jointState[ct.parent].transform * ct.offset.template cast<T>();
 
         // get the constraint position in local ellipsoid space
         const Eigen::Vector3<T> localPosition =
-            state.jointState[ct.ellipsoidParent].transformation.inverse() * position;
+            state.jointState[ct.ellipsoidParent].transform.inverse() * position;
 
         // calculate constraint position in ellipsoid space
         const Eigen::Vector3<T> ellipsoidPosition =
@@ -160,7 +160,7 @@ double LimitErrorFunctionT<T>::getError(
 
         // calculate the difference between projected position and actual position
         const Eigen::Vector3<T> diff =
-            position - state.jointState[ct.ellipsoidParent].transformation * projectedPosition;
+            position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
 
         error += diff.squaredNorm() * kPositionWeight * limit.weight;
         break;
@@ -329,11 +329,11 @@ double LimitErrorFunctionT<T>::getGradient(
 
         // get the constraint position in global space
         const Eigen::Vector3<T> position =
-            state.jointState[ct.parent].transformation * ct.offset.template cast<T>();
+            state.jointState[ct.parent].transform * ct.offset.template cast<T>();
 
         // get the constraint position in local ellipsoid space
         const Eigen::Vector3<T> localPosition =
-            state.jointState[ct.ellipsoidParent].transformation.inverse() * position;
+            state.jointState[ct.ellipsoidParent].transform.inverse() * position;
 
         // calculate constraint position in ellipsoid space
         const Eigen::Vector3<T> ellipsoidPosition =
@@ -348,7 +348,7 @@ double LimitErrorFunctionT<T>::getGradient(
 
         // calculate the difference between projected position and actual position
         const Eigen::Vector3<T> diff =
-            position - state.jointState[ct.ellipsoidParent].transformation * projectedPosition;
+            position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
         const T wgt = T(2) * kPositionWeight * limit.weight * tWeight;
 
         // loop over all joints the constraint is attached to and calculate gradient
@@ -598,11 +598,11 @@ double LimitErrorFunctionT<T>::getJacobian(
 
         // get the constraint position in global space
         const Eigen::Vector3<T> position =
-            state.jointState[ct.parent].transformation * ct.offset.template cast<T>();
+            state.jointState[ct.parent].transform * ct.offset.template cast<T>();
 
         // get the constraint position in local ellipsoid space
         const Eigen::Vector3<T> localPosition =
-            state.jointState[ct.ellipsoidParent].transformation.inverse() * position;
+            state.jointState[ct.ellipsoidParent].transform.inverse() * position;
 
         // calculate constraint position in ellipsoid space
         const Eigen::Vector3<T> ellipsoidPosition =
@@ -617,7 +617,7 @@ double LimitErrorFunctionT<T>::getJacobian(
 
         // calculate the difference between projected position and actual position
         const Eigen::Vector3<T> diff =
-            position - state.jointState[ct.ellipsoidParent].transformation * projectedPosition;
+            position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
 
         // calculate offset in jacobian
         Eigen::Ref<Eigen::MatrixX<T>> jac = jacobian.block(count, 0, 3, params.size());

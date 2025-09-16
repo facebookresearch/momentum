@@ -126,7 +126,7 @@ double SimdPositionErrorFunction::getError(
           drjit::load<FloatP>(&constraints_->offsetX[constraintOffsetIndex]),
           drjit::load<FloatP>(&constraints_->offsetY[constraintOffsetIndex]),
           drjit::load<FloatP>(&constraints_->offsetZ[constraintOffsetIndex])};
-      const Vector3fP pos_world = jointState.transformation * offset;
+      const Vector3fP pos_world = jointState.transform * offset;
 
       // Calculate distance of point to target: dist = pos - target
       const Vector3fP target{
@@ -181,7 +181,7 @@ double SimdPositionErrorFunction::getGradient(
               drjit::load<FloatP>(&constraints_->offsetX[constraintOffsetIndex]),
               drjit::load<FloatP>(&constraints_->offsetY[constraintOffsetIndex]),
               drjit::load<FloatP>(&constraints_->offsetZ[constraintOffsetIndex])};
-          const Vector3fP pos_world = jointState_cons.transformation * offset;
+          const Vector3fP pos_world = jointState_cons.transform * offset;
 
           // Calculate distance of point to target: dist = pos - target
           const Vector3fP target{
@@ -332,7 +332,7 @@ double SimdPositionErrorFunction::getJacobian(
               drjit::load<FloatP>(&constraints_->offsetX[constraintOffsetIndex]),
               drjit::load<FloatP>(&constraints_->offsetY[constraintOffsetIndex]),
               drjit::load<FloatP>(&constraints_->offsetZ[constraintOffsetIndex])};
-          const Vector3fP pos_world = jointState_cons.transformation * offset;
+          const Vector3fP pos_world = jointState_cons.transform * offset;
 
           // Calculate distance of point to target: dist = pos - target
           const Vector3fP target{
@@ -543,7 +543,7 @@ double SimdPositionErrorFunctionAVX::getError(
       break;
     }
     // pre-load some joint specific values
-    const auto& transformation = state.jointState[jointId].transformation;
+    const auto transformation = state.jointState[jointId].transform.toMatrix();
 
     __m256 posx;
     __m256 posy;
@@ -620,7 +620,7 @@ double SimdPositionErrorFunctionAVX::getGradient(
         auto& grad_local = std::get<1>(error_grad_local);
 
         // pre-load some joint specific values
-        const auto& transformation = state.jointState[jointId].transformation;
+        const auto transformation = state.jointState[jointId].transform.toMatrix();
 
         __m256 posx;
         __m256 posy;
@@ -814,7 +814,7 @@ double SimdPositionErrorFunctionAVX::getJacobian(
         const auto offset = jacobianOffset_[jointId] + addressOffset;
 
         // pre-load some joint specific values
-        const auto& transformation = state.jointState[jointId].transformation;
+        const auto transformation = state.jointState[jointId].transform.toMatrix();
 
         __m256 posx;
         __m256 posy;
