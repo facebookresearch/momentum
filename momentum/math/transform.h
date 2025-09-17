@@ -158,6 +158,27 @@ struct TransformT {
     return toRotationMatrix() * scale;
   }
 
+  /// Gets the X axis of the rotation
+  [[nodiscard]] Vector3<T> getAxisX() const {
+    // Optimized version of Eigen::Quaternion::toRotationMatrix()
+    Vector3<T> axis;
+
+    const T ty = T(2) * rotation.y();
+    const T tz = T(2) * rotation.z();
+    const T twy = ty * rotation.w();
+    const T twz = tz * rotation.w();
+    const T txy = ty * rotation.x();
+    const T txz = tz * rotation.x();
+    const T tyy = ty * rotation.y();
+    const T tzz = tz * rotation.z();
+
+    axis[0] = T(1) - (tyy + tzz);
+    axis[1] = txy + twz;
+    axis[2] = txz - twy;
+
+    return axis;
+  }
+
   /// Applies full transform to a point
   [[nodiscard]] Vector3<T> transformPoint(const Vector3<T>& pt) const {
     return translation + rotation * (scale * pt).eval();
@@ -178,6 +199,14 @@ struct TransformT {
         this->translation.template cast<T2>(),
         this->rotation.template cast<T2>(),
         static_cast<T2>(this->scale));
+  }
+
+  /// Checks if this transform is approximately equal to another
+  [[nodiscard]] bool isApprox(
+      const TransformT<T>& other,
+      T tol = Eigen::NumTraits<T>::dummy_precision()) const {
+    // TODO: Improve
+    return toAffine3().isApprox(other.toAffine3(), tol);
   }
 };
 

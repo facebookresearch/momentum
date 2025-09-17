@@ -18,14 +18,14 @@ using namespace momentum;
 TEST(CollisionGeometryTest, DefaultConstructor) {
   // Test with float precision
   TaperedCapsuleT<float> capsuleFloat;
-  EXPECT_TRUE(capsuleFloat.transformation.isApprox(Affine3<float>::Identity()));
+  EXPECT_TRUE(capsuleFloat.transformation.isApprox(TransformT<float>()));
   EXPECT_TRUE(capsuleFloat.radius.isApprox(Vector2<float>::Zero()));
   EXPECT_EQ(capsuleFloat.parent, kInvalidIndex);
   EXPECT_FLOAT_EQ(capsuleFloat.length, 0.0f);
 
   // Test with double precision
   TaperedCapsuleT<double> capsuleDouble;
-  EXPECT_TRUE(capsuleDouble.transformation.isApprox(Affine3<double>::Identity()));
+  EXPECT_TRUE(capsuleDouble.transformation.isApprox(TransformT<double>()));
   EXPECT_TRUE(capsuleDouble.radius.isApprox(Vector2<double>::Zero()));
   EXPECT_EQ(capsuleDouble.parent, kInvalidIndex);
   EXPECT_DOUBLE_EQ(capsuleDouble.length, 0.0);
@@ -41,7 +41,7 @@ TEST(CollisionGeometryTest, IsApprox) {
   EXPECT_TRUE(capsule1.isApprox(capsule2));
 
   // Modify capsule2's transformation
-  capsule2.transformation.translation() = Vector3<float>(1.0f, 0.0f, 0.0f);
+  capsule2.transformation.translation = Vector3<float>(1.0f, 0.0f, 0.0f);
   EXPECT_FALSE(capsule1.isApprox(capsule2));
 
   // Reset capsule2 and modify its radius
@@ -61,7 +61,7 @@ TEST(CollisionGeometryTest, IsApprox) {
 
   // Test with a custom tolerance
   capsule2 = TaperedCapsuleT<float>();
-  capsule2.transformation.translation() = Vector3<float>(1e-5f, 0.0f, 0.0f);
+  capsule2.transformation.translation = Vector3<float>(1e-5f, 0.0f, 0.0f);
   EXPECT_TRUE(
       capsule1.isApprox(capsule2, 1e-4f)); // Should be approximately equal with this tolerance
   EXPECT_FALSE(

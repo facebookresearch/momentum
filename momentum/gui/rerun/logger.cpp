@@ -350,13 +350,12 @@ void logCollisionGeometry(
   for (const auto& cg : collisionGeometry) {
     const auto& js = skeletonState.jointState.at(cg.parent);
 
-    const Affine3f tf = js.transform.toAffine3() * cg.transformation;
-    // Rerun capsule's axis is along the Z-axis while Momentum's is along the X-axis, so we need to
-    // rotate 90 degrees around the Y-axis to align the axes.
-    const Quaternionf q =
-        Quaternionf(tf.linear()) * Eigen::AngleAxisf(0.5f * pi(), Vector3f::UnitY());
+    const float halfX = 0.5f * cg.length;
+    const Transform tf =
+        js.transform * cg.transformation * Transform::makeTranslation({halfX, 0, 0});
+    const Quaternionf& q = tf.rotation;
 
-    translations.push_back(toRerunPosition3D(tf.translation()));
+    translations.push_back(toRerunPosition3D(tf.translation));
     quaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
     lengths.emplace_back(cg.length);
     // TODO: Rerun doesn't support capsules with different radii (i.e. tapered capsule) yet

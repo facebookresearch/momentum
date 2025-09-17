@@ -396,8 +396,7 @@ CollisionGeometry legacyCollisionToMomentum(const nlohmann::json& legacyCollisio
       TaperedCapsule capsule;
 
       if (capsuleJson.contains("transformation")) {
-        TransformT<float> transform = jsonToTransform<float>(capsuleJson["transformation"]);
-        capsule.transformation = transform.toAffine3();
+        capsule.transformation = jsonToTransform<float>(capsuleJson["transformation"]);
       }
 
       if (capsuleJson.contains("radius")) {
@@ -425,8 +424,7 @@ nlohmann::json momentumCollisionToLegacy(const CollisionGeometry& collision) {
   for (const auto& capsule : collision) {
     nlohmann::json capsuleJson;
 
-    TransformT<float> transform = TransformT<float>::fromAffine3(capsule.transformation);
-    capsuleJson["transformation"] = transformToJson(transform);
+    capsuleJson["transformation"] = transformToJson(capsule.transformation);
     capsuleJson["radius"] = eigenToJsonArray(capsule.radius);
     capsuleJson["parent"] = capsule.parent;
     capsuleJson["length"] = capsule.length;

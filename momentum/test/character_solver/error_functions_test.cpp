@@ -50,6 +50,34 @@ using Types = testing::Types<float, double>;
 
 TYPED_TEST_SUITE(Momentum_ErrorFunctionsTest, Types);
 
+namespace {
+
+Character getSkinnedLocatorTestCharacter() {
+  Character character = withTestBlendShapes(createTestCharacter(4));
+
+  std::vector<bool> activeLocators(character.skinnedLocators.size(), true);
+  activeLocators[1] = false;
+  const auto [transform, limits] = addSkinnedLocatorParameters(
+      character.parameterTransform, character.parameterLimits, activeLocators);
+
+  return {
+      character.skeleton,
+      transform,
+      limits,
+      character.locators,
+      character.mesh.get(),
+      character.skinWeights.get(),
+      character.collision.get(),
+      character.poseShapes.get(),
+      character.blendShape,
+      character.faceExpressionBlendShape,
+      character.name,
+      character.inverseBindPose,
+      character.skinnedLocators};
+}
+
+} // namespace
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
 
@@ -467,34 +495,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
         Eps<T>(5e-5f, 5e-6));
   }
 }
-
-namespace {
-
-Character getSkinnedLocatorTestCharacter() {
-  Character character = withTestBlendShapes(createTestCharacter(4));
-
-  std::vector<bool> activeLocators(character.skinnedLocators.size(), true);
-  activeLocators[1] = false;
-  const auto [transform, limits] = addSkinnedLocatorParameters(
-      character.parameterTransform, character.parameterLimits, activeLocators);
-
-  return {
-      character.skeleton,
-      transform,
-      limits,
-      character.locators,
-      character.mesh.get(),
-      character.skinWeights.get(),
-      character.collision.get(),
-      character.poseShapes.get(),
-      character.blendShape,
-      character.faceExpressionBlendShape,
-      character.name,
-      character.inverseBindPose,
-      character.skinnedLocators};
-}
-
-} // namespace
 
 TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
