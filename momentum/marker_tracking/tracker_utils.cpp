@@ -7,6 +7,8 @@
 
 #include "momentum/marker_tracking/tracker_utils.h"
 
+#include "momentum/character/blend_shape.h"
+#include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/inverse_parameter_transform.h"
 #include "momentum/character/parameter_limits.h"
@@ -449,6 +451,15 @@ std::tuple<Eigen::VectorXf, LocatorList, SkinnedLocatorList> extractIdAndLocator
       idParam.v.head(targetCharacter.parameterTransform.numAllModelParameters()),
       locators,
       skinnedLocators};
+}
+
+Mesh extractBlendShapeFromParams(
+    const momentum::ModelParameters& param,
+    const momentum::Character& sourceCharacter) {
+  Mesh result = *sourceCharacter.mesh;
+  auto blendWeights = extractBlendWeights(sourceCharacter.parameterTransform, param);
+  result.vertices = sourceCharacter.blendShape->computeShape<float>(blendWeights);
+  return result;
 }
 
 void fillIdentity(

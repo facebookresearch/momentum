@@ -118,7 +118,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
             return fmt::format(
-                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\")",
+                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\", calib_shape={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -130,7 +130,8 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.locatorsOnly),
                 self.greedySampling,
                 boolToString(self.enforceFloorInFirstFrame),
-                self.firstFramePoseConstraintSet);
+                self.firstFramePoseConstraintSet,
+                boolToString(self.calibShape));
           })
       .def(
           py::init<
@@ -145,7 +146,8 @@ PYBIND11_MODULE(marker_tracking, m) {
               bool,
               size_t,
               bool,
-              std::string>(),
+              std::string,
+              bool>(),
           R"(Create a CalibrationConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
@@ -171,7 +173,8 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("locators_only") = false,
           py::arg("greedy_sampling") = 0,
           py::arg("enforce_floor_in_first_frame") = false,
-          py::arg("first_frame_pose_constraint_set") = "")
+          py::arg("first_frame_pose_constraint_set") = "",
+          py::arg("calib_shape") = false)
       .def_readwrite(
           "calib_frames",
           &momentum::CalibrationConfig::calibFrames,
@@ -199,7 +202,11 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "first_frame_pose_constraint_set",
           &momentum::CalibrationConfig::firstFramePoseConstraintSet,
-          "Name of pose constraint set to use in first frame");
+          "Name of pose constraint set to use in first frame")
+      .def_readwrite(
+          "calib_shape",
+          &momentum::CalibrationConfig::calibShape,
+          "Calibrate shape parameters");
 
   auto trackingConfig =
       py::class_<momentum::TrackingConfig, momentum::BaseConfig>(
