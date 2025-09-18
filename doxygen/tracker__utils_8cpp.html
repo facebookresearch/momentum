@@ -97,6 +97,8 @@ $(document).ready(function(){initNavTree('tracker__utils_8cpp.html',''); initRes
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="tracker__utils_8h_source.html">momentum/marker_tracking/tracker_utils.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="blend__shape_8h_source.html">momentum/character/blend_shape.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="blend__shape__skinning_8h_source.html">momentum/character/blend_shape_skinning.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="inverse__parameter__transform_8h_source.html">momentum/character/inverse_parameter_transform.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="parameter__limits_8h_source.html">momentum/character/parameter_limits.h</a>&quot;</code><br />
@@ -137,6 +139,8 @@ Functions</h2></td></tr>
 <tr class="separator:aab70645310a06eab39456dcb9b084e98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a571c151c67aa408a90ae54b4996e284b" id="r_a571c151c67aa408a90ae54b4996e284b"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; Eigen::VectorXf, <a class="el" href="namespacemomentum.html#ac06297b73bd818fa28ad4bbc98d2e3ad">LocatorList</a>, <a class="el" href="namespacemomentum.html#a0880456b104920deacb90580faa7dc6c">SkinnedLocatorList</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a571c151c67aa408a90ae54b4996e284b">momentum::extractIdAndLocatorsFromParams</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">param</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sourceCharacter</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetCharacter</a>)</td></tr>
 <tr class="separator:a571c151c67aa408a90ae54b4996e284b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4591df41bc5c72d11bab59b07ddf5284" id="r_a4591df41bc5c72d11bab59b07ddf5284"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a4591df41bc5c72d11bab59b07ddf5284">momentum::extractBlendShapeFromParams</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">momentum::ModelParameters</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">param</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">momentum::Character</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sourceCharacter</a>)</td></tr>
+<tr class="separator:a4591df41bc5c72d11bab59b07ddf5284"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73e44695fb092ba7863259c1affa8283" id="r_a73e44695fb092ba7863259c1affa8283"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a73e44695fb092ba7863259c1affa8283">momentum::fillIdentity</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">idSet</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;identity, Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">motionNoId</a>)</td></tr>
 <tr class="separator:a73e44695fb092ba7863259c1affa8283"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8babd568c031639522dc41c963d46f0a" id="r_a8babd568c031639522dc41c963d46f0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a8babd568c031639522dc41c963d46f0a">momentum::removeIdentity</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">idSet</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ade72a5ad1f8b3000b90f216070608699">ModelParameters</a> &amp;identity, Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">motionWithId</a>)</td></tr>
@@ -159,7 +163,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00144">144</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00146">146</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 </div>
 </div>
@@ -175,7 +179,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00145">145</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00147">147</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="utility_8cpp_source.html#l00302">momentum::closestPointsOnSegments()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00148">momentum::CollisionErrorFunctionT&lt; T &gt;::getCollisionPairs()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00187">momentum::CollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00121">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getError()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00235">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00022">momentum::DistanceErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00239">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00169">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00283">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00042">momentum::DistanceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00417">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00338">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, <a class="el" href="simd__collision__error__function_8cpp_source.html#l00475">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00118">momentum::DistanceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00041">momentum::CollisionErrorFunctionT&lt; T &gt;::updateCollisionPairs()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00044">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::updateCollisionPairs()</a>, and <a class="el" href="simd__collision__error__function_8cpp_source.html#l00104">momentum::SimdCollisionErrorFunctionT&lt; T &gt;::updateCollisionPairs()</a>.</p>
 
@@ -193,7 +197,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00143">143</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00145">145</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 </div>
 </div>
@@ -209,7 +213,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00142">142</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tracker__utils_8cpp_source.html#l00144">144</a> of file <a class="el" href="tracker__utils_8cpp_source.html">tracker_utils.cpp</a>.</p>
 
 </div>
 </div>
@@ -219,7 +223,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_da9a4e26ab0cde1b62bca67c124a4985.html">marker_tracking</a></li><li class="navelem"><a class="el" href="tracker__utils_8cpp.html">tracker_utils.cpp</a></li>
-    <li class="footer">Generated on Wed Sep 17 2025 15:33:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Sep 18 2025 17:17:13 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

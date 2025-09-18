@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.__init__"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.calib_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.calib_shape"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.calib_shape</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.enforce_floor_in_first_frame</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.first_frame_pose_constraint_set</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.global_scale_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.global_scale_only</span></code></a></li>
@@ -194,7 +195,7 @@
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
 <li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig) -&gt; None</p></li>
-<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’, calib_shape: bool = False) -&gt; None</p></li>
 </ol>
 <p>Create a CalibrationConfig with specified parameters.</p>
 <blockquote>
@@ -240,6 +241,12 @@
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.calib_frames">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames" title="Link to this definition"></a></dt>
 <dd><p>Number of frames used for model calibration</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.calib_shape">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_shape</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.calib_shape" title="Link to this definition"></a></dt>
+<dd><p>Calibrate shape parameters</p>
 </dd></dl>
 
 <dl class="py property">
