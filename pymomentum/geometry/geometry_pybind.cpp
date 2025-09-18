@@ -236,7 +236,7 @@ PYBIND11_MODULE(geometry, m) {
   //
   // [static methods for io]
   // - load_gltf_from_bytes(gltf_btyes)
-  // - to_gltf(character, fps, motion, offsets)
+  // - save_gltf_to_dict(character, fps, motion, offsets)
   // - load_fbx(fbxFilename, modelFilename, locatorsFilename)
   // - load_fbx_from_bytes(fbx_bytes, permissive)
   // - load_fbx_with_motion(fbxFilename, permissive)
@@ -689,7 +689,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           py::arg("gltf_bytes"))
       // toGLTF(character, fps, motion)
       .def_static(
-          "to_gltf",
+          "save_gltf_to_dict",
           &toGLTF,
           py::call_guard<py::gil_scoped_release>(),
           R"(Serialize a character as a GLTF using dictionary form.
