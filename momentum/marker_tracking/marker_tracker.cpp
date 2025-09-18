@@ -23,6 +23,7 @@
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/tracker_utils.h"
+#include "momentum/math/mesh.h"
 #include "momentum/solver/gauss_newton_solver.h"
 #include "momentum/solver/solver.h"
 
@@ -210,7 +211,7 @@ Eigen::MatrixXf trackSequence(
   // (ie. not time varying). The input globalParams indicate which parameters within universalParams
   // we want to solve for. globalParams is either a subset or all of universalParams.
   ParameterSet poseParams = pt.getPoseParameters();
-  ParameterSet universalParams = pt.getScalingParameters();
+  ParameterSet universalParams = pt.getScalingParameters() | pt.getBlendShapeParameters();
   const auto locatorSet =
       pt.getParameterSet("locators", true) | pt.getParameterSet("skinnedLocators", true);
   poseParams &= ~locatorSet;
@@ -727,6 +728,11 @@ void calibrateModel(
   } else {
     calibBodySetExtended = transformExtended.getScalingParameters();
     calibBodySet = transform.getScalingParameters();
+
+    if (config.calibShape) {
+      calibBodySetExtended |= transformExtended.getBlendShapeParameters();
+      calibBodySet |= transform.getBlendShapeParameters();
+    }
   }
 
   // special trackingConfig for initialization: zero out smoothness and collision
@@ -852,6 +858,9 @@ void calibrateModel(
     // below.
     std::tie(identity.v, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
+    if (config.calibShape && solvingCharacter.blendShape && character.mesh) {
+      *character.mesh = extractBlendShapeFromParams(motion.col(0), solvingCharacter);
+    }
 
     // The sequence solve above could get stuck with euler singularity but per-frame solve could get
     // it out. Pass in the first frame from previous solve as a better initial guess than the zero

@@ -58,6 +58,10 @@ extractIdAndLocatorsFromParams(
     const momentum::Character& sourceCharacter,
     const momentum::Character& targetCharacter);
 
+Mesh extractBlendShapeFromParams(
+    const momentum::ModelParameters& param,
+    const momentum::Character& sourceCharacter);
+
 void fillIdentity(
     const momentum::ParameterSet& idSet,
     const momentum::ModelParameters& identity,

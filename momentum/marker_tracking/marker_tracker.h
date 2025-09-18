@@ -45,6 +45,8 @@ struct CalibrationConfig : public BaseConfig {
   bool enforceFloorInFirstFrame = false;
   /// Name of a pose constraint set to use for the first frame
   std::string firstFramePoseConstraintSet;
+  /// Calibrate the character's shape
+  bool calibShape = false;
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
