@@ -20,6 +20,7 @@
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/skeleton_solver_function.h"
 #include "momentum/character_solver/skinned_locator_error_function.h"
+#include "momentum/character_solver/skinned_locator_triangle_error_function.h"
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/tracker_utils.h"
@@ -217,6 +218,11 @@ Eigen::MatrixXf trackSequence(
   poseParams &= ~locatorSet;
   universalParams |= locatorSet;
 
+  std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> skinnedLocatorMeshContraints;
+  if ((globalParams & pt.getBlendShapeParameters()).any() && !character.skinnedLocators.empty()) {
+    skinnedLocatorMeshContraints = createSkinnedLocatorMeshConstraints(character, 1.0f);
+  }
+
   // set up the solver function
   std::vector<size_t> sortedFrames = frames;
   std::sort(sortedFrames.begin(), sortedFrames.end());
@@ -259,6 +265,16 @@ Eigen::MatrixXf trackSequence(
         skinnedConstrFunc->setConstraints(skinnedConstData.at(iFrame));
         skinnedConstrFunc->setWeight(posConstrWeight);
         solverFunc.addErrorFunction(solverFrame, skinnedConstrFunc);
+      }
+
+      if (!skinnedLocatorMeshContraints.empty() && solverFrame == 0) {
+        // Need to create a function to keep the skinned constraints close to
+        // the mesh.
+        auto skinnedTriangleConstrFunc =
+            std::make_shared<SkinnedLocatorTriangleErrorFunctionT<float>>(character);
+        skinnedTriangleConstrFunc->setConstraints(skinnedLocatorMeshContraints);
+        skinnedTriangleConstrFunc->setWeight(solvedFrames * posConstrWeight);
+        solverFunc.addErrorFunction(solverFrame, skinnedTriangleConstrFunc);
       }
 
       // prepare floor constraints
