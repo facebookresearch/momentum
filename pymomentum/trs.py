@@ -27,6 +27,7 @@ matrices (such as the widely-used 6D rotation representation), so this library p
 useful functionality for converting between the two.
 
 Key features:
+
 - Creating TRS transforms from individual components (:func:`from_translation`,
   :func:`from_rotation_matrix`, :func:`from_scale`)
 - Converting between TRS transforms and 4x4 transformation matrices
