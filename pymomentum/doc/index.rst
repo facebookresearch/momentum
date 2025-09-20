@@ -8,6 +8,7 @@ Welcome to PyMomentum
    geometry
    quaternion
    skel_state
+   trs
    solver
    solver2
    marker_tracking
