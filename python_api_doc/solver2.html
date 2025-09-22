@@ -385,6 +385,23 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVelocityConstraint.weight"><code class="docutils literal notranslate"><span class="pre">VertexVelocityConstraint.weight</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceConstraint"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceConstraint</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceConstraint.__init__"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceConstraint.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceConstraint.target_distance"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceConstraint.target_distance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index1"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceConstraint.vertex_index1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index2"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceConstraint.vertex_index2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceConstraint.weight"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceConstraint.weight</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.add_constraint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.add_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.clear_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.num_constraints"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.num_constraints()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.solve_sequence"><code class="docutils literal notranslate"><span class="pre">solve_sequence()</span></code></a></li>
 </ul>
 </li>
@@ -2834,6 +2851,129 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexVelocityConstraint.weight">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVelocityConstraint.weight" title="Link to this definition"></a></dt>
 <dd><p>The weight of the constraint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceConstraint">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexVertexDistanceConstraint</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceConstraint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceConstraint.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceConstraint.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceConstraint.target_distance">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_distance</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceConstraint.target_distance" title="Link to this definition"></a></dt>
+<dd><p>The target distance between the two vertices</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vertex_index1</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index1" title="Link to this definition"></a></dt>
+<dd><p>The index of the first vertex</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vertex_index2</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index2" title="Link to this definition"></a></dt>
+<dd><p>The index of the second vertex</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceConstraint.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceConstraint.weight" title="Link to this definition"></a></dt>
+<dd><p>The weight of the constraint</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexVertexDistanceErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
+<p>Error function that minimizes the distance between pairs of vertices on the character’s mesh.</p>
+<p>This is useful for constraints where you want to maintain specific distances between
+different parts of the character mesh, such as keeping fingers at a certain distance
+or maintaining the width of body parts.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction" title="pymomentum.solver2.VertexVertexDistanceErrorFunction"><span class="pre">pymomentum.solver2.VertexVertexDistanceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a VertexVertexDistanceErrorFunction.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param character<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The character to use.</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>The weight applied to the error function.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction.add_constraint">
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction" title="pymomentum.solver2.VertexVertexDistanceErrorFunction"><span class="pre">pymomentum.solver2.VertexVertexDistanceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_index1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_index2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.add_constraint" title="Link to this definition"></a></dt>
+<dd><p>Adds a vertex-to-vertex distance constraint to the error function.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param vertex_index1<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The index of the first vertex.</p>
+</dd>
+<dt class="field-even">param vertex_index2<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the second vertex.</p>
+</dd>
+<dt class="field-odd">param weight<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The weight of the constraint.</p>
+</dd>
+<dt class="field-even">param target_distance<span class="colon">:</span></dt>
+<dd class="field-even"><p>The desired distance between the two vertices.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction.add_constraints">
+<span class="sig-name descname"><span class="pre">add_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction" title="pymomentum.solver2.VertexVertexDistanceErrorFunction"><span class="pre">pymomentum.solver2.VertexVertexDistanceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_index1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_index2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.add_constraints" title="Link to this definition"></a></dt>
+<dd><p>Adds multiple vertex-to-vertex distance constraints to the error function.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param vertex_index1<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of indices for the first vertices.</p>
+</dd>
+<dt class="field-even">param vertex_index2<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of indices for the second vertices.</p>
+</dd>
+<dt class="field-odd">param weight<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of weights for the constraints.</p>
+</dd>
+<dt class="field-even">param target_distance<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of desired distances between vertex pairs.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction.clear_constraints">
+<span class="sig-name descname"><span class="pre">clear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction" title="pymomentum.solver2.VertexVertexDistanceErrorFunction"><span class="pre">pymomentum.solver2.VertexVertexDistanceErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.clear_constraints" title="Link to this definition"></a></dt>
+<dd><p>Clears all vertex-to-vertex distance constraints from the error function.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction.constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of vertex-to-vertex distance constraints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexVertexDistanceErrorFunction.num_constraints">
+<span class="sig-name descname"><span class="pre">num_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction" title="pymomentum.solver2.VertexVertexDistanceErrorFunction"><span class="pre">pymomentum.solver2.VertexVertexDistanceErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.num_constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of constraints.</p>
 </dd></dl>
 
 </dd></dl>
