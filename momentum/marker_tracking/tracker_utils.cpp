@@ -16,6 +16,7 @@
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/skinned_locator_error_function.h"
 #include "momentum/math/mesh.h"
+#include "momentum/math/utility.h"
 
 #include "momentum/common/log.h"
 
@@ -245,6 +246,44 @@ momentum::Character locatorsToSkinnedLocators(
       sourceCharacter.name,
       sourceCharacter.inverseBindPose,
       skinnedLocators};
+}
+
+std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
+    const momentum::Character& character,
+    float targetDepth) {
+  if (!character.mesh || !character.skinWeights) {
+    return {};
+  }
+
+  // skip the triangle tree if we don't need it:
+  if (character.skinnedLocators.empty()) {
+    return {};
+  }
+
+  const auto& mesh = *character.mesh;
+
+  std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> result;
+  result.reserve(character.skinnedLocators.size());
+  for (size_t i = 0; i < character.skinnedLocators.size(); ++i) {
+    const auto& locator = character.skinnedLocators[i];
+    const Eigen::Vector3f p_world = locator.position;
+
+    // Find the closest point on the mesh to the locator.
+    const auto closestPointResult = closestPointOnMeshMatchingParent(
+        *character.mesh, *character.skinWeights, p_world, locator.parents[0], targetDepth);
+    if (!closestPointResult.valid) {
+      continue;
+    }
+
+    momentum::SkinnedLocatorTriangleConstraintT<float> constr;
+    constr.locatorIndex = i;
+    constr.tgtTriangleIndices = mesh.faces[closestPointResult.triangleIdx];
+    constr.tgtTriangleBaryCoords = closestPointResult.baryCoords;
+    constr.depth = targetDepth;
+    result.push_back(constr);
+  }
+
+  return result;
 }
 
 Character createLocatorCharacter(const Character& sourceCharacter, const std::string& prefix) {

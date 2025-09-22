@@ -11,6 +11,7 @@
 #include <momentum/character/locator.h>
 #include <momentum/character/marker.h>
 #include <momentum/character_solver/fwd.h>
+#include <momentum/character_solver/skinned_locator_triangle_error_function.h>
 
 namespace momentum {
 
@@ -40,6 +41,10 @@ momentum::Character createLocatorCharacter(
 momentum::Character locatorsToSkinnedLocators(
     const momentum::Character& sourceCharacter,
     float maxDistance = 3.0f);
+
+std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
+    const momentum::Character& character,
+    float targetDepth = 1.0f);
 
 // Extract locator offsets from a LocatorCharacter for a normal Character given input calibrated
 // parameters
