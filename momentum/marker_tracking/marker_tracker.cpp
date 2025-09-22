@@ -277,6 +277,21 @@ Eigen::MatrixXf trackSequence(
         solverFunc.addErrorFunction(solverFrame, skinnedTriangleConstrFunc);
       }
 
+      if (pt.getBlendShapeParameters().any() && solverFrame == 0) {
+        // regularize the blend shape parameters
+        auto blendShapeConstrFunc = std::make_shared<ModelParametersErrorFunction>(character);
+        blendShapeConstrFunc->setWeight(solvedFrames * 0.1f);
+        Eigen::VectorXf weights = Eigen::VectorXf::Zero(pt.numAllModelParameters());
+        for (Eigen::Index i = 0; i < pt.blendShapeParameters.size(); ++i) {
+          if (pt.blendShapeParameters[i] >= 0) {
+            weights[pt.blendShapeParameters[i]] = 1.0f;
+          }
+        }
+        blendShapeConstrFunc->setTargetParameters(
+            ModelParameters::Zero(pt.numAllModelParameters()), weights);
+        solverFunc.addErrorFunction(solverFrame, blendShapeConstrFunc);
+      }
+
       // prepare floor constraints
       if (!floorConstraints.empty()) {
         bool halfPlane = true;
