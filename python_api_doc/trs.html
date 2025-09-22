@@ -1,0 +1,426 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.trs &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.solver" href="solver.html" />
+    <link rel="prev" title="pymomentum.skel_state" href="skel_state.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.trs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#trs-translation-rotation-scale-utilities">TRS (Translation-Rotation-Scale) Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.from_matrix"><code class="docutils literal notranslate"><span class="pre">from_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.from_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">from_rotation_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.from_scale"><code class="docutils literal notranslate"><span class="pre">from_scale()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.from_skeleton_state"><code class="docutils literal notranslate"><span class="pre">from_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.from_translation"><code class="docutils literal notranslate"><span class="pre">from_translation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.to_matrix"><code class="docutils literal notranslate"><span class="pre">to_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">to_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.transform_points"><code class="docutils literal notranslate"><span class="pre">transform_points()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.trs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/trs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.trs">
+<span id="pymomentum-trs"></span><h1>pymomentum.trs<a class="headerlink" href="#module-pymomentum.trs" title="Link to this heading"></a></h1>
+<section id="trs-translation-rotation-scale-utilities">
+<h2>TRS (Translation-Rotation-Scale) Utilities<a class="headerlink" href="#trs-translation-rotation-scale-utilities" title="Link to this heading"></a></h2>
+<p>This module provides utilities for working with TRS (Translation-Rotation-Scale)
+transforms in PyMomentum.</p>
+<p>A TRS transform is represented as a tuple of three separate tensors:</p>
+<ul class="simple">
+<li><p><strong>Translation (t)</strong>: tensor of shape […, 3] - 3D position offset</p></li>
+<li><p><strong>Rotation (r)</strong>: tensor of shape […, 3, 3] - 3x3 rotation matrix</p></li>
+<li><p><strong>Scale (s)</strong>: tensor of shape […, 1] - uniform scale factor</p></li>
+</ul>
+<p>This representation provides efficient operations since rotation matrices can be
+directly used for transformations and inverted via transpose, avoiding quaternion
+to matrix conversions.  It is also preferable to working with 4x4 matrices, because
+extracting the scale from a fully general 4x4 matrix is expensive.</p>
+<p>Note that internally, momentum mostly uses skel_states which use quaternions rather
+than rotation matrices.  However, many use cases (particularly for ML) prefer rotation
+matrices (such as the widely-used 6D rotation representation), so this library provides
+useful functionality for converting between the two.</p>
+<p>Key features:</p>
+<ul class="simple">
+<li><p>Creating TRS transforms from individual components (<a class="reference internal" href="#pymomentum.trs.from_translation" title="pymomentum.trs.from_translation"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_translation()</span></code></a>,
+<a class="reference internal" href="#pymomentum.trs.from_rotation_matrix" title="pymomentum.trs.from_rotation_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_rotation_matrix()</span></code></a>, <a class="reference internal" href="#pymomentum.trs.from_scale" title="pymomentum.trs.from_scale"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_scale()</span></code></a>)</p></li>
+<li><p>Converting between TRS transforms and 4x4 transformation matrices
+(<a class="reference internal" href="#pymomentum.trs.to_matrix" title="pymomentum.trs.to_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_matrix()</span></code></a>, <a class="reference internal" href="#pymomentum.trs.from_matrix" title="pymomentum.trs.from_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_matrix()</span></code></a>)</p></li>
+<li><p>Performing transformations and operations (<a class="reference internal" href="#pymomentum.trs.multiply" title="pymomentum.trs.multiply"><code class="xref py py-func docutils literal notranslate"><span class="pre">multiply()</span></code></a>, <a class="reference internal" href="#pymomentum.trs.inverse" title="pymomentum.trs.inverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">inverse()</span></code></a>,
+<a class="reference internal" href="#pymomentum.trs.transform_points" title="pymomentum.trs.transform_points"><code class="xref py py-func docutils literal notranslate"><span class="pre">transform_points()</span></code></a>)</p></li>
+<li><p>Interoperability with skeleton states (<a class="reference internal" href="#pymomentum.trs.from_skeleton_state" title="pymomentum.trs.from_skeleton_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_skeleton_state()</span></code></a>,
+<a class="reference internal" href="#pymomentum.trs.to_skeleton_state" title="pymomentum.trs.to_skeleton_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_skeleton_state()</span></code></a>)</p></li>
+<li><p>Fast inverse computation using rotation matrix transpose</p></li>
+</ul>
+<dl>
+<dt>Example:</dt><dd><p>Creating and using a TRS transform:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymomentum</span><span class="w"> </span><span class="kn">import</span> <span class="n">trs</span>
+
+<span class="c1"># Create identity transform</span>
+<span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">trs</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
+
+<span class="c1"># Create from translation</span>
+<span class="n">translation</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">trs</span><span class="o">.</span><span class="n">from_translation</span><span class="p">(</span><span class="n">translation</span><span class="p">)</span>
+
+<span class="c1"># Transform points</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>
+<span class="n">transformed</span> <span class="o">=</span> <span class="n">trs</span><span class="o">.</span><span class="n">transform_points</span><span class="p">((</span><span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">s</span><span class="p">),</span> <span class="n">points</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Note:</dt><dd><p>All functions in this module work with TRS transforms represented as tuples
+of (translation, rotation_matrix, scale) tensors.</p>
+</dd>
+</dl>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.blend">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">blend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs_transforms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.blend" title="Link to this definition"></a></dt>
+<dd><p>Blend multiple TRS transforms with the given weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trs_transforms</strong> (<em>Sequence</em><em>[</em><em>TRSTransform</em><em>]</em>) – A sequence of TRS transform tuples to blend.</p></li>
+<li><p><strong>weights</strong> (<em>torch.Tensor</em><em>, </em><em>optional</em>) – The weights to use for blending. If not provided, equal weights are used.
+Should have shape [num_transforms] or […, num_transforms].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The blended TRS transform.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.from_matrix">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.from_matrix" title="Link to this definition"></a></dt>
+<dd><p>Convert 4x4 transformation matrices to TRS transforms. Assumes uniform scaling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>matrices</strong> (<em>torch.Tensor</em>) – A tensor of 4x4 matrices of shape […, 4, 4].</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRS transform tuple (translation, rotation_matrix, scale).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.from_rotation_matrix">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">from_rotation_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotation_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.from_rotation_matrix" title="Link to this definition"></a></dt>
+<dd><p>Create a TRS transform from rotation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rotation_matrix</strong> (<em>torch.Tensor</em>) – The rotation matrix component of shape […, 3, 3].</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRS transform tuple (zero_translation, rotation_matrix, unit_scale).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.from_scale">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">from_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.from_scale" title="Link to this definition"></a></dt>
+<dd><p>Create a TRS transform from scale.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scale</strong> (<em>torch.Tensor</em>) – The scale component of shape […, 1].</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRS transform tuple (zero_translation, identity_rotation, scale).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.from_skeleton_state">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">from_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skeleton_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.from_skeleton_state" title="Link to this definition"></a></dt>
+<dd><p>Convert skeleton state to TRS transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skeleton_state</strong> (<em>torch.Tensor</em>) – The skeleton state tensor of shape […, 8] containing
+(tx, ty, tz, rx, ry, rz, rw, s).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRS transform tuple (translation, rotation_matrix, scale).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.from_translation">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">from_translation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.from_translation" title="Link to this definition"></a></dt>
+<dd><p>Create a TRS transform from translation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>translation</strong> (<em>torch.Tensor</em>) – The translation component of shape […, 3].</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRS transform tuple (translation, identity_rotation, unit_scale).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.identity">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.identity" title="Link to this definition"></a></dt>
+<dd><p>Returns a TRS transform representing the identity transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The size of each batch dimension in the output tensors.
+Defaults to None, which means the output will have no batch dimensions.</p></li>
+<li><p><strong>device</strong> (<em>torch.device</em><em>, </em><em>optional</em>) – The device on which to create the tensors. Defaults to None.</p></li>
+<li><p><strong>dtype</strong> (<em>torch.dtype</em><em>, </em><em>optional</em>) – The data type of the tensors. Defaults to None (float32).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Identity TRS transform tuple.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.inverse">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.inverse" title="Link to this definition"></a></dt>
+<dd><p>Compute the inverse of a TRS transform. This is efficient since rotation
+matrix inverse is just transpose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trs</strong> (<em>TRSTransform</em>) – The TRS transform tuple to invert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The inverted TRS transform tuple.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.multiply">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trs2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.multiply" title="Link to this definition"></a></dt>
+<dd><p>Multiply (compose) two TRS transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trs1</strong> (<em>TRSTransform</em>) – The first TRS transform tuple (t1, r1, s1).</p></li>
+<li><p><strong>trs2</strong> (<em>TRSTransform</em>) – The second TRS transform tuple (t2, r2, s2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The composed TRS transform tuple representing trs1 * trs2.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.slerp">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">slerp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trs1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.trs.slerp" title="Link to this definition"></a></dt>
+<dd><p>Spherical linear interpolation between two TRS transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trs0</strong> (<em>TRSTransform</em>) – The first TRS transform tuple.</p></li>
+<li><p><strong>trs1</strong> (<em>TRSTransform</em>) – The second TRS transform tuple.</p></li>
+<li><p><strong>t</strong> (<em>torch.Tensor</em>) – The interpolation factor where 0 &lt;= t &lt;= 1. t=0 corresponds to trs0, t=1 corresponds to trs1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The interpolated TRS transform.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.to_matrix">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">to_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.trs.to_matrix" title="Link to this definition"></a></dt>
+<dd><p>Convert TRS transform to 4x4 transformation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trs</strong> (<em>TRSTransform</em>) – The TRS transform tuple to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tensor containing 4x4 transformation matrices of shape […, 4, 4].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.to_skeleton_state">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.trs.to_skeleton_state" title="Link to this definition"></a></dt>
+<dd><p>Convert TRS transform to skeleton state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trs</strong> (<em>TRSTransform</em>) – The TRS transform tuple to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Skeleton state tensor of shape […, 8] containing (tx, ty, tz, rx, ry, rz, rw, s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.transform_points">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">transform_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.trs.transform_points" title="Link to this definition"></a></dt>
+<dd><p>Transform 3D points by the TRS transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trs</strong> (<em>TRSTransform</em>) – The TRS transform tuple to use for transformation.</p></li>
+<li><p><strong>points</strong> (<em>torch.Tensor</em>) – The points to transform of shape […, 3].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed points of shape […, 3].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skel_state.html" class="btn btn-neutral float-left" title="pymomentum.skel_state" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solver.html" class="btn btn-neutral float-right" title="pymomentum.solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

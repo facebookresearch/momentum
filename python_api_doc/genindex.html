@@ -44,6 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
@@ -409,14 +410,16 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.bind_pose">bind_pose (pymomentum.geometry.Character property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="quaternion.html#pymomentum.quaternion.blend">blend() (in module pymomentum.quaternion)</a>
 
       <ul>
         <li><a href="skel_state.html#pymomentum.skel_state.blend">(in module pymomentum.skel_state)</a>
 </li>
+        <li><a href="trs.html#pymomentum.trs.blend">(in module pymomentum.trs)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.blend_shape">blend_shape (pymomentum.geometry.Character property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.blend_shape_parameters">blend_shape_parameters (pymomentum.geometry.ParameterTransform property)</a>
@@ -647,14 +650,14 @@
 </li>
       <li><a href="solver2.html#pymomentum.solver2.FixedAxisDiffErrorFunction">FixedAxisDiffErrorFunction (class in pymomentum.solver2)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.fps">fps (pymomentum.geometry.GltfBuilder property)</a>
 
       <ul>
         <li><a href="geometry.html#pymomentum.geometry.MarkerSequence.fps">(pymomentum.geometry.MarkerSequence property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.MarkerSequence.frames">frames (pymomentum.geometry.MarkerSequence property)</a>
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.from_axis_angle">from_axis_angle() (in module pymomentum.quaternion)</a>
@@ -666,17 +669,35 @@
 </li>
       </ul></li>
       <li><a href="skel_state.html#pymomentum.skel_state.from_matrix">from_matrix() (in module pymomentum.skel_state)</a>
+
+      <ul>
+        <li><a href="trs.html#pymomentum.trs.from_matrix">(in module pymomentum.trs)</a>
 </li>
+      </ul></li>
       <li><a href="skel_state.html#pymomentum.skel_state.from_quaternion">from_quaternion() (in module pymomentum.skel_state)</a>
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.from_rotation_matrix">from_rotation_matrix() (in module pymomentum.quaternion)</a>
+
+      <ul>
+        <li><a href="trs.html#pymomentum.trs.from_rotation_matrix">(in module pymomentum.trs)</a>
 </li>
+      </ul></li>
       <li><a href="skel_state.html#pymomentum.skel_state.from_scale">from_scale() (in module pymomentum.skel_state)</a>
+
+      <ul>
+        <li><a href="trs.html#pymomentum.trs.from_scale">(in module pymomentum.trs)</a>
+</li>
+      </ul></li>
+      <li><a href="trs.html#pymomentum.trs.from_skeleton_state">from_skeleton_state() (in module pymomentum.trs)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.from_tensors">from_tensors() (pymomentum.geometry.BlendShape static method)</a>
 </li>
       <li><a href="skel_state.html#pymomentum.skel_state.from_translation">from_translation() (in module pymomentum.skel_state)</a>
+
+      <ul>
+        <li><a href="trs.html#pymomentum.trs.from_translation">(in module pymomentum.trs)</a>
 </li>
+      </ul></li>
       <li><a href="quaternion.html#pymomentum.quaternion.from_two_vectors">from_two_vectors() (in module pymomentum.quaternion)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FBXCoordSystemInfo.frontVector">frontVector (pymomentum.geometry.FBXCoordSystemInfo property)</a>
@@ -776,6 +797,8 @@
       <ul>
         <li><a href="skel_state.html#pymomentum.skel_state.identity">(in module pymomentum.skel_state)</a>
 </li>
+        <li><a href="trs.html#pymomentum.trs.identity">(in module pymomentum.trs)</a>
+</li>
       </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.SkinWeights.index">index (pymomentum.geometry.SkinWeights property)</a>
 </li>
@@ -783,6 +806,8 @@
 
       <ul>
         <li><a href="skel_state.html#pymomentum.skel_state.inverse">(in module pymomentum.skel_state)</a>
+</li>
+        <li><a href="trs.html#pymomentum.trs.inverse">(in module pymomentum.trs)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.inverse">(pymomentum.geometry.ParameterTransform method)</a>
 </li>
@@ -1019,10 +1044,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.LimitType.MinMaxJoint">MinMaxJoint (pymomentum.geometry.LimitType attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.LimitType.MinMaxJointPassive">MinMaxJointPassive (pymomentum.geometry.LimitType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.ModelOptions.model">model (pymomentum.marker_tracking.ModelOptions property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.model_parameter_index">model_parameter_index (pymomentum.geometry.LimitMinMax property)</a>
@@ -1059,6 +1084,8 @@
 </li>
         <li><a href="solver2.html#module-pymomentum.solver2">pymomentum.solver2</a>
 </li>
+        <li><a href="trs.html#module-pymomentum.trs">pymomentum.trs</a>
+</li>
       </ul></li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Motion">Motion (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
@@ -1068,6 +1095,8 @@
 
       <ul>
         <li><a href="skel_state.html#pymomentum.skel_state.multiply">(in module pymomentum.skel_state)</a>
+</li>
+        <li><a href="trs.html#pymomentum.trs.multiply">(in module pymomentum.trs)</a>
 </li>
       </ul></li>
       <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions.multithreaded">multithreaded (pymomentum.solver2.SequenceSolverOptions property)</a>
@@ -1272,10 +1301,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.pose_mesh">pose_mesh() (pymomentum.geometry.Character method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.pose_parameters">pose_parameters (pymomentum.geometry.ParameterTransform property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.PosePrior">PosePrior (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.PosePriorErrorFunction">PosePriorErrorFunction (class in pymomentum.solver2)</a>
@@ -1356,6 +1385,13 @@
 
       <ul>
         <li><a href="solver2.html#module-pymomentum.solver2">module</a>
+</li>
+      </ul></li>
+      <li>
+    pymomentum.trs
+
+      <ul>
+        <li><a href="trs.html#module-pymomentum.trs">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1543,6 +1579,8 @@
       <ul>
         <li><a href="skel_state.html#pymomentum.skel_state.slerp">(in module pymomentum.skel_state)</a>
 </li>
+        <li><a href="trs.html#pymomentum.trs.slerp">(in module pymomentum.trs)</a>
+</li>
       </ul></li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig.smoothing">smoothing (pymomentum.marker_tracking.TrackingConfig property)</a>
 </li>
@@ -1634,21 +1672,27 @@
         <li><a href="solver2.html#pymomentum.solver2.SolverOptions.threshold">(pymomentum.solver2.SolverOptions property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.to_bytes">to_bytes() (pymomentum.geometry.BlendShape method)</a>
 
       <ul>
         <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.to_bytes">(pymomentum.geometry.GltfBuilder method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.to_gltf">to_gltf() (pymomentum.geometry.Character static method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.to_legacy_json_string">to_legacy_json_string() (pymomentum.geometry.Character static method)</a>
 </li>
       <li><a href="skel_state.html#pymomentum.skel_state.to_matrix">to_matrix() (in module pymomentum.skel_state)</a>
+
+      <ul>
+        <li><a href="trs.html#pymomentum.trs.to_matrix">(in module pymomentum.trs)</a>
 </li>
+      </ul></li>
       <li><a href="quaternion.html#pymomentum.quaternion.to_rotation_matrix">to_rotation_matrix() (in module pymomentum.quaternion)</a>
+</li>
+      <li><a href="trs.html#pymomentum.trs.to_skeleton_state">to_skeleton_state() (in module pymomentum.trs)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mppca.to_tensors">to_tensors() (pymomentum.geometry.Mppca method)</a>
 </li>
@@ -1657,7 +1701,11 @@
       <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.transform">transform (pymomentum.geometry.ParameterTransform property)</a>
 </li>
       <li><a href="skel_state.html#pymomentum.skel_state.transform_points">transform_points() (in module pymomentum.skel_state)</a>
+
+      <ul>
+        <li><a href="trs.html#pymomentum.trs.transform_points">(in module pymomentum.trs)</a>
 </li>
+      </ul></li>
       <li><a href="solver.html#pymomentum.solver.transform_pose">transform_pose() (in module pymomentum.solver)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.TaperedCapsule.transformation">transformation (pymomentum.geometry.TaperedCapsule property)</a>
