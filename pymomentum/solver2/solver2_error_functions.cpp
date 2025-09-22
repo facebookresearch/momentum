@@ -24,6 +24,7 @@
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/state_error_function.h>
 #include <momentum/character_solver/vertex_projection_error_function.h>
+#include <momentum/character_solver/vertex_vertex_distance_error_function.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
 #include <fmt/format.h>
@@ -1238,6 +1239,162 @@ distance is greater than zero (ie. the point being above).)")
           py::arg("name") = std::optional<std::vector<std::string>>{});
 }
 
+void defVertexVertexDistanceErrorFunction(py::module_& m) {
+  py::class_<mm::VertexVertexDistanceConstraintT<float>>(
+      m, "VertexVertexDistanceConstraint")
+      .def(
+          "__repr__",
+          [](const mm::VertexVertexDistanceConstraintT<float>& self) {
+            return fmt::format(
+                "VertexVertexDistanceConstraint(vertex_index1={}, vertex_index2={}, weight={}, target_distance={})",
+                self.vertexIndex1,
+                self.vertexIndex2,
+                self.weight,
+                self.targetDistance);
+          })
+      .def_readonly(
+          "vertex_index1",
+          &mm::VertexVertexDistanceConstraintT<float>::vertexIndex1,
+          "The index of the first vertex")
+      .def_readonly(
+          "vertex_index2",
+          &mm::VertexVertexDistanceConstraintT<float>::vertexIndex2,
+          "The index of the second vertex")
+      .def_readonly(
+          "weight",
+          &mm::VertexVertexDistanceConstraintT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "target_distance",
+          &mm::VertexVertexDistanceConstraintT<float>::targetDistance,
+          "The target distance between the two vertices");
+
+  py::class_<
+      mm::VertexVertexDistanceErrorFunctionT<float>,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::VertexVertexDistanceErrorFunctionT<float>>>(
+      m,
+      "VertexVertexDistanceErrorFunction",
+      R"(Error function that minimizes the distance between pairs of vertices on the character's mesh.
+
+This is useful for constraints where you want to maintain specific distances between
+different parts of the character mesh, such as keeping fingers at a certain distance
+or maintaining the width of body parts.)")
+      .def(
+          "__repr__",
+          [](const mm::VertexVertexDistanceErrorFunctionT<float>& self) {
+            return fmt::format(
+                "VertexVertexDistanceErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
+          py::init<>(
+              [](const mm::Character& character, float weight)
+                  -> std::shared_ptr<
+                      mm::VertexVertexDistanceErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
+                auto result = std::make_shared<
+                    mm::VertexVertexDistanceErrorFunctionT<float>>(character);
+                result->setWeight(weight);
+                return result;
+              }),
+          R"(Initialize a VertexVertexDistanceErrorFunction.
+
+            :param character: The character to use.
+            :param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::VertexVertexDistanceErrorFunctionT<float>& self,
+             int vertexIndex1,
+             int vertexIndex2,
+             float weight,
+             float targetDistance) {
+            validateVertexIndex(
+                vertexIndex1, "vertex_index1", self.getCharacter());
+            validateVertexIndex(
+                vertexIndex2, "vertex_index2", self.getCharacter());
+            validateWeight(weight, "weight");
+            self.addConstraint(
+                vertexIndex1, vertexIndex2, weight, targetDistance);
+          },
+          R"(Adds a vertex-to-vertex distance constraint to the error function.
+
+        :param vertex_index1: The index of the first vertex.
+        :param vertex_index2: The index of the second vertex.
+        :param weight: The weight of the constraint.
+        :param target_distance: The desired distance between the two vertices.)",
+          py::arg("vertex_index1"),
+          py::arg("vertex_index2"),
+          py::arg("weight"),
+          py::arg("target_distance"))
+      .def(
+          "add_constraints",
+          [](mm::VertexVertexDistanceErrorFunctionT<float>& self,
+             const py::array_t<int>& vertexIndex1,
+             const py::array_t<int>& vertexIndex2,
+             const py::array_t<float>& weight,
+             const py::array_t<float>& targetDistance) {
+            ArrayShapeValidator validator;
+            const int nConsIdx = -1;
+            validator.validate(
+                vertexIndex1, "vertex_index1", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(
+                vertexIndex1, "vertex_index1", self.getCharacter());
+            validator.validate(
+                vertexIndex2, "vertex_index2", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(
+                vertexIndex2, "vertex_index2", self.getCharacter());
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+            validateWeights(weight, "weight");
+            validator.validate(
+                targetDistance, "target_distance", {nConsIdx}, {"n_cons"});
+
+            auto vertexIndex1Acc = vertexIndex1.unchecked<1>();
+            auto vertexIndex2Acc = vertexIndex2.unchecked<1>();
+            auto weightAcc = weight.unchecked<1>();
+            auto targetDistanceAcc = targetDistance.unchecked<1>();
+
+            py::gil_scoped_release release;
+
+            for (py::ssize_t i = 0; i < vertexIndex1.shape(0); ++i) {
+              self.addConstraint(
+                  vertexIndex1Acc(i),
+                  vertexIndex2Acc(i),
+                  weightAcc(i),
+                  targetDistanceAcc(i));
+            }
+          },
+          R"(Adds multiple vertex-to-vertex distance constraints to the error function.
+
+        :param vertex_index1: A numpy array of indices for the first vertices.
+        :param vertex_index2: A numpy array of indices for the second vertices.
+        :param weight: A numpy array of weights for the constraints.
+        :param target_distance: A numpy array of desired distances between vertex pairs.)",
+          py::arg("vertex_index1"),
+          py::arg("vertex_index2"),
+          py::arg("weight"),
+          py::arg("target_distance"))
+      .def(
+          "clear_constraints",
+          &mm::VertexVertexDistanceErrorFunctionT<float>::clearConstraints,
+          "Clears all vertex-to-vertex distance constraints from the error function.")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::VertexVertexDistanceErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of vertex-to-vertex distance constraints.")
+      .def(
+          "num_constraints",
+          &mm::VertexVertexDistanceErrorFunctionT<float>::numConstraints,
+          "Returns the number of constraints.");
+}
+
 } // namespace
 
 void addErrorFunctions(py::module_& m) {
@@ -2237,6 +2394,9 @@ rotation matrix to a target rotation.)")
 
   // Vertex Projection error function
   defVertexProjectionErrorFunction(m);
+
+  // Vertex-to-vertex distance error function
+  defVertexVertexDistanceErrorFunction(m);
 }
 
 } // namespace pymomentum
