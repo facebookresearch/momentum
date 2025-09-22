@@ -32,6 +32,20 @@ using namespace momentum;
 
 namespace momentum {
 
+/// Sample representative frames from motion data to maximize parameter variance.
+///
+/// Uses a greedy algorithm to select frames that are maximally different from each other
+/// in parameter space, while filtering out frames with high marker tracking errors.
+/// This is useful for calibration where you want to solve on a diverse set of poses
+/// rather than all frames.
+///
+/// @param character The character model used for computing marker errors
+/// @param initialMotion Initial motion parameters matrix (parameters x frames)
+/// @param markerData Marker observations for each frame
+/// @param parameters Set of parameters to consider for variance calculation
+/// @param frameStride Only consider every frameStride-th frame as candidates
+/// @param numSamples Maximum number of frames to sample
+/// @return Vector of frame indices representing the selected keyframes
 std::vector<size_t> sampleFrames(
     momentum::Character& character,
     const MatrixXf& initialMotion,
@@ -151,6 +165,23 @@ std::vector<size_t> sampleFrames(
   return frameIndices;
 }
 
+/// Track motion across multiple frames simultaneously with temporal constraints.
+///
+/// This is the main global optimization function that solves for both pose parameters
+/// and global parameters (scaling, locators, blend shapes) across multiple frames
+/// simultaneously. It enforces temporal smoothness constraints and can handle
+/// calibration scenarios where identity parameters need to be solved.
+///
+/// @param markerData Marker observations for each frame
+/// @param character The character model with skeleton, locators, and parameter transform
+/// @param globalParams Set of global parameters to solve (scaling, locators, etc.)
+/// @param initialMotion Initial parameter values (parameters x frames)
+/// @param config Tracking configuration settings
+/// @param regularizer Weight for regularizing changes to global parameters
+/// @param frameStride Process every frameStride-th frame (1 = all frames)
+/// @param enforceFloorInFirstFrame Force floor contact constraints in first frame
+/// @param firstFramePoseConstraintSet Name of pose constraint set for first frame
+/// @return Solved motion parameters matrix (parameters x frames)
 Eigen::MatrixXf trackSequence(
     const gsl::span<const std::vector<Marker>> markerData,
     const Character& character,
@@ -180,6 +211,23 @@ Eigen::MatrixXf trackSequence(
       firstFramePoseConstraintSet);
 }
 
+/// Track motion across multiple frames simultaneously for specific frame indices.
+///
+/// This is the same as the main trackSequence function above, but instead of using
+/// a frameStride to sample frames uniformly, it tracks motion only for the specified
+/// frame indices. This is particularly useful during calibration when you want to
+/// solve on carefully selected keyframes rather than uniformly sampled frames.
+///
+/// @param markerData Marker observations for each frame
+/// @param character The character model with skeleton, locators, and parameter transform
+/// @param globalParams Set of global parameters to solve (scaling, locators, etc.)
+/// @param initialMotion Initial parameter values (parameters x frames)
+/// @param config Tracking configuration settings
+/// @param frames Vector of specific frame indices to solve
+/// @param regularizer Weight for regularizing changes to global parameters
+/// @param enforceFloorInFirstFrame Force floor contact constraints in first frame
+/// @param firstFramePoseConstraintSet Name of pose constraint set for first frame
+/// @return Solved motion parameters matrix (parameters x frames)
 Eigen::MatrixXf trackSequence(
     const gsl::span<const std::vector<Marker>> markerData,
     const Character& character,
@@ -391,6 +439,19 @@ Eigen::MatrixXf trackSequence(
   return outMotion;
 }
 
+/// Track poses independently per frame with fixed character identity.
+///
+/// This is the main production tracking function used after character calibration.
+/// It solves each frame independently using a per-frame optimizer, which makes it
+/// robust to tracking failures. The character identity (scaling, locators, blend shapes)
+/// is fixed from calibration and only pose parameters are solved.
+///
+/// @param markerData Marker observations for each frame
+/// @param character The character model with calibrated identity parameters
+/// @param globalParams Fixed global parameters (scaling, locators, etc.) from calibration
+/// @param config Tracking configuration settings
+/// @param frameStride Process every frameStride-th frame (1 = all frames)
+/// @return Solved motion parameters matrix (parameters x frames) with fixed identity
 Eigen::MatrixXf trackPosesPerframe(
     const gsl::span<const std::vector<Marker>> markerData,
     const Character& character,
@@ -562,6 +623,19 @@ Eigen::MatrixXf trackPosesPerframe(
   return motion;
 }
 
+/// Track poses independently for specific frame indices with fixed character identity.
+///
+/// Similar to trackPosesPerframe, but only solves for the specified frame indices
+/// rather than processing frames with a stride. This is particularly useful during
+/// calibration when you want to solve poses only for carefully selected keyframes
+/// that have been sampled for maximum parameter variance.
+///
+/// @param markerData Marker observations for each frame
+/// @param character The character model with fixed identity parameters
+/// @param initialMotion Initial parameter values (parameters x frames)
+/// @param config Tracking configuration settings
+/// @param frameIndices Vector of specific frame indices to solve
+/// @return Solved motion parameters matrix (parameters x frames) with poses for selected frames
 Eigen::MatrixXf trackPosesForFrames(
     const gsl::span<const std::vector<Marker>> markerData,
     const Character& character,
@@ -721,6 +795,18 @@ Character addSkinnedLocatorParametersToTransform(Character character) {
   return character;
 }
 
+/// Calibrate character identity parameters (scaling, locators, blend shapes) from marker data.
+///
+/// This is the main calibration function that solves for global character parameters
+/// that remain constant across all frames. It uses a multi-stage approach:
+/// 1. Initialize poses with fixed identity
+/// 2. Alternate between solving global parameters and poses
+/// 3. Fine-tune locator positions
+///
+/// @param markerData Marker observations for each frame
+/// @param config Calibration configuration settings
+/// @param character Character model to calibrate (modified in-place)
+/// @param identity Output identity parameters (scaling, blend shapes)
 void calibrateModel(
     const gsl::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
@@ -944,6 +1030,17 @@ void calibrateModel(
   identity.v = motion.col(0).head(transform.numAllModelParameters());
 }
 
+/// Calibrate only locator positions with fixed character identity parameters.
+///
+/// This is a specialized calibration function that only solves for locator positions
+/// while keeping all other character parameters (scaling, blend shapes) fixed.
+/// This is useful when you have reliable identity parameters and only need to
+/// fine-tune marker positions.
+///
+/// @param markerData Marker observations for each frame
+/// @param config Calibration configuration settings
+/// @param identity Fixed identity parameters (scaling, blend shapes)
+/// @param character Character model to calibrate (locators modified in-place)
 void calibrateLocators(
     const gsl::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
@@ -1040,6 +1137,17 @@ void calibrateLocators(
   }
 }
 
+/// Refine existing motion by smoothing and optionally recalibrating identity/locators.
+///
+/// This is a post-processing function that takes an already tracked motion and improves it
+/// by applying temporal smoothness constraints, and optionally recalibrating character identity
+/// or locator positions. It uses the sequence solver to enforce temporal coherence across frames.
+///
+/// @param markerData Marker observations for each frame
+/// @param motion Initial motion to refine (parameters x frames)
+/// @param config Refinement configuration settings
+/// @param character Character model (may be modified if calibration is enabled)
+/// @return Refined motion parameters matrix with improved temporal consistency
 MatrixXf refineMotion(
     gsl::span<const std::vector<momentum::Marker>> markerData,
     const MatrixXf& motion,
@@ -1089,6 +1197,17 @@ MatrixXf refineMotion(
   return newMotion;
 }
 
+/// Compute average and maximum marker tracking errors across all frames.
+///
+/// This is a utility function for evaluating tracking quality by measuring the
+/// Euclidean distance between observed marker positions and their corresponding
+/// locator positions on the character. It provides both average error per frame
+/// and the maximum error encountered across all markers and frames.
+///
+/// @param markerData Marker observations for each frame
+/// @param motion Solved motion parameters matrix (parameters x frames)
+/// @param character Character model with locators
+/// @return Pair of (average_error, max_error) in world units
 std::pair<float, float> getLocatorError(
     gsl::span<const std::vector<momentum::Marker>> markerData,
     const MatrixXf& motion,
