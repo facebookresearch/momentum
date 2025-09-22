@@ -231,6 +231,11 @@ mt_python_library(
   PYMOMENTUM_SOURCES_VARS skel_state_sources
 )
 
+mt_python_library(
+  NAME trs
+  PYMOMENTUM_SOURCES_VARS trs_sources
+)
+
 #===============================================================================
 # Tests
 #===============================================================================
