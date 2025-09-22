@@ -1448,6 +1448,144 @@ class TestSolver(unittest.TestCase):
         self.assertIn("VertexSequenceErrorFunction", repr_str)
         self.assertIn("num_constraints=2", repr_str)
 
+    def test_vertex_vertex_distance_constraint(self) -> None:
+        """Test VertexVertexDistanceErrorFunction to ensure vertices are pulled to target distance."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+
+        # Choose two vertices to constrain - use vertices that are initially far apart
+        vertex_index1 = 0
+        vertex_index2 = character.mesh.vertices.shape[0] - 1  # Last vertex
+        target_distance = 0.5  # Target distance between the two vertices
+        weight = 1.0
+
+        # Get initial positions of the vertices
+        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_init
+        )
+        initial_mesh = character.skin_points(skel_state_init)
+        initial_pos1 = initial_mesh[vertex_index1, :3]
+        initial_pos2 = initial_mesh[vertex_index2, :3]
+        initial_distance = torch.norm(initial_pos2 - initial_pos1).item()
+
+        # Create VertexVertexDistanceErrorFunction
+        vertex_distance_error = pym_solver2.VertexVertexDistanceErrorFunction(character)
+
+        # Test basic properties
+        self.assertEqual(vertex_distance_error.num_constraints(), 0)
+        self.assertEqual(len(vertex_distance_error.constraints), 0)
+
+        # Add a single constraint
+        vertex_distance_error.add_constraint(
+            vertex_index1=vertex_index1,
+            vertex_index2=vertex_index2,
+            weight=weight,
+            target_distance=target_distance,
+        )
+
+        # Verify constraint was added
+        self.assertEqual(vertex_distance_error.num_constraints(), 1)
+        self.assertEqual(len(vertex_distance_error.constraints), 1)
+
+        constraint = vertex_distance_error.constraints[0]
+        self.assertEqual(constraint.vertex_index1, vertex_index1)
+        self.assertEqual(constraint.vertex_index2, vertex_index2)
+        self.assertAlmostEqual(constraint.weight, weight)
+        self.assertAlmostEqual(constraint.target_distance, target_distance)
+
+        # Create solver function with the vertex distance error
+        solver_function = pym_solver2.SkeletonSolverFunction(
+            character, [vertex_distance_error]
+        )
+
+        # Set solver options
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 100
+        solver_options.regularization = 1e-5
+
+        # Create and run the solver
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+        model_params_final = solver.solve(model_params_init.numpy())
+
+        # Convert final model parameters to skeleton state
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final)
+        )
+
+        # Compute final mesh and vertex positions
+        final_mesh = character.skin_points(skel_state_final)
+        final_pos1 = final_mesh[vertex_index1, :3]
+        final_pos2 = final_mesh[vertex_index2, :3]
+        final_distance = torch.norm(final_pos2 - final_pos1).item()
+
+        # Assert that the final distance is close to the target distance
+        self.assertAlmostEqual(
+            final_distance,
+            target_distance,
+            delta=1e-3,
+            msg=f"Final distance {final_distance} does not match target {target_distance}",
+        )
+
+        # Verify that the distance actually changed from the initial distance
+        self.assertNotAlmostEqual(
+            initial_distance,
+            final_distance,
+            delta=1e-1,
+            msg=f"Distance did not change significantly from initial {initial_distance} to final {final_distance}",
+        )
+
+        # Test multiple constraints using add_constraints
+        vertex_distance_error.clear_constraints()
+        self.assertEqual(vertex_distance_error.num_constraints(), 0)
+
+        # Add multiple constraints
+        vertex_indices1 = np.array([0, 1], dtype=np.int32)
+        vertex_indices2 = np.array([2, 3], dtype=np.int32)
+        weights = np.array([1.0, 2.0], dtype=np.float32)
+        target_distances = np.array([0.3, 0.7], dtype=np.float32)
+
+        vertex_distance_error.add_constraints(
+            vertex_index1=vertex_indices1,
+            vertex_index2=vertex_indices2,
+            weight=weights,
+            target_distance=target_distances,
+        )
+
+        # Verify multiple constraints were added
+        self.assertEqual(vertex_distance_error.num_constraints(), 2)
+        constraints = vertex_distance_error.constraints
+        self.assertEqual(len(constraints), 2)
+
+        # Check first constraint
+        self.assertEqual(constraints[0].vertex_index1, 0)
+        self.assertEqual(constraints[0].vertex_index2, 2)
+        self.assertAlmostEqual(constraints[0].weight, 1.0)
+        self.assertAlmostEqual(constraints[0].target_distance, 0.3)
+
+        # Check second constraint
+        self.assertEqual(constraints[1].vertex_index1, 1)
+        self.assertEqual(constraints[1].vertex_index2, 3)
+        self.assertAlmostEqual(constraints[1].weight, 2.0)
+        self.assertAlmostEqual(constraints[1].target_distance, 0.7)
+
+        # Test string representation
+        repr_str = repr(vertex_distance_error)
+        self.assertIn("VertexVertexDistanceErrorFunction", repr_str)
+        self.assertIn("num_constraints=2", repr_str)
+
+        # Test constraint string representation
+        constraint_repr = repr(constraints[0])
+        self.assertIn("VertexVertexDistanceConstraint", constraint_repr)
+        self.assertIn("vertex_index1=0", constraint_repr)
+        self.assertIn("vertex_index2=2", constraint_repr)
+
     def test_weight_validation(self) -> None:
         """Test that error functions throw ValueError when negative weights are passed."""
 
