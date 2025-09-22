@@ -135,6 +135,10 @@ skel_state_sources = [
     "skel_state.py",
 ]
 
+trs_sources = [
+    "trs.py",
+]
+
 marker_tracking_public_headers = [
 ]
 
