@@ -227,6 +227,7 @@ character_solver_public_headers = [
     "character_solver/normal_error_function.h",
     "character_solver/orientation_error_function.h",
     "character_solver/plane_error_function.h",
+    "character_solver/point_triangle_vertex_error_function.h",
     "character_solver/pose_prior_error_function.h",
     "character_solver/position_error_function.h",
     "character_solver/projection_error_function.h",
@@ -240,7 +241,7 @@ character_solver_public_headers = [
     "character_solver/trust_region_qr.h",
     "character_solver/vertex_error_function.h",
     "character_solver/vertex_projection_error_function.h",
-    "character_solver/point_triangle_vertex_error_function.h",
+    "character_solver/vertex_vertex_distance_error_function.h",
 ]
 
 character_solver_sources = [
@@ -255,6 +256,7 @@ character_solver_sources = [
     "character_solver/normal_error_function.cpp",
     "character_solver/orientation_error_function.cpp",
     "character_solver/plane_error_function.cpp",
+    "character_solver/point_triangle_vertex_error_function.cpp",
     "character_solver/pose_prior_error_function.cpp",
     "character_solver/position_error_function.cpp",
     "character_solver/projection_error_function.cpp",
@@ -267,7 +269,7 @@ character_solver_sources = [
     "character_solver/trust_region_qr.cpp",
     "character_solver/vertex_error_function.cpp",
     "character_solver/vertex_projection_error_function.cpp",
-    "character_solver/point_triangle_vertex_error_function.cpp",
+    "character_solver/vertex_vertex_distance_error_function.cpp",
 ]
 
 character_solver_test_sources = [
