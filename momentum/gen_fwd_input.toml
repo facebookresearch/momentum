@@ -84,6 +84,7 @@ template_classes = [
     "NormalErrorFunction",
     "OrientationErrorFunction",
     "PlaneErrorFunction",
+    "PointTriangleVertexErrorFunction",
     "PosePriorErrorFunction",
     "PoseTransformSolver",
     "PositionErrorFunction",
@@ -97,7 +98,7 @@ template_classes = [
     "TrustRegionQR",
     "VertexErrorFunction",
     "VertexProjectionErrorFunction",
-    "PointTriangleVertexErrorFunction",
+    "VertexVertexDistanceErrorFunction",
 ]
 
 [[fwd]]
