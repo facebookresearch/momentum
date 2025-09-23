@@ -94,8 +94,27 @@ def multiply(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
     """
     Multiply two quaternions together.
 
-    :parameter q1: A quaternion ((x, y, z), w)).
-    :parameter q2: A quaternion ((x, y, z), w)).
+    Normalizes input quaternions before multiplication for numerical stability.
+    For performance-critical code where quaternions are guaranteed to be normalized,
+    use :func:`multiply_assume_normalized`.
+
+    :param q1: A quaternion ((x, y, z), w)).
+    :param q2: A quaternion ((x, y, z), w)).
+    :return: The normalized product q1*q2.
+    """
+    return multiply_assume_normalized(normalize(q1), normalize(q2))
+
+
+def multiply_assume_normalized(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
+    """
+    Multiply two quaternions together, assuming they are already normalized.
+
+    This is a performance-optimized version of :func:`multiply` that skips
+    normalization of the input quaternions. Use this only when you are certain
+    both quaternions are already normalized.
+
+    :param q1: A normalized quaternion ((x, y, z), w)).
+    :param q2: A normalized quaternion ((x, y, z), w)).
     :return: The product q1*q2.
     """
     check(q1)
@@ -173,8 +192,27 @@ def rotate_vector(q: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
     """
     Rotate a vector by a quaternion.
 
-    :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
-    :parameter v: (nBatch x k x 3) vector.
+    Normalizes the input quaternion before rotation for numerical stability.
+    For performance-critical code where quaternions are guaranteed to be normalized,
+    use :func:`rotate_vector_assume_normalized`.
+
+    :param q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
+    :param v: (nBatch x k x 3) vector.
+    :return: (nBatch x k x 3) rotated vectors.
+    """
+    return rotate_vector_assume_normalized(normalize(q), v)
+
+
+def rotate_vector_assume_normalized(q: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
+    """
+    Rotate a vector by a quaternion, assuming the quaternion is already normalized.
+
+    This is a performance-optimized version of :func:`rotate_vector` that skips
+    normalization of the input quaternion. Use this only when you are certain
+    the quaternion is already normalized.
+
+    :param q: (nBatch x k x 4) tensor with normalized quaternions in ((x, y, z), w) format.
+    :param v: (nBatch x k x 3) vector.
     :return: (nBatch x k x 3) rotated vectors.
     """
     r, axis = split(q)
