@@ -63,7 +63,7 @@ Note:
     batched operations for efficient processing of multiple quaternions.
 """
 
-from typing import Sequence
+from typing import Sequence, Tuple
 
 import torch
 
@@ -529,3 +529,154 @@ def from_two_vectors(v1: torch.Tensor, v2: torch.Tensor) -> torch.Tensor:
 
     vec = torch.where(scalar <= 0, axis, vec)
     return normalize(torch.cat((vec, scalar), dim=-1))
+
+
+def normalize_backprop(q: torch.Tensor, grad: torch.Tensor) -> torch.Tensor:
+    """
+    Custom backpropagation for quaternion normalization.
+
+    This function computes gradients for quaternion normalization in a numerically
+    stable way, avoiding potential issues with automatic differentiation when
+    quaternions are near zero norm.
+
+    :param q: The input quaternion tensor of shape (..., 4).
+    :param grad: The gradient from the output of shape (..., 4).
+    :return: The gradient with respect to the input quaternion q.
+    """
+    with torch.no_grad():
+        s = torch.linalg.norm(q, dim=-1, keepdim=True)
+        g = s * s * grad - q * (torch.sum(q * grad, dim=-1, keepdim=True))
+        g = g / (s * s * s)
+    return g
+
+
+def rotate_vector_backprop(
+    q: torch.Tensor, v: torch.Tensor, grad: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Custom backpropagation for quaternion vector rotation.
+
+    Computes gradients for the quaternion rotation operation using the
+    Euler-Rodrigues formula.
+
+    This version normalizes the input quaternion. For performance-critical code
+    where quaternions are guaranteed to be normalized, use
+    :func:`rotate_vector_backprop_assume_normalized`.
+
+    :param q: The quaternion tensor of shape (..., 4).
+    :param v: The vector tensor of shape (..., 3).
+    :param grad: The gradient from the output of shape (..., 3).
+    :return: A tuple of (grad_q, grad_v) representing gradients with respect
+             to the quaternion and vector respectively.
+    """
+    q_normalized = normalize(q)
+    grad_q_normalized, grad_v = rotate_vector_backprop_assume_normalized(
+        q_normalized, v, grad
+    )
+    # Convert gradient from normalized quaternion back to original quaternion
+    grad_q = normalize_backprop(q, grad_q_normalized)
+    return grad_q, grad_v
+
+
+def rotate_vector_backprop_assume_normalized(
+    q: torch.Tensor, v: torch.Tensor, grad: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Custom backpropagation for quaternion vector rotation assuming unit quaternions.
+
+    This is a performance-optimized version of :func:`rotate_vector_backprop` that
+    assumes the input quaternion is already normalized. Use this only when you are
+    certain the quaternion is normalized to avoid numerical issues.
+
+    :param q: The normalized quaternion tensor of shape (..., 4).
+    :param v: The vector tensor of shape (..., 3).
+    :param grad: The gradient from the output of shape (..., 3).
+    :return: A tuple of (grad_q, grad_v) representing gradients with respect
+             to the quaternion and vector respectively.
+    """
+    with torch.no_grad():
+        # Split quaternion into axis and scalar parts
+        a = q[..., :3]  # axis
+        w = q[..., 3:]  # scalar
+
+        # Compute cross products needed for gradients
+        av = torch.cross(a, v, dim=-1)
+        ag = torch.cross(a, grad, dim=-1)
+        aag = torch.cross(a, ag, dim=-1)
+        gv = torch.cross(grad, v, dim=-1)
+
+        # Compute dot products needed for gradients
+        adv = (a * v).sum(dim=-1, keepdim=True)
+        adg = (a * grad).sum(dim=-1, keepdim=True)
+        vdg = (v * grad).sum(dim=-1, keepdim=True)
+        avdg = (av * grad).sum(dim=-1, keepdim=True)
+
+        # Calculate gradients
+        grad_v = grad - 2 * w * ag + 2 * aag
+        grad_w = 2 * avdg
+        grad_a = -2 * gv * w + 2 * (adv * grad + v * adg - 2 * a * vdg)
+
+        grad_q = torch.cat([grad_a, grad_w], dim=-1)
+        # For unit quaternions, project gradient to tangent space
+        grad_q = grad_q - q * torch.sum(q * grad_q, dim=-1, keepdim=True)
+
+    return grad_q, grad_v
+
+
+def multiply_backprop(
+    q1: torch.Tensor, q2: torch.Tensor, grad_q: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Custom backpropagation for quaternion multiplication.
+
+    Computes gradients for quaternion multiplication with proper handling of
+    normalization.
+
+    This version normalizes the input quaternions. For performance-critical code
+    where quaternions are guaranteed to be normalized, use
+    :func:`multiply_backprop_assume_normalized`.
+
+    :param q1: The first quaternion tensor of shape (..., 4).
+    :param q2: The second quaternion tensor of shape (..., 4).
+    :param grad_q: The gradient from the output of shape (..., 4).
+    :return: A tuple of (grad_q1, grad_q2) representing gradients with respect
+             to the first and second quaternions respectively.
+    """
+    q1_normalized = normalize(q1)
+    q2_normalized = normalize(q2)
+    grad_q1_normalized, grad_q2_normalized = multiply_backprop_assume_normalized(
+        q1_normalized, q2_normalized, grad_q
+    )
+    # Convert gradients from normalized quaternions back to original quaternions
+    grad_q1 = normalize_backprop(q1, grad_q1_normalized)
+    grad_q2 = normalize_backprop(q2, grad_q2_normalized)
+    return grad_q1, grad_q2
+
+
+def multiply_backprop_assume_normalized(
+    q1: torch.Tensor, q2: torch.Tensor, grad_q: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Custom backpropagation for quaternion multiplication assuming unit quaternions.
+
+    Computes gradients for quaternion multiplication when both input quaternions
+    are assumed to be normalized. This is more efficient than the general case
+    but should only be used when quaternions are guaranteed to be unit quaternions.
+
+    :param q1: The first normalized quaternion tensor of shape (..., 4).
+    :param q2: The second normalized quaternion tensor of shape (..., 4).
+    :param grad_q: The gradient from the output of shape (..., 4).
+    :return: A tuple of (grad_q1, grad_q2) representing gradients with respect
+             to the first and second quaternions respectively.
+    """
+    with torch.no_grad():
+        # Use quaternion multiplication properties for gradient computation
+        grad_q1 = multiply_assume_normalized(grad_q, conjugate(q2))
+        grad_q2 = multiply_assume_normalized(conjugate(q1), grad_q)
+
+        # For unit quaternions, project gradients to tangent space
+        q_result = multiply_assume_normalized(q1, q2)
+        grad_q1 = grad_q1 - q1 * torch.sum(q_result * grad_q, dim=-1, keepdim=True)
+        grad_q2 = grad_q2 - q2 * torch.sum(q_result * grad_q, dim=-1, keepdim=True)
+
+    return grad_q1, grad_q2
