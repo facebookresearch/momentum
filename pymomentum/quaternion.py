@@ -154,10 +154,13 @@ def inverse(q: torch.Tensor) -> torch.Tensor:
     """
     Compute the inverse of a quaternion.
 
+    Uses numerical clamping to avoid division by very small numbers,
+    improving numerical stability for near-zero quaternions.
+
     :parameter q: A quaternion ((x, y, z), w)).
     :return: The inverse.
     """
-    return conjugate(q) / (q * q).sum(-1, keepdim=True)
+    return conjugate(q) / torch.clamp((q * q).sum(-1, keepdim=True), min=1e-7)
 
 
 def _get_nonzero_denominator(d: torch.Tensor, eps: float) -> torch.Tensor:
