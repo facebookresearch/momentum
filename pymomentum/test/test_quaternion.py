@@ -546,6 +546,205 @@ class TestQuaternion(unittest.TestCase):
         self.assert_all_close(dq_general, dq_assume, tol=1e-4)
         self.assert_all_close(dv_general, dv_assume, tol=1e-4)
 
+    def test_from_rotation_matrix_numerical_stability(self) -> None:
+        """Test the enhanced matrix-to-quaternion conversion with numerical stability."""
+        torch.manual_seed(0)
+
+        # Test with random rotation matrices
+        nBatch = 10
+        quats_orig = generateRandomQuats(nBatch)
+        matrices = quaternion.to_rotation_matrix(quats_orig)
+
+        # Convert back using the enhanced method
+        quats_recovered = quaternion.from_rotation_matrix(matrices)
+        matrices_recovered = quaternion.to_rotation_matrix(quats_recovered)
+
+        # Check that matrices match (accounting for quaternion sign ambiguity)
+        self.assertLess(
+            torch.norm(matrices - matrices_recovered),
+            1e-4,
+            "Enhanced matrix-to-quaternion conversion should be stable",
+        )
+
+        # Test with identity matrices (edge case)
+        identity_matrices = torch.eye(3).expand(5, 3, 3)
+        identity_quats = quaternion.from_rotation_matrix(identity_matrices)
+        expected_identity = quaternion.identity().expand(5, 4)
+
+        # Check that identity matrices produce identity quaternions (up to sign)
+        diff1 = torch.norm(identity_quats - expected_identity, dim=-1)
+        diff2 = torch.norm(identity_quats + expected_identity, dim=-1)
+        min_diff = torch.minimum(diff1, diff2)
+        self.assertLess(torch.max(min_diff).item(), 1e-4)
+
+    def test_quaternion_inverse_numerical_stability(self) -> None:
+        """Test that the improved inverse function handles near-zero quaternions."""
+        torch.manual_seed(0)
+
+        # Test with normal quaternions
+        q_normal = generateRandomQuats(5)
+        q_inv = quaternion.inverse(q_normal)
+        q_identity = quaternion.multiply(q_normal, q_inv)
+        expected_identity = quaternion.identity().expand_as(q_identity)
+
+        self.assertLess(
+            torch.norm(q_identity - expected_identity),
+            1e-4,
+            "Inverse should work correctly for normal quaternions",
+        )
+
+        # Test with very small quaternions (near-zero norm)
+        q_small = torch.tensor([[1e-8, 1e-8, 1e-8, 1e-8]], dtype=torch.float64)
+        q_inv_small = quaternion.inverse(q_small)
+
+        # Should not produce NaN or Inf values
+        self.assertFalse(
+            torch.isnan(q_inv_small).any(), "Inverse should not produce NaN"
+        )
+        self.assertFalse(
+            torch.isinf(q_inv_small).any(), "Inverse should not produce Inf"
+        )
+
+    def test_quaternion_cross_validation(self) -> None:
+        """Cross-validate quaternion operations against rotation matrix operations."""
+        torch.manual_seed(0)
+        nMat = 10
+
+        # Generate random quaternions and vectors
+        q1 = generateRandomQuats(nMat)
+        q2 = generateRandomQuats(nMat)
+        v = torch.normal(mean=0, std=1, size=(nMat, 3), dtype=torch.float64)
+
+        # Test multiplication consistency
+        q_mult = quaternion.multiply(q1, q2)
+        m1 = quaternion.to_rotation_matrix(q1)
+        m2 = quaternion.to_rotation_matrix(q2)
+        m_mult = torch.bmm(m1, m2)
+        m_from_q_mult = quaternion.to_rotation_matrix(q_mult)
+
+        self.assertLess(
+            torch.norm(m_mult - m_from_q_mult),
+            1e-4,
+            "Quaternion multiplication should match matrix multiplication",
+        )
+
+        # Test vector rotation consistency
+        v_rotated_q = quaternion.rotate_vector(q1, v)
+        v_rotated_m = torch.bmm(m1, v.unsqueeze(-1)).squeeze(-1)
+
+        self.assertLess(
+            torch.norm(v_rotated_q - v_rotated_m),
+            1e-4,
+            "Quaternion vector rotation should match matrix rotation",
+        )
+
+    def test_assume_normalized_variants_consistency(self) -> None:
+        """Test that assume_normalized functions produce consistent results."""
+        torch.manual_seed(0)
+
+        # Generate already normalized quaternions
+        q1 = generateRandomQuats(10)
+        q2 = generateRandomQuats(10)
+        v = torch.normal(mean=0, std=1, size=(10, 3), dtype=torch.float64)
+
+        # Test multiply variants
+        q_mult_normal = quaternion.multiply(q1, q2)
+        q_mult_assume = quaternion.multiply_assume_normalized(q1, q2)
+
+        self.assertLess(
+            torch.norm(q_mult_normal - q_mult_assume),
+            1e-4,
+            "multiply and multiply_assume_normalized should give same results for normalized inputs",
+        )
+
+        # Test rotate vector variants
+        v_rot_normal = quaternion.rotate_vector(q1, v)
+        v_rot_assume = quaternion.rotate_vector_assume_normalized(q1, v)
+
+        self.assertLess(
+            torch.norm(v_rot_normal - v_rot_assume),
+            1e-4,
+            "rotate_vector and rotate_vector_assume_normalized should give same results for normalized inputs",
+        )
+
+    def test_matrix_conversion_round_trip(self) -> None:
+        """Test round-trip conversion between quaternions and matrices."""
+        torch.manual_seed(0)
+
+        # Test with various quaternion configurations
+        test_cases = [
+            generateRandomQuats(10),  # Random quaternions
+            quaternion.identity().expand(5, 4),  # Identity quaternions
+            quaternion.from_axis_angle(
+                torch.tensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+            ),  # Basic rotations
+        ]
+
+        for quats in test_cases:
+            # Forward: quaternion -> matrix -> quaternion
+            matrices = quaternion.to_rotation_matrix(quats)
+            quats_recovered = quaternion.from_rotation_matrix(matrices)
+            matrices_recovered = quaternion.to_rotation_matrix(quats_recovered)
+
+            # Check matrix consistency (matrices should match exactly)
+            self.assertLess(
+                torch.norm(matrices - matrices_recovered),
+                1e-4,
+                "Round-trip matrix conversion should be consistent",
+            )
+
+            # Check quaternion consistency (up to sign due to quaternion double cover)
+            diff_pos = torch.norm(quats - quats_recovered, dim=-1)
+            diff_neg = torch.norm(quats + quats_recovered, dim=-1)
+            min_diff = torch.minimum(diff_pos, diff_neg)
+            self.assertLess(
+                torch.max(min_diff).item(),
+                1e-4,
+                "Round-trip quaternion conversion should be consistent up to sign",
+            )
+
+    def test_backprop_gradient_consistency(self) -> None:
+        """Test that custom backprop functions match PyTorch autograd gradients."""
+        torch.manual_seed(0)
+
+        # Test with different batch sizes and ensure consistency
+        for batch_size in [1, 10, 100]:
+            q = torch.randn((batch_size, 4), dtype=torch.float64, requires_grad=True)
+            v = torch.randn((batch_size, 3), dtype=torch.float64, requires_grad=True)
+
+            # Test normalize backprop
+            grad_out = torch.randn_like(q)
+            autograd_grad = torch.autograd.grad(
+                quaternion.normalize(q), q, grad_out, retain_graph=True
+            )[0]
+            custom_grad = quaternion.normalize_backprop(q, grad_out)
+
+            self.assertLess(
+                torch.norm(autograd_grad - custom_grad),
+                1e-5,
+                f"Normalize backprop should match autograd (batch_size={batch_size})",
+            )
+
+            # Test rotate_vector backprop
+            grad_out_v = torch.randn((batch_size, 3), dtype=torch.float64)
+            autograd_grad_q, autograd_grad_v = torch.autograd.grad(
+                quaternion.rotate_vector(q, v), [q, v], grad_out_v, retain_graph=True
+            )
+            custom_grad_q, custom_grad_v = quaternion.rotate_vector_backprop(
+                q, v, grad_out_v
+            )
+
+            self.assertLess(
+                torch.norm(autograd_grad_q - custom_grad_q),
+                1e-5,
+                f"Rotate backprop quaternion grad should match autograd (batch_size={batch_size})",
+            )
+            self.assertLess(
+                torch.norm(autograd_grad_v - custom_grad_v),
+                1e-5,
+                f"Rotate backprop vector grad should match autograd (batch_size={batch_size})",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
