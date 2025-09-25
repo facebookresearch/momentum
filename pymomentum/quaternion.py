@@ -326,6 +326,37 @@ def euler_xyz_to_quaternion(euler_xyz: torch.Tensor) -> torch.Tensor:
     return q
 
 
+def euler_zyx_to_quaternion(euler_zyx: torch.Tensor) -> torch.Tensor:
+    """
+    Convert Euler ZYX angles to a quaternion.
+
+    This function converts ZYX Euler angles (yaw-pitch-roll convention) to quaternions.
+    The rotation order is Z-Y-X, meaning first rotate around Z-axis (yaw), then Y-axis (pitch),
+    then X-axis (roll).
+
+    :parameter euler_zyx: A tensor of shape (..., 3) representing the Euler ZYX angles
+                         in order [yaw, pitch, roll].
+    :return: A tensor of shape (..., 4) representing the quaternion in ((x, y, z), w) format.
+    """
+    yaw, pitch, roll = euler_zyx.unbind(-1)
+
+    # Compute half angles
+    cy = torch.cos(yaw * 0.5)
+    sy = torch.sin(yaw * 0.5)
+    cp = torch.cos(pitch * 0.5)
+    sp = torch.sin(pitch * 0.5)
+    cr = torch.cos(roll * 0.5)
+    sr = torch.sin(roll * 0.5)
+
+    # Compute quaternion components for ZYX convention
+    x = sr * cp * cy + cr * sp * sy
+    y = cr * sp * cy - sr * cp * sy
+    z = cr * cp * sy + sr * sp * cy
+    w = cr * cp * cy - sr * sp * sy
+
+    return torch.stack((x, y, z, w), dim=-1)
+
+
 def from_rotation_matrix(matrices: torch.Tensor) -> torch.Tensor:
     """
     Convert a rotation matrix to a quaternion.
