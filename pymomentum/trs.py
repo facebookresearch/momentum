@@ -192,17 +192,15 @@ def multiply(trs1: TRSTransform, trs2: TRSTransform) -> TRSTransform:
     t2, r2, s2 = trs2
 
     # Composed rotation: r1 @ r2
-    r_result = torch.bmm(r1.view(-1, 3, 3), r2.view(-1, 3, 3)).view_as(r1)
+    r_result = rotmat_multiply(r1, r2)
 
     # Composed scale: s1 * s2
     s_result = s1 * s2
 
     # Composed translation: t1 + r1 @ (s1 * t2)
     # First scale t2 by s1, then rotate by r1, then add t1
-    scaled_t2 = s1.unsqueeze(-1) * t2.unsqueeze(-1)  # [..., 3, 1]
-    rotated_scaled_t2 = torch.bmm(r1.view(-1, 3, 3), scaled_t2.view(-1, 3, 1)).view_as(
-        t1
-    )
+    scaled_t2 = s1 * t2  # [..., 3, 1]
+    rotated_scaled_t2 = rotmat_rotate_vector(r1, scaled_t2)
     t_result = t1 + rotated_scaled_t2
 
     return t_result, r_result, s_result
@@ -229,7 +227,7 @@ def inverse(trs: TRSTransform) -> TRSTransform:
     # Inverse translation: -R^T * (t / s)
     # First scale translation by inverse scale, then apply inverse rotation
     scaled_t = s_inv.unsqueeze(-1) * t.unsqueeze(-1)  # [..., 3, 1]
-    t_inv = -torch.bmm(r_inv.view(-1, 3, 3), scaled_t.view(-1, 3, 1)).view_as(t)
+    t_inv = -rotmat_multiply(r_inv, scaled_t).view_as(t)
 
     return t_inv, r_inv, s_inv
 
@@ -251,11 +249,7 @@ def transform_points(trs: TRSTransform, points: torch.Tensor) -> torch.Tensor:
     t, r, s = trs
 
     # Apply scale, then rotation, then translation: t + r @ (s * points)
-    scaled_points = s.unsqueeze(-1) * points.unsqueeze(-1)  # [..., 3, 1]
-    rotated_points = torch.bmm(r.view(-1, 3, 3), scaled_points.view(-1, 3, 1)).view_as(
-        points
-    )
-    transformed_points = t + rotated_points
+    transformed_points = t + rotmat_rotate_vector(r, s * points)
 
     return transformed_points
 
@@ -454,3 +448,50 @@ def blend(
     r_blend = quaternion.to_rotation_matrix(q_blend)
 
     return t_blend, r_blend, s_blend
+
+
+# ======================================================================
+# Rotation Matrix Utilities
+# ======================================================================
+
+
+def rotmat_inverse(r: torch.Tensor) -> torch.Tensor:
+    """
+    Compute the inverse of rotation matrices.
+
+    For orthogonal rotation matrices, the inverse is simply the transpose.
+
+    :parameter r: Rotation matrices of shape [..., 3, 3].
+    :type r: torch.Tensor
+    :return: Inverse rotation matrices of shape [..., 3, 3].
+    :rtype: torch.Tensor
+    """
+    return r.transpose(-2, -1)
+
+
+def rotmat_multiply(r1: torch.Tensor, r2: torch.Tensor) -> torch.Tensor:
+    """
+    Multiply two rotation matrices.
+
+    :parameter r1: First rotation matrices of shape [..., 3, 3].
+    :type r1: torch.Tensor
+    :parameter r2: Second rotation matrices of shape [..., 3, 3].
+    :type r2: torch.Tensor
+    :return: Product r1 @ r2 of shape [..., 3, 3].
+    :rtype: torch.Tensor
+    """
+    return torch.einsum("...ij,...jk->...ik", r1, r2)
+
+
+def rotmat_rotate_vector(r: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
+    """
+    Apply rotation matrices to vectors.
+
+    :parameter r: Rotation matrices of shape [..., 3, 3].
+    :type r: torch.Tensor
+    :parameter v: Vectors of shape [..., 3].
+    :type v: torch.Tensor
+    :return: Rotated vectors r @ v of shape [..., 3].
+    :rtype: torch.Tensor
+    """
+    return torch.einsum("...ij,...j->...i", r, v)
