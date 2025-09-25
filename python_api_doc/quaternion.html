@@ -62,9 +62,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.multiply_assume_normalized"><code class="docutils literal notranslate"><span class="pre">multiply_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.multiply_backprop"><code class="docutils literal notranslate"><span class="pre">multiply_backprop()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.multiply_backprop_assume_normalized"><code class="docutils literal notranslate"><span class="pre">multiply_backprop_assume_normalized()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.normalize_backprop"><code class="docutils literal notranslate"><span class="pre">normalize_backprop()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.quaternion_to_xyz_euler"><code class="docutils literal notranslate"><span class="pre">quaternion_to_xyz_euler()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.rotate_vector"><code class="docutils literal notranslate"><span class="pre">rotate_vector()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.rotate_vector_assume_normalized"><code class="docutils literal notranslate"><span class="pre">rotate_vector_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.rotate_vector_backprop"><code class="docutils literal notranslate"><span class="pre">rotate_vector_backprop()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.rotate_vector_backprop_assume_normalized"><code class="docutils literal notranslate"><span class="pre">rotate_vector_backprop_assume_normalized()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.to_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix()</span></code></a></li>
@@ -305,6 +312,8 @@ If not provided, all quaternions will be weighted equally.</p></li>
 <dt class="sig sig-object py" id="pymomentum.quaternion.inverse">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.inverse" title="Link to this definition"></a></dt>
 <dd><p>Compute the inverse of a quaternion.</p>
+<p>Uses numerical clamping to avoid division by very small numbers,
+improving numerical stability for near-zero quaternions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>q</strong> – A quaternion ((x, y, z), w)).</p>
@@ -319,6 +328,9 @@ If not provided, all quaternions will be weighted equally.</p></li>
 <dt class="sig sig-object py" id="pymomentum.quaternion.multiply">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.multiply" title="Link to this definition"></a></dt>
 <dd><p>Multiply two quaternions together.</p>
+<p>Normalizes input quaternions before multiplication for numerical stability.
+For performance-critical code where quaternions are guaranteed to be normalized,
+use <a class="reference internal" href="#pymomentum.quaternion.multiply_assume_normalized" title="pymomentum.quaternion.multiply_assume_normalized"><code class="xref py py-func docutils literal notranslate"><span class="pre">multiply_assume_normalized()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -327,7 +339,73 @@ If not provided, all quaternions will be weighted equally.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normalized product q1*q2.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.multiply_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">multiply_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.multiply_assume_normalized" title="Link to this definition"></a></dt>
+<dd><p>Multiply two quaternions together, assuming they are already normalized.</p>
+<p>This is a performance-optimized version of <a class="reference internal" href="#pymomentum.quaternion.multiply" title="pymomentum.quaternion.multiply"><code class="xref py py-func docutils literal notranslate"><span class="pre">multiply()</span></code></a> that skips
+normalization of the input quaternions. Use this only when you are certain
+both quaternions are already normalized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q1</strong> – A normalized quaternion ((x, y, z), w)).</p></li>
+<li><p><strong>q2</strong> – A normalized quaternion ((x, y, z), w)).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The product q1*q2.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.multiply_backprop">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">multiply_backprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.quaternion.multiply_backprop" title="Link to this definition"></a></dt>
+<dd><p>Custom backpropagation for quaternion multiplication.</p>
+<p>Computes gradients for quaternion multiplication with proper handling of
+normalization.</p>
+<p>This version normalizes the input quaternions. For performance-critical code
+where quaternions are guaranteed to be normalized, use
+<a class="reference internal" href="#pymomentum.quaternion.multiply_backprop_assume_normalized" title="pymomentum.quaternion.multiply_backprop_assume_normalized"><code class="xref py py-func docutils literal notranslate"><span class="pre">multiply_backprop_assume_normalized()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q1</strong> – The first quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>q2</strong> – The second quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>grad_q</strong> – The gradient from the output of shape (…, 4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (grad_q1, grad_q2) representing gradients with respect
+to the first and second quaternions respectively.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.multiply_backprop_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">multiply_backprop_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.quaternion.multiply_backprop_assume_normalized" title="Link to this definition"></a></dt>
+<dd><p>Custom backpropagation for quaternion multiplication assuming unit quaternions.</p>
+<p>Computes gradients for quaternion multiplication when both input quaternions
+are assumed to be normalized. This is more efficient than the general case
+but should only be used when quaternions are guaranteed to be unit quaternions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q1</strong> – The first normalized quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>q2</strong> – The second normalized quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>grad_q</strong> – The gradient from the output of shape (…, 4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (grad_q1, grad_q2) representing gradients with respect
+to the first and second quaternions respectively.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -347,6 +425,26 @@ If not provided, all quaternions will be weighted equally.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.normalize_backprop">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">normalize_backprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.normalize_backprop" title="Link to this definition"></a></dt>
+<dd><p>Custom backpropagation for quaternion normalization.</p>
+<p>This function computes gradients for quaternion normalization in a numerically
+stable way, avoiding potential issues with automatic differentiation when
+quaternions are near zero norm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> – The input quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>grad</strong> – The gradient from the output of shape (…, 4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The gradient with respect to the input quaternion q.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.quaternion.quaternion_to_xyz_euler">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">quaternion_to_xyz_euler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.quaternion_to_xyz_euler" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -361,6 +459,9 @@ Should not be smaller than 1e-6 as this can cause NaN gradients for some models.
 <dt class="sig sig-object py" id="pymomentum.quaternion.rotate_vector">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">rotate_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.rotate_vector" title="Link to this definition"></a></dt>
 <dd><p>Rotate a vector by a quaternion.</p>
+<p>Normalizes the input quaternion before rotation for numerical stability.
+For performance-critical code where quaternions are guaranteed to be normalized,
+use <a class="reference internal" href="#pymomentum.quaternion.rotate_vector_assume_normalized" title="pymomentum.quaternion.rotate_vector_assume_normalized"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate_vector_assume_normalized()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -370,6 +471,72 @@ Should not be smaller than 1e-6 as this can cause NaN gradients for some models.
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(nBatch x k x 3) rotated vectors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.rotate_vector_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">rotate_vector_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.rotate_vector_assume_normalized" title="Link to this definition"></a></dt>
+<dd><p>Rotate a vector by a quaternion, assuming the quaternion is already normalized.</p>
+<p>This is a performance-optimized version of <a class="reference internal" href="#pymomentum.quaternion.rotate_vector" title="pymomentum.quaternion.rotate_vector"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate_vector()</span></code></a> that skips
+normalization of the input quaternion. Use this only when you are certain
+the quaternion is already normalized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> – (nBatch x k x 4) tensor with normalized quaternions in ((x, y, z), w) format.</p></li>
+<li><p><strong>v</strong> – (nBatch x k x 3) vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(nBatch x k x 3) rotated vectors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.rotate_vector_backprop">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">rotate_vector_backprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.quaternion.rotate_vector_backprop" title="Link to this definition"></a></dt>
+<dd><p>Custom backpropagation for quaternion vector rotation.</p>
+<p>Computes gradients for the quaternion rotation operation using the
+Euler-Rodrigues formula.</p>
+<p>This version normalizes the input quaternion. For performance-critical code
+where quaternions are guaranteed to be normalized, use
+<a class="reference internal" href="#pymomentum.quaternion.rotate_vector_backprop_assume_normalized" title="pymomentum.quaternion.rotate_vector_backprop_assume_normalized"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate_vector_backprop_assume_normalized()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> – The quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>v</strong> – The vector tensor of shape (…, 3).</p></li>
+<li><p><strong>grad</strong> – The gradient from the output of shape (…, 3).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (grad_q, grad_v) representing gradients with respect
+to the quaternion and vector respectively.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.rotate_vector_backprop_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">rotate_vector_backprop_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.quaternion.rotate_vector_backprop_assume_normalized" title="Link to this definition"></a></dt>
+<dd><p>Custom backpropagation for quaternion vector rotation assuming unit quaternions.</p>
+<p>This is a performance-optimized version of <a class="reference internal" href="#pymomentum.quaternion.rotate_vector_backprop" title="pymomentum.quaternion.rotate_vector_backprop"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate_vector_backprop()</span></code></a> that
+assumes the input quaternion is already normalized. Use this only when you are
+certain the quaternion is normalized to avoid numerical issues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> – The normalized quaternion tensor of shape (…, 4).</p></li>
+<li><p><strong>v</strong> – The vector tensor of shape (…, 3).</p></li>
+<li><p><strong>grad</strong> – The gradient from the output of shape (…, 3).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (grad_q, grad_v) representing gradients with respect
+to the quaternion and vector respectively.</p>
 </dd>
 </dl>
 </dd></dl>
