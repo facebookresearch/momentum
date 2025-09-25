@@ -220,6 +220,46 @@ def match_leading_dimensions(
     return t_left
 
 
+def _normalize_split_skel_state(
+    components: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    Normalize the quaternion component of a split skeleton state.
+
+    :parameter components: Tuple of (translation, rotation, scale) components.
+    :type components: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    :return: Tuple of (translation, normalized_rotation, scale) components.
+    :rtype: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    """
+    t, q, s = components
+    return t, quaternion.normalize(q), s
+
+
+def _multiply_split_skel_states(
+    skel_state1: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+    skel_state2: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+) -> torch.Tensor:
+    """
+    Helper function to multiply two skeleton states from their split components.
+    Assumes quaternions are already normalized.
+
+    :parameter skel_state1: Tuple of (translation, rotation, scale) for first skeleton state.
+    :type skel_state1: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    :parameter skel_state2: Tuple of (translation, rotation, scale) for second skeleton state.
+    :type skel_state2: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    :return: The product of the two skeleton states.
+    :rtype: torch.Tensor
+    """
+    t1, q1, s1 = skel_state1
+    t2, q2, s2 = skel_state2
+
+    t_res = t1 + quaternion.rotate_vector_assume_normalized(q1, s1.expand_as(t2) * t2)
+    s_res = s1 * s2
+    q_res = quaternion.multiply_assume_normalized(q1, q2)
+
+    return torch.cat((t_res, q_res, s_res), -1)
+
+
 def multiply(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
     """
     Multiply two skeleton states.
@@ -235,15 +275,27 @@ def multiply(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
     check(s2)
     s1 = match_leading_dimensions(s1, s2)
 
-    t1, q1, s1_ = split(s1)
-    t2, q2, s2_ = split(s2)
+    return _multiply_split_skel_states(
+        _normalize_split_skel_state(split(s1)), _normalize_split_skel_state(split(s2))
+    )
 
-    # Assuming quaternionRotateVector and quaternionMultiply are implemented elsewhere
-    t_res = t1 + quaternion.rotate_vector(q1, s1_.expand_as(t2) * t2)
-    s_res = s1_ * s2_
-    q_res = quaternion.multiply(q1, q2)
 
-    return torch.cat((t_res, q_res, s_res), -1)
+def multiply_assume_normalized(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
+    """
+    Multiply two skeleton states.
+    This is an optimized version that assumes both skeleton states are already properly
+    formatted and the quaternions are normalized, skipping validation checks.
+
+    :parameter s1: The first skeleton state.
+    :type s1: torch.Tensor
+    :parameter s2: The second skeleton state.
+    :type s2: torch.Tensor
+    :return: The product of the two skeleton states.
+    :rtype: torch.Tensor
+    """
+    s1 = match_leading_dimensions(s1, s2)
+
+    return _multiply_split_skel_states(split(s1), split(s2))
 
 
 def inverse(skeleton_states: torch.Tensor) -> torch.Tensor:
@@ -262,6 +314,25 @@ def inverse(skeleton_states: torch.Tensor) -> torch.Tensor:
     return torch.cat((-s_inv * quaternion.rotate_vector(q_inv, t), q_inv, s_inv), -1)
 
 
+def _transform_points_split_skel_state(
+    skel_state: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+    points: torch.Tensor,
+) -> torch.Tensor:
+    """
+    Helper function to transform points using skeleton state components.
+    Assumes quaternion is already normalized.
+
+    :parameter skel_state: Tuple of (translation, rotation, scale) components.
+    :type skel_state: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    :parameter points: The points to transform.
+    :type points: torch.Tensor
+    :return: The transformed points.
+    :rtype: torch.Tensor
+    """
+    t, q, s = skel_state
+    return t + quaternion.rotate_vector(q, s.expand_as(points) * points)
+
+
 def transform_points(skel_state: torch.Tensor, points: torch.Tensor) -> torch.Tensor:
     """
     Transform 3d points by the transform represented by the skeleton state.
@@ -278,8 +349,28 @@ def transform_points(skel_state: torch.Tensor, points: torch.Tensor) -> torch.Te
         raise ValueError("Points tensor should have last dimension 3.")
     skel_state = match_leading_dimensions(skel_state, points)
 
-    t, q, s = split(skel_state)
-    return t + quaternion.rotate_vector(q, s.expand_as(points) * points)
+    return _transform_points_split_skel_state(
+        _normalize_split_skel_state(split(skel_state)), points
+    )
+
+
+def transform_points_assume_normalized(
+    skel_state: torch.Tensor, points: torch.Tensor
+) -> torch.Tensor:
+    """
+    Transform 3d points by the transform represented by the skeleton state.
+    This is an optimized version that assumes the skeleton state is already properly
+    formatted and the quaternion is normalized, skipping validation checks.
+
+    :parameter skel_state: The skeleton state to use for transformation.
+    :type skel_state: torch.Tensor
+    :parameter points: The points to transform.
+    :type points: torch.Tensor
+    :return: The transformed points.
+    :rtype: torch.Tensor
+    """
+    skel_state = match_leading_dimensions(skel_state, points)
+    return _transform_points_split_skel_state(split(skel_state), points)
 
 
 def identity(
