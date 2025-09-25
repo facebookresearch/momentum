@@ -12,6 +12,7 @@ import pymomentum.geometry as pym_geometry
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import torch
+from torch.nn import Parameter as P
 
 
 def generate_skel_state_components(
@@ -184,8 +185,8 @@ class TestSkelState(unittest.TestCase):
     def test_skel_state_splitting(self) -> None:
         t1 = torch.Tensor([1, 0, 0])
         skel_state1 = pym_skel_state.from_translation(t1)
-        t2, r2, s2 = pym_skel_state.split(skel_state1)
-        self.assertTrue(torch.allclose(t2, t2))
+        t2, _, _ = pym_skel_state.split(skel_state1)
+        self.assertTrue(torch.allclose(t1, t2))
 
         r3 = torch.Tensor([0, 1, 0, 0])
         skel_state3 = pym_skel_state.from_quaternion(r3)
@@ -339,6 +340,104 @@ class TestSkelState(unittest.TestCase):
             torch.allclose(s_mid_scale, (s0_scale + s1_scale) / 2, atol=1e-4),
             "Expected scale to be the midpoint when t=0.5.",
         )
+
+    # Additional tests migrated from sim3 to ensure complete coverage
+    def init_sim3_like_skel_state(
+        self, batch_size: int, nr_joints: int
+    ) -> torch.Tensor:
+        """Initialize skel_state similar to how sim3 tests initialize their state"""
+        t = torch.randn((batch_size, nr_joints, 3), dtype=torch.float32)
+        q = torch.randn((batch_size, nr_joints, 4), dtype=torch.float32)
+        s = torch.randn((batch_size, nr_joints, 1), dtype=torch.float32)
+
+        q = pym_quaternion.normalize(q)
+        s = torch.exp2(s).clamp(max=2)
+        return torch.cat([t, q, s], dim=-1)
+
+    def test_bulk_multiplication(self) -> None:
+        """Test multiplication using the same approach as sim3 tests"""
+        torch.manual_seed(1002389)
+        state1 = self.init_sim3_like_skel_state(1024, 159)
+        state2 = self.init_sim3_like_skel_state(1024, 159)
+        state = pym_skel_state.multiply(state1, state2)
+
+        # Convert to TRS format (like sim3_to_trs_state)
+        t1, q1, s1 = pym_skel_state.split(state1)
+        t2, q2, s2 = pym_skel_state.split(state2)
+        r1 = pym_quaternion.to_rotation_matrix(q1)
+        r2 = pym_quaternion.to_rotation_matrix(q2)
+
+        # Expected multiplication results (matching sim3 formula)
+        t_expected = torch.einsum("bjxy,bjy->bjx", r1, t2) * s1 + t1
+        r_expected = torch.einsum("bjxy,bjyz->bjxz", r1, r2)
+        s_expected = s1 * s2
+
+        # Get actual results
+        tt, qq, ss = pym_skel_state.split(state)
+        rr = pym_quaternion.to_rotation_matrix(qq)
+
+        self.assertTrue(torch.allclose(t_expected, tt, atol=1e-5, rtol=1e-5))
+        self.assertTrue(torch.allclose(r_expected, rr, atol=1e-5, rtol=1e-5))
+        self.assertTrue(torch.allclose(s_expected, ss, atol=1e-5, rtol=1e-5))
+
+    def test_bulk_points_transformation(self) -> None:
+        """Test point transformation using the same approach as sim3 tests"""
+        torch.manual_seed(1002389)
+        state = self.init_sim3_like_skel_state(1024, 159)
+        points = torch.randn((1024, 159, 3))
+
+        # Apply transformation
+        p1 = pym_skel_state.transform_points(state, points)
+
+        # Expected result (matching apply_sim3_on_points formula)
+        tt, qq, ss = pym_skel_state.split(state)
+        rr = pym_quaternion.to_rotation_matrix(qq)
+        p2 = ss * torch.einsum("bjxy,bjy->bjx", rr, points) + tt
+
+        self.assertTrue(torch.allclose(p1, p2, atol=1e-5, rtol=1e-5))
+
+    def test_bulk_multiplication_backward(self) -> None:
+        """Test multiplication backward pass using the same approach as sim3 tests"""
+        torch.manual_seed(10023893)
+        state1 = self.init_sim3_like_skel_state(1024, 159)
+        state2 = self.init_sim3_like_skel_state(1024, 159)
+
+        ps1 = P(state1)
+        ps2 = P(state2)
+
+        state = pym_skel_state.multiply(ps1, ps2)
+        grad = torch.randn_like(state)
+
+        # Test autograd computation
+        ds1, ds2 = torch.autograd.grad(
+            outputs=[state],
+            inputs=[ps1, ps2],
+            grad_outputs=[grad],
+        )
+
+        # Verify gradients are not None and have correct shape
+        self.assertIsNotNone(ds1)
+        self.assertIsNotNone(ds2)
+        self.assertEqual(ds1.shape, state1.shape)
+        self.assertEqual(ds2.shape, state2.shape)
+
+    def test_bulk_inverse(self) -> None:
+        """Test inverse using the same approach as sim3 tests"""
+        torch.manual_seed(1002389)
+        state = self.init_sim3_like_skel_state(1024, 159)
+        state_inv = pym_skel_state.inverse(state)
+
+        # Expected identity result
+        state_expected = torch.zeros_like(state)
+        state_expected[..., 6] = 1  # quaternion w component = 1
+        state_expected[..., 7] = 1  # scale component = 1
+
+        # Test both directions of multiplication
+        state2 = pym_skel_state.multiply(state, state_inv)
+        self.assertTrue(torch.allclose(state2, state_expected, atol=1e-5, rtol=1e-5))
+
+        state3 = pym_skel_state.multiply(state_inv, state)
+        self.assertTrue(torch.allclose(state3, state_expected, atol=1e-5, rtol=1e-5))
 
 
 if __name__ == "__main__":
