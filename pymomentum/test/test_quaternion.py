@@ -745,6 +745,48 @@ class TestQuaternion(unittest.TestCase):
                 f"Rotate backprop vector grad should match autograd (batch_size={batch_size})",
             )
 
+    def test_euler_zyx_to_quaternion(self) -> None:
+        """Test the new ZYX Euler angle to quaternion conversion function."""
+        torch.manual_seed(0)  # ensure repeatability
+        nBatch = 6
+        nMat = 5
+        euler_zyx = torch.normal(
+            mean=0,
+            std=2,  # smaller std to avoid extreme angles
+            size=(nBatch, nMat, 3),
+            dtype=torch.float64,
+            requires_grad=True,
+        )
+
+        # Test that ZYX conversion produces valid quaternions
+        quats_zyx = quaternion.euler_zyx_to_quaternion(euler_zyx)
+
+        # Check that they're normalized
+        norms = torch.norm(quats_zyx, dim=-1)
+        self.assertTrue(torch.allclose(norms, torch.ones_like(norms), atol=1e-4))
+
+        # Check that rotation matrices are orthogonal
+        matrices_zyx = quaternion.to_rotation_matrix(quats_zyx)
+        matrices_transpose = matrices_zyx.transpose(-1, -2)
+        identity = torch.eye(3).expand_as(matrices_zyx)
+        product = torch.bmm(
+            matrices_zyx.view(-1, 3, 3), matrices_transpose.view(-1, 3, 3)
+        )
+        product = product.view(matrices_zyx.shape)
+
+        self.assertLess(
+            torch.norm(product - identity).item(),
+            1e-4,
+            "ZYX quaternion should produce orthogonal rotation matrix",
+        )
+
+        # Check gradients
+        torch.autograd.gradcheck(
+            quaternion.euler_zyx_to_quaternion,
+            [euler_zyx],
+            raise_exception=True,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
