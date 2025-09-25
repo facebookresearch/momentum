@@ -10,6 +10,7 @@ import unittest
 
 import pymomentum.quaternion as quaternion
 import torch
+from torch.nn import Parameter as P
 
 
 def generateRandomQuats(sz: int) -> torch.Tensor:
@@ -360,6 +361,190 @@ class TestQuaternion(unittest.TestCase):
             ),
             1e-5,
         )
+
+    # ===============================================================
+    # Custom Backpropagation Tests
+    # ======================================================================
+
+    def assert_all_close(
+        self, a: torch.Tensor, b: torch.Tensor, tol: float = 1e-5
+    ) -> None:
+        """Helper method for comparing tensors with a tolerance."""
+        self.assertTrue(torch.allclose(a, b, atol=tol, rtol=tol))
+
+    def test_normalize_backprop(self) -> None:
+        """Test custom backpropagation for quaternion normalization."""
+        torch.manual_seed(0)
+
+        q = torch.randn((1024, 2, 4), dtype=torch.float64)
+        g = torch.randn((1024, 2, 4), dtype=torch.float64)
+
+        pq = P(q)
+        qn = quaternion.normalize(pq)
+
+        # Backward via autograd
+        (dq1,) = torch.autograd.grad(
+            outputs=[qn],
+            inputs=[pq],
+            grad_outputs=[g],
+        )
+        # Backward via our custom backprop function
+        dq2 = quaternion.normalize_backprop(pq, g)
+        self.assert_all_close(dq1, dq2)
+
+    def test_rotate_vector_backprop(self) -> None:
+        """Test custom backpropagation for quaternion vector rotation."""
+        torch.manual_seed(0)
+
+        q = torch.randn((1024, 2, 4), dtype=torch.float64)
+        v = torch.randn((1024, 2, 3), dtype=torch.float64)
+
+        pq = P(q)
+        pv = P(v)
+
+        # Forward
+        qv = quaternion.rotate_vector(pq, pv)
+        # Backward via autograd
+        dqv = torch.randn_like(qv)
+        dq1, dv1 = torch.autograd.grad(
+            outputs=[qv],
+            inputs=[pq, pv],
+            grad_outputs=[dqv],
+        )
+        # Backward via our custom backprop function
+        dq2, dv2 = quaternion.rotate_vector_backprop(pq, pv, dqv)
+
+        # Check vector gradients
+        self.assert_all_close(dv1, dv2)
+        # Check quaternion gradients (scalar part)
+        self.assert_all_close(dq1[..., 3], dq2[..., 3])
+        # Check quaternion gradients (vector part)
+        self.assert_all_close(dq1[..., :3], dq2[..., :3])
+
+    def test_rotate_vector_backprop_assume_normalized(self) -> None:
+        """Test custom backpropagation for quaternion vector rotation with normalized quaternions."""
+        torch.manual_seed(0)
+
+        batch_size = 1024
+        q = torch.randn((batch_size, 2, 4), dtype=torch.float64)
+        q = quaternion.normalize(q)
+        v = torch.randn((batch_size, 2, 3), dtype=torch.float64)
+
+        pq = P(q)
+        pv = P(v)
+
+        # Forward using the assume_normalized version
+        qv = quaternion.rotate_vector(pq, pv)
+        # Backward via autograd
+        dqv = torch.randn_like(qv)
+        dq1, dv1 = torch.autograd.grad(
+            outputs=[qv],
+            inputs=[pq, pv],
+            grad_outputs=[dqv],
+        )
+        # Backward via our custom backprop function
+        dq2, dv2 = quaternion.rotate_vector_backprop_assume_normalized(pq, pv, dqv)
+
+        # Check vector gradients
+        self.assert_all_close(dv1, dv2)
+        # Check quaternion gradients (scalar part)
+        self.assert_all_close(dq1[..., 3], dq2[..., 3])
+        # Check quaternion gradients (vector part)
+        self.assert_all_close(dq1[..., :3], dq2[..., :3])
+
+    def test_multiply_backprop(self) -> None:
+        """Test custom backpropagation for quaternion multiplication."""
+        torch.manual_seed(0)
+
+        q1 = torch.randn((1024, 2, 4), dtype=torch.float64)
+        q2 = torch.randn((1024, 2, 4), dtype=torch.float64)
+
+        pq1 = P(q1)
+        pq2 = P(q2)
+
+        q = quaternion.multiply(pq1, pq2)
+        dq = torch.randn_like(q)
+
+        # Backward via autograd
+        dq11, dq21 = torch.autograd.grad(
+            outputs=[q],
+            inputs=[pq1, pq2],
+            grad_outputs=[dq],
+        )
+        # Backward via our custom backprop function
+        dq12, dq22 = quaternion.multiply_backprop(pq1, pq2, dq)
+
+        self.assert_all_close(dq11, dq12)
+        self.assert_all_close(dq21, dq22)
+
+    def test_multiply_backprop_assume_normalized(self) -> None:
+        """Test custom backpropagation for quaternion multiplication with normalized quaternions."""
+        torch.manual_seed(0)
+
+        q1 = torch.randn((1024, 2, 4), dtype=torch.float64)
+        q2 = torch.randn((1024, 2, 4), dtype=torch.float64)
+        q1 = quaternion.normalize(q1)
+        q2 = quaternion.normalize(q2)
+
+        pq1 = P(q1)
+        pq2 = P(q2)
+
+        q = quaternion.multiply(pq1, pq2)
+        dq = torch.randn_like(q)
+
+        # Backward via autograd
+        dq11, dq21 = torch.autograd.grad(
+            outputs=[q],
+            inputs=[pq1, pq2],
+            grad_outputs=[dq],
+        )
+        # Backward via our custom backprop function
+        dq12, dq22 = quaternion.multiply_backprop_assume_normalized(pq1, pq2, dq)
+
+        self.assert_all_close(dq11, dq12)
+        self.assert_all_close(dq21, dq22)
+
+    def test_backprop_consistency(self) -> None:
+        """Test that the normalizing and assume_normalized backprop versions are consistent."""
+        torch.manual_seed(0)
+
+        # Test with already normalized quaternions - both versions should give same results
+        q1 = torch.randn((100, 4), dtype=torch.float64)
+        q2 = torch.randn((100, 4), dtype=torch.float64)
+        q1_norm = quaternion.normalize(q1)
+        q2_norm = quaternion.normalize(q2)
+
+        pq1_norm = P(q1_norm)
+        pq2_norm = P(q2_norm)
+
+        # Test multiply backprop consistency
+        q_result = quaternion.multiply(pq1_norm, pq2_norm)
+        dq = torch.randn_like(q_result)
+
+        dq1_general, dq2_general = quaternion.multiply_backprop(pq1_norm, pq2_norm, dq)
+        dq1_assume, dq2_assume = quaternion.multiply_backprop_assume_normalized(
+            pq1_norm, pq2_norm, dq
+        )
+
+        # The results should be very close since inputs are already normalized
+        self.assert_all_close(dq1_general, dq1_assume, tol=1e-4)
+        self.assert_all_close(dq2_general, dq2_assume, tol=1e-4)
+
+        # Test rotate vector backprop consistency
+        v = torch.randn((100, 3), dtype=torch.float64)
+        pv = P(v)
+
+        qv_result = quaternion.rotate_vector(pq1_norm, pv)
+        dqv = torch.randn_like(qv_result)
+
+        dq_general, dv_general = quaternion.rotate_vector_backprop(pq1_norm, pv, dqv)
+        dq_assume, dv_assume = quaternion.rotate_vector_backprop_assume_normalized(
+            pq1_norm, pv, dqv
+        )
+
+        # The results should be very close since input quaternion is already normalized
+        self.assert_all_close(dq_general, dq_assume, tol=1e-4)
+        self.assert_all_close(dv_general, dv_assume, tol=1e-4)
 
 
 if __name__ == "__main__":
