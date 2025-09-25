@@ -56,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.check_and_normalize_weights"><code class="docutils literal notranslate"><span class="pre">check_and_normalize_weights()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.conjugate"><code class="docutils literal notranslate"><span class="pre">conjugate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.euler_xyz_to_quaternion"><code class="docutils literal notranslate"><span class="pre">euler_xyz_to_quaternion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.euler_zyx_to_quaternion"><code class="docutils literal notranslate"><span class="pre">euler_zyx_to_quaternion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.from_axis_angle"><code class="docutils literal notranslate"><span class="pre">from_axis_angle()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.from_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">from_rotation_matrix()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.from_two_vectors"><code class="docutils literal notranslate"><span class="pre">from_two_vectors()</span></code></a></li>
@@ -239,6 +240,24 @@ If not provided, all quaternions will be weighted equally.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>euler_xyz</strong> – A tensor of shape (…, 3) representing the Euler XYZ angles.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tensor of shape (…, 4) representing the quaternion in ((x, y, z), w) format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.euler_zyx_to_quaternion">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">euler_zyx_to_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">euler_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.euler_zyx_to_quaternion" title="Link to this definition"></a></dt>
+<dd><p>Convert Euler ZYX angles to a quaternion.</p>
+<p>This function converts ZYX Euler angles (yaw-pitch-roll convention) to quaternions.
+The rotation order is Z-Y-X, meaning first rotate around Z-axis (yaw), then Y-axis (pitch),
+then X-axis (roll).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>euler_zyx</strong> – A tensor of shape (…, 3) representing the Euler ZYX angles
+in order [yaw, pitch, roll].</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tensor of shape (…, 4) representing the quaternion in ((x, y, z), w) format.</p>
