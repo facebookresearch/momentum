@@ -1233,6 +1233,8 @@ std::pair<float, float> getLocatorError(
   // go over all frames and pose the locators and compute the error
   double error = 0.0;
   double maxError = 0.0;
+  size_t frameNum = 0.0;
+  std::string markerName = "";
   for (size_t iFrame = 0; iFrame < numFrames; ++iFrame) {
     const auto jointParams = pt.apply(motion.col(iFrame));
     state.set(jointParams, character.skeleton, false);
@@ -1261,7 +1263,11 @@ std::pair<float, float> getLocatorError(
       const Vector3f diff = locatorPos - jMarker.pos.cast<float>();
       const float markerError = diff.norm();
       frameError += markerError;
-      maxError = std::max(maxError, static_cast<double>(markerError));
+      if (markerError > maxError) {
+        maxError = markerError;
+        frameNum = iFrame;
+        markerName = jMarker.name;
+      }
       validMarkers++;
     }
 
@@ -1269,6 +1275,7 @@ std::pair<float, float> getLocatorError(
       error += frameError / validMarkers;
     }
   }
+  MT_LOGI("Max marker error: {} at frame {} for marker {}", maxError, frameNum, markerName);
   return {static_cast<float>(error / numFrames), static_cast<float>(maxError)};
 }
 

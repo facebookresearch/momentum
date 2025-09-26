@@ -58,7 +58,7 @@ Eigen::MatrixXf processMarkers(
   Eigen::MatrixXf finalMotion = trackPosesPerframe(inputData, character, identity, trackingConfig);
 
   if (trackingConfig.debug) {
-    auto errors = getLocatorError(markerData, finalMotion, character);
+    auto errors = getLocatorError(inputData, finalMotion, character);
     MT_LOGI("Average marker error: {}", errors.first);
     MT_LOGI("Max marker error: {}", errors.second);
   }
