@@ -119,12 +119,16 @@ def multiply_assume_normalized(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tens
     """
     check(q1)
     check(q2)
-    r1, v1 = split(q1)
-    r2, v2 = split(q2)
-    assert q1.size() == q2.size(), "Expected matching quaternion dimensions."
-    r_res = r1 * r2 - (v1 * v2).sum(-1, keepdim=True)
-    v_res = r1.expand_as(v2) * v2 + r2.expand_as(v1) * v1 + torch.cross(v1, v2, -1)
-    return torch.cat((v_res, r_res), -1)
+
+    x1, y1, z1, w1 = q1.unbind(-1)
+    x2, y2, z2, w2 = q2.unbind(-1)
+
+    x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+    y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
+    z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+
+    return torch.stack((x, y, z, w), dim=-1)
 
 
 def normalize(q: torch.Tensor) -> torch.Tensor:
