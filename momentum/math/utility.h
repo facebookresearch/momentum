@@ -187,7 +187,13 @@ template <typename T>
     const Vector3<T>& angles,
     EulerConvention convention = EulerConvention::Intrinsic);
 
-/// Converts a quaternion to Euler angles (intrinsic XYZ convention)
+/// Converts a quaternion to Euler angles using the Extrinsic XYZ convention
+///
+/// The returned angles [x, y, z] are such that applying Extrinsic rotations
+/// RotX(x) then RotY(y) then RotZ(z) (i.e., about fixed world axes) reproduces
+/// the input quaternion's rotation. Empirically verified by tests.
+///
+/// Note: This matches the convention used in skeleton_state (skel_state): Extrinsic XYZ.
 ///
 /// @tparam T The scalar type
 /// @param q Input quaternion

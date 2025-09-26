@@ -6,6 +6,7 @@
  */
 
 #include "momentum/math/constants.h"
+#include "momentum/math/random.h"
 #include "momentum/math/utility.h"
 
 #include <gtest/gtest.h>
@@ -188,6 +189,67 @@ TYPED_TEST(UtilityTest, QuaternionToEuler) {
     EXPECT_NEAR(euler.x(), pi<T>() / 4, T(1e-3));
     EXPECT_NEAR(euler.y(), T(0), T(1e-3));
     EXPECT_NEAR(euler.z(), T(0), T(1e-3));
+  }
+}
+
+TYPED_TEST(UtilityTest, QuaternionToEulerConventionIsExtrinsicXYZ) {
+  using T = typename TestFixture::Type;
+
+  const T tol = Eps<T>(1e-5f, 1e-9);
+
+  // Deterministic, non-degenerate angles to avoid special symmetries
+  const std::vector<Vector3<T>> angles_list = {
+      Vector3<T>(T(0.3), T(-0.4), T(0.5)),
+      Vector3<T>(T(0.7), T(0.2), T(-0.6)),
+      Vector3<T>(T(-1.1), T(0.9), T(1.3)),
+      // near singularities but not exactly
+      Vector3<T>(T(0.0), T(0.5) * pi<T>(), T(0.3)),
+      Vector3<T>(T(0.2), T(-0.5) * pi<T>(), T(-0.1))};
+
+  for (const auto& angles : angles_list) {
+    const Quaternion<T> q = Quaternion<T>(
+        AngleAxis<T>(angles[0], Vector3<T>::UnitX()) *
+        AngleAxis<T>(angles[1], Vector3<T>::UnitY()) *
+        AngleAxis<T>(angles[2], Vector3<T>::UnitZ()));
+
+    const Matrix3<T> R = q.toRotationMatrix();
+
+    const Vector3<T> euler = quaternionToEuler(q);
+
+    const Matrix3<T> Rintr = eulerXYZToRotationMatrix(euler, EulerConvention::Intrinsic);
+    const Matrix3<T> Rextr = eulerXYZToRotationMatrix(euler, EulerConvention::Extrinsic);
+
+    EXPECT_TRUE(Rextr.isApprox(R, tol));
+    EXPECT_FALSE(Rintr.isApprox(R, tol));
+  }
+
+  // Randomized angles with fixed seed; verify extrinsic reconstruction at least
+  Random<> rng(12345);
+  for (int i = 0; i < 20; ++i) {
+    const Vector3<T> angles = rng.uniform<Vector3<T>>(-pi<T>(), pi<T>());
+    const Quaternion<T> q = Quaternion<T>(
+        AngleAxis<T>(angles[0], Vector3<T>::UnitX()) *
+        AngleAxis<T>(angles[1], Vector3<T>::UnitY()) *
+        AngleAxis<T>(angles[2], Vector3<T>::UnitZ()));
+    const Matrix3<T> R = q.toRotationMatrix();
+    const Vector3<T> euler = quaternionToEuler(q);
+    const Matrix3<T> Rextr = eulerXYZToRotationMatrix(euler, EulerConvention::Extrinsic);
+    EXPECT_TRUE(Rextr.isApprox(R, tol));
+  }
+
+  // Special/edge cases
+  {
+    // zero angles
+    const Vector3<T> angles(T(0), T(0), T(0));
+    const Quaternion<T> q = Quaternion<T>(
+        AngleAxis<T>(angles[0], Vector3<T>::UnitX()) *
+        AngleAxis<T>(angles[1], Vector3<T>::UnitY()) *
+        AngleAxis<T>(angles[2], Vector3<T>::UnitZ()));
+    const Matrix3<T> R = q.toRotationMatrix();
+    const Vector3<T> euler = quaternionToEuler(q);
+    EXPECT_TRUE(euler.isApprox(Vector3<T>::Zero(), tol));
+    const Matrix3<T> Rextr = eulerXYZToRotationMatrix(euler, EulerConvention::Extrinsic);
+    EXPECT_TRUE(Rextr.isApprox(R, tol));
   }
 }
 
