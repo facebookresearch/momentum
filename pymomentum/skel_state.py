@@ -253,7 +253,7 @@ def _multiply_split_skel_states(
     t1, q1, s1 = skel_state1
     t2, q2, s2 = skel_state2
 
-    t_res = t1 + quaternion.rotate_vector_assume_normalized(q1, s1.expand_as(t2) * t2)
+    t_res = t1 + s1.expand_as(t2) * quaternion.rotate_vector_assume_normalized(q1, t2)
     s_res = s1 * s2
     q_res = quaternion.multiply_assume_normalized(q1, q2)
 
@@ -462,3 +462,65 @@ def from_matrix(matrices: torch.Tensor) -> torch.Tensor:
     result = torch.cat((translations, quaternions, scales), -1)
     result_shape = list(initial_shape[:-2]) + [8]
     return result.reshape(result_shape)
+
+
+@torch.jit.script
+def multiply_backprop(
+    state1: torch.Tensor, state2: torch.Tensor, grad_state: torch.Tensor
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Backpropagate gradients through skeleton state multiplication.
+
+    This function computes the gradients with respect to the two input skeleton states
+    given the gradient with respect to the output of skeleton state multiplication.
+
+    The forward formula is (matching the corrected skel_state.multiply):
+    - t = t1 + s1 * quaternion.rotate_vector(q1, t2)
+    - q = quaternion.multiply(q1, q2)
+    - s = s1 * s2
+
+    :parameter state1: The first skeleton state (parent).
+    :type state1: torch.Tensor
+    :parameter state2: The second skeleton state (child).
+    :type state2: torch.Tensor
+    :parameter grad_state: The gradient with respect to the output skeleton state.
+    :type grad_state: torch.Tensor
+    :return: A tuple of (grad_state1, grad_state2) representing gradients with respect
+             to the first and second skeleton states respectively.
+    :rtype: tuple[torch.Tensor, torch.Tensor]
+    """
+    with torch.no_grad():
+        t1, q1, s1 = split(state1)
+        t2, q2, s2 = split(state2)
+        gt, gq, gs = split(grad_state)
+
+        # Gradient with respect to s2: gs * s1
+        gs2 = gs * s1
+
+        # Gradient with respect to quaternions from quaternion multiplication
+        # Use the "assume normalized" version to avoid norm computation
+        gq1_from_gq, gq2 = quaternion.multiply_backprop_assume_normalized(q1, q2, gq)
+
+        # Gradient with respect to quaternions from translation computation
+        # Following the corrected forward: t = t1 + s1 * quaternion.rotate_vector(q1, t2)
+        # We need gradients from: quaternion.rotate_vector(q1, t2) with gt scaled by s1
+        gq1_from_gt, gt2 = quaternion.rotate_vector_backprop_assume_normalized(
+            q1, t2, gt
+        )
+        gt2 = gt2 * s1.expand_as(t2)
+
+        # Combine quaternion gradients - add the missing s1 factor!
+        gq1 = gq1_from_gq + gq1_from_gt * s1.expand_as(gq1_from_gt)
+
+        # Gradient with respect to t1: direct passthrough
+        gt1 = gt
+
+        # Gradient with respect to s1: from both scale multiplication and rotation
+        # From scale multiplication: gs * s2
+        # From rotation: sum over the dot product of rotated vector with gradient
+        gs1_from_rotation = (quaternion.rotate_vector(q1, t2) * gt).sum(
+            dim=-1, keepdim=True
+        )
+        gs1 = gs1_from_rotation + gs * s2
+
+    return torch.cat([gt1, gq1, gs1], dim=-1), torch.cat([gt2, gq2, gs2], dim=-1)
