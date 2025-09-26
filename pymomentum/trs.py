@@ -495,3 +495,41 @@ def rotmat_rotate_vector(r: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
     :rtype: torch.Tensor
     """
     return torch.einsum("...ij,...j->...i", r, v)
+
+
+def rotmat_from_euler_xyz(euler: torch.Tensor) -> torch.Tensor:
+    """
+    Create rotation matrices from XYZ Euler angles.
+
+    This function converts XYZ Euler angles to rotation matrices using the
+    ZYX rotation order (also known as Tait-Bryan angles). The rotation is
+    applied as follows: first around the X-axis, then Y-axis, then Z-axis.
+
+    :parameter euler: Euler angles of shape [..., 3] where the last dimension
+                      contains [rx, ry, rz] rotations in radians.
+    :type euler: torch.Tensor
+    :return: Rotation matrices of shape [..., 3, 3].
+    :rtype: torch.Tensor
+    """
+    cos_angles = torch.cos(euler)
+    sin_angles = torch.sin(euler)
+
+    cx, cy, cz = cos_angles.unbind(-1)
+    sx, sy, sz = sin_angles.unbind(-1)
+
+    result = torch.stack(
+        [
+            cy * cz,
+            -cx * sz + sx * sy * cz,
+            sx * sz + cx * sy * cz,
+            cy * sz,
+            cx * cz + sx * sy * sz,
+            -sx * cz + cx * sy * sz,
+            -sy,
+            sx * cy,
+            cx * cy,
+        ],
+        dim=-1,
+    )
+    result_shape = result.shape[:-1] + (3, 3)
+    return result.view(result_shape)
