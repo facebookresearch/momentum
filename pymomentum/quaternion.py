@@ -164,6 +164,7 @@ def inverse(q: torch.Tensor) -> torch.Tensor:
     :parameter q: A quaternion ((x, y, z), w)).
     :return: The inverse.
     """
+    check(q)
     return conjugate(q) / torch.clamp((q * q).sum(-1, keepdim=True), min=1e-7)
 
 
@@ -179,6 +180,7 @@ def quaternion_to_xyz_euler(q: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
     :param eps: a small number to avoid calling asin(1) or asin(-1).
         Should not be smaller than 1e-6 as this can cause NaN gradients for some models.
     """
+    check(q)
     q = normalize(q)
     x, y, z, w = q.unbind(-1)
 
@@ -222,20 +224,21 @@ def rotate_vector_assume_normalized(q: torch.Tensor, v: torch.Tensor) -> torch.T
     :param v: (nBatch x k x 3) vector.
     :return: (nBatch x k x 3) rotated vectors.
     """
+    check(q)
     r, axis = split(q)
     av = torch.cross(axis, v, -1)
     aav = torch.cross(axis, av, -1)
     return v + 2 * (av * r + aav)
 
 
-def to_rotation_matrix(q: torch.Tensor) -> torch.Tensor:
+def to_rotation_matrix_assume_normalized(q: torch.Tensor) -> torch.Tensor:
     """
     Convert quaternions to 3x3 rotation matrices.
 
     :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
     :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
     """
-    assert q.size(-1) == 4, "Expected quaternion tensor (last dimension=4)."
+    check(q)
     qx = q.select(-1, 0).unsqueeze(-1)
     qy = q.select(-1, 1).unsqueeze(-1)
     qz = q.select(-1, 2).unsqueeze(-1)
@@ -265,6 +268,16 @@ def to_rotation_matrix(q: torch.Tensor) -> torch.Tensor:
         -1,
     )
     return result.reshape(*q.shape[:-1], 3, 3)
+
+
+def to_rotation_matrix(q: torch.Tensor) -> torch.Tensor:
+    """
+    Convert quaternions to 3x3 rotation matrices.
+
+    :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
+    :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
+    """
+    return to_rotation_matrix_assume_normalized(normalize(q))
 
 
 def identity(
