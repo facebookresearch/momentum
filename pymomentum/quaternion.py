@@ -135,7 +135,7 @@ def normalize(q: torch.Tensor) -> torch.Tensor:
     :return: The normalized quaternion.
     """
     check(q)
-    return q / q.norm(2, dim=-1, keepdim=True)
+    return torch.nn.functional.normalize(q, dim=-1)
 
 
 def conjugate(q: torch.Tensor) -> torch.Tensor:
