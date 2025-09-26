@@ -308,26 +308,29 @@ def euler_xyz_to_quaternion(euler_xyz: torch.Tensor) -> torch.Tensor:
     """
     Convert Euler XYZ angles to a quaternion.
 
-    :parameter euler_xyz: A tensor of shape (..., 3) representing the Euler XYZ angles.
+    This function converts XYZ Euler angles to quaternions.
+    The rotation order is X-Y-Z, meaning first rotate around X-axis, then Y-axis,
+    then Z-axis.
+
+    :parameter euler_xyz: A tensor of shape (..., 3) representing the Euler XYZ angles
+                         in order [roll, pitch, yaw].
     :return: A tensor of shape (..., 4) representing the quaternion in ((x, y, z), w) format.
     """
-    x_angles = euler_xyz[..., 0]
-    y_angles = euler_xyz[..., 1]
-    z_angles = euler_xyz[..., 2]
-    # Create rotation axes and angles
-    x_axes = torch.zeros_like(euler_xyz)
-    x_axes[..., 0] = 1
-    y_axes = torch.zeros_like(euler_xyz)
-    y_axes[..., 1] = 1
-    z_axes = torch.zeros_like(euler_xyz)
-    z_axes[..., 2] = 1
-    # Apply rotations in ZYX order (since we're converting from XYZ Euler angles)
-    rot_z = from_axis_angle(z_axes * z_angles.unsqueeze(-1))
-    rot_y = from_axis_angle(y_axes * y_angles.unsqueeze(-1))
-    rot_x = from_axis_angle(x_axes * x_angles.unsqueeze(-1))
-    # Multiply quaternions in reverse order (since we applied them in ZYX order)
-    q = multiply(rot_z, multiply(rot_y, rot_x))
-    return q
+    roll, pitch, yaw = euler_xyz.unbind(-1)
+
+    cy = torch.cos(yaw * 0.5)
+    sy = torch.sin(yaw * 0.5)
+    cp = torch.cos(pitch * 0.5)
+    sp = torch.sin(pitch * 0.5)
+    cr = torch.cos(roll * 0.5)
+    sr = torch.sin(roll * 0.5)
+
+    x = sr * cp * cy - cr * sp * sy
+    y = cr * sp * cy + sr * cp * sy
+    z = cr * cp * sy - sr * sp * cy
+    w = cr * cp * cy + sr * sp * sy
+
+    return torch.stack((x, y, z, w), dim=-1)
 
 
 def euler_zyx_to_quaternion(euler_zyx: torch.Tensor) -> torch.Tensor:
