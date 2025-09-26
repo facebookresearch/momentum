@@ -439,6 +439,32 @@ class TestSkelState(unittest.TestCase):
         state3 = pym_skel_state.multiply(state_inv, state)
         self.assertTrue(torch.allclose(state3, state_expected, atol=1e-5, rtol=1e-5))
 
+    def test_multiply_backprop(self) -> None:
+        """Test multiply_backprop function matches autograd gradients"""
+        torch.manual_seed(10023893)
+        state1 = self.init_sim3_like_skel_state(1024, 159)
+        state2 = self.init_sim3_like_skel_state(1024, 159)
+
+        ps1 = P(state1)
+        ps2 = P(state2)
+
+        state = pym_skel_state.multiply(ps1, ps2)
+        grad = torch.randn_like(state)
+
+        # Test autograd computation
+        ds1_autograd, ds2_autograd = torch.autograd.grad(
+            outputs=[state],
+            inputs=[ps1, ps2],
+            grad_outputs=[grad],
+        )
+
+        # Test our custom backprop function
+        ds1_custom, ds2_custom = pym_skel_state.multiply_backprop(ps1, ps2, grad)
+
+        # Compare gradients - use appropriate tolerance for numerical differences
+        self.assertTrue(torch.allclose(ds1_autograd, ds1_custom, atol=1e-4, rtol=1e-4))
+        self.assertTrue(torch.allclose(ds2_autograd, ds2_custom, atol=1e-4, rtol=1e-4))
+
 
 if __name__ == "__main__":
     unittest.main()
