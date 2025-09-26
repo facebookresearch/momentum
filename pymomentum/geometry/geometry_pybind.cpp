@@ -246,7 +246,7 @@ PYBIND11_MODULE(geometry, m) {
   // - load_urdf(urdf_filename)
   // - load_urdf_from_bytes(urdf_bytes)
   // - save_gltf(path, character, fps, motion, offsets, markers)
-  // - save_gltf_from_skel_states(path, character, fps, skel_states,
+  // - save_gltf_with_skel_states(path, character, fps, skel_states,
   // joint_params, markers)
   // - save_fbx(path, character, fps, motion, offsets)
   // - save_fbx_with_joint_params(path, character, fps, joint_params)
@@ -890,7 +890,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("markers") =
               std::optional<const std::vector<std::vector<momentum::Marker>>>{})
       .def_static(
-          "save_gltf_from_skel_states",
+          "save_gltf_with_skel_states",
           &saveGLTFCharacterToFileFromSkelStates,
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to a gltf file.
