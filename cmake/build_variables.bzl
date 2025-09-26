@@ -427,8 +427,8 @@ io_fbx_sources = [
     "io/fbx/polygon_data.cpp",
 ]
 
-io_fbx_sources_unsupported = [
-    "io/fbx/fbx_io_unsupported.cpp",
+io_fbx_sources_openfbx_only = [
+    "io/fbx/fbx_io_openfbx_only.cpp",
     "io/fbx/openfbx_loader.cpp",
     "io/fbx/polygon_data.cpp",
 ]

@@ -38,34 +38,37 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
 }
 
 void saveFbx(
-    const filesystem::path& filename,
-    const Character& character,
-    const MatrixXf& poses,
-    const VectorXf& identity,
-    double framerate,
-    bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
-  MT_THROW("FbxSDK is not supported on your platform.");
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    const MatrixXf& /* poses */,
+    const VectorXf& /* identity */,
+    double /* framerate */,
+    bool /* saveMesh */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    bool /* permissive */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
 
 void saveFbxWithJointParams(
-    const filesystem::path& filename,
-    const Character& character,
-    const MatrixXf& jointParams,
-    double framerate,
-    bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
-  MT_THROW("FbxSDK is not supported on your platform.");
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    const MatrixXf& /* jointParams */,
+    double /* framerate */,
+    bool /* saveMesh */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    bool /* permissive */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
 
 void saveFbxModel(
-    const filesystem::path& filename,
-    const Character& character,
-    const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
-  MT_THROW("FbxSDK is not supported on your platform.");
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    bool /* permissive */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
 
 } // namespace momentum

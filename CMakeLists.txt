@@ -59,7 +59,7 @@ include(GNUInstallDirs)
 #===============================================================================
 
 mt_option(BUILD_SHARED_LIBS "Build as shared libraries" ON)
-mt_option(MOMENTUM_BUILD_WITH_FBXSDK "Build with IO FBX" OFF)
+mt_option(MOMENTUM_ENABLE_FBX_SAVING "Enable FBX saving via Autodesk FBX SDK (FBX loading always available via OpenFBX)" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
@@ -353,7 +353,7 @@ mt_library(
     character
 )
 
-if(MOMENTUM_BUILD_WITH_FBXSDK)
+if(MOMENTUM_ENABLE_FBX_SAVING)
   set(io_fbx_sources_var io_fbx_sources)
   find_package(FbxSdk MODULE REQUIRED)
 
@@ -371,7 +371,8 @@ if(MOMENTUM_BUILD_WITH_FBXSDK)
 
   set(io_fbx_private_link_libraries fbxsdk::fbxsdk)
 else()
-  set(io_fbx_sources_var io_fbx_sources_unsupported)
+  # When FBX SDK is not available, use OpenFBX-only mode (OpenFBX is always available)
+  set(io_fbx_sources_var io_fbx_sources_openfbx_only)
   set(io_fbx_private_link_libraries )
 endif()
 
