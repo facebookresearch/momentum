@@ -578,6 +578,66 @@ class TestTRS(unittest.TestCase):
 
         self.assertTrue(torch.allclose(transformed1, transformed2))
 
+    def test_rotmat_from_euler_xyz(self) -> None:
+        """Test rotmat_from_euler_xyz function."""
+        # Test with zero angles (should give identity matrix)
+        euler_zero = torch.tensor([0.0, 0.0, 0.0])
+        rotmat_zero = pym_trs.rotmat_from_euler_xyz(euler_zero)
+        expected_identity = torch.eye(3)
+        self.assertTrue(torch.allclose(rotmat_zero, expected_identity, atol=1e-6))
+
+        # Test with 90-degree rotation around X-axis
+        euler_x_90 = torch.tensor([math.pi / 2, 0.0, 0.0])
+        rotmat_x_90 = pym_trs.rotmat_from_euler_xyz(euler_x_90)
+        expected_x_90 = self._rotation_x(math.pi / 2)
+        self.assertTrue(torch.allclose(rotmat_x_90, expected_x_90, atol=1e-6))
+
+        # Test with 90-degree rotation around Y-axis
+        euler_y_90 = torch.tensor([0.0, math.pi / 2, 0.0])
+        rotmat_y_90 = pym_trs.rotmat_from_euler_xyz(euler_y_90)
+        expected_y_90 = self._rotation_y(math.pi / 2)
+        self.assertTrue(torch.allclose(rotmat_y_90, expected_y_90, atol=1e-6))
+
+        # Test with 90-degree rotation around Z-axis
+        euler_z_90 = torch.tensor([0.0, 0.0, math.pi / 2])
+        rotmat_z_90 = pym_trs.rotmat_from_euler_xyz(euler_z_90)
+        expected_z_90 = self._rotation_z(math.pi / 2)
+        self.assertTrue(torch.allclose(rotmat_z_90, expected_z_90, atol=1e-6))
+
+        # Test with combined rotations (30, 45, 60 degrees)
+        rx, ry, rz = math.pi / 6, math.pi / 4, math.pi / 3
+        euler_combined = torch.tensor([rx, ry, rz])
+        rotmat_combined = pym_trs.rotmat_from_euler_xyz(euler_combined)
+
+        # Manually compute expected result (ZYX order: Rz * Ry * Rx)
+        expected_combined = torch.matmul(
+            torch.matmul(self._rotation_z(rz), self._rotation_y(ry)),
+            self._rotation_x(rx),
+        )
+        self.assertTrue(torch.allclose(rotmat_combined, expected_combined, atol=1e-6))
+
+        # Test batched input
+        batch_euler = torch.tensor(
+            [
+                [0.0, 0.0, 0.0],  # Identity
+                [math.pi / 2, 0.0, 0.0],  # 90° around X
+                [0.0, math.pi / 2, 0.0],  # 90° around Y
+            ]
+        )
+        batch_rotmat = pym_trs.rotmat_from_euler_xyz(batch_euler)
+
+        # Check shapes
+        self.assertEqual(batch_rotmat.shape, (3, 3, 3))
+
+        # Check individual matrices
+        self.assertTrue(torch.allclose(batch_rotmat[0], torch.eye(3), atol=1e-6))
+        self.assertTrue(
+            torch.allclose(batch_rotmat[1], self._rotation_x(math.pi / 2), atol=1e-6)
+        )
+        self.assertTrue(
+            torch.allclose(batch_rotmat[2], self._rotation_y(math.pi / 2), atol=1e-6)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
