@@ -195,31 +195,6 @@ def to_matrix(skeleton_state: torch.Tensor) -> torch.Tensor:
     return result
 
 
-def match_leading_dimensions(
-    t_left: torch.Tensor, t_right: torch.Tensor
-) -> torch.Tensor:
-    """
-    Match the leading dimensions of two tensors.
-
-    :parameter t_left: The first tensor.
-    :type t_left: torch.Tensor
-    :parameter t_right: The second tensor.
-    :type t_right: torch.Tensor
-    :return: The first tensor with its leading dimensions matched to the second tensor.
-    :rtype: torch.Tensor
-    """
-    if t_right.dim() < t_left.dim():
-        raise ValueError(
-            "First tensor can't have larger dimensionality than the second."
-        )
-
-    while t_left.dim() < t_right.dim():
-        t_left = t_left.unsqueeze(0)
-
-    t_left = t_left.expand(*t_right.shape[:-1], t_left.shape[-1])
-    return t_left
-
-
 def _normalize_split_skel_state(
     components: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -253,7 +228,7 @@ def _multiply_split_skel_states(
     t1, q1, s1 = skel_state1
     t2, q2, s2 = skel_state2
 
-    t_res = t1 + s1.expand_as(t2) * quaternion.rotate_vector_assume_normalized(q1, t2)
+    t_res = t1 + s1 * quaternion.rotate_vector_assume_normalized(q1, t2)
     s_res = s1 * s2
     q_res = quaternion.multiply_assume_normalized(q1, q2)
 
@@ -273,7 +248,8 @@ def multiply(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
     """
     check(s1)
     check(s2)
-    s1 = match_leading_dimensions(s1, s2)
+    while s1.ndim < s2.ndim:
+        s1 = s1.unsqueeze(0)
 
     return _multiply_split_skel_states(
         _normalize_split_skel_state(split(s1)), _normalize_split_skel_state(split(s2))
@@ -293,7 +269,8 @@ def multiply_assume_normalized(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tens
     :return: The product of the two skeleton states.
     :rtype: torch.Tensor
     """
-    s1 = match_leading_dimensions(s1, s2)
+    while s1.ndim < s2.ndim:
+        s1 = s1.unsqueeze(0)
 
     return _multiply_split_skel_states(split(s1), split(s2))
 
@@ -330,7 +307,7 @@ def _transform_points_split_skel_state(
     :rtype: torch.Tensor
     """
     t, q, s = skel_state
-    return t + quaternion.rotate_vector(q, s.expand_as(points) * points)
+    return t + quaternion.rotate_vector(q, s * points)
 
 
 def transform_points(skel_state: torch.Tensor, points: torch.Tensor) -> torch.Tensor:
@@ -347,7 +324,10 @@ def transform_points(skel_state: torch.Tensor, points: torch.Tensor) -> torch.Te
     check(skel_state)
     if points.dim() < 1 or points.shape[-1] != 3:
         raise ValueError("Points tensor should have last dimension 3.")
-    skel_state = match_leading_dimensions(skel_state, points)
+
+    # allow transforming multiple points with a single skel_state.
+    while skel_state.ndim < points.ndim:
+        skel_state = skel_state.unsqueeze(0)
 
     return _transform_points_split_skel_state(
         _normalize_split_skel_state(split(skel_state)), points
@@ -369,7 +349,9 @@ def transform_points_assume_normalized(
     :return: The transformed points.
     :rtype: torch.Tensor
     """
-    skel_state = match_leading_dimensions(skel_state, points)
+    # when multipying by points, we'll allow a single skel_state to transform multiple points.  So we'll allow adding a single extra dimension to the skel_state.
+    if skel_state.ndim < points.ndim:
+        skel_state = skel_state.unsqueeze(0)
     return _transform_points_split_skel_state(split(skel_state), points)
 
 
@@ -426,7 +408,9 @@ def slerp(s0: torch.Tensor, s1: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     check(s0)
     check(s1)
 
-    t = match_leading_dimensions(t, s0)
+    if t.ndim < s0.ndim:
+        t = t.unsqueeze(0)
+
     t0, q0, s0 = split(s0)
     t1, q1, s1 = split(s1)
 
