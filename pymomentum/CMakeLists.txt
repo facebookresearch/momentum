@@ -236,6 +236,11 @@ mt_python_library(
   PYMOMENTUM_SOURCES_VARS trs_sources
 )
 
+mt_python_library(
+  NAME backend
+  PYMOMENTUM_SOURCES_VARS backend_sources
+)
+
 #===============================================================================
 # Tests
 #===============================================================================
