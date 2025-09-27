@@ -286,11 +286,17 @@ in order [yaw, pitch, roll].</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.quaternion.from_rotation_matrix">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">from_rotation_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.from_rotation_matrix" title="Link to this definition"></a></dt>
-<dd><p>Convert a rotation matrix to a quaternion.</p>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">from_rotation_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.from_rotation_matrix" title="Link to this definition"></a></dt>
+<dd><p>Convert a rotation matrix to a quaternion using numerically stable method.</p>
+<p>This implementation uses the robust algorithm that computes all four quaternion
+component candidates and selects the best-conditioned one, ensuring numerical
+stability across all rotation matrix configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>matrices</strong> – A tensor of shape (…, 3, 3) representing the rotation matrices.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrices</strong> – A tensor of shape (…, 3, 3) representing the rotation matrices.</p></li>
+<li><p><strong>eta</strong> – Numerical precision threshold (unused, kept for compatibility).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tensor of shape (…, 4) representing the quaternions in ((x, y, z), w) format.</p>
