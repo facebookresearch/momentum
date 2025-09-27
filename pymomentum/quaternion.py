@@ -267,7 +267,7 @@ def to_rotation_matrix_assume_normalized(q: torch.Tensor) -> torch.Tensor:
         ],
         -1,
     )
-    return result.reshape(*q.shape[:-1], 3, 3)
+    return result.reshape(list(q.shape[:-1]) + [3, 3])
 
 
 def to_rotation_matrix(q: torch.Tensor) -> torch.Tensor:

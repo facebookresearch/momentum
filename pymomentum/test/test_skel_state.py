@@ -209,19 +209,6 @@ class TestSkelState(unittest.TestCase):
             "Expected skeleton state to have last dimension 8", str(context.exception)
         )
 
-    def test_match_leading_dimensions_error(self) -> None:
-        # Test case where t_right.dim() < t_left.dim() (triggers ValueError)
-        t_left = torch.randn(2, 3, 4)  # 3 dimensions
-        t_right = torch.randn(5)  # 1 dimension (less than t_left)
-
-        with self.assertRaises(ValueError) as context:
-            pym_skel_state.match_leading_dimensions(t_left, t_right)
-
-        self.assertIn(
-            "First tensor can't have larger dimensionality than the second",
-            str(context.exception),
-        )
-
     def test_identity_no_size(self) -> None:
         # Test case where size=None (triggers the else branch in identity function)
         identity_state = pym_skel_state.identity()
@@ -253,19 +240,6 @@ class TestSkelState(unittest.TestCase):
         self.assertEqual(skel_state.shape, (8,))
         # Translation should match what we set
         self.assertTrue(torch.allclose(skel_state[:3], torch.tensor([1.0, 2.0, 3.0])))
-
-    def test_match_leading_dimensions_while_loop(self) -> None:
-        # Test case where t_left.dim() < t_right.dim() (triggers while loop)
-        t_left = torch.randn(4)  # 1 dimension
-        t_right = torch.randn(2, 3, 4)  # 3 dimensions
-
-        result = pym_skel_state.match_leading_dimensions(t_left, t_right)
-
-        # Should expand t_left to match t_right's leading dimensions
-        self.assertEqual(result.shape, (2, 3, 4))
-        # Should have expanded the original tensor
-        self.assertTrue(torch.allclose(result[0, 0], t_left))
-        self.assertTrue(torch.allclose(result[1, 2], t_left))
 
     def test_transform_points_invalid_dimensions(self) -> None:
         # Test case where points.dim() < 1 or points.shape[-1] != 3
@@ -464,6 +438,72 @@ class TestSkelState(unittest.TestCase):
         # Compare gradients - use appropriate tolerance for numerical differences
         self.assertTrue(torch.allclose(ds1_autograd, ds1_custom, atol=1e-4, rtol=1e-4))
         self.assertTrue(torch.allclose(ds2_autograd, ds2_custom, atol=1e-4, rtol=1e-4))
+
+    def test_multiply_broadcasting(self) -> None:
+        """Test that multiplication works correctly with broadcasting for different tensor dimensions"""
+        torch.manual_seed(42)
+
+        # Create skel states with different shapes for broadcasting
+        # First state: [3, 2, 8] - larger first dimension
+        state1 = generate_random_skel_state(6).reshape(3, 2, 8)
+
+        # Second state: [1, 2, 8] - smaller first dimension (will be broadcasted)
+        state2 = generate_random_skel_state(2).reshape(1, 2, 8)
+
+        # Multiply with broadcasting
+        result_broadcast = pym_skel_state.multiply(state1, state2)
+
+        # Manual expansion for reference
+        state2_expanded = state2.expand(3, 2, 8)
+        result_manual = pym_skel_state.multiply(state1, state2_expanded)
+
+        # Results should be the same
+        self.assertTrue(
+            torch.allclose(result_broadcast, result_manual, atol=1e-6),
+            "Broadcasting multiplication should match manually expanded multiplication",
+        )
+
+        # Test with different broadcasting patterns
+        # Test broadcasting with compatible dimensions: [2, 1, 8] vs [2, 3, 8]
+        state_narrow = generate_random_skel_state(2).reshape(2, 1, 8)
+        state_wide = generate_random_skel_state(6).reshape(2, 3, 8)
+
+        result_narrow_broadcast = pym_skel_state.multiply(state_narrow, state_wide)
+        narrow_expanded = state_narrow.expand(2, 3, 8)
+        result_narrow_manual = pym_skel_state.multiply(narrow_expanded, state_wide)
+
+        self.assertTrue(
+            torch.allclose(result_narrow_broadcast, result_narrow_manual, atol=1e-6),
+            "Narrow state broadcasting should work correctly",
+        )
+
+        # Test reverse broadcasting: [2, 3, 8] vs [2, 1, 8]
+        result_reverse_broadcast = pym_skel_state.multiply(state_wide, state_narrow)
+        result_reverse_manual = pym_skel_state.multiply(state_wide, narrow_expanded)
+
+        self.assertTrue(
+            torch.allclose(result_reverse_broadcast, result_reverse_manual, atol=1e-6),
+            "Reverse broadcasting should work correctly",
+        )
+
+        # Verify shapes are correct
+        self.assertEqual(result_broadcast.shape, (3, 2, 8))
+        self.assertEqual(result_narrow_broadcast.shape, (2, 3, 8))
+        self.assertEqual(result_reverse_broadcast.shape, (2, 3, 8))
+
+        # Test that results preserve transformation properties by converting to matrices
+        # Broadcasting result should match element-wise multiplication
+        for i in range(3):
+            for j in range(2):
+                m1 = pym_skel_state.to_matrix(state1[i, j])
+                m2 = pym_skel_state.to_matrix(state2[0, j])  # Broadcasted dimension
+                expected_matrix = torch.matmul(m1, m2)
+                actual_matrix = pym_skel_state.to_matrix(result_broadcast[i, j])
+
+                self.assertTrue(
+                    torch.allclose(expected_matrix, actual_matrix, atol=1e-5),
+                    f"Matrix multiplication should match for element [{i}, {j}]",
+                )
 
 
 if __name__ == "__main__":
