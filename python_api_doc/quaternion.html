@@ -76,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.to_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.quaternion.to_rotation_matrix_assume_normalized"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix_assume_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
@@ -599,6 +600,20 @@ to the quaternion and vector respectively.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.quaternion.to_rotation_matrix">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">to_rotation_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.to_rotation_matrix" title="Link to this definition"></a></dt>
+<dd><p>Convert quaternions to 3x3 rotation matrices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> – (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.quaternion.to_rotation_matrix_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.quaternion.</span></span><span class="sig-name descname"><span class="pre">to_rotation_matrix_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.quaternion.to_rotation_matrix_assume_normalized" title="Link to this definition"></a></dt>
 <dd><p>Convert quaternions to 3x3 rotation matrices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
