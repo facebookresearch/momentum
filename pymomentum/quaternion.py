@@ -377,87 +377,91 @@ def euler_zyx_to_quaternion(euler_zyx: torch.Tensor) -> torch.Tensor:
     return torch.stack((x, y, z, w), dim=-1)
 
 
-def from_rotation_matrix(matrices: torch.Tensor) -> torch.Tensor:
+def from_rotation_matrix(matrices: torch.Tensor, eta: float = 1e-6) -> torch.Tensor:
     """
-    Convert a rotation matrix to a quaternion.
+    Convert a rotation matrix to a quaternion using numerically stable method.
+
+    This implementation uses the robust algorithm that computes all four quaternion
+    component candidates and selects the best-conditioned one, ensuring numerical
+    stability across all rotation matrix configurations.
 
     :parameter matrices: A tensor of shape (..., 3, 3) representing the rotation matrices.
+    :parameter eta: Numerical precision threshold (unused, kept for compatibility).
     :return: A tensor of shape (..., 4) representing the quaternions in ((x, y, z), w) format.
     """
-    # Convert a rotation matrix to a quaternion using the method described here:
-    # https://math.stackexchange.com/questions/893984/conversion-of-rotation-matrix-to-quaternion
-    # Assumes that the input is a rotation matrix, will return the wrong result
-    # if not.
-    eigenvalues, eigenvectors = torch.linalg.eig(matrices)
-    # Angle can be read off the trace, as described in the SO post:
-    trace_m = matrices[..., 0, 0] + matrices[..., 1, 1] + matrices[..., 2, 2]
-    cos_theta = (trace_m - 1) / 2
-    # For quaternion, we need cos(theta/2) and sin(theta/2):
-    cos_half_theta = torch.sqrt(torch.clamp((1 + cos_theta) / 2.0, min=0))
-    sin_half_theta = torch.sqrt(torch.clamp((1 - cos_theta) / 2.0, min=0))
-    # There is one vector for which R * v = v; that vector must be the axis of
-    # rotation and has an eigenvalue of 1.  Because the eigenvalues aren't sorted
-    # we'll need to find it by looking for eigenvalue with the largest real
-    # component (which should be 1).
-    max_eig, max_eig_ind = torch.max(eigenvalues.real, dim=-1)
-    # Extract the eigenvector matching the real eigenvalue 1.  This requires a
-    # torch.gather because we're extracting a different eigenvector for each
-    # input (the eigenvalues are not sorted and anyway they all have norm 1).
-    qv = (
-        torch.gather(
-            eigenvectors,
-            dim=-1,
-            index=max_eig_ind.unsqueeze(-1)
-            .unsqueeze(-1)
-            .expand(*max_eig_ind.shape, 3, 1),
+    m = matrices
+    m00, m01, m02 = m[..., 0, 0], m[..., 0, 1], m[..., 0, 2]
+    m10, m11, m12 = m[..., 1, 0], m[..., 1, 1], m[..., 1, 2]
+    m20, m21, m22 = m[..., 2, 0], m[..., 2, 1], m[..., 2, 2]
+
+    # Compute the absolute values of all four quaternion components
+    q_abs = torch.sqrt(
+        torch.clamp(
+            torch.stack(
+                [
+                    1.0 + m00 + m11 + m22,  # w component
+                    1.0 + m00 - m11 - m22,  # x component
+                    1.0 - m00 + m11 - m22,  # y component
+                    1.0 - m00 - m11 + m22,  # z component
+                ],
+                dim=-1,
+            ),
+            min=1e-15,
         )
-        .squeeze(-1)
-        .real
     )
-    qv = sin_half_theta.unsqueeze(-1).expand_as(qv) * qv
-    qx = qv[..., 0].unsqueeze(-1)
-    qy = qv[..., 1].unsqueeze(-1)
-    qz = qv[..., 2].unsqueeze(-1)
-    qw = cos_half_theta.unsqueeze(-1)
-    # Because of the way we derived qw, we don't know if we have the sign correct
-    # (this depends also on which way v is pointing).  To make sure we use the
-    # correct one, reconstruct the upper triangular part of the matrix from the
-    # quaternion and pick the sign that produces the target matrix.
-    #
-    # Quaternion-to-matrix is:
-    #   [1 0 0]     [-qy^2-qz^2    qx*qy       qx*qz     ]        [ 0  -qz  qy]
-    #   [0 1 0] + 2*[qx*qy        -qx^2-qz^2   qy*qz     ] + 2*qw*[ qz  0  -qx]
-    #   [0 0 1]     [qx*qz         qy*qz       -qx^2-qy^2]        [-qy  qx  0 ]
-    #   identity    symmetric matrix                            skew-symmetric
-    #   matrix
-    # We can ignore the diagonal entries since they don't depend on w and focus
-    # on the upper off-diagonal entries.
-    #     2*qx*qy - 2*w*qz = m12
-    #     2*qx*qz + 2*w*qy = m13
-    #     2*qy*qz - 2*w*qx = m23
-    symmetric_part_diff = torch.stack(
+
+    # We produce the desired quaternion multiplied by each of r, i, j, k
+    quat_by_rijk = torch.stack(
         [
-            2 * qx * qy - matrices[..., 0, 1].unsqueeze(-1),
-            2 * qx * qz - matrices[..., 0, 2].unsqueeze(-1),
-            2 * qy * qz - matrices[..., 1, 2].unsqueeze(-1),
+            torch.stack(
+                [m21 - m12, m02 - m20, m10 - m01, torch.square(q_abs[..., 0])], dim=-1
+            ),
+            torch.stack(
+                [torch.square(q_abs[..., 1]), m10 + m01, m02 + m20, m21 - m12], dim=-1
+            ),
+            torch.stack(
+                [m10 + m01, torch.square(q_abs[..., 2]), m12 + m21, m02 - m20], dim=-1
+            ),
+            torch.stack(
+                [m20 + m02, m21 + m12, torch.square(q_abs[..., 3]), m10 - m01], dim=-1
+            ),
         ],
-        dim=-1,
+        dim=-2,
     )
-    skew_symmetric_part = torch.stack([-2 * qz, 2 * qy, -2 * qx], dim=-1)
-    diff_w_positive = (
-        symmetric_part_diff
-        + qw.unsqueeze(-1).expand_as(skew_symmetric_part) * skew_symmetric_part
+
+    # We floor here at 0.01 to avoid divide-by-zero but the exact level is not important;
+    # if q_abs is small, the candidate won't be picked.
+    flr = 0.01
+    quat_candidates = quat_by_rijk / (2.0 * torch.clamp(q_abs[..., None], min=flr))
+
+    # If not for numerical problems, quat_candidates[i] should be same (up to a sign),
+    # forall i; we pick the best-conditioned one (with the largest denominator)
+    result = quat_candidates[..., 0, :]
+
+    # Select the best candidate by picking the one with the largest denominator.
+    result = torch.where(
+        q_abs[..., 1, None] > q_abs[..., 0, None], quat_candidates[..., 1, :], result
     )
-    diff_w_negative = (
-        symmetric_part_diff
-        - qw.unsqueeze(-1).expand_as(skew_symmetric_part) * skew_symmetric_part
+    result = torch.where(
+        torch.logical_and(
+            q_abs[..., 2, None] > q_abs[..., 0, None],
+            q_abs[..., 2, None] > q_abs[..., 1, None],
+        ),
+        quat_candidates[..., 2, :],
+        result,
     )
-    qv = torch.where(
-        torch.norm(diff_w_positive, dim=-1) < torch.norm(diff_w_negative, dim=-1),
-        qv,
-        -qv,
+    result = torch.where(
+        torch.logical_and(
+            torch.logical_and(
+                q_abs[..., 3, None] > q_abs[..., 0, None],
+                q_abs[..., 3, None] > q_abs[..., 1, None],
+            ),
+            q_abs[..., 3, None] > q_abs[..., 2, None],
+        ),
+        quat_candidates[..., 3, :],
+        result,
     )
-    return torch.cat([qv, qw], dim=-1)
+    return normalize(result)
 
 
 def check_and_normalize_weights(
@@ -518,7 +522,7 @@ def blend(
     check(quaternions)
     outer_prod = torch.einsum("...i,...k->...ik", [quaternions, quaternions])
     QtQ = (weights.unsqueeze(-1).unsqueeze(-1) * outer_prod).sum(dim=-3)
-    eigenvalues, eigenvectors = torch.linalg.eigh(QtQ)
+    _, eigenvectors = torch.linalg.eigh(QtQ)
     result = eigenvectors.select(dim=-1, index=3)
     return result
 
@@ -578,7 +582,7 @@ def from_two_vectors(v1: torch.Tensor, v2: torch.Tensor) -> torch.Tensor:
     # handle the anti-parallel case, we need a vector which is perpendicular to
     # both v1 and v2 which we can obtain using the SVD:
     m = torch.stack([v1, v2], dim=-2)
-    u, s, vh = torch.svd(m, compute_uv=True, some=False)
+    _, _, vh = torch.svd(m, compute_uv=True, some=False)
     axis = vh[..., :, 2]
 
     vec = torch.where(scalar <= 0, axis, vec)
