@@ -139,6 +139,10 @@ trs_sources = [
     "trs.py",
 ]
 
+backend_sources = [
+    "backend/__init__.py",
+]
+
 marker_tracking_public_headers = [
 ]
 
