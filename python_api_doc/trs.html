@@ -58,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.rotmat_from_euler_xyz"><code class="docutils literal notranslate"><span class="pre">rotmat_from_euler_xyz()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.rotmat_inverse"><code class="docutils literal notranslate"><span class="pre">rotmat_inverse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.rotmat_multiply"><code class="docutils literal notranslate"><span class="pre">rotmat_multiply()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.trs.rotmat_rotate_vector"><code class="docutils literal notranslate"><span class="pre">rotmat_rotate_vector()</span></code></a></li>
@@ -314,6 +315,27 @@ matrix inverse is just transpose.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TRSTransform</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.trs.rotmat_from_euler_xyz">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.trs.</span></span><span class="sig-name descname"><span class="pre">rotmat_from_euler_xyz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">euler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.trs.rotmat_from_euler_xyz" title="Link to this definition"></a></dt>
+<dd><p>Create rotation matrices from XYZ Euler angles.</p>
+<p>This function converts XYZ Euler angles to rotation matrices using the
+ZYX rotation order (also known as Tait-Bryan angles). The rotation is
+applied as follows: first around the X-axis, then Y-axis, then Z-axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>euler</strong> (<em>torch.Tensor</em>) – Euler angles of shape […, 3] where the last dimension
+contains [rx, ry, rz] rotations in radians.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rotation matrices of shape […, 3, 3].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
 </dd></dl>
