@@ -91,12 +91,14 @@ void SimdPositionConstraints::clearConstraints() {
 SimdPositionErrorFunction::SimdPositionErrorFunction(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SkeletonErrorFunction(skel, pt), maxThreads_(maxThreads) {
   constraints_ = nullptr;
 }
 
-SimdPositionErrorFunction::SimdPositionErrorFunction(const Character& character, size_t maxThreads)
+SimdPositionErrorFunction::SimdPositionErrorFunction(
+    const Character& character,
+    uint32_t maxThreads)
     : SimdPositionErrorFunction(character.skeleton, character.parameterTransform, maxThreads) {
   // Do nothing
 }
@@ -514,14 +516,14 @@ inline double __vectorcall sum8(const __m256 x) {
 SimdPositionErrorFunctionAVX::SimdPositionErrorFunctionAVX(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SimdPositionErrorFunction(skel, pt, maxThreads) {
   // Do nothing
 }
 
 SimdPositionErrorFunctionAVX::SimdPositionErrorFunctionAVX(
     const Character& character,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SimdPositionErrorFunction(character, maxThreads) {
   // Do nothing
 }

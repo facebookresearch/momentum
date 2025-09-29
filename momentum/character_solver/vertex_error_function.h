@@ -47,7 +47,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   explicit VertexErrorFunctionT(
       const Character& character,
       VertexConstraintType type = VertexConstraintType::Position,
-      size_t maxThreads = 0);
+      uint32_t maxThreads = 0);
   virtual ~VertexErrorFunctionT() override;
 
   [[nodiscard]] double getError(
@@ -146,7 +146,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   const VertexConstraintType constraintType_;
 
-  size_t maxThreads_;
+  uint32_t maxThreads_;
 
   void updateMeshes(const ModelParametersT<T>& modelParameters, const SkeletonStateT<T>& state);
 };

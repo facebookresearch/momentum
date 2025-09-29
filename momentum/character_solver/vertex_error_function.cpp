@@ -36,7 +36,7 @@ template <typename T>
 VertexErrorFunctionT<T>::VertexErrorFunctionT(
     const Character& character_in,
     VertexConstraintType type,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SkeletonErrorFunctionT<T>(character_in.skeleton, character_in.parameterTransform),
       character_(character_in),
       constraintType_(type),

@@ -107,12 +107,12 @@ void SimdNormalConstraints::clearConstraints() {
 SimdNormalErrorFunction::SimdNormalErrorFunction(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SkeletonErrorFunction(skel, pt), maxThreads_(maxThreads) {
   constraints_ = nullptr;
 }
 
-SimdNormalErrorFunction::SimdNormalErrorFunction(const Character& character, size_t maxThreads)
+SimdNormalErrorFunction::SimdNormalErrorFunction(const Character& character, uint32_t maxThreads)
     : SimdNormalErrorFunction(character.skeleton, character.parameterTransform, maxThreads) {}
 
 double SimdNormalErrorFunction::getError(

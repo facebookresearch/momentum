@@ -33,7 +33,7 @@ struct VertexProjectionConstraintT {
 template <typename T>
 class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
-  explicit VertexProjectionErrorFunctionT(const Character& character, size_t maxThreads = 0);
+  explicit VertexProjectionErrorFunctionT(const Character& character, uint32_t maxThreads = 0);
   ~VertexProjectionErrorFunctionT() override;
 
   [[nodiscard]] double getError(
@@ -110,7 +110,7 @@ class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   std::unique_ptr<MeshT<T>>
       posedMesh_; // The posed mesh after the skeleton transforms have been applied.
 
-  size_t maxThreads_;
+  uint32_t maxThreads_;
 
   T _nearClip = 1.0f;
 };
