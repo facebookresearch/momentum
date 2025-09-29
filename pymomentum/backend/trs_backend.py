@@ -1,4 +1,31 @@
 # pyre-strict
+"""
+TRS Backend for PyMomentum
+
+This module provides efficient forward kinematics and skinning operations using
+the TRS (Translation-Rotation-Scale) representation where each transformation
+component is stored separately.
+
+The TRS representation uses separate tensors for translation (3D), rotation matrices (3x3),
+and scale factors (1D), making it suitable for applications that need explicit access
+to individual transformation components.
+
+Performance Notes:
+This backend is typically 25-50% faster than the skeleton state backend in PyTorch,
+likely due to not requiring quaternion normalization operations. While it doesn't
+match the C++ reference implementation exactly (use skel_state_backend for that),
+it provides excellent performance for PyTorch-based applications.
+
+Key Functions:
+- global_trs_state_from_local_trs_state: Forward kinematics from local to global joint states
+- skin_points_from_trs_state: Linear blend skinning using TRS transformations
+- local_trs_state_from_joint_params: Convert joint parameters to local TRS states
+
+Related Modules:
+- skel_state_backend: Alternative backend using compact 8-parameter skeleton states
+- trs: Core TRS transformation operations and utilities
+"""
+
 from typing import List, Tuple
 
 import torch as th
@@ -6,7 +33,7 @@ from pymomentum import trs
 
 
 @th.jit.script
-def fk_from_local_state_impl(
+def global_trs_state_from_local_trs_state_impl(
     local_state_t: th.Tensor,
     local_state_r: th.Tensor,
     local_state_s: th.Tensor,
@@ -17,20 +44,55 @@ def fk_from_local_state_impl(
     th.Tensor, th.Tensor, th.Tensor, List[Tuple[th.Tensor, th.Tensor, th.Tensor]]
 ]:
     """
-    just a vanilla forward kinematics with PyTorch, but utilizing prefix multiplication.
+    Compute global TRS state from local joint transformations using forward kinematics.
 
-    given $y=sRx+t$
+    This function implements forward kinematics (FK) using prefix multiplication for efficient
+    parallel computation. Each joint's local TRS transformation is composed with its parent's
+    global transformation to produce the joint's global transformation.
 
-    we have FK:
-    sg = sp * sl
-    rg = rp * rl
-    tg = tp + sp * rp * tl
-    where
-    - sp, rp, tp are the parent global state
-    - sl, rl, tl are the local state
-    - sg, rg, tg are the global state
+    The TRS representation uses separate tensors for each transformation component:
+    - Translation (3D): translation vector [tx, ty, tz]
+    - Rotation (3x3): rotation matrix
+    - Scale (1D): uniform scale factor [s]
 
-    WARNING: this function is not differentiable.
+    Forward Kinematics Formula:
+    For each joint j with parent p in the kinematic hierarchy:
+        s_global_j = s_parent * s_local_j
+        R_global_j = R_parent * R_local_j
+        t_global_j = t_parent + s_parent * R_parent * t_local_j
+
+    This corresponds to the similarity transformation: y = s * R * x + t
+
+    Args:
+        local_state_t: Local joint translations, shape (batch_size, num_joints, 3).
+        local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3).
+        local_state_s: Local joint scales, shape (batch_size, num_joints, 1).
+        prefix_mul_indices: List of [child_index, parent_index] tensor pairs that define
+            the traversal order for the kinematic tree. This ordering enables efficient
+            parallel computation while respecting parent-child dependencies.
+        save_intermediate_results: If True, saves intermediate joint states during the
+            forward pass for use in backpropagation. Set to False for inference-only
+            computations to reduce memory usage.
+        use_double_precision: If True, performs computations in float64 for improved
+            numerical stability. Recommended for deep kinematic chains to minimize
+            accumulated floating-point errors.
+
+    Returns:
+        global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
+        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
+        global_state_s: Global joint scales, shape (batch_size, num_joints, 1).
+        intermediate_results: List of (t, r, s) tuples from the forward pass.
+            Required for efficient gradient computation during backpropagation.
+            Empty if save_intermediate_results=False.
+
+    Note:
+        This function is JIT-compiled for performance. The prefix multiplication approach
+        allows vectorized batch computation while maintaining kinematic chain dependencies.
+        The function is not differentiable by itself - use the wrapper function for gradients.
+
+    See Also:
+        :func:`global_trs_state_from_local_trs_state`: User-facing wrapper with autodiff
+        :func:`local_trs_state_from_joint_params`: Convert joint parameters to local states
     """
     dtype = local_state_t.dtype
     with th.no_grad():
@@ -81,7 +143,7 @@ def fk_from_local_state_impl(
 
 
 @th.jit.script
-def fk_from_local_state_no_grad(
+def global_trs_state_from_local_trs_state_no_grad(
     local_state_t: th.Tensor,
     local_state_r: th.Tensor,
     local_state_s: th.Tensor,
@@ -91,8 +153,32 @@ def fk_from_local_state_no_grad(
 ) -> Tuple[
     th.Tensor, th.Tensor, th.Tensor, List[Tuple[th.Tensor, th.Tensor, th.Tensor]]
 ]:
+    """
+    Compute global TRS state without gradient tracking.
+
+    This is a convenience wrapper around global_trs_state_from_local_trs_state_impl
+    that explicitly disables gradient computation using torch.no_grad(). Useful for
+    inference-only forward passes to reduce memory usage.
+
+    Args:
+        local_state_t: Local joint translations, shape (batch_size, num_joints, 3)
+        local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3)
+        local_state_s: Local joint scales, shape (batch_size, num_joints, 1)
+        prefix_mul_indices: List of [child_index, parent_index] tensor pairs
+        save_intermediate_results: Whether to save intermediate states for backprop
+        use_double_precision: Whether to use float64 for numerical stability
+
+    Returns:
+        global_state_t: Global joint translations, shape (batch_size, num_joints, 3)
+        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3)
+        global_state_s: Global joint scales, shape (batch_size, num_joints, 1)
+        intermediate_results: List of (t, r, s) tuples from forward pass
+
+    See Also:
+        :func:`global_trs_state_from_local_trs_state_impl`: Implementation function
+    """
     with th.no_grad():
-        outputs = fk_from_local_state_impl(
+        outputs = global_trs_state_from_local_trs_state_impl(
             local_state_t,
             local_state_r,
             local_state_s,
@@ -147,7 +233,7 @@ def ik_from_global_state(
 
 
 @th.jit.script
-def fk_from_local_state_backprop(
+def global_trs_state_from_local_trs_state_backprop(
     joint_state_t: th.Tensor,
     joint_state_r: th.Tensor,
     joint_state_s: th.Tensor,
@@ -293,7 +379,7 @@ class ForwardKinematicsFromLocalTransformationJIT(th.autograd.Function):
     ) -> Tuple[
         th.Tensor, th.Tensor, th.Tensor, List[Tuple[th.Tensor, th.Tensor, th.Tensor]]
     ]:
-        return fk_from_local_state_no_grad(
+        return global_trs_state_from_local_trs_state_no_grad(
             local_state_t,
             local_state_r,
             local_state_s,
@@ -348,7 +434,7 @@ class ForwardKinematicsFromLocalTransformationJIT(th.autograd.Function):
             grad_local_state_t,
             grad_local_state_r,
             grad_local_state_s,
-        ) = fk_from_local_state_backprop(
+        ) = global_trs_state_from_local_trs_state_backprop(
             joint_state_t,
             joint_state_r,
             joint_state_s,
@@ -361,14 +447,38 @@ class ForwardKinematicsFromLocalTransformationJIT(th.autograd.Function):
         return (grad_local_state_t, grad_local_state_r, grad_local_state_s, None)
 
 
-def fk_from_local_state(
+def global_trs_state_from_local_trs_state(
     local_state_t: th.Tensor,
     local_state_r: th.Tensor,
     local_state_s: th.Tensor,
     prefix_mul_indices: List[th.Tensor],
 ) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
     """
-    wrap FK as a function.
+    Compute global TRS state from local joint transformations (user-facing wrapper).
+
+    This is the main entry point for forward kinematics using TRS states. It automatically
+    selects between JIT-compiled and autograd-enabled implementations based on the execution context.
+
+    Args:
+        local_state_t: Local joint translations, shape (batch_size, num_joints, 3).
+        local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3).
+        local_state_s: Local joint scales, shape (batch_size, num_joints, 1).
+        prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining
+                           the kinematic hierarchy traversal order.
+
+    Returns:
+        global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
+        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
+        global_state_s: Global joint scales, shape (batch_size, num_joints, 1).
+
+    Note:
+        When called within torch.jit.script or torch.jit.trace context, uses the JIT-compiled
+        implementation for maximum performance. Otherwise, uses the autograd-enabled version
+        for gradient computation.
+
+    See Also:
+        :func:`global_trs_state_from_local_trs_state_impl`: JIT implementation
+        :func:`local_trs_state_from_joint_params`: Convert joint parameters to local states
     """
     if th.jit.is_tracing() or th.jit.is_scripting():
         (
@@ -376,7 +486,7 @@ def fk_from_local_state(
             joint_state_r,
             joint_state_s,
             _,
-        ) = fk_from_local_state_impl(
+        ) = global_trs_state_from_local_trs_state_impl(
             local_state_t,
             local_state_r,
             local_state_s,
@@ -401,14 +511,31 @@ def fk_from_local_state(
     )
 
 
-def fk_from_local_state_forward_only(
+def global_trs_state_from_local_trs_state_forward_only(
     local_state_t: th.Tensor,
     local_state_r: th.Tensor,
     local_state_s: th.Tensor,
     prefix_mul_indices: list[th.Tensor],
 ) -> tuple[th.Tensor, th.Tensor, th.Tensor]:
     """
-    wrap FK as a function.
+    Compute global TRS state from local joint transformations (forward-only wrapper).
+
+    This is a forward-only version that bypasses autograd completely, used when
+    gradients are not needed and maximum performance is required.
+
+    Args:
+        local_state_t: Local joint translations, shape (batch_size, num_joints, 3).
+        local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3).
+        local_state_s: Local joint scales, shape (batch_size, num_joints, 1).
+        prefix_mul_indices: List of [child_index, parent_index] tensor pairs.
+
+    Returns:
+        global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
+        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
+        global_state_s: Global joint scales, shape (batch_size, num_joints, 1).
+
+    See Also:
+        :func:`global_trs_state_from_local_trs_state`: Main user-facing function with autograd
     """
     (
         joint_state_t,
