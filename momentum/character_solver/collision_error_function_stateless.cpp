@@ -21,7 +21,7 @@ CollisionErrorFunctionStatelessT<T>::CollisionErrorFunctionStatelessT(
     const Skeleton& skel,
     const ParameterTransform& pt,
     const CollisionGeometry& cg,
-    size_t /*unused*/)
+    uint32_t /*unused*/)
     : SkeletonErrorFunctionT<T>(skel, pt), collisionGeometry(cg) {
   updateCollisionPairs();
 }
@@ -29,7 +29,7 @@ CollisionErrorFunctionStatelessT<T>::CollisionErrorFunctionStatelessT(
 template <typename T>
 CollisionErrorFunctionStatelessT<T>::CollisionErrorFunctionStatelessT(
     const Character& character,
-    size_t /*maxThreads*/)
+    uint32_t /*maxThreads*/)
     : CollisionErrorFunctionStatelessT(
           character.skeleton,
           character.parameterTransform,

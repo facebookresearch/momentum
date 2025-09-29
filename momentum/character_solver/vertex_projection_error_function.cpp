@@ -30,7 +30,7 @@ namespace momentum {
 template <typename T>
 VertexProjectionErrorFunctionT<T>::VertexProjectionErrorFunctionT(
     const Character& character_in,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SkeletonErrorFunctionT<T>(character_in.skeleton, character_in.parameterTransform),
       character_(character_in),
       maxThreads_(maxThreads) {

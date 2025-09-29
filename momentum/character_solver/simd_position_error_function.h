@@ -77,7 +77,7 @@ class SimdPositionErrorFunction : public SkeletonErrorFunction {
   explicit SimdPositionErrorFunction(
       const Skeleton& skel,
       const ParameterTransform& pt,
-      size_t maxThreads = std::numeric_limits<uint32_t>::max());
+      uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   /// @param maxThreads An optional parameter that specifies the maximum number of threads to be
   /// used with dispenso::parallel_for. If this parameter is set to zero, the function will run in
@@ -85,7 +85,7 @@ class SimdPositionErrorFunction : public SkeletonErrorFunction {
   /// maximum allowable size of a uint32_t, which is also the default for dispenso.
   explicit SimdPositionErrorFunction(
       const Character& character,
-      size_t maxThreads = std::numeric_limits<uint32_t>::max());
+      uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   [[nodiscard]] double getError(const ModelParameters& params, const SkeletonState& state) override;
 
@@ -114,7 +114,7 @@ class SimdPositionErrorFunction : public SkeletonErrorFunction {
   // constraints to use
   const SimdPositionConstraints* constraints_;
 
-  size_t maxThreads_;
+  uint32_t maxThreads_;
 };
 
 #ifdef MOMENTUM_ENABLE_AVX
@@ -127,11 +127,11 @@ class SimdPositionErrorFunctionAVX : public SimdPositionErrorFunction {
   explicit SimdPositionErrorFunctionAVX(
       const Skeleton& skel,
       const ParameterTransform& pt,
-      size_t maxThreads = std::numeric_limits<uint32_t>::max());
+      uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   explicit SimdPositionErrorFunctionAVX(
       const Character& character,
-      size_t maxThreads = std::numeric_limits<uint32_t>::max());
+      uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   double getError(const ModelParameters& params, const SkeletonState& state) final;
 

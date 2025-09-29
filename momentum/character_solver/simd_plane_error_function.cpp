@@ -94,12 +94,12 @@ void SimdPlaneConstraints::clearConstraints() {
 SimdPlaneErrorFunction::SimdPlaneErrorFunction(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SkeletonErrorFunction(skel, pt), maxThreads_(maxThreads) {
   constraints_ = nullptr;
 }
 
-SimdPlaneErrorFunction::SimdPlaneErrorFunction(const Character& character, size_t maxThreads)
+SimdPlaneErrorFunction::SimdPlaneErrorFunction(const Character& character, uint32_t maxThreads)
     : SimdPlaneErrorFunction(character.skeleton, character.parameterTransform, maxThreads) {
   // Do nothing
 }
@@ -465,12 +465,14 @@ inline double __vectorcall sum8(const __m256 x) {
 SimdPlaneErrorFunctionAVX::SimdPlaneErrorFunctionAVX(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    size_t maxThreads)
+    uint32_t maxThreads)
     : SimdPlaneErrorFunction(skel, pt, maxThreads) {
   // Do nothing
 }
 
-SimdPlaneErrorFunctionAVX::SimdPlaneErrorFunctionAVX(const Character& character, size_t maxThreads)
+SimdPlaneErrorFunctionAVX::SimdPlaneErrorFunctionAVX(
+    const Character& character,
+    uint32_t maxThreads)
     : SimdPlaneErrorFunction(character, maxThreads) {
   // Do nothing
 }
