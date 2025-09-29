@@ -309,16 +309,17 @@ loadMotion(const std::string& gltfFilename) {
 
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     const std::string& path,
-    const bool mainSubjectOnly) {
+    const bool mainSubjectOnly,
+    const momentum::UpVector up) {
   if (mainSubjectOnly) {
-    const auto markerSequence = momentum::loadMarkersForMainSubject(path);
+    const auto markerSequence = momentum::loadMarkersForMainSubject(path, up);
     if (markerSequence.has_value()) {
       return {markerSequence.value()};
     } else {
       return {};
     }
   } else {
-    return momentum::loadMarkers(path);
+    return momentum::loadMarkers(path, up);
   }
 }
 

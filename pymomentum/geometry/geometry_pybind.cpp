@@ -28,6 +28,7 @@
 #include <momentum/character/skin_weights.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/legacy_json/legacy_json_io.h>
+#include <momentum/io/marker/coordinate_system.h>
 #include <momentum/io/shape/blend_shape_io.h>
 #include <momentum/math/intersection.h>
 #include <momentum/math/mesh.h>
@@ -64,6 +65,11 @@ PYBIND11_MODULE(geometry, m) {
       .value("XAxis", mm::FBXUpVector::XAxis)
       .value("YAxis", mm::FBXUpVector::YAxis)
       .value("ZAxis", mm::FBXUpVector::ZAxis);
+
+  py::enum_<mm::UpVector>(m, "UpVector")
+      .value("X", mm::UpVector::X)
+      .value("Y", mm::UpVector::Y)
+      .value("Z", mm::UpVector::Z);
 
   py::enum_<mm::FBXFrontVector>(m, "FBXFrontVector")
       .value("ParityEven", mm::FBXFrontVector::ParityEven)
@@ -2708,10 +2714,12 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 
 :param path: A marker data file: .c3d, .gltf, or .trc.
 :param mainSubjectOnly: True to load only one subject's data.
+:param up: The up vector to use for the coordinate system, default to Y.
 :return: an array of MarkerSequence, one per subject in the file.
       )",
       py::arg("path"),
-      py::arg("main_subject_only") = true);
+      py::arg("main_subject_only") = true,
+      py::arg("up") = mm::UpVector::Y);
 
   // mapModelParameters_names(motionData, sourceParameterNames,
   // targetCharacter)
