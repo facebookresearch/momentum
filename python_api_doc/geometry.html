@@ -400,6 +400,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.TaperedCapsule.transformation"><code class="docutils literal notranslate"><span class="pre">TaperedCapsule.transformation</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.UpVector"><code class="docutils literal notranslate"><span class="pre">UpVector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.UpVector.X"><code class="docutils literal notranslate"><span class="pre">UpVector.X</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.UpVector.Y"><code class="docutils literal notranslate"><span class="pre">UpVector.Y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.UpVector.Z"><code class="docutils literal notranslate"><span class="pre">UpVector.Z</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.UpVector.__init__"><code class="docutils literal notranslate"><span class="pre">UpVector.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.UpVector.name"><code class="docutils literal notranslate"><span class="pre">UpVector.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.UpVector.value"><code class="docutils literal notranslate"><span class="pre">UpVector.value</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.apply_parameter_transform"><code class="docutils literal notranslate"><span class="pre">apply_parameter_transform()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.compute_vertex_normals"><code class="docutils literal notranslate"><span class="pre">compute_vertex_normals()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.create_test_character"><code class="docutils literal notranslate"><span class="pre">create_test_character()</span></code></a></li>
@@ -3005,6 +3014,46 @@ isAncestor(id, id) returns true.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">UpVector</span></span><a class="headerlink" href="#pymomentum.geometry.UpVector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Members:</p>
+<p>X</p>
+<p>Y</p>
+<p>Z</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector.X">
+<span class="sig-name descname"><span class="pre">X</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UpVector.X:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.UpVector.X" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector.Y">
+<span class="sig-name descname"><span class="pre">Y</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UpVector.Y:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.UpVector.Y" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector.Z">
+<span class="sig-name descname"><span class="pre">Z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UpVector.Z:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.UpVector.Z" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.UpVector" title="pymomentum.geometry.UpVector"><span class="pre">pymomentum.geometry.UpVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.UpVector.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.UpVector.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.UpVector.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.geometry.UpVector.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.apply_parameter_transform">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">apply_parameter_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.apply_parameter_transform" title="Link to this definition"></a></dt>
@@ -3204,13 +3253,14 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.load_markers">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">load_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_subject_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.MarkerSequence" title="pymomentum.geometry.MarkerSequence"><span class="pre">pymomentum.geometry.MarkerSequence</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.load_markers" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">load_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_subject_only:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up:</span> <span class="pre">pymomentum.geometry.UpVector</span> <span class="pre">=</span> <span class="pre">&lt;UpVector.Y:</span> <span class="pre">1&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.MarkerSequence" title="pymomentum.geometry.MarkerSequence"><span class="pre">pymomentum.geometry.MarkerSequence</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.load_markers" title="Link to this definition"></a></dt>
 <dd><p>Load 3d mocap marker data from file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> – A marker data file: .c3d, .gltf, or .trc.</p></li>
 <li><p><strong>mainSubjectOnly</strong> – True to load only one subject’s data.</p></li>
+<li><p><strong>up</strong> – The up vector to use for the coordinate system, default to Y.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
