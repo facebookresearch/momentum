@@ -12,3 +12,5 @@ Welcome to PyMomentum
    solver
    solver2
    marker_tracking
+   backend
+   gpu_character

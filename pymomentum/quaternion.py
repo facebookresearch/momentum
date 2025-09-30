@@ -5,7 +5,7 @@
 
 """
 Quaternion Utilities
-===================
+====================
 
 This module provides comprehensive utilities for working with quaternions in PyMomentum.
 
