@@ -9,6 +9,7 @@
 
 #include <momentum/character/marker.h>
 #include <momentum/character/types.h>
+#include <momentum/io/marker/coordinate_system.h>
 #include <pybind11/numpy.h>
 
 #include <optional>
@@ -91,7 +92,8 @@ loadMotion(const std::string& gltfFilename);
 
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     const std::string& path,
-    const bool mainSubjectOnly = true);
+    const bool mainSubjectOnly = true,
+    const momentum::UpVector up = momentum::UpVector::Y);
 
 /// Utility function to convert pybind11::array_t<float> to SkeletonState vector
 /// This is shared between saveGLTFCharacterToFileFromSkelStates and
