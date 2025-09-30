@@ -28,10 +28,9 @@ class CollisionErrorFunctionStatelessT : public SkeletonErrorFunctionT<T> {
   explicit CollisionErrorFunctionStatelessT(
       const Skeleton& skel,
       const ParameterTransform& pt,
-      const CollisionGeometry& cg,
-      uint32_t maxThreads = 1);
+      const CollisionGeometry& cg);
 
-  explicit CollisionErrorFunctionStatelessT(const Character& character, uint32_t maxThreads = 1);
+  explicit CollisionErrorFunctionStatelessT(const Character& character);
 
   [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
       final;
