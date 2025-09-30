@@ -514,9 +514,11 @@ function(mt_python_library)
   set(prefix _ARG)
   set(options
     NO_INSTALL
+    PRESERVE_DIRECTORY_STRUCTURE
   )
   set(oneValueArgs
     NAME
+    DESTINATION_SUBDIR
   )
   set(multiValueArgs
     PYMOMENTUM_SOURCES_VARS
@@ -534,7 +536,34 @@ function(mt_python_library)
   endforeach()
 
   if(NOT ${_ARG_NO_INSTALL})
-    set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_PYTHON_LIBRARIES_TO_INSTALL ${libs})
+    if(${_ARG_PRESERVE_DIRECTORY_STRUCTURE})
+      # Store files with their directory structure preserved
+      foreach(lib ${libs})
+        # Get relative path from pymomentum source directory
+        file(RELATIVE_PATH rel_path "${PROJECT_SOURCE_DIR}/pymomentum" "${lib}")
+        get_filename_component(file_dir "${rel_path}" DIRECTORY)
+
+        if(file_dir STREQUAL "")
+          # File is in root, install to pymomentum directly
+          set(install_dest "pymomentum")
+        else()
+          # File is in subdirectory, preserve structure
+          set(install_dest "pymomentum/${file_dir}")
+        endif()
+
+        # Store file and its destination
+        set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_STRUCTURED_LIBRARIES_TO_INSTALL "${lib}:${install_dest}")
+      endforeach()
+    elseif(_ARG_DESTINATION_SUBDIR)
+      # Install to specific subdirectory
+      set(install_dest "pymomentum/${_ARG_DESTINATION_SUBDIR}")
+      foreach(lib ${libs})
+        set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_STRUCTURED_LIBRARIES_TO_INSTALL "${lib}:${install_dest}")
+      endforeach()
+    else()
+      # Default behavior: install flat to pymomentum directory
+      set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_PYTHON_LIBRARIES_TO_INSTALL ${libs})
+    endif()
   endif()
 endfunction()
 
@@ -562,10 +591,52 @@ function(mt_install_pymomentum)
     DESTINATION pymomentum
   )
 
-  # Install Python modules
+  # Install Python modules (flat structure, legacy behavior)
   get_property(pymomentum_python_libraries_to_install GLOBAL PROPERTY PYMOMENTUM_PYTHON_LIBRARIES_TO_INSTALL)
-  install(
-    FILES ${pymomentum_python_libraries_to_install}
-    DESTINATION pymomentum
-  )
+  if(pymomentum_python_libraries_to_install)
+    install(
+      FILES ${pymomentum_python_libraries_to_install}
+      DESTINATION pymomentum
+    )
+  endif()
+
+  # Install Python modules with preserved directory structure
+  get_property(pymomentum_structured_libraries_to_install GLOBAL PROPERTY PYMOMENTUM_STRUCTURED_LIBRARIES_TO_INSTALL)
+  if(pymomentum_structured_libraries_to_install)
+    # Group files by destination directory
+    set(destinations_processed "")
+    foreach(file_dest_pair ${pymomentum_structured_libraries_to_install})
+      # Split "file:destination" pair
+      string(FIND "${file_dest_pair}" ":" colon_pos)
+      string(SUBSTRING "${file_dest_pair}" 0 ${colon_pos} file_path)
+      math(EXPR dest_start "${colon_pos} + 1")
+      string(SUBSTRING "${file_dest_pair}" ${dest_start} -1 dest_path)
+
+      # Check if we've already processed this destination
+      list(FIND destinations_processed "${dest_path}" dest_index)
+      if(dest_index EQUAL -1)
+        # New destination, collect all files for this destination
+        set(files_for_dest "")
+        foreach(other_pair ${pymomentum_structured_libraries_to_install})
+          string(FIND "${other_pair}" ":" other_colon_pos)
+          math(EXPR other_dest_start "${other_colon_pos} + 1")
+          string(SUBSTRING "${other_pair}" ${other_dest_start} -1 other_dest_path)
+
+          if("${other_dest_path}" STREQUAL "${dest_path}")
+            string(SUBSTRING "${other_pair}" 0 ${other_colon_pos} other_file_path)
+            list(APPEND files_for_dest "${other_file_path}")
+          endif()
+        endforeach()
+
+        # Install all files for this destination
+        install(
+          FILES ${files_for_dest}
+          DESTINATION ${dest_path}
+        )
+
+        # Mark this destination as processed
+        list(APPEND destinations_processed "${dest_path}")
+      endif()
+    endforeach()
+  endif()
 endfunction()
