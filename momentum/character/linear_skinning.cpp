@@ -50,6 +50,9 @@ std::vector<Vector3<T>> applySSD(
     transformations[i] = (state.jointState[i].transform * inverseBindPose[i]).matrix();
   }
 
+  dispenso::ParForOptions options;
+  options.minItemsPerChunk = 1024u;
+
   // go over all vertices and perform transformation
   dispenso::parallel_for(
       dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
@@ -83,7 +86,8 @@ std::vector<Vector3<T>> applySSD(
             output.noalias() += temp * weight;
           }
         }
-      });
+      },
+      options);
 
   return result;
 }
@@ -145,6 +149,9 @@ void applySSD(
     transformations[i].noalias() = (jointState[i].transform * inverseBindPose[i]).matrix();
   }
 
+  dispenso::ParForOptions options;
+  options.minItemsPerChunk = 1024u;
+
   // go over all vertices and perform transformation
   dispenso::parallel_for(
       dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
@@ -186,7 +193,8 @@ void applySSD(
           }
           outputn.normalize();
         }
-      });
+      },
+      options);
 }
 
 Affine3f getInverseSSDTransformation(
