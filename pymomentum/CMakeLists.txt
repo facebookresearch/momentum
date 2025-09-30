@@ -239,6 +239,12 @@ mt_python_library(
 mt_python_library(
   NAME backend
   PYMOMENTUM_SOURCES_VARS backend_sources
+  PRESERVE_DIRECTORY_STRUCTURE
+)
+
+mt_python_library(
+  NAME gpu_character
+  PYMOMENTUM_SOURCES_VARS gpu_character_sources
 )
 
 #===============================================================================
