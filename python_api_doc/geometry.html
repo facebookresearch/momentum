@@ -548,7 +548,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>blend_shape_path</strong> – The path to a blend shape file.</p></li>
+<li><p><strong>path</strong> – The path to a blend shape file.</p></li>
 <li><p><strong>num_expected_shapes</strong> – Trim the shape basis if it contains more shapes than this.  Pass -1 (the default) to leave the shapes untouched.</p></li>
 <li><p><strong>num_expected_vertices</strong> – Trim the shape basis if it contains more vertices than this.  Pass -1 (the default) to leave the shapes untouched.</p></li>
 </ul>
@@ -871,7 +871,7 @@ support the proprietary momentum motion format for storing model parameters in G
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_legacy_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_legacy_json" title="Link to this definition"></a></dt>
 <dd><p>Load a character from a legacy JSON file.</p>
 <p>This function directly converts from the deprecated JSON format to momentum::Character,
-this is a legacy format that has historically been used in mopy but should be considered deprecated.</p>
+this is a legacy format that has historically been used in previous Python libraries but should be considered deprecated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_path</strong> – Path to the legacy JSON file.</p>
@@ -1361,10 +1361,10 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dd><p>Returns a new character with the passed-in skinned locators.  If ‘replace’ is true, the existing skinned locators are replaced, otherwise (the default) the new skinned locators are appended to the existing ones.</p>
 <blockquote>
 <div><dl class="field-list simple">
-<dt class="field-odd">parameter skinned_locators<span class="colon">:</span></dt>
+<dt class="field-odd">param skinned_locators<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The skinned locators to add to the character.</p>
 </dd>
-<dt class="field-even">parameter replace<span class="colon">:</span></dt>
+<dt class="field-even">param replace<span class="colon">:</span></dt>
 <dd class="field-even"><p>If true, replace the existing skinned locators with the passed-in ones.  Otherwise, append the new skinned locators to the existing ones.  Defaults to false.</p>
 </dd>
 </dl>
@@ -3259,7 +3259,7 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> – A marker data file: .c3d, .gltf, or .trc.</p></li>
-<li><p><strong>mainSubjectOnly</strong> – True to load only one subject’s data.</p></li>
+<li><p><strong>main_subject_only</strong> – True to load only one subject’s data.</p></li>
 <li><p><strong>up</strong> – The up vector to use for the coordinate system, default to Y.</p></li>
 </ul>
 </dd>
@@ -3277,7 +3277,7 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 you will likely want to retarget the parameters using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mapParameters()</span></code> function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>gltfFilename</strong> – A .gltf file; e.g. character_s0.glb.</p>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a tuple [motionData, motionParameterNames, identityData, identityParameterNames].</p>
