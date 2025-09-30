@@ -18,8 +18,8 @@
 
 namespace momentum {
 
-/// Loads a Character from a legacy JSON format that was previously used by mopy (and some
-/// other tools).
+/// Loads a Character from a legacy JSON format that was previously used by older Python libraries
+/// (and some other tools).
 ///
 /// The legacy JSON format contains:
 /// - "skeleton": FBX skeleton structure with joints, hierarchy, and transforms

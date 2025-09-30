@@ -434,8 +434,8 @@ PYBIND11_MODULE(geometry, m) {
           },
           R"(Returns a new character with the passed-in skinned locators.  If 'replace' is true, the existing skinned locators are replaced, otherwise (the default) the new skinned locators are appended to the existing ones.
 
-          :parameter skinned_locators: The skinned locators to add to the character.
-          :parameter replace: If true, replace the existing skinned locators with the passed-in ones.  Otherwise, append the new skinned locators to the existing ones.  Defaults to false.
+          :param skinned_locators: The skinned locators to add to the character.
+          :param replace: If true, replace the existing skinned locators with the passed-in ones.  Otherwise, append the new skinned locators to the existing ones.  Defaults to false.
           )",
           py::arg("skinned_locators"),
           py::arg("replace") = false)
@@ -901,11 +901,11 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to a gltf file.
 
-:parameter path: A .gltf export filename.
-:parameter character: A Character to be saved to the output file.
-:parameter fps: Frequency in frames per second
-:parameter skel_states: Skeleton states [n_frames x n_joints x n_parameters_per_joint]
-:parameter markers: Additional marker (3d positions) data in [n_frames][n_markers]
+:param path: A .gltf export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second
+:param skel_states: Skeleton states [n_frames x n_joints x n_parameters_per_joint]
+:param markers: Additional marker (3d positions) data in [n_frames][n_markers]
       )",
           py::arg("path"),
           py::arg("character"),
@@ -919,12 +919,12 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to an fbx file.
 
-:parameter path: An .fbx export filename.
-:parameter character: A Character to be saved to the output file.
-:parameter fps: Frequency in frames per second
-:parameter motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
-:parameter offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
-:parameter coord_system_info: [Optional] FBX coordinate system info
+:param path: An .fbx export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second
+:param motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
+:param offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
+:param coord_system_info: [Optional] FBX coordinate system info
       )",
           py::arg("path"),
           py::arg("character"),
@@ -939,11 +939,11 @@ support the proprietary momentum motion format for storing model parameters in G
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to an fbx file with joint params.
 
-:parameter path: An .fbx export filename.
-:parameter character: A Character to be saved to the output file.
-:parameter fps: Frequency in frames per second
-:parameter joint_params: [Optional] 2D pose matrix in [n_frames x n_parameters]
-:parameter coord_system_info: [Optional] FBX coordinate system info
+:param path: An .fbx export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second
+:param joint_params: [Optional] 2D pose matrix in [n_frames x n_parameters]
+:param coord_system_info: [Optional] FBX coordinate system info
       )",
           py::arg("path"),
           py::arg("character"),
@@ -961,9 +961,9 @@ support the proprietary momentum motion format for storing model parameters in G
           R"(Load a character from a legacy JSON file.
 
 This function directly converts from the deprecated JSON format to momentum::Character,
-this is a legacy format that has historically been used in mopy but should be considered deprecated.
+this is a legacy format that has historically been used in previous Python libraries but should be considered deprecated.
 
-:parameter json_path: Path to the legacy JSON file.
+:param json_path: Path to the legacy JSON file.
 :return: A valid Character.)",
           py::arg("json_path"))
       .def_static(
@@ -978,7 +978,7 @@ this is a legacy format that has historically been used in mopy but should be co
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from legacy JSON bytes.
 
-:parameter json_bytes: A bytes object containing the legacy JSON data.
+:param json_bytes: A bytes object containing the legacy JSON data.
 :return: A valid Character.)",
           py::arg("json_bytes"))
       .def_static(
@@ -989,7 +989,7 @@ this is a legacy format that has historically been used in mopy but should be co
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a legacy JSON string.
 
-:parameter json_string: String containing the legacy JSON data.
+:param json_string: String containing the legacy JSON data.
 :return: A valid Character.)",
           py::arg("json_string"))
       .def_static(
@@ -1003,8 +1003,8 @@ this is a legacy format that has historically been used in mopy but should be co
 This function converts a momentum::Character back to the legacy JSON format
 for compatibility with existing tools and workflows.
 
-:parameter character: The Character to save.
-:parameter json_path: Path where to save the legacy JSON file.)",
+:param character: The Character to save.
+:param json_path: Path where to save the legacy JSON file.)",
           py::arg("character"),
           py::arg("json_path"))
       .def_static(
@@ -1015,7 +1015,7 @@ for compatibility with existing tools and workflows.
           py::call_guard<py::gil_scoped_release>(),
           R"(Convert a character to legacy JSON string.
 
-:parameter character: The Character to convert.
+:param character: The Character to convert.
 :return: String containing the legacy JSON representation.)",
           py::arg("character"))
       .def(
@@ -1036,7 +1036,7 @@ for compatibility with existing tools and workflows.
 parameters rather than joints.  Does not modify the parameter transform.  This is the equivalent of calling
 ```character.simplify_skeleton(character.joints_from_parameters(enabled_params))```.
 
-:parameter enabled_parameters: Model parameters to be kept in the simplified model.  Defaults to including all parameters.
+:param enabled_parameters: Model parameters to be kept in the simplified model.  Defaults to including all parameters.
 :return: a new :class:`Character` with extraneous joints removed.)",
           py::arg("enabled_parameters") = std::optional<at::Tensor>{})
       .def(
@@ -1433,15 +1433,15 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
             return mesh;
           }),
           R"(
-:parameter vertices: n x 3 array of vertex locations.
-:parameter faces: n x 3 array of triangles.
-:parameter normals: Optional n x 3 array of vertex normals.  If not passed in, vertex normals will be computed automatically.
-:parameter lines: Optional list of lines, where each line is a list of vertex indices.
-:parameter colors: Optional n x 3 array of vertex colors.
-:parameter confidence: Optional n x 1 array of vertex confidence values.
-:parameter texcoords: Optional n x 2 array of texture coordinates.
-:parameter texcoord_faces: Optional n x 3 array of triangles in the texture map.  Each triangle corresponds to a triangle on the mesh, but indices should refer to the texcoord array.
-:parameter texcoord_lines: Optional list of lines, where each line is a list of texture coordinate indices.
+:param vertices: n x 3 array of vertex locations.
+:param faces: n x 3 array of triangles.
+:param normals: Optional n x 3 array of vertex normals.  If not passed in, vertex normals will be computed automatically.
+:param lines: Optional list of lines, where each line is a list of vertex indices.
+:param colors: Optional n x 3 array of vertex colors.
+:param confidence: Optional n x 1 array of vertex confidence values.
+:param texcoords: Optional n x 2 array of texture coordinates.
+:param texcoord_faces: Optional n x 3 array of triangles in the texture map.  Each triangle corresponds to a triangle on the mesh, but indices should refer to the texcoord array.
+:param texcoord_lines: Optional list of lines, where each line is a list of texture coordinate indices.
           )",
           py::arg("vertices"),
           py::arg("faces"),
@@ -1554,9 +1554,9 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           &loadBlendShapeFromFile,
           R"(Load a blend shape basis from a file.
 
-:parameter blend_shape_path: The path to a blend shape file.
-:parameter num_expected_shapes: Trim the shape basis if it contains more shapes than this.  Pass -1 (the default) to leave the shapes untouched.
-:parameter num_expected_vertices: Trim the shape basis if it contains more vertices than this.  Pass -1 (the default) to leave the shapes untouched.
+:param path: The path to a blend shape file.
+:param num_expected_shapes: Trim the shape basis if it contains more shapes than this.  Pass -1 (the default) to leave the shapes untouched.
+:param num_expected_vertices: Trim the shape basis if it contains more vertices than this.  Pass -1 (the default) to leave the shapes untouched.
 :return: A :class:`BlendShape`.)",
           py::arg("path"),
           py::arg("num_expected_shapes") = -1,
@@ -1566,9 +1566,9 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           &loadBlendShapeFromBytes,
           R"(Load a blend shape basis from bytes in memory.
 
-:parameter blend_shape_bytes: A chunk of bytes containing the blend shape basis.
-:parameter num_expected_shapes: Trim the shape basis if it contains more shapes than this.  Pass -1 (the default) to leave the shapes untouched.
-:parameter num_expected_vertices: Trim the shape basis if it contains more vertices than this.  Pass -1 (the default) to leave the shapes untouched.
+:param blend_shape_bytes: A chunk of bytes containing the blend shape basis.
+:param num_expected_shapes: Trim the shape basis if it contains more shapes than this.  Pass -1 (the default) to leave the shapes untouched.
+:param num_expected_vertices: Trim the shape basis if it contains more vertices than this.  Pass -1 (the default) to leave the shapes untouched.
 :return: a :class:`BlendShape`.)",
           py::arg("blend_shape_bytes"),
           py::arg("num_expected_shapes") = -1,
@@ -1587,8 +1587,8 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           &loadBlendShapeFromTensors,
           R"(Create a blend shape basis from numpy.ndarrays.
 
-:parameter base_shape: A [nPts x 3] ndarray containing the base shape.
-:parameter shape_vectors: A [nShapes x nPts x 3] ndarray containing the blend shape basis.
+:param base_shape: A [nPts x 3] ndarray containing the base shape.
+:param shape_vectors: A [nShapes x nPts x 3] ndarray containing the blend shape basis.
 :return: a :class:`BlendShape`.)",
           py::arg("base_shape"),
           py::arg("shape_vectors"))
@@ -1613,7 +1613,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
 The resulting shape is equal to the base shape plus a linear combination of the shape vectors.
 
-:parameter coeffs: A torch.Tensor of size [n_batch x n_shapes] containing blend shape coefficients.
+:param coeffs: A torch.Tensor of size [n_batch x n_shapes] containing blend shape coefficients.
 :result: A [n_batch x n_vertices x 3] tensor containing the vertex positions.)",
           py::arg("coeffs"))
       .def("__repr__", [](const mm::BlendShape& bs) {
@@ -2698,7 +2698,7 @@ The resulting tensors are as follows:
 Unless you can guarantee that the parameters in the motion files match your existing character,
 you will likely want to retarget the parameters using the :meth:`mapParameters` function.
 
-:parameter gltfFilename: A .gltf file; e.g. character_s0.glb.
+:parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [motionData, motionParameterNames, identityData, identityParameterNames].
       )",
       py::arg("gltf_filename"));
@@ -2713,7 +2713,7 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
       R"(Load 3d mocap marker data from file.
 
 :param path: A marker data file: .c3d, .gltf, or .trc.
-:param mainSubjectOnly: True to load only one subject's data.
+:param main_subject_only: True to load only one subject's data.
 :param up: The up vector to use for the coordinate system, default to Y.
 :return: an array of MarkerSequence, one per subject in the file.
       )",
