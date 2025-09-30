@@ -159,3 +159,9 @@ marker_tracking_extensions_public_headers = [
 marker_tracking_extensions_sources = [
     "marker_tracking_extensions/marker_tracking_extensions_pybind.cpp",
 ]
+
+gpu_character_sources = [
+    "gpu_character.py",
+    "gpu_parameter_limits.py",
+    "utility.py",
+]
