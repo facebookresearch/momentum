@@ -6,6 +6,7 @@
  */
 
 #include "momentum/io/urdf/urdf_io.h"
+#include "momentum/math/constants.h"
 
 #include <urdf_model/link.h>
 #include <urdf_model/pose.h>
@@ -14,8 +15,6 @@
 namespace momentum {
 
 namespace {
-
-constexpr size_t kMtoCM = 100.0;
 
 template <typename T>
 struct ParsingData {
@@ -177,8 +176,8 @@ bool loadUrdfSkeletonRecursive(
           jointLimits.type = MinMax;
           jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
           // meters in URDF, centimeters in Momentum
-          jointLimits.data.minMax.limits[0] = urdfJointLimits->lower * kMtoCM;
-          jointLimits.data.minMax.limits[1] = urdfJointLimits->upper * kMtoCM;
+          jointLimits.data.minMax.limits[0] = toCm<float>(urdfJointLimits->lower);
+          jointLimits.data.minMax.limits[1] = toCm<float>(urdfJointLimits->upper);
           jointLimits.weight = 1.0f;
           data.limits.push_back(jointLimits);
           break;
@@ -231,7 +230,7 @@ bool loadUrdfSkeletonRecursive(
     joint.preRotation =
         parentJointAxis.inverse() * toMomentumQuaternion<float>(urdfPose.rotation) * jointAxis;
     joint.translationOffset =
-        parentJointAxis.inverse() * toMomentumVector3<float>(urdfPose.position) * kMtoCM;
+        parentJointAxis.inverse() * toMomentumVector3<float>(urdfPose.position) * toCm<float>();
   } else {
     joint.preRotation = parentJointAxis.inverse() * jointAxis;
     joint.translationOffset.setZero();
