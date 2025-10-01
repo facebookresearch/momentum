@@ -33,6 +33,7 @@ set(headers
   axel/math/BoundingBoxUtils.h
   axel/math/PointTriangleProjection.h
   axel/math/PointTriangleProjectionDefinitions.h
+  axel/math/RayBoxIntersection.h
   axel/math/RayTriangleIntersection.h
   axel/BoundingBox.h
   axel/Bvh.h
@@ -45,6 +46,7 @@ set(headers
 
 set(sources
   axel/math/PointTriangleProjection.cpp
+  axel/math/RayBoxIntersection.cpp
   axel/math/RayTriangleIntersection.cpp
   axel/BoundingBox.cpp
   axel/Bvh.cpp
