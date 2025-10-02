@@ -3159,6 +3159,7 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
   :param points_source: [nBatch x nPoints x 3] tensor of source points.
   :param vertices_target: [nBatch x nPoints x 3] tensor of target vertices.
   :param faces_target: [nBatch x nPoints x 3] tensor of target faces.
+  :param max_distance: Maximum search distance, allows the search to end early if no points are found within this bound.
   :return: A tuple of three tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
            The second is [nBatch x nPoints x 3] and contains the actual closest point (or 0, 0, 0 if invalid).
            The third is [nBatch x nPoints] and contains the index of the closest face (or -1 if invalid).
@@ -3166,7 +3167,8 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
         )",
       py::arg("points_source"),
       py::arg("vertices_target"),
-      py::arg("faces_target"));
+      py::arg("faces_target"),
+      py::arg("max_distance") = std::numeric_limits<float>::max());
 
   m.def(
       "replace_rest_mesh",

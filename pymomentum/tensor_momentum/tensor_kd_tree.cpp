@@ -327,7 +327,8 @@ void findClosestPointsOnMesh_imp(
     at::Tensor faces_target,
     at::Tensor result_points,
     at::Tensor result_face_index,
-    at::Tensor result_barycentric) {
+    at::Tensor result_barycentric,
+    float maxDist) {
   using TriBvh = typename axel::TriBvh<S>;
 
   const int64_t nSrcPts = points_source.size(0);
@@ -374,7 +375,8 @@ void findClosestPointsOnMesh_imp(
         for (int64_t k = srcStart; k < srcEnd; ++k) {
           const Eigen::Vector3<S> p_src =
               pts_src_map.template segment<3>(3 * k);
-          const auto queryResult = targetTree.closestSurfacePoint(p_src);
+          const auto queryResult =
+              targetTree.closestSurfacePoint(p_src, maxDist);
           if (queryResult.triangleIdx == axel::kInvalidTriangleIdx) {
             result_face_indices_map(k) = -1;
           } else {
@@ -393,7 +395,8 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>
 findClosestPointsOnMesh(
     at::Tensor points_source,
     at::Tensor vertices_target,
-    at::Tensor faces_target) {
+    at::Tensor faces_target,
+    float maxDist) {
   TensorChecker checker("find_closest_points_on_mesh");
 
   bool squeeze_src = false;
@@ -455,7 +458,8 @@ findClosestPointsOnMesh(
           faces_target.select(0, iBatch),
           result_closest_points.select(0, iBatch),
           result_face_index.select(0, iBatch),
-          result_barycentric.select(0, iBatch));
+          result_barycentric.select(0, iBatch),
+          maxDist);
     }
   } else {
     for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
@@ -465,7 +469,8 @@ findClosestPointsOnMesh(
           faces_target.select(0, iBatch),
           result_closest_points.select(0, iBatch),
           result_face_index.select(0, iBatch),
-          result_barycentric.select(0, iBatch));
+          result_barycentric.select(0, iBatch),
+          maxDist);
     }
   }
 
