@@ -97,6 +97,7 @@ find_package(Dispenso CONFIG REQUIRED)
 find_package(drjit CONFIG REQUIRED)
 find_package(Eigen3 3.4.0 CONFIG REQUIRED)
 find_package(ezc3d CONFIG REQUIRED)
+find_package(Kokkos CONFIG REQUIRED) # For mdspan headers (vendored in Kokkos)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(fx-gltf CONFIG REQUIRED)
@@ -506,6 +507,20 @@ mt_library(
 )
 
 mt_library(
+  NAME rasterizer
+  HEADERS_VARS
+    rasterizer_public_headers
+  SOURCES_VARS
+    rasterizer_sources
+  PUBLIC_LINK_LIBRARIES
+    common
+    drjit
+    Eigen3::Eigen
+    Kokkos::kokkos # For mdspan headers (vendored in Kokkos)
+    Microsoft.GSL::GSL
+)
+
+mt_library(
   NAME rerun_eigen_adapters
   HEADERS_VARS
     rerun_eigen_adapters_public_headers
@@ -749,6 +764,14 @@ if(MOMENTUM_BUILD_TESTING)
       io_test_helper
     ENV
       "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
+  )
+
+  mt_test(
+    NAME rasterizer_test
+    SOURCES_VARS rasterizer_test_sources
+    LINK_LIBRARIES
+      rasterizer
+      axel
   )
 endif()
 
