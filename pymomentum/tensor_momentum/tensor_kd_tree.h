@@ -32,6 +32,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>
 findClosestPointsOnMesh(
     at::Tensor points_source,
     at::Tensor vertices_target,
-    at::Tensor faces_target);
+    at::Tensor faces_target,
+    float maxDist);
 
 } // namespace pymomentum
