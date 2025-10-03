@@ -683,6 +683,29 @@ refine_motion_sources = [
     "examples/refine_motion/refine_motion.cpp",
 ]
 
+rasterizer_public_headers = [
+    "rasterizer/camera.h",
+    "rasterizer/geometry.h",
+    "rasterizer/fwd.h",
+    "rasterizer/image.h",
+    "rasterizer/rasterizer.h",
+    "rasterizer/tensor.h",
+    "rasterizer/utility.h",
+]
+
+rasterizer_sources = [
+    "rasterizer/camera.cpp",
+    "rasterizer/geometry.cpp",
+    "rasterizer/rasterizer.cpp",
+    "rasterizer/image.cpp",
+]
+
+rasterizer_test_sources = [
+    "test/rasterizer/test_camera.cpp",
+    "test/rasterizer/test_geometry.cpp",
+    "test/rasterizer/test_software_rasterizer.cpp",
+]
+
 #===========
 # Tutorials
 #===========
