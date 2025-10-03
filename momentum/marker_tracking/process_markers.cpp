@@ -83,14 +83,34 @@ void processMarkerFile(
     return;
   }
 
+  // read input character and optionally its identity parameters
+  auto [character, identity] = loadCharacterWithIdentity(modelOptions);
+
   // read marker data
-  const auto actor = momentum::loadMarkersForMainSubject(inputMarkerFile);
+  const auto actors = momentum::loadMarkers(inputMarkerFile);
+
+  // first try to see if we have an actor with the same name as the character
+  std::optional<MarkerSequence> actor;
+  for (const auto& a : actors) {
+    if (a.name == character.name) {
+      actor = a;
+      break;
+    }
+  }
+
+  // if not, get the main actor
+  if (!actor) {
+    const int index = findMainSubjectIndex(actors);
+    if (index >= 0) {
+      actor = actors[index];
+    }
+  }
+
+  // did we find an actor?
   if (!actor) {
     MT_LOGE("No marker sequence found in the marker file: {}", inputMarkerFile);
     return;
   }
-  // read input character and optionally its identity parameters
-  auto [character, identity] = loadCharacterWithIdentity(modelOptions);
   try {
     Eigen::MatrixXf finalMotion = processMarkers(
         character,
@@ -101,6 +121,9 @@ void processMarkerFile(
         calibrate,
         firstFrame,
         maxFrames);
+
+    // name the character after the actor name
+    character.name = actor->name;
 
     // save results
     const size_t lastFrame = maxFrames > 0 ? std::min(firstFrame + maxFrames, actor->frames.size())
