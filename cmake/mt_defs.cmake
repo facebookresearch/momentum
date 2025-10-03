@@ -242,7 +242,7 @@ function(mt_library)
       ${_ARG_PUBLIC_INCLUDE_DIRECTORIES}
   )
   target_include_directories(${_ARG_NAME} ${private_or_interface} ${_ARG_PRIVATE_INCLUDE_DIRECTORIES})
-  target_compile_features(${_ARG_NAME} ${public_or_interface} cxx_std_17)
+  target_compile_features(${_ARG_NAME} ${public_or_interface} cxx_std_20)
 
   target_link_libraries(${_ARG_NAME} ${public_or_interface} ${_ARG_PUBLIC_LINK_LIBRARIES})
   target_link_libraries(${_ARG_NAME} ${private_or_interface} ${_ARG_PRIVATE_LINK_LIBRARIES})
@@ -494,7 +494,7 @@ function(mt_python_binding)
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
       ${_ARG_INCLUDE_DIRECTORIES}
   )
-  target_compile_features(${_ARG_NAME} PRIVATE cxx_std_17)
+  target_compile_features(${_ARG_NAME} PRIVATE cxx_std_20)
   target_link_libraries(${_ARG_NAME} PRIVATE ${_ARG_LINK_LIBRARIES})
   target_compile_options(${_ARG_NAME} PRIVATE ${_ARG_COMPILE_OPTIONS})
 
