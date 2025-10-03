@@ -56,13 +56,13 @@ void rasterizeMeshWithRayTracer(
       Eigen::Vector3f worldRayDirection = camera.worldFromEye().linear() * rayDirection;
       worldRayDirection.normalize();
 
-      for (int iTri = 0; iTri < mesh.numTriangles(); ++iTri) {
-        const auto& tri = mesh.triangle(iTri);
+      for (int iTri = 0; iTri < static_cast<int>(mesh.faces.size()); ++iTri) {
+        const auto& tri = mesh.faces[iTri];
         Eigen::Vector3f intersectionPoint = Eigen::Vector3f::Zero();
         float t = 0;
-        Eigen::Vector3f v0 = mesh.position(tri.x());
-        Eigen::Vector3f v1 = mesh.position(tri.y());
-        Eigen::Vector3f v2 = mesh.position(tri.z());
+        Eigen::Vector3f v0 = mesh.vertices[tri.x()];
+        Eigen::Vector3f v1 = mesh.vertices[tri.y()];
+        Eigen::Vector3f v2 = mesh.vertices[tri.z()];
         bool intersected = axel::rayTriangleIntersect(
             rayOrigin, worldRayDirection, v0, v1, v2, intersectionPoint, t);
         if (intersected && t >= 0.0f && t < min_dist) {
@@ -203,32 +203,33 @@ TEST(SoftwareRasterizer, OneQuad) {
 
   Camera camera(intrinsics);
 
-  Mesh mesh(4, 2);
-  mesh.position(0) = Eigen::Vector3f(-0.51f, -0.51f, 1.5f);
-  mesh.position(1) = Eigen::Vector3f(-0.51f, 0.51f, 1.5f);
-  mesh.position(2) = Eigen::Vector3f(0.51f, -0.51f, 1.5f);
-  mesh.position(3) = Eigen::Vector3f(0.51f, 0.51f, 1.5f);
+  Mesh mesh;
+  mesh.vertices = {
+      Eigen::Vector3f(-0.51f, -0.51f, 1.5f),
+      Eigen::Vector3f(-0.51f, 0.51f, 1.5f),
+      Eigen::Vector3f(0.51f, -0.51f, 1.5f),
+      Eigen::Vector3f(0.51f, 0.51f, 1.5f)};
 
-  mesh.normal(0) = Eigen::Vector3f::UnitZ();
-  mesh.normal(1) = Eigen::Vector3f::UnitZ();
-  mesh.normal(2) = Eigen::Vector3f::UnitZ();
-  mesh.normal(3) = Eigen::Vector3f::UnitZ();
+  mesh.normals = {
+      Eigen::Vector3f::UnitZ(),
+      Eigen::Vector3f::UnitZ(),
+      Eigen::Vector3f::UnitZ(),
+      Eigen::Vector3f::UnitZ()};
 
   // triangles need to be clockwise:
   //  1---3
   //  | \ |
   //  0---2
 
-  mesh.triangle(0) = Eigen::Vector3i(0, 1, 2);
-  mesh.triangle(1) = Eigen::Vector3i(1, 3, 2);
+  mesh.faces = {Eigen::Vector3i(0, 1, 2), Eigen::Vector3i(1, 3, 2)};
 
   testRasterizerWithGeometry(camera, mesh);
 
   // Move the positions around a bit:
-  mesh.position(0).z() = 1.4f;
-  mesh.position(1).z() = 1.5f;
-  mesh.position(2).z() = 1.6f;
-  mesh.position(3).z() = 1.7f;
+  mesh.vertices[0].z() = 1.4f;
+  mesh.vertices[1].z() = 1.5f;
+  mesh.vertices[2].z() = 1.6f;
+  mesh.vertices[3].z() = 1.7f;
 
   testRasterizerWithGeometry(camera, mesh);
 }
@@ -244,24 +245,25 @@ TEST(SoftwareRasterizer, EyeZIsZero) {
 
   Camera camera(intrinsics);
 
-  Mesh mesh(4, 2);
-  mesh.position(0) = Eigen::Vector3f(-0.51f, -0.51f, 0.0f);
-  mesh.position(1) = Eigen::Vector3f(-0.51f, 0.51f, 1.5f);
-  mesh.position(2) = Eigen::Vector3f(0.51f, -0.51f, 1.5f);
-  mesh.position(3) = Eigen::Vector3f(0.51f, 0.51f, 0.0f);
+  Mesh mesh;
+  mesh.vertices = {
+      Eigen::Vector3f(-0.51f, -0.51f, 0.0f),
+      Eigen::Vector3f(-0.51f, 0.51f, 1.5f),
+      Eigen::Vector3f(0.51f, -0.51f, 1.5f),
+      Eigen::Vector3f(0.51f, 0.51f, 0.0f)};
 
-  mesh.normal(0) = Eigen::Vector3f::UnitZ();
-  mesh.normal(1) = Eigen::Vector3f::UnitZ();
-  mesh.normal(2) = Eigen::Vector3f::UnitZ();
-  mesh.normal(3) = Eigen::Vector3f::UnitZ();
+  mesh.normals = {
+      Eigen::Vector3f::UnitZ(),
+      Eigen::Vector3f::UnitZ(),
+      Eigen::Vector3f::UnitZ(),
+      Eigen::Vector3f::UnitZ()};
 
   // triangles need to be clockwise:
   //  1---3
   //  | \ |
   //  0---2
 
-  mesh.triangle(0) = Eigen::Vector3i(0, 1, 2);
-  mesh.triangle(1) = Eigen::Vector3i(1, 3, 2);
+  mesh.faces = {Eigen::Vector3i(0, 1, 2), Eigen::Vector3i(1, 3, 2)};
 
   auto zBuffer_rasterizer = makeRasterizerZBuffer(camera);
   auto triangleIndexBuffer_rasterizer = makeRasterizerIndexBuffer(camera);
@@ -289,7 +291,7 @@ TEST(SoftwareRasterizer, EyeZIsZero) {
     }
   }
 
-  mesh.position(3) = Eigen::Vector3f(0.51f, 0.51f, 1.5f);
+  mesh.vertices[3] = Eigen::Vector3f(0.51f, 0.51f, 1.5f);
 
   rasterizeMesh(
       mesh,
