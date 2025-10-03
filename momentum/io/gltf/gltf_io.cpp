@@ -334,8 +334,8 @@ void loadHierarchyRecursive(
 
 // Load the hierarchy from the file, including skeleton, collision geometry, locators and a mapping
 // between the nodes and the objects.
-std::tuple<JointList, CollisionGeometry_u, LocatorList, std::vector<size_t>> loadHierarchy(
-    const fx::gltf::Document& model) {
+std::tuple<std::string, JointList, CollisionGeometry_u, LocatorList, std::vector<size_t>>
+loadHierarchy(const fx::gltf::Document& model) {
   JointList joints;
   auto collision = std::make_unique<CollisionGeometry>();
   LocatorList locators;
@@ -354,6 +354,8 @@ std::tuple<JointList, CollisionGeometry_u, LocatorList, std::vector<size_t>> loa
       break;
     }
   }
+  MT_THROW_IF(model.nodes.empty(), "No valid node found in the gltf file.");
+  std::string name = model.nodes.at(0).name;
 
   std::sort(
       collision->begin(), collision->end(), [](const TaperedCapsule& c1, const TaperedCapsule& c2) {
@@ -366,7 +368,7 @@ std::tuple<JointList, CollisionGeometry_u, LocatorList, std::vector<size_t>> loa
     int l2Parent = l2.parent == kInvalidIndex ? -1 : static_cast<int>(l2.parent);
     return l1Parent < l2Parent;
   });
-  return std::make_tuple(joints, std::move(collision), locators, nodeToObjectMap);
+  return std::make_tuple(name, joints, std::move(collision), locators, nodeToObjectMap);
 }
 
 // Return the number of vertices newly loaded
@@ -660,7 +662,8 @@ Character populateCharacterFromModel(
   // ---------------------------------------------
   // load the joints, collision geometry and locators
   // ---------------------------------------------
-  std::tie(result.skeleton.joints, result.collision, result.locators, nodeToObjectMap) =
+  std::tie(
+      result.name, result.skeleton.joints, result.collision, result.locators, nodeToObjectMap) =
       loadHierarchy(model);
   MT_CHECK(
       nodeToObjectMap.size() == model.nodes.size(),
