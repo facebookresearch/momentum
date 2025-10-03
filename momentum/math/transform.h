@@ -214,6 +214,15 @@ template <typename T>
 using TransformListT =
     std::vector<TransformT<T>>; // structure describing a the state of all joints in a skeleton
 
+template <typename T>
+TransformT<T> blendTransforms(
+    gsl::span<const TransformT<T>> transforms,
+    gsl::span<const T> weights);
+
+/// Spherical linear interpolation between two transforms
+template <typename T>
+TransformT<T> slerp(const TransformT<T>& t1, const TransformT<T>& t2, T weight);
+
 using Transform = TransformT<float>;
 using TransformList = TransformListT<float>;
 
