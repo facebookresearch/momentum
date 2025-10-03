@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/math/mesh.h>
 #include <momentum/rasterizer/camera.h>
 #include <Eigen/Core>
 #include <utility>
@@ -16,65 +17,8 @@ namespace momentum::rasterizer {
 using RowMatrixXf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 using RowMatrixXi = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-struct Mesh {
-  Eigen::VectorXf positions;
-  Eigen::VectorXf normals;
-  Eigen::VectorXi triangles;
-
-  Mesh() = default;
-
-  Mesh(size_t nVerts, size_t nTris) {
-    positions.resize(3 * nVerts);
-    normals.resize(3 * nVerts);
-    triangles.resize(3 * nTris);
-  }
-  Mesh(Eigen::VectorXf positions, Eigen::VectorXf normals, Eigen::VectorXi triangles)
-      : positions(std::move(positions)),
-        normals(std::move(normals)),
-        triangles(std::move(triangles)) {}
-  Mesh(
-      const std::vector<Eigen::Vector3f>& positions,
-      const std::vector<Eigen::Vector3f>& normals,
-      const std::vector<Eigen::Vector3i>& triangles);
-
-  Mesh(const RowMatrixXf& vertices, const RowMatrixXf& normals, const RowMatrixXi& triangles);
-
-  [[nodiscard]] Eigen::Index numTriangles() const {
-    return triangles.size() / 3;
-  }
-  [[nodiscard]] Eigen::Index numVertices() const {
-    return positions.size() / 3;
-  }
-  [[nodiscard]] bool empty() const {
-    return positions.size() == 0 || triangles.size() == 0;
-  }
-
-  Eigen::Ref<Eigen::Vector3f> position(Eigen::Index i) {
-    return positions.segment<3>(3 * i);
-  }
-
-  [[nodiscard]] Eigen::Ref<const Eigen::Vector3f> position(Eigen::Index i) const {
-    return positions.segment<3>(3 * i);
-  }
-
-  Eigen::Ref<Eigen::Vector3f> normal(Eigen::Index i) {
-    return normals.segment<3>(3 * i);
-  }
-
-  [[nodiscard]] Eigen::Ref<const Eigen::Vector3f> normal(Eigen::Index i) const {
-    return normals.segment<3>(3 * i);
-  }
-
-  Eigen::Ref<Eigen::Vector3i> triangle(Eigen::Index i) {
-    return triangles.segment<3>(3 * i);
-  }
-
-  [[nodiscard]] Eigen::Ref<const Eigen::Vector3i> triangle(Eigen::Index i) const {
-    return triangles.segment<3>(3 * i);
-  }
-
-  void computeVertexNormals();
-};
+/// Use the momentum Mesh class as the rasterizer Mesh type
+using Mesh = momentum::MeshT<float>;
 
 // Utility functions for creating primitives.
 Mesh makeSphere(int subdivisionLevel);

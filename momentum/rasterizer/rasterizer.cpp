@@ -1592,11 +1592,11 @@ void rasterizeMesh(
     float depthOffset,
     const Eigen::Vector2f& imageOffset) {
   rasterizeMeshImp<int>(
-      mesh.positions,
-      mesh.normals,
-      mesh.triangles,
-      Eigen::VectorXf{},
-      Eigen::VectorXi{},
+      mapVector<float, 3>(mesh.vertices),
+      mapVector<float, 3>(mesh.normals),
+      mapVector<int, 3>(mesh.faces),
+      mapVector<float, 2>(mesh.texcoords),
+      mapVector<int, 3>(mesh.texcoord_faces),
       Eigen::VectorXf{},
       camera,
       zBuffer,
