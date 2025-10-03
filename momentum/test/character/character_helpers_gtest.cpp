@@ -171,6 +171,7 @@ void compareCollisionGeometry(
 }
 
 void compareChars(const Character& refChar, const Character& character, const bool withMesh) {
+  ASSERT_EQ(refChar.name, character.name);
   const auto& refJoints = refChar.skeleton.joints;
   const auto& joints = character.skeleton.joints;
   ASSERT_EQ(refJoints.size(), joints.size());
