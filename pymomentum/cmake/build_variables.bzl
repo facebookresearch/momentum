@@ -161,7 +161,8 @@ marker_tracking_extensions_sources = [
 ]
 
 gpu_character_sources = [
-    "gpu_character.py",
-    "gpu_parameter_limits.py",
-    "utility.py",
+    "torch/__init__.py",
+    "torch/character.py",
+    "torch/parameter_limits.py",
+    "torch/utility.py",
 ]
