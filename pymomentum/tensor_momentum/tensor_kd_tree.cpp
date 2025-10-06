@@ -328,7 +328,7 @@ void findClosestPointsOnMesh_imp(
     at::Tensor result_points,
     at::Tensor result_face_index,
     at::Tensor result_barycentric) {
-  using TriBvh = typename axel::TriBvh<S>;
+  using TriBvh = typename axel::TriBvh<S, axel::kNativeLaneWidth<S>>;
 
   const int64_t nSrcPts = points_source.size(0);
   const int64_t nTgtVertices = vertices_target.size(0);

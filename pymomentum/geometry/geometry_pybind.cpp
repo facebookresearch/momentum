@@ -3112,7 +3112,6 @@ This is used e.g. to swap one character's hand skeleton with another.
   m.def(
       "find_closest_points",
       &findClosestPoints,
-      py::call_guard<py::gil_scoped_release>(),
       R"(For each point in the points_source tensor, find the closest point in the points_target tensor.  This version of find_closest points supports both 2- and 3-dimensional point sets.
 
 :param points_source: [nBatch x nPoints x dim] tensor of source points (dim must be 2 or 3).
@@ -3129,7 +3128,6 @@ This is used e.g. to swap one character's hand skeleton with another.
   m.def(
       "find_closest_points",
       &findClosestPointsWithNormals,
-      py::call_guard<py::gil_scoped_release>(),
       R"(For each point in the points_source tensor, find the closest point in the points_target tensor whose normal is compatible (n_source . n_target > max_normal_dot).
 Using the normal is a good way to avoid certain kinds of bad matches, such as matching the front of the body against depth values from the back of the body.
 
@@ -3153,7 +3151,6 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
   m.def(
       "find_closest_points_on_mesh",
       &findClosestPointsOnMesh,
-      py::call_guard<py::gil_scoped_release>(),
       R"(For each point in the points_source tensor, find the closest point in the target mesh.
 
   :param points_source: [nBatch x nPoints x 3] tensor of source points.
