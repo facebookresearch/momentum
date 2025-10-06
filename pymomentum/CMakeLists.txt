@@ -243,8 +243,9 @@ mt_python_library(
 )
 
 mt_python_library(
-  NAME gpu_character
+  NAME torch
   PYMOMENTUM_SOURCES_VARS gpu_character_sources
+  PRESERVE_DIRECTORY_STRUCTURE
 )
 
 #===============================================================================
