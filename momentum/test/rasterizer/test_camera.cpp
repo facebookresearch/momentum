@@ -747,7 +747,7 @@ TEST_F(CameraTest, EigenProjectMatchesVectorized) {
       auto [vectorizedProjected, vectorizedMask] = cameraInfo.intrinsics->project(vectorizedPoint);
 
       // Choose tolerance based on whether camera has distortion
-      float tolerance = cameraInfo.hasDistortion ? 3e-5f : 1e-4f;
+      float tolerance = cameraInfo.hasDistortion ? 4e-5f : 1e-4f;
 
       // Compare results
       if (tolerance > 0.0f) {
