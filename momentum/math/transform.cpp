@@ -6,6 +6,7 @@
  */
 
 #include "momentum/math/transform.h"
+#include <Eigen/Eigenvalues>
 #include "momentum/common/checks.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/random.h"
@@ -88,6 +89,72 @@ TransformT<T> TransformT<T>::inverse() const {
   const double invScale = T(1) / scale;
   return TransformT<T>(-invScale * (invRot * translation), invRot, invScale);
 }
+
+template <typename T>
+TransformT<T> blendTransforms(
+    gsl::span<const TransformT<T>> transforms,
+    gsl::span<const T> weights) {
+  assert(transforms.size() == weights.size());
+  if (transforms.empty()) {
+    return TransformT<T>();
+  }
+
+  // Find average rotation by means described in
+  // https://stackoverflow.com/questions/12374087/average-of-multiple-quaternions
+  // http://www.acsu.buffalo.edu/~johnc/ave_quat07.pdf
+  //
+  // i.e. Stack quaternion coeffs in Q, compute M = Q^T x Q, and yield the eigenvector corresponding
+  // to the largest eigenvalue as the average rotation
+  Matrix4<T> QtQ = Matrix4<T>::Zero();
+
+  const auto n = transforms.size();
+  for (size_t i = 0; i < n; ++i) {
+    const auto& q = transforms[i].rotation;
+    QtQ += weights[i] * (q.coeffs() * q.coeffs().transpose());
+  }
+
+  const Eigen::SelfAdjointEigenSolver<Matrix4<T>> eigDecomp(QtQ);
+  assert(
+      eigDecomp.eigenvalues()[2] <=
+      eigDecomp.eigenvalues()[3]); // Eigen is supposed to sort smallest to largest.
+  Vector4<T> avgcoeffs = eigDecomp.eigenvectors().col(3);
+  assert(std::abs(avgcoeffs.norm() - 1) < 1e-4); // should be guaranteed by the eigensolver.
+  Quaternion<T> rot(avgcoeffs);
+
+  Vector3<T> pos = Vector3<T>::Zero();
+  T weightSum = 0;
+  T scale = 0;
+  for (size_t i = 0; i < n; ++i) {
+    pos += weights[i] * transforms[i].translation;
+    scale += weights[i] * transforms[i].scale;
+    weightSum += weights[i];
+  }
+
+  if (weightSum != 0) {
+    pos /= weightSum;
+    scale /= weightSum;
+  }
+
+  return TransformT<T>{pos, rot, scale};
+}
+
+template <typename T>
+TransformT<T> slerp(const TransformT<T>& t1, const TransformT<T>& t2, T weight) {
+  return TransformT<T>(
+      t1.translation + weight * (t2.translation - t1.translation),
+      t1.rotation.slerp(weight, t2.rotation),
+      t1.scale + weight * (t2.scale - t1.scale));
+}
+
+template TransformT<float> blendTransforms(
+    gsl::span<const TransformT<float>> transforms,
+    gsl::span<const float> weights);
+template TransformT<double> blendTransforms(
+    gsl::span<const TransformT<double>> transforms,
+    gsl::span<const double> weights);
+
+template TransformT<float> slerp(const TransformT<float>&, const TransformT<float>&, float);
+template TransformT<double> slerp(const TransformT<double>&, const TransformT<double>&, double);
 
 template struct TransformT<float>;
 template struct TransformT<double>;

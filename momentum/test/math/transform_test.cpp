@@ -380,3 +380,269 @@ TYPED_TEST(TransformTest, CompatibleWithEigenAffine) {
         (tf4.matrix() - tf1.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-4f, 5e-14));
   }
 }
+
+TYPED_TEST(TransformTest, Blend1) {
+  using T = typename TestFixture::Type;
+
+  const auto nTest = 10;
+  for (size_t i = 0; i < nTest; ++i) {
+    const auto js = TransformT<T>::makeRandom();
+    const std::vector<TransformT<T>> transforms{js};
+    const std::vector<T> weights{T(1.0)};
+    const auto blended =
+        blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+
+    ASSERT_LT(
+        (js.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
+        Eps<T>(1e-5f, 1e-13));
+  }
+}
+
+TYPED_TEST(TransformTest, Blend2) {
+  using T = typename TestFixture::Type;
+
+  const auto nTest = 10;
+  for (size_t i = 0; i < nTest; ++i) {
+    const auto js1 = TransformT<T>::makeRandom();
+    const auto js2 = TransformT<T>::makeRandom();
+
+    {
+      const std::vector<TransformT<T>> transforms{js1, js2};
+      const std::vector<T> weights{T(1.0), T(0.0)};
+      const auto blended =
+          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+      ASSERT_LT(
+          (js1.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
+          Eps<T>(1e-5f, 1e-13));
+    }
+
+    {
+      const std::vector<TransformT<T>> transforms{js1, js2};
+      const std::vector<T> weights{T(0.0), T(1.0)};
+      const auto blended =
+          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+      ASSERT_LT(
+          (js2.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
+          Eps<T>(1e-5f, 1e-13));
+    }
+
+    {
+      const std::vector<TransformT<T>> transforms{js1, js2};
+      const std::vector<T> weights{T(2.0), T(2.0)};
+      const auto halfway =
+          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+      const auto lerped = slerp(js1, js2, T(0.5));
+      ASSERT_LT(
+          (halfway.toMatrix() - lerped.toMatrix()).template lpNorm<Eigen::Infinity>(),
+          Eps<T>(1e-5f, 1e-13));
+    }
+  }
+}
+
+// Antipodal quaternions are the same quaternion, so they should blend to the
+// same rotation no matter what the coeffs.
+TYPED_TEST(TransformTest, BlendOpposites) {
+  using T = typename TestFixture::Type;
+
+  const auto nTest = 10;
+  for (size_t iTest = 0; iTest < nTest; ++iTest) {
+    const auto js1 = TransformT<T>::makeRandom();
+    const TransformT<T> js2(js1.translation, Quaternion<T>(-js1.rotation.coeffs()), js1.scale);
+
+    for (int j = 0; j < 5; ++j) {
+      const std::vector<TransformT<T>> transforms{js1, js2};
+      const std::vector<T> weights{T(j), T(4 - j)};
+      const auto blended =
+          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+      ASSERT_LT(
+          (js1.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
+          Eps<T>(1e-5f, 1e-13));
+      ASSERT_LT(
+          (js2.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
+          Eps<T>(1e-5f, 1e-13));
+    }
+  }
+}
+
+TYPED_TEST(TransformTest, SlerpTest) {
+  using T = typename TestFixture::Type;
+
+  const TransformT<T> t1; // identity
+  const Vector3<T> trans(1, 0, 0);
+  const Vector3<T> rotDir(0, 0, 1);
+  const T rotAmt = static_cast<T>(M_PI / 4.0);
+  const TransformT<T> t2(trans, Quaternion<T>(Eigen::AngleAxis<T>(rotAmt, rotDir)));
+
+  // Check the endpoints:
+  {
+    const TransformT<T> l1 = slerp(t1, t2, T(0.0));
+    ASSERT_LT(
+        (l1.toMatrix() - t1.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+  }
+
+  {
+    const TransformT<T> l2 = slerp(t1, t2, T(1.0));
+    ASSERT_LT(
+        (l2.toMatrix() - t2.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+  }
+
+  const size_t numSamples = 10;
+  for (size_t i = 0; i <= numSamples; ++i) {
+    const T amt = T(i) / T(numSamples);
+    const TransformT<T> l3 = slerp(t1, t2, amt);
+    ASSERT_LT(
+        (l3.translation - amt * trans).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+    const TransformT<T> expected(
+        amt * trans, Quaternion<T>(Eigen::AngleAxis<T>(amt * rotAmt, rotDir)));
+    ASSERT_LT(
+        (l3.toMatrix() - expected.toMatrix()).template lpNorm<Eigen::Infinity>(),
+        Eps<T>(1e-5f, 1e-13));
+  }
+}
+
+TYPED_TEST(TransformTest, SlerpRandomTransforms) {
+  using T = typename TestFixture::Type;
+
+  for (size_t iTest = 0; iTest < 20; ++iTest) {
+    const TransformT<T> t1 = TransformT<T>::makeRandom();
+    const TransformT<T> t2 = TransformT<T>::makeRandom();
+
+    // Check the endpoints:
+    {
+      const TransformT<T> l1 = slerp(t1, t2, T(0.0));
+      ASSERT_LT(
+          (l1.toMatrix() - t1.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+    }
+
+    {
+      const TransformT<T> l2 = slerp(t1, t2, T(1.0));
+      ASSERT_LT(
+          (l2.toMatrix() - t2.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+    }
+
+    // Check intermediate values
+    for (size_t i = 1; i < 10; ++i) {
+      const T amt = T(i) / T(10);
+      const TransformT<T> lerped = slerp(t1, t2, amt);
+
+      // Check that translation is linearly interpolated
+      const Vector3<T> expectedTranslation =
+          t1.translation + amt * (t2.translation - t1.translation);
+      ASSERT_LT(
+          (lerped.translation - expectedTranslation).template lpNorm<Eigen::Infinity>(),
+          Eps<T>(1e-5f, 1e-13));
+
+      // Check that scale is linearly interpolated
+      const T expectedScale = t1.scale + amt * (t2.scale - t1.scale);
+      ASSERT_NEAR(lerped.scale, expectedScale, Eps<T>(1e-5f, 1e-13));
+
+      // Check that the rotation interpolation produces a valid rotation
+      ASSERT_NEAR(lerped.rotation.norm(), T(1.0), Eps<T>(1e-5f, 1e-13));
+    }
+  }
+}
+
+TYPED_TEST(TransformTest, SlerpIdentityTransforms) {
+  using T = typename TestFixture::Type;
+
+  const TransformT<T> identity;
+
+  // Slerp between identity and itself should be identity
+  for (size_t i = 0; i <= 10; ++i) {
+    const T amt = T(i) / T(10);
+    const TransformT<T> result = slerp(identity, identity, amt);
+
+    ASSERT_LT(
+        (result.toMatrix() - identity.toMatrix()).template lpNorm<Eigen::Infinity>(),
+        Eps<T>(1e-5f, 1e-13));
+  }
+}
+
+TYPED_TEST(TransformTest, SlerpScaleOnly) {
+  using T = typename TestFixture::Type;
+
+  const TransformT<T> t1 = TransformT<T>::makeScale(T(0.5));
+  const TransformT<T> t2 = TransformT<T>::makeScale(T(2.0));
+
+  // Check endpoints
+  {
+    const TransformT<T> l1 = slerp(t1, t2, T(0.0));
+    ASSERT_NEAR(l1.scale, T(0.5), Eps<T>(1e-5f, 1e-13));
+  }
+
+  {
+    const TransformT<T> l2 = slerp(t1, t2, T(1.0));
+    ASSERT_NEAR(l2.scale, T(2.0), Eps<T>(1e-5f, 1e-13));
+  }
+
+  // Check midpoint
+  {
+    const TransformT<T> l3 = slerp(t1, t2, T(0.5));
+    ASSERT_NEAR(l3.scale, T(1.25), Eps<T>(1e-5f, 1e-13)); // 0.5 + 0.5 * (2.0 - 0.5) = 1.25
+  }
+}
+
+TYPED_TEST(TransformTest, SlerpTranslationOnly) {
+  using T = typename TestFixture::Type;
+
+  const Vector3<T> trans1(1, 0, 0);
+  const Vector3<T> trans2(0, 1, 0);
+  const TransformT<T> t1 = TransformT<T>::makeTranslation(trans1);
+  const TransformT<T> t2 = TransformT<T>::makeTranslation(trans2);
+
+  // Check endpoints
+  {
+    const TransformT<T> l1 = slerp(t1, t2, T(0.0));
+    ASSERT_LT((l1.translation - trans1).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+  }
+
+  {
+    const TransformT<T> l2 = slerp(t1, t2, T(1.0));
+    ASSERT_LT((l2.translation - trans2).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+  }
+
+  // Check midpoint
+  {
+    const TransformT<T> l3 = slerp(t1, t2, T(0.5));
+    const Vector3<T> expectedMidpoint = (trans1 + trans2) / T(2);
+    ASSERT_LT(
+        (l3.translation - expectedMidpoint).template lpNorm<Eigen::Infinity>(),
+        Eps<T>(1e-5f, 1e-13));
+  }
+}
+
+TYPED_TEST(TransformTest, SlerpRotationOnly) {
+  using T = typename TestFixture::Type;
+
+  const Vector3<T> axis(0, 0, 1);
+  const T angle1 = T(0);
+  const T angle2 = static_cast<T>(M_PI / 2);
+
+  const TransformT<T> t1 =
+      TransformT<T>::makeRotation(Quaternion<T>(Eigen::AngleAxis<T>(angle1, axis)));
+  const TransformT<T> t2 =
+      TransformT<T>::makeRotation(Quaternion<T>(Eigen::AngleAxis<T>(angle2, axis)));
+
+  // Check endpoints
+  {
+    const TransformT<T> l1 = slerp(t1, t2, T(0.0));
+    ASSERT_LT(
+        (l1.toMatrix() - t1.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+  }
+
+  {
+    const TransformT<T> l2 = slerp(t1, t2, T(1.0));
+    ASSERT_LT(
+        (l2.toMatrix() - t2.toMatrix()).template lpNorm<Eigen::Infinity>(), Eps<T>(1e-5f, 1e-13));
+  }
+
+  // Check that midpoint rotation is approximately at PI/4
+  {
+    const TransformT<T> l3 = slerp(t1, t2, T(0.5));
+    const TransformT<T> expectedMidpoint = TransformT<T>::makeRotation(
+        Quaternion<T>(Eigen::AngleAxis<T>(static_cast<T>(M_PI / 4), axis)));
+    ASSERT_LT(
+        (l3.toMatrix() - expectedMidpoint.toMatrix()).template lpNorm<Eigen::Infinity>(),
+        Eps<T>(1e-4f, 1e-12)); // Slightly looser tolerance for rotation interpolation
+  }
+}
