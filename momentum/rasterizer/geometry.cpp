@@ -258,7 +258,7 @@ Mesh makeCylinder(int numCircleSubdivisions, int numLengthSubdivisions) {
        makeCylinderCap(numCircleSubdivisions, false)});
 }
 
-// Builds a capsule with shperical end capped, oriented along the x axis:
+// Builds a capsule with spherical end capped, oriented along the x axis:
 Mesh makeCapsule(
     int numCircleSubdivisions,
     int numLengthSubdivisions,
