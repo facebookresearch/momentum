@@ -165,3 +165,16 @@ gpu_character_sources = [
     "gpu_parameter_limits.py",
     "utility.py",
 ]
+
+renderer_public_headers = [
+    "renderer/mesh_processing.h",
+    "renderer/momentum_render.h",
+    "renderer/software_rasterizer.h",
+]
+
+renderer_sources = [
+    "renderer/mesh_processing.cpp",
+    "renderer/momentum_render.cpp",
+    "renderer/renderer_pybind.cpp",
+    "renderer/software_rasterizer.cpp",
+]
