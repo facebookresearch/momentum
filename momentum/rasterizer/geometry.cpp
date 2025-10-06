@@ -16,75 +16,65 @@
 
 namespace momentum::rasterizer {
 
-void Mesh::computeVertexNormals() {
-  normals.setZero();
+Mesh fromFlatVectors(
+    const Eigen::VectorXf& positions,
+    const Eigen::VectorXf& normals,
+    const Eigen::VectorXi& triangles) {
+  Mesh mesh;
 
-  for (int i = 0; i < numTriangles(); ++i) {
-    const Eigen::Vector3i tri = triangle(i);
-    const Eigen::Vector3f p0 = position(tri.x());
-    const Eigen::Vector3f p1 = position(tri.y());
-    const Eigen::Vector3f p2 = position(tri.z());
-
-    const Eigen::Vector3f n = (p1 - p0).cross(p2 - p0).normalized();
-
-    normal(tri.x()) += n;
-    normal(tri.y()) += n;
-    normal(tri.z()) += n;
+  // Convert positions
+  const size_t numVerts = positions.size() / 3;
+  mesh.vertices.reserve(numVerts);
+  for (size_t i = 0; i < numVerts; ++i) {
+    mesh.vertices.emplace_back(positions.segment<3>(3 * i));
   }
 
-  for (int i = 0; i < numVertices(); ++i) {
-    normal(i).stableNormalize();
+  // Convert normals
+  mesh.normals.reserve(numVerts);
+  for (size_t i = 0; i < numVerts; ++i) {
+    mesh.normals.emplace_back(normals.segment<3>(3 * i));
   }
+
+  // Convert triangles
+  const size_t numTris = triangles.size() / 3;
+  mesh.faces.reserve(numTris);
+  for (size_t i = 0; i < numTris; ++i) {
+    mesh.faces.emplace_back(triangles.segment<3>(3 * i));
+  }
+
+  return mesh;
 }
 
 Mesh mergeMeshes(const std::initializer_list<Mesh>& meshes) {
-  Eigen::Index numTotalTriangles = 0;
-  Eigen::Index numTotalVertices = 0;
+  Mesh result;
+
+  size_t totalVerts = 0;
+  size_t totalTris = 0;
   for (const auto& m : meshes) {
-    numTotalTriangles += m.numTriangles();
-    numTotalVertices += m.numVertices();
+    totalVerts += m.vertices.size();
+    totalTris += m.faces.size();
   }
 
-  Mesh result(numTotalVertices, numTotalTriangles);
-  Eigen::Index triOffset = 0;
-  Eigen::Index vertOffset = 0;
-  for (const auto& m : meshes) {
-    result.positions.segment(3 * vertOffset, 3 * m.numVertices()) = m.positions;
-    result.normals.segment(3 * vertOffset, 3 * m.numVertices()) = m.normals;
-    result.triangles.segment(3 * triOffset, 3 * m.numTriangles()) = m.triangles;
-    result.triangles.segment(3 * triOffset, 3 * m.numTriangles()).array() += vertOffset;
+  result.vertices.reserve(totalVerts);
+  result.normals.reserve(totalVerts);
+  result.faces.reserve(totalTris);
 
-    triOffset += m.numTriangles();
-    vertOffset += m.numVertices();
+  for (const auto& m : meshes) {
+    const size_t vertOffset = result.vertices.size();
+
+    // Add vertices and normals
+    result.vertices.insert(result.vertices.end(), m.vertices.begin(), m.vertices.end());
+    result.normals.insert(result.normals.end(), m.normals.begin(), m.normals.end());
+
+    // Add faces with offset
+    for (const auto& face : m.faces) {
+      result.faces.emplace_back(
+          face.x() + vertOffset, face.y() + vertOffset, face.z() + vertOffset);
+    }
   }
 
   return result;
 }
-
-template <typename T>
-Eigen::Matrix<T, Eigen::Dynamic, 1> toFlatArray(const std::vector<Eigen::Vector3<T>>& v) {
-  Eigen::Matrix<T, Eigen::Dynamic, 1> result(3 * v.size());
-  for (size_t i = 0; i < v.size(); ++i) {
-    result.template segment<3>(3 * i) = v[i];
-  }
-  return result;
-}
-
-Mesh::Mesh(
-    const std::vector<Eigen::Vector3f>& positions,
-    const std::vector<Eigen::Vector3f>& normals,
-    const std::vector<Eigen::Vector3i>& triangles)
-    : positions(toFlatArray<float>(positions)),
-      normals(toFlatArray<float>(normals)),
-      triangles(toFlatArray<int>(triangles)) {}
-
-Mesh::Mesh(
-    const RowMatrixXf& vertices_in,
-    const RowMatrixXf& normals_in,
-    const RowMatrixXi& triangles_in)
-    : positions(vertices_in.transpose().reshaped(3 * vertices_in.rows(), 1)),
-      normals(normals_in.transpose().reshaped(3 * normals_in.rows(), 1)),
-      triangles(triangles_in.transpose().reshaped(3 * triangles_in.rows(), 1)) {}
 
 Mesh makeSphere(int subdivisionLevel) {
   // Use subdivision level to determine resolution
@@ -100,18 +90,16 @@ Mesh makeSphere(int subdivisionLevel) {
     azimuthPoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 
-  std::vector<Eigen::Vector3f> positions;
-  std::vector<Eigen::Vector3f> normals;
-  std::vector<Eigen::Vector3i> triangles;
+  Mesh mesh;
 
   // Total vertices: 1 north pole + middle bands + 1 south pole
   const int numMiddleBands = numPolarSubdivisions - 1;
-  positions.reserve(2 + numMiddleBands * numAzimuthSubdivisions);
-  normals.reserve(2 + numMiddleBands * numAzimuthSubdivisions);
+  mesh.vertices.reserve(2 + numMiddleBands * numAzimuthSubdivisions);
+  mesh.normals.reserve(2 + numMiddleBands * numAzimuthSubdivisions);
 
   // Add north pole vertex (index 0)
-  positions.emplace_back(0.0f, 0.0f, 1.0f);
-  normals.emplace_back(0.0f, 0.0f, 1.0f); // Will be recomputed later
+  mesh.vertices.emplace_back(0.0f, 0.0f, 1.0f);
+  mesh.normals.emplace_back(0.0f, 0.0f, 1.0f);
 
   // Add middle band vertices (indices 1 to numMiddleBands * numAzimuthSubdivisions)
   for (int iPolar = 1; iPolar < numPolarSubdivisions; ++iPolar) {
@@ -126,17 +114,17 @@ Mesh makeSphere(int subdivisionLevel) {
       // Spherical coordinates: x = sin(polar) * cos(azimuth), y = sin(polar) * sin(azimuth), z =
       // cos(polar)
       Eigen::Vector3f pos(sinPolar * cosAzimuth, sinPolar * sinAzimuth, cosPolar);
-      positions.push_back(pos);
-      normals.push_back(pos.normalized());
+      mesh.vertices.push_back(pos);
+      mesh.normals.push_back(pos.normalized());
     }
   }
 
   // Add south pole vertex (last index)
-  positions.emplace_back(0.0f, 0.0f, -1.0f);
-  normals.emplace_back(0.0f, 0.0f, -1.0f); // Will be recomputed later
+  mesh.vertices.emplace_back(0.0f, 0.0f, -1.0f);
+  mesh.normals.emplace_back(0.0f, 0.0f, -1.0f);
 
   const int northPoleIdx = 0;
-  const int southPoleIdx = static_cast<int>(positions.size() - 1);
+  const int southPoleIdx = static_cast<int>(mesh.vertices.size() - 1);
 
   // Helper function to get vertex index in middle bands
   auto getMiddleVertexIdx = [&](int polarBand, int azimuthIdx) -> int {
@@ -148,7 +136,7 @@ Mesh makeSphere(int subdivisionLevel) {
     const int iAzimuthNext = (iAzimuth + 1) % numAzimuthSubdivisions;
     const int idx1 = getMiddleVertexIdx(0, iAzimuth);
     const int idx2 = getMiddleVertexIdx(0, iAzimuthNext);
-    triangles.emplace_back(northPoleIdx, idx1, idx2);
+    mesh.faces.emplace_back(northPoleIdx, idx1, idx2);
   }
 
   // Generate triangles for middle bands
@@ -162,8 +150,8 @@ Mesh makeSphere(int subdivisionLevel) {
       const int idx4 = getMiddleVertexIdx(iPolar + 1, iAzimuth);
 
       // Create two triangles for each quad with correct winding
-      triangles.emplace_back(idx1, idx3, idx2);
-      triangles.emplace_back(idx1, idx4, idx3);
+      mesh.faces.emplace_back(idx1, idx3, idx2);
+      mesh.faces.emplace_back(idx1, idx4, idx3);
     }
   }
 
@@ -173,33 +161,40 @@ Mesh makeSphere(int subdivisionLevel) {
     const int iAzimuthNext = (iAzimuth + 1) % numAzimuthSubdivisions;
     const int idx1 = getMiddleVertexIdx(lastBandIdx, iAzimuth);
     const int idx2 = getMiddleVertexIdx(lastBandIdx, iAzimuthNext);
-    triangles.emplace_back(southPoleIdx, idx2, idx1);
+    mesh.faces.emplace_back(southPoleIdx, idx2, idx1);
   }
 
-  return {positions, normals, triangles};
+  return mesh;
 }
 
 // Builds a cap normal to the x axis
 Mesh makeCylinderCap(int numCircleSubdivisions, bool top, float radius = 1.0) {
-  Mesh result(numCircleSubdivisions + 1, numCircleSubdivisions);
+  Mesh result;
+
+  // Reserve space for vertices, normals and faces
+  result.vertices.reserve(1 + numCircleSubdivisions);
+  result.normals.reserve(1 + numCircleSubdivisions);
+  result.faces.reserve(numCircleSubdivisions);
 
   const float xValue = top ? 1.0f : 0.0f;
   const Eigen::Vector3f normal = (top ? 1.0f : -1.0f) * Eigen::Vector3f::UnitX();
 
-  result.position(0) = Eigen::Vector3f(xValue, 0, 0);
-  result.normal(0) = normal;
+  // Add center vertex
+  result.vertices.emplace_back(xValue, 0, 0);
+  result.normals.push_back(normal);
 
-  for (Eigen::Index i = 0; i < numCircleSubdivisions; ++i) {
+  // Add circle vertices
+  for (int i = 0; i < numCircleSubdivisions; ++i) {
     const float angle = 2.0f * M_PI * float(i) / float(numCircleSubdivisions);
-    result.position(i + 1) =
-        Eigen::Vector3f(xValue, radius * std::cos(angle), radius * std::sin(angle));
-    result.normal(i + 1) = normal;
+    result.vertices.emplace_back(xValue, radius * std::cos(angle), radius * std::sin(angle));
+    result.normals.push_back(normal);
   }
 
-  for (Eigen::Index i = 0; i < numCircleSubdivisions; ++i) {
+  // Add triangles
+  for (int i = 0; i < numCircleSubdivisions; ++i) {
     const int cur = i + 1;
     const int next = (i + 1) % numCircleSubdivisions + 1;
-    result.triangle(i) = top ? Eigen::Vector3i(0, cur, next) : Eigen::Vector3i(0, next, cur);
+    result.faces.emplace_back(top ? Eigen::Vector3i(0, cur, next) : Eigen::Vector3i(0, next, cur));
   }
 
   return result;
@@ -223,31 +218,30 @@ Mesh makeCylinderBody(
     return iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
   };
 
-  Mesh result(
-      (numLengthSubdivisions + 1) * numCircleSubdivisions,
-      2 * numLengthSubdivisions * numCircleSubdivisions);
+  Mesh result;
+  result.vertices.reserve((numLengthSubdivisions + 1) * numCircleSubdivisions);
+  result.normals.reserve((numLengthSubdivisions + 1) * numCircleSubdivisions);
+  result.faces.reserve(2 * numLengthSubdivisions * numCircleSubdivisions);
 
   // Build the vertices along the length:
   for (int iLength = 0; iLength <= numLengthSubdivisions; ++iLength) {
     float xPos = float(iLength) / float(numLengthSubdivisions) * length;
     for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
       const Eigen::Vector2f circlePt = circlePoints.at(jRadius);
-      result.position(vertexIndex(iLength, jRadius)) =
-          Eigen::Vector3f(xPos, radius * circlePt.x(), radius * circlePt.y());
+      result.vertices.emplace_back(xPos, radius * circlePt.x(), radius * circlePt.y());
       // normal points outward:
-      result.normal(vertexIndex(iLength, jRadius)) =
-          Eigen::Vector3f(0, circlePt.x(), circlePt.y()).normalized();
+      result.normals.emplace_back(Eigen::Vector3f(0, circlePt.x(), circlePt.y()).normalized());
     }
   }
 
   // Build the triangles:
   for (int iLength = 0; iLength < numLengthSubdivisions; ++iLength) {
     for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
-      result.triangle(2 * vertexIndex(iLength, jRadius) + 0) = Eigen::Vector3i(
+      result.faces.emplace_back(
           vertexIndex(iLength, jRadius),
           vertexIndex(iLength, jRadius + 1),
           vertexIndex(iLength + 1, jRadius + 1));
-      result.triangle(2 * vertexIndex(iLength, jRadius) + 1) = Eigen::Vector3i(
+      result.faces.emplace_back(
           vertexIndex(iLength, jRadius),
           vertexIndex(iLength + 1, jRadius + 1),
           vertexIndex(iLength + 1, jRadius));
@@ -287,17 +281,13 @@ Mesh makeCapsule(
     polarPoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 
-  Mesh result(
-      (numLengthSubdivisions + 1) * numCircleSubdivisions +
-          2 * numCircleSubdivisions * numPolarSubdivisions,
-      0);
+  Mesh result;
 
-  int vertexOffset = 0;
-
-  std::vector<Eigen::Vector3i> triangles;
-  triangles.reserve(
-      2 * numLengthSubdivisions * numCircleSubdivisions +
-      2 * 2 * numCircleSubdivisions * (numPolarSubdivisions - 1));
+  // Reserve space for all vertices
+  const size_t totalVertices = (numLengthSubdivisions + 1) * numCircleSubdivisions +
+      2 * numCircleSubdivisions * numPolarSubdivisions;
+  result.vertices.resize(totalVertices, Eigen::Vector3f::Zero());
+  result.normals.resize(totalVertices, Eigen::Vector3f::Zero());
 
   // If I have my math correct, this is the offset of the normal along the x axis.
   // Explanation: theta is the angle subtended by the vector v along the surface of the
@@ -311,117 +301,112 @@ Mesh makeCapsule(
   //    \  | __/  theta    |
   //     \ |/______________|__ x axis
   const float normalX = -(endRadius - startRadius) / length;
-  {
-    auto vertexIndex = [&](int iLength, int jRadius) {
-      return vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
-    };
 
-    // Build the vertices along the length:
-    for (int iLength = 0; iLength <= numLengthSubdivisions; ++iLength) {
-      const float fraction = float(iLength) / float(numLengthSubdivisions);
-      const float xPos = length * fraction;
-      const float radius = std::lerp(startRadius, endRadius, fraction);
-      for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
-        const Eigen::Vector2f circlePt = circlePoints.at(jRadius);
-        result.position(vertexIndex(iLength, jRadius)) =
-            Eigen::Vector3f(xPos, radius * circlePt.x(), radius * circlePt.y());
-        // normal points outward:
-        result.normal(vertexIndex(iLength, jRadius)) =
-            Eigen::Vector3f(normalX, circlePt.x(), circlePt.y()).normalized();
-      }
+  // Build the main cylinder body vertices
+  size_t vertexOffset = 0;
+  auto vertexIndex = [&](int iLength, int jRadius) {
+    return vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
+  };
+
+  // Build the vertices along the length:
+  for (int iLength = 0; iLength <= numLengthSubdivisions; ++iLength) {
+    const float fraction = float(iLength) / float(numLengthSubdivisions);
+    const float xPos = length * fraction;
+    const float radius = std::lerp(startRadius, endRadius, fraction);
+    for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
+      const Eigen::Vector2f& circlePt = circlePoints.at(jRadius);
+      result.vertices[vertexIndex(iLength, jRadius)] =
+          Eigen::Vector3f(xPos, radius * circlePt.x(), radius * circlePt.y());
+      // normal points outward:
+      result.normals[vertexIndex(iLength, jRadius)] =
+          Eigen::Vector3f(normalX, circlePt.x(), circlePt.y()).normalized();
     }
+  }
 
-    // Build the triangles:
-    for (int iLength = 0; iLength < numLengthSubdivisions; ++iLength) {
-      for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
-        triangles.emplace_back(
-            vertexIndex(iLength, jRadius),
-            vertexIndex(iLength, jRadius + 1),
-            vertexIndex(iLength + 1, jRadius + 1));
-        triangles.emplace_back(
-            vertexIndex(iLength, jRadius),
-            vertexIndex(iLength + 1, jRadius + 1),
-            vertexIndex(iLength + 1, jRadius));
-      }
+  // Build the triangles for cylinder body:
+  for (int iLength = 0; iLength < numLengthSubdivisions; ++iLength) {
+    for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
+      result.faces.emplace_back(
+          vertexIndex(iLength, jRadius),
+          vertexIndex(iLength, jRadius + 1),
+          vertexIndex(iLength + 1, jRadius + 1));
+      result.faces.emplace_back(
+          vertexIndex(iLength, jRadius),
+          vertexIndex(iLength + 1, jRadius + 1),
+          vertexIndex(iLength + 1, jRadius));
     }
   }
 
   vertexOffset += (numLengthSubdivisions + 1) * numCircleSubdivisions;
 
   // Construct the lower cap:
-  {
-    for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
-      for (int iPolar = 0; iPolar < numPolarSubdivisions; ++iPolar) {
-        const auto cosAzimuth = circlePoints.at(iAzimuth).x();
-        const auto sinAzimuth = circlePoints.at(iAzimuth).y();
-        const auto cosPolar = polarPoints.at(iPolar).x();
-        const auto sinPolar = polarPoints.at(iPolar).y();
+  for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
+    for (int iPolar = 0; iPolar < numPolarSubdivisions; ++iPolar) {
+      const auto cosAzimuth = circlePoints.at(iAzimuth).x();
+      const auto sinAzimuth = circlePoints.at(iAzimuth).y();
+      const auto cosPolar = polarPoints.at(iPolar).x();
+      const auto sinPolar = polarPoints.at(iPolar).y();
 
-        Eigen::Vector3f pos =
-            Eigen::Vector3f(-cosPolar, sinPolar * cosAzimuth, sinPolar * sinAzimuth);
+      Eigen::Vector3f pos =
+          Eigen::Vector3f(-cosPolar, sinPolar * cosAzimuth, sinPolar * sinAzimuth);
 
-        result.position(vertexOffset + iPolar * numCircleSubdivisions + iAzimuth) =
-            startRadius * pos;
-        result.normal(vertexOffset + iPolar * numCircleSubdivisions + iAzimuth) = pos.normalized();
-      }
+      result.vertices[vertexOffset + iPolar * numCircleSubdivisions + iAzimuth] = startRadius * pos;
+      result.normals[vertexOffset + iPolar * numCircleSubdivisions + iAzimuth] = pos.normalized();
     }
+  }
 
-    for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
-      for (int jPolar = 0; jPolar < (numPolarSubdivisions - 1); ++jPolar) {
-        const int iAzimuthNext = (iAzimuth + 1) % numCircleSubdivisions;
-        const int jPolarNext = (jPolar + 1);
+  for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
+    for (int jPolar = 0; jPolar < (numPolarSubdivisions - 1); ++jPolar) {
+      const int iAzimuthNext = (iAzimuth + 1) % numCircleSubdivisions;
+      const int jPolarNext = (jPolar + 1);
 
-        int idx1 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuth;
-        int idx2 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext;
-        int idx3 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext;
-        int idx4 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth;
+      int idx1 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuth;
+      int idx2 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext;
+      int idx3 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext;
+      int idx4 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth;
 
-        if (jPolar != 0) {
-          triangles.emplace_back(idx1, idx2, idx3);
-        }
-        triangles.emplace_back(idx1, idx3, idx4);
+      if (jPolar != 0) {
+        result.faces.emplace_back(idx1, idx2, idx3);
       }
+      result.faces.emplace_back(idx1, idx3, idx4);
     }
   }
 
   vertexOffset += numCircleSubdivisions * numPolarSubdivisions;
 
-  {
-    for (int iPolar = 0; iPolar < numPolarSubdivisions; ++iPolar) {
-      for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
-        const auto cosAzimuth = circlePoints.at(iAzimuth).x();
-        const auto sinAzimuth = circlePoints.at(iAzimuth).y();
-        const auto cosPolar = polarPoints.at(iPolar).x();
-        const auto sinPolar = polarPoints.at(iPolar).y();
+  // Construct the upper cap:
+  for (int iPolar = 0; iPolar < numPolarSubdivisions; ++iPolar) {
+    for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
+      const auto cosAzimuth = circlePoints.at(iAzimuth).x();
+      const auto sinAzimuth = circlePoints.at(iAzimuth).y();
+      const auto cosPolar = polarPoints.at(iPolar).x();
+      const auto sinPolar = polarPoints.at(iPolar).y();
 
-        Eigen::Vector3f pos =
-            Eigen::Vector3f(cosPolar, sinPolar * cosAzimuth, sinPolar * sinAzimuth);
-
-        result.position(vertexOffset + iPolar * numCircleSubdivisions + iAzimuth) =
-            Eigen::Vector3f(length, 0, 0) + endRadius * pos;
-        result.normal(vertexOffset + iPolar * numCircleSubdivisions + iAzimuth) = pos.normalized();
-      }
-    }
-
-    for (int jPolar = 0; jPolar < (numPolarSubdivisions - 1); ++jPolar) {
-      for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
-        const int iAzimuthNext = (iAzimuth + 1) % numCircleSubdivisions;
-        const int jPolarNext = jPolar + 1;
-
-        int idx1 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuth;
-        int idx2 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext;
-        int idx3 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext;
-        int idx4 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth;
-
-        if (jPolar != 0) {
-          triangles.emplace_back(idx3, idx2, idx1);
-        }
-        triangles.emplace_back(idx4, idx3, idx1);
-      }
+      Eigen::Vector3f pos = Eigen::Vector3f(cosPolar, sinPolar * cosAzimuth, sinPolar * sinAzimuth);
+      result.vertices[vertexOffset + iPolar * numCircleSubdivisions + iAzimuth] =
+          Eigen::Vector3f(length, 0, 0) + endRadius * pos;
+      result.normals[vertexOffset + iPolar * numCircleSubdivisions + iAzimuth] = pos.normalized();
+      result.vertices.push_back(Eigen::Vector3f(length, 0, 0) + endRadius * pos);
+      result.normals.push_back(pos.normalized());
     }
   }
 
-  result.triangles = toFlatArray(triangles);
+  for (int jPolar = 0; jPolar < (numPolarSubdivisions - 1); ++jPolar) {
+    for (int iAzimuth = 0; iAzimuth < numCircleSubdivisions; ++iAzimuth) {
+      const int iAzimuthNext = (iAzimuth + 1) % numCircleSubdivisions;
+      const int jPolarNext = jPolar + 1;
+
+      int idx1 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuth;
+      int idx2 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext;
+      int idx3 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext;
+      int idx4 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth;
+
+      if (jPolar != 0) {
+        result.faces.emplace_back(idx3, idx2, idx1);
+      }
+      result.faces.emplace_back(idx4, idx3, idx1);
+    }
+  }
 
   return result;
 }
@@ -445,20 +430,22 @@ Mesh makeArrowhead(
   const float startRadius = outerRadius;
   const size_t numLengthSubdivisions = 1;
 
-  const auto numPolarSubdivisions = numCircleSubdivisions / 2 + 1;
-  std::vector<Eigen::Vector2f> polarPoints;
-  polarPoints.reserve(numPolarSubdivisions);
-  for (int i = 0; i < numPolarSubdivisions; ++i) {
-    const float angle = M_PI * ((float)i / (float)numCircleSubdivisions);
-    polarPoints.emplace_back(std::cos(angle), std::sin(angle));
-  }
+  Mesh result;
 
-  Mesh result(
-      (numLengthSubdivisions + 1) * numCircleSubdivisions + 2 * numCircleSubdivisions,
-      numLengthSubdivisions * numCircleSubdivisions + 2 * numCircleSubdivisions);
+  // Reserve space for vertices, normals and faces
+  // Arrowhead body: (numLengthSubdivisions + 1) * numCircleSubdivisions
+  // Cap: 2 * numCircleSubdivisions (inner and outer ring)
+  const size_t totalVertices =
+      (numLengthSubdivisions + 1) * numCircleSubdivisions + 2 * numCircleSubdivisions;
+  result.vertices.reserve(totalVertices);
+  result.normals.reserve(totalVertices);
 
-  int vertexOffset = 0;
-  int triangleOffset = 0;
+  // Estimate triangles: body triangles + cap triangles
+  const size_t totalTriangles =
+      numLengthSubdivisions * numCircleSubdivisions + 2 * numCircleSubdivisions;
+  result.faces.reserve(totalTriangles);
+
+  size_t vertexOffset = 0;
 
   // If I have my math correct, this is the offset of the normal along the x axis.
   // Explanation: theta is the angle subtended by the vector v along the surface of the
@@ -472,38 +459,35 @@ Mesh makeArrowhead(
   //    \  | __/  theta    |
   //     \ |/______________|__ x axis
   const float normalX = -(endRadius - startRadius) / length;
-  {
-    auto vertexIndex = [&](int iLength, int jRadius) {
-      return vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
-    };
 
-    // Build the vertices along the length:
-    for (int iLength = 0; iLength <= numLengthSubdivisions; ++iLength) {
-      const float fraction = float(iLength) / float(numLengthSubdivisions);
-      const float xPos = translation + length * fraction;
-      const float radiusCur = std::lerp(startRadius, endRadius, fraction);
-      for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
-        const Eigen::Vector2f circlePt = circlePoints.at(jRadius);
-        result.position(vertexIndex(iLength, jRadius)) =
-            Eigen::Vector3f(xPos, radiusCur * circlePt.x(), radiusCur * circlePt.y());
-        // normal points outward:
-        result.normal(vertexIndex(iLength, jRadius)) =
-            Eigen::Vector3f(normalX, circlePt.x(), circlePt.y()).normalized();
-      }
-    }
+  auto vertexIndex = [&](int iLength, int jRadius) {
+    return vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
+  };
 
-    // Build the triangles:
-    for (int iLength = 0; iLength < numLengthSubdivisions; ++iLength) {
-      for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
-        result.triangle(triangleOffset + vertexIndex(iLength, jRadius) + 0) = Eigen::Vector3i(
-            vertexIndex(iLength, jRadius),
-            vertexIndex(iLength, jRadius + 1),
-            vertexIndex(iLength + 1, jRadius + 1));
-      }
+  // Build the vertices along the length:
+  for (int iLength = 0; iLength <= numLengthSubdivisions; ++iLength) {
+    const float fraction = float(iLength) / float(numLengthSubdivisions);
+    const float xPos = translation + length * fraction;
+    const float radiusCur = std::lerp(startRadius, endRadius, fraction);
+    for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
+      const Eigen::Vector2f circlePt = circlePoints.at(jRadius);
+      result.vertices.emplace_back(xPos, radiusCur * circlePt.x(), radiusCur * circlePt.y());
+      // normal points outward:
+      result.normals.emplace_back(
+          Eigen::Vector3f(normalX, circlePt.x(), circlePt.y()).normalized());
     }
   }
 
-  triangleOffset += numLengthSubdivisions * numCircleSubdivisions;
+  // Build the triangles:
+  for (int iLength = 0; iLength < numLengthSubdivisions; ++iLength) {
+    for (int jRadius = 0; jRadius < numCircleSubdivisions; ++jRadius) {
+      result.faces.emplace_back(
+          vertexIndex(iLength, jRadius),
+          vertexIndex(iLength, jRadius + 1),
+          vertexIndex(iLength + 1, jRadius + 1));
+    }
+  }
+
   vertexOffset += (numLengthSubdivisions + 1) * numCircleSubdivisions;
 
   // Construct the lower cap:
@@ -511,22 +495,20 @@ Mesh makeArrowhead(
     const auto cosTheta = circlePoints.at(iCircle).x();
     const auto sinTheta = circlePoints.at(iCircle).y();
 
-    result.position(vertexOffset + 2 * iCircle + 0) =
-        Eigen::Vector3f(translation, innerRadius * cosTheta, innerRadius * sinTheta);
-    result.position(vertexOffset + 2 * iCircle + 1) =
-        Eigen::Vector3f(translation, outerRadius * cosTheta, outerRadius * sinTheta);
-    result.normal(vertexOffset + 2 * iCircle + 0) = -Eigen::Vector3f::UnitX();
-    result.normal(vertexOffset + 2 * iCircle + 1) = -Eigen::Vector3f::UnitX();
+    result.vertices.emplace_back(translation, innerRadius * cosTheta, innerRadius * sinTheta);
+    result.vertices.emplace_back(translation, outerRadius * cosTheta, outerRadius * sinTheta);
+    result.normals.push_back(-Eigen::Vector3f::UnitX());
+    result.normals.push_back(-Eigen::Vector3f::UnitX());
   }
 
   for (int iCircle = 0; iCircle < numCircleSubdivisions; ++iCircle) {
     const int iCircleNext = (iCircle + 1) % numCircleSubdivisions;
 
-    result.triangle(triangleOffset + 2 * iCircle + 0) = Eigen::Vector3i(
+    result.faces.emplace_back(
         vertexOffset + 2 * iCircle + 0,
         vertexOffset + 2 * iCircleNext + 0,
         vertexOffset + 2 * iCircle + 1);
-    result.triangle(triangleOffset + 2 * iCircle + 1) = Eigen::Vector3i(
+    result.faces.emplace_back(
         vertexOffset + 2 * iCircle + 1,
         vertexOffset + 2 * iCircleNext + 0,
         vertexOffset + 2 * iCircleNext + 1);
@@ -617,7 +599,11 @@ std::array<Mesh, 2> makeCheckerboard(float width, int numChecks, int subdivision
     }
 
     std::vector<Eigen::Vector3f> normals(positions.size(), Eigen::Vector3f::UnitY());
-    result[iMesh] = Mesh(positions, normals, triangles);
+
+    // Create mesh using momentum MeshT format
+    result[iMesh].vertices = positions;
+    result[iMesh].normals = normals;
+    result[iMesh].faces = triangles;
   }
 
   return result;
@@ -664,6 +650,15 @@ std::tuple<Mesh, std::vector<Eigen::Vector3f>> makeOctahedron(float radius, floa
   std::vector<Eigen::Vector3i> triangles;
 
   std::vector<Eigen::Vector3f> lines;
+
+  // Reserve space for octahedron
+  // Octahedron has 8 triangular faces, so 8 * 3 = 24 vertices (before subdivision)
+  positions.reserve(24);
+  normals.reserve(24);
+  triangles.reserve(8);
+
+  // Reserve space for lines: 4 midpoint edges + 4 center lines + 4 edge lines
+  lines.reserve(16);
 
   for (int i = 0; i < 4; ++i) {
     lines.push_back(midPoints[i]);
@@ -732,10 +727,13 @@ std::tuple<Mesh, std::vector<Eigen::Vector3f>> makeOctahedron(float radius, floa
     }
   }
 
+  Mesh mesh;
+  mesh.vertices = positions;
+  mesh.normals = normals;
+  mesh.faces = triangles;
+
   float max_edge_length = 0.1f;
-  return {
-      subdivideMeshNoSmoothing(Mesh(positions, normals, triangles), max_edge_length),
-      subdivideLines(lines, max_edge_length)};
+  return {subdivideMeshNoSmoothing(mesh, max_edge_length), subdivideLines(lines, max_edge_length)};
 }
 
 namespace {
@@ -998,9 +996,20 @@ subdivideMeshNoSmoothing(
 }
 
 Mesh subdivideMeshNoSmoothing(const Mesh& mesh, float max_edge_length, size_t max_depth) {
-  RowMatrixXf positions = mesh.positions.reshaped(3, mesh.positions.rows() / 3).transpose();
-  RowMatrixXf normals = mesh.normals.reshaped(3, mesh.normals.rows() / 3).transpose();
-  RowMatrixXi triangles = mesh.triangles.reshaped(3, mesh.triangles.rows() / 3).transpose();
+  // Convert momentum mesh to row matrices
+  RowMatrixXf positions(mesh.vertices.size(), 3);
+  RowMatrixXf normals(mesh.normals.size(), 3);
+  RowMatrixXi triangles(mesh.faces.size(), 3);
+
+  for (size_t i = 0; i < mesh.vertices.size(); ++i) {
+    positions.row(i) = mesh.vertices[i];
+  }
+  for (size_t i = 0; i < mesh.normals.size(); ++i) {
+    normals.row(i) = mesh.normals[i];
+  }
+  for (size_t i = 0; i < mesh.faces.size(); ++i) {
+    triangles.row(i) = mesh.faces[i];
+  }
 
   for (size_t depth = 0; depth <= max_depth; depth++) {
     float maxEdgeLengthCur = 0;
@@ -1021,7 +1030,26 @@ Mesh subdivideMeshNoSmoothing(const Mesh& mesh, float max_edge_length, size_t ma
         positions, normals, triangles, RowMatrixXf{}, RowMatrixXi{}, max_edge_length);
   }
 
-  auto result = Mesh(positions, normals, triangles);
+  // Convert back to momentum mesh format
+  Mesh result;
+
+  // Convert vertices
+  result.vertices.reserve(positions.rows());
+  for (int i = 0; i < positions.rows(); ++i) {
+    result.vertices.emplace_back(positions.row(i));
+  }
+
+  // Convert normals
+  result.normals.reserve(normals.rows());
+  for (int i = 0; i < normals.rows(); ++i) {
+    result.normals.emplace_back(normals.row(i));
+  }
+
+  // Convert triangles
+  result.faces.reserve(triangles.rows());
+  for (int i = 0; i < triangles.rows(); ++i) {
+    result.faces.emplace_back(triangles.row(i));
+  }
 
   return result;
 }

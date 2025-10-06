@@ -12,6 +12,7 @@
 #include <momentum/common/aligned.h>
 #include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/fwd.h>
+#include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/tensor.h>
 #include <Eigen/Geometry>
 #include <gsl/span>
@@ -34,8 +35,6 @@ using Extents = Kokkos::dextents<index_t, Rank>;
 using Span2f = Span<float, 2>;
 using Span3f = Span<float, 3>;
 using Span2i = Span<int32_t, 2>;
-
-struct Mesh;
 
 struct PhongMaterial {
   Eigen::Vector3f diffuseColor;
