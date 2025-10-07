@@ -221,6 +221,27 @@ mt_python_binding(
   COMPILE_OPTIONS
 )
 
+mt_python_binding(
+  NAME renderer
+  PYMOMENTUM_HEADERS_VARS renderer_public_headers
+  PYMOMENTUM_SOURCES_VARS renderer_sources
+  INCLUDE_DIRECTORIES
+    ${ATEN_INCLUDE_DIR}
+    ${TORCH_INCLUDE_DIRS}
+  LINK_LIBRARIES
+    character
+    math
+    rasterizer
+    skeleton
+    tensor_momentum
+    tensor_utility
+    ${ATEN_LIBRARIES}
+    ${TORCH_LIBRARIES}
+    ${torch_python}
+  COMPILE_OPTIONS
+    ${TORCH_CXX_FLAGS}
+)
+
 mt_python_library(
   NAME quaternion
   PYMOMENTUM_SOURCES_VARS quaternion_sources
