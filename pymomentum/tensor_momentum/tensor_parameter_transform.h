@@ -20,29 +20,22 @@ at::Tensor applyParamTransform(
     const momentum::ParameterTransform* paramTransform,
     at::Tensor modelParams);
 
-at::Tensor applyParamTransform(
-    pybind11::object characters,
-    at::Tensor modelParams);
+at::Tensor applyParamTransform(pybind11::object characters, at::Tensor modelParams);
 
 // Gets the parameter sets specified in the model file as a dictionary
 // mapping strings to boolean tensors.
 std::unordered_map<std::string, at::Tensor> getParameterSets(
     const momentum::ParameterTransform& parameterTransform);
 
-at::Tensor getScalingParameters(
-    const momentum::ParameterTransform& parameterTransform);
+at::Tensor getScalingParameters(const momentum::ParameterTransform& parameterTransform);
 
-at::Tensor getRigidParameters(
-    const momentum::ParameterTransform& parameterTransform);
+at::Tensor getRigidParameters(const momentum::ParameterTransform& parameterTransform);
 
-at::Tensor getAllParameters(
-    const momentum::ParameterTransform& parameterTransform);
+at::Tensor getAllParameters(const momentum::ParameterTransform& parameterTransform);
 
-at::Tensor getBlendShapeParameters(
-    const momentum::ParameterTransform& parameterTransform);
+at::Tensor getBlendShapeParameters(const momentum::ParameterTransform& parameterTransform);
 
-at::Tensor getPoseParameters(
-    const momentum::ParameterTransform& parameterTransform);
+at::Tensor getPoseParameters(const momentum::ParameterTransform& parameterTransform);
 
 at::Tensor getParametersForJoints(
     const momentum::ParameterTransform& parameterTransform,
@@ -61,8 +54,8 @@ at::Tensor applyInverseParamTransform(
     const momentum::InverseParameterTransform* invParamTransform,
     at::Tensor jointParams);
 
-std::unique_ptr<momentum::InverseParameterTransform>
-createInverseParameterTransform(const momentum::ParameterTransform& transform);
+std::unique_ptr<momentum::InverseParameterTransform> createInverseParameterTransform(
+    const momentum::ParameterTransform& transform);
 
 // If the user passes an empty tensor for a parameter set, what kind of
 // value to return.  This is different for different cases: sometimes we
@@ -97,7 +90,6 @@ at::Tensor modelParametersToBlendShapeCoefficients(
     const momentum::Character& character,
     at::Tensor modelParameters);
 
-at::Tensor getParameterTransformTensor(
-    const momentum::ParameterTransform& parameterTransform);
+at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& parameterTransform);
 
 } // namespace pymomentum

@@ -24,11 +24,8 @@ namespace pymomentum {
 // If forceBatchSize is false, then it is allowed to return a list with a single
 // element. This is sometimes useful to avoid redundant computation inside the
 // Character.
-std::vector<const momentum::Character*> toCharacterList(
-    PyObject* obj,
-    int64_t nBatch,
-    const char* context,
-    bool forceBatchSize = true);
+std::vector<const momentum::Character*>
+toCharacterList(PyObject* obj, int64_t nBatch, const char* context, bool forceBatchSize = true);
 
 // Utility function to extract a single character from the character list.
 // This is useful for performing checks against the character types before

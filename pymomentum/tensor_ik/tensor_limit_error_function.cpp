@@ -27,9 +27,7 @@ class TensorLimitErrorFunction : public TensorErrorFunction<T> {
 };
 
 template <typename T>
-TensorLimitErrorFunction<T>::TensorLimitErrorFunction(
-    size_t batchSize,
-    size_t nFrames)
+TensorLimitErrorFunction<T>::TensorLimitErrorFunction(size_t batchSize, size_t nFrames)
     : TensorErrorFunction<T>("Limit", "limit", batchSize, nFrames, {}, {}) {}
 
 template <typename T>
@@ -39,25 +37,17 @@ TensorLimitErrorFunction<T>::createErrorFunctionImp(
     size_t /* unused iBatch*/,
     size_t /* unused jFrame*/) const {
   return std::make_unique<momentum::LimitErrorFunctionT<T>>(
-      character.skeleton,
-      character.parameterTransform,
-      character.parameterLimits);
+      character.skeleton, character.parameterTransform, character.parameterLimits);
 }
 
 } // anonymous namespace
 
 template <typename T>
-std::unique_ptr<TensorErrorFunction<T>> createLimitErrorFunction(
-    size_t batchSize,
-    size_t nFrames) {
+std::unique_ptr<TensorErrorFunction<T>> createLimitErrorFunction(size_t batchSize, size_t nFrames) {
   return std::make_unique<TensorLimitErrorFunction<T>>(batchSize, nFrames);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>> createLimitErrorFunction(
-    size_t,
-    size_t);
-template std::unique_ptr<TensorErrorFunction<double>> createLimitErrorFunction(
-    size_t,
-    size_t);
+template std::unique_ptr<TensorErrorFunction<float>> createLimitErrorFunction(size_t, size_t);
+template std::unique_ptr<TensorErrorFunction<double>> createLimitErrorFunction(size_t, size_t);
 
 } // namespace pymomentum

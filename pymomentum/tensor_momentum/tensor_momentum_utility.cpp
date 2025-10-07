@@ -13,10 +13,7 @@
 
 namespace pymomentum {
 
-void checkValidBoneIndex(
-    at::Tensor idx,
-    const momentum::Character& character,
-    const char* name) {
+void checkValidBoneIndex(at::Tensor idx, const momentum::Character& character, const char* name) {
   if (isEmpty(idx)) {
     return;
   }
@@ -59,12 +56,9 @@ void checkValidVertexIndex(
     return;
   }
 
-  MT_THROW_IF(
-      !character.mesh && !allow_missing,
-      "Vertex indices invalid for empty mesh.");
+  MT_THROW_IF(!character.mesh && !allow_missing, "Vertex indices invalid for empty mesh.");
 
-  const int64_t nVertices =
-      (character.mesh) ? character.mesh->vertices.size() : 0;
+  const int64_t nVertices = (character.mesh) ? character.mesh->vertices.size() : 0;
   const int64_t minVal = allow_missing ? -1 : 0;
   MT_THROW_IF(
       idx.less((int64_t)minVal).any().cpu().template item<bool>() ||
@@ -95,8 +89,7 @@ std::vector<bool> tensorToJointSet(
   }
 
   MT_THROW_IF(
-      isEmpty(jointSet) || jointSet.ndimension() != 1 ||
-          jointSet.size(0) != nJoints,
+      isEmpty(jointSet) || jointSet.ndimension() != 1 || jointSet.size(0) != nJoints,
       "Mismatch between joint set size and number of joints in skeleton.");
 
   jointSet = jointSet.to(at::DeviceType::CPU, at::ScalarType::Bool);

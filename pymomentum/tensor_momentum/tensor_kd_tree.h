@@ -14,13 +14,10 @@
 namespace pymomentum {
 
 // Returns [closest point, closest index, valid]
-std::tuple<at::Tensor, at::Tensor, at::Tensor> findClosestPoints(
-    at::Tensor points_source,
-    at::Tensor points_target,
-    float maxDist);
+std::tuple<at::Tensor, at::Tensor, at::Tensor>
+findClosestPoints(at::Tensor points_source, at::Tensor points_target, float maxDist);
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>
-findClosestPointsWithNormals(
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> findClosestPointsWithNormals(
     at::Tensor points_source,
     at::Tensor normals_source,
     at::Tensor points_target,
@@ -28,8 +25,7 @@ findClosestPointsWithNormals(
     float maxDist,
     float maxNormalDot);
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>
-findClosestPointsOnMesh(
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> findClosestPointsOnMesh(
     at::Tensor points_source,
     at::Tensor vertices_target,
     at::Tensor faces_target);

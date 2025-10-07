@@ -17,7 +17,9 @@
 #include <momentum/common/checks.h>
 
 #include <dispenso/parallel_for.h> // @manual
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 #include <Eigen/Core>
 
 namespace pymomentum {
@@ -26,6 +28,8 @@ using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
 namespace {
+
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 
 template <typename T>
 struct ApplyParameterTransformFunction
@@ -37,9 +41,7 @@ struct ApplyParameterTransformFunction
       const momentum::ParameterTransform* paramTransform,
       at::Tensor modelParams);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_jointParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_jointParameters);
 
   static std::vector<momentum::ParameterTransformT<T>> getParameterTransforms(
       const momentum::ParameterTransform* paramTransform,
@@ -57,8 +59,7 @@ ApplyParameterTransformFunction<T>::getParameterTransforms(
   if (paramTransform) {
     result.push_back(paramTransform->cast<T>());
   } else {
-    for (const auto c : toCharacterList(
-             characters, nBatch, "ParameterTransform.apply", false)) {
+    for (const auto c : toCharacterList(characters, nBatch, "ParameterTransform.apply", false)) {
       result.push_back(c->parameterTransform.cast<T>());
     }
   }
@@ -94,14 +95,12 @@ variable_list ApplyParameterTransformFunction<T>::forward(
     ctx->saved_data["parameterTransform"] =
         c10::ivalue::ConcretePyObjectHolder::create(py::cast(paramTransform));
   } else {
-    ctx->saved_data["character"] =
-        c10::ivalue::ConcretePyObjectHolder::create(characters);
+    ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters);
   }
 
   const auto nBatch = checker.getBatchSize();
   MT_CHECK(paramTransform != nullptr || characters != nullptr);
-  const auto paramTransforms =
-      getParameterTransforms(paramTransform, characters, nBatch);
+  const auto paramTransforms = getParameterTransforms(paramTransform, characters, nBatch);
 
   assert(!paramTransforms.empty());
   const auto nJointParam = paramTransforms.front().numJointParameters();
@@ -136,13 +135,10 @@ variable_list ApplyParameterTransformFunction<T>::backward(
     auto itr = ctx->saved_data.find("parameterTransform");
     if (itr == ctx->saved_data.end()) {
       itr = ctx->saved_data.find("character");
-      MT_THROW_IF(
-          itr == ctx->saved_data.end(),
-          "Missing both paramTransform and characters.");
+      MT_THROW_IF(itr == ctx->saved_data.end(), "Missing both paramTransform and characters.");
       characters = itr->second.toPyObject();
     } else {
-      paramTransform = py::cast<const momentum::ParameterTransform*>(
-          itr->second.toPyObject());
+      paramTransform = py::cast<const momentum::ParameterTransform*>(itr->second.toPyObject());
     }
   }
 
@@ -169,12 +165,10 @@ variable_list ApplyParameterTransformFunction<T>::backward(
   const auto nBatch = checker.getBatchSize();
 
   MT_CHECK(paramTransform != nullptr || characters != nullptr);
-  const auto paramTransforms =
-      getParameterTransforms(paramTransform, characters, nBatch);
+  const auto paramTransforms = getParameterTransforms(paramTransform, characters, nBatch);
   const int nModelParams = (int)paramTransforms.front().numAllModelParameters();
 
-  at::Tensor result =
-      at::zeros({(int)nBatch, (int)nModelParams}, toScalarType<T>());
+  at::Tensor result = at::zeros({(int)nBatch, (int)nModelParams}, toScalarType<T>());
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
     toEigenMap<T>(result.select(0, iBatch)) =
         paramTransforms[iBatch % paramTransforms.size()].transform.transpose() *
@@ -188,22 +182,32 @@ variable_list ApplyParameterTransformFunction<T>::backward(
   return {at::Tensor(), at::Tensor(), result.to(input_device)};
 }
 
+#endif // PYMOMENTUM_LIMITED_TORCH_API
+
 } // anonymous namespace
 
 at::Tensor applyParamTransform(
     const momentum::ParameterTransform* paramTransform,
     at::Tensor modelParams) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_CHECK_NOTNULL(paramTransform);
   PyObject* characters = nullptr;
   return applyTemplatedAutogradFunction<ApplyParameterTransformFunction>(
       characters, paramTransform, modelParams)[0];
+#else
+  MT_THROW("applyParamTransform is not supported in limited PyTorch API mode");
+#endif
 }
 
-at::Tensor applyParamTransform(py::object characters, at::Tensor modelParams) {
+at::Tensor applyParamTransform(pybind11::object characters, at::Tensor modelParams) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_CHECK_NOTNULL(characters.ptr());
   const momentum::ParameterTransform* paramTransform = nullptr;
   return applyTemplatedAutogradFunction<ApplyParameterTransformFunction>(
       characters.ptr(), paramTransform, modelParams)[0];
+#else
+  MT_THROW("applyParamTransform is not supported in limited PyTorch API mode");
+#endif
 }
 
 at::Tensor parameterSetToTensor(
@@ -247,8 +251,7 @@ momentum::ParameterSet tensorToParameterSet(
   const auto nParam = parameterTransform.numAllModelParameters();
 
   MT_THROW_IF(
-      isEmpty(paramSet) || paramSet.ndimension() != 1 ||
-          paramSet.size(0) != nParam,
+      isEmpty(paramSet) || paramSet.ndimension() != 1 || paramSet.size(0) != nParam,
       "Mismatch between active parameters size and parameter transform size.");
 
   paramSet = paramSet.to(at::DeviceType::CPU, at::ScalarType::Bool);
@@ -263,43 +266,33 @@ momentum::ParameterSet tensorToParameterSet(
   return result;
 }
 
-at::Tensor getScalingParameters(
-    const momentum::ParameterTransform& parameterTransform) {
-  return parameterSetToTensor(
-      parameterTransform, parameterTransform.getScalingParameters());
+at::Tensor getScalingParameters(const momentum::ParameterTransform& parameterTransform) {
+  return parameterSetToTensor(parameterTransform, parameterTransform.getScalingParameters());
 }
 
-at::Tensor getRigidParameters(
-    const momentum::ParameterTransform& parameterTransform) {
-  return parameterSetToTensor(
-      parameterTransform, parameterTransform.getRigidParameters());
+at::Tensor getRigidParameters(const momentum::ParameterTransform& parameterTransform) {
+  return parameterSetToTensor(parameterTransform, parameterTransform.getRigidParameters());
 }
 
-at::Tensor getAllParameters(
-    const momentum::ParameterTransform& parameterTransform) {
+at::Tensor getAllParameters(const momentum::ParameterTransform& parameterTransform) {
   momentum::ParameterSet params;
   params.set();
   return parameterSetToTensor(parameterTransform, params);
 }
 
-at::Tensor getBlendShapeParameters(
-    const momentum::ParameterTransform& parameterTransform) {
-  return parameterSetToTensor(
-      parameterTransform, parameterTransform.getBlendShapeParameters());
+at::Tensor getBlendShapeParameters(const momentum::ParameterTransform& parameterTransform) {
+  return parameterSetToTensor(parameterTransform, parameterTransform.getBlendShapeParameters());
 }
 
-at::Tensor getPoseParameters(
-    const momentum::ParameterTransform& parameterTransform) {
-  return parameterSetToTensor(
-      parameterTransform, parameterTransform.getPoseParameters());
+at::Tensor getPoseParameters(const momentum::ParameterTransform& parameterTransform) {
+  return parameterSetToTensor(parameterTransform, parameterTransform.getPoseParameters());
 }
 
 std::unordered_map<std::string, at::Tensor> getParameterSets(
     const momentum::ParameterTransform& parameterTransform) {
   std::unordered_map<std::string, at::Tensor> result;
   for (const auto& ps : parameterTransform.parameterSets) {
-    result.insert(
-        {ps.first, parameterSetToTensor(parameterTransform, ps.second)});
+    result.insert({ps.first, parameterSetToTensor(parameterTransform, ps.second)});
   }
   return result;
 }
@@ -307,12 +300,10 @@ std::unordered_map<std::string, at::Tensor> getParameterSets(
 at::Tensor getParametersForJoints(
     const momentum::ParameterTransform& parameterTransform,
     const std::vector<size_t>& jointIndices) {
-  const auto nJoints =
-      parameterTransform.numJointParameters() / momentum::kParametersPerJoint;
+  const auto nJoints = parameterTransform.numJointParameters() / momentum::kParametersPerJoint;
   std::vector<bool> activeJoints(nJoints);
   for (const auto& idx : jointIndices) {
-    MT_THROW_IF(
-        idx >= nJoints, "getParametersForJoints: joint index out of bounds.");
+    MT_THROW_IF(idx >= nJoints, "getParametersForJoints: joint index out of bounds.");
     activeJoints[idx] = true;
   }
 
@@ -320,10 +311,7 @@ at::Tensor getParametersForJoints(
 
   // iterate over all non-zero entries of the matrix
   for (int k = 0; k < parameterTransform.transform.outerSize(); ++k) {
-    for (momentum::SparseRowMatrixf::InnerIterator it(
-             parameterTransform.transform, k);
-         it;
-         ++it) {
+    for (momentum::SparseRowMatrixf::InnerIterator it(parameterTransform.transform, k); it; ++it) {
       const auto globalParam = it.row();
       const auto kParam = it.col();
       assert(kParam < parameterTransform.numAllModelParameters());
@@ -363,6 +351,8 @@ at::Tensor findParameters(
 
 namespace {
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+
 struct ApplyInverseParameterTransformFunction
     : public torch::autograd::Function<ApplyInverseParameterTransformFunction> {
  public:
@@ -371,9 +361,7 @@ struct ApplyInverseParameterTransformFunction
       const momentum::InverseParameterTransform* inverseParamTransform,
       at::Tensor jointParams);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_modelParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_modelParameters);
 };
 
 variable_list ApplyInverseParameterTransformFunction::forward(
@@ -399,16 +387,12 @@ variable_list ApplyInverseParameterTransformFunction::forward(
   const auto nBatch = checker.getBatchSize();
 
   ctx->saved_data["inverseParameterTransform"] =
-      c10::ivalue::ConcretePyObjectHolder::create(
-          py::cast(inverseParamTransform));
+      c10::ivalue::ConcretePyObjectHolder::create(py::cast(inverseParamTransform));
 
-  auto result = at::zeros(
-      {nBatch, inverseParamTransform->numAllModelParameters()}, at::kFloat);
+  auto result = at::zeros({nBatch, inverseParamTransform->numAllModelParameters()}, at::kFloat);
   for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
     toEigenMap<float>(result.select(0, iBatch)) =
-        inverseParamTransform
-            ->apply(toEigenMap<float>(jointParams.select(0, iBatch)))
-            .pose.v;
+        inverseParamTransform->apply(toEigenMap<float>(jointParams.select(0, iBatch))).pose.v;
   }
 
   if (squeeze) {
@@ -426,32 +410,27 @@ variable_list ApplyInverseParameterTransformFunction::backward(
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
 
   // Restore variables:
-  const auto inverseParamTransform =
-      py::cast<const momentum::InverseParameterTransform*>(
-          ctx->saved_data["inverseParameterTransform"].toPyObject());
+  const auto inverseParamTransform = py::cast<const momentum::InverseParameterTransform*>(
+      ctx->saved_data["inverseParameterTransform"].toPyObject());
 
-  const auto input_device =
-      grad_outputs[0].device(); // grad_outputs size is guarded already
+  const auto input_device = grad_outputs[0].device(); // grad_outputs size is guarded already
 
   bool squeeze = false;
-  auto dLoss_dModelParameters = grad_outputs[0].contiguous().to(
-      at::DeviceType::CPU, at::ScalarType::Float);
+  auto dLoss_dModelParameters =
+      grad_outputs[0].contiguous().to(at::DeviceType::CPU, at::ScalarType::Float);
   if (dLoss_dModelParameters.ndimension() == 1) {
     squeeze = true;
     dLoss_dModelParameters = dLoss_dModelParameters.unsqueeze(0);
   }
 
   MT_THROW_IF(
-      dLoss_dModelParameters.size(1) !=
-          inverseParamTransform->numAllModelParameters(),
+      dLoss_dModelParameters.size(1) != inverseParamTransform->numAllModelParameters(),
       "Unexpected error: mismatch in parameter transform sizes.");
 
   const auto nBatch = dLoss_dModelParameters.size(0);
 
-  const int nModelParams =
-      static_cast<int>(inverseParamTransform->numAllModelParameters());
-  const int nJointParams =
-      static_cast<int>(inverseParamTransform->numJointParameters());
+  const int nModelParams = static_cast<int>(inverseParamTransform->numAllModelParameters());
+  const int nJointParams = static_cast<int>(inverseParamTransform->numJointParameters());
 
   auto result = at::zeros({nBatch, nJointParams}, at::kFloat);
 
@@ -469,12 +448,9 @@ variable_list ApplyInverseParameterTransformFunction::backward(
   const auto& qrDecomposition = inverseParamTransform->inverseTransform;
   for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
     tmp.head(nModelParams) =
-        qrDecomposition.matrixR()
-            .triangularView<Eigen::Upper>()
-            .transpose()
-            .solve(toEigenMap<float>(dLoss_dModelParameters.select(0, iBatch)));
-    toEigenMap<float>(result.select(0, iBatch)) =
-        (qrDecomposition.matrixQ() * tmp).eval();
+        qrDecomposition.matrixR().triangularView<Eigen::Upper>().transpose().solve(
+            toEigenMap<float>(dLoss_dModelParameters.select(0, iBatch)));
+    toEigenMap<float>(result.select(0, iBatch)) = (qrDecomposition.matrixQ() * tmp).eval();
   }
 
   if (squeeze) {
@@ -484,17 +460,22 @@ variable_list ApplyInverseParameterTransformFunction::backward(
   return {at::Tensor(), result.to(input_device)};
 }
 
+#endif // PYMOMENTUM_LIMITED_TORCH_API
+
 } // anonymous namespace
 
 at::Tensor applyInverseParamTransform(
     const momentum::InverseParameterTransform* invParamTransform,
     at::Tensor jointParams) {
-  return ApplyInverseParameterTransformFunction::apply(
-      invParamTransform, jointParams)[0];
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+  return ApplyInverseParameterTransformFunction::apply(invParamTransform, jointParams)[0];
+#else
+  MT_THROW("applyInverseParamTransform is not supported in limited PyTorch API mode");
+#endif
 }
 
-std::unique_ptr<momentum::InverseParameterTransform>
-createInverseParameterTransform(const momentum::ParameterTransform& transform) {
+std::unique_ptr<momentum::InverseParameterTransform> createInverseParameterTransform(
+    const momentum::ParameterTransform& transform) {
   return std::make_unique<momentum::InverseParameterTransform>(transform);
 }
 
@@ -512,8 +493,7 @@ at::Tensor unflattenJointParameters(
     const momentum::Character& character,
     at::Tensor tensor_in,
     bool* unflattened) {
-  if (tensor_in.ndimension() >= 2 &&
-      tensor_in.size(-1) == momentum::kParametersPerJoint &&
+  if (tensor_in.ndimension() >= 2 && tensor_in.size(-1) == momentum::kParametersPerJoint &&
       tensor_in.size(-2) == character.skeleton.joints.size()) {
     maybeSet(unflattened, false);
     return tensor_in;
@@ -521,8 +501,7 @@ at::Tensor unflattenJointParameters(
 
   MT_THROW_IF(
       tensor_in.ndimension() < 1 ||
-          tensor_in.size(-1) !=
-              momentum::kParametersPerJoint * character.skeleton.joints.size(),
+          tensor_in.size(-1) != momentum::kParametersPerJoint * character.skeleton.joints.size(),
       "Expected [... x (nJoints*7)] joint parameters tensor (with nJoints={}); got {}",
       character.skeleton.joints.size(),
       formatTensorSizes(tensor_in));
@@ -543,8 +522,7 @@ at::Tensor flattenJointParameters(
     at::Tensor tensor_in,
     bool* flattened) {
   if (tensor_in.ndimension() >= 1 &&
-      tensor_in.size(-1) ==
-          (momentum::kParametersPerJoint * character.skeleton.joints.size())) {
+      tensor_in.size(-1) == (momentum::kParametersPerJoint * character.skeleton.joints.size())) {
     maybeSet(flattened, false);
     return tensor_in;
   }
@@ -563,8 +541,7 @@ at::Tensor flattenJointParameters(
   }
   assert(dimensions.size() >= 2); // Guaranteed by check above.
   dimensions.pop_back();
-  dimensions.back() =
-      momentum::kParametersPerJoint * character.skeleton.joints.size();
+  dimensions.back() = momentum::kParametersPerJoint * character.skeleton.joints.size();
   maybeSet(flattened, true);
   return tensor_in.reshape(dimensions);
 }
@@ -576,8 +553,7 @@ at::Tensor modelParametersToBlendShapeCoefficients(
       -1, to1DTensor(character.parameterTransform.blendShapeParameters));
 }
 
-at::Tensor getParameterTransformTensor(
-    const momentum::ParameterTransform& parameterTransform) {
+at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& parameterTransform) {
   const auto& transformSparse = parameterTransform.transform;
 
   const at::Tensor transformDense =
@@ -586,12 +562,9 @@ at::Tensor getParameterTransformTensor(
   auto tranformAccessor = transformDense.accessor<float, 2>();
 
   for (int i = 0; i < transformSparse.outerSize(); ++i) {
-    for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(
-             transformSparse, i);
-         it;
+    for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(transformSparse, i); it;
          ++it) {
-      tranformAccessor[static_cast<long>(it.row())]
-                      [static_cast<long>(it.col())] = it.value();
+      tranformAccessor[static_cast<long>(it.row())][static_cast<long>(it.col())] = it.value();
     }
   }
   return transformDense;

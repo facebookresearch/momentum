@@ -27,15 +27,13 @@ namespace pymomentum {
 // numFrames, and pymomentum represents motion as numFrames x numParameters.
 
 // Using row-major matrices for input/output avoids some extra copies in numpy:
-using RowMatrixf =
-    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMatrixf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 momentum::Character loadGLTFCharacterFromFile(const std::string& path);
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes);
 
 /// Utility function to transpose motion parameters for C++ internal format
-momentum::MotionParameters transpose(
-    const momentum::MotionParameters& motionParameters);
+momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters);
 
 void saveGLTFCharacterToFile(
     const std::string& path,
@@ -43,16 +41,14 @@ void saveGLTFCharacterToFile(
     const float fps,
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const momentum::IdentityParameters>& offsets,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
-        markers);
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers);
 
 void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
     const pybind11::array_t<float>& skel_states,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
-        markers);
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers);
 
 void saveFBXCharacterToFile(
     const std::string& path,
@@ -69,8 +65,8 @@ void saveFBXCharacterToFileWithJointParams(
     std::optional<const Eigen::MatrixXf> jointParams,
     std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo);
 
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadGLTFCharacterWithMotion(const std::string& gltfFilename);
+std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(
+    const std::string& gltfFilename);
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& bytes);
@@ -83,11 +79,7 @@ loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfFilename);
 
 std::string toGLTF(const momentum::Character& character);
 
-std::tuple<
-    RowMatrixf,
-    std::vector<std::string>,
-    Eigen::VectorXf,
-    std::vector<std::string>>
+std::tuple<RowMatrixf, std::vector<std::string>, Eigen::VectorXf, std::vector<std::string>>
 loadMotion(const std::string& gltfFilename);
 
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(

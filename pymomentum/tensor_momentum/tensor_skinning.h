@@ -15,10 +15,8 @@
 
 namespace pymomentum {
 
-at::Tensor skinPoints(
-    pybind11::object character,
-    at::Tensor skel_state,
-    std::optional<at::Tensor> restPoints);
+at::Tensor
+skinPoints(pybind11::object character, at::Tensor skel_state, std::optional<at::Tensor> restPoints);
 
 at::Tensor computeVertexNormals(at::Tensor positions, at::Tensor triangles);
 

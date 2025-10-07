@@ -96,35 +96,27 @@ TensorDistanceErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto errorFun =
-      std::make_unique<momentum::FullyDifferentiableDistanceErrorFunctionT<T>>(
-          character.skeleton, character.parameterTransform);
+  auto errorFun = std::make_unique<momentum::FullyDifferentiableDistanceErrorFunctionT<T>>(
+      character.skeleton, character.parameterTransform);
 
-  const auto weights =
-      this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kWeights)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto origins =
-      this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kOrigins)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto offsets =
-      this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kOffsets)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto parents =
-      this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kParents)
-          .template toEigenMap<int>(iBatch, jFrame);
-  const auto targets =
-      this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kTargets)
-          .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kWeights)
+                           .template toEigenMap<T>(iBatch, jFrame);
+  const auto origins = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kOrigins)
+                           .template toEigenMap<T>(iBatch, jFrame);
+  const auto offsets = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kOffsets)
+                           .template toEigenMap<T>(iBatch, jFrame);
+  const auto parents = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kParents)
+                           .template toEigenMap<int>(iBatch, jFrame);
+  const auto targets = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kTargets)
+                           .template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index kCons = 0; kCons < nCons; ++kCons) {
     momentum::DistanceConstraintDataT<T> constraintData;
-    constraintData.origin =
-        extractVector<T, 3>(origins, kCons, Eigen::Vector3<T>::Zero());
+    constraintData.origin = extractVector<T, 3>(origins, kCons, Eigen::Vector3<T>::Zero());
     constraintData.target = extractScalar<T>(targets, kCons);
     constraintData.parent = extractScalar<int>(parents, kCons);
-    constraintData.offset =
-        extractVector<T, 3>(offsets, kCons, Eigen::Vector3<T>::Zero());
+    constraintData.offset = extractVector<T, 3>(offsets, kCons, Eigen::Vector3<T>::Zero());
     constraintData.weight = extractScalar<T>(weights, kCons, T(1));
     errorFun->addConstraint(constraintData);
   }
@@ -147,8 +139,7 @@ std::unique_ptr<TensorErrorFunction<T>> createDistanceErrorFunction(
       batchSize, nFrames, cameras, parents, offsets, weights, targets);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createDistanceErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createDistanceErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor cameras,
@@ -157,8 +148,7 @@ createDistanceErrorFunction<float>(
     at::Tensor weights,
     at::Tensor targets);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createDistanceErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createDistanceErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor cameras,

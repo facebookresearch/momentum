@@ -82,9 +82,8 @@ TensorVertexErrorFunction<T>::TensorVertexErrorFunction(
                {NCONS_IDX, 3},
                TensorType::TYPE_FLOAT,
                TensorInput::NON_DIFFERENTIABLE,
-               constraintType == momentum::VertexConstraintType::Position
-                   ? TensorInput::OPTIONAL
-                   : TensorInput::REQUIRED},
+               constraintType == momentum::VertexConstraintType::Position ? TensorInput::OPTIONAL
+                                                                          : TensorInput::REQUIRED},
               {kTypeName,
                at::Tensor(),
                {},
@@ -100,17 +99,15 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result = std::make_unique<momentum::VertexErrorFunctionT<T>>(
-      character, _constraintType);
+  auto result = std::make_unique<momentum::VertexErrorFunctionT<T>>(character, _constraintType);
 
-  const auto weights =
-      this->getTensorInput(kWeightsName).template toEigenMap<T>(iBatch, jFrame);
-  const auto vertices = this->getTensorInput(kVerticesName)
-                            .template toEigenMap<int>(iBatch, jFrame);
-  const auto target_positions = this->getTensorInput(kTargetPositionsName)
-                                    .template toEigenMap<T>(iBatch, jFrame);
-  const auto target_normals = this->getTensorInput(kTargetNormalsName)
-                                  .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights = this->getTensorInput(kWeightsName).template toEigenMap<T>(iBatch, jFrame);
+  const auto vertices =
+      this->getTensorInput(kVerticesName).template toEigenMap<int>(iBatch, jFrame);
+  const auto target_positions =
+      this->getTensorInput(kTargetPositionsName).template toEigenMap<T>(iBatch, jFrame);
+  const auto target_normals =
+      this->getTensorInput(kTargetNormalsName).template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index i = 0; i < nCons; ++i) {
@@ -139,13 +136,7 @@ std::unique_ptr<TensorErrorFunction<T>> createVertexErrorFunction(
     at::Tensor target_normals,
     momentum::VertexConstraintType constraintType) {
   return std::make_unique<TensorVertexErrorFunction<T>>(
-      batchSize,
-      nFrames,
-      vertexIndex,
-      weights,
-      target_positions,
-      target_normals,
-      constraintType);
+      batchSize, nFrames, vertexIndex, weights, target_positions, target_normals, constraintType);
 }
 
 template std::unique_ptr<TensorErrorFunction<float>> createVertexErrorFunction(

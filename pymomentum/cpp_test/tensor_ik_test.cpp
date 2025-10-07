@@ -45,14 +45,10 @@ PositionErrorFunctionTensors toPositionTensors(
   result.targets = at::zeros({1, nCons, 3}, at::kFloat);
 
   for (size_t iCons = 0; iCons < nCons; ++iCons) {
-    pymomentum::toEigenMap<int>(result.parents)(iCons) =
-        constraints[iCons].parent;
-    pymomentum::toEigenMap<float>(result.offsets).segment<3>(3 * iCons) =
-        constraints[iCons].offset;
-    pymomentum::toEigenMap<float>(result.weights)(iCons) =
-        constraints[iCons].weight;
-    pymomentum::toEigenMap<float>(result.targets).segment<3>(3 * iCons) =
-        constraints[iCons].target;
+    pymomentum::toEigenMap<int>(result.parents)(iCons) = constraints[iCons].parent;
+    pymomentum::toEigenMap<float>(result.offsets).segment<3>(3 * iCons) = constraints[iCons].offset;
+    pymomentum::toEigenMap<float>(result.weights)(iCons) = constraints[iCons].weight;
+    pymomentum::toEigenMap<float>(result.targets).segment<3>(3 * iCons) = constraints[iCons].target;
   }
 
   return result;
@@ -65,8 +61,7 @@ at::Tensor concatBatch(std::vector<at::Tensor> tensors) {
 
   const auto sizes = tensors[0].sizes();
   std::vector<int64_t> sizes_batch = {(int64_t)tensors.size()};
-  std::copy(
-      std::begin(sizes), std::end(sizes), std::back_inserter(sizes_batch));
+  std::copy(std::begin(sizes), std::end(sizes), std::back_inserter(sizes_batch));
 
   at::Tensor result = at::zeros(sizes_batch, tensors[0].scalar_type());
 
@@ -86,8 +81,7 @@ void addPositionConstraints(
     const Eigen::VectorX<T>& modelParameters,
     std::mt19937& rng) {
   const momentum::SkeletonState state(
-      character.parameterTransform.apply(
-          modelParameters.template cast<float>()),
+      character.parameterTransform.apply(modelParameters.template cast<float>()),
       character.skeleton);
 
   auto randomVec3 = [&]() {
@@ -107,19 +101,16 @@ void addPositionConstraints(
           state.jointState[jCons].transform.template cast<T>() * offset +
           randomVec3().template cast<T>();
       const float weight = 1.0f + unif(rng);
-      func.addConstraint(
-          momentum::PositionConstraintT<T>(offset, target, parent, weight));
+      func.addConstraint(momentum::PositionConstraintT<T>(offset, target, parent, weight));
     }
   }
 }
 
 template <typename T>
 struct IKProblem {
-  std::shared_ptr<momentum::FullyDifferentiablePositionErrorFunctionT<T>>
-      markerError;
+  std::shared_ptr<momentum::FullyDifferentiablePositionErrorFunctionT<T>> markerError;
   std::shared_ptr<momentum::LimitErrorFunction> limitError;
-  std::shared_ptr<momentum::FullyDifferentiableOrientationErrorFunctionT<T>>
-      orientationError;
+  std::shared_ptr<momentum::FullyDifferentiableOrientationErrorFunctionT<T>> orientationError;
   std::shared_ptr<momentum::SkeletonSolverFunction> solverFunction;
 
   Eigen::VectorX<T> modelParameters_init;
@@ -167,63 +158,49 @@ TEST(TensorIK, TensorIK) {
   momentum::ParameterSet activeParams;
   activeParams.set();
 
-  Eigen::VectorX<T> dLoss_dModelParams(
-      character.parameterTransform.numAllModelParameters());
+  Eigen::VectorX<T> dLoss_dModelParams(character.parameterTransform.numAllModelParameters());
   for (int i = 0; i < dLoss_dModelParams.size(); ++i) {
     dLoss_dModelParams(i) = unif(rng);
   }
 
   for (size_t iBatch = 0; iBatch < nBatch; ++iBatch) {
-    ikProblems[iBatch].modelParameters_init = Eigen::VectorX<T>::Zero(
-        character.parameterTransform.numAllModelParameters());
+    ikProblems[iBatch].modelParameters_init =
+        Eigen::VectorX<T>::Zero(character.parameterTransform.numAllModelParameters());
 
-    ikProblems[iBatch].solverFunction =
-        std::make_unique<momentum::SkeletonSolverFunction>(
-            &character.skeleton, &character.parameterTransform);
+    ikProblems[iBatch].solverFunction = std::make_unique<momentum::SkeletonSolverFunction>(
+        &character.skeleton, &character.parameterTransform);
 
-    ikProblems[iBatch].markerError = std::make_shared<
-        momentum::FullyDifferentiablePositionErrorFunctionT<T>>(
-        character.skeleton, character.parameterTransform);
+    ikProblems[iBatch].markerError =
+        std::make_shared<momentum::FullyDifferentiablePositionErrorFunctionT<T>>(
+            character.skeleton, character.parameterTransform);
     ikProblems[iBatch].markerError->setWeight(2.0f + unif(rng));
     addPositionConstraints(
-        *ikProblems[iBatch].markerError,
-        character,
-        ikProblems[iBatch].modelParameters_init,
-        rng);
+        *ikProblems[iBatch].markerError, character, ikProblems[iBatch].modelParameters_init, rng);
     // std::cout << "GAUSS-NEWTON\n========================================\n";
     // pymomentum::printConstraintList(ikProblems[iBatch].markerError->getConstraints(),
     // std::cout);
-    ikProblems[iBatch].solverFunction->addErrorFunction(
-        ikProblems[iBatch].markerError);
+    ikProblems[iBatch].solverFunction->addErrorFunction(ikProblems[iBatch].markerError);
 
-    ikProblems[iBatch].limitError =
-        std::make_shared<momentum::LimitErrorFunction>(
-            character.skeleton,
-            character.parameterTransform,
-            character.parameterLimits);
-    ikProblems[iBatch].solverFunction->addErrorFunction(
-        ikProblems[iBatch].limitError);
+    ikProblems[iBatch].limitError = std::make_shared<momentum::LimitErrorFunction>(
+        character.skeleton, character.parameterTransform, character.parameterLimits);
+    ikProblems[iBatch].solverFunction->addErrorFunction(ikProblems[iBatch].limitError);
 
-    ikProblems[iBatch].orientationError = std::make_shared<
-        momentum::FullyDifferentiableOrientationErrorFunctionT<T>>(
-        character.skeleton, character.parameterTransform);
-    ikProblems[iBatch].solverFunction->addErrorFunction(
-        ikProblems[iBatch].orientationError);
+    ikProblems[iBatch].orientationError =
+        std::make_shared<momentum::FullyDifferentiableOrientationErrorFunctionT<T>>(
+            character.skeleton, character.parameterTransform);
+    ikProblems[iBatch].solverFunction->addErrorFunction(ikProblems[iBatch].orientationError);
 
-    momentum::GaussNewtonSolver solver(
-        solverOptions, ikProblems[iBatch].solverFunction.get());
+    momentum::GaussNewtonSolver solver(solverOptions, ikProblems[iBatch].solverFunction.get());
     solver.setEnabledParameters(activeParams);
 
-    ikProblems[iBatch].modelParameters_final =
-        ikProblems[iBatch].modelParameters_init;
+    ikProblems[iBatch].modelParameters_final = ikProblems[iBatch].modelParameters_init;
     solver.solve(ikProblems[iBatch].modelParameters_final);
     // std::cout << "Optimized parameters (GaussNewtonSolver): "<<
     // ikProblems[iBatch].modelParameters_final.transpose() << "\n";
 
     const auto positionTensors =
         toPositionTensors<T>(ikProblems[iBatch].markerError->getConstraints());
-    std::vector<std::unique_ptr<pymomentum::TensorErrorFunction<T>>>
-        tensorErrorFunctions;
+    std::vector<std::unique_ptr<pymomentum::TensorErrorFunction<T>>> tensorErrorFunctions;
     tensorErrorFunctions.push_back(pymomentum::createPositionErrorFunction<T>(
         1,
         0,
@@ -231,21 +208,18 @@ TEST(TensorIK, TensorIK) {
         positionTensors.offsets,
         positionTensors.weights,
         positionTensors.targets));
-    tensorErrorFunctions.push_back(
-        pymomentum::createLimitErrorFunction<T>(1, 0));
-    tensorErrorFunctions.push_back(
-        pymomentum::createOrientationErrorFunction<T>(
-            1, 0, at::Tensor(), at::Tensor(), at::Tensor(), at::Tensor()));
+    tensorErrorFunctions.push_back(pymomentum::createLimitErrorFunction<T>(1, 0));
+    tensorErrorFunctions.push_back(pymomentum::createOrientationErrorFunction<T>(
+        1, 0, at::Tensor(), at::Tensor(), at::Tensor(), at::Tensor()));
 
-    auto tensorErrorFunctionWeights = toTensor(
-        extractErrorFunctionWeights<T>(*ikProblems[iBatch].solverFunction));
+    auto tensorErrorFunctionWeights =
+        toTensor(extractErrorFunctionWeights<T>(*ikProblems[iBatch].solverFunction));
 
     size_t numActiveErrorFunctions = tensorErrorFunctionWeights.sizes()[0];
     std::vector<int> weightsMap(numActiveErrorFunctions);
     std::iota(weightsMap.begin(), weightsMap.end(), 0);
 
-    const std::vector<const momentum::Character*> characters(
-        nBatch, &character);
+    const std::vector<const momentum::Character*> characters(nBatch, &character);
     at::Tensor modelParameters_final_tensor = solveTensorIKProblem(
         characters,
         activeParams,
@@ -258,13 +232,10 @@ TEST(TensorIK, TensorIK) {
     const Eigen::VectorX<T> modelParameters_final_extract =
         pymomentum::toEigenMap<T>(modelParameters_final_tensor);
 
-    auto dumpStats = [&](const char* name,
-                         Eigen::Ref<const Eigen::VectorX<T>> modelParams) {
+    auto dumpStats = [&](const char* name, Eigen::Ref<const Eigen::VectorX<T>> modelParams) {
       std::cout << "Eval " << name << ".\n";
       std::cout << "   modelParams: " << modelParams.transpose() << "\n";
-      std::cout << "   error: "
-                << ikProblems[iBatch].solverFunction->getError(modelParams)
-                << "\n";
+      std::cout << "   error: " << ikProblems[iBatch].solverFunction->getError(modelParams) << "\n";
       Eigen::VectorX<T> gradient = Eigen::VectorX<T>::Zero(modelParams.size());
       ikProblems[iBatch].solverFunction->getGradient(modelParams, gradient);
       std::cout << "   gradient: " << gradient.transpose() << "\n";
@@ -274,10 +245,8 @@ TEST(TensorIK, TensorIK) {
     dumpStats("Tensor version", modelParameters_final_extract);
 
     ASSERT_EQ(
-        character.parameterTransform.numAllModelParameters(),
-        modelParameters_final_extract.size());
-    for (size_t iParam = 0;
-         iParam < character.parameterTransform.numAllModelParameters();
+        character.parameterTransform.numAllModelParameters(), modelParameters_final_extract.size());
+    for (size_t iParam = 0; iParam < character.parameterTransform.numAllModelParameters();
          ++iParam) {
       ASSERT_NEAR(
           ikProblems[iBatch].modelParameters_final(iParam),

@@ -14,21 +14,13 @@
 
 namespace pymomentum {
 
-at::Tensor modelParametersToSkeletonState(
-    pybind11::object characters,
-    at::Tensor modelParams);
+at::Tensor modelParametersToSkeletonState(pybind11::object characters, at::Tensor modelParams);
 
-at::Tensor modelParametersToLocalSkeletonState(
-    pybind11::object characters,
-    at::Tensor modelParams);
+at::Tensor modelParametersToLocalSkeletonState(pybind11::object characters, at::Tensor modelParams);
 
-at::Tensor jointParametersToSkeletonState(
-    pybind11::object characters,
-    at::Tensor jointParams);
+at::Tensor jointParametersToSkeletonState(pybind11::object characters, at::Tensor jointParams);
 
-at::Tensor jointParametersToLocalSkeletonState(
-    pybind11::object characters,
-    at::Tensor jointParams);
+at::Tensor jointParametersToLocalSkeletonState(pybind11::object characters, at::Tensor jointParams);
 
 at::Tensor skeletonStateToJointParameters(
     const momentum::Character& character,

@@ -12,8 +12,6 @@
 
 namespace pymomentum {
 
-at::Tensor applyBlendShapeCoefficients(
-    pybind11::object blendShape,
-    at::Tensor coeffs);
+at::Tensor applyBlendShapeCoefficients(pybind11::object blendShape, at::Tensor coeffs);
 
 }

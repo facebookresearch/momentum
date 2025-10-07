@@ -20,7 +20,9 @@
 
 #include <ceres/jet.h>
 #include <dispenso/parallel_for.h> // @manual
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 #include <Eigen/Core>
 
 namespace py = pybind11;
@@ -33,22 +35,23 @@ namespace pymomentum {
 
 namespace {
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+
 template <typename T>
 momentum::TransformT<T> computeLocalTransform(
     const momentum::Joint& joint,
     Eigen::Ref<const Eigen::Matrix<T, Eigen::Dynamic, 1>> parameters) {
   momentum::TransformT<T> result;
 
-  result.translation =
-      joint.translationOffset.cast<T>() + parameters.template segment<3>(0);
+  result.translation = joint.translationOffset.cast<T>() + parameters.template segment<3>(0);
 
   // apply pre-rotation
   result.rotation = joint.preRotation.cast<T>();
 
   // do the rotations
   for (int index = 2; index >= 0; --index) {
-    result.rotation *= Eigen::Quaternion<T>(Eigen::AngleAxis<T>(
-        parameters[3 + index], Eigen::Vector3f::Unit(index).cast<T>()));
+    result.rotation *= Eigen::Quaternion<T>(
+        Eigen::AngleAxis<T>(parameters[3 + index], Eigen::Vector3f::Unit(index).cast<T>()));
   }
 
   // perform scale if necessary
@@ -111,20 +114,16 @@ void computeSkelStateBackward(
 
       for (int d = 0; d < momentum::kParametersPerJoint; ++d) {
         Eigen::VectorX<JetType> jointParams_cur =
-            jointParameters
-                .segment(kParametersPerJoint * curJoint, kParametersPerJoint)
+            jointParameters.segment(kParametersPerJoint * curJoint, kParametersPerJoint)
                 .template cast<JetType>();
         jointParams_cur(d).v[0] = 1;
 
-        const momentum::TransformT<JetType> joint_fullXF =
-            momentum::TransformT<JetType>(parentXF) *
+        const momentum::TransformT<JetType> joint_fullXF = momentum::TransformT<JetType>(parentXF) *
             computeLocalTransform<JetType>(joint, jointParams_cur) *
             momentum::TransformT<JetType>(accumTransform);
 
         dLoss_dJointParameters(curJoint * momentum::kParametersPerJoint + d) +=
-            joint_fullXF.translation
-                .dot(dLoss_dSkeletonState.template segment<3>(8 * iJoint))
-                .v[0];
+            joint_fullXF.translation.dot(dLoss_dSkeletonState.template segment<3>(8 * iJoint)).v[0];
         dLoss_dJointParameters(curJoint * momentum::kParametersPerJoint + d) +=
             joint_fullXF.rotation.coeffs()
                 .dot(dLoss_dSkeletonState.template segment<4>(8 * iJoint + 3))
@@ -133,8 +132,7 @@ void computeSkelStateBackward(
             (joint_fullXF.scale * dLoss_dSkeletonState(8 * iJoint + 7)).v[0];
       }
 
-      accumTransform =
-          skelState.jointState[curJoint].localTransform * accumTransform;
+      accumTransform = skelState.jointState[curJoint].localTransform * accumTransform;
       curJoint = joint.parent;
     }
   }
@@ -187,8 +185,7 @@ void computeLocalSkelStateBackward(
 
     for (int d = 0; d < momentum::kParametersPerJoint; ++d) {
       Eigen::VectorX<JetType> jointParams_cur =
-          jointParameters
-              .segment(kParametersPerJoint * iJoint, kParametersPerJoint)
+          jointParameters.segment(kParametersPerJoint * iJoint, kParametersPerJoint)
               .template cast<JetType>();
       jointParams_cur(d).v[0] = 1;
 
@@ -196,13 +193,11 @@ void computeLocalSkelStateBackward(
           computeLocalTransform<JetType>(joint, jointParams_cur);
 
       dLoss_dJointParameters(iJoint * momentum::kParametersPerJoint + d) +=
-          joint_fullXF.translation
-              .dot(dLoss_dLocalSkeletonState.template segment<3>(8 * iJoint))
+          joint_fullXF.translation.dot(dLoss_dLocalSkeletonState.template segment<3>(8 * iJoint))
               .v[0];
       dLoss_dJointParameters(iJoint * momentum::kParametersPerJoint + d) +=
           joint_fullXF.rotation.coeffs()
-              .dot(
-                  dLoss_dLocalSkeletonState.template segment<4>(8 * iJoint + 3))
+              .dot(dLoss_dLocalSkeletonState.template segment<4>(8 * iJoint + 3))
               .v[0];
       dLoss_dJointParameters(iJoint * momentum::kParametersPerJoint + d) +=
           (joint_fullXF.scale * dLoss_dLocalSkeletonState(8 * iJoint + 7)).v[0];
@@ -212,17 +207,12 @@ void computeLocalSkelStateBackward(
 
 template <typename T>
 struct JointParametersToSkeletonStateFunction
-    : public torch::autograd::Function<
-          JointParametersToSkeletonStateFunction<T>> {
+    : public torch::autograd::Function<JointParametersToSkeletonStateFunction<T>> {
  public:
-  static variable_list forward(
-      AutogradContext* ctx,
-      PyObject* characters_in,
-      at::Tensor modelParameters);
+  static variable_list
+  forward(AutogradContext* ctx, PyObject* characters_in, at::Tensor modelParameters);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_jointParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_jointParameters);
 };
 
 template <typename T>
@@ -231,19 +221,16 @@ variable_list JointParametersToSkeletonStateFunction<T>::forward(
     PyObject* characters_in,
     at::Tensor jointParameters) {
   const int nJoints =
-      (int)anyCharacter(characters_in, "jointParametersToSkeletonState()")
-          .skeleton.joints.size();
+      (int)anyCharacter(characters_in, "jointParametersToSkeletonState()").skeleton.joints.size();
   const int nJointParams = nJoints * momentum::kParametersPerJoint;
 
   TensorChecker checker("jointParametersToSkeletonState");
   bool squeeze;
   const auto input_device =
-      jointParameters[0]
-          .device(); // Save the input device, reused for the returned grad
+      jointParameters[0].device(); // Save the input device, reused for the returned grad
 
   jointParameters = flattenJointParameters(
-      anyCharacter(characters_in, "jointParametersToLocalSkeletonState()"),
-      jointParameters);
+      anyCharacter(characters_in, "jointParametersToLocalSkeletonState()"), jointParameters);
 
   jointParameters = checker.validateAndFixTensor(
       jointParameters,
@@ -256,12 +243,11 @@ variable_list JointParametersToSkeletonStateFunction<T>::forward(
       &squeeze);
   const auto nBatch = checker.getBatchSize();
 
-  ctx->saved_data["character"] =
-      c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+  ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
   ctx->save_for_backward({jointParameters});
 
-  const auto characters = toCharacterList(
-      characters_in, nBatch, "jointParametersToSkeletonState()");
+  const auto characters =
+      toCharacterList(characters_in, nBatch, "jointParametersToSkeletonState()");
 
   auto result = at::zeros({nBatch, nJoints, 8}, toScalarType<T>());
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
@@ -270,8 +256,7 @@ variable_list JointParametersToSkeletonStateFunction<T>::forward(
         toEigenMap<T>(jointParameters.select(0, iBatch)), character->skeleton);
     auto result_cur = toEigenMap<T>(result.select(0, iBatch));
     for (int64_t iJoint = 0; iJoint < nJoints; ++iJoint) {
-      result_cur.template segment<3>(8 * iJoint + 0) =
-          skelState.jointState[iJoint].translation();
+      result_cur.template segment<3>(8 * iJoint + 0) = skelState.jointState[iJoint].translation();
       result_cur.template segment<4>(8 * iJoint + 3) =
           skelState.jointState[iJoint].rotation().coeffs();
       result_cur(8 * iJoint + 7) = skelState.jointState[iJoint].scale();
@@ -297,19 +282,16 @@ variable_list JointParametersToSkeletonStateFunction<T>::backward(
   const auto saved = ctx->get_saved_variables();
   auto savedItr = std::begin(saved);
   auto jointParameters = *savedItr++;
-  MT_THROW_IF(
-      savedItr != std::end(saved), "Mismatch in saved variable counts.");
+  MT_THROW_IF(savedItr != std::end(saved), "Mismatch in saved variable counts.");
 
-  const auto nJoints = anyCharacter(
-                           ctx->saved_data["character"].toPyObject(),
-                           "modelParametersToPositions()")
-                           .skeleton.joints.size();
+  const auto nJoints =
+      anyCharacter(ctx->saved_data["character"].toPyObject(), "modelParametersToPositions()")
+          .skeleton.joints.size();
   const int nJointParams = nJoints * momentum::kParametersPerJoint;
 
   TensorChecker checker("jointParametersToSkeletonState");
   const auto input_device =
-      grad_outputs[0]
-          .device(); // Save the input device, reused for the returned grad
+      grad_outputs[0].device(); // Save the input device, reused for the returned grad
 
   bool squeeze_jointParams;
   jointParameters = checker.validateAndFixTensor(
@@ -336,9 +318,7 @@ variable_list JointParametersToSkeletonStateFunction<T>::backward(
   const auto nBatch = checker.getBatchSize();
 
   const auto characters = toCharacterList(
-      ctx->saved_data["character"].toPyObject(),
-      nBatch,
-      "jointParametersToSkeletonState()");
+      ctx->saved_data["character"].toPyObject(), nBatch, "jointParametersToSkeletonState()");
 
   auto result = at::zeros({nBatch, nJointParams}, toScalarType<T>());
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
@@ -359,17 +339,12 @@ variable_list JointParametersToSkeletonStateFunction<T>::backward(
 
 template <typename T>
 struct JointParametersToLocalSkeletonStateFunction
-    : public torch::autograd::Function<
-          JointParametersToLocalSkeletonStateFunction<T>> {
+    : public torch::autograd::Function<JointParametersToLocalSkeletonStateFunction<T>> {
  public:
-  static variable_list forward(
-      AutogradContext* ctx,
-      PyObject* characters_in,
-      at::Tensor modelParameters);
+  static variable_list
+  forward(AutogradContext* ctx, PyObject* characters_in, at::Tensor modelParameters);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_jointParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_jointParameters);
 };
 
 template <typename T>
@@ -377,9 +352,8 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::forward(
     AutogradContext* ctx,
     PyObject* characters_in,
     at::Tensor jointParameters) {
-  const int nJoints =
-      (int)anyCharacter(characters_in, "jointParametersToLocalSkeletonState()")
-          .skeleton.joints.size();
+  const int nJoints = (int)anyCharacter(characters_in, "jointParametersToLocalSkeletonState()")
+                          .skeleton.joints.size();
   const int nJointParams = nJoints * momentum::kParametersPerJoint;
 
   TensorChecker checker("jointParametersToLocalSkeletonState");
@@ -387,8 +361,7 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::forward(
   const auto input_device = jointParameters.device();
 
   jointParameters = flattenJointParameters(
-      anyCharacter(characters_in, "jointParametersToLocalSkeletonState()"),
-      jointParameters);
+      anyCharacter(characters_in, "jointParametersToLocalSkeletonState()"), jointParameters);
   jointParameters = checker.validateAndFixTensor(
       jointParameters,
       "jointParameters",
@@ -400,12 +373,11 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::forward(
       &squeeze);
   const auto nBatch = checker.getBatchSize();
 
-  ctx->saved_data["character"] =
-      c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+  ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
   ctx->save_for_backward({jointParameters});
 
-  const auto characters = toCharacterList(
-      characters_in, nBatch, "jointParametersToLocalSkeletonState()");
+  const auto characters =
+      toCharacterList(characters_in, nBatch, "jointParametersToLocalSkeletonState()");
 
   auto result = at::zeros({nBatch, nJoints, 8}, toScalarType<T>());
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
@@ -441,19 +413,16 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
   const auto saved = ctx->get_saved_variables();
   auto savedItr = std::begin(saved);
   auto jointParameters = *savedItr++;
-  MT_THROW_IF(
-      savedItr != std::end(saved), "Mismatch in saved variable counts.");
+  MT_THROW_IF(savedItr != std::end(saved), "Mismatch in saved variable counts.");
 
-  const auto nJoints = anyCharacter(
-                           ctx->saved_data["character"].toPyObject(),
-                           "modelParametersToPositions()")
-                           .skeleton.joints.size();
+  const auto nJoints =
+      anyCharacter(ctx->saved_data["character"].toPyObject(), "modelParametersToPositions()")
+          .skeleton.joints.size();
   const int nJointParams = nJoints * momentum::kParametersPerJoint;
 
   TensorChecker checker("jointParametersToLocalSkeletonState");
   const auto input_device =
-      grad_outputs[0]
-          .device(); // Save the input device, reused for the returned grad
+      grad_outputs[0].device(); // Save the input device, reused for the returned grad
 
   bool squeeze_jointParams;
   jointParameters = checker.validateAndFixTensor(
@@ -480,9 +449,7 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
   const auto nBatch = checker.getBatchSize();
 
   const auto characters = toCharacterList(
-      ctx->saved_data["character"].toPyObject(),
-      nBatch,
-      "jointParametersToLocalSkeletonState()");
+      ctx->saved_data["character"].toPyObject(), nBatch, "jointParametersToLocalSkeletonState()");
 
   auto result = at::zeros({nBatch, nJointParams}, toScalarType<T>());
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
@@ -501,28 +468,32 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
   return {at::Tensor(), result.to(input_device)};
 }
 
+#endif // PYMOMENTUM_LIMITED_TORCH_API
+
 } // anonymous namespace
 
-at::Tensor jointParametersToSkeletonState(
-    pybind11::object characters,
-    at::Tensor jointParams) {
+at::Tensor jointParametersToSkeletonState(pybind11::object characters, at::Tensor jointParams) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<JointParametersToSkeletonStateFunction>(
       characters.ptr(), jointParams)[0];
+#else
+  MT_THROW("jointParametersToSkeletonState is not supported in limited PyTorch API mode");
+#endif
 }
 
 at::Tensor jointParametersToLocalSkeletonState(
     pybind11::object characters,
     at::Tensor jointParams) {
-  return applyTemplatedAutogradFunction<
-      JointParametersToLocalSkeletonStateFunction>(
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+  return applyTemplatedAutogradFunction<JointParametersToLocalSkeletonStateFunction>(
       characters.ptr(), jointParams)[0];
+#else
+  MT_THROW("jointParametersToLocalSkeletonState is not supported in limited PyTorch API mode");
+#endif
 }
 
-at::Tensor modelParametersToSkeletonState(
-    pybind11::object characters,
-    at::Tensor modelParams) {
-  return jointParametersToSkeletonState(
-      characters, applyParamTransform(characters, modelParams));
+at::Tensor modelParametersToSkeletonState(pybind11::object characters, at::Tensor modelParams) {
+  return jointParametersToSkeletonState(characters, applyParamTransform(characters, modelParams));
 }
 
 at::Tensor modelParametersToLocalSkeletonState(
@@ -570,8 +541,7 @@ at::Tensor matricesToSkeletonStates(at::Tensor matrices) {
   const at::Tensor rotation_matrices = at::bmm(U, Vt);
   const at::Tensor quaternions = rotationMatrixToQuaternion(rotation_matrices);
   at::Tensor result = at::cat({translations, quaternions, scales}, -1);
-  std::vector<int64_t> resultShape(
-      initialShape.begin(), initialShape.end() - 2);
+  std::vector<int64_t> resultShape(initialShape.begin(), initialShape.end() - 2);
   resultShape.push_back(8);
   return result.reshape(resultShape);
 }
@@ -595,9 +565,7 @@ at::Tensor preRotationsTensor(const momentum::Character& character) {
   }
 
   return torch::from_blob(
-             (void*)data.data(),
-             {nJoints, 4},
-             torch::TensorOptions().dtype(toScalarType<float>()))
+             (void*)data.data(), {nJoints, 4}, torch::TensorOptions().dtype(toScalarType<float>()))
       .clone();
 }
 
@@ -609,15 +577,11 @@ at::Tensor translationOffsetsTensor(const momentum::Character& character) {
   }
 
   return torch::from_blob(
-             (void*)data.data(),
-             {nJoints, 3},
-             torch::TensorOptions().dtype(toScalarType<float>()))
+             (void*)data.data(), {nJoints, 3}, torch::TensorOptions().dtype(toScalarType<float>()))
       .clone();
 }
 
-at::Tensor getParentSkeletonState(
-    const momentum::Character& character,
-    at::Tensor skelState) {
+at::Tensor getParentSkeletonState(const momentum::Character& character, at::Tensor skelState) {
   // Attach the identity to the beginning of the skel_state.  Then we'll offset
   // the parents by such that the root node gets its world-space transform from
   // the 0th element.
@@ -650,12 +614,10 @@ at::Tensor localSkeletonStateToJointParameters(
       character.skeleton.joints.size(),
       formatTensorSizes(localSkelState));
 
-  auto [localTranslation, localRotation, localScale] =
-      splitSkeletonState(localSkelState);
+  auto [localTranslation, localRotation, localScale] = splitSkeletonState(localSkelState);
 
   // For translation, just need to subtract off the per-joint offset:
-  at::Tensor translationOffsets =
-      translationOffsetsTensor(character).type_as(localSkelState);
+  at::Tensor translationOffsets = translationOffsetsTensor(character).type_as(localSkelState);
   while (translationOffsets.ndimension() < localSkelState.ndimension()) {
     translationOffsets = translationOffsets.unsqueeze(0);
   }
@@ -666,28 +628,25 @@ at::Tensor localSkeletonStateToJointParameters(
   // pre-rotation, and then convert to Euler angles.
   //    local_skel_state =  prerot * local_rot
   //    local_rot = pre_rot.inverse() * local_skel_state
-  at::Tensor preRotations =
-      preRotationsTensor(character).type_as(localSkelState);
+  at::Tensor preRotations = preRotationsTensor(character).type_as(localSkelState);
   while (preRotations.ndimension() < localSkelState.ndimension()) {
     preRotations = preRotations.unsqueeze(0);
   }
   preRotations = preRotations.expand_as(localRotation);
-  at::Tensor rotationJointParams = quaternionToXYZEuler(
-      quaternionMultiply(quaternionInverse(preRotations), localRotation));
+  at::Tensor rotationJointParams =
+      quaternionToXYZEuler(quaternionMultiply(quaternionInverse(preRotations), localRotation));
 
   // skel state scale is exp2 of the joint parameter scale:
   at::Tensor scaleJointParams = at::log2(localScale);
 
-  return at::cat(
-      {translationJointParams, rotationJointParams, scaleJointParams}, -1);
+  return at::cat({translationJointParams, rotationJointParams, scaleJointParams}, -1);
 }
 
 at::Tensor skeletonStateToJointParameters(
     const momentum::Character& character,
     at::Tensor skelState) {
   MT_THROW_IF(
-      skelState.ndimension() < 2 ||
-          skelState.size(-2) != character.skeleton.joints.size() ||
+      skelState.ndimension() < 2 || skelState.size(-2) != character.skeleton.joints.size() ||
           skelState.size(-1) != 8,
       "Expected skel_state with dimensions [nBatch x nJoints={} x 8]; got {}.",
       character.skeleton.joints.size(),

@@ -66,19 +66,15 @@ TensorMotionErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result =
-      std::make_unique<momentum::FullyDifferentiableMotionErrorFunctionT<T>>(
-          character.skeleton, character.parameterTransform);
-  const auto& weights = this->getTensorInput(
-      FullyDifferentiableMotionErrorFunction::kTargetWeights);
+  auto result = std::make_unique<momentum::FullyDifferentiableMotionErrorFunctionT<T>>(
+      character.skeleton, character.parameterTransform);
+  const auto& weights =
+      this->getTensorInput(FullyDifferentiableMotionErrorFunction::kTargetWeights);
   result->setTargetParameters(
-      this->getTensorInput(
-              FullyDifferentiableMotionErrorFunction::kTargetParameters)
+      this->getTensorInput(FullyDifferentiableMotionErrorFunction::kTargetParameters)
           .template toEigenMap<T>(iBatch, jFrame),
       weights.isTensorEmpty()
-          ? Eigen::VectorX<T>::Ones(
-                character.parameterTransform.numAllModelParameters())
-                .eval()
+          ? Eigen::VectorX<T>::Ones(character.parameterTransform.numAllModelParameters()).eval()
           : weights.template toEigenMap<T>(iBatch, jFrame));
   return result;
 }
@@ -96,15 +92,13 @@ std::unique_ptr<TensorErrorFunction<T>> createMotionErrorFunction(
       batchSize, nFrames, paramTransform, targetParameters, targetWeights);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createMotionErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createMotionErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     const momentum::ParameterTransform& paramTransform,
     at::Tensor targetParameters,
     at::Tensor targetWeights);
-template std::unique_ptr<TensorErrorFunction<double>>
-createMotionErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createMotionErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     const momentum::ParameterTransform& paramTransform,

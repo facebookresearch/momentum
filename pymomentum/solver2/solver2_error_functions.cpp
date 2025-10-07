@@ -41,32 +41,21 @@ namespace pymomentum {
 namespace {
 
 template <typename AimErrorFunctionT>
-void defAimErrorFunction(
-    py::module_& m,
-    const char* name,
-    const char* description) {
-  py::class_<
-      AimErrorFunctionT,
-      mm::SkeletonErrorFunction,
-      std::shared_ptr<AimErrorFunctionT>>(m, name, description)
+void defAimErrorFunction(py::module_& m, const char* name, const char* description) {
+  py::class_<AimErrorFunctionT, mm::SkeletonErrorFunction, std::shared_ptr<AimErrorFunctionT>>(
+      m, name, description)
       .def(
           "__repr__",
           [=](const AimErrorFunctionT& self) -> std::string {
             return fmt::format(
-                "{}(weight={}, num_constraints={})",
-                name,
-                self.getWeight(),
-                self.numConstraints());
+                "{}(weight={}, num_constraints={})", name, self.getWeight(), self.numConstraints());
           })
       .def(
           py::init<>(
-              [](const mm::Character& character,
-                 float lossAlpha,
-                 float lossC,
-                 float weight) -> std::shared_ptr<AimErrorFunctionT> {
+              [](const mm::Character& character, float lossAlpha, float lossC, float weight)
+                  -> std::shared_ptr<AimErrorFunctionT> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<AimErrorFunctionT>(
-                    character, lossAlpha, lossC);
+                auto result = std::make_shared<AimErrorFunctionT>(character, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
               }),
@@ -97,8 +86,8 @@ void defAimErrorFunction(
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
             validateWeight(weight, "weight");
-            self.addConstraint(mm::AimDataT<float>(
-                localPoint, localDir, globalTarget, parent, weight, name));
+            self.addConstraint(
+                mm::AimDataT<float>(localPoint, localDir, globalTarget, parent, weight, name));
           },
           R"(Adds an aim constraint to the error function.
 
@@ -125,24 +114,16 @@ void defAimErrorFunction(
              const std::optional<std::vector<std::string>>& name) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                localPoint, "local_point", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                localDir, "local_dir", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                globalTarget,
-                "global_target",
-                {nConsIdx, 3},
-                {"n_cons", "xyz"});
+            validator.validate(localPoint, "local_point", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(localDir, "local_dir", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(globalTarget, "global_target", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}",
-                  parent.shape(0),
-                  name->size()));
+                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
             }
 
             py::gil_scoped_release release;
@@ -151,23 +132,16 @@ void defAimErrorFunction(
             auto localDirAcc = localDir.unchecked<2>();
             auto globalTargetAcc = globalTarget.unchecked<2>();
             auto parentAcc = parent.unchecked<1>();
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             for (py::ssize_t i = 0; i < localPoint.shape(0); ++i) {
               validateJointIndex(parentAcc(i), "parent", self.getSkeleton());
               self.addConstraint(mm::AimDataT<float>(
+                  Eigen::Vector3f(localPointAcc(i, 0), localPointAcc(i, 1), localPointAcc(i, 2)),
+                  Eigen::Vector3f(localDirAcc(i, 0), localDirAcc(i, 1), localDirAcc(i, 2)),
                   Eigen::Vector3f(
-                      localPointAcc(i, 0),
-                      localPointAcc(i, 1),
-                      localPointAcc(i, 2)),
-                  Eigen::Vector3f(
-                      localDirAcc(i, 0), localDirAcc(i, 1), localDirAcc(i, 2)),
-                  Eigen::Vector3f(
-                      globalTargetAcc(i, 0),
-                      globalTargetAcc(i, 1),
-                      globalTargetAcc(i, 2)),
+                      globalTargetAcc(i, 0), globalTargetAcc(i, 1), globalTargetAcc(i, 2)),
                   parentAcc(i),
                   weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
                   name.has_value() ? name->at(i) : std::string{}));
@@ -190,10 +164,7 @@ void defAimErrorFunction(
 }
 
 template <typename FixedAxisErrorFunctionT>
-void defFixedAxisError(
-    py::module_& m,
-    const char* name,
-    const char* description) {
+void defFixedAxisError(py::module_& m, const char* name, const char* description) {
   py::class_<
       FixedAxisErrorFunctionT,
       mm::SkeletonErrorFunctionT<float>,
@@ -202,20 +173,15 @@ void defFixedAxisError(
           "__repr__",
           [=](const FixedAxisErrorFunctionT& self) -> std::string {
             return fmt::format(
-                "{}(weight={}, num_constraints={})",
-                name,
-                self.getWeight(),
-                self.numConstraints());
+                "{}(weight={}, num_constraints={})", name, self.getWeight(), self.numConstraints());
           })
       .def(
           py::init<>(
-              [](const mm::Character& character,
-                 float lossAlpha,
-                 float lossC,
-                 float weight) -> std::shared_ptr<FixedAxisErrorFunctionT> {
+              [](const mm::Character& character, float lossAlpha, float lossC, float weight)
+                  -> std::shared_ptr<FixedAxisErrorFunctionT> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<FixedAxisErrorFunctionT>(
-                    character, lossAlpha, lossC);
+                auto result =
+                    std::make_shared<FixedAxisErrorFunctionT>(character, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
               }),
@@ -241,8 +207,8 @@ void defFixedAxisError(
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
             validateWeight(weight, "weight");
-            self.addConstraint(mm::FixedAxisDataT<float>(
-                localAxis, globalAxis, parent, weight, name));
+            self.addConstraint(
+                mm::FixedAxisDataT<float>(localAxis, globalAxis, parent, weight, name));
           },
           R"(Adds a fixed axis constraint to the error function.
 
@@ -258,9 +224,7 @@ void defFixedAxisError(
           py::arg("name") = std::string{})
       .def_property_readonly(
           "constraints",
-          [](const FixedAxisErrorFunctionT& self) {
-            return self.getConstraints();
-          },
+          [](const FixedAxisErrorFunctionT& self) { return self.getConstraints(); },
           "Returns the list of fixed axis constraints.")
       .def(
           "add_constraints",
@@ -272,38 +236,27 @@ void defFixedAxisError(
              const std::optional<std::vector<std::string>>& name) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                localAxis, "local_axis", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                globalAxis, "global_axis", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(localAxis, "local_axis", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(globalAxis, "global_axis", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}",
-                  parent.shape(0),
-                  name->size()));
+                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
             }
 
             auto localAxisAcc = localAxis.unchecked<2>();
             auto globalAxisAcc = globalAxis.unchecked<2>();
             auto parentAcc = parent.unchecked<1>();
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             for (py::ssize_t i = 0; i < localAxis.shape(0); ++i) {
               self.addConstraint(mm::FixedAxisDataT<float>(
-                  Eigen::Vector3f(
-                      localAxisAcc(i, 0),
-                      localAxisAcc(i, 1),
-                      localAxisAcc(i, 2)),
-                  Eigen::Vector3f(
-                      globalAxisAcc(i, 0),
-                      globalAxisAcc(i, 1),
-                      globalAxisAcc(i, 2)),
+                  Eigen::Vector3f(localAxisAcc(i, 0), localAxisAcc(i, 1), localAxisAcc(i, 2)),
+                  Eigen::Vector3f(globalAxisAcc(i, 0), globalAxisAcc(i, 1), globalAxisAcc(i, 2)),
                   parentAcc(i),
                   weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
                   name.has_value() ? name->at(i) : std::string{}));
@@ -342,24 +295,13 @@ void defNormalErrorFunction(py::module_& m) {
                 self.globalPoint.y(),
                 self.globalPoint.z());
           })
+      .def_readonly("parent", &mm::NormalDataT<float>::parent, "The parent joint index")
+      .def_readonly("weight", &mm::NormalDataT<float>::weight, "The weight of the constraint")
       .def_readonly(
-          "parent", &mm::NormalDataT<float>::parent, "The parent joint index")
+          "local_point", &mm::NormalDataT<float>::localPoint, "The local point in parent space")
       .def_readonly(
-          "weight",
-          &mm::NormalDataT<float>::weight,
-          "The weight of the constraint")
-      .def_readonly(
-          "local_point",
-          &mm::NormalDataT<float>::localPoint,
-          "The local point in parent space")
-      .def_readonly(
-          "local_normal",
-          &mm::NormalDataT<float>::localNormal,
-          "The local normal in parent space")
-      .def_readonly(
-          "global_point",
-          &mm::NormalDataT<float>::globalPoint,
-          "The global point");
+          "local_normal", &mm::NormalDataT<float>::localNormal, "The local normal in parent space")
+      .def_readonly("global_point", &mm::NormalDataT<float>::globalPoint, "The global point");
   py::class_<
       mm::NormalErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
@@ -378,14 +320,11 @@ plane defined by a local point and a local normal vector.)")
           })
       .def(
           py::init<>(
-              [](const mm::Character& character,
-                 float lossAlpha,
-                 float lossC,
-                 float weight)
+              [](const mm::Character& character, float lossAlpha, float lossC, float weight)
                   -> std::shared_ptr<mm::NormalErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<mm::NormalErrorFunctionT<float>>(
-                    character, lossAlpha, lossC);
+                auto result =
+                    std::make_shared<mm::NormalErrorFunctionT<float>>(character, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
               }),
@@ -436,9 +375,7 @@ plane defined by a local point and a local normal vector.)")
           py::arg("name") = std::string{})
       .def_property_readonly(
           "constraints",
-          [](const mm::NormalErrorFunctionT<float>& self) {
-            return self.getConstraints();
-          },
+          [](const mm::NormalErrorFunctionT<float>& self) { return self.getConstraints(); },
           "Returns the list of normal constraints.")
       .def(
           "add_constraints",
@@ -451,21 +388,16 @@ plane defined by a local point and a local normal vector.)")
              const std::optional<std::vector<std::string>>& name) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                localPoint, "local_point", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                localNormal, "local_normal", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                globalPoint, "global_point", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(localPoint, "local_point", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(localNormal, "local_normal", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(globalPoint, "global_point", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}",
-                  parent.shape(0),
-                  name->size()));
+                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
             }
 
             auto localPointAcc = localPoint.has_value()
@@ -474,25 +406,17 @@ plane defined by a local point and a local normal vector.)")
             auto localNormalAcc = localNormal.unchecked<2>();
             auto globalPointAcc = globalPoint.unchecked<2>();
             auto parentAcc = parent.unchecked<1>();
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               self.addConstraint(mm::NormalDataT<float>(
-                  localPointAcc.has_value() ? Eigen::Vector3f(
-                                                  (*localPointAcc)(i, 0),
-                                                  (*localPointAcc)(i, 1),
-                                                  (*localPointAcc)(i, 2))
-                                            : Eigen::Vector3f::Zero(),
-                  Eigen::Vector3f(
-                      localNormalAcc(i, 0),
-                      localNormalAcc(i, 1),
-                      localNormalAcc(i, 2)),
-                  Eigen::Vector3f(
-                      globalPointAcc(i, 0),
-                      globalPointAcc(i, 1),
-                      globalPointAcc(i, 2)),
+                  localPointAcc.has_value()
+                      ? Eigen::Vector3f(
+                            (*localPointAcc)(i, 0), (*localPointAcc)(i, 1), (*localPointAcc)(i, 2))
+                      : Eigen::Vector3f::Zero(),
+                  Eigen::Vector3f(localNormalAcc(i, 0), localNormalAcc(i, 1), localNormalAcc(i, 2)),
+                  Eigen::Vector3f(globalPointAcc(i, 0), globalPointAcc(i, 1), globalPointAcc(i, 2)),
                   parentAcc(i),
                   weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
                   name.has_value() ? name->at(i) : std::string{}));
@@ -531,26 +455,14 @@ void defDistanceErrorFunction(py::module_& m) {
                 self.origin.z(),
                 self.target);
           })
+      .def_readonly("parent", &mm::DistanceConstraintDataT<float>::parent, "The parent joint index")
       .def_readonly(
-          "parent",
-          &mm::DistanceConstraintDataT<float>::parent,
-          "The parent joint index")
+          "weight", &mm::DistanceConstraintDataT<float>::weight, "The weight of the constraint")
       .def_readonly(
-          "weight",
-          &mm::DistanceConstraintDataT<float>::weight,
-          "The weight of the constraint")
+          "offset", &mm::DistanceConstraintDataT<float>::offset, "The offset in parent space")
       .def_readonly(
-          "offset",
-          &mm::DistanceConstraintDataT<float>::offset,
-          "The offset in parent space")
-      .def_readonly(
-          "origin",
-          &mm::DistanceConstraintDataT<float>::origin,
-          "The origin point in world space")
-      .def_readonly(
-          "target",
-          &mm::DistanceConstraintDataT<float>::target,
-          "The target distance");
+          "origin", &mm::DistanceConstraintDataT<float>::origin, "The origin point in world space")
+      .def_readonly("target", &mm::DistanceConstraintDataT<float>::target, "The target distance");
 
   py::class_<
       mm::DistanceErrorFunctionT<float>,
@@ -570,12 +482,11 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
           })
       .def(
           py::init<>(
-              [](const mm::Character& character, float weight)
-                  -> std::shared_ptr<mm::DistanceErrorFunctionT<float>> {
+              [](const mm::Character& character,
+                 float weight) -> std::shared_ptr<mm::DistanceErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result =
-                    std::make_shared<mm::DistanceErrorFunctionT<float>>(
-                        character.skeleton, character.parameterTransform);
+                auto result = std::make_shared<mm::DistanceErrorFunctionT<float>>(
+                    character.skeleton, character.parameterTransform);
                 result->setWeight(weight);
                 return result;
               }),
@@ -627,35 +538,31 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
              const std::optional<py::array_t<float>>& weight) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                origin, "origin", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(origin, "origin", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(target, "target", {nConsIdx}, {"n_cons"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
-            validator.validate(
-                offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             auto originAcc = origin.unchecked<2>();
             auto targetAcc = target.unchecked<1>();
             auto parentAcc = parent.unchecked<1>();
             auto offsetAcc = offset.unchecked<2>();
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             py::gil_scoped_release release;
 
             for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               mm::DistanceConstraintDataT<float> constraint;
-              constraint.origin = Eigen::Vector3f(
-                  originAcc(i, 0), originAcc(i, 1), originAcc(i, 2));
+              constraint.origin =
+                  Eigen::Vector3f(originAcc(i, 0), originAcc(i, 1), originAcc(i, 2));
               constraint.target = targetAcc(i);
               constraint.parent = parentAcc(i);
-              constraint.offset = Eigen::Vector3f(
-                  offsetAcc(i, 0), offsetAcc(i, 1), offsetAcc(i, 2));
-              constraint.weight =
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f;
+              constraint.offset =
+                  Eigen::Vector3f(offsetAcc(i, 0), offsetAcc(i, 1), offsetAcc(i, 2));
+              constraint.weight = weightAcc.has_value() ? (*weightAcc)(i) : 1.0f;
               self.addConstraint(constraint);
             }
           },
@@ -705,21 +612,13 @@ void defProjectionErrorFunction(py::module_& m) {
                 self.target.y());
           })
       .def_readonly(
-          "parent",
-          &mm::ProjectionConstraintDataT<float>::parent,
-          "The parent joint index")
+          "parent", &mm::ProjectionConstraintDataT<float>::parent, "The parent joint index")
       .def_readonly(
-          "weight",
-          &mm::ProjectionConstraintDataT<float>::weight,
-          "The weight of the constraint")
+          "weight", &mm::ProjectionConstraintDataT<float>::weight, "The weight of the constraint")
       .def_readonly(
-          "offset",
-          &mm::ProjectionConstraintDataT<float>::offset,
-          "The offset in parent space")
+          "offset", &mm::ProjectionConstraintDataT<float>::offset, "The offset in parent space")
       .def_readonly(
-          "target",
-          &mm::ProjectionConstraintDataT<float>::target,
-          "The target 2D position")
+          "target", &mm::ProjectionConstraintDataT<float>::target, "The target 2D position")
       .def_readonly(
           "projection",
           &mm::ProjectionConstraintDataT<float>::projection,
@@ -742,14 +641,12 @@ This is useful for camera-based constraints where you want to match a 3D point t
           })
       .def(
           py::init<>(
-              [](const mm::Character& character, float nearClip, float weight)
-                  -> std::shared_ptr<mm::ProjectionErrorFunctionT<float>> {
+              [](const mm::Character& character,
+                 float nearClip,
+                 float weight) -> std::shared_ptr<mm::ProjectionErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result =
-                    std::make_shared<mm::ProjectionErrorFunctionT<float>>(
-                        character.skeleton,
-                        character.parameterTransform,
-                        nearClip);
+                auto result = std::make_shared<mm::ProjectionErrorFunctionT<float>>(
+                    character.skeleton, character.parameterTransform, nearClip);
                 result->setWeight(weight);
                 return result;
               }),
@@ -804,27 +701,20 @@ This is useful for camera-based constraints where you want to match a 3D point t
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
             validator.validate(
-                projection,
-                "projection",
-                {nConsIdx, 3, 4},
-                {"n_cons", "rows", "cols"});
-            validator.validate(
-                target, "target", {nConsIdx, 2}, {"n_cons", "xy"});
+                projection, "projection", {nConsIdx, 3, 4}, {"n_cons", "rows", "cols"});
+            validator.validate(target, "target", {nConsIdx, 2}, {"n_cons", "xy"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
-            validator.validate(
-                offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             auto projectionAcc = projection.unchecked<3>();
             auto targetAcc = target.unchecked<2>();
             auto parentAcc = parent.unchecked<1>();
-            auto offsetAcc = offset.has_value()
-                ? std::make_optional(offset->unchecked<2>())
-                : std::nullopt;
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto offsetAcc =
+                offset.has_value() ? std::make_optional(offset->unchecked<2>()) : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             py::gil_scoped_release release;
 
@@ -841,23 +731,18 @@ This is useful for camera-based constraints where you want to match a 3D point t
               constraint.projection = proj;
 
               // Set target
-              constraint.target =
-                  Eigen::Vector2f(targetAcc(i, 0), targetAcc(i, 1));
+              constraint.target = Eigen::Vector2f(targetAcc(i, 0), targetAcc(i, 1));
 
               // Set parent
               constraint.parent = parentAcc(i);
 
               // Set offset
               constraint.offset = offsetAcc.has_value()
-                  ? Eigen::Vector3f(
-                        (*offsetAcc)(i, 0),
-                        (*offsetAcc)(i, 1),
-                        (*offsetAcc)(i, 2))
+                  ? Eigen::Vector3f((*offsetAcc)(i, 0), (*offsetAcc)(i, 1), (*offsetAcc)(i, 2))
                   : Eigen::Vector3f::Zero();
 
               // Set weight
-              constraint.weight =
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f;
+              constraint.weight = weightAcc.has_value() ? (*weightAcc)(i) : 1.0f;
 
               self.addConstraint(constraint);
             }
@@ -894,9 +779,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
 
 void defVertexProjectionErrorFunction(py::module_& m) {
   py::class_<mm::VertexProjectionConstraint>(
-      m,
-      "VertexProjectionConstraint",
-      "Read-only access to a vertex projection constraint.")
+      m, "VertexProjectionConstraint", "Read-only access to a vertex projection constraint.")
       .def(
           "__repr__",
           [](const mm::VertexProjectionConstraint& self) {
@@ -944,13 +827,10 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           py::init<>(
               [](const mm::Character& character,
                  size_t maxThreads,
-                 float weight)
-                  -> std::shared_ptr<
-                      mm::VertexProjectionErrorFunctionT<float>> {
+                 float weight) -> std::shared_ptr<mm::VertexProjectionErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result =
-                    std::make_shared<mm::VertexProjectionErrorFunctionT<float>>(
-                        character, maxThreads);
+                auto result = std::make_shared<mm::VertexProjectionErrorFunctionT<float>>(
+                    character, maxThreads);
                 result->setWeight(weight);
                 return result;
               }),
@@ -970,8 +850,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
              float weight,
              const Eigen::Vector2f& targetPosition,
              const Eigen::Matrix<float, 3, 4>& projection) {
-            validateVertexIndex(
-                vertexIndex, "vertex_index", self.getCharacter());
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validateWeight(weight, "weight");
             self.addConstraint(vertexIndex, weight, targetPosition, projection);
           },
@@ -1004,21 +883,12 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
              const py::array_t<float>& projection) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(
-                vertexIndex, "vertex_index", self.getCharacter());
+            validator.validate(vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+            validator.validate(targetPosition, "target_position", {nConsIdx, 2}, {"n_cons", "xy"});
             validator.validate(
-                targetPosition,
-                "target_position",
-                {nConsIdx, 2},
-                {"n_cons", "xy"});
-            validator.validate(
-                projection,
-                "projection",
-                {nConsIdx, 3, 4},
-                {"n_cons", "rows", "cols"});
+                projection, "projection", {nConsIdx, 3, 4}, {"n_cons", "rows", "cols"});
 
             auto vertexIndexAcc = vertexIndex.unchecked<1>();
             auto weightAcc = weight.unchecked<1>();
@@ -1039,8 +909,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
               self.addConstraint(
                   vertexIndexAcc(i),
                   weightAcc(i),
-                  Eigen::Vector2f(
-                      targetPositionAcc(i, 0), targetPositionAcc(i, 1)),
+                  Eigen::Vector2f(targetPositionAcc(i, 0), targetPositionAcc(i, 1)),
                   proj);
             }
           },
@@ -1073,22 +942,11 @@ void defPlaneErrorFunction(py::module_& m) {
                 self.normal.z(),
                 self.d);
           })
-      .def_readonly(
-          "parent", &mm::PlaneDataT<float>::parent, "The parent joint index")
-      .def_readonly(
-          "weight",
-          &mm::PlaneDataT<float>::weight,
-          "The weight of the constraint")
-      .def_readonly(
-          "offset",
-          &mm::PlaneDataT<float>::offset,
-          "The offset in parent space")
-      .def_readonly(
-          "normal", &mm::PlaneDataT<float>::normal, "The normal of the plane")
-      .def_readonly(
-          "d",
-          &mm::PlaneDataT<float>::d,
-          "The d parameter in the plane equation");
+      .def_readonly("parent", &mm::PlaneDataT<float>::parent, "The parent joint index")
+      .def_readonly("weight", &mm::PlaneDataT<float>::weight, "The weight of the constraint")
+      .def_readonly("offset", &mm::PlaneDataT<float>::offset, "The offset in parent space")
+      .def_readonly("normal", &mm::PlaneDataT<float>::normal, "The normal of the plane")
+      .def_readonly("d", &mm::PlaneDataT<float>::d, "The d parameter in the plane equation");
 
   py::class_<
       mm::PlaneErrorFunction,
@@ -1116,8 +974,8 @@ distance is greater than zero (ie. the point being above).)")
                  float lossC,
                  float weight) -> std::shared_ptr<mm::PlaneErrorFunction> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<mm::PlaneErrorFunction>(
-                    character, above, lossAlpha, lossC);
+                auto result =
+                    std::make_shared<mm::PlaneErrorFunction>(character, above, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
               }),
@@ -1146,8 +1004,7 @@ distance is greater than zero (ie. the point being above).)")
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
             validateWeight(weight, "weight");
-            self.addConstraint(
-                mm::PlaneDataT<float>(offset, normal, d, parent, weight, name));
+            self.addConstraint(mm::PlaneDataT<float>(offset, normal, d, parent, weight, name));
           },
           R"(Adds a plane constraint to the error function.
 
@@ -1165,9 +1022,7 @@ distance is greater than zero (ie. the point being above).)")
           py::arg("name") = std::string{})
       .def_property_readonly(
           "constraints",
-          [](const mm::PlaneErrorFunction& self) {
-            return self.getConstraints();
-          },
+          [](const mm::PlaneErrorFunction& self) { return self.getConstraints(); },
           "Returns the list of plane constraints.")
       .def(
           "add_constraints",
@@ -1180,10 +1035,8 @@ distance is greater than zero (ie. the point being above).)")
              const std::optional<std::vector<std::string>>& name) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                normal, "normal", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(normal, "normal", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(d, "d", {nConsIdx}, {"n_cons"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
@@ -1191,32 +1044,25 @@ distance is greater than zero (ie. the point being above).)")
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}",
-                  parent.shape(0),
-                  name->size()));
+                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
             }
 
-            auto offsetAcc = offset.has_value()
-                ? std::make_optional(offset->unchecked<2>())
-                : std::nullopt;
+            auto offsetAcc =
+                offset.has_value() ? std::make_optional(offset->unchecked<2>()) : std::nullopt;
             auto normalAcc = normal.unchecked<2>();
             auto dAcc = d.unchecked<1>();
             auto parentAcc = parent.unchecked<1>();
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             py::gil_scoped_release release;
 
             for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               self.addConstraint(mm::PlaneDataT<float>(
-                  offsetAcc.has_value() ? Eigen::Vector3f(
-                                              (*offsetAcc)(i, 0),
-                                              (*offsetAcc)(i, 1),
-                                              (*offsetAcc)(i, 2))
-                                        : Eigen::Vector3f::Zero(),
-                  Eigen::Vector3f(
-                      normalAcc(i, 0), normalAcc(i, 1), normalAcc(i, 2)),
+                  offsetAcc.has_value()
+                      ? Eigen::Vector3f((*offsetAcc)(i, 0), (*offsetAcc)(i, 1), (*offsetAcc)(i, 2))
+                      : Eigen::Vector3f::Zero(),
+                  Eigen::Vector3f(normalAcc(i, 0), normalAcc(i, 1), normalAcc(i, 2)),
                   dAcc(i),
                   parentAcc(i),
                   weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
@@ -1240,8 +1086,7 @@ distance is greater than zero (ie. the point being above).)")
 }
 
 void defVertexVertexDistanceErrorFunction(py::module_& m) {
-  py::class_<mm::VertexVertexDistanceConstraintT<float>>(
-      m, "VertexVertexDistanceConstraint")
+  py::class_<mm::VertexVertexDistanceConstraintT<float>>(m, "VertexVertexDistanceConstraint")
       .def(
           "__repr__",
           [](const mm::VertexVertexDistanceConstraintT<float>& self) {
@@ -1290,12 +1135,11 @@ or maintaining the width of body parts.)")
           })
       .def(
           py::init<>(
-              [](const mm::Character& character, float weight)
-                  -> std::shared_ptr<
-                      mm::VertexVertexDistanceErrorFunctionT<float>> {
+              [](const mm::Character& character,
+                 float weight) -> std::shared_ptr<mm::VertexVertexDistanceErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<
-                    mm::VertexVertexDistanceErrorFunctionT<float>>(character);
+                auto result =
+                    std::make_shared<mm::VertexVertexDistanceErrorFunctionT<float>>(character);
                 result->setWeight(weight);
                 return result;
               }),
@@ -1314,13 +1158,10 @@ or maintaining the width of body parts.)")
              int vertexIndex2,
              float weight,
              float targetDistance) {
-            validateVertexIndex(
-                vertexIndex1, "vertex_index1", self.getCharacter());
-            validateVertexIndex(
-                vertexIndex2, "vertex_index2", self.getCharacter());
+            validateVertexIndex(vertexIndex1, "vertex_index1", self.getCharacter());
+            validateVertexIndex(vertexIndex2, "vertex_index2", self.getCharacter());
             validateWeight(weight, "weight");
-            self.addConstraint(
-                vertexIndex1, vertexIndex2, weight, targetDistance);
+            self.addConstraint(vertexIndex1, vertexIndex2, weight, targetDistance);
           },
           R"(Adds a vertex-to-vertex distance constraint to the error function.
 
@@ -1341,18 +1182,13 @@ or maintaining the width of body parts.)")
              const py::array_t<float>& targetDistance) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                vertexIndex1, "vertex_index1", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(
-                vertexIndex1, "vertex_index1", self.getCharacter());
-            validator.validate(
-                vertexIndex2, "vertex_index2", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(
-                vertexIndex2, "vertex_index2", self.getCharacter());
+            validator.validate(vertexIndex1, "vertex_index1", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(vertexIndex1, "vertex_index1", self.getCharacter());
+            validator.validate(vertexIndex2, "vertex_index2", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(vertexIndex2, "vertex_index2", self.getCharacter());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
             validateWeights(weight, "weight");
-            validator.validate(
-                targetDistance, "target_distance", {nConsIdx}, {"n_cons"});
+            validator.validate(targetDistance, "target_distance", {nConsIdx}, {"n_cons"});
 
             auto vertexIndex1Acc = vertexIndex1.unchecked<1>();
             auto vertexIndex2Acc = vertexIndex2.unchecked<1>();
@@ -1363,10 +1199,7 @@ or maintaining the width of body parts.)")
 
             for (py::ssize_t i = 0; i < vertexIndex1.shape(0); ++i) {
               self.addConstraint(
-                  vertexIndex1Acc(i),
-                  vertexIndex2Acc(i),
-                  weightAcc(i),
-                  targetDistanceAcc(i));
+                  vertexIndex1Acc(i), vertexIndex2Acc(i), weightAcc(i), targetDistanceAcc(i));
             }
           },
           R"(Adds multiple vertex-to-vertex distance constraints to the error function.
@@ -1408,8 +1241,7 @@ void addErrorFunctions(py::module_& m) {
       .def(
           "__repr__",
           [](const mm::LimitErrorFunction& self) {
-            return fmt::format(
-                "LimitErrorFunction(weight={})", self.getWeight());
+            return fmt::format("LimitErrorFunction(weight={})", self.getWeight());
           })
       .def(
           py::init<>([](const mm::Character& character, float weight) {
@@ -1433,8 +1265,7 @@ void addErrorFunctions(py::module_& m) {
       .def(
           "__repr__",
           [](const mm::ModelParametersErrorFunction& self) {
-            return fmt::format(
-                "ModelParametersErrorFunction(weight={})", self.getWeight());
+            return fmt::format("ModelParametersErrorFunction(weight={})", self.getWeight());
           })
       .def(
           py::init<>([](const mm::Character& character,
@@ -1443,13 +1274,11 @@ void addErrorFunctions(py::module_& m) {
                         float weight) {
             validateWeight(weight, "weight");
             validateWeights(weights, "weights");
-            auto result =
-                std::make_shared<mm::ModelParametersErrorFunction>(character);
+            auto result = std::make_shared<mm::ModelParametersErrorFunction>(character);
             result->setWeight(weight);
 
             if (targetParams.has_value() || weights.has_value()) {
-              const auto nParams =
-                  character.parameterTransform.numAllModelParameters();
+              const auto nParams = character.parameterTransform.numAllModelParameters();
               result->setTargetParameters(
                   arrayToVec(targetParams, nParams, 0.0f, "target_parameters"),
                   arrayToVec(weights, nParams, 1.0f, "weights"));
@@ -1474,8 +1303,7 @@ void addErrorFunctions(py::module_& m) {
           [](mm::ModelParametersErrorFunction& self,
              const py::array_t<float>& targetParams,
              const std::optional<py::array_t<float>>& weights) {
-            const auto nParams =
-                self.getParameterTransform().numAllModelParameters();
+            const auto nParams = self.getParameterTransform().numAllModelParameters();
             self.setTargetParameters(
                 arrayToVec(targetParams, nParams, "target_parameters"),
                 arrayToVec(weights, nParams, 1.0f, "weights"));
@@ -1502,18 +1330,10 @@ void addErrorFunctions(py::module_& m) {
                 self.target.y(),
                 self.target.z());
           })
-      .def_readonly(
-          "parent", &mm::PositionDataT<float>::parent, "The parent joint index")
-      .def_readonly(
-          "weight",
-          &mm::PositionDataT<float>::weight,
-          "The weight of the constraint")
-      .def_readonly(
-          "offset",
-          &mm::PositionDataT<float>::offset,
-          "The offset in parent space")
-      .def_readonly(
-          "target", &mm::PositionDataT<float>::target, "The target position");
+      .def_readonly("parent", &mm::PositionDataT<float>::parent, "The parent joint index")
+      .def_readonly("weight", &mm::PositionDataT<float>::weight, "The weight of the constraint")
+      .def_readonly("offset", &mm::PositionDataT<float>::offset, "The offset in parent space")
+      .def_readonly("target", &mm::PositionDataT<float>::target, "The target position");
 
   py::class_<
       mm::PositionErrorFunction,
@@ -1535,13 +1355,11 @@ Uses a generalized loss function that support various forms of losses such as L1
           })
       .def(
           py::init<>(
-              [](const mm::Character& character,
-                 float lossAlpha,
-                 float lossC,
-                 float weight) -> std::shared_ptr<mm::PositionErrorFunction> {
+              [](const mm::Character& character, float lossAlpha, float lossC, float weight)
+                  -> std::shared_ptr<mm::PositionErrorFunction> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<mm::PositionErrorFunction>(
-                    character, lossAlpha, lossC);
+                auto result =
+                    std::make_shared<mm::PositionErrorFunction>(character, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
               }),
@@ -1568,11 +1386,7 @@ Uses a generalized loss function that support various forms of losses such as L1
             validateJointIndex(parent, "parent", errf.getSkeleton());
             validateWeight(weight, "weight");
             errf.addConstraint(mm::PositionData(
-                offset.value_or(Eigen::Vector3f::Zero()),
-                target,
-                parent,
-                weight,
-                name));
+                offset.value_or(Eigen::Vector3f::Zero()), target, parent, weight, name));
           },
           R"(Adds a new constraint to the error function.
 
@@ -1590,9 +1404,7 @@ Uses a generalized loss function that support various forms of losses such as L1
           py::arg("name") = std::string{})
       .def_property_readonly(
           "constraints",
-          [](const mm::PositionErrorFunction& self) {
-            return self.getConstraints();
-          },
+          [](const mm::PositionErrorFunction& self) { return self.getConstraints(); },
           "Returns the list of position constraints.")
       .def(
           "clear_constraints",
@@ -1610,28 +1422,22 @@ Uses a generalized loss function that support various forms of losses such as L1
             const int nConsIdx = -1;
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", errf.getSkeleton());
-            validator.validate(
-                offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(
-                target, "target", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(offset, "offset", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(target, "target", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
             validateWeights(weight, "weight");
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}",
-                  parent.shape(0),
-                  name->size()));
+                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
             }
 
             auto parent_acc = parent.unchecked<1>();
-            auto offset_acc = offset.has_value()
-                ? std::make_optional(offset->unchecked<2>())
-                : std::nullopt;
+            auto offset_acc =
+                offset.has_value() ? std::make_optional(offset->unchecked<2>()) : std::nullopt;
             auto target_acc = target.unchecked<2>();
-            auto weight_acc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weight_acc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             py::gil_scoped_release release;
 
@@ -1642,10 +1448,7 @@ Uses a generalized loss function that support various forms of losses such as L1
                                                (*offset_acc)(iCons, 1),
                                                (*offset_acc)(iCons, 2))
                                          : Eigen::Vector3f::Zero(),
-                  Eigen::Vector3f(
-                      target_acc(iCons, 0),
-                      target_acc(iCons, 1),
-                      target_acc(iCons, 2)),
+                  Eigen::Vector3f(target_acc(iCons, 0), target_acc(iCons, 1), target_acc(iCons, 2)),
                   parent_acc(iCons),
                   weight_acc.has_value() ? (*weight_acc)(iCons) : 1.0f,
                   name.has_value() ? name->at(iCons) : std::string{}));
@@ -1684,24 +1487,11 @@ Uses a generalized loss function that support various forms of losses such as L1
                 self.globalTarget.y(),
                 self.globalTarget.z());
           })
-      .def_readonly(
-          "parent", &mm::AimDataT<float>::parent, "The parent joint index")
-      .def_readonly(
-          "weight",
-          &mm::AimDataT<float>::weight,
-          "The weight of the constraint")
-      .def_readonly(
-          "local_point",
-          &mm::AimDataT<float>::localPoint,
-          "The origin of the local ray")
-      .def_readonly(
-          "local_dir",
-          &mm::AimDataT<float>::localDir,
-          "The direction of the local ray")
-      .def_readonly(
-          "global_target",
-          &mm::AimDataT<float>::globalTarget,
-          "The global aim target");
+      .def_readonly("parent", &mm::AimDataT<float>::parent, "The parent joint index")
+      .def_readonly("weight", &mm::AimDataT<float>::weight, "The weight of the constraint")
+      .def_readonly("local_point", &mm::AimDataT<float>::localPoint, "The origin of the local ray")
+      .def_readonly("local_dir", &mm::AimDataT<float>::localDir, "The direction of the local ray")
+      .def_readonly("global_target", &mm::AimDataT<float>::globalTarget, "The global aim target");
 
   defAimErrorFunction<mm::AimDistErrorFunctionT<float>>(
       m,
@@ -1712,8 +1502,7 @@ between the tartet position and its projection onto the ray.  Note that the ray 
 for positive t values, meaning that if the target point is _behind_ the ray origin, its
 projection will be at the ray origin where t=0.)");
 
-  defAimErrorFunction<mm::AimDirErrorFunctionT<float>>(
-      m, "AimDirErrorFunction", R"(
+  defAimErrorFunction<mm::AimDirErrorFunctionT<float>>(m, "AimDirErrorFunction", R"(
 The AimDirErrorFunction minimizes the element-wise difference between a ray (origin, direction)
 defined in joint-local space and the normalized vector connecting the ray origin to the
 world-space target point.  If the vector has near-zero length, the residual is set to zero to
@@ -1735,22 +1524,11 @@ avoid divide-by-zero. )");
                 self.globalAxis.y(),
                 self.globalAxis.z());
           })
+      .def_readonly("parent", &mm::FixedAxisDataT<float>::parent, "The parent joint index")
+      .def_readonly("weight", &mm::FixedAxisDataT<float>::weight, "The weight of the constraint")
       .def_readonly(
-          "parent",
-          &mm::FixedAxisDataT<float>::parent,
-          "The parent joint index")
-      .def_readonly(
-          "weight",
-          &mm::FixedAxisDataT<float>::weight,
-          "The weight of the constraint")
-      .def_readonly(
-          "local_axis",
-          &mm::FixedAxisDataT<float>::localAxis,
-          "The local axis in parent space")
-      .def_readonly(
-          "global_axis",
-          &mm::FixedAxisDataT<float>::globalAxis,
-          "The global axis");
+          "local_axis", &mm::FixedAxisDataT<float>::localAxis, "The local axis in parent space")
+      .def_readonly("global_axis", &mm::FixedAxisDataT<float>::globalAxis, "The global axis");
 
   defFixedAxisError<mm::FixedAxisDiffErrorFunctionT<float>>(
       m,
@@ -1776,18 +1554,15 @@ avoid divide-by-zero. )");
       .def(
           "__repr__",
           [](const mm::StateErrorFunction& self) {
-            return fmt::format(
-                "StateErrorFunction(weight={})", self.getWeight());
+            return fmt::format("StateErrorFunction(weight={})", self.getWeight());
           })
       .def(
           py::init<>([](const mm::Character& character,
                         float weight,
                         float positionWeight,
                         float rotationWeight,
-                        const std::optional<py::array_t<float>>&
-                            jointPositionWeights,
-                        const std::optional<py::array_t<float>>&
-                            jointRotationWeights) {
+                        const std::optional<py::array_t<float>>& jointPositionWeights,
+                        const std::optional<py::array_t<float>>& jointRotationWeights) {
             validateWeight(weight, "weight");
             validateWeight(positionWeight, "position_weight");
             validateWeight(rotationWeight, "rotation_weight");
@@ -1819,8 +1594,7 @@ avoid divide-by-zero. )");
               }
             };
 
-            if (jointPositionWeights.has_value() ||
-                jointRotationWeights.has_value()) {
+            if (jointPositionWeights.has_value() || jointRotationWeights.has_value()) {
               result->setTargetWeights(
                   getWeights(jointPositionWeights, "joint_position_weights"),
                   getWeights(jointRotationWeights, "joint_rotation_weights"));
@@ -1843,18 +1617,13 @@ avoid divide-by-zero. )");
           py::arg("weight") = 1.0f,
           py::arg("position_weight") = 1.0f,
           py::arg("rotation_weight") = 1.0f,
-          py::arg("joint_position_weights") =
-              std::optional<py::array_t<float>>{},
-          py::arg("joint_rotation_weights") =
-              std::optional<py::array_t<float>>{})
+          py::arg("joint_position_weights") = std::optional<py::array_t<float>>{},
+          py::arg("joint_rotation_weights") = std::optional<py::array_t<float>>{})
       .def(
           "set_target_state",
-          [](mm::StateErrorFunction& self,
-             const py::array_t<float>& targetStateArray) {
-            if (targetStateArray.ndim() != 2 ||
-                targetStateArray.shape(1) != 8) {
-              throw std::runtime_error(
-                  "Expected target state array of shape (njoints, 8)");
+          [](mm::StateErrorFunction& self, const py::array_t<float>& targetStateArray) {
+            if (targetStateArray.ndim() != 2 || targetStateArray.shape(1) != 8) {
+              throw std::runtime_error("Expected target state array of shape (njoints, 8)");
             }
 
             const auto targetTransforms = toTransformList(targetStateArray);
@@ -1874,10 +1643,7 @@ avoid divide-by-zero. )");
           py::arg("target_state"));
 
   py::enum_<mm::VertexConstraintType>(m, "VertexConstraintType")
-      .value(
-          "Position",
-          mm::VertexConstraintType::Position,
-          "Target the vertex position")
+      .value("Position", mm::VertexConstraintType::Position, "Target the vertex position")
       .value(
           "Plane",
           mm::VertexConstraintType::Plane,
@@ -1907,10 +1673,7 @@ avoid divide-by-zero. )");
           "vertex_index",
           &mm::VertexConstraint::vertexIndex,
           "The index of the vertex to constrain.")
-      .def_readonly(
-          "weight",
-          &mm::VertexConstraint::weight,
-          "The weight of the constraint.")
+      .def_readonly("weight", &mm::VertexConstraint::weight, "The weight of the constraint.")
       .def_readonly(
           "target_position",
           &mm::VertexConstraint::targetPosition,
@@ -1938,8 +1701,8 @@ avoid divide-by-zero. )");
                         float weight,
                         size_t maxThreads) {
             validateWeight(weight, "weight");
-            auto result = std::make_shared<mm::VertexErrorFunction>(
-                character, constraintType, maxThreads);
+            auto result =
+                std::make_shared<mm::VertexErrorFunction>(character, constraintType, maxThreads);
             result->setWeight(weight);
             return result;
           }),
@@ -1959,11 +1722,9 @@ avoid divide-by-zero. )");
              float weight,
              const Eigen::Vector3f& targetPosition,
              const Eigen::Vector3f& targetNormal) {
-            validateVertexIndex(
-                vertexIndex, "vertex_index", self.getCharacter());
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validateWeight(weight, "weight");
-            self.addConstraint(
-                vertexIndex, weight, targetPosition, targetNormal);
+            self.addConstraint(vertexIndex, weight, targetPosition, targetNormal);
           },
           R"(Adds a vertex constraint to the error function.
 
@@ -1984,20 +1745,10 @@ avoid divide-by-zero. )");
              const py::array_t<float>& weight) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(
-                vertexIndex, "vertex_index", errf.getCharacter());
-            validator.validate(
-                targetPosition,
-                "target_position",
-                {nConsIdx, 3},
-                {"n_cons", "xyz"});
-            validator.validate(
-                targetNormal,
-                "target_normal",
-                {nConsIdx, 3},
-                {"n_cons", "xyz"});
+            validator.validate(vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(vertexIndex, "vertex_index", errf.getCharacter());
+            validator.validate(targetPosition, "target_position", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(targetNormal, "target_normal", {nConsIdx, 3}, {"n_cons", "xyz"});
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             auto vertex_index_acc = vertexIndex.unchecked<1>();
@@ -2040,36 +1791,29 @@ avoid divide-by-zero. )");
           "Clears all vertex constraints from the error function.")
       .def_property_readonly(
           "constraints",
-          [](const mm::VertexErrorFunction& self) {
-            return self.getConstraints();
-          },
+          [](const mm::VertexErrorFunction& self) { return self.getConstraints(); },
           "Returns the list of vertex constraints.");
 
   py::class_<
       mm::PointTriangleVertexErrorFunction,
       mm::SkeletonErrorFunction,
-      std::shared_ptr<mm::PointTriangleVertexErrorFunction>>(
-      m, "PointTriangleVertexErrorFunction")
+      std::shared_ptr<mm::PointTriangleVertexErrorFunction>>(m, "PointTriangleVertexErrorFunction")
       .def(
           "__repr__",
           [](const mm::PointTriangleVertexErrorFunction& self) {
-            return fmt::format(
-                "PointTriangleVertexErrorFunction(weight={})",
-                self.getWeight());
+            return fmt::format("PointTriangleVertexErrorFunction(weight={})", self.getWeight());
           })
       .def(
           py::init<>(
               [](const mm::Character& character,
                  mm::VertexConstraintType constraintType,
-                 float weight)
-                  -> std::shared_ptr<mm::PointTriangleVertexErrorFunction> {
+                 float weight) -> std::shared_ptr<mm::PointTriangleVertexErrorFunction> {
                 if (!character.mesh || !character.skinWeights) {
                   throw std::runtime_error("No mesh or skin weights found");
                 }
 
-                auto result =
-                    std::make_shared<mm::PointTriangleVertexErrorFunction>(
-                        character, constraintType);
+                auto result = std::make_shared<mm::PointTriangleVertexErrorFunction>(
+                    character, constraintType);
                 result->setWeight(weight);
                 return result;
               }),
@@ -2088,17 +1832,11 @@ avoid divide-by-zero. )");
              const py::array_t<float>& weight) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
+            validator.validate(srcVertexIndex, "source_vertex_index", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(srcVertexIndex, "source_vertex_index", errf.getCharacter());
             validator.validate(
-                srcVertexIndex, "source_vertex_index", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(
-                srcVertexIndex, "source_vertex_index", errf.getCharacter());
-            validator.validate(
-                tgtTriangleIndex,
-                "target_triangle_index",
-                {nConsIdx, 3},
-                {"n_cons", "idx"});
-            validateVertexIndex(
-                tgtTriangleIndex, "target_triangle_index", errf.getCharacter());
+                tgtTriangleIndex, "target_triangle_index", {nConsIdx, 3}, {"n_cons", "idx"});
+            validateVertexIndex(tgtTriangleIndex, "target_triangle_index", errf.getCharacter());
             validator.validate(
                 tgtTriangleBaryCoord,
                 "target_triangle_bary_coord",
@@ -2109,15 +1847,13 @@ avoid divide-by-zero. )");
 
             auto src_vertex_index_acc = srcVertexIndex.unchecked<1>();
             auto tgt_triangle_index_acc = tgtTriangleIndex.unchecked<2>();
-            auto tgt_triangle_bary_coord_acc =
-                tgtTriangleBaryCoord.unchecked<2>();
+            auto tgt_triangle_bary_coord_acc = tgtTriangleBaryCoord.unchecked<2>();
             auto depth_acc = depth.unchecked<1>();
             auto weight_acc = weight.unchecked<1>();
 
             py::gil_scoped_release release;
 
-            for (size_t iCons = 0; iCons < src_vertex_index_acc.shape(0);
-                 ++iCons) {
+            for (size_t iCons = 0; iCons < src_vertex_index_acc.shape(0); ++iCons) {
               errf.addConstraint(
                   src_vertex_index_acc(iCons),
                   Eigen::Vector3i(
@@ -2156,16 +1892,14 @@ avoid divide-by-zero. )");
       .def(
           "__repr__",
           [](const mm::PosePriorErrorFunction& self) {
-            return fmt::format(
-                "PosePriorErrorFunction(weight={})", self.getWeight());
+            return fmt::format("PosePriorErrorFunction(weight={})", self.getWeight());
           })
       .def(
           py::init<>([](const mm::Character& character,
                         std::shared_ptr<const mm::Mppca> posePrior,
                         float weight) {
             validateWeight(weight, "weight");
-            auto result = std::make_shared<mm::PosePriorErrorFunction>(
-                character, posePrior);
+            auto result = std::make_shared<mm::PosePriorErrorFunction>(character, posePrior);
             result->setWeight(weight);
             return result;
           }),
@@ -2187,10 +1921,9 @@ avoid divide-by-zero. )");
           py::arg("pose_prior"))
       .def(
           "log_probability",
-          [](const mm::PosePriorErrorFunction& self,
-             const py::array_t<float>& modelParameters) {
-            return self.logProbability(toModelParameters(
-                modelParameters, self.getParameterTransform()));
+          [](const mm::PosePriorErrorFunction& self, const py::array_t<float>& modelParameters) {
+            return self.logProbability(
+                toModelParameters(modelParameters, self.getParameterTransform()));
           },
           R"(Computes the log probability of the given model parameters under the pose prior.
 
@@ -2216,15 +1949,11 @@ rotation matrix to a target rotation.)")
           })
       .def(
           py::init<>(
-              [](const mm::Character& character,
-                 float lossAlpha,
-                 float lossC,
-                 float weight)
+              [](const mm::Character& character, float lossAlpha, float lossC, float weight)
                   -> std::shared_ptr<mm::OrientationErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result =
-                    std::make_shared<mm::OrientationErrorFunctionT<float>>(
-                        character, lossAlpha, lossC);
+                auto result = std::make_shared<mm::OrientationErrorFunctionT<float>>(
+                    character, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
               }),
@@ -2251,8 +1980,7 @@ rotation matrix to a target rotation.)")
             validateJointIndex(parent, "parent", self.getSkeleton());
             validateWeight(weight, "weight");
             self.addConstraint(mm::OrientationDataT<float>(
-                offset.has_value() ? toQuaternion(*offset)
-                                   : Eigen::Quaternionf::Identity(),
+                offset.has_value() ? toQuaternion(*offset) : Eigen::Quaternionf::Identity(),
                 toQuaternion(target),
                 parent,
                 weight,
@@ -2280,29 +2008,23 @@ rotation matrix to a target rotation.)")
              const std::optional<std::vector<std::string>>& name) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                offset, "offset", {nConsIdx, 4}, {"n_cons", "xyzw"});
-            validator.validate(
-                target, "target", {nConsIdx, 4}, {"n_cons", "xyzw"});
+            validator.validate(offset, "offset", {nConsIdx, 4}, {"n_cons", "xyzw"});
+            validator.validate(target, "target", {nConsIdx, 4}, {"n_cons", "xyzw"});
             validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
             validateJointIndex(parent, "parent", self.getSkeleton());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
               throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}",
-                  parent.shape(0),
-                  name->size()));
+                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
             }
 
-            auto offsetAcc = offset.has_value()
-                ? std::make_optional(offset->unchecked<2>())
-                : std::nullopt;
+            auto offsetAcc =
+                offset.has_value() ? std::make_optional(offset->unchecked<2>()) : std::nullopt;
             auto targetAcc = target.unchecked<2>();
             auto parentAcc = parent.unchecked<1>();
-            auto weightAcc = weight.has_value()
-                ? std::make_optional(weight->unchecked<1>())
-                : std::nullopt;
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             py::gil_scoped_release release;
 
@@ -2353,8 +2075,7 @@ rotation matrix to a target rotation.)")
       .def(
           py::init<>([](const mm::Character& character, float weight) {
             validateWeight(weight, "weight");
-            auto result =
-                std::make_shared<mm::CollisionErrorFunction>(character);
+            auto result = std::make_shared<mm::CollisionErrorFunction>(character);
             result->setWeight(weight);
             return result;
           }),
@@ -2369,8 +2090,8 @@ rotation matrix to a target rotation.)")
           "get_collision_pairs",
           [](const mm::CollisionErrorFunction& self) {
             const auto& collisionPairs = self.getCollisionPairs();
-            py::array_t<float> result(std::vector<py::ssize_t>{
-                (py::ssize_t)collisionPairs.size(), 2});
+            py::array_t<float> result(
+                std::vector<py::ssize_t>{(py::ssize_t)collisionPairs.size(), 2});
             auto resultAcc = result.mutable_unchecked<2>();
             for (size_t i = 0; i < collisionPairs.size(); ++i) {
               resultAcc(i, 0) = collisionPairs[i].x();

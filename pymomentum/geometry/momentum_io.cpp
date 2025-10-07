@@ -30,12 +30,10 @@ momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
-  return momentum::loadGltfCharacter(
-      gsl::make_span<const std::byte>(data, length));
+  return momentum::loadGltfCharacter(gsl::make_span<const std::byte>(data, length));
 }
 
-momentum::MotionParameters transpose(
-    const momentum::MotionParameters& motionParameters) {
+momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters) {
   const auto& [parameters, poses] = motionParameters;
   return {parameters, poses.transpose()};
 }
@@ -96,8 +94,7 @@ std::vector<momentum::SkeletonState> arrayToSkeletonStates(
       // transform = parentTransform * localTransform
       // localTransform = parentTransform.inverse() * transform
       skelStateCur.jointState[jJoint].transform = transform;
-      skelStateCur.jointState[jJoint].localTransform =
-          parentTransform.inverse() * transform;
+      skelStateCur.jointState[jJoint].localTransform = parentTransform.inverse() * transform;
     }
   }
   return skeletonStates;
@@ -109,8 +106,7 @@ void saveGLTFCharacterToFile(
     const float fps,
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const momentum::IdentityParameters>& offsets,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
-        markers) {
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
   if (motion.has_value()) {
     const auto& [parameters, poses] = motion.value();
     MT_THROW_IF(
@@ -134,8 +130,7 @@ void saveGLTFCharacterToFileFromSkelStates(
     const momentum::Character& character,
     const float fps,
     const pybind11::array_t<float>& skel_states,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>&
-        markers) {
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
   const auto numFrames = skel_states.shape(0);
 
   MT_THROW_IF(
@@ -171,8 +166,7 @@ void saveFBXCharacterToFile(
         offsets.value(),
         fps,
         true, /*saveMesh*/
-        coordSystemInfo.has_value() ? coordSystemInfo.value()
-                                    : momentum::FBXCoordSystemInfo());
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo());
   } else {
     momentum::saveFbxModel(path, character);
   }
@@ -191,17 +185,15 @@ void saveFBXCharacterToFileWithJointParams(
         jointParams.value().transpose(),
         fps,
         true, /*saveMesh*/
-        coordSystemInfo.has_value() ? coordSystemInfo.value()
-                                    : momentum::FBXCoordSystemInfo());
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo());
   } else {
     momentum::saveFbxModel(path, character);
   }
 }
 
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadGLTFCharacterWithMotion(const std::string& gltfFilename) {
-  const auto [character, motion, identity, fps] =
-      momentum::loadCharacterWithMotion(gltfFilename);
+std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(
+    const std::string& gltfFilename) {
+  const auto [character, motion, identity, fps] = momentum::loadCharacterWithMotion(gltfFilename);
   return std::make_tuple(character, motion.transpose(), identity, fps);
 }
 
@@ -214,24 +206,21 @@ loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes) {
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
   const auto [character, motion, identity, fps] =
-      momentum::loadCharacterWithMotion(
-          gsl::make_span<const std::byte>(data, length));
+      momentum::loadCharacterWithMotion(gsl::make_span<const std::byte>(data, length));
   return std::make_tuple(character, motion.transpose(), identity, fps);
 }
 
 pybind11::array_t<float> skelStatesToTensor(
     gsl::span<const momentum::SkeletonState> states,
     const momentum::Character& character) {
-  pybind11::array_t<float> result(
-      {(int)states.size(), (int)character.skeleton.joints.size(), 8});
+  pybind11::array_t<float> result({(int)states.size(), (int)character.skeleton.joints.size(), 8});
 
   auto r = result.mutable_unchecked<3>();
 
   for (size_t iFrame = 0; iFrame < states.size(); ++iFrame) {
     const auto& state = states[iFrame];
     if (state.jointState.size() != r.shape(1)) {
-      throw std::runtime_error(
-          "Mismatch between number of joints in skeleton state and tensor");
+      throw std::runtime_error("Mismatch between number of joints in skeleton state and tensor");
     }
 
     for (size_t iJoint = 0; iJoint < state.jointState.size(); ++iJoint) {
@@ -264,12 +253,10 @@ loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes) {
   {
     pybind11::gil_scoped_release release;
     std::tie(character, states, timestamps) =
-        momentum::loadCharacterWithSkeletonStates(
-            gsl::make_span<const std::byte>(data, length));
+        momentum::loadCharacterWithSkeletonStates(gsl::make_span<const std::byte>(data, length));
   }
 
-  return std::make_tuple(
-      character, skelStatesToTensor(states, character), timestamps);
+  return std::make_tuple(character, skelStatesToTensor(states, character), timestamps);
 }
 
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
@@ -283,8 +270,7 @@ loadGLTFCharacterWithSkelStates(const std::string& gltfFilename) {
         momentum::loadCharacterWithSkeletonStates(gltfFilename);
   }
 
-  return std::make_tuple(
-      character, skelStatesToTensor(states, character), timestamps);
+  return std::make_tuple(character, skelStatesToTensor(states, character), timestamps);
 }
 
 std::string toGLTF(const momentum::Character& character) {
@@ -292,11 +278,7 @@ std::string toGLTF(const momentum::Character& character) {
   return j.dump();
 }
 
-std::tuple<
-    RowMatrixf,
-    std::vector<std::string>,
-    Eigen::VectorXf,
-    std::vector<std::string>>
+std::tuple<RowMatrixf, std::vector<std::string>, Eigen::VectorXf, std::vector<std::string>>
 loadMotion(const std::string& gltfFilename) {
   const auto [motion, identity, fps] = momentum::loadMotion(gltfFilename);
 

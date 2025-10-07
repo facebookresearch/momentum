@@ -86,17 +86,15 @@ TensorVertexProjectionErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result =
-      std::make_unique<momentum::VertexProjectionErrorFunctionT<T>>(character);
+  auto result = std::make_unique<momentum::VertexProjectionErrorFunctionT<T>>(character);
 
-  const auto weights =
-      this->getTensorInput(kWeightsName).template toEigenMap<T>(iBatch, jFrame);
-  const auto vertices = this->getTensorInput(kVerticesName)
-                            .template toEigenMap<int>(iBatch, jFrame);
-  const auto target_positions = this->getTensorInput(kTargetPositionsName)
-                                    .template toEigenMap<T>(iBatch, jFrame);
-  const auto projections = this->getTensorInput(kProjectionsName)
-                               .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights = this->getTensorInput(kWeightsName).template toEigenMap<T>(iBatch, jFrame);
+  const auto vertices =
+      this->getTensorInput(kVerticesName).template toEigenMap<int>(iBatch, jFrame);
+  const auto target_positions =
+      this->getTensorInput(kTargetPositionsName).template toEigenMap<T>(iBatch, jFrame);
+  const auto projections =
+      this->getTensorInput(kProjectionsName).template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index i = 0; i < nCons; ++i) {
@@ -127,8 +125,7 @@ std::unique_ptr<TensorErrorFunction<T>> createVertexProjectionErrorFunction(
       batchSize, nFrames, vertexIndex, weights, target_positions, projections);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createVertexProjectionErrorFunction(
+template std::unique_ptr<TensorErrorFunction<float>> createVertexProjectionErrorFunction(
     size_t batchSize,
     size_t nFrames,
     at::Tensor vertexIndex,
@@ -136,8 +133,7 @@ createVertexProjectionErrorFunction(
     at::Tensor target_positions,
     at::Tensor projections);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createVertexProjectionErrorFunction(
+template std::unique_ptr<TensorErrorFunction<double>> createVertexProjectionErrorFunction(
     size_t batchSize,
     size_t nFrames,
     at::Tensor vertexIndex,

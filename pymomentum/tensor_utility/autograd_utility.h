@@ -24,8 +24,7 @@ inline bool hasFloat64(T&& val) {
 
 template <typename T, typename... Rest>
 inline bool hasFloat64(T&& val, Rest&&... rest) {
-  return hasFloat64(std::forward<T>(val)) ||
-      hasFloat64(std::forward<Rest>(rest)...);
+  return hasFloat64(std::forward<T>(val)) || hasFloat64(std::forward<Rest>(rest)...);
 }
 
 // Takes an autograd function that is templated on float type and apply the
@@ -33,8 +32,7 @@ inline bool hasFloat64(T&& val, Rest&&... rest) {
 // of the inputs are double precision Tensors then promote everything to
 // double."
 template <template <class> class Fn, class... Args>
-inline torch::autograd::variable_list applyTemplatedAutogradFunction(
-    Args&&... args) {
+inline torch::autograd::variable_list applyTemplatedAutogradFunction(Args&&... args) {
   if (hasFloat64(std::forward<Args>(args)...)) {
     return Fn<double>::apply(std::forward<Args>(args)...);
   } else {

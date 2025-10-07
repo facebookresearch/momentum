@@ -22,9 +22,7 @@ namespace pymomentum {
 
 std::string getDimStr(const pybind11::array& array);
 
-std::string getDimStr(
-    const std::vector<int>& dims,
-    const std::vector<std::string>& dimNames);
+std::string getDimStr(const std::vector<int>& dims, const std::vector<std::string>& dimNames);
 
 class ArrayShapeValidator {
  public:
@@ -70,10 +68,7 @@ momentum::ParameterSet arrayToParameterSet(
     const momentum::ParameterTransform& transform,
     bool defaultValue);
 
-void validateJointIndex(
-    int jointIndex,
-    const char* name,
-    const momentum::Skeleton& skeleton);
+void validateJointIndex(int jointIndex, const char* name, const momentum::Skeleton& skeleton);
 
 void validateJointIndex(
     const pybind11::array_t<int>& jointIndex,
@@ -85,10 +80,7 @@ void validateJointIndex(
     const char* name,
     const momentum::Skeleton& skeleton);
 
-void validateVertexIndex(
-    int vertexIndex,
-    const char* name,
-    const momentum::Character& character);
+void validateVertexIndex(int vertexIndex, const char* name, const momentum::Character& character);
 
 void validateVertexIndex(
     const pybind11::array_t<int>& vertexIndex,
@@ -99,15 +91,11 @@ void validateWeight(float weight, const char* name);
 
 void validateWeights(const pybind11::array_t<float>& weights, const char* name);
 
-void validateWeights(
-    const std::optional<pybind11::array_t<float>>& weights,
-    const char* name);
+void validateWeights(const std::optional<pybind11::array_t<float>>& weights, const char* name);
 
 void validateWeights(const Eigen::VectorXf& weights, const char* name);
 
-void validateWeights(
-    const std::optional<Eigen::VectorXf>& weights,
-    const char* name);
+void validateWeights(const std::optional<Eigen::VectorXf>& weights, const char* name);
 
 void validateErrorFunctionMatchesCharacter(
     const momentum::SkeletonSolverFunction& solverFunction,

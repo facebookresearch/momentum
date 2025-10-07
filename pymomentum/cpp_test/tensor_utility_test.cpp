@@ -94,8 +94,7 @@ TEST(TensorUtility, ToEigenMap) {
 
   // Test type mismatch
   EXPECT_THROW(
-      pymomentum::toEigenMap<float>(torch::tensor({1, 2, 3}, torch::kInt)),
-      std::runtime_error);
+      pymomentum::toEigenMap<float>(torch::tensor({1, 2, 3}, torch::kInt)), std::runtime_error);
 }
 
 // Test toMatrixList function
@@ -245,27 +244,23 @@ TEST(TensorUtility, To2DTensor) {
 TEST(TensorUtility, ThrowIfNaNOrINF) {
   // Test with valid tensor
   at::Tensor validTensor = torch::ones({2, 3}, torch::kFloat);
-  EXPECT_NO_THROW(
-      pymomentum::throwIfNaNOrINF(validTensor, "test_context", "test_tensor"));
+  EXPECT_NO_THROW(pymomentum::throwIfNaNOrINF(validTensor, "test_context", "test_tensor"));
 
   // Test with NaN tensor
   at::Tensor nanTensor = torch::ones({2, 3}, torch::kFloat);
   nanTensor[0][0] = std::numeric_limits<float>::quiet_NaN();
   EXPECT_THROW(
-      pymomentum::throwIfNaNOrINF(nanTensor, "test_context", "test_tensor"),
-      std::runtime_error);
+      pymomentum::throwIfNaNOrINF(nanTensor, "test_context", "test_tensor"), std::runtime_error);
 
   // Test with INF tensor
   at::Tensor infTensor = torch::ones({2, 3}, torch::kFloat);
   infTensor[0][0] = std::numeric_limits<float>::infinity();
   EXPECT_THROW(
-      pymomentum::throwIfNaNOrINF(infTensor, "test_context", "test_tensor"),
-      std::runtime_error);
+      pymomentum::throwIfNaNOrINF(infTensor, "test_context", "test_tensor"), std::runtime_error);
 
   // Test with empty tensor
   at::Tensor emptyTensor = at::zeros({0});
-  EXPECT_NO_THROW(
-      pymomentum::throwIfNaNOrINF(emptyTensor, "test_context", "test_tensor"));
+  EXPECT_NO_THROW(pymomentum::throwIfNaNOrINF(emptyTensor, "test_context", "test_tensor"));
 }
 
 TEST(ValidateTensor, CheckBatchDim) {
@@ -275,32 +270,20 @@ TEST(ValidateTensor, CheckBatchDim) {
   // Establish batch dimension:
   {
     at::Tensor res = checker.validateAndFixTensor(
-        at::zeros({nBatch, 5, 3}, at::kFloat),
-        "arg1",
-        {5, 3},
-        {"five", "three"},
-        at::kFloat);
+        at::zeros({nBatch, 5, 3}, at::kFloat), "arg1", {5, 3}, {"five", "three"}, at::kFloat);
     ASSERT_EQ(3, res.ndimension());
   }
 
   {
     at::Tensor res = checker.validateAndFixTensor(
-        at::zeros({nBatch, 6, 4}, at::kFloat),
-        "arg2",
-        {6, 4},
-        {"six", "four"},
-        at::kFloat);
+        at::zeros({nBatch, 6, 4}, at::kFloat), "arg2", {6, 4}, {"six", "four"}, at::kFloat);
     ASSERT_EQ(3, res.ndimension());
     ASSERT_EQ(nBatch, res.size(0));
   }
 
   {
     at::Tensor res = checker.validateAndFixTensor(
-        at::zeros({2, 1}, at::kFloat),
-        "arg2",
-        {2, 1},
-        {"two", "one"},
-        at::kFloat);
+        at::zeros({2, 1}, at::kFloat), "arg2", {2, 1}, {"two", "one"}, at::kFloat);
     ASSERT_EQ(3, res.ndimension());
     ASSERT_EQ(nBatch, res.size(0));
   }
@@ -308,11 +291,7 @@ TEST(ValidateTensor, CheckBatchDim) {
   {
     EXPECT_THROW(
         checker.validateAndFixTensor(
-            at::zeros({nBatch + 1, 1}, at::kFloat),
-            "arg3",
-            {1},
-            {"one"},
-            at::kFloat),
+            at::zeros({nBatch + 1, 1}, at::kFloat), "arg3", {1}, {"one"}, at::kFloat),
         std::runtime_error);
   }
 }
@@ -380,26 +359,12 @@ TEST(ValidateTensor, AdditionalChecks) {
   bool unsqueezed = false;
   EXPECT_THROW(
       checker.validateAndFixTensor(
-          at::zeros({0}),
-          "empty_tensor",
-          {5},
-          {"five"},
-          at::kFloat,
-          true,
-          false,
-          &unsqueezed),
+          at::zeros({0}), "empty_tensor", {5}, {"five"}, at::kFloat, true, false, &unsqueezed),
       std::runtime_error);
 
   // Test with allowEmpty=true
   at::Tensor emptyResult = checker.validateAndFixTensor(
-      at::zeros({0}),
-      "empty_tensor",
-      {5},
-      {"five"},
-      at::kFloat,
-      true,
-      true,
-      &unsqueezed);
+      at::zeros({0}), "empty_tensor", {5}, {"five"}, at::kFloat, true, true, &unsqueezed);
   EXPECT_TRUE(pymomentum::isEmpty(emptyResult));
 
   // Test needsSqueeze_out parameter with unbatched tensor
@@ -480,29 +445,23 @@ TEST(ValidateTensor, AdditionalChecks) {
   // Test with wrong dimension count
   EXPECT_THROW(
       checker.validateAndFixTensor(
-          at::zeros({2, 3, 4, 5}),
-          "wrong_dim",
-          {3, 4},
-          {"three", "four"},
-          at::kFloat),
+          at::zeros({2, 3, 4, 5}), "wrong_dim", {3, 4}, {"three", "four"}, at::kFloat),
       std::runtime_error);
 
   // Test with allowUnbatched=false
   EXPECT_THROW(
-      checker.validateAndFixTensor(
-          at::zeros({5}), "unbatched", {5}, {"five"}, at::kFloat, false),
+      checker.validateAndFixTensor(at::zeros({5}), "unbatched", {5}, {"five"}, at::kFloat, false),
       std::runtime_error);
 
   // Test type conversion
   at::Tensor intTensor = torch::ones({2, 3}, torch::kInt);
-  at::Tensor convertedTensor = checker.validateAndFixTensor(
-      intTensor, "convert_type", {2, 3}, {"two", "three"}, at::kFloat);
+  at::Tensor convertedTensor =
+      checker.validateAndFixTensor(intTensor, "convert_type", {2, 3}, {"two", "three"}, at::kFloat);
   EXPECT_EQ(at::kFloat, convertedTensor.scalar_type());
 
   // Test getBatchSize and getBoundValue
   pymomentum::TensorChecker checker2("testFun3");
-  checker2.validateAndFixTensor(
-      at::zeros({4, 5, 6}), "test", {5, -1}, {"five", "var"}, at::kFloat);
+  checker2.validateAndFixTensor(at::zeros({4, 5, 6}), "test", {5, -1}, {"five", "var"}, at::kFloat);
 
   EXPECT_EQ(4, checker2.getBatchSize());
   EXPECT_EQ(6, checker2.getBoundValue(-1));
@@ -565,8 +524,7 @@ TEST(AutogradUtility, ApplyTemplatedAutogradFunction) {
   at::Tensor floatTensor2 = torch::ones({3, 4}, torch::kFloat);
 
   auto floatResult =
-      pymomentum::applyTemplatedAutogradFunction<MockAutogradFunction>(
-          floatTensor1, floatTensor2);
+      pymomentum::applyTemplatedAutogradFunction<MockAutogradFunction>(floatTensor1, floatTensor2);
 
   EXPECT_EQ(1, floatResult.size());
   EXPECT_EQ(at::kFloat, floatResult[0].scalar_type());
@@ -575,8 +533,7 @@ TEST(AutogradUtility, ApplyTemplatedAutogradFunction) {
   at::Tensor doubleTensor = torch::ones({2, 3}, torch::kDouble);
 
   auto mixedResult =
-      pymomentum::applyTemplatedAutogradFunction<MockAutogradFunction>(
-          floatTensor1, doubleTensor);
+      pymomentum::applyTemplatedAutogradFunction<MockAutogradFunction>(floatTensor1, doubleTensor);
 
   EXPECT_EQ(1, mixedResult.size());
   EXPECT_EQ(at::kDouble, mixedResult[0].scalar_type());
@@ -585,8 +542,7 @@ TEST(AutogradUtility, ApplyTemplatedAutogradFunction) {
   at::Tensor doubleTensor2 = torch::ones({3, 4}, torch::kDouble);
 
   auto doubleResult =
-      pymomentum::applyTemplatedAutogradFunction<MockAutogradFunction>(
-          doubleTensor, doubleTensor2);
+      pymomentum::applyTemplatedAutogradFunction<MockAutogradFunction>(doubleTensor, doubleTensor2);
 
   EXPECT_EQ(1, doubleResult.size());
   EXPECT_EQ(at::kDouble, doubleResult[0].scalar_type());

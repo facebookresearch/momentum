@@ -3,6 +3,21 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+backend_sources = [
+    "backend/__init__.py",
+    "backend/skel_state_backend.py",
+    "backend/trs_backend.py",
+    "backend/utils.py",
+]
+
+python_utility_public_headers = [
+    "python_utility/python_utility.h",
+]
+
+python_utility_sources = [
+    "python_utility/python_utility.cpp",
+]
+
 tensor_utility_public_headers = [
     "tensor_utility/autograd_utility.h",
     "tensor_utility/tensor_utility.h",
@@ -14,14 +29,6 @@ tensor_utility_sources = [
 
 tensor_utility_test_sources = [
     "cpp_test/tensor_utility_test.cpp",
-]
-
-python_utility_public_headers = [
-    "python_utility/python_utility.h",
-]
-
-python_utility_sources = [
-    "python_utility/python_utility.cpp",
 ]
 
 tensor_momentum_public_headers = [
@@ -127,25 +134,6 @@ solver2_sources = [
     "solver2/solver2_utility.cpp",
 ]
 
-quaternion_sources = [
-    "quaternion.py",
-]
-
-skel_state_sources = [
-    "skel_state.py",
-]
-
-trs_sources = [
-    "trs.py",
-]
-
-backend_sources = [
-    "backend/__init__.py",
-    "backend/trs_backend.py",
-    "backend/skel_state_backend.py",
-    "backend/utils.py",
-]
-
 marker_tracking_public_headers = [
 ]
 
@@ -167,15 +155,6 @@ gpu_character_sources = [
     "torch/utility.py",
 ]
 
-renderer_public_headers = [
-    "renderer/mesh_processing.h",
-    "renderer/momentum_render.h",
-    "renderer/software_rasterizer.h",
-]
-
-renderer_sources = [
-    "renderer/mesh_processing.cpp",
-    "renderer/momentum_render.cpp",
-    "renderer/renderer_pybind.cpp",
-    "renderer/software_rasterizer.cpp",
+character_manager_sources = [
+    "character_manager/character_manager_pybind.cpp",
 ]

@@ -55,18 +55,13 @@ struct TensorInput {
   TensorType targetType = TensorType::TYPE_FLOAT;
 
   // Whether the input is differentiable:
-  enum Differentiability {
-    DIFFERENTIABLE,
-    NON_DIFFERENTIABLE
-  } differentiability = DIFFERENTIABLE;
+  enum Differentiability { DIFFERENTIABLE, NON_DIFFERENTIABLE } differentiability = DIFFERENTIABLE;
 
   // Whether the input is allowed to be empty.
   enum Optionality { REQUIRED, OPTIONAL } optionality = REQUIRED;
 
   template <typename T>
-  Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> toEigenMap(
-      size_t iBatch,
-      size_t iFrame) const;
+  Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> toEigenMap(size_t iBatch, size_t iFrame) const;
 
   bool isTensorEmpty() const {
     return ::pymomentum::isEmpty(tensor);
@@ -152,10 +147,8 @@ class TensorErrorFunction {
   // call virtual function createErrorFunctionImp() to return the real
   // error function.
   // Pass in SIZE_MAX for jFrame if not a sequence/multi-frame problem.
-  std::shared_ptr<momentum::SkeletonErrorFunctionT<T>> createErrorFunction(
-      const momentum::Character& character,
-      size_t iBatch,
-      size_t jFrame) const;
+  std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>
+  createErrorFunction(const momentum::Character& character, size_t iBatch, size_t jFrame) const;
 
   const std::vector<TensorInput>& tensorInputs() const {
     return _tensorInputs;
@@ -196,10 +189,8 @@ class TensorErrorFunction {
   // solves we will pass SIZE_MAX for the frame index (this gets passed along
   // to the TensorInput and allows the caller to not have to disambiguate the
   // 'first frame of a multi-frame problem' from 'single-frame problem').
-  createErrorFunctionImp(
-      const momentum::Character& character,
-      size_t iBatch,
-      size_t jFrame) const = 0;
+  createErrorFunctionImp(const momentum::Character& character, size_t iBatch, size_t jFrame)
+      const = 0;
 
   // sharedDimensionFlag: the negative integer representing runtime dimension
   // size as described in TensorInput. Returns the actual size of that
@@ -230,9 +221,7 @@ class TensorErrorFunction {
   // corresponding value in _sharedSizeNames will be printed as the name of this
   // dimension. Otherwise, print "Y<absolute value of the integer>".
   template <typename TVec>
-  std::string formatTensorSize(
-      const TVec& sizes,
-      bool includeBatchPrefix = false) const;
+  std::string formatTensorSize(const TVec& sizes, bool includeBatchPrefix = false) const;
 
   std::string sharedSizeName(int iShared) const;
 

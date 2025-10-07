@@ -85,8 +85,7 @@ TensorPosePriorErrorFunction<T>::TensorPosePriorErrorFunction(
             TensorInput::REQUIRED}},
           {}) {
   if (posePrior_model != nullptr) {
-    _posePrior_model =
-        std::make_shared<momentum::MppcaT<T>>(posePrior_model->cast<T>());
+    _posePrior_model = std::make_shared<momentum::MppcaT<T>>(posePrior_model->cast<T>());
   }
 }
 
@@ -108,18 +107,15 @@ std::unique_ptr<TensorErrorFunction<T>> createPosePriorErrorFunction(
     size_t batchSize,
     size_t nFrames,
     const momentum::Mppca* posePrior_model) {
-  return std::make_unique<TensorPosePriorErrorFunction<T>>(
-      batchSize, nFrames, posePrior_model);
+  return std::make_unique<TensorPosePriorErrorFunction<T>>(batchSize, nFrames, posePrior_model);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createPosePriorErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createPosePriorErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     const momentum::Mppca* posePrior_model);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createPosePriorErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createPosePriorErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     const momentum::Mppca* posePrior_model);

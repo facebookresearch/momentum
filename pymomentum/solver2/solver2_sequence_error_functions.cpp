@@ -30,47 +30,37 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
   py::class_<
       mm::StateSequenceErrorFunction,
       mm::SequenceErrorFunction,
-      std::shared_ptr<mm::StateSequenceErrorFunction>>(
-      m, "StateSequenceErrorFunction")
+      std::shared_ptr<mm::StateSequenceErrorFunction>>(m, "StateSequenceErrorFunction")
       .def(
-          py::init<>(
-              [](const mm::Character& character,
-                 float weight,
-                 float positionWeight,
-                 float rotationWeight,
-                 const std::optional<py::array_t<float>>& jointPositionWeights,
-                 const std::optional<py::array_t<float>>&
-                     jointRotationWeights) {
-                validateWeight(weight, "weight");
-                validateWeight(positionWeight, "position_weight");
-                validateWeight(rotationWeight, "rotation_weight");
-                validateWeights(jointPositionWeights, "joint_position_weights");
-                validateWeights(jointRotationWeights, "joint_rotation_weights");
+          py::init<>([](const mm::Character& character,
+                        float weight,
+                        float positionWeight,
+                        float rotationWeight,
+                        const std::optional<py::array_t<float>>& jointPositionWeights,
+                        const std::optional<py::array_t<float>>& jointRotationWeights) {
+            validateWeight(weight, "weight");
+            validateWeight(positionWeight, "position_weight");
+            validateWeight(rotationWeight, "rotation_weight");
+            validateWeights(jointPositionWeights, "joint_position_weights");
+            validateWeights(jointRotationWeights, "joint_rotation_weights");
 
-                auto result =
-                    std::make_shared<mm::StateSequenceErrorFunction>(character);
-                result->setWeight(weight);
-                result->setWeights(positionWeight, rotationWeight);
+            auto result = std::make_shared<mm::StateSequenceErrorFunction>(character);
+            result->setWeight(weight);
+            result->setWeights(positionWeight, rotationWeight);
 
-                const auto nJoints = character.skeleton.joints.size();
-                if (jointPositionWeights.has_value()) {
-                  result->setPositionTargetWeights(arrayToVec(
-                      jointPositionWeights,
-                      nJoints,
-                      1.0f,
-                      "joint_position_weights"));
-                }
+            const auto nJoints = character.skeleton.joints.size();
+            if (jointPositionWeights.has_value()) {
+              result->setPositionTargetWeights(
+                  arrayToVec(jointPositionWeights, nJoints, 1.0f, "joint_position_weights"));
+            }
 
-                if (jointRotationWeights.has_value()) {
-                  result->setRotationTargetWeights(arrayToVec(
-                      jointRotationWeights,
-                      nJoints,
-                      1.0f,
-                      "joint_rotation_weights"));
-                }
+            if (jointRotationWeights.has_value()) {
+              result->setRotationTargetWeights(
+                  arrayToVec(jointRotationWeights, nJoints, 1.0f, "joint_rotation_weights"));
+            }
 
-                return result;
-              }),
+            return result;
+          }),
           R"(A sequence error function that penalizes changes in global position and rotation.
 
 :param character: The character to use.
@@ -88,12 +78,9 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
           py::arg("joint_rotation_weights") = std::optional<Eigen::VectorXf>{})
       .def(
           "set_target_state",
-          [](mm::StateSequenceErrorFunction& self,
-             const py::array_t<float>& targetStateArray) {
-            if (targetStateArray.ndim() != 2 ||
-                targetStateArray.shape(1) != 8) {
-              throw std::runtime_error(
-                  "Expected target state array of shape (njoints, 8)");
+          [](mm::StateSequenceErrorFunction& self, const py::array_t<float>& targetStateArray) {
+            if (targetStateArray.ndim() != 2 || targetStateArray.shape(1) != 8) {
+              throw std::runtime_error("Expected target state array of shape (njoints, 8)");
             }
 
             const auto targetTransforms = toTransformList(targetStateArray);
@@ -124,18 +111,14 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
             validateWeight(weight, "weight");
             validateWeights(targetWeights, "target_weights");
 
-            auto result =
-                std::make_shared<mm::ModelParametersSequenceErrorFunction>(
-                    character);
+            auto result = std::make_shared<mm::ModelParametersSequenceErrorFunction>(character);
             result->setWeight(weight);
 
             if (targetWeights.has_value()) {
-              if (targetWeights->size() !=
-                  character.parameterTransform.numAllModelParameters()) {
+              if (targetWeights->size() != character.parameterTransform.numAllModelParameters()) {
                 throw std::runtime_error(
                     "Invalid target weights; expected " +
-                    std::to_string(
-                        character.parameterTransform.numAllModelParameters()) +
+                    std::to_string(character.parameterTransform.numAllModelParameters()) +
                     " values but got " + std::to_string(targetWeights->size()));
               }
               result->setTargetWeights(targetWeights.value());
@@ -153,8 +136,7 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
           py::arg("weight") = 1.0f,
           py::arg("target_weights") = std::optional<Eigen::VectorXf>{});
 
-  py::class_<mm::VertexVelocityConstraintT<float>>(
-      m, "VertexVelocityConstraint")
+  py::class_<mm::VertexVelocityConstraintT<float>>(m, "VertexVelocityConstraint")
       .def(
           "__repr__",
           [](const mm::VertexVelocityConstraintT<float>& self) {
@@ -171,9 +153,7 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
           &mm::VertexVelocityConstraintT<float>::vertexIndex,
           "The index of the vertex to constrain.")
       .def_readonly(
-          "weight",
-          &mm::VertexVelocityConstraintT<float>::weight,
-          "The weight of the constraint.")
+          "weight", &mm::VertexVelocityConstraintT<float>::weight, "The weight of the constraint.")
       .def_readonly(
           "target_velocity",
           &mm::VertexVelocityConstraintT<float>::targetVelocity,
@@ -182,8 +162,7 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
   py::class_<
       mm::VertexSequenceErrorFunctionT<float>,
       mm::SequenceErrorFunction,
-      std::shared_ptr<mm::VertexSequenceErrorFunctionT<float>>>(
-      m, "VertexSequenceErrorFunction")
+      std::shared_ptr<mm::VertexSequenceErrorFunctionT<float>>>(m, "VertexSequenceErrorFunction")
       .def(
           "__repr__",
           [](const mm::VertexSequenceErrorFunctionT<float>& self) {
@@ -195,9 +174,7 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
       .def(
           py::init<>([](const mm::Character& character, float weight) {
             validateWeight(weight, "weight");
-            auto result =
-                std::make_shared<mm::VertexSequenceErrorFunctionT<float>>(
-                    character);
+            auto result = std::make_shared<mm::VertexSequenceErrorFunctionT<float>>(character);
             result->setWeight(weight);
             return result;
           }),
@@ -219,8 +196,7 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
              int vertexIndex,
              float weight,
              const Eigen::Vector3f& targetVelocity) {
-            validateVertexIndex(
-                vertexIndex, "vertex_index", self.getCharacter());
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validateWeight(weight, "weight");
             self.addConstraint(vertexIndex, weight, targetVelocity);
           },
@@ -240,16 +216,10 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
              const py::array_t<float>& targetVelocity) {
             ArrayShapeValidator validator;
             const int nConsIdx = -1;
-            validator.validate(
-                vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(
-                vertexIndex, "vertex_index", self.getCharacter());
+            validator.validate(vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
-            validator.validate(
-                targetVelocity,
-                "target_velocity",
-                {nConsIdx, 3},
-                {"n_cons", "xyz"});
+            validator.validate(targetVelocity, "target_velocity", {nConsIdx, 3}, {"n_cons", "xyz"});
 
             auto vertexIndexAcc = vertexIndex.unchecked<1>();
             auto weightAcc = weight.unchecked<1>();
@@ -262,9 +232,7 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
                   vertexIndexAcc(i),
                   weightAcc(i),
                   Eigen::Vector3f(
-                      targetVelocityAcc(i, 0),
-                      targetVelocityAcc(i, 1),
-                      targetVelocityAcc(i, 2)));
+                      targetVelocityAcc(i, 0), targetVelocityAcc(i, 1), targetVelocityAcc(i, 2)));
             }
           },
           R"(Adds multiple vertex velocity constraints to the error function.
@@ -281,9 +249,7 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
           "Clears all vertex velocity constraints from the error function.")
       .def_property_readonly(
           "constraints",
-          [](const mm::VertexSequenceErrorFunctionT<float>& self) {
-            return self.getConstraints();
-          },
+          [](const mm::VertexSequenceErrorFunctionT<float>& self) { return self.getConstraints(); },
           "Returns the list of vertex velocity constraints.")
       .def_property_readonly(
           "num_constraints",

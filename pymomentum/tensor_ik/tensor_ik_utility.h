@@ -47,8 +47,7 @@ std::tuple<at::Tensor, at::Tensor> checkSequenceIKInputs(
     const char* context);
 
 template <typename T>
-std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>
-buildMomentumErrorFunctions(
+std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> buildMomentumErrorFunctions(
     const std::vector<const momentum::Character*>& characters,
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
@@ -59,12 +58,10 @@ template <typename T>
 momentum::SkeletonSolverFunctionT<T> buildSolverFunction(
     const momentum::Character& character,
     const momentum::ParameterTransformT<T>& parameterTransform,
-    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>&
-        errorFunctions);
+    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>& errorFunctions);
 
 template <typename T>
-std::unique_ptr<momentum::SequenceSolverFunctionT<T>>
-buildSequenceSolverFunction(
+std::unique_ptr<momentum::SequenceSolverFunctionT<T>> buildSequenceSolverFunction(
     const momentum::Character& character,
     const momentum::ParameterTransformT<T>& parameterTransform,
     at::Tensor modelParams_init,

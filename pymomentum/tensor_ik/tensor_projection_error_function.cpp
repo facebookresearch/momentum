@@ -93,9 +93,8 @@ TensorProjectionErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto errorFun =
-      std::make_unique<FullyDifferentiableProjectionErrorFunctionT<T>>(
-          character.skeleton, character.parameterTransform);
+  auto errorFun = std::make_unique<FullyDifferentiableProjectionErrorFunctionT<T>>(
+      character.skeleton, character.parameterTransform);
 
   using momentum ::FullyDifferentiableProjectionErrorFunction;
 
@@ -103,33 +102,26 @@ TensorProjectionErrorFunction<T>::createErrorFunctionImp(
   // One sample is made by NCAM cameras.
   // Each camera has NCONS constraints.
   // So each Eigen map actually stores 2D data.
-  const auto weights =
-      this->getTensorInput(FullyDifferentiableProjectionErrorFunction::kWeights)
-          .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights = this->getTensorInput(FullyDifferentiableProjectionErrorFunction::kWeights)
+                           .template toEigenMap<T>(iBatch, jFrame);
   const auto offsets =
-      this->getTensorInput(
-              momentum::FullyDifferentiableProjectionErrorFunction::kOffsets)
+      this->getTensorInput(momentum::FullyDifferentiableProjectionErrorFunction::kOffsets)
           .template toEigenMap<T>(iBatch, jFrame);
   const auto parents =
-      this->getTensorInput(
-              momentum::FullyDifferentiableProjectionErrorFunction::kParents)
+      this->getTensorInput(momentum::FullyDifferentiableProjectionErrorFunction::kParents)
           .template toEigenMap<int>(iBatch, jFrame);
-  const auto targets =
-      this->getTensorInput(FullyDifferentiableProjectionErrorFunction::kTargets)
-          .template toEigenMap<T>(iBatch, jFrame);
+  const auto targets = this->getTensorInput(FullyDifferentiableProjectionErrorFunction::kTargets)
+                           .template toEigenMap<T>(iBatch, jFrame);
   const auto projections =
-      this->getTensorInput(
-              FullyDifferentiableProjectionErrorFunction::kProjections)
+      this->getTensorInput(FullyDifferentiableProjectionErrorFunction::kProjections)
           .template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index kCons = 0; kCons < nCons; ++kCons) {
     momentum::ProjectionConstraintDataT<T> constraintData;
-    constraintData.target =
-        extractVector<T, 2>(targets, kCons, Eigen::Vector2<T>::Zero());
+    constraintData.target = extractVector<T, 2>(targets, kCons, Eigen::Vector2<T>::Zero());
     constraintData.parent = extractScalar<int>(parents, kCons);
-    constraintData.offset =
-        extractVector<T, 3>(offsets, kCons, Eigen::Vector3<T>::Zero());
+    constraintData.offset = extractVector<T, 3>(offsets, kCons, Eigen::Vector3<T>::Zero());
     constraintData.weight = extractScalar<T>(weights, kCons, T(1));
     constraintData.projection = extractMatrix<T, 3, 4>(projections, kCons);
     errorFun->addConstraint(constraintData);
@@ -153,8 +145,7 @@ std::unique_ptr<TensorErrorFunction<T>> createProjectionErrorFunction(
       batchSize, nFrames, projections, parents, offsets, weights, targets);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createProjectionErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createProjectionErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor projections,
@@ -163,8 +154,7 @@ createProjectionErrorFunction<float>(
     at::Tensor weights,
     at::Tensor targets);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createProjectionErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createProjectionErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor projections,

@@ -15,10 +15,7 @@ namespace pymomentum {
 
 // Verifies that the bone indices are empty or all valid.
 // Throws runtime_error when one index is out of range.
-void checkValidBoneIndex(
-    at::Tensor idx,
-    const momentum::Character& character,
-    const char* name);
+void checkValidBoneIndex(at::Tensor idx, const momentum::Character& character, const char* name);
 
 // allow_missing means -1 is allowed:
 void checkValidParameterIndex(

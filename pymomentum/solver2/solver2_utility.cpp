@@ -41,9 +41,7 @@ std::string getDimStr(const py::array& array) {
   return oss.str();
 }
 
-std::string getDimStr(
-    const std::vector<int>& dims,
-    const std::vector<std::string>& dimNames) {
+std::string getDimStr(const std::vector<int>& dims, const std::vector<std::string>& dimNames) {
   std::ostringstream oss;
   oss << "[";
   bool first = true;
@@ -113,10 +111,8 @@ void ArrayShapeValidator::validate(
   }
 }
 
-mm::ParameterSet arrayToParameterSet(
-    const py::array_t<bool>& array,
-    const size_t nParameters,
-    bool defaultValue) {
+mm::ParameterSet
+arrayToParameterSet(const py::array_t<bool>& array, const size_t nParameters, bool defaultValue) {
   if (nParameters > mm::kMaxModelParams) {
     throw std::runtime_error(
         "Parameter set size exceeds maximum allowed size of " +
@@ -150,13 +146,11 @@ mm::ParameterSet arrayToParameterSet(
   return result;
 }
 
-Eigen::VectorXf arrayToVec(
-    const py::array_t<float>& array,
-    py::ssize_t expectedSize,
-    const char* parameterName) {
+Eigen::VectorXf
+arrayToVec(const py::array_t<float>& array, py::ssize_t expectedSize, const char* parameterName) {
   if (array.ndim() != 1) {
-    throw std::runtime_error(fmt::format(
-        "Expected a 1D array for {}; got {}", parameterName, getDimStr(array)));
+    throw std::runtime_error(
+        fmt::format("Expected a 1D array for {}; got {}", parameterName, getDimStr(array)));
   }
 
   if (expectedSize >= 0 && array.shape(0) != expectedSize) {
@@ -179,8 +173,7 @@ mm::ParameterSet arrayToParameterSet(
     const py::array_t<bool>& array,
     const mm::ParameterTransform& parameterTransform,
     bool defaultValue) {
-  return arrayToParameterSet(
-      array, parameterTransform.numAllModelParameters(), defaultValue);
+  return arrayToParameterSet(array, parameterTransform.numAllModelParameters(), defaultValue);
 }
 
 Eigen::VectorXf arrayToVec(
@@ -218,11 +211,7 @@ void validateIndexArray(
   auto validateIndex = [&](int idx) {
     if (idx < 0 || idx >= maxIndex) {
       throw std::runtime_error(fmt::format(
-          "Invalid {} for {}: {}; expected a value between 0 and {}",
-          type,
-          name,
-          idx,
-          maxIndex));
+          "Invalid {} for {}: {}; expected a value between 0 and {}", type, name, idx, maxIndex));
     }
   };
 
@@ -240,19 +229,13 @@ void validateIndexArray(
     }
   } else {
     throw std::runtime_error(fmt::format(
-        "Invalid {} array; expected 1D or 2D array, got {}",
-        name,
-        getDimStr(indexArray)));
+        "Invalid {} array; expected 1D or 2D array, got {}", name, getDimStr(indexArray)));
   }
 }
 
-void validateJointIndex(
-    int jointIndex,
-    const char* name,
-    const mm::Skeleton& skeleton) {
+void validateJointIndex(int jointIndex, const char* name, const mm::Skeleton& skeleton) {
   if (jointIndex < 0) {
-    throw std::runtime_error(
-        fmt::format("Invalid {} index: {}", name, jointIndex));
+    throw std::runtime_error(fmt::format("Invalid {} index: {}", name, jointIndex));
   }
 
   if (jointIndex >= static_cast<int>(skeleton.joints.size())) {
@@ -278,13 +261,10 @@ void validateJointIndex(
   validateJointIndex(jointIndex, name, character.skeleton);
 }
 
-void validateVertexIndex(
-    int vertexIndex,
-    const char* name,
-    const momentum::Character& character) {
+void validateVertexIndex(int vertexIndex, const char* name, const momentum::Character& character) {
   if (!character.mesh) {
-    throw std::runtime_error(fmt::format(
-        "Character does not have a mesh; cannot validate {}", name));
+    throw std::runtime_error(
+        fmt::format("Character does not have a mesh; cannot validate {}", name));
   }
 
   if (vertexIndex < 0 || vertexIndex >= character.mesh->vertices.size()) {
@@ -301,19 +281,17 @@ void validateVertexIndex(
     const char* name,
     const momentum::Character& character) {
   if (!character.mesh) {
-    throw std::runtime_error(fmt::format(
-        "Character does not have a mesh; cannot validate {}", name));
+    throw std::runtime_error(
+        fmt::format("Character does not have a mesh; cannot validate {}", name));
   }
 
-  validateIndexArray(
-      vertexIndex, name, "vertex index", character.mesh->vertices.size());
+  validateIndexArray(vertexIndex, name, "vertex index", character.mesh->vertices.size());
 }
 
 mm::TransformList toTransformList(const py::array_t<float>& array) {
   if (array.ndim() != 2 || array.shape(1) != 8) {
-    throw std::runtime_error(fmt::format(
-        "Expected (nJoints x 8) skeleton state tensor; got {}",
-        getDimStr(array)));
+    throw std::runtime_error(
+        fmt::format("Expected (nJoints x 8) skeleton state tensor; got {}", getDimStr(array)));
   }
 
   const auto nTransforms = array.shape(0);
@@ -339,8 +317,8 @@ momentum::ModelParameters toModelParameters(
     const py::array_t<float>& array,
     const mm::ParameterTransform& pt) {
   if (array.ndim() != 1) {
-    throw std::runtime_error(fmt::format(
-        "Expected a 1D array for model parameters; got {}", getDimStr(array)));
+    throw std::runtime_error(
+        fmt::format("Expected a 1D array for model parameters; got {}", getDimStr(array)));
   }
 
   const auto nParams = array.shape(0);
@@ -366,8 +344,7 @@ Eigen::Quaternionf toQuaternion(const Eigen::Vector4f& q) {
 
 void validateWeight(float weight, const char* name) {
   if (weight < 0.0f) {
-    throw py::value_error(fmt::format(
-        "Invalid {}: {}; weight must be non-negative", name, weight));
+    throw py::value_error(fmt::format("Invalid {}: {}; weight must be non-negative", name, weight));
   }
 }
 
@@ -376,17 +353,12 @@ void validateWeights(const py::array_t<float>& weights, const char* name) {
   for (py::ssize_t i = 0; i < weights.shape(0); ++i) {
     if (weightsAcc(i) < 0.0f) {
       throw py::value_error(fmt::format(
-          "Invalid {} at index {}: {}; all weights must be non-negative",
-          name,
-          i,
-          weightsAcc(i)));
+          "Invalid {} at index {}: {}; all weights must be non-negative", name, i, weightsAcc(i)));
     }
   }
 }
 
-void validateWeights(
-    const std::optional<py::array_t<float>>& weights,
-    const char* name) {
+void validateWeights(const std::optional<py::array_t<float>>& weights, const char* name) {
   if (weights.has_value()) {
     validateWeights(weights.value(), name);
   }
@@ -396,17 +368,12 @@ void validateWeights(const Eigen::VectorXf& weights, const char* name) {
   for (int i = 0; i < weights.size(); ++i) {
     if (weights(i) < 0.0f) {
       throw py::value_error(fmt::format(
-          "Invalid {} at index {}: {}; all weights must be non-negative",
-          name,
-          i,
-          weights(i)));
+          "Invalid {} at index {}: {}; all weights must be non-negative", name, i, weights(i)));
     }
   }
 }
 
-void validateWeights(
-    const std::optional<Eigen::VectorXf>& weights,
-    const char* name) {
+void validateWeights(const std::optional<Eigen::VectorXf>& weights, const char* name) {
   if (weights.has_value()) {
     validateWeights(weights.value(), name);
   }
@@ -420,8 +387,7 @@ void validateErrorFunctionMatchesCharacter(
         "Skeleton in solver function does not match skeleton in error function; did you use the correct Character when constructing it?");
   }
 
-  if (solverFunction.getParameterTransform() !=
-      &errorFunction.getParameterTransform()) {
+  if (solverFunction.getParameterTransform() != &errorFunction.getParameterTransform()) {
     throw std::runtime_error(
         "Parameter transform in solver function does not match parameter transform in error function; did you use the correct Character when constructing it?");
   }

@@ -16,8 +16,7 @@
 
 namespace pymomentum {
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor>
-mppcaToTensors(
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTensors(
     const momentum::Mppca& mppca,
     std::optional<const momentum::ParameterTransform*> paramTransform) {
   at::Tensor mu = to2DTensor(mppca.mu);
@@ -55,12 +54,9 @@ mppcaToTensors(
       W = at::zeros({(int)nMixtures, (int)W_rank, (int)mppca.d});
     }
 
-    for (Eigen::Index jComponent = 0;
-         jComponent < W_rank && jComponent < W.size(1);
-         ++jComponent) {
+    for (Eigen::Index jComponent = 0; jComponent < W_rank && jComponent < W.size(1); ++jComponent) {
       toEigenMap<float>(W.select(0, iMix).select(0, jComponent)) =
-          std::sqrt(C_eigenvalues(jComponent)) *
-          Cinv_eigs.eigenvectors().col(jComponent);
+          std::sqrt(C_eigenvalues(jComponent)) * Cinv_eigs.eigenvectors().col(jComponent);
     }
 
     const float C_logDeterminant = -Cinv_eigs.eigenvalues().array().log().sum();
@@ -87,11 +83,7 @@ mppcaToTensors(
   }
 
   return {
-      to1DTensor<float>(pi),
-      mu,
-      W,
-      to1DTensor<float>(sigma),
-      to1DTensor<int>(parameterIndices)};
+      to1DTensor<float>(pi), mu, W, to1DTensor<float>(sigma), to1DTensor<int>(parameterIndices)};
 }
 
 } // namespace pymomentum

@@ -16,7 +16,9 @@
 #include <ATen/Functions.h>
 #include <ceres/jet.h>
 #include <dispenso/parallel_for.h> // @manual
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 #include <Eigen/Core>
 
 namespace pymomentum {
@@ -32,26 +34,20 @@ struct XYZEulerToQuaternionFunction
  public:
   static variable_list forward(AutogradContext* ctx, at::Tensor xyzEuler);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_rotationMatrices);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_rotationMatrices);
 };
 
 template <typename T>
-Eigen::Quaternion<T> xyzEulerToQuaternion(
-    const Eigen::Vector3<T>& eulerAngles) {
+Eigen::Quaternion<T> xyzEulerToQuaternion(const Eigen::Vector3<T>& eulerAngles) {
   Eigen::Quaternion<T> result = Eigen::Quaternion<T>::Identity();
   for (Eigen::Index l = 0; l < 3; ++l) {
-    result = Eigen::AngleAxis<T>(eulerAngles[l], Eigen::Vector3<T>::Unit(l)) *
-        result;
+    result = Eigen::AngleAxis<T>(eulerAngles[l], Eigen::Vector3<T>::Unit(l)) * result;
   }
   return result;
 }
 
 template <typename T>
-variable_list XYZEulerToQuaternionFunction<T>::forward(
-    AutogradContext* ctx,
-    at::Tensor xyzEuler) {
+variable_list XYZEulerToQuaternionFunction<T>::forward(AutogradContext* ctx, at::Tensor xyzEuler) {
   const auto nEuler_index = -1;
 
   ctx->save_for_backward({xyzEuler});
@@ -74,8 +70,7 @@ variable_list XYZEulerToQuaternionFunction<T>::forward(
   const auto nEuler = checker.getBoundValue(nEuler_index);
   const auto nBatch = checker.getBatchSize();
 
-  at::Tensor result =
-      at::zeros({nBatch, nEuler, 4}, at::CPU(toScalarType<T>()));
+  at::Tensor result = at::zeros({nBatch, nEuler, 4}, at::CPU(toScalarType<T>()));
 
   dispenso::parallel_for(0, nBatch, [&](size_t iBatch) {
     at::Tensor xyzEuler_cur = xyzEuler.select(0, iBatch);
@@ -86,8 +81,7 @@ variable_list XYZEulerToQuaternionFunction<T>::forward(
 
     for (Eigen::Index k = 0; k < nEuler; ++k) {
       result_map.template segment<4>(4 * k) =
-          xyzEulerToQuaternion<T>(xyzEuler_map.template segment<3>(3 * k))
-              .coeffs();
+          xyzEulerToQuaternion<T>(xyzEuler_map.template segment<3>(3 * k)).coeffs();
     }
   });
 
@@ -136,8 +130,7 @@ variable_list XYZEulerToQuaternionFunction<T>::backward(
 
   const auto nBatch = checker.getBatchSize();
   const auto nEuler = checker.getBoundValue(nEuler_index);
-  at::Tensor d_xyzEuler =
-      at::zeros({nBatch, nEuler, 3}, at::CPU(toScalarType<T>()));
+  at::Tensor d_xyzEuler = at::zeros({nBatch, nEuler, 3}, at::CPU(toScalarType<T>()));
 
   dispenso::parallel_for(0, nBatch, [&](size_t iBatch) {
     at::Tensor xyzEuler_cur = xyzEuler.select(0, iBatch);
@@ -145,18 +138,15 @@ variable_list XYZEulerToQuaternionFunction<T>::backward(
     at::Tensor d_xyzEuler_cur = d_xyzEuler.select(0, iBatch);
 
     Eigen::Map<Eigen::VectorX<T>> xyzEuler_map = toEigenMap<T>(xyzEuler_cur);
-    Eigen::Map<Eigen::VectorX<T>> dLoss_dQuat_map =
-        toEigenMap<T>(dLoss_dQuat_cur);
-    Eigen::Map<Eigen::VectorX<T>> d_xyzEuler_map =
-        toEigenMap<T>(d_xyzEuler_cur);
+    Eigen::Map<Eigen::VectorX<T>> dLoss_dQuat_map = toEigenMap<T>(dLoss_dQuat_cur);
+    Eigen::Map<Eigen::VectorX<T>> d_xyzEuler_map = toEigenMap<T>(d_xyzEuler_cur);
 
     using JetType = ceres::Jet<T, 3>;
 
     for (Eigen::Index k = 0; k < nEuler; ++k) {
       d_xyzEuler_map.template segment<3>(3 * k) =
           xyzEulerToQuaternion<JetType>(
-              momentum::buildJetVec<T, 3>(
-                  xyzEuler_map.template segment<3>(3 * k)))
+              momentum::buildJetVec<T, 3>(xyzEuler_map.template segment<3>(3 * k)))
               .coeffs()
               .dot(dLoss_dQuat_map.template segment<4>(4 * k))
               .v;
@@ -177,8 +167,7 @@ at::Tensor sqr(at::Tensor val) {
 } // namespace
 
 void checkQuaternion(at::Tensor q) {
-  MT_THROW_IF(
-      q.size(-1) != 4, "Quaternion should have last dimension equal to 4.");
+  MT_THROW_IF(q.size(-1) != 4, "Quaternion should have last dimension equal to 4.");
 }
 
 std::tuple<at::Tensor, at::Tensor> splitQuaternion(at::Tensor q) {
@@ -194,15 +183,13 @@ at::Tensor quaternionMultiply(at::Tensor q1, at::Tensor q2) {
   auto [r1, v1] = splitQuaternion(q1);
   auto [r2, v2] = splitQuaternion(q2);
 
-  MT_THROW_IF(
-      q1.sizes() != q2.sizes(), "Expected matching quaternion dimensions.");
+  MT_THROW_IF(q1.sizes() != q2.sizes(), "Expected matching quaternion dimensions.");
 
   // (r1*v1 + r2*v2 + v1 x v2, r1*r2 - v1.v2)
   // Dot product here is a product followed by a sum because I can't figure out
   // what 'tensordot' is actually supposed to do.
   at::Tensor r_res = r1 * r2 - (v1 * v2).sum(-1, true);
-  at::Tensor v_res =
-      r1.expand_as(v2) * v2 + r2.expand_as(v1) * v1 + at::cross(v1, v2, -1);
+  at::Tensor v_res = r1.expand_as(v2) * v2 + r2.expand_as(v1) * v1 + at::cross(v1, v2, -1);
 
   return at::cat({v_res, r_res}, -1);
 }
@@ -230,11 +217,9 @@ at::Tensor quaternionToXYZEuler(at::Tensor q) {
   at::Tensor qz = q.select(-1, 2);
   at::Tensor qw = q.select(-1, 3);
 
-  at::Tensor rx =
-      at::atan2(2 * (qw * qx + qy * qz), 1 - 2 * (sqr(qx) + sqr(qy)));
+  at::Tensor rx = at::atan2(2 * (qw * qx + qy * qz), 1 - 2 * (sqr(qx) + sqr(qy)));
   at::Tensor ry = at::asin(2 * (qw * qy - qz * qx));
-  at::Tensor rz =
-      at::atan2(2 * (qw * qz + qx * qy), 1 - 2 * (sqr(qy) + sqr(qz)));
+  at::Tensor rz = at::atan2(2 * (qw * qz + qx * qy), 1 - 2 * (sqr(qy) + sqr(qz)));
   return at::stack({rx, ry, rz}, -1);
 }
 
@@ -246,8 +231,7 @@ at::Tensor quaternionRotateVector(at::Tensor q, at::Tensor v) {
 }
 
 at::Tensor xyzEulerToQuaternion(at::Tensor xyzEuler) {
-  return applyTemplatedAutogradFunction<XYZEulerToQuaternionFunction>(
-      xyzEuler)[0];
+  return applyTemplatedAutogradFunction<XYZEulerToQuaternionFunction>(xyzEuler)[0];
 }
 
 at::Tensor quaternionIdentity() {
@@ -256,8 +240,7 @@ at::Tensor quaternionIdentity() {
 }
 
 at::Tensor quaternionToRotationMatrix(at::Tensor q) {
-  MT_THROW_IF(
-      q.size(-1) != 4, "Expected quaternion tensor (last dimension=4).");
+  MT_THROW_IF(q.size(-1) != 4, "Expected quaternion tensor (last dimension=4).");
 
   const at::Tensor qx = q.select(-1, 0).unsqueeze(-1);
   const at::Tensor qy = q.select(-1, 1).unsqueeze(-1);
@@ -353,16 +336,14 @@ at::Tensor rotationMatrixToQuaternion(at::Tensor matrices) {
   using at::indexing::Ellipsis;
 
   // Angle can be read off the trace, as described in the SO post:
-  const at::Tensor trace_m = matrices.index({Ellipsis, 0, 0}) +
-      matrices.index({Ellipsis, 1, 1}) + matrices.index({Ellipsis, 2, 2});
+  const at::Tensor trace_m = matrices.index({Ellipsis, 0, 0}) + matrices.index({Ellipsis, 1, 1}) +
+      matrices.index({Ellipsis, 2, 2});
   const at::Tensor cos_theta = (trace_m - 1) / 2;
 
   // For quaternion, we need cos(theta/2) and sin(theta/2):
   // TODO is use of half-angle formula here bad for precision?
-  const at::Tensor cos_half_theta =
-      at::sqrt(at::clamp((1 + cos_theta) / 2.0, 0));
-  const at::Tensor sin_half_theta =
-      at::sqrt(at::clamp((1 - cos_theta) / 2.0, 0));
+  const at::Tensor cos_half_theta = at::sqrt(at::clamp((1 + cos_theta) / 2.0, 0));
+  const at::Tensor sin_half_theta = at::sqrt(at::clamp((1 - cos_theta) / 2.0, 0));
 
   // There is one vector for which R * v = v; that vector must be the axis of
   // rotation and has an eigenvalue of 1.  Because the eigenvalues aren't sorted
@@ -377,10 +358,7 @@ at::Tensor rotationMatrixToQuaternion(at::Tensor matrices) {
   max_eig_ind_sizes.push_back(3);
   max_eig_ind_sizes.push_back(1);
   at::Tensor qv = at::real(
-      eigenvectors
-          .gather(
-              -1,
-              max_eig_ind.unsqueeze(-1).unsqueeze(-1).expand(max_eig_ind_sizes))
+      eigenvectors.gather(-1, max_eig_ind.unsqueeze(-1).unsqueeze(-1).expand(max_eig_ind_sizes))
           .squeeze(-1));
   qv = sin_half_theta.unsqueeze(-1).expand_as(qv) * qv;
 
@@ -415,25 +393,20 @@ at::Tensor rotationMatrixToQuaternion(at::Tensor matrices) {
 
   at::Tensor skew_symmetric_part = at::stack({-2 * qz, 2 * qy, -2 * qx}, -1);
   // The difference if w is positive:
-  at::Tensor diff_w_positive = symmetric_part_diff +
-      qw.unsqueeze(-1).expand_as(skew_symmetric_part) * skew_symmetric_part;
+  at::Tensor diff_w_positive =
+      symmetric_part_diff + qw.unsqueeze(-1).expand_as(skew_symmetric_part) * skew_symmetric_part;
   // The difference if w is negative:
-  at::Tensor diff_w_negative = symmetric_part_diff -
-      qw.unsqueeze(-1).expand_as(skew_symmetric_part) * skew_symmetric_part;
+  at::Tensor diff_w_negative =
+      symmetric_part_diff - qw.unsqueeze(-1).expand_as(skew_symmetric_part) * skew_symmetric_part;
 
   // Select the one that matches the target matrix (we are flipping v here
   // instead of w because -q = q):
-  qv = at::where(
-      at::norm(diff_w_positive, 2, -1) < at::norm(diff_w_negative, 2, -1),
-      qv,
-      -qv);
+  qv = at::where(at::norm(diff_w_positive, 2, -1) < at::norm(diff_w_negative, 2, -1), qv, -qv);
 
   return at::cat({qv, qw}, -1);
 }
 
-at::Tensor checkAndNormalizeWeights(
-    at::Tensor quaternions,
-    std::optional<at::Tensor> weights_in) {
+at::Tensor checkAndNormalizeWeights(at::Tensor quaternions, std::optional<at::Tensor> weights_in) {
   at::Tensor weights;
   if (weights_in) {
     weights = *weights_in;
@@ -465,9 +438,7 @@ at::Tensor checkAndNormalizeWeights(
   return weights / weight_sum.unsqueeze(-1).expand_as(weights);
 }
 
-at::Tensor blendQuaternions(
-    at::Tensor quaternions,
-    std::optional<at::Tensor> weights_in) {
+at::Tensor blendQuaternions(at::Tensor quaternions, std::optional<at::Tensor> weights_in) {
   // If no weights, then assume evenly weighted:
   at::Tensor weights = checkAndNormalizeWeights(quaternions, weights_in);
 
@@ -478,8 +449,7 @@ at::Tensor blendQuaternions(
   // i.e. Stack quaternion coeffs in Q, compute M = Q^T x Q, and yield the
   // eigenvector corresponding to the largest eigenvalue as the average rotation
   checkQuaternion(quaternions);
-  at::Tensor outer_prod =
-      at::einsum("...i,...k->...ik", {quaternions, quaternions});
+  at::Tensor outer_prod = at::einsum("...i,...k->...ik", {quaternions, quaternions});
   at::Tensor QtQ = (weights.unsqueeze(-1).unsqueeze(-1) * outer_prod).sum(-3);
   const auto [eigenvalues, eigenvectors] = at::linalg_eigh(QtQ);
   at::Tensor result = eigenvectors.select(-1, 3);
