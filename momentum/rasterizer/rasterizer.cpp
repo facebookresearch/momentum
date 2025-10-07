@@ -49,6 +49,7 @@ Light transformLight(const Light& light, const Eigen::Affine3f& xf) {
     case LightType::Point:
       return {xf * light.position, light.color, LightType::Point};
   }
+  return light; // Should never reach here
 }
 
 namespace {
@@ -1090,7 +1091,7 @@ void rasterizeLinesImp(
         lineStart_window,
         lineEnd_window,
         cameraSimd,
-        lineMask && validProj1 && validProj2,
+        lineMask & validProj1 & validProj2,
         nearClip,
         color_drjit,
         thickness,
@@ -1269,7 +1270,7 @@ void rasterizeSplatsImp(
       p_quad_eye[i] = cameraSimd.worldToEye(p_quad_world[i]);
       auto [p_window, validProj] = cameraSimd.eyeToWindow(p_quad_eye[i]);
       p_quad_window[i] = p_window;
-      validSplats = validSplats && validProj;
+      validSplats = validSplats & validProj;
     }
 
     // To do backface culling, we'll compute the signed area of the
