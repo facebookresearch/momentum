@@ -134,6 +134,18 @@ solver2_sources = [
     "solver2/solver2_utility.cpp",
 ]
 
+quaternion_sources = [
+    "quaternion.py",
+]
+
+skel_state_sources = [
+    "skel_state.py",
+]
+
+trs_sources = [
+    "trs.py",
+]
+
 marker_tracking_public_headers = [
 ]
 
@@ -149,7 +161,6 @@ marker_tracking_extensions_sources = [
 ]
 
 gpu_character_sources = [
-    "torch/__init__.py",
     "torch/character.py",
     "torch/parameter_limits.py",
     "torch/utility.py",
