@@ -43,7 +43,8 @@ PYBIND11_MODULE(solver2, m) {
   m.attr("__name__") = "pymomentum.solver2";
   m.doc() = "Inverse kinematics and other optimizations for momentum models.";
 
-  pybind11::module_::import("pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
+  pybind11::module_::import(
+      "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
 
   // Error functions:
   py::class_<mm::SkeletonErrorFunction, std::shared_ptr<mm::SkeletonErrorFunction>>(
@@ -335,7 +336,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
             return self.getErrorFunctions(frameIdx);
           },
           R"(Returns the per-frame error functions for a given frame.
-          
+
           Note that this is read-only; appending to this list will not affect the SequenceErrorFunction,
           use :func:`add_error_function` instead.)",
           py::arg("frame_idx"))
@@ -348,7 +349,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
             return self.getSequenceErrorFunctions(frameIdx);
           },
           R"(Returns the sequence error functions.
-          
+
           Note that this is read-only; appending to this list will not affect the SequenceErrorFunction,
           use :func:`add_sequence_error_function` instead.)",
           py::arg("frame_idx"));

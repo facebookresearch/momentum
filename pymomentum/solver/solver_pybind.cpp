@@ -29,8 +29,10 @@ PYBIND11_MODULE(solver, m) {
   m.doc() = "Inverse kinematics and other optimizations for momentum models.";
 
   pybind11::module_::import("torch"); // @dep=//caffe2:torch
-  pybind11::module_::import("pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
-  auto solver2 = pybind11::module_::import("pymomentum.solver2"); // @dep=fbcode//pymomentum:solver2
+  pybind11::module_::import(
+      "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
+  auto solver2 = pybind11::module_::import(
+      "pymomentum.solver2"); // @dep=fbsource//arvr/libraries/pymomentum:solver2
 
   m.attr("VertexConstraintType") = solver2.attr("VertexConstraintType").attr("Position");
 

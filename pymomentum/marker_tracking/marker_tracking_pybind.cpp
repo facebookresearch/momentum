@@ -60,7 +60,8 @@ PYBIND11_MODULE(marker_tracking, m) {
   m.doc() = "Module for exposing the C++ APIs of the marker tracking pipeline ";
   m.attr("__name__") = "pymomentum.marker_tracking";
 
-  pybind11::module_::import("pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
+  pybind11::module_::import(
+      "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
 
   // Bindings for types defined in marker_tracking/marker_tracker.h
   auto baseConfig =
