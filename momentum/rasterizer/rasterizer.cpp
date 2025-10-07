@@ -48,6 +48,8 @@ Light transformLight(const Light& light, const Eigen::Affine3f& xf) {
       return {xf.linear() * light.position, light.color, LightType::Directional};
     case LightType::Point:
       return {xf * light.position, light.color, LightType::Point};
+    default:
+      MT_THROW("Unknown light type: {}", static_cast<int>(light.type));
   }
 }
 
@@ -1090,7 +1092,7 @@ void rasterizeLinesImp(
         lineStart_window,
         lineEnd_window,
         cameraSimd,
-        lineMask && validProj1 && validProj2,
+        IntP::MaskType(lineMask) && validProj1 && validProj2,
         nearClip,
         color_drjit,
         thickness,
