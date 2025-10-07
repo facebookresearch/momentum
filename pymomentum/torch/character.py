@@ -10,6 +10,7 @@ from typing import Tuple
 import pymomentum.geometry as pym_geometry
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
+import pymomentum.trs as pym_trs
 import torch
 
 from pymomentum.backend import skel_state_backend, trs_backend, utils as backend_utils
@@ -87,6 +88,141 @@ class Skeleton(torch.nn.Module):
         # it using exp and natural log instead. The constant here is ln(2.0)
         local_state_s = torch.exp(0.6931471824645996 * joint_parameters[..., 6:])
         return torch.cat([local_state_t, local_state_q, local_state_s], dim=-1)
+
+    def joint_parameters_to_local_trs(
+        self, joint_parameters: torch.Tensor
+    ) -> pym_trs.TRSTransform:
+        """
+        Convert joint parameters to local TRS (Translation-Rotation-Scale) state.
+
+        This function takes joint parameters and converts them to the TRS representation
+        as a tuple, consistent with the pymomentum.trs module interface.
+        The TRS format is useful for applications that need explicit access to individual
+        transformation components and can be more efficient than the skeleton state format.
+
+        Args:
+            joint_parameters: Joint parameters tensor of shape (batch_size, num_joints * 7)
+                or (batch_size, num_joints, 7). Each joint has 7 parameters:
+                - [0:3] translation offset
+                - [3:6] euler xyz rotation angles
+                - [6] log2 scale factor
+
+        Returns:
+            TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Local joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Local joint scales, shape (batch_size, num_joints, 1)
+
+        Raises:
+            RuntimeError: If the character has no skeleton
+
+        Note:
+            This function is equivalent to joint_parameters_to_local_skeleton_state() but
+            returns the TRS format instead of the 8-parameter skeleton state format.
+            It uses the TRS backend for efficient computation.
+        """
+        if not hasattr(self, "joint_prerotations"):
+            raise RuntimeError("Character has no skeleton")
+
+        joint_parameters = _unsqueeze_joint_params(joint_parameters)
+
+        # Convert joint_prerotations from quaternions to rotation matrices
+        joint_rotation_matrices = pym_quaternion.to_rotation_matrix(
+            self.joint_prerotations
+        )
+
+        # Use the TRS backend for efficient conversion
+        return trs_backend.get_local_state_from_joint_params(
+            joint_params=joint_parameters,
+            joint_offset=self.joint_translation_offsets,
+            joint_rotation=joint_rotation_matrices,
+        )
+
+    def joint_parameters_to_trs(
+        self, joint_parameters: torch.Tensor
+    ) -> pym_trs.TRSTransform:
+        """
+        Convert joint parameters directly to global TRS (Translation-Rotation-Scale) state.
+
+        This function performs the full forward kinematics pipeline using the TRS backend,
+        converting joint parameters to local TRS state and then to global TRS state in
+        a single call. This is more efficient than calling the two-step process separately.
+
+        Args:
+            joint_parameters: Joint parameters tensor of shape (batch_size, num_joints * 7)
+                or (batch_size, num_joints, 7). Each joint has 7 parameters:
+                - [0:3] translation offset
+                - [3:6] euler xyz rotation angles
+                - [6] log2 scale factor
+
+        Returns:
+            TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Global joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Global joint scales, shape (batch_size, num_joints, 1)
+
+        Raises:
+            RuntimeError: If the character has no skeleton
+
+        Note:
+            This is equivalent to calling joint_parameters_to_local_trs() followed by
+            local_trs_to_global_trs(), but more efficient as it avoids intermediate steps.
+        """
+        # Get local TRS state from joint parameters
+        local_trs = self.joint_parameters_to_local_trs(joint_parameters)
+        local_state_t, local_state_r, local_state_s = local_trs
+
+        # Convert local TRS to global TRS using forward kinematics
+        return trs_backend.global_trs_state_from_local_trs_state(
+            local_state_t=local_state_t,
+            local_state_r=local_state_r,
+            local_state_s=local_state_s,
+            prefix_mul_indices=list(
+                self.pmi.split(
+                    split_size=self._pmi_buffer_sizes,
+                    dim=1,
+                )
+            ),
+        )
+
+    def local_trs_to_global_trs(
+        self,
+        local_trs: pym_trs.TRSTransform,
+    ) -> pym_trs.TRSTransform:
+        """
+        Convert local TRS state to global TRS state using forward kinematics.
+
+        This function performs forward kinematics on the local TRS transformations
+        to compute the global joint transformations. This is useful when you have
+        local TRS states from other sources and need to convert them to global states.
+
+        Args:
+            local_trs: Local TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Local joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Local joint scales, shape (batch_size, num_joints, 1)
+
+        Returns:
+            TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Global joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Global joint scales, shape (batch_size, num_joints, 1)
+
+        Note:
+            This function uses the TRS backend for efficient forward kinematics computation.
+        """
+        local_state_t, local_state_r, local_state_s = local_trs
+        return trs_backend.global_trs_state_from_local_trs_state(
+            local_state_t=local_state_t,
+            local_state_r=local_state_r,
+            local_state_s=local_state_s,
+            prefix_mul_indices=list(
+                self.pmi.split(
+                    split_size=self._pmi_buffer_sizes,
+                    dim=1,
+                )
+            ),
+        )
 
     def local_skeleton_state_to_skeleton_state(
         self, local_skel_state: torch.Tensor
@@ -227,23 +363,34 @@ class LinearBlendSkinning(torch.nn.Module):
             vert_indices_flattened=self.vert_indices_flattened,
         )
 
-    def skin_with_transforms(
+    def skin_with_trs(
         self,
-        translation: torch.Tensor,
-        rotation: torch.Tensor,
-        scale: torch.Tensor,
+        global_trs: pym_trs.TRSTransform,
         rest_vertex_positions: torch.Tensor,
     ) -> torch.Tensor:
         """
-        Apply skinning using matrices rather than skeleton states.  This can be useful
-        in cases where you directly predict the matrices but want to avoid extra conversions.
+        Apply skinning using global TRS state (Translation-Rotation-Scale).
 
-        :param translation: A tensor of shape (..., 3) representing the translation.
-        :param rotation: A tensor of shape (..., 3, 3) representing the 3x3 rotation matrices.
-        :param scale: A tensor of shape (..., 1) representing the scale.
-        :param rest_vertex_positions: A tensor of shape (..., 3) representing the rest vertex positions.
-        :return: A tensor of shape (..., 3) representing the skinned vertex positions.
+        This method takes global TRS state as a tuple and applies linear blend skinning
+        using the TRS backend. This is useful when working directly with TRS representations
+        or when you want to avoid conversions to skeleton state format.
+
+        Args:
+            global_trs: Global TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Global joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Global joint scales, shape (batch_size, num_joints, 1)
+            rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3)
+                or (num_vertices, 3) which will be expanded to batch size
+
+        Returns:
+            skinned_vertices: Skinned vertex positions, shape (batch_size, num_vertices, 3)
+
+        Note:
+            This method uses the TRS backend skinning function for efficient computation.
         """
+        global_state_t, global_state_r, global_state_s = global_trs
+
         inv_bind_pose_rot: torch.Tensor = pym_quaternion.to_rotation_matrix(
             self.inverse_bind_pose[..., 3:7]
         )
@@ -251,15 +398,46 @@ class LinearBlendSkinning(torch.nn.Module):
 
         return trs_backend.skinning(
             template=rest_vertex_positions,
-            t=translation,
-            r=rotation,
-            s=scale,
+            t=global_state_t,
+            r=global_state_r,
+            s=global_state_s,
             t0=inv_bind_pose_trans,
             r0=inv_bind_pose_rot,
             skin_indices_flattened=self.skin_indices_flattened,
             skin_weights_flattened=self.skin_weights_flattened,
             vert_indices_flattened=self.vert_indices_flattened,
         )
+
+    def skin_with_transforms(
+        self,
+        global_state_t: torch.Tensor,
+        global_state_r: torch.Tensor,
+        global_state_s: torch.Tensor,
+        rest_vertex_positions: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Apply skinning using individual global TRS tensors (legacy interface).
+
+        This method provides backward compatibility for code that passes individual
+        tensors instead of the TRS tuple format. Internally, it creates a tuple
+        and delegates to skin_with_trs().
+
+        Args:
+            global_state_t: Global joint translations, shape (batch_size, num_joints, 3)
+            global_state_r: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+            global_state_s: Global joint scales, shape (batch_size, num_joints, 1)
+            rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3)
+                or (num_vertices, 3) which will be expanded to batch size
+
+        Returns:
+            skinned_vertices: Skinned vertex positions, shape (batch_size, num_vertices, 3)
+
+        Note:
+            This method is provided for backward compatibility. New code should use
+            skin_with_trs() with the TRS tuple interface.
+        """
+        global_trs = (global_state_t, global_state_r, global_state_s)
+        return self.skin_with_trs(global_trs, rest_vertex_positions)
 
     def unpose(
         self, global_joint_state: torch.Tensor, verts: torch.Tensor
