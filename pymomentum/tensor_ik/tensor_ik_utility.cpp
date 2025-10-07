@@ -25,8 +25,7 @@ size_t checkNumParams(
     const char* context) {
   MT_THROW_IF(characters.empty(), "Empty character list in {}", context);
 
-  const auto nParams =
-      characters.front()->parameterTransform.numAllModelParameters();
+  const auto nParams = characters.front()->parameterTransform.numAllModelParameters();
   MT_THROW_IF(
       nParams == 0,
       "In {}, parameter transform is empty (has no parameters) and hence is not suitable for optimization.",
@@ -34,8 +33,7 @@ size_t checkNumParams(
 
   for (const auto& character : characters) {
     MT_THROW_IF(
-        character->parameterTransform.name !=
-            characters.front()->parameterTransform.name,
+        character->parameterTransform.name != characters.front()->parameterTransform.name,
         "In {}, mismatch between the parameter transforms of the passed-in characters.  For batch-mode solve, all parameters must be the same (although the skeletons can vary).",
         context);
   }
@@ -59,8 +57,7 @@ std::tuple<at::Tensor, at::Tensor> checkIKInputs(
     bool* squeezeErrorFunctionWeights) {
   const auto nParams = checkNumParams(characters, context);
 
-  modelParams =
-      modelParams.contiguous().to(at::DeviceType::CPU, toScalarType<T>());
+  modelParams = modelParams.contiguous().to(at::DeviceType::CPU, toScalarType<T>());
 
   throwIfNaNOrINF(modelParams, context, "model params");
 
@@ -72,15 +69,12 @@ std::tuple<at::Tensor, at::Tensor> checkIKInputs(
       context);
 
   // Code in momentumIK is supposed to enforce this:
-  MT_THROW_IF(
-      modelParams.ndimension() != 2,
-      "Expected batched modelParameters vector.");
+  MT_THROW_IF(modelParams.ndimension() != 2, "Expected batched modelParameters vector.");
 
   const auto nBatch = modelParams.size(0);
 
   if (errorFunctionWeights.ndimension() == 1) {
-    errorFunctionWeights =
-        errorFunctionWeights.unsqueeze(0).expand({nBatch, -1});
+    errorFunctionWeights = errorFunctionWeights.unsqueeze(0).expand({nBatch, -1});
     maybeSet(squeezeErrorFunctionWeights, true);
   } else {
     maybeSet(squeezeErrorFunctionWeights, false);
@@ -97,9 +91,7 @@ std::tuple<at::Tensor, at::Tensor> checkIKInputs(
       numActiveErrorFunctions);
 
   return {
-      modelParams,
-      errorFunctionWeights.contiguous().to(
-          at::DeviceType::CPU, toScalarType<T>())};
+      modelParams, errorFunctionWeights.contiguous().to(at::DeviceType::CPU, toScalarType<T>())};
 }
 
 template <typename T>
@@ -111,8 +103,7 @@ std::tuple<at::Tensor, at::Tensor> checkSequenceIKInputs(
     const char* context) {
   const auto nParams = checkNumParams(characters, context);
 
-  modelParams =
-      modelParams.contiguous().to(at::DeviceType::CPU, toScalarType<T>());
+  modelParams = modelParams.contiguous().to(at::DeviceType::CPU, toScalarType<T>());
   throwIfNaNOrINF(modelParams, context, "model params");
 
   // Caller is supposed to ensure this:
@@ -132,8 +123,7 @@ std::tuple<at::Tensor, at::Tensor> checkSequenceIKInputs(
 
   if (errorFunctionWeights.ndimension() == 1) {
     errorFunctionWeights =
-        errorFunctionWeights.unsqueeze(0).unsqueeze(0).expand(
-            {nBatch, nFrames, -1});
+        errorFunctionWeights.unsqueeze(0).unsqueeze(0).expand({nBatch, nFrames, -1});
   } else if (errorFunctionWeights.ndimension() == 2) {
     MT_THROW_IF(
         nBatch != 1,
@@ -144,8 +134,7 @@ std::tuple<at::Tensor, at::Tensor> checkSequenceIKInputs(
   }
 
   MT_THROW_IF(
-      errorFunctionWeights.ndimension() != 3 ||
-          errorFunctionWeights.size(0) != nBatch ||
+      errorFunctionWeights.ndimension() != 3 || errorFunctionWeights.size(0) != nBatch ||
           errorFunctionWeights.size(1) != nFrames ||
           errorFunctionWeights.size(2) != numActiveErrorFunctions,
       "In {}: mismatch in error function weights sizes. Expected [opt. nBatch={} x opt. nFrames={} x nErrorFunctions={}] but got {}",
@@ -156,14 +145,11 @@ std::tuple<at::Tensor, at::Tensor> checkSequenceIKInputs(
       formatTensorSizes(errorFunctionWeights));
 
   return {
-      modelParams,
-      errorFunctionWeights.contiguous().to(
-          at::DeviceType::CPU, toScalarType<T>())};
+      modelParams, errorFunctionWeights.contiguous().to(at::DeviceType::CPU, toScalarType<T>())};
 }
 
 template <typename T>
-std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>
-buildMomentumErrorFunctions(
+std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> buildMomentumErrorFunctions(
     const std::vector<const momentum::Character*>& characters,
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
@@ -179,9 +165,7 @@ buildMomentumErrorFunctions(
     result.push_back(errf->createErrorFunction(character, iBatch, jFrame));
     // weightsMap maps error type order in the enum to order in input
     // errorFunctionWeights.
-    T weight = weightsMap[iErr] < 0
-        ? T(0)
-        : toEigenMap<T>(weights_cur)[weightsMap[iErr]];
+    T weight = weightsMap[iErr] < 0 ? T(0) : toEigenMap<T>(weights_cur)[weightsMap[iErr]];
     result.back()->setWeight(weight);
   }
 
@@ -192,10 +176,8 @@ template <typename T>
 momentum::SkeletonSolverFunctionT<T> buildSolverFunction(
     const momentum::Character& character,
     const momentum::ParameterTransformT<T>& parameterTransform,
-    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>&
-        errorFunctions) {
-  momentum::SkeletonSolverFunctionT<T> result(
-      &character.skeleton, &parameterTransform);
+    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>& errorFunctions) {
+  momentum::SkeletonSolverFunctionT<T> result(&character.skeleton, &parameterTransform);
   for (const auto& errf : errorFunctions) {
     result.addErrorFunction(errf);
   }
@@ -204,8 +186,7 @@ momentum::SkeletonSolverFunctionT<T> buildSolverFunction(
 }
 
 template <typename T>
-std::unique_ptr<momentum::SequenceSolverFunctionT<T>>
-buildSequenceSolverFunction(
+std::unique_ptr<momentum::SequenceSolverFunctionT<T>> buildSequenceSolverFunction(
     const momentum::Character& character,
     const momentum::ParameterTransformT<T>& parameterTransform,
     at::Tensor modelParams_init,
@@ -215,8 +196,7 @@ buildSequenceSolverFunction(
     const std::vector<int>& weightsMap,
     const int64_t iBatch) {
   assert(modelParams_init.ndimension() == 2);
-  assert(
-      modelParams_init.size(-1) == parameterTransform.numAllModelParameters());
+  assert(modelParams_init.size(-1) == parameterTransform.numAllModelParameters());
   const auto nFrames = modelParams_init.size(0);
   auto result = std::make_unique<momentum::SequenceSolverFunctionT<T>>(
       &character.skeleton, &parameterTransform, sharedParams, nFrames);
@@ -234,9 +214,7 @@ buildSequenceSolverFunction(
       auto errf_momentum = errf->createErrorFunction(character, iBatch, jFrame);
       // weightsMap maps error type order in the enum to order in input
       // errorFunctionWeights.
-      T weight = weightsMap[iErr] < 0
-          ? T(0)
-          : toEigenMap<T>(weights_cur)[weightsMap[iErr]];
+      T weight = weightsMap[iErr] < 0 ? T(0) : toEigenMap<T>(weights_cur)[weightsMap[iErr]];
       errf_momentum->setWeight(weight);
 
       result->addErrorFunction(jFrame, errf_momentum);
@@ -257,8 +235,7 @@ std::vector<ErrorFunctionInput<T>> buildErrorFunctionInputs(
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
     const std::vector<int>& weightsMap) {
   std::vector<ErrorFunctionInput<T>> result;
-  for (size_t iErrorFunction = 0; iErrorFunction < errorFunctions.size();
-       ++iErrorFunction) {
+  for (size_t iErrorFunction = 0; iErrorFunction < errorFunctions.size(); ++iErrorFunction) {
     const auto& errf = errorFunctions[iErrorFunction];
     const auto& inputs_cur = errf->tensorInputs();
     for (size_t jInput = 0; jInput < inputs_cur.size(); ++jInput) {
@@ -272,8 +249,7 @@ std::vector<ErrorFunctionInput<T>> buildErrorFunctionInputs(
         continue;
       }
 
-      if (inputs_cur[jInput].differentiability ==
-              TensorInput::NON_DIFFERENTIABLE ||
+      if (inputs_cur[jInput].differentiability == TensorInput::NON_DIFFERENTIABLE ||
           isEmpty(inputs_cur[jInput].tensor)) {
         continue;
       }
@@ -320,8 +296,7 @@ torch::autograd::variable_list toTensors(
         if (inputs_all[iGlobalInput].dLoss_dInput[jBatch].size() == 0) {
           continue;
         }
-        toEigenMap<T>(derivs_cur) =
-            inputs_all[iGlobalInput].dLoss_dInput[jBatch];
+        toEigenMap<T>(derivs_cur) = inputs_all[iGlobalInput].dLoss_dInput[jBatch];
       }
     }
 
@@ -362,16 +337,14 @@ template std::tuple<at::Tensor, at::Tensor> checkSequenceIKInputs<double>(
 template std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<float>>>
 buildMomentumErrorFunctions<float>(
     const std::vector<const momentum::Character*>& characters,
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
     const int64_t iBatch);
 template std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<double>>>
 buildMomentumErrorFunctions<double>(
     const std::vector<const momentum::Character*>& characters,
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
     const int64_t iBatch);
@@ -379,14 +352,11 @@ buildMomentumErrorFunctions<double>(
 template momentum::SkeletonSolverFunctionT<float> buildSolverFunction<float>(
     const momentum::Character& character,
     const momentum::ParameterTransformT<float>& parameterTransform,
-    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<float>>>&
-        errorFunctions);
+    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<float>>>& errorFunctions);
 template momentum::SkeletonSolverFunctionT<double> buildSolverFunction<double>(
     const momentum::Character& character,
     const momentum::ParameterTransformT<double>& parameterTransform,
-    const std::vector<
-        std::shared_ptr<momentum::SkeletonErrorFunctionT<double>>>&
-        errorFunctions);
+    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<double>>>& errorFunctions);
 
 template std::unique_ptr<momentum::SequenceSolverFunctionT<float>>
 buildSequenceSolverFunction<float>(
@@ -394,8 +364,7 @@ buildSequenceSolverFunction<float>(
     const momentum::ParameterTransformT<float>& parameterTransform,
     at::Tensor modelParams_init,
     const momentum::ParameterSet& sharedParams,
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
     const int64_t iBatch);
@@ -405,28 +374,23 @@ buildSequenceSolverFunction<double>(
     const momentum::ParameterTransformT<double>& parameterTransform,
     at::Tensor modelParams_init,
     const momentum::ParameterSet& sharedParams,
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
     const int64_t iBatch);
 
 template std::vector<ErrorFunctionInput<float>> buildErrorFunctionInputs(
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     const std::vector<int>& weightsMap);
 template std::vector<ErrorFunctionInput<double>> buildErrorFunctionInputs(
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     const std::vector<int>& weightsMap);
 
 template std::vector<at::Tensor> toTensors<float>(
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     const std::vector<ErrorFunctionInput<float>>& inputs_all);
 template std::vector<at::Tensor> toTensors<double>(
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     const std::vector<ErrorFunctionInput<double>>& inputs_all);
 
 } // namespace detail

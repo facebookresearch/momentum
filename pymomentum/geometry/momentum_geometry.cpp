@@ -28,15 +28,19 @@
 #include <momentum/io/urdf/urdf_io.h>
 #include <momentum/math/mesh.h>
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 #include <Eigen/Core>
 
 #include <cstdint>
 
 namespace py = pybind11;
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
+#endif
 
 namespace pymomentum {
 
@@ -106,9 +110,7 @@ at::Tensor mapTensor(
 
   at::Tensor result = at::zeros(tgtSizes, srcTensor.scalar_type());
   return result.index_copy(
-      dimension,
-      tgtIndicesTensor,
-      srcTensor.index_select(dimension, srcIndicesTensor));
+      dimension, tgtIndicesTensor, srcTensor.index_select(dimension, srcIndicesTensor));
 }
 
 at::Tensor mapModelParameters(
@@ -130,10 +132,9 @@ at::Tensor mapModelParameters_names(
       "Mismatch between motion size and parameter name count.");
 
   std::vector<std::string> missingParams;
-  for (size_t iParamSource = 0; iParamSource < parameterNames_in.size();
-       ++iParamSource) {
-    auto iParamRemap = character_remap.parameterTransform.getParameterIdByName(
-        parameterNames_in[iParamSource]);
+  for (size_t iParamSource = 0; iParamSource < parameterNames_in.size(); ++iParamSource) {
+    auto iParamRemap =
+        character_remap.parameterTransform.getParameterIdByName(parameterNames_in[iParamSource]);
     if (iParamRemap == momentum::kInvalidIndex) {
       missingParams.push_back(parameterNames_in[iParamSource]);
     }
@@ -141,17 +142,11 @@ at::Tensor mapModelParameters_names(
 
   if (verbose && !missingParams.empty()) {
     // TODO better logging:
-    py::print(
-        "WARNING: missing parameters found during map_model_parameters: ",
-        missingParams);
+    py::print("WARNING: missing parameters found during map_model_parameters: ", missingParams);
   }
 
   // Map tensor at dimension -1.
-  return mapTensor(
-      -1,
-      parameterNames_in,
-      character_remap.parameterTransform.name,
-      motion_in);
+  return mapTensor(-1, parameterNames_in, character_remap.parameterTransform.name, motion_in);
 }
 
 at::Tensor mapJointParameters(
@@ -164,10 +159,7 @@ at::Tensor mapJointParameters(
 
   // Map tensor at dimension -2.
   at::Tensor result = mapTensor(
-      -2,
-      srcCharacter.skeleton.getJointNames(),
-      tgtCharacter.skeleton.getJointNames(),
-      srcMotion);
+      -2, srcCharacter.skeleton.getJointNames(), tgtCharacter.skeleton.getJointNames(), srcMotion);
   if (unflattened) {
     result = flattenJointParameters(tgtCharacter, result);
   }
@@ -181,8 +173,8 @@ momentum::Character loadFBXCharacterFromFile(
     const std::optional<std::string>& configPath,
     const std::optional<std::string>& locatorsPath,
     bool permissive) {
-  momentum::Character result = momentum::loadFbxCharacter(
-      filesystem::path(fbxPath), keepLocators, permissive);
+  momentum::Character result =
+      momentum::loadFbxCharacter(filesystem::path(fbxPath), keepLocators, permissive);
   if (configPath && !configPath->empty()) {
     result = loadConfigFromFile(result, *configPath);
   }
@@ -205,21 +197,17 @@ void transposeMotionInPlace(std::vector<Eigen::MatrixXf>& motion) {
 }
 
 std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
-loadFBXCharacterWithMotionFromFile(
-    const std::string& fbxPath,
-    bool permissive) {
-  auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
-      filesystem::path(fbxPath), keepLocators, permissive);
+loadFBXCharacterWithMotionFromFile(const std::string& fbxPath, bool permissive) {
+  auto [character, motion, fps] =
+      momentum::loadFbxCharacterWithMotion(filesystem::path(fbxPath), keepLocators, permissive);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
 }
 
 std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
-loadFBXCharacterWithMotionFromBytes(
-    const py::bytes& fbxBytes,
-    bool permissive) {
-  auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
-      toSpan<std::byte>(fbxBytes), keepLocators, permissive);
+loadFBXCharacterWithMotionFromBytes(const py::bytes& fbxBytes, bool permissive) {
+  auto [character, motion, fps] =
+      momentum::loadFbxCharacterWithMotion(toSpan<std::byte>(fbxBytes), keepLocators, permissive);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
 }
@@ -230,11 +218,8 @@ momentum::Character loadLocatorsFromFile(
   MT_THROW_IF(locatorsPath.empty(), "Missing locators path.");
   momentum::Character result = character;
   auto locators = momentum::loadLocators(
-      filesystem::path(locatorsPath),
-      character.skeleton,
-      character.parameterTransform);
-  std::copy(
-      locators.begin(), locators.end(), std::back_inserter(result.locators));
+      filesystem::path(locatorsPath), character.skeleton, character.parameterTransform);
+  std::copy(locators.begin(), locators.end(), std::back_inserter(result.locators));
   return result;
 }
 
@@ -244,8 +229,7 @@ momentum::Character loadConfigFromFile(
   MT_THROW_IF(configPath.empty(), "Missing model definition path.");
 
   const auto [parameterTransform, parameterLimits] =
-      momentum::loadModelDefinition(
-          filesystem::path(configPath), character.skeleton);
+      momentum::loadModelDefinition(filesystem::path(configPath), character.skeleton);
 
   return momentum::Character(
       character.skeleton,
@@ -263,19 +247,15 @@ momentum::Character loadConfigFromFile(
       character.skinnedLocators);
 }
 
-momentum::Character loadFBXCharacterFromBytes(
-    const pybind11::bytes& bytes,
-    bool permissive) {
-  return momentum::loadFbxCharacter(
-      toSpan<std::byte>(bytes), keepLocators, permissive);
+momentum::Character loadFBXCharacterFromBytes(const pybind11::bytes& bytes, bool permissive) {
+  return momentum::loadFbxCharacter(toSpan<std::byte>(bytes), keepLocators, permissive);
 }
 
 momentum::Character loadConfigFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes) {
   const auto [parameterTransform, parameterLimits] =
-      momentum::loadModelDefinition(
-          toSpan<std::byte>(bytes), character.skeleton);
+      momentum::loadModelDefinition(toSpan<std::byte>(bytes), character.skeleton);
 
   return momentum::Character(
       character.skeleton,
@@ -298,11 +278,8 @@ momentum::Character loadLocatorsFromBytes(
     const pybind11::bytes& bytes) {
   momentum::Character result = character;
   auto locators = momentum::loadLocatorsFromBuffer(
-      toSpan<std::byte>(bytes),
-      character.skeleton,
-      character.parameterTransform);
-  std::copy(
-      locators.begin(), locators.end(), std::back_inserter(result.locators));
+      toSpan<std::byte>(bytes), character.skeleton, character.parameterTransform);
+  std::copy(locators.begin(), locators.end(), std::back_inserter(result.locators));
   return result;
 }
 
@@ -310,50 +287,35 @@ momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath) {
   return momentum::loadUrdfCharacter<float>(urdfPath);
 }
 
-momentum::Character loadURDFCharacterFromBytes(
-    const pybind11::bytes& urdfBytes) {
+momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes) {
   return momentum::loadUrdfCharacter<float>(toSpan<std::byte>(urdfBytes));
 }
 
-std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(
-    const std::string& path) {
+std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path) {
   return momentum::loadMppca(path);
 }
 
-void savePosePriorToFile(
-    const momentum::Mppca& mppca,
-    const std::string& path) {
+void savePosePriorToFile(const momentum::Mppca& mppca, const std::string& path) {
   return momentum::saveMppca(mppca, path);
 }
 
-std::shared_ptr<const momentum::Mppca> loadPosePriorFromBytes(
-    const py::bytes& bytes) {
+std::shared_ptr<const momentum::Mppca> loadPosePriorFromBytes(const py::bytes& bytes) {
   return momentum::loadMppca(toSpan<unsigned char>(bytes));
 }
 
-std::shared_ptr<momentum::BlendShape> loadBlendShapeFromFile(
-    const std::string& path,
-    int nExpectedShapes,
-    int nExpectedVertices) {
-  auto result =
-      momentum::loadBlendShape(path, nExpectedShapes, nExpectedVertices);
-  MT_THROW_IF(
-      result.getBaseShape().empty(),
-      "Error loading blend shape from '{}'.",
-      path);
+std::shared_ptr<momentum::BlendShape>
+loadBlendShapeFromFile(const std::string& path, int nExpectedShapes, int nExpectedVertices) {
+  auto result = momentum::loadBlendShape(path, nExpectedShapes, nExpectedVertices);
+  MT_THROW_IF(result.getBaseShape().empty(), "Error loading blend shape from '{}'.", path);
   return std::make_shared<momentum::BlendShape>(std::move(result));
 }
 
-std::shared_ptr<momentum::BlendShape> loadBlendShapeFromBytes(
-    const pybind11::bytes& bytes,
-    int nExpectedShapes,
-    int nExpectedVertices) {
+std::shared_ptr<momentum::BlendShape>
+loadBlendShapeFromBytes(const pybind11::bytes& bytes, int nExpectedShapes, int nExpectedVertices) {
   PyBytesStreamBuffer streambuf(bytes);
   std::istream is(&streambuf);
-  momentum::BlendShape result =
-      momentum::loadBlendShape(is, nExpectedShapes, nExpectedVertices);
-  MT_THROW_IF(
-      result.getBaseShape().empty(), "Error loading blend shape from bytes.");
+  momentum::BlendShape result = momentum::loadBlendShape(is, nExpectedShapes, nExpectedVertices);
+  MT_THROW_IF(result.getBaseShape().empty(), "Error loading blend shape from bytes.");
   return std::make_shared<momentum::BlendShape>(std::move(result));
 }
 
@@ -363,9 +325,7 @@ py::bytes saveBlendShapeToBytes(const momentum::BlendShape& blendShape) {
   return py::bytes(oss.str());
 }
 
-void saveBlendShapeToFile(
-    const momentum::BlendShape& blendShape,
-    const std::string& path) {
+void saveBlendShapeToFile(const momentum::BlendShape& blendShape, const std::string& path) {
   momentum::saveBlendShape(filesystem::path(path), blendShape);
 }
 
@@ -427,16 +387,12 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
   return result;
 }
 
-momentum::Character replaceRestMesh(
-    const momentum::Character& character,
-    RowMatrixf positions) {
+momentum::Character replaceRestMesh(const momentum::Character& character, RowMatrixf positions) {
   MT_THROW_IF(
-      !character.mesh,
-      "Can't replace vertex positions because the Character lacks a mesh.");
+      !character.mesh, "Can't replace vertex positions because the Character lacks a mesh.");
 
   MT_THROW_IF(
-      positions.cols() != 3 ||
-          positions.rows() != character.mesh->vertices.size(),
+      positions.cols() != 3 || positions.rows() != character.mesh->vertices.size(),
       "Expected a mesh position vector of size {} x 3; got {} x {}",
       character.mesh->vertices.size(),
       positions.rows(),
@@ -467,8 +423,7 @@ momentum::Character replaceRestMesh(
 at::Tensor uniformRandomToModelParameters(
     const momentum::Character& character,
     at::Tensor unifNoise) {
-  unifNoise =
-      unifNoise.contiguous().to(at::DeviceType::CPU, at::ScalarType::Float);
+  unifNoise = unifNoise.contiguous().to(at::DeviceType::CPU, at::ScalarType::Float);
 
   const auto& paramTransform = character.parameterTransform;
 
@@ -500,8 +455,7 @@ at::Tensor uniformRandomToModelParameters(
       if (name.find("scale_") != std::string::npos) {
         res_i[iParam] = 1.0f * (unif_i[iParam] - 0.5f);
       } else if (
-          name.find("_tx") != std::string::npos ||
-          name.find("_ty") != std::string::npos ||
+          name.find("_tx") != std::string::npos || name.find("_ty") != std::string::npos ||
           name.find("_tz") != std::string::npos) {
         res_i[iParam] = 5.0f * (unif_i[iParam] - 0.5f);
       } else {
@@ -526,17 +480,14 @@ std::vector<bool> bonesToVertices(
     const momentum::SkinWeights& skinWeights,
     const std::vector<bool>& bones) {
   const auto nVerts = mesh.vertices.size();
-  MT_THROW_IF(
-      skinWeights.index.rows() != nVerts,
-      "Skinning weights don't match mesh vertices.");
+  MT_THROW_IF(skinWeights.index.rows() != nVerts, "Skinning weights don't match mesh vertices.");
 
   std::vector<bool> result(nVerts);
   for (size_t iVert = 0; iVert < nVerts; ++iVert) {
     float maxWeight = 0.f; // Record max weight from a bone.
     float sumWeight = 0.f; // Record sum of weights from selected bones.
     size_t maxCoefIdx = momentum::kInvalidIndex;
-    for (size_t jCoefIdx = 0; jCoefIdx < skinWeights.weight.row(iVert).size();
-         ++jCoefIdx) {
+    for (size_t jCoefIdx = 0; jCoefIdx < skinWeights.weight.row(iVert).size(); ++jCoefIdx) {
       float w = skinWeights.weight.row(iVert)[jCoefIdx];
       if (w > maxWeight) {
         maxWeight = w;
@@ -566,9 +517,7 @@ std::vector<size_t> bitsetToList(const std::vector<bool>& bits) {
   return result;
 }
 
-std::vector<bool> listToBitset(
-    const std::vector<size_t>& list,
-    const size_t sz) {
+std::vector<bool> listToBitset(const std::vector<size_t>& list, const size_t sz) {
   std::vector<bool> result(sz);
   for (const auto& x : list) {
     result[x] = true;
@@ -597,8 +546,7 @@ std::pair<momentum::Mesh, momentum::SkinWeights> subsetVerticesMesh(
     assert(iFullIndex < mesh.vertices.size());
     resultMesh.vertices.push_back(mesh.vertices[iFullIndex]);
     resultMesh.normals.push_back(
-        iFullIndex < mesh.normals.size() ? mesh.normals[iFullIndex]
-                                         : Eigen::Vector3f::Zero());
+        iFullIndex < mesh.normals.size() ? mesh.normals[iFullIndex] : Eigen::Vector3f::Zero());
 
     if (!mesh.colors.empty()) {
       resultMesh.colors.push_back(mesh.colors[iFullIndex]);
@@ -633,17 +581,14 @@ std::pair<momentum::Mesh, momentum::SkinWeights> subsetVerticesMesh(
   }
 
   momentum::SkinWeights resultSkinWeights;
-  resultSkinWeights.index = momentum::IndexMatrix::Zero(
-      subsetIndexToFullIndex.size(), momentum::kMaxSkinJoints);
-  resultSkinWeights.weight = momentum::WeightMatrix::Zero(
-      subsetIndexToFullIndex.size(), momentum::kMaxSkinJoints);
-  for (size_t iSubsetIndex = 0; iSubsetIndex < subsetIndexToFullIndex.size();
-       ++iSubsetIndex) {
+  resultSkinWeights.index =
+      momentum::IndexMatrix::Zero(subsetIndexToFullIndex.size(), momentum::kMaxSkinJoints);
+  resultSkinWeights.weight =
+      momentum::WeightMatrix::Zero(subsetIndexToFullIndex.size(), momentum::kMaxSkinJoints);
+  for (size_t iSubsetIndex = 0; iSubsetIndex < subsetIndexToFullIndex.size(); ++iSubsetIndex) {
     const size_t iFullIndex = subsetIndexToFullIndex[iSubsetIndex];
-    resultSkinWeights.index.row(iSubsetIndex) =
-        skinWeights.index.row(iFullIndex);
-    resultSkinWeights.weight.row(iSubsetIndex) =
-        skinWeights.weight.row(iFullIndex);
+    resultSkinWeights.index.row(iSubsetIndex) = skinWeights.index.row(iFullIndex);
+    resultSkinWeights.weight.row(iSubsetIndex) = skinWeights.weight.row(iFullIndex);
   }
 
   return {resultMesh, resultSkinWeights};
@@ -651,9 +596,7 @@ std::pair<momentum::Mesh, momentum::SkinWeights> subsetVerticesMesh(
 
 std::vector<size_t> getUpperBodyJoints(const momentum::Skeleton& skeleton) {
   auto upperBodyRoot_idx = skeleton.getJointIdByName("b_spine0");
-  MT_THROW_IF(
-      upperBodyRoot_idx == momentum::kInvalidIndex,
-      "Missing 'b_spine0' joint.");
+  MT_THROW_IF(upperBodyRoot_idx == momentum::kInvalidIndex, "Missing 'b_spine0' joint.");
 
   std::vector<size_t> result;
 
@@ -675,14 +618,13 @@ std::vector<size_t> getUpperBodyJoints(const momentum::Skeleton& skeleton) {
   return result;
 }
 
-momentum::Character stripLowerBodyVertices(
-    const momentum::Character& character) {
+momentum::Character stripLowerBodyVertices(const momentum::Character& character) {
   if (!character.mesh || !character.skinWeights) {
     return character;
   }
 
-  const std::vector<bool> jointsToKeep = listToBitset(
-      getUpperBodyJoints(character.skeleton), character.skeleton.joints.size());
+  const std::vector<bool> jointsToKeep =
+      listToBitset(getUpperBodyJoints(character.skeleton), character.skeleton.joints.size());
 
   auto [mesh_new, skinWeights_new] = subsetVerticesMesh(
       *character.mesh,
@@ -785,9 +727,7 @@ std::shared_ptr<momentum::Mppca> createMppcaModel(
       mu.rows(),
       mu.cols());
 
-  MT_THROW_IF(
-      sigma.size() != nModels,
-      "Mismatch between mixture counts in pi and sigma2.");
+  MT_THROW_IF(sigma.size() != nModels, "Mismatch between mixture counts in pi and sigma2.");
 
   MT_THROW_IF(
       W.ndim() != 3 || W.shape(0) != nModels || W.shape(2) != dimension,
@@ -816,11 +756,7 @@ std::shared_ptr<momentum::Mppca> createMppcaModel(
   }
 
   auto result = std::make_shared<momentum::Mppca>();
-  result->set(
-      pi.cast<float>(),
-      mu.cast<float>(),
-      W_in,
-      sigma.array().square().cast<float>());
+  result->set(pi.cast<float>(), mu.cast<float>(), W_in, sigma.array().square().cast<float>());
   result->names = parameterNames;
   return result;
 }
@@ -835,8 +771,7 @@ std::unique_ptr<momentum::Mesh> getPosedMesh(
   using momentum::kParametersPerJoint;
 
   MT_THROW_IF(
-      jointParameters.size() !=
-          kParametersPerJoint * character.skeleton.joints.size(),
+      jointParameters.size() != kParametersPerJoint * character.skeleton.joints.size(),
       "Mismatched jointParameters size in getPosedMesh(); expected {}x{} parameters but got {}",
       kParametersPerJoint,
       character.skeleton.joints.size(),
@@ -846,10 +781,7 @@ std::unique_ptr<momentum::Mesh> getPosedMesh(
   skelState.set(jointParameters, character.skeleton);
 
   result->vertices = momentum::applySSD(
-      character.inverseBindPose,
-      *character.skinWeights,
-      character.mesh->vertices,
-      skelState);
+      character.inverseBindPose, *character.skinWeights, character.mesh->vertices, skelState);
   result->updateNormals();
   return result;
 }
@@ -956,8 +888,7 @@ at::Tensor applyModelParameterLimitsTemplate(
     //   tensor. The indices tensor used in this step is the same as the one in
     //   tensor.index_select().
 
-    at::Tensor limitedIndicesTensor =
-        to1DTensor(limitedIndices).to(modelParams.device());
+    at::Tensor limitedIndicesTensor = to1DTensor(limitedIndices).to(modelParams.device());
     at::Tensor minLimitsTensor =
         to1DTensor(minLimits).to(modelParams.device(), modelParams.dtype());
     at::Tensor maxLimitsTensor =
@@ -966,9 +897,7 @@ at::Tensor applyModelParameterLimitsTemplate(
         -1,
         limitedIndicesTensor,
         torch::clamp(
-            modelParams.index_select(-1, limitedIndicesTensor),
-            minLimitsTensor,
-            maxLimitsTensor));
+            modelParams.index_select(-1, limitedIndicesTensor), minLimitsTensor, maxLimitsTensor));
   }
 
   if (squeeze) {
@@ -978,9 +907,7 @@ at::Tensor applyModelParameterLimitsTemplate(
   return modelParams;
 }
 
-at::Tensor applyModelParameterLimits(
-    const momentum::Character& character,
-    at::Tensor modelParams) {
+at::Tensor applyModelParameterLimits(const momentum::Character& character, at::Tensor modelParams) {
   if (hasFloat64(modelParams)) {
     return applyModelParameterLimitsTemplate<double>(character, modelParams);
   } else {
@@ -991,11 +918,9 @@ at::Tensor applyModelParameterLimits(
 std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
     const momentum::Character& character) {
   Eigen::VectorXf minLimits = Eigen::VectorXf::Constant(
-      character.parameterTransform.numAllModelParameters(),
-      std::numeric_limits<float>::lowest());
+      character.parameterTransform.numAllModelParameters(), std::numeric_limits<float>::lowest());
   Eigen::VectorXf maxLimits = Eigen::VectorXf::Constant(
-      character.parameterTransform.numAllModelParameters(),
-      std::numeric_limits<float>::max());
+      character.parameterTransform.numAllModelParameters(), std::numeric_limits<float>::max());
 
   for (const auto& l : character.parameterLimits) {
     if (l.type == momentum::LimitType::MinMax) {
@@ -1008,8 +933,7 @@ std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
   return {minLimits, maxLimits};
 }
 
-std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(
-    const momentum::Character& character) {
+std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(const momentum::Character& character) {
   MatrixX7f minLimits = MatrixX7f::Constant(
       character.skeleton.joints.size(),
       momentum::kParametersPerJoint,
@@ -1023,10 +947,8 @@ std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(
     if (l.type == momentum::LimitType::MinMaxJoint ||
         l.type == momentum::LimitType::MinMaxJointPassive) {
       const auto& limitVal = l.data.minMaxJoint;
-      minLimits(limitVal.jointIndex, limitVal.jointParameter) =
-          limitVal.limits.x();
-      maxLimits(limitVal.jointIndex, limitVal.jointParameter) =
-          limitVal.limits.y();
+      minLimits(limitVal.jointIndex, limitVal.jointParameter) = limitVal.limits.x();
+      maxLimits(limitVal.jointIndex, limitVal.jointParameter) = limitVal.limits.y();
     }
   }
 
@@ -1035,8 +957,8 @@ std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(
 
 py::array_t<float> getBindPose(const momentum::Character& character) {
   const auto& inverseBindPose = character.inverseBindPose;
-  py::array_t<float> result = py::array_t<float>(
-      std::vector<py::ssize_t>{(py::ssize_t)inverseBindPose.size(), 4, 4});
+  py::array_t<float> result =
+      py::array_t<float>(std::vector<py::ssize_t>{(py::ssize_t)inverseBindPose.size(), 4, 4});
   auto r = result.mutable_unchecked<3>(); // Will throw if ndim != 3 or
                                           // flags.writable is false
   for (py::ssize_t i = 0; i < inverseBindPose.size(); i++) {
@@ -1052,8 +974,8 @@ py::array_t<float> getBindPose(const momentum::Character& character) {
 
 py::array_t<float> getInverseBindPose(const momentum::Character& character) {
   const auto& inverseBindPose = character.inverseBindPose;
-  py::array_t<float> result = py::array_t<float>(
-      std::vector<py::ssize_t>{(py::ssize_t)inverseBindPose.size(), 4, 4});
+  py::array_t<float> result =
+      py::array_t<float>(std::vector<py::ssize_t>{(py::ssize_t)inverseBindPose.size(), 4, 4});
   auto r = result.mutable_unchecked<3>(); // Will throw if ndim != 3 or
                                           // flags.writable is false
   for (py::ssize_t i = 0; i < inverseBindPose.size(); i++) {
@@ -1074,8 +996,7 @@ std::vector<bool> jointListToBitset(
 
   for (const auto& jointIndex : jointIndices) {
     if (jointIndex < 0 || jointIndex >= activeJoints.size()) {
-      throw pybind11::index_error(
-          fmt::format("Invalid joint index {}", jointIndex));
+      throw pybind11::index_error(fmt::format("Invalid joint index {}", jointIndex));
     }
     activeJoints.at(jointIndex) = true;
   }

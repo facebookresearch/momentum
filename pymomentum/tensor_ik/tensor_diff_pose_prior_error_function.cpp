@@ -123,9 +123,8 @@ std::vector<Eigen::MatrixX<T>> tensor_W_to_matrix_list(
   for (int iMix = 0; iMix < nMixtures; ++iMix) {
     result.emplace_back(nParameters, nComponents);
     for (int jComponent = 0; jComponent < nComponents; ++jComponent) {
-      result.back().col(jComponent) = W.segment(
-          iMix * nComponents * nParameters + jComponent * nParameters,
-          nParameters);
+      result.back().col(jComponent) =
+          W.segment(iMix * nComponents * nParameters + jComponent * nParameters, nParameters);
     }
   }
 
@@ -133,10 +132,8 @@ std::vector<Eigen::MatrixX<T>> tensor_W_to_matrix_list(
 }
 
 template <typename T>
-Eigen::MatrixX<T> tensor_mu_to_matrix(
-    Eigen::Ref<const Eigen::VectorX<T>> mu,
-    int nMixtures,
-    int nParameters) {
+Eigen::MatrixX<T>
+tensor_mu_to_matrix(Eigen::Ref<const Eigen::VectorX<T>> mu, int nMixtures, int nParameters) {
   Eigen::MatrixX<T> muMat(nMixtures, nParameters);
   assert(mu.size() == nMixtures * nParameters);
 
@@ -152,21 +149,16 @@ TensorDiffPosePriorErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  const auto pi =
-      this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kPi)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto mu =
-      this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kMu)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto W =
-      this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kW)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto sigma =
-      this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kSigma)
-          .template toEigenMap<T>(iBatch, jFrame);
+  const auto pi = this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kPi)
+                      .template toEigenMap<T>(iBatch, jFrame);
+  const auto mu = this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kMu)
+                      .template toEigenMap<T>(iBatch, jFrame);
+  const auto W = this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kW)
+                     .template toEigenMap<T>(iBatch, jFrame);
+  const auto sigma = this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kSigma)
+                         .template toEigenMap<T>(iBatch, jFrame);
   const std::vector<std::string> parameterNames = parameterIndicesToNames(
-      this->getTensorInput(
-              FullyDifferentiablePosePriorErrorFunction::kParameterIndices)
+      this->getTensorInput(FullyDifferentiablePosePriorErrorFunction::kParameterIndices)
           .template toEigenMap<int>(iBatch, jFrame),
       character.parameterTransform);
 
@@ -174,9 +166,8 @@ TensorDiffPosePriorErrorFunction<T>::createErrorFunctionImp(
   const auto nParameters = this->sharedSize(NPARAMETERS_IDX);
   const auto nComponents = this->sharedSize(NCOMPONENTS_IDX);
 
-  auto result =
-      std::make_unique<momentum::FullyDifferentiablePosePriorErrorFunctionT<T>>(
-          character.skeleton, character.parameterTransform, parameterNames);
+  auto result = std::make_unique<momentum::FullyDifferentiablePosePriorErrorFunctionT<T>>(
+      character.skeleton, character.parameterTransform, parameterNames);
   if (nMixtures != 0 && nParameters != 0) {
     result->setPosePrior(
         pi,
@@ -203,8 +194,7 @@ std::unique_ptr<TensorErrorFunction<T>> createDiffPosePriorErrorFunction(
       batchSize, nFrames, pi, mu, W, sigma, parameterIndices);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createDiffPosePriorErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createDiffPosePriorErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor pi,
@@ -213,8 +203,7 @@ createDiffPosePriorErrorFunction<float>(
     at::Tensor sigma,
     at::Tensor parameterIndices);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createDiffPosePriorErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createDiffPosePriorErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor pi,

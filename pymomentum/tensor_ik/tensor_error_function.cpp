@@ -15,8 +15,7 @@
 namespace pymomentum {
 
 template <typename T>
-std::string TensorErrorFunction<T>::fullArgumentName(
-    const TensorInput& input) const {
+std::string TensorErrorFunction<T>::fullArgumentName(const TensorInput& input) const {
   std::ostringstream oss;
   oss << _argumentPrefix << "_" << input.inputName;
   return oss.str();
@@ -54,8 +53,7 @@ bool TensorErrorFunction<T>::anyNonEmptyTensor() const {
 }
 
 template <typename T>
-std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>
-TensorErrorFunction<T>::createErrorFunction(
+std::shared_ptr<momentum::SkeletonErrorFunctionT<T>> TensorErrorFunction<T>::createErrorFunction(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
@@ -74,8 +72,8 @@ TensorErrorFunction<T>::createErrorFunction(
 template <typename T>
 bool TensorErrorFunction<T>::requiredTensorEmpty() const {
   for (const auto& i : _tensorInputs) {
-    if (i.targetType != TensorType::TYPE_SENTINEL &&
-        i.optionality == TensorInput::REQUIRED && isEmpty(i.tensor)) {
+    if (i.targetType != TensorType::TYPE_SENTINEL && i.optionality == TensorInput::REQUIRED &&
+        isEmpty(i.tensor)) {
       return true;
     }
   }
@@ -121,9 +119,7 @@ class DimensionString {
 template <typename T>
 std::string TensorErrorFunction<T>::sharedSizeName(int iShared) const {
   auto itr = std::find_if(
-      _sharedSizeNames.begin(),
-      _sharedSizeNames.end(),
-      [&](const std::pair<int, const char*>& pr) {
+      _sharedSizeNames.begin(), _sharedSizeNames.end(), [&](const std::pair<int, const char*>& pr) {
         return pr.first == iShared;
       });
   if (itr != _sharedSizeNames.end()) {
@@ -137,9 +133,8 @@ std::string TensorErrorFunction<T>::sharedSizeName(int iShared) const {
 
 template <typename T>
 template <typename TVec>
-std::string TensorErrorFunction<T>::formatTensorSize(
-    const TVec& sizes,
-    bool includeBatchPrefix) const {
+std::string TensorErrorFunction<T>::formatTensorSize(const TVec& sizes, bool includeBatchPrefix)
+    const {
   DimensionString result;
 
   if (includeBatchPrefix) {
@@ -260,9 +255,7 @@ void TensorErrorFunction<T>::validateDimensions() {
         // Match up to an existing shared size:
         auto itr = sharedSizes.find(sharedDimIndex);
         if (itr == sharedSizes.end()) {
-          sharedSizes.insert(
-              itr,
-              std::make_pair(sharedDimIndex, std::make_pair(tensorSz, &i)));
+          sharedSizes.insert(itr, std::make_pair(sharedDimIndex, std::make_pair(tensorSz, &i)));
         } else {
           // Found previous instance; validate that the sizes match:
           const auto storedSz = itr->second.first;
@@ -309,9 +302,8 @@ void TensorErrorFunction<T>::fixTensors() {
       continue;
     }
 
-    auto scalarType = (i.targetType == TensorType::TYPE_FLOAT)
-        ? toScalarType<T>()
-        : at::ScalarType::Int;
+    auto scalarType =
+        (i.targetType == TensorType::TYPE_FLOAT) ? toScalarType<T>() : at::ScalarType::Int;
 
     // Tensors that require gradients need to be on the CPU or we will hit
     // errors in the tensor list that we return that are difficult to pull
@@ -332,8 +324,7 @@ Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> TensorInput::toEigenMap(
     size_t iBatch,
     size_t iFrame) const {
   MT_THROW_IF(
-      targetType == TensorType::TYPE_SENTINEL,
-      "Attempt to use sentinel tensor as actual input.");
+      targetType == TensorType::TYPE_SENTINEL, "Attempt to use sentinel tensor as actual input.");
 
   if (isEmpty(tensor)) {
     return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>>(nullptr, 0);
@@ -362,22 +353,22 @@ Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> TensorInput::toEigenMap(
   return pymomentum::toEigenMap<T>(tensor_cur);
 }
 
-template Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1>>
-TensorInput::toEigenMap<double>(size_t iBatch, size_t iFrame) const;
+template Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1>> TensorInput::toEigenMap<double>(
+    size_t iBatch,
+    size_t iFrame) const;
 
-template Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 1>>
-TensorInput::toEigenMap<float>(size_t iBatch, size_t iFrame) const;
+template Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 1>> TensorInput::toEigenMap<float>(
+    size_t iBatch,
+    size_t iFrame) const;
 
-template Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>>
-TensorInput::toEigenMap<int>(size_t iBatch, size_t iFrame) const;
+template Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>> TensorInput::toEigenMap<int>(
+    size_t iBatch,
+    size_t iFrame) const;
 
 template <typename T>
-const TensorInput& TensorErrorFunction<T>::getTensorInput(
-    const char* name) const {
-  auto itr = std::find_if(
-      _tensorInputs.begin(),
-      _tensorInputs.end(),
-      [name](const TensorInput& input) {
+const TensorInput& TensorErrorFunction<T>::getTensorInput(const char* name) const {
+  auto itr =
+      std::find_if(_tensorInputs.begin(), _tensorInputs.end(), [name](const TensorInput& input) {
         return strcmp(name, input.inputName) == 0;
       });
   MT_THROW_IF(itr == _tensorInputs.end(), "Missing input: {}", name);
@@ -389,9 +380,7 @@ template <typename T>
 size_t TensorErrorFunction<T>::sharedSize(int sharedDimensionFlag) const {
   const auto find = _sharedSizes.find(sharedDimensionFlag);
   MT_THROW_IF(
-      find == _sharedSizes.end(),
-      "Cannot find a shared dimension flag: {}",
-      sharedDimensionFlag);
+      find == _sharedSizes.end(), "Cannot find a shared dimension flag: {}", sharedDimensionFlag);
   return find->second;
 }
 

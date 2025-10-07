@@ -29,18 +29,13 @@ PYBIND11_MODULE(solver, m) {
   m.doc() = "Inverse kinematics and other optimizations for momentum models.";
 
   pybind11::module_::import("torch"); // @dep=//caffe2:torch
-  pybind11::module_::import(
-      "pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
-  auto solver2 = pybind11::module_::import(
-      "pymomentum.solver2"); // @dep=fbcode//pymomentum:solver2
+  pybind11::module_::import("pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
+  auto solver2 = pybind11::module_::import("pymomentum.solver2"); // @dep=fbcode//pymomentum:solver2
 
-  m.attr("VertexConstraintType") =
-      solver2.attr("VertexConstraintType").attr("Position");
+  m.attr("VertexConstraintType") = solver2.attr("VertexConstraintType").attr("Position");
 
   py::enum_<ErrorFunctionType>(
-      m,
-      "ErrorFunctionType",
-      R"(Types of error functions passed to solveBodyIKProblem().)")
+      m, "ErrorFunctionType", R"(Types of error functions passed to solveBodyIKProblem().)")
       .value("Position", ErrorFunctionType::Position)
       .value("Orientation", ErrorFunctionType::Orientation)
       .value("Limit", ErrorFunctionType::Limit)
@@ -54,9 +49,7 @@ PYBIND11_MODULE(solver, m) {
       .export_values();
 
   py::enum_<LinearSolverType>(
-      m,
-      "LinearSolverType",
-      R"(Types of linear solver supported by solveBodyIKProblem().)")
+      m, "LinearSolverType", R"(Types of linear solver supported by solveBodyIKProblem().)")
       .value("Cholesky", LinearSolverType::Cholesky)
       .value("QR", LinearSolverType::QR)
       .value("TrustRegionQR", LinearSolverType::TrustRegionQR);
@@ -251,8 +244,7 @@ All quaternion parameters use the quaternion order [x, y, z, w], where :math:`q 
       py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
       py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
-      py::arg("vertex_proj_cons_target_positions") =
-          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
@@ -302,8 +294,7 @@ For details on the arguments, see :py:func:`solve_ik`.
       py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
       py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
-      py::arg("vertex_proj_cons_target_positions") =
-          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
@@ -350,8 +341,7 @@ For details on the arguments, see :py:func:`solve_ik`.
       py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
       py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
-      py::arg("vertex_proj_cons_target_positions") =
-          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
@@ -411,8 +401,7 @@ For details on the arguments, see :py:func:`solve_ik`.
       py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
       py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
-      py::arg("vertex_proj_cons_target_positions") =
-          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   // -------------------------------------------------------------
@@ -472,8 +461,7 @@ This is to prevent confusing ambiguities in whether you meant sharing across the
       py::arg("vertex_cons_type") = momentum::VertexConstraintType::Position,
       py::arg("vertex_proj_cons_vertices") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_weights") = std::optional<at::Tensor>{},
-      py::arg("vertex_proj_cons_target_positions") =
-          std::optional<at::Tensor>{},
+      py::arg("vertex_proj_cons_target_positions") = std::optional<at::Tensor>{},
       py::arg("vertex_proj_cons_projections") = std::optional<at::Tensor>{});
 
   m.def(
@@ -512,12 +500,10 @@ the derivatives will not be computed.
       "set_num_threads",
       [](int nThreads) {
         MT_THROW_IF(
-            nThreads == 0,
-            "Expected nThreads >= 1; use -1 to specify the number of processors.");
+            nThreads == 0, "Expected nThreads >= 1; use -1 to specify the number of processors.");
 
         if (nThreads < 0) {
-          dispenso::globalThreadPool().resize(
-              std::thread::hardware_concurrency());
+          dispenso::globalThreadPool().resize(std::thread::hardware_concurrency());
           return;
         }
 

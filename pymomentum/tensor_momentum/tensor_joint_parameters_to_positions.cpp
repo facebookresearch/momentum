@@ -16,8 +16,11 @@
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/common/exception.h>
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 #include <Eigen/Core>
 
 namespace pymomentum {
@@ -26,6 +29,8 @@ using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
 namespace {
+
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 
 template <typename T>
 void jointParametersToPositions(
@@ -37,19 +42,15 @@ void jointParametersToPositions(
   const momentum::SkeletonStateT<T> skelState(jointParameters, skeleton);
 
   const int n = parents.size();
-  MT_THROW_IF(
-      offsets.size() != 3 * n,
-      "Mismatched offsets size in jointParametersToPositions()");
+  MT_THROW_IF(offsets.size() != 3 * n, "Mismatched offsets size in jointParametersToPositions()");
 
   MT_THROW_IF(
-      positions.size() != 3 * n,
-      "Mismatched positions size in jointParametersToPositions()");
+      positions.size() != 3 * n, "Mismatched positions size in jointParametersToPositions()");
 
   for (int i = 0; i < n; ++i) {
     const int parent = parents[i];
     const Eigen::Vector3<T> offset = offsets.template segment<3>(3 * i);
-    const Eigen::Vector3<T> p_world =
-        skelState.jointState[parent].transform * offset;
+    const Eigen::Vector3<T> p_world = skelState.jointState[parent].transform * offset;
     positions.template segment<3>(3 * i) = p_world;
   }
 }
@@ -66,24 +67,20 @@ void d_jointParametersToPositions(
   const momentum::SkeletonStateT<T> skelState(jointParameters, skeleton);
 
   const int n = parents.size();
-  MT_THROW_IF(
-      offsets.size() != 3 * n,
-      "Mismatched offsets size in d_modelParametersToPositions()");
+  MT_THROW_IF(offsets.size() != 3 * n, "Mismatched offsets size in d_modelParametersToPositions()");
 
   dLoss_jointParameters.setZero();
 
   for (int i = 0; i < n; ++i) {
-    const Eigen::Vector3<T> dLoss_dPosition =
-        dLoss_dPositions.template segment<3>(3 * i);
+    const Eigen::Vector3<T> dLoss_dPosition = dLoss_dPositions.template segment<3>(3 * i);
 
     const int parent = parents[i];
-    const Eigen::Vector3<T> p_world = skelState.jointState[parent].transform *
-        offsets.template segment<3>(3 * i);
+    const Eigen::Vector3<T> p_world =
+        skelState.jointState[parent].transform * offsets.template segment<3>(3 * i);
 
     for (int k = 0; k < 3; ++k) {
       dLoss_offsets(3 * i + k) =
-          (skelState.jointState[parent].transform.toLinear() *
-           Eigen::Vector3<T>::Unit(k))
+          (skelState.jointState[parent].transform.toLinear() * Eigen::Vector3<T>::Unit(k))
               .dot(dLoss_dPosition);
     }
 
@@ -134,9 +131,7 @@ struct JointParametersToPositionsFunction
       at::Tensor parents,
       at::Tensor offsets);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_jointParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_jointParameters);
 };
 
 template <typename T>
@@ -148,8 +143,7 @@ variable_list JointParametersToPositionsFunction<T>::forward(
     at::Tensor offsets) {
   const int nJointParameters = static_cast<int>(
       momentum::kParametersPerJoint *
-      anyCharacter(characters_in, "joint_parameters_to_positions()")
-          .skeleton.joints.size());
+      anyCharacter(characters_in, "joint_parameters_to_positions()").skeleton.joints.size());
 
   const auto nPoints_idx = -1;
 
@@ -157,8 +151,7 @@ variable_list JointParametersToPositionsFunction<T>::forward(
   const auto input_device = jointParameters.device();
 
   jointParameters = flattenJointParameters(
-      anyCharacter(characters_in, "joint_parameters_to_positions()"),
-      jointParameters);
+      anyCharacter(characters_in, "joint_parameters_to_positions()"), jointParameters);
 
   bool squeeze = false;
   jointParameters = checker.validateAndFixTensor(
@@ -174,30 +167,19 @@ variable_list JointParametersToPositionsFunction<T>::forward(
   parents = checker.validateAndFixTensor(
       parents, "parents", {nPoints_idx}, {"nPoints"}, at::kInt, true, true);
   checkValidBoneIndex(
-      parents,
-      anyCharacter(characters_in, "joint_parameters_to_positions()"),
-      "parents");
+      parents, anyCharacter(characters_in, "joint_parameters_to_positions()"), "parents");
 
   offsets = checker.validateAndFixTensor(
-      offsets,
-      "offsets",
-      {nPoints_idx, 3},
-      {"nPoints", "xyz"},
-      toScalarType<T>(),
-      true,
-      true);
+      offsets, "offsets", {nPoints_idx, 3}, {"nPoints", "xyz"}, toScalarType<T>(), true, true);
 
   const auto nPoints = checker.getBoundValue(nPoints_idx);
   const auto nBatch = checker.getBatchSize();
-  const auto characters =
-      toCharacterList(characters_in, nBatch, "joint_parameters_to_positions()");
+  const auto characters = toCharacterList(characters_in, nBatch, "joint_parameters_to_positions()");
 
-  ctx->saved_data["character"] =
-      c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+  ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
   ctx->save_for_backward({jointParameters, parents, offsets});
 
-  at::Tensor result =
-      at::zeros({nBatch, nPoints, 3}, at::CPU(toScalarType<T>()));
+  at::Tensor result = at::zeros({nBatch, nPoints, 3}, at::CPU(toScalarType<T>()));
 
   for (int64_t k = 0; k < nBatch; ++k) {
     const auto character = characters[k];
@@ -233,9 +215,7 @@ variable_list JointParametersToPositionsFunction<T>::backward(
   // Restore variables:
   const int nJointParameters = static_cast<int>(
       momentum::kParametersPerJoint *
-      anyCharacter(
-          ctx->saved_data["character"].toPyObject(),
-          "jointParametersToPositions()")
+      anyCharacter(ctx->saved_data["character"].toPyObject(), "jointParametersToPositions()")
           .skeleton.joints.size());
 
   const auto saved = ctx->get_saved_variables();
@@ -247,8 +227,7 @@ variable_list JointParametersToPositionsFunction<T>::backward(
   const auto input_device =
       grad_outputs[0].device(); // grad_output size is asserted in the beginning
 
-  auto dLoss_dPositions =
-      grad_outputs[0].contiguous().to(at::DeviceType::CPU, toScalarType<T>());
+  auto dLoss_dPositions = grad_outputs[0].contiguous().to(at::DeviceType::CPU, toScalarType<T>());
 
   bool squeeze_jointParams = false;
   bool squeeze_offsets = false;
@@ -267,8 +246,7 @@ variable_list JointParametersToPositionsFunction<T>::backward(
       false,
       &squeeze_jointParams);
 
-  parents = checker.validateAndFixTensor(
-      parents, "parents", {nPoints_idx}, {"nPoints"}, at::kInt);
+  parents = checker.validateAndFixTensor(parents, "parents", {nPoints_idx}, {"nPoints"}, at::kInt);
 
   offsets = checker.validateAndFixTensor(
       offsets,
@@ -283,14 +261,10 @@ variable_list JointParametersToPositionsFunction<T>::backward(
   const auto nPoints = checker.getBoundValue(nPoints_idx);
   const auto nBatch = checker.getBatchSize();
   const auto characters = toCharacterList(
-      ctx->saved_data["character"].toPyObject(),
-      nBatch,
-      "jointParametersToPositions()");
+      ctx->saved_data["character"].toPyObject(), nBatch, "jointParametersToPositions()");
 
-  at::Tensor d_jointParameters =
-      at::zeros({nBatch, nJointParameters}, at::CPU(toScalarType<T>()));
-  at::Tensor d_offsets =
-      at::zeros({nBatch, nPoints, 3}, at::CPU(toScalarType<T>()));
+  at::Tensor d_jointParameters = at::zeros({nBatch, nJointParameters}, at::CPU(toScalarType<T>()));
+  at::Tensor d_offsets = at::zeros({nBatch, nPoints, 3}, at::CPU(toScalarType<T>()));
 
   for (int64_t k = 0; k < nBatch; ++k) {
     const auto character = characters[k];
@@ -321,21 +295,24 @@ variable_list JointParametersToPositionsFunction<T>::backward(
   }
 
   return {
-      at::Tensor(),
-      d_jointParameters.to(input_device),
-      at::Tensor(),
-      d_offsets.to(input_device)};
+      at::Tensor(), d_jointParameters.to(input_device), at::Tensor(), d_offsets.to(input_device)};
 }
+
+#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
 at::Tensor jointParametersToPositions(
-    py::object characters_in,
+    pybind11::object characters_in,
     at::Tensor jointParameters,
     at::Tensor parents,
     at::Tensor offsets) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<JointParametersToPositionsFunction>(
       characters_in.ptr(), jointParameters, parents, offsets)[0];
+#else
+  MT_THROW("jointParametersToPositions is not supported in limited PyTorch API mode");
+#endif
 }
 
 at::Tensor modelParametersToPositions(
@@ -344,10 +321,7 @@ at::Tensor modelParametersToPositions(
     at::Tensor parents,
     at::Tensor offsets) {
   return jointParametersToPositions(
-      characters,
-      applyParamTransform(characters, modelParameters),
-      parents,
-      offsets);
+      characters, applyParamTransform(characters, modelParameters), parents, offsets);
 }
 
 } // namespace pymomentum

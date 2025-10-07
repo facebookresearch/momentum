@@ -95,10 +95,9 @@ Setting this value will affect subsequently added motions and animations.
              bool addLocators,
              bool addMesh) {
             // Use defaults if not provided
-            Eigen::Vector3f actualPositionOffset =
-                positionOffset.value_or(Eigen::Vector3f::Zero());
-            Eigen::Vector4f actualRotationOffset = rotationOffset.value_or(
-                Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f));
+            Eigen::Vector3f actualPositionOffset = positionOffset.value_or(Eigen::Vector3f::Zero());
+            Eigen::Vector4f actualRotationOffset =
+                rotationOffset.value_or(Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f));
 
             // Convert Vector4f (x,y,z,w) to Quaternionf (w,x,y,z)
             mm::Quaternionf quaternionOffset(
@@ -213,8 +212,7 @@ model parameters that animate the character over time.
                 pymomentum::arrayToSkeletonStates(skeletonStates, character);
 
             // Call the addSkeletonStates method
-            builder.addSkeletonStates(
-                character, fps, gsl::make_span(skelStates), customName);
+            builder.addSkeletonStates(character, fps, gsl::make_span(skelStates), customName);
           },
           R"(Add skeleton states animation to the specified character.
           
@@ -240,8 +238,7 @@ per-joint transforms that define the character's pose over time.
              const std::vector<std::vector<mm::Marker>>& markerSequence,
              mm::GltfBuilder::MarkerMesh markerMesh,
              const std::string& animName) {
-            builder.addMarkerSequence(
-                fps, gsl::make_span(markerSequence), markerMesh, animName);
+            builder.addMarkerSequence(fps, gsl::make_span(markerSequence), markerMesh, animName);
           },
           R"(Add marker sequence animation data to the GLTF scene.
             

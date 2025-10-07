@@ -47,8 +47,7 @@ at::Tensor denullify(std::optional<at::Tensor> tensor) {
 
 template <typename T>
 Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> toEigenMap(at::Tensor t) {
-  MT_THROW_IF(
-      t.scalar_type() != toScalarType<T>(), "Mismatch in tensor types.");
+  MT_THROW_IF(t.scalar_type() != toScalarType<T>(), "Mismatch in tensor types.");
 
   int64_t sz = 1;
   for (const auto& d : t.sizes()) {
@@ -58,45 +57,36 @@ Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> toEigenMap(at::Tensor t) {
   return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>>((T*)t.data_ptr(), sz);
 }
 
-template Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 1>> toEigenMap(
-    at::Tensor t);
-template Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1>> toEigenMap(
-    at::Tensor t);
-template Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>> toEigenMap(
-    at::Tensor t);
+template Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 1>> toEigenMap(at::Tensor t);
+template Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1>> toEigenMap(at::Tensor t);
+template Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>> toEigenMap(at::Tensor t);
 
 template <typename T, int Rows, int Cols>
 std::vector<Eigen::Matrix<T, Rows, Cols>> toMatrixList(at::Tensor tensor) {
-  MT_THROW_IF(
-      tensor.ndimension() != 3, "toMatrixList expected tensor of dimension 3.");
+  MT_THROW_IF(tensor.ndimension() != 3, "toMatrixList expected tensor of dimension 3.");
 
   const auto nMat = tensor.size(0);
   const auto nRows = tensor.size(1);
   const auto nCols = tensor.size(2);
 
   MT_THROW_IF(
-      Rows != Eigen::Dynamic && nRows != Rows,
-      "Mismatch in row dimension for toMatrixList()");
+      Rows != Eigen::Dynamic && nRows != Rows, "Mismatch in row dimension for toMatrixList()");
 
   MT_THROW_IF(
-      Cols != Eigen::Dynamic && nCols != Cols,
-      "Mismatch in row dimension for toMatrixList()");
+      Cols != Eigen::Dynamic && nCols != Cols, "Mismatch in row dimension for toMatrixList()");
 
   std::vector<Eigen::Matrix<T, Rows, Cols>> result;
   result.reserve(nMat);
 
   for (int i = 0; i < nMat; ++i) {
-    result.push_back(
-        toEigenMap<T>(tensor.select(0, i)).reshaped(nRows, nCols).transpose());
+    result.push_back(toEigenMap<T>(tensor.select(0, i)).reshaped(nRows, nCols).transpose());
   }
 
   return result;
 }
 
-template std::vector<Eigen::Matrix4f> toMatrixList<float, 4, 4>(
-    at::Tensor tensor);
-template std::vector<Eigen::Matrix4d> toMatrixList<double, 4, 4>(
-    at::Tensor tensor);
+template std::vector<Eigen::Matrix4f> toMatrixList<float, 4, 4>(at::Tensor tensor);
+template std::vector<Eigen::Matrix4d> toMatrixList<double, 4, 4>(at::Tensor tensor);
 
 std::string formatExpectedDimensions(
     const std::vector<int>& expectedSizes,
@@ -108,8 +98,7 @@ std::string formatExpectedDimensions(
     oss << " x ";
     if (dimensionNames[i] == nullptr) {
       MT_THROW_IF(
-          expectedSizes[i] < 0,
-          "Expected size must be non-negative when dimension name is null");
+          expectedSizes[i] < 0, "Expected size must be non-negative when dimension name is null");
       oss << expectedSizes[i];
       continue;
     }
@@ -135,12 +124,10 @@ at::Tensor TensorChecker::validateAndFixTensor(
     bool allowUnbatched,
     bool allowEmpty,
     bool* needsSqueeze_out) {
-  at::Tensor result =
-      tensor_orig.contiguous().to(at::DeviceType::CPU, expectedScalarType);
+  at::Tensor result = tensor_orig.contiguous().to(at::DeviceType::CPU, expectedScalarType);
 
   MT_THROW_IF(
-      expectedSizes.size() != dimensionNames.size(),
-      "Unexpected error in validateAndFixTensor()");
+      expectedSizes.size() != dimensionNames.size(), "Unexpected error in validateAndFixTensor()");
   const auto nExpectedDim = expectedSizes.size();
 
   if (isEmpty(tensor_orig)) {
@@ -149,8 +136,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
         "In {}, tensor argument {} is empty. Expected {}",
         _functionName,
         tensorName,
-        formatExpectedDimensions(
-            expectedSizes, dimensionNames, _boundVariableSizes));
+        formatExpectedDimensions(expectedSizes, dimensionNames, _boundVariableSizes));
     return result;
   }
 
@@ -163,8 +149,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
         "In {}, expected {} to be a batched tensor with dimensions {} but got unbatched tensor with dimensions {}",
         _functionName,
         tensorName,
-        formatExpectedDimensions(
-            expectedSizes, dimensionNames, _boundVariableSizes),
+        formatExpectedDimensions(expectedSizes, dimensionNames, _boundVariableSizes),
         formatTensorSizes(tensor_orig));
 
     result = result.unsqueeze(0);
@@ -203,8 +188,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
         _functionName,
         tensorName,
         formatTensorSizes(tensor_orig),
-        formatExpectedDimensions(
-            expectedSizes, dimensionNames, _boundVariableSizes),
+        formatExpectedDimensions(expectedSizes, dimensionNames, _boundVariableSizes),
         formatTensorSizes(tensor_orig));
   }
 
@@ -230,8 +214,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
             _functionName,
             tensorName,
             dimensionNames[iDim],
-            formatExpectedDimensions(
-                expectedSizes, dimensionNames, boundVariableSizes_new),
+            formatExpectedDimensions(expectedSizes, dimensionNames, boundVariableSizes_new),
             formatTensorSizes(tensor_orig));
       }
     } else {
@@ -241,8 +224,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
           _functionName,
           tensorName,
           dimensionNames[iDim],
-          formatExpectedDimensions(
-              expectedSizes, dimensionNames, boundVariableSizes_new),
+          formatExpectedDimensions(expectedSizes, dimensionNames, boundVariableSizes_new),
           formatTensorSizes(tensor_orig));
     }
   }
@@ -258,9 +240,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
 }
 
 int64_t TensorChecker::getBatchSize() {
-  MT_THROW_IF(
-      _batchSize <= 0,
-      "TensorChecker: Called getBatchSize with invalid batch size.");
+  MT_THROW_IF(_batchSize <= 0, "TensorChecker: Called getBatchSize with invalid batch size.");
   return _batchSize;
 }
 
@@ -273,17 +253,13 @@ int64_t TensorChecker::getBoundValue(int idx) {
   return itr->second;
 }
 
-void throwIfNaNOrINF(
-    const at::Tensor& t,
-    const char* context,
-    const char* tensorName) {
+void throwIfNaNOrINF(const at::Tensor& t, const char* context, const char* tensorName) {
   if (isEmpty(t)) {
     return;
   }
 
   MT_THROW_IF(
-      at::isnan(t).any().cpu().item<bool>() ||
-          at::isinf(t).any().cpu().item<bool>(),
+      at::isnan(t).any().cpu().item<bool>() || at::isinf(t).any().cpu().item<bool>(),
       "In {}, {} with dimension {} has NaN/INF.",
       context,
       tensorName,

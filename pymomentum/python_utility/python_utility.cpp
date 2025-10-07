@@ -18,17 +18,13 @@ namespace pymomentum {
 
 namespace py = pybind11;
 
-std::vector<const momentum::Character*> toCharacterList(
-    PyObject* obj,
-    int64_t nBatch,
-    const char* context,
-    bool forceBatchSize) {
+std::vector<const momentum::Character*>
+toCharacterList(PyObject* obj, int64_t nBatch, const char* context, bool forceBatchSize) {
   assert(obj != nullptr);
   if (PyList_Check(obj)) {
     std::vector<const momentum::Character*> result;
     for (Py_ssize_t i = 0; i < PyList_Size(obj); ++i) {
-      result.push_back(
-          py::cast<const momentum::Character*>(PyList_GetItem(obj, i)));
+      result.push_back(py::cast<const momentum::Character*>(PyList_GetItem(obj, i)));
     }
 
     MT_THROW_IF(
@@ -55,9 +51,7 @@ std::vector<const momentum::Character*> toCharacterList(
 
       if (result.front()->mesh) {
         MT_THROW_IF(
-            !c->mesh ||
-                c->mesh->vertices.size() !=
-                    result.front()->mesh->vertices.size(),
+            !c->mesh || c->mesh->vertices.size() != result.front()->mesh->vertices.size(),
             "Mismatch in meshes in {}; when processing a batch of characters, all characters must have the same number of vertices.",
             context);
       }
@@ -82,19 +76,16 @@ std::vector<const momentum::Character*> toCharacterList(
 const momentum::Character& anyCharacter(PyObject* obj, const char* context) {
   assert(obj != nullptr);
   if (PyList_Check(obj)) {
-    for (Py_ssize_t i = 0; i < PyList_Size(obj); ++i) {
-      try {
-        return *py::cast<const momentum::Character*>(PyList_GetItem(obj, i));
-      } catch (std::exception&) {
-        MT_THROW(
-            "Expected a valid pymomentum.Character of list of Characters in {}",
-            context);
-      }
-    }
-
-    MT_THROW(
+    MT_THROW_IF(
+        PyList_Size(obj) == 0,
         "Expected a valid pymomentum.Character of list of Characters in {}; got an empty list.",
         context);
+
+    try {
+      return *py::cast<const momentum::Character*>(PyList_GetItem(obj, 0));
+    } catch (std::exception&) {
+      MT_THROW("Expected a valid pymomentum.Character of list of Characters in {}", context);
+    }
   }
 
   return *py::cast<const momentum::Character*>(obj);

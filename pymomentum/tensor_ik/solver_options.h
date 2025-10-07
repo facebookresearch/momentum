@@ -36,9 +36,8 @@ struct SolverOptions {
   float sequenceSmoothingWeight = 0.0f;
 
   bool operator==(const SolverOptions& rhs) const {
-    return linearSolverType == rhs.linearSolverType &&
-        levmar_lambda == rhs.levmar_lambda && minIter == rhs.minIter &&
-        maxIter == rhs.maxIter && threshold == rhs.threshold &&
+    return linearSolverType == rhs.linearSolverType && levmar_lambda == rhs.levmar_lambda &&
+        minIter == rhs.minIter && maxIter == rhs.maxIter && threshold == rhs.threshold &&
         lineSearch == rhs.lineSearch;
   }
 };

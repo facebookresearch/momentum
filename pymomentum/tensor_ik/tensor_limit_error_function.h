@@ -12,8 +12,6 @@
 namespace pymomentum {
 
 template <typename T>
-std::unique_ptr<TensorErrorFunction<T>> createLimitErrorFunction(
-    size_t batchSize,
-    size_t nFrames);
+std::unique_ptr<TensorErrorFunction<T>> createLimitErrorFunction(size_t batchSize, size_t nFrames);
 
 }

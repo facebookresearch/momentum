@@ -16,8 +16,7 @@
 
 namespace pymomentum {
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor>
-mppcaToTensors(
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTensors(
     const momentum::Mppca& mppca,
     std::optional<const momentum::ParameterTransform*> paramTransform);
 

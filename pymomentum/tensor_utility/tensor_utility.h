@@ -52,10 +52,7 @@ at::Tensor denullify(std::optional<at::Tensor> tensor);
 // Check for NaN and INF in a tensor, throw runtime error with provided
 // strings in the error message: "In <context>, <tensorName> with dimension
 // [...] has nan or inf."
-void throwIfNaNOrINF(
-    const at::Tensor& t,
-    const char* context,
-    const char* tensorName);
+void throwIfNaNOrINF(const at::Tensor& t, const char* context, const char* tensorName);
 
 // Build an 1D tensor from external buffer. Support data type
 // float, double, int, int64_t.
@@ -73,10 +70,7 @@ void throwIfNaNOrINF(
 // the memory.
 template <typename T>
 inline at::Tensor to1DTensor(const T* data, int64_t size) {
-  return torch::from_blob(
-             (void*)data,
-             {size},
-             torch::TensorOptions().dtype(toScalarType<T>()))
+  return torch::from_blob((void*)data, {size}, torch::TensorOptions().dtype(toScalarType<T>()))
       .clone();
 }
 
@@ -97,8 +91,7 @@ inline at::Tensor to1DTensor(const std::vector<T>& vec) {
 // Build 2D tensor from Eigen row-major dense Matrix. Support data type
 // float, double, int, int64_t.
 template <typename T, int _Rows, int _Cols>
-at::Tensor to2DTensor(
-    const Eigen::Matrix<T, _Rows, _Cols, Eigen::RowMajor>& mat) {
+at::Tensor to2DTensor(const Eigen::Matrix<T, _Rows, _Cols, Eigen::RowMajor>& mat) {
   return torch::from_blob(
              (void*)mat.data(),
              {mat.rows(), mat.cols()},
@@ -109,8 +102,7 @@ at::Tensor to2DTensor(
 // Build 2D tensor from Eigen col-major dense Matrix. Support data type
 // float, double, int, int64_t.
 template <typename T, int _Rows, int _Cols>
-at::Tensor to2DTensor(
-    const Eigen::Matrix<T, _Rows, _Cols, Eigen::ColMajor>& mat) {
+at::Tensor to2DTensor(const Eigen::Matrix<T, _Rows, _Cols, Eigen::ColMajor>& mat) {
   Eigen::Matrix<T, _Rows, _Cols, Eigen::RowMajor> matRowMajor = mat;
   return to2DTensor(matRowMajor);
 }
@@ -122,8 +114,7 @@ at::Tensor to2DTensor(
 //
 class TensorChecker {
  public:
-  explicit TensorChecker(const char* functionName)
-      : _functionName(functionName) {}
+  explicit TensorChecker(const char* functionName) : _functionName(functionName) {}
 
   // Performs the following validations:
   //   1. Checks that all the dimensions are correct

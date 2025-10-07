@@ -38,23 +38,18 @@ void findClosestPoints_imp(
   const int64_t nSrcPts = points_source.size(0);
   const int64_t nTgtPts = points_target.size(0);
 
-  const axel::SimdKdTreef<Dimension> kdTree_target(
-      {pts_tgt_ptr, pts_tgt_ptr + nTgtPts});
+  const axel::SimdKdTreef<Dimension> kdTree_target({pts_tgt_ptr, pts_tgt_ptr + nTgtPts});
 
   Eigen::Map<Eigen::VectorXf> pts_src_map = toEigenMap<float>(points_source);
   Eigen::Map<Eigen::VectorXf> pts_tgt_map = toEigenMap<float>(points_target);
-  Eigen::Map<Eigen::VectorXi> result_indices_map =
-      toEigenMap<int>(result_indices);
-  Eigen::Map<Eigen::VectorXf> result_points_map =
-      toEigenMap<float>(result_points);
+  Eigen::Map<Eigen::VectorXi> result_indices_map = toEigenMap<int>(result_indices);
+  Eigen::Map<Eigen::VectorXf> result_points_map = toEigenMap<float>(result_points);
 
   dispenso::parallel_for(
-      dispenso::makeChunkedRange(0, nSrcPts, 64),
-      [&](int64_t srcStart, int64_t srcEnd) {
+      dispenso::makeChunkedRange(0, nSrcPts, 64), [&](int64_t srcStart, int64_t srcEnd) {
         for (int64_t k = srcStart; k < srcEnd; ++k) {
           const Vec p_src = pts_src_map.segment<Dimension>(Dimension * k);
-          const auto [valid, tgt_index, sqrDist] =
-              kdTree_target.closestPoint(p_src, maxSqrDist);
+          const auto [valid, tgt_index, sqrDist] = kdTree_target.closestPoint(p_src, maxSqrDist);
           if (valid) {
             result_indices_map(k) = tgt_index;
             result_points_map.segment<Dimension>(Dimension * k) =
@@ -80,46 +75,35 @@ void findClosestPointsWithNormal_imp(
     at::Tensor result_indices) {
   assert(points_source.size(1) == 3);
   assert(points_target.size(1) == 3);
-  const Eigen::Vector3f* pts_tgt_ptr =
-      (const Eigen::Vector3f*)points_target.data_ptr();
-  const Eigen::Vector3f* normals_tgt_ptr =
-      (const Eigen::Vector3f*)normals_target.data_ptr();
+  const Eigen::Vector3f* pts_tgt_ptr = (const Eigen::Vector3f*)points_target.data_ptr();
+  const Eigen::Vector3f* normals_tgt_ptr = (const Eigen::Vector3f*)normals_target.data_ptr();
 
   const int64_t nSrcPts = points_source.size(0);
   const int64_t nTgtPts = points_target.size(0);
 
   const axel::SimdKdTreef<3> kdTree_target(
-      {pts_tgt_ptr, pts_tgt_ptr + nTgtPts},
-      {normals_tgt_ptr, normals_tgt_ptr + nTgtPts});
+      {pts_tgt_ptr, pts_tgt_ptr + nTgtPts}, {normals_tgt_ptr, normals_tgt_ptr + nTgtPts});
 
   Eigen::Map<Eigen::VectorXf> pts_src_map = toEigenMap<float>(points_source);
   Eigen::Map<Eigen::VectorXf> pts_tgt_map = toEigenMap<float>(points_target);
-  Eigen::Map<Eigen::VectorXf> normals_src_map =
-      toEigenMap<float>(normals_source);
-  Eigen::Map<Eigen::VectorXf> normals_tgt_map =
-      toEigenMap<float>(normals_target);
+  Eigen::Map<Eigen::VectorXf> normals_src_map = toEigenMap<float>(normals_source);
+  Eigen::Map<Eigen::VectorXf> normals_tgt_map = toEigenMap<float>(normals_target);
 
-  Eigen::Map<Eigen::VectorXi> result_indices_map =
-      toEigenMap<int>(result_indices);
-  Eigen::Map<Eigen::VectorXf> result_points_map =
-      toEigenMap<float>(result_points);
-  Eigen::Map<Eigen::VectorXf> result_normals_map =
-      toEigenMap<float>(result_normals);
+  Eigen::Map<Eigen::VectorXi> result_indices_map = toEigenMap<int>(result_indices);
+  Eigen::Map<Eigen::VectorXf> result_points_map = toEigenMap<float>(result_points);
+  Eigen::Map<Eigen::VectorXf> result_normals_map = toEigenMap<float>(result_normals);
 
   dispenso::parallel_for(
-      dispenso::makeChunkedRange(0, nSrcPts, 64),
-      [&](int64_t srcStart, int64_t srcEnd) {
+      dispenso::makeChunkedRange(0, nSrcPts, 64), [&](int64_t srcStart, int64_t srcEnd) {
         for (int64_t k = srcStart; k < srcEnd; ++k) {
           const Eigen::Vector3f p_src = pts_src_map.segment<3>(3 * k);
           const Eigen::Vector3f normal_src = normals_src_map.segment<3>(3 * k);
-          const auto [valid, tgt_index, sqrDist] = kdTree_target.closestPoint(
-              p_src, normal_src, maxSqrDist, maxNormalDot);
+          const auto [valid, tgt_index, sqrDist] =
+              kdTree_target.closestPoint(p_src, normal_src, maxSqrDist, maxNormalDot);
           if (valid) {
             result_indices_map(k) = tgt_index;
-            result_points_map.segment<3>(3 * k) =
-                pts_tgt_map.segment<3>(3 * tgt_index);
-            result_normals_map.segment<3>(3 * k) =
-                normals_tgt_map.segment<3>(3 * tgt_index);
+            result_points_map.segment<3>(3 * k) = pts_tgt_map.segment<3>(3 * tgt_index);
+            result_normals_map.segment<3>(3 * k) = normals_tgt_map.segment<3>(3 * tgt_index);
           } else {
             // No valid point found so return -1:
             result_indices_map(k) = -1;
@@ -154,10 +138,8 @@ bool isNormalized(at::Tensor t) {
 
 } // anonymous namespace
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor> findClosestPoints(
-    at::Tensor points_source,
-    at::Tensor points_target,
-    float maxDist) {
+std::tuple<at::Tensor, at::Tensor, at::Tensor>
+findClosestPoints(at::Tensor points_source, at::Tensor points_target, float maxDist) {
   TensorChecker checker("find_closest_points");
 
   bool squeeze_src = false;
@@ -191,10 +173,8 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> findClosestPoints(
   const auto dim = checker.getBoundValue(dimIdx);
   const auto nSrcPts = checker.getBoundValue(nSrcPtsIndex);
 
-  at::Tensor result_index =
-      at::zeros({nBatch, nSrcPts}, at::CPU(toScalarType<int>()));
-  at::Tensor result_points =
-      at::zeros({nBatch, nSrcPts, dim}, at::CPU(toScalarType<float>()));
+  at::Tensor result_index = at::zeros({nBatch, nSrcPts}, at::CPU(toScalarType<int>()));
+  at::Tensor result_points = at::zeros({nBatch, nSrcPts, dim}, at::CPU(toScalarType<float>()));
 
   dispenso::parallel_for((int64_t)0, nBatch, [&](int64_t iBatch) {
     if (dim == 2) {
@@ -222,8 +202,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> findClosestPoints(
   return {result_points, result_index, result_index >= 0};
 }
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>
-findClosestPointsWithNormals(
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> findClosestPointsWithNormals(
     at::Tensor points_source,
     at::Tensor normals_source,
     at::Tensor points_target,
@@ -291,12 +270,9 @@ findClosestPointsWithNormals(
   const auto nBatch = checker.getBatchSize();
   const auto nSrcPts = checker.getBoundValue(nSrcPtsIndex);
 
-  at::Tensor result_index =
-      at::zeros({nBatch, nSrcPts}, at::CPU(toScalarType<int>()));
-  at::Tensor result_points =
-      at::zeros({nBatch, nSrcPts, 3}, at::CPU(toScalarType<float>()));
-  at::Tensor result_normals =
-      at::zeros({nBatch, nSrcPts, 3}, at::CPU(toScalarType<float>()));
+  at::Tensor result_index = at::zeros({nBatch, nSrcPts}, at::CPU(toScalarType<int>()));
+  at::Tensor result_points = at::zeros({nBatch, nSrcPts, 3}, at::CPU(toScalarType<float>()));
+  at::Tensor result_normals = at::zeros({nBatch, nSrcPts, 3}, at::CPU(toScalarType<float>()));
 
   dispenso::parallel_for((int64_t)0, nBatch, [&](int64_t iBatch) {
     findClosestPointsWithNormal_imp(
@@ -345,8 +321,7 @@ void findClosestPointsOnMesh_imp(
   }
 
   Eigen::MatrixX3<S> targetVerticesMat(nTgtVertices, 3);
-  Eigen::Map<Eigen::VectorX<S>> vertices_tgt_map =
-      toEigenMap<S>(vertices_target);
+  Eigen::Map<Eigen::VectorX<S>> vertices_tgt_map = toEigenMap<S>(vertices_target);
   for (int64_t i = 0; i < nTgtVertices; ++i) {
     targetVerticesMat.row(i) = vertices_tgt_map.template segment<3>(3 * i);
   }
@@ -357,23 +332,17 @@ void findClosestPointsOnMesh_imp(
     targetFacesMat.row(i) = faces_tgt_map.segment<3>(3 * i);
   }
 
-  const TriBvh targetTree(
-      std::move(targetVerticesMat), std::move(targetFacesMat));
+  const TriBvh targetTree(std::move(targetVerticesMat), std::move(targetFacesMat));
 
   Eigen::Map<Eigen::VectorX<S>> pts_src_map = toEigenMap<S>(points_source);
-  Eigen::Map<Eigen::VectorXi> result_face_indices_map =
-      toEigenMap<int>(result_face_index);
-  Eigen::Map<Eigen::VectorX<S>> result_points_map =
-      toEigenMap<S>(result_points);
-  Eigen::Map<Eigen::VectorX<S>> result_bary_map =
-      toEigenMap<S>(result_barycentric);
+  Eigen::Map<Eigen::VectorXi> result_face_indices_map = toEigenMap<int>(result_face_index);
+  Eigen::Map<Eigen::VectorX<S>> result_points_map = toEigenMap<S>(result_points);
+  Eigen::Map<Eigen::VectorX<S>> result_bary_map = toEigenMap<S>(result_barycentric);
 
   dispenso::parallel_for(
-      dispenso::makeChunkedRange(0, nSrcPts),
-      [&](int64_t srcStart, int64_t srcEnd) {
+      dispenso::makeChunkedRange(0, nSrcPts), [&](int64_t srcStart, int64_t srcEnd) {
         for (int64_t k = srcStart; k < srcEnd; ++k) {
-          const Eigen::Vector3<S> p_src =
-              pts_src_map.template segment<3>(3 * k);
+          const Eigen::Vector3<S> p_src = pts_src_map.template segment<3>(3 * k);
           const auto queryResult = targetTree.closestSurfacePoint(p_src);
           if (queryResult.triangleIdx == axel::kInvalidTriangleIdx) {
             result_face_indices_map(k) = -1;
@@ -381,16 +350,14 @@ void findClosestPointsOnMesh_imp(
             result_face_indices_map[k] = queryResult.triangleIdx;
             result_points_map.template segment<3>(3 * k) = queryResult.point;
             if (queryResult.baryCoords) {
-              result_bary_map.template segment<3>(3 * k) =
-                  *queryResult.baryCoords;
+              result_bary_map.template segment<3>(3 * k) = *queryResult.baryCoords;
             }
           }
         }
       });
 }
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor>
-findClosestPointsOnMesh(
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> findClosestPointsOnMesh(
     at::Tensor points_source,
     at::Tensor vertices_target,
     at::Tensor faces_target) {
@@ -440,12 +407,9 @@ findClosestPointsOnMesh(
   const auto nBatch = checker.getBatchSize();
   const auto nSrcPts = checker.getBoundValue(nSrcPtsIndex);
 
-  at::Tensor result_closest_points =
-      at::zeros({nBatch, nSrcPts, 3}, at::CPU(at::kFloat));
-  at::Tensor result_face_index =
-      at::zeros({nBatch, nSrcPts}, at::CPU(toScalarType<int>()));
-  at::Tensor result_barycentric =
-      at::zeros({nBatch, nSrcPts, 3}, at::CPU(toScalarType<float>()));
+  at::Tensor result_closest_points = at::zeros({nBatch, nSrcPts, 3}, at::CPU(at::kFloat));
+  at::Tensor result_face_index = at::zeros({nBatch, nSrcPts}, at::CPU(toScalarType<int>()));
+  at::Tensor result_barycentric = at::zeros({nBatch, nSrcPts, 3}, at::CPU(toScalarType<float>()));
 
   if (dtype == toScalarType<double>()) {
     for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
@@ -475,11 +439,7 @@ findClosestPointsOnMesh(
     result_barycentric = result_barycentric.squeeze(0);
   }
 
-  return {
-      result_face_index >= 0,
-      result_closest_points,
-      result_face_index,
-      result_barycentric};
+  return {result_face_index >= 0, result_closest_points, result_face_index, result_barycentric};
 }
 
 } // namespace pymomentum

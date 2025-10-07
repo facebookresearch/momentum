@@ -92,9 +92,7 @@ PYBIND11_MODULE(geometry, m) {
   // typed correctly; otherwise we end up with "momentum::Locator" in the
   // docstrings/type descriptors.
   auto characterClass = py::class_<mm::Character>(
-      m,
-      "Character",
-      "A complete momentum character including its skeleton and mesh.");
+      m, "Character", "A complete momentum character including its skeleton and mesh.");
   auto parameterTransformClass = py::class_<mm::ParameterTransform>(
       m,
       "ParameterTransform",
@@ -102,8 +100,7 @@ PYBIND11_MODULE(geometry, m) {
       "This class handles the transformation from a compact set of model parameters "
       "(typically ~50) used in optimization to the full 7*nJoints parameters needed "
       "for skeleton posing.");
-  auto inverseParameterTransformClass = py::class_<
-      mm::InverseParameterTransform>(
+  auto inverseParameterTransformClass = py::class_<mm::InverseParameterTransform>(
       m,
       "InverseParameterTransform",
       "Inverse parameter transform that maps from full joint parameters back to "
@@ -138,11 +135,8 @@ PYBIND11_MODULE(geometry, m) {
       "A 3D point attached to a skeleton joint used for inverse kinematics constraints. "
       "Locators define target positions that the character should reach during pose optimization, "
       "with configurable weights and axis locks for fine-grained control.");
-  auto skinnedLocatorClass =
-      py::class_<mm::SkinnedLocator>(m, "SkinnedLocator");
-  auto blendShapeClass = py::class_<
-      mm::BlendShape,
-      std::shared_ptr<mm::BlendShape>>(
+  auto skinnedLocatorClass = py::class_<mm::SkinnedLocator>(m, "SkinnedLocator");
+  auto blendShapeClass = py::class_<mm::BlendShape, std::shared_ptr<mm::BlendShape>>(
       m,
       "BlendShape",
       "A blend shape basis for facial expressions and corrective shapes. "
@@ -286,8 +280,7 @@ PYBIND11_MODULE(geometry, m) {
                   skinWeights->weight.rows());
 
               MT_THROW_IF(
-                  skinWeights->index.maxCoeff() >=
-                      character.skeleton.joints.size(),
+                  skinWeights->index.maxCoeff() >= character.skeleton.joints.size(),
                   "Skin weight index is out of range; max index is {}, but there are only {} joints.",
                   skinWeights->index.maxCoeff(),
                   character.skeleton.joints.size());
@@ -346,9 +339,7 @@ PYBIND11_MODULE(geometry, m) {
           py::arg("parameter_limits"))
       .def(
           "clone",
-          [](const mm::Character& character) {
-            return mm::Character{character};
-          },
+          [](const mm::Character& character) { return mm::Character{character}; },
           "Performs a deep-copy of the character.")
       .def(
           "with_locators",
@@ -362,10 +353,7 @@ PYBIND11_MODULE(geometry, m) {
                   character.locators.end(),
                   std::back_inserter(combinedLocators));
             }
-            std::copy(
-                locators.begin(),
-                locators.end(),
-                std::back_inserter(combinedLocators));
+            std::copy(locators.begin(), locators.end(), std::back_inserter(combinedLocators));
             return momentum::Character(
                 character.skeleton,
                 character.parameterTransform,
@@ -395,8 +383,7 @@ PYBIND11_MODULE(geometry, m) {
              bool replace = false) {
             for (const auto& skinnedLocator : skinnedLocators) {
               for (Eigen::Index i = 0; i < skinnedLocator.parents.size(); ++i) {
-                if (skinnedLocator.parents[i] >=
-                    character.skeleton.joints.size()) {
+                if (skinnedLocator.parents[i] >= character.skeleton.joints.size()) {
                   throw py::index_error(fmt::format(
                       "Skinned locator {} has parent index {} which is out of range (there are only {} joints).",
                       skinnedLocator.name,
@@ -441,9 +428,7 @@ PYBIND11_MODULE(geometry, m) {
           py::arg("replace") = false)
       .def_readonly("name", &mm::Character::name, "The character's name.")
       .def_readonly(
-          "skeleton",
-          &mm::Character::skeleton,
-          "The character's skeleton. See :class:`Skeleton`.")
+          "skeleton", &mm::Character::skeleton, "The character's skeleton. See :class:`Skeleton`.")
       .def_readonly(
           "parameter_limits",
           &mm::Character::parameterLimits,
@@ -464,28 +449,24 @@ PYBIND11_MODULE(geometry, m) {
       .def_property_readonly(
           "mesh",
           [](const mm::Character& c) -> std::unique_ptr<mm::Mesh> {
-            return (c.mesh) ? std::make_unique<mm::Mesh>(*c.mesh)
-                            : mm::Mesh_u();
+            return (c.mesh) ? std::make_unique<mm::Mesh>(*c.mesh) : mm::Mesh_u();
           },
           ":return: The character's :class:`Mesh`, or None if not present.")
       .def_property_readonly(
           "has_mesh",
           [](const mm::Character& c) -> bool {
-            return static_cast<bool>(c.mesh) &&
-                static_cast<bool>(c.skinWeights);
+            return static_cast<bool>(c.mesh) && static_cast<bool>(c.skinWeights);
           })
       .def_property_readonly(
           "skin_weights",
           [](const mm::Character& c) -> std::unique_ptr<mm::SkinWeights> {
-            return (c.skinWeights)
-                ? std::make_unique<mm::SkinWeights>(*c.skinWeights)
-                : mm::SkinWeights_u();
+            return (c.skinWeights) ? std::make_unique<mm::SkinWeights>(*c.skinWeights)
+                                   : mm::SkinWeights_u();
           },
           "The character's skinning weights. See :class:`SkinWeights`.")
       .def_property_readonly(
           "blend_shape",
-          [](const mm::Character& c)
-              -> std::optional<std::shared_ptr<const mm::BlendShape>> {
+          [](const mm::Character& c) -> std::optional<std::shared_ptr<const mm::BlendShape>> {
             if (c.blendShape) {
               return c.blendShape;
             } else {
@@ -509,8 +490,7 @@ PYBIND11_MODULE(geometry, m) {
              const std::optional<mm::BlendShape_const_p>& blendShape,
              int nShapes) {
             return c.withBlendShape(
-                blendShape.value_or(mm::BlendShape_const_p{}),
-                nShapes < 0 ? INT_MAX : nShapes);
+                blendShape.value_or(mm::BlendShape_const_p{}), nShapes < 0 ? INT_MAX : nShapes);
           },
           R"(Returns a character that uses the parameter transform to control the passed-in blend shape basis.
 It can be used to solve for shapes and pose simultaneously.
@@ -522,8 +502,7 @@ It can be used to solve for shapes and pose simultaneously.
           py::arg("n_shapes") = -1)
       .def(
           "with_collision_geometry",
-          [](const mm::Character& c,
-             const std::vector<mm::TaperedCapsule>& collision_geometry) {
+          [](const mm::Character& c, const std::vector<mm::TaperedCapsule>& collision_geometry) {
             return mm::Character(
                 c.skeleton,
                 c.parameterTransform,
@@ -615,10 +594,8 @@ simply want to apply an identity-specific scale to the character, you should use
           py::arg("scale"))
       .def(
           "transformed",
-          [](const momentum::Character& character,
-             const Eigen::Matrix4f& xform) {
-            return momentum::transformCharacter(
-                character, Eigen::Affine3f(xform));
+          [](const momentum::Character& character, const Eigen::Matrix4f& xform) {
+            return momentum::transformCharacter(character, Eigen::Affine3f(xform));
           },
           R"(Transform the character (mesh and skeleton) by the desired transformation matrix.
 
@@ -637,12 +614,9 @@ If you want to translate/rotate/scale a character, you should preferentially use
             return result;
           },
           "Rebind the character's inverse bind pose from the resting skeleton pose.")
+      .def_property_readonly("bind_pose", &getBindPose, "Get the bind pose for skinning.")
       .def_property_readonly(
-          "bind_pose", &getBindPose, "Get the bind pose for skinning.")
-      .def_property_readonly(
-          "inverse_bind_pose",
-          &getInverseBindPose,
-          "Get the inverse bind pose for skinning.")
+          "inverse_bind_pose", &getInverseBindPose, "Get the inverse bind pose for skinning.")
       .def(
           "find_locators",
           &getLocators,
@@ -676,7 +650,6 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
       .def_static(
           "load_gltf_from_bytes",
           &loadGLTFCharacterFromBytes,
-          py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
 
 :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
@@ -686,7 +659,6 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
       .def_static(
           "load_gltf_with_motion_from_bytes",
           &loadGLTFCharacterWithMotionFromBytes,
-          py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and motion from a gltf byte array.
 
   :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
@@ -891,10 +863,8 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("character"),
           py::arg("fps") = 120.f,
           py::arg("motion") = std::optional<momentum::MotionParameters>{},
-          py::arg("offsets") =
-              std::optional<const momentum::IdentityParameters>{},
-          py::arg("markers") =
-              std::optional<const std::vector<std::vector<momentum::Marker>>>{})
+          py::arg("offsets") = std::optional<const momentum::IdentityParameters>{},
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
       .def_static(
           "save_gltf_from_skel_states",
           &saveGLTFCharacterToFileFromSkelStates,
@@ -911,8 +881,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("character"),
           py::arg("fps"),
           py::arg("skel_states"),
-          py::arg("markers") =
-              std::optional<const std::vector<std::vector<momentum::Marker>>>{})
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
       .def_static(
           "save_fbx",
           &saveFBXCharacterToFile,
@@ -931,8 +900,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("fps") = 120.f,
           py::arg("motion") = std::optional<const Eigen::MatrixXf>{},
           py::arg("offsets") = std::optional<const Eigen::VectorXf>{},
-          py::arg("coord_system_info") =
-              std::optional<mm::FBXCoordSystemInfo>{})
+          py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{})
       .def_static(
           "save_fbx_with_joint_params",
           &saveFBXCharacterToFileWithJointParams,
@@ -949,14 +917,11 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("character"),
           py::arg("fps") = 120.f,
           py::arg("joint_params") = std::optional<const Eigen::MatrixXf>{},
-          py::arg("coord_system_info") =
-              std::optional<mm::FBXCoordSystemInfo>{})
+          py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{})
       // Legacy JSON I/O methods
       .def_static(
           "load_legacy_json",
-          [](const std::string& jsonPath) {
-            return mm::loadCharacterFromLegacyJson(jsonPath);
-          },
+          [](const std::string& jsonPath) { return mm::loadCharacterFromLegacyJson(jsonPath); },
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a legacy JSON file.
 
@@ -971,8 +936,7 @@ this is a legacy format that has historically been used in previous Python libra
           [](const py::bytes& jsonBytes) {
             std::string jsonString(jsonBytes);
             gsl::span<const std::byte> buffer(
-                reinterpret_cast<const std::byte*>(jsonString.data()),
-                jsonString.size());
+                reinterpret_cast<const std::byte*>(jsonString.data()), jsonString.size());
             return mm::loadCharacterFromLegacyJsonBuffer(buffer);
           },
           py::call_guard<py::gil_scoped_release>(),
@@ -1009,9 +973,7 @@ for compatibility with existing tools and workflows.
           py::arg("json_path"))
       .def_static(
           "to_legacy_json_string",
-          [](const mm::Character& character) {
-            return mm::characterToLegacyJsonString(character);
-          },
+          [](const mm::Character& character) { return mm::characterToLegacyJsonString(character); },
           py::call_guard<py::gil_scoped_release>(),
           R"(Convert a character to legacy JSON string.
 
@@ -1021,12 +983,11 @@ for compatibility with existing tools and workflows.
       .def(
           "simplify",
           [](const momentum::Character& character,
-             std::optional<at::Tensor> enabledParamsTensor)
-              -> momentum::Character {
+             std::optional<at::Tensor> enabledParamsTensor) -> momentum::Character {
             momentum::ParameterSet enabledParams;
             if (enabledParamsTensor) {
-              enabledParams = tensorToParameterSet(
-                  character.parameterTransform, *enabledParamsTensor);
+              enabledParams =
+                  tensorToParameterSet(character.parameterTransform, *enabledParamsTensor);
             } else {
               enabledParams.set();
             }
@@ -1042,10 +1003,8 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def(
           "simplify_skeleton",
           [](const momentum::Character& character,
-             const std::vector<int>& enabledJointIndices)
-              -> momentum::Character {
-            return character.simplifySkeleton(
-                jointListToBitset(character, enabledJointIndices));
+             const std::vector<int>& enabledJointIndices) -> momentum::Character {
+            return character.simplifySkeleton(jointListToBitset(character, enabledJointIndices));
           },
           "Simplifies the character by removing unwanted joints.",
           py::arg("enabled_joint_indices"))
@@ -1053,29 +1012,25 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           "simplify_parameter_transform",
           [](const momentum::Character& character,
              at::Tensor enabledParameters) -> momentum::Character {
-            return character.simplifyParameterTransform(tensorToParameterSet(
-                character.parameterTransform, enabledParameters));
+            return character.simplifyParameterTransform(
+                tensorToParameterSet(character.parameterTransform, enabledParameters));
           },
           "Simplifies the character by removing unwanted parameters.",
           py::arg("enabled_parameters"))
       .def(
           "parameters_for_joints",
-          [](const momentum::Character& character,
-             const std::vector<int>& jointIndices) {
+          [](const momentum::Character& character, const std::vector<int>& jointIndices) {
             return parameterSetToTensor(
                 character.parameterTransform,
-                character.activeJointsToParameters(
-                    jointListToBitset(character, jointIndices)));
+                character.activeJointsToParameters(jointListToBitset(character, jointIndices)));
           },
           "Maps a list of joint indices to a boolean tensor containing the parameters which drive those joints.",
           py::arg("joint_indices"))
       .def(
           "joints_for_parameters",
-          [](const momentum::Character& character,
-             at::Tensor enabledParamsTensor) {
-            return bitsetToJointList(
-                character.parametersToActiveJoints(tensorToParameterSet(
-                    character.parameterTransform, enabledParamsTensor)));
+          [](const momentum::Character& character, at::Tensor enabledParamsTensor) {
+            return bitsetToJointList(character.parametersToActiveJoints(
+                tensorToParameterSet(character.parameterTransform, enabledParamsTensor)));
           },
           "Maps a list of parameter indices to a list of joints driven by those parameters.",
           py::arg("active_parameters"))
@@ -1105,10 +1060,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
             return momentum::Joint{
                 name,
                 parent == -1 ? mm::kInvalidIndex : parent,
-                {preRotation[3],
-                 preRotation[0],
-                 preRotation[1],
-                 preRotation[2]},
+                {preRotation[3], preRotation[0], preRotation[1], preRotation[2]},
                 translationOffset};
           }),
           py::arg("name"),
@@ -1141,9 +1093,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           "Returns the pre-rotation for this joint in default pose of the character. Quaternion format: (x, y, z, w)")
       .def_property_readonly(
           "pre_rotation_matrix",
-          [](const mm::Joint& joint) {
-            return joint.preRotation.toRotationMatrix();
-          })
+          [](const mm::Joint& joint) { return joint.preRotation.toRotationMatrix(); })
       .def_property_readonly(
           "translation_offset",
           [](const mm::Joint& joint) { return joint.translationOffset; },
@@ -1173,9 +1123,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
   // =====================================================
   skeletonClass
       .def(
-          py::init([](const std::vector<mm::Joint>& jointList) {
-            return mm::Skeleton(jointList);
-          }),
+          py::init([](const std::vector<mm::Joint>& jointList) { return mm::Skeleton(jointList); }),
           py::arg("joint_list"))
       .def_property_readonly(
           "size",
@@ -1209,9 +1157,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           ":return: the parent of each joint in the skeleton.  The root joint has parent -1.")
       .def(
           "joint_index",
-          [](const mm::Skeleton& skel,
-             const std::string& name,
-             bool allow_missing = false) -> int {
+          [](const mm::Skeleton& skel, const std::string& name, bool allow_missing = false) -> int {
             auto result = skel.getJointIdByName(name);
             if (result == momentum::kInvalidIndex) {
               if (allow_missing) {
@@ -1293,9 +1239,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
                 skeleton.joints.cbegin(),
                 skeleton.joints.cend(),
                 std::back_inserter(preRotations),
-                [](const mm::Joint& joint) {
-                  return joint.preRotation.coeffs();
-                });
+                [](const mm::Joint& joint) { return joint.preRotation.coeffs(); });
             return pymomentum::asArray(preRotations);
           },
           "Returns skeleton joint offsets tensor for all joints shape: (num_joints, 4)")
@@ -1364,9 +1308,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
                     auto index = index_accessor(i, j);
                     if (index < 0) {
                       throw py::value_error(fmt::format(
-                          "Index array contains negative index value at row {}, column {}",
-                          i,
-                          j));
+                          "Index array contains negative index value at row {}, column {}", i, j));
                     }
                     index_matrix(i, j) = static_cast<uint32_t>(index);
                   }
@@ -1399,9 +1341,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           "Returns the skinning indices.")
       .def("__repr__", [](const mm::SkinWeights& sw) {
         return fmt::format(
-            "SkinWeights(vertices={}, influences={})",
-            sw.weight.rows(),
-            sw.weight.cols());
+            "SkinWeights(vertices={}, influences={})", sw.weight.rows(), sw.weight.cols());
       });
 
   // =====================================================
@@ -1424,8 +1364,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
                       const std::vector<std::vector<int32_t>>& texcoord_lines) {
             mm::Mesh mesh;
             MT_THROW_IF(vertices.ndim() != 2, "vertices must be a 2D array");
-            MT_THROW_IF(
-                vertices.shape(1) != 3, "vertices must have size n x 3");
+            MT_THROW_IF(vertices.shape(1) != 3, "vertices must have size n x 3");
 
             MT_THROW_IF(faces.ndim() != 2, "faces must be a 2D array");
             MT_THROW_IF(faces.shape(1) != 3, "faces must have size n x 3");
@@ -1441,8 +1380,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
             if (normals.has_value()) {
               MT_THROW_IF(
-                  normals->ndim() != 2 || normals->shape(1) != 3,
-                  "normals must have size n x 3");
+                  normals->ndim() != 2 || normals->shape(1) != 3, "normals must have size n x 3");
               MT_THROW_IF(
                   normals->shape(0) != nVerts,
                   "vertices and normals must have the same number of rows");
@@ -1461,8 +1399,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
             if (colors && colors->size() != 0) {
               MT_THROW_IF(
-                  (colors->ndim() != 2 || colors->shape(1) != 3),
-                  "colors should have size n x 3");
+                  (colors->ndim() != 2 || colors->shape(1) != 3), "colors should have size n x 3");
               MT_THROW_IF(
                   (colors->shape(0) != nVerts),
                   "colors should be empty or equal to the number of vertices");
@@ -1494,8 +1431,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
               for (const auto& f : mesh.texcoord_faces) {
                 MT_THROW_IF(
-                    f.x() >= nTextureCoords || f.y() >= nTextureCoords ||
-                        f.z() >= nTextureCoords,
+                    f.x() >= nTextureCoords || f.y() >= nTextureCoords || f.z() >= nTextureCoords,
                     "texcoord face index exceeded texcoord count");
               }
             }
@@ -1535,41 +1471,31 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           ":return: The number of faces in the mesh.")
       .def_property_readonly(
           "vertices",
-          [](const mm::Mesh& mesh) {
-            return pymomentum::asArray(mesh.vertices);
-          },
+          [](const mm::Mesh& mesh) { return pymomentum::asArray(mesh.vertices); },
           ":return: The vertices of the mesh in a [n x 3] numpy array.")
       .def_property_readonly(
           "normals",
-          [](const mm::Mesh& mesh) {
-            return pymomentum::asArray(mesh.normals);
-          },
+          [](const mm::Mesh& mesh) { return pymomentum::asArray(mesh.normals); },
           ":return: The per-vertex normals of the mesh in a [n x 3] numpy array.")
       .def_property_readonly(
           "faces",
           [](const mm::Mesh& mesh) { return pymomentum::asArray(mesh.faces); },
           ":return: The triangles of the mesh in an [n x 3] numpy array.")
-      .def_readonly(
-          "lines", &mm::Mesh::lines, "list of list of vertex indices per line")
+      .def_readonly("lines", &mm::Mesh::lines, "list of list of vertex indices per line")
       .def_property_readonly(
           "colors",
           [](const mm::Mesh& mesh) { return pymomentum::asArray(mesh.colors); },
           ":return: Per-vertex colors if available; returned as a (possibly empty) [n x 3] numpy array.")
-      .def_readonly(
-          "confidence", &mm::Mesh::confidence, "list of per-vertex confidences")
+      .def_readonly("confidence", &mm::Mesh::confidence, "list of per-vertex confidences")
       .def_property_readonly(
           "texcoords",
-          [](const mm::Mesh& mesh) {
-            return pymomentum::asArray(mesh.texcoords);
-          },
+          [](const mm::Mesh& mesh) { return pymomentum::asArray(mesh.texcoords); },
           "texture coordinates as m x 3 array.  Note that the number of texture coordinates may "
           "be different from the number of vertices as there can be cuts in the texture map.  "
           "Use texcoord_faces to index the texture coordinates.")
       .def_property_readonly(
           "texcoord_faces",
-          [](const mm::Mesh& mesh) {
-            return pymomentum::asArray(mesh.texcoord_faces);
-          },
+          [](const mm::Mesh& mesh) { return pymomentum::asArray(mesh.texcoord_faces); },
           "n x 3 faces in the texture map.  Each face maps 1-to-1 to a face in the original "
           "mesh but indexes into the texcoords array.")
       .def_readonly(
@@ -1612,10 +1538,8 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           [](const mm::BlendShape& blendShape) -> py::array_t<float> {
             const Eigen::MatrixXf& shapeVectors = blendShape.getShapeVectors();
             const Eigen::Index nVerts = shapeVectors.rows() / 3;
-            MT_THROW_IF(
-                shapeVectors.rows() % 3 != 0, "Invalid blend shape basis.");
-            py::array_t<float> result(
-                std::vector<ptrdiff_t>{shapeVectors.cols(), nVerts, 3});
+            MT_THROW_IF(shapeVectors.rows() % 3 != 0, "Invalid blend shape basis.");
+            py::array_t<float> result(std::vector<ptrdiff_t>{shapeVectors.cols(), nVerts, 3});
             py::buffer_info buf = result.request();
             memcpy(buf.ptr, shapeVectors.data(), result.nbytes());
             return result;
@@ -1645,15 +1569,8 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           py::arg("blend_shape_bytes"),
           py::arg("num_expected_shapes") = -1,
           py::arg("num_expected_vertices") = -1)
-      .def(
-          "to_bytes",
-          &saveBlendShapeToBytes,
-          R"(Save a blend shape basis to bytes in memory.)")
-      .def(
-          "save",
-          &saveBlendShapeToFile,
-          R"(Save a blend shape basis to a file.)",
-          py::arg("path"))
+      .def("to_bytes", &saveBlendShapeToBytes, R"(Save a blend shape basis to bytes in memory.)")
+      .def("save", &saveBlendShapeToFile, R"(Save a blend shape basis to a file.)", py::arg("path"))
       .def_static(
           "from_tensors",
           &loadBlendShapeFromTensors,
@@ -1666,15 +1583,11 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           py::arg("shape_vectors"))
       .def_property_readonly(
           "n_shapes",
-          [](const mm::BlendShape& blendShape) {
-            return blendShape.shapeSize();
-          },
+          [](const mm::BlendShape& blendShape) { return blendShape.shapeSize(); },
           "Number of shapes in the blend shape basis.")
       .def_property_readonly(
           "n_vertices",
-          [](const mm::BlendShape& blendShape) {
-            return blendShape.modelSize();
-          },
+          [](const mm::BlendShape& blendShape) { return blendShape.modelSize(); },
           "Number of vertices in the mesh.")
       .def(
           "compute_shape",
@@ -1689,10 +1602,7 @@ The resulting shape is equal to the base shape plus a linear combination of the 
 :result: A [n_batch x n_vertices x 3] tensor containing the vertex positions.)",
           py::arg("coeffs"))
       .def("__repr__", [](const mm::BlendShape& bs) {
-        return fmt::format(
-            "BlendShape(shapes={}, vertices={})",
-            bs.shapeSize(),
-            bs.modelSize());
+        return fmt::format("BlendShape(shapes={}, vertices={})", bs.shapeSize(), bs.modelSize());
       });
 
   // =====================================================
@@ -1719,20 +1629,15 @@ The resulting shape is equal to the base shape plus a linear combination of the 
           py::arg("limit_origin") = Eigen::Vector3f::Zero(),
           py::arg("limit_weight") = Eigen::Vector3f::Zero())
       .def_readonly("name", &mm::Locator::name, "The locator's name.")
+      .def_readonly("parent", &mm::Locator::parent, "The locator's parent joint index.")
       .def_readonly(
-          "parent", &mm::Locator::parent, "The locator's parent joint index.")
-      .def_readonly(
-          "offset",
-          &mm::Locator::offset,
-          "The locator's offset to parent joint location.")
+          "offset", &mm::Locator::offset, "The locator's offset to parent joint location.")
       .def_readonly(
           "locked",
           &mm::Locator::locked,
           "Flag per axes to indicate whether that axis can be moved during optimization or not.")
       .def_readonly(
-          "weight",
-          &mm::Locator::weight,
-          "Weight for this locator during IK optimization.")
+          "weight", &mm::Locator::weight, "Weight for this locator during IK optimization.")
       .def_readonly(
           "limit_origin",
           &mm::Locator::limitOrigin,
@@ -1767,14 +1672,12 @@ The resulting shape is equal to the base shape plus a linear combination of the 
                       const std::optional<Eigen::Vector3f>& position,
                       float weight) {
             if (parents.size() != skinWeights.size()) {
-              throw std::runtime_error(
-                  "parents and skin_weights must have the same size");
+              throw std::runtime_error("parents and skin_weights must have the same size");
             }
 
             if (parents.size() > mm::kMaxSkinJoints) {
               throw std::runtime_error(fmt::format(
-                  "parents and skin_weights must have at most {} elements",
-                  mm::kMaxSkinJoints));
+                  "parents and skin_weights must have at most {} elements", mm::kMaxSkinJoints));
             }
 
             Eigen::Matrix<uint32_t, mm::kMaxSkinJoints, 1> parentsTmp =
@@ -1785,14 +1688,12 @@ The resulting shape is equal to the base shape plus a linear combination of the 
             for (size_t i = 0; i < parents.size(); ++i) {
               if (parents(i) < 0) {
                 throw std::runtime_error(
-                    "parents must be non-negative, but got " +
-                    std::to_string(parents(i)));
+                    "parents must be non-negative, but got " + std::to_string(parents(i)));
               }
 
               if (skinWeights(i) < 0) {
                 throw std::runtime_error(
-                    "skin_weights must be non-negative, but got " +
-                    std::to_string(skinWeights(i)));
+                    "skin_weights must be non-negative, but got " + std::to_string(skinWeights(i)));
               }
               parentsTmp(i) = parents(i);
               skinWeightsTmp(i) = skinWeights(i);
@@ -1810,8 +1711,7 @@ The resulting shape is equal to the base shape plus a linear combination of the 
           py::arg("skin_weights"),
           py::arg("position") = std::nullopt,
           py::arg("weight") = 1.0f)
-      .def_readonly(
-          "name", &mm::SkinnedLocator::name, "The skinned locator's name.")
+      .def_readonly("name", &mm::SkinnedLocator::name, "The skinned locator's name.")
       .def_property_readonly(
           "parents",
           [](const mm::SkinnedLocator& locator) { return locator.parents; },
@@ -1838,13 +1738,9 @@ The resulting shape is equal to the base shape plus a linear combination of the 
             l.weight);
       });
 
-  parameterLimitClass
-      .def_readonly(
-          "type", &mm::ParameterLimit::type, "Type of parameter limit.")
-      .def_readonly(
-          "weight", &mm::ParameterLimit::weight, "Weight of parameter limit.")
-      .def_readonly(
-          "data", &mm::ParameterLimit::data, "Data of parameter limit.")
+  parameterLimitClass.def_readonly("type", &mm::ParameterLimit::type, "Type of parameter limit.")
+      .def_readonly("weight", &mm::ParameterLimit::weight, "Weight of parameter limit.")
+      .def_readonly("data", &mm::ParameterLimit::data, "Data of parameter limit.")
       .def_static(
           "create_minmax",
           [](size_t model_parameter_index, float min, float max, float weight) {
@@ -1867,11 +1763,7 @@ Create a parameter limit with min and max values for a model parameter.
           py::arg("weight") = 1.0f)
       .def_static(
           "create_minmax_joint",
-          [](size_t joint_index,
-             size_t joint_parameter,
-             float min,
-             float max,
-             float weight) {
+          [](size_t joint_index, size_t joint_parameter, float min, float max, float weight) {
             mm::LimitData data;
             data.minMaxJoint.jointIndex = joint_index;
             data.minMaxJoint.jointParameter = joint_parameter;
@@ -1906,10 +1798,8 @@ Create a parameter limit with min and max values for a joint parameter.
             data.linear.targetIndex = target_model_parameter_index;
             data.linear.scale = scale;
             data.linear.offset = offset;
-            data.linear.rangeMin =
-                rangeMin.value_or(-std::numeric_limits<float>::max());
-            data.linear.rangeMax =
-                rangeMax.value_or(std::numeric_limits<float>::max());
+            data.linear.rangeMin = rangeMin.value_or(-std::numeric_limits<float>::max());
+            data.linear.rangeMax = rangeMax.value_or(std::numeric_limits<float>::max());
             return mm::ParameterLimit{data, mm::LimitType::Linear, weight};
           },
           R"(Create a parameter limit with a linear constraint.
@@ -1942,16 +1832,13 @@ Create a parameter limit with min and max values for a joint parameter.
              std::optional<float> rangeMax) {
             mm::LimitData data;
             data.linearJoint.referenceJointIndex = reference_joint_index;
-            data.linearJoint.referenceJointParameter =
-                reference_joint_parameter;
+            data.linearJoint.referenceJointParameter = reference_joint_parameter;
             data.linearJoint.targetJointIndex = target_joint_index;
             data.linearJoint.targetJointParameter = target_joint_parameter;
             data.linearJoint.scale = scale;
             data.linearJoint.offset = offset;
-            data.linearJoint.rangeMin =
-                rangeMin.value_or(-std::numeric_limits<float>::max());
-            data.linearJoint.rangeMax =
-                rangeMax.value_or(std::numeric_limits<float>::max());
+            data.linearJoint.rangeMin = rangeMin.value_or(-std::numeric_limits<float>::max());
+            data.linearJoint.rangeMax = rangeMax.value_or(std::numeric_limits<float>::max());
             return mm::ParameterLimit{data, mm::LimitType::LinearJoint, weight};
           },
           R"(Create a parameter limit with a linear joint constraint.
@@ -1977,11 +1864,7 @@ Create a parameter limit with min and max values for a joint parameter.
           py::arg("range_max") = std::optional<float>{})
       .def_static(
           "create_halfplane",
-          [](size_t param1,
-             size_t param2,
-             Eigen::Vector2f normal,
-             float offset,
-             float weight) {
+          [](size_t param1, size_t param2, Eigen::Vector2f normal, float offset, float weight) {
             mm::LimitData data;
             data.halfPlane.param1 = param1;
             data.halfPlane.param2 = param2;
@@ -2109,35 +1992,19 @@ Create a parameter limit with min and max values for a joint parameter.
         }
 
         if (!dataStr.empty()) {
-          return fmt::format(
-              "ParameterLimit(type={}, weight={}, {})",
-              typeStr,
-              pl.weight,
-              dataStr);
+          return fmt::format("ParameterLimit(type={}, weight={}, {})", typeStr, pl.weight, dataStr);
         } else {
-          return fmt::format(
-              "ParameterLimit(type={}, weight={})", typeStr, pl.weight);
+          return fmt::format("ParameterLimit(type={}, weight={})", typeStr, pl.weight);
         }
       });
 
-  parameterLimitDataClass
-      .def_readonly("minmax", &mm::LimitData::minMax, "Data for MinMax limit.")
-      .def_readonly(
-          "minmax_joint",
-          &mm::LimitData::minMaxJoint,
-          "Data for MinMaxJoint limit.")
+  parameterLimitDataClass.def_readonly("minmax", &mm::LimitData::minMax, "Data for MinMax limit.")
+      .def_readonly("minmax_joint", &mm::LimitData::minMaxJoint, "Data for MinMaxJoint limit.")
       .def_readonly("linear", &mm::LimitData::linear, "Data for Linear limit.")
-      .def_readonly(
-          "linear_joint",
-          &mm::LimitData::linearJoint,
-          "Data for LinearJoint limit.")
-      .def_readonly(
-          "halfplane", &mm::LimitData::halfPlane, "Data for HalfPlane limit.")
-      .def_readonly(
-          "ellipsoid", &mm::LimitData::ellipsoid, "Data for Ellipsoid limit.")
-      .def("__repr__", [](const mm::LimitData& ld) {
-        return fmt::format("LimitData()");
-      });
+      .def_readonly("linear_joint", &mm::LimitData::linearJoint, "Data for LinearJoint limit.")
+      .def_readonly("halfplane", &mm::LimitData::halfPlane, "Data for HalfPlane limit.")
+      .def_readonly("ellipsoid", &mm::LimitData::ellipsoid, "Data for Ellipsoid limit.")
+      .def("__repr__", [](const mm::LimitData& ld) { return fmt::format("LimitData()"); });
 
   parameterLimitMinMaxClass
       .def_readonly(
@@ -2161,10 +2028,7 @@ Create a parameter limit with min and max values for a joint parameter.
       });
 
   parameterLimitMinMaxJointClass
-      .def_readonly(
-          "joint_index",
-          &mm::LimitMinMaxJoint::jointIndex,
-          "Index of joint to affect.")
+      .def_readonly("joint_index", &mm::LimitMinMaxJoint::jointIndex, "Index of joint to affect.")
       .def_readonly(
           "joint_parameter_index",
           &mm::LimitMinMaxJoint::jointParameter,
@@ -2196,9 +2060,7 @@ Create a parameter limit with min and max values for a joint parameter.
           &mm::LimitLinear::targetIndex,
           "Index of target parameter p1 to use in equation p_0 = scale * p_1 - offset.")
       .def_readonly(
-          "scale",
-          &mm::LimitLinear::scale,
-          "Scale to use in equation p_0 = scale * p_1 - offset.")
+          "scale", &mm::LimitLinear::scale, "Scale to use in equation p_0 = scale * p_1 - offset.")
       .def_readonly(
           "offset",
           &mm::LimitLinear::offset,
@@ -2284,8 +2146,7 @@ Create a parameter limit with min and max values for a joint parameter.
             llj.offset);
       });
 
-  parameterLimitHalfPlaneClass
-      .def_readonly("param1_index", &mm::LimitHalfPlane::param1)
+  parameterLimitHalfPlaneClass.def_readonly("param1_index", &mm::LimitHalfPlane::param1)
       .def_readonly("param2_index", &mm::LimitHalfPlane::param2)
       .def_readonly("offset", &mm::LimitHalfPlane::offset)
       .def_readonly("normal", &mm::LimitHalfPlane::normal)
@@ -2302,9 +2163,7 @@ Create a parameter limit with min and max values for a joint parameter.
   parameterLimitEllipsoidClass
       .def_property_readonly(
           "ellipsoid",
-          [](const mm::LimitEllipsoid& data) -> Eigen::Matrix4f {
-            return data.ellipsoid.matrix();
-          })
+          [](const mm::LimitEllipsoid& data) -> Eigen::Matrix4f { return data.ellipsoid.matrix(); })
       .def_property_readonly(
           "ellipsoid_inv",
           [](const mm::LimitEllipsoid& data) -> Eigen::Matrix4f {
@@ -2337,47 +2196,36 @@ Create a parameter limit with min and max values for a joint parameter.
       .def(
           py::init([](const std::vector<std::string>& names,
                       const mm::Skeleton& skeleton,
-                      const Eigen::SparseMatrix<float, Eigen::RowMajor>&
-                          transform) {
+                      const Eigen::SparseMatrix<float, Eigen::RowMajor>& transform) {
             mm::ParameterTransform parameterTransform;
             parameterTransform.name = names;
             parameterTransform.transform.resize(
-                static_cast<int>(skeleton.joints.size()) *
-                    mm::kParametersPerJoint,
+                static_cast<int>(skeleton.joints.size()) * mm::kParametersPerJoint,
                 static_cast<int>(names.size()));
 
             for (int i = 0; i < transform.outerSize(); ++i) {
-              for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator
-                       it(transform, i);
-                   it;
+              for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(transform, i); it;
                    ++it) {
                 parameterTransform.transform.coeffRef(
-                    static_cast<long>(it.row()), static_cast<long>(it.col())) =
-                    it.value();
+                    static_cast<long>(it.row()), static_cast<long>(it.col())) = it.value();
               }
             }
 
-            parameterTransform.offsets.setZero(
-                skeleton.joints.size() * mm::kParametersPerJoint);
+            parameterTransform.offsets.setZero(skeleton.joints.size() * mm::kParametersPerJoint);
             return parameterTransform;
           }),
           py::arg("names"),
           py::arg("skeleton"),
           py::arg("transform"))
-      .def_readonly(
-          "names",
-          &mm::ParameterTransform::name,
-          "List of model parameter names")
+      .def_readonly("names", &mm::ParameterTransform::name, "List of model parameter names")
       .def_property_readonly(
           "size",
           &mm::ParameterTransform::numAllModelParameters,
           "Size of the model parameter vector.")
       .def(
           "apply",
-          [](const mm::ParameterTransform* paramTransform,
-             torch::Tensor modelParams) -> torch::Tensor {
-            return applyParamTransform(paramTransform, modelParams);
-          },
+          [](const mm::ParameterTransform* paramTransform, torch::Tensor modelParams)
+              -> torch::Tensor { return applyParamTransform(paramTransform, modelParams); },
           R"(Apply the parameter transform to a k-dimensional model parameter vector (returns the 7*nJoints joint parameter vector).
 
 The modelParameters store the reduced set of parameters (typically around 50) that are actually
@@ -2395,9 +2243,7 @@ Rotations are in Euler angles.)",
           &getRigidParameters,
           "Boolean torch.Tensor indicating which parameters are used to control the character's rigid transform (translation and rotation).")
       .def_property_readonly(
-          "all_parameters",
-          &getAllParameters,
-          "Boolean torch.Tensor with all parameters enabled.")
+          "all_parameters", &getAllParameters, "Boolean torch.Tensor with all parameters enabled.")
       .def_property_readonly(
           "blend_shape_parameters",
           &getBlendShapeParameters,
@@ -2409,8 +2255,7 @@ Rotations are in Euler angles.)",
       .def_property_readonly(
           "no_parameters",
           [](const momentum::ParameterTransform& parameterTransform) {
-            return parameterSetToTensor(
-                parameterTransform, momentum::ParameterSet());
+            return parameterSetToTensor(parameterTransform, momentum::ParameterSet());
           },
           "Boolean torch.Tensor with no parameters enabled.")
       .def_property_readonly(
@@ -2511,12 +2356,8 @@ Each PPCA model is a Gaussian with mean mu and covariance (sigma^2*I + W*W^T).
           "n_mixtures",
           &mm::Mppca::p,
           R"(The number of individual Gaussians in the mixture model.)")
-      .def_readonly(
-          "n_dimension",
-          &mm::Mppca::d,
-          R"(The dimension of the parameter space.)")
-      .def_readonly(
-          "names", &mm::Mppca::names, R"(The names of the parameters.)")
+      .def_readonly("n_dimension", &mm::Mppca::d, R"(The dimension of the parameter space.)")
+      .def_readonly("names", &mm::Mppca::names, R"(The names of the parameters.)")
       .def(
           "to_tensors",
           &mppcaToTensors,
@@ -2538,8 +2379,7 @@ The resulting tensors are as follows:
 
 :param parameter_transform: An optional parameter transform used to map the parameters; if not present, then the param_idx tensor will be empty.
 :return: an tuple (pi, mean, weights, sigma, param_idx) for the Probabilistic PCA model.)",
-          py::arg("parameter_transform") =
-              std::optional<const mm::ParameterTransform*>())
+          py::arg("parameter_transform") = std::optional<const mm::ParameterTransform*>())
       .def("get_mixture", &getMppcaModel, py::arg("i_model"))
       .def_static(
           "load",
@@ -2558,8 +2398,7 @@ The resulting tensors are as follows:
           "Load a mixture PCA model (e.g. poseprior.mppca).",
           py::arg("mppca_bytes"))
       .def("__repr__", [](const mm::Mppca& mppca) {
-        return fmt::format(
-            "Mppca(mixtures={}, dimension={})", mppca.p, mppca.d);
+        return fmt::format("Mppca(mixtures={}, dimension={})", mppca.p, mppca.d);
       });
 
   // Class TaperedCapsule, defining the properties:
@@ -2574,8 +2413,7 @@ The resulting tensors are as follows:
                         const std::optional<Eigen::Vector2f>& radius,
                         float length) {
             mm::TaperedCapsule capsule;
-            capsule.transformation =
-                transformation.value_or(Eigen::Matrix4f::Identity());
+            capsule.transformation = transformation.value_or(Eigen::Matrix4f::Identity());
             capsule.radius = radius.value_or(Eigen::Vector2f::Ones());
             capsule.parent = parent;
             capsule.length = length;
@@ -2599,21 +2437,14 @@ The resulting tensors are as follows:
           "Transformation defining the orientation and starting point relative to the parent coordinate system")
       .def_property_readonly(
           "radius",
-          [](const mm::TaperedCapsule& capsule) -> Eigen::Vector2f {
-            return capsule.radius;
-          },
+          [](const mm::TaperedCapsule& capsule) -> Eigen::Vector2f { return capsule.radius; },
           "Start and end radius for the capsule.")
       .def_property_readonly(
           "parent",
-          [](const mm::TaperedCapsule& capsule) -> int {
-            return capsule.parent;
-          },
+          [](const mm::TaperedCapsule& capsule) -> int { return capsule.parent; },
           "Parent joint to which the capsule is attached.")
       .def_property_readonly(
-          "length",
-          [](const mm::TaperedCapsule& capsule) -> float {
-            return capsule.length;
-          })
+          "length", [](const mm::TaperedCapsule& capsule) -> float { return capsule.length; })
       .def("__repr__", [](const mm::TaperedCapsule& tc) {
         return fmt::format(
             "TaperedCapsule(parent={}, length={}, radius=[{}, {}])",
@@ -2642,9 +2473,7 @@ The resulting tensors are as follows:
       .def_readwrite("name", &mm::Marker::name, "Name of the marker")
       .def_readwrite("pos", &mm::Marker::pos, "Marker 3d position")
       .def_readwrite(
-          "occluded",
-          &mm::Marker::occluded,
-          "True if the marker is occluded with no position info")
+          "occluded", &mm::Marker::occluded, "True if the marker is occluded with no position info")
       .def("__repr__", [](const mm::Marker& m) {
         return fmt::format(
             "Marker(name='{}', pos=[{} {} {}], occluded={})",
@@ -2661,17 +2490,11 @@ The resulting tensors are as follows:
   //    fps
   markerSequenceClass.def(py::init())
       .def_readwrite("name", &mm::MarkerSequence::name, "Name of the subject")
-      .def_readwrite(
-          "frames",
-          &mm::MarkerSequence::frames,
-          "Marker data in [nframes][nMarkers]")
+      .def_readwrite("frames", &mm::MarkerSequence::frames, "Marker data in [nframes][nMarkers]")
       .def_readwrite("fps", &mm::MarkerSequence::fps, "Frame rate")
       .def("__repr__", [](const mm::MarkerSequence& ms) {
         return fmt::format(
-            "MarkerSequence(name='{}', frames={}, fps={})",
-            ms.name,
-            ms.frames.size(),
-            ms.fps);
+            "MarkerSequence(name='{}', frames={}, fps={})", ms.name, ms.frames.size(), ms.fps);
       });
 
   // =====================================================
@@ -2687,29 +2510,22 @@ The resulting tensors are as follows:
           py::init([](const momentum::FBXUpVector upVector,
                       const momentum::FBXFrontVector frontVector,
                       const momentum::FBXCoordSystem coordSystem) {
-            return momentum::FBXCoordSystemInfo{
-                upVector, frontVector, coordSystem};
+            return momentum::FBXCoordSystemInfo{upVector, frontVector, coordSystem};
           }),
           py::arg("upVector"),
           py::arg("frontVector"),
           py::arg("coordSystem"))
       .def_property_readonly(
           "upVector",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
-            return coordSystemInfo.upVector;
-          },
+          [](const mm::FBXCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.upVector; },
           "Returns the up vector.")
       .def_property_readonly(
           "frontVector",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
-            return coordSystemInfo.frontVector;
-          },
+          [](const mm::FBXCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.frontVector; },
           "Returns the front vector.")
       .def_property_readonly(
           "coordSystem",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) {
-            return coordSystemInfo.coordSystem;
-          },
+          [](const mm::FBXCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.coordSystem; },
           "Returns the coordinate system.")
       .def("__repr__", [](const mm::FBXCoordSystemInfo& info) {
         std::string upVectorStr;
@@ -3052,8 +2868,7 @@ This can be useful for visualization if you don't want the legs to distract.
 
   m.def(
       "strip_joints",
-      [](const momentum::Character& c,
-         const std::vector<std::string>& joints_in) {
+      [](const momentum::Character& c, const std::vector<std::string>& joints_in) {
         std::vector<size_t> joints;
         for (const auto& j : joints_in) {
           const auto idx = c.skeleton.getJointIdByName(j);
@@ -3098,8 +2913,8 @@ This is used e.g. to swap one character's hand skeleton with another.
   m.def(
       "reduce_to_selected_model_parameters",
       [](const momentum::Character& character, at::Tensor activeParameters) {
-        return character.simplifyParameterTransform(tensorToParameterSet(
-            character.parameterTransform, activeParameters));
+        return character.simplifyParameterTransform(
+            tensorToParameterSet(character.parameterTransform, activeParameters));
       },
       R"(Strips out unused parameters from the parameter transform.
 

@@ -27,16 +27,8 @@ class TensorCollisionErrorFunction : public TensorErrorFunction<T> {
 };
 
 template <typename T>
-TensorCollisionErrorFunction<T>::TensorCollisionErrorFunction(
-    size_t batchSize,
-    size_t nFrames)
-    : TensorErrorFunction<T>(
-          "Collision",
-          "collision",
-          batchSize,
-          nFrames,
-          {},
-          {}) {}
+TensorCollisionErrorFunction<T>::TensorCollisionErrorFunction(size_t batchSize, size_t nFrames)
+    : TensorErrorFunction<T>("Collision", "collision", batchSize, nFrames, {}, {}) {}
 
 template <typename T>
 std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>
@@ -64,9 +56,7 @@ std::unique_ptr<TensorErrorFunction<T>> createCollisionErrorFunction(
   return std::make_unique<TensorCollisionErrorFunction<T>>(batchSize, nFrames);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-    createCollisionErrorFunction(size_t, size_t);
-template std::unique_ptr<TensorErrorFunction<double>>
-    createCollisionErrorFunction(size_t, size_t);
+template std::unique_ptr<TensorErrorFunction<float>> createCollisionErrorFunction(size_t, size_t);
+template std::unique_ptr<TensorErrorFunction<double>> createCollisionErrorFunction(size_t, size_t);
 
 } // namespace pymomentum

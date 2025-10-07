@@ -116,11 +116,9 @@ at::Tensor solveTensorIKProblem(
   // momentumSolverOptions.doLineSearch = solverOptions.lineSearch;
   // momentumSolverOptions.verbose = true;
 
-  const auto nParams =
-      characters.front()->parameterTransform.numAllModelParameters();
+  const auto nParams = characters.front()->parameterTransform.numAllModelParameters();
 
-  at::Tensor modelParameters_final =
-      at::zeros({nBatch, (int)nParams}, toScalarType<T>());
+  at::Tensor modelParameters_final = at::zeros({nBatch, (int)nParams}, toScalarType<T>());
 
   ThreadSafeExceptionWrapper exception;
 
@@ -132,34 +130,26 @@ at::Tensor solveTensorIKProblem(
           character.parameterTransform.cast<T>();
 
       at::Tensor modelParameters_init_cur = modelParams_init.select(0, iBatch);
-      at::Tensor modelParameters_final_cur =
-          modelParameters_final.select(0, iBatch);
+      at::Tensor modelParameters_final_cur = modelParameters_final.select(0, iBatch);
 
-      const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>
-          errorFunctions_cur = buildMomentumErrorFunctions(
-              characters,
-              errorFunctions,
-              errorFunctionWeights,
-              weightsMap,
-              iBatch);
-      momentum::SkeletonSolverFunctionT<T> solverFunction = buildSolverFunction(
-          *characters[iBatch], parameterTransform, errorFunctions_cur);
+      const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> errorFunctions_cur =
+          buildMomentumErrorFunctions(
+              characters, errorFunctions, errorFunctionWeights, weightsMap, iBatch);
+      momentum::SkeletonSolverFunctionT<T> solverFunction =
+          buildSolverFunction(*characters[iBatch], parameterTransform, errorFunctions_cur);
 
       std::unique_ptr<momentum::SolverT<T>> solver;
       if (solverOptions.linearSolverType == LinearSolverType::Cholesky) {
-        auto derivedSolverOptions =
-            momentum::SubsetGaussNewtonSolverOptions(momentumSolverOptions);
+        auto derivedSolverOptions = momentum::SubsetGaussNewtonSolverOptions(momentumSolverOptions);
         derivedSolverOptions.regularization = solverOptions.levmar_lambda;
         derivedSolverOptions.doLineSearch = solverOptions.lineSearch;
         solver = std::make_unique<momentum::SubsetGaussNewtonSolverT<T>>(
             derivedSolverOptions, &solverFunction);
-      } else if (
-          solverOptions.linearSolverType == LinearSolverType::TrustRegionQR) {
-        solver = std::make_unique<momentum::TrustRegionQRT<T>>(
-            momentumSolverOptions, &solverFunction);
+      } else if (solverOptions.linearSolverType == LinearSolverType::TrustRegionQR) {
+        solver =
+            std::make_unique<momentum::TrustRegionQRT<T>>(momentumSolverOptions, &solverFunction);
       } else {
-        auto derivedSolverOptions =
-            momentum::GaussNewtonSolverQROptions(momentumSolverOptions);
+        auto derivedSolverOptions = momentum::GaussNewtonSolverQROptions(momentumSolverOptions);
         derivedSolverOptions.regularization = solverOptions.levmar_lambda;
         derivedSolverOptions.doLineSearch = solverOptions.lineSearch;
         solver = std::make_unique<momentum::GaussNewtonSolverQRT<T>>(
@@ -167,19 +157,16 @@ at::Tensor solveTensorIKProblem(
       }
       solver->setEnabledParameters(activeParams);
 
-      Eigen::VectorX<T> parameters_opt =
-          toEigenMap<T>(modelParameters_init_cur);
+      Eigen::VectorX<T> parameters_opt = toEigenMap<T>(modelParameters_init_cur);
       solver->solve(parameters_opt);
 
       // Record iteration count.
       const std::vector<double>& iterHistory = solver->getErrorHistory();
       nTotalSolveIKIter += iterHistory.size();
 
-      if (parameters_opt.array().isNaN().any() ||
-          parameters_opt.array().isInf().any()) {
+      if (parameters_opt.array().isNaN().any() || parameters_opt.array().isInf().any()) {
         ++numNaNs;
-        toEigenMap<T>(modelParameters_final_cur) =
-            toEigenMap<T>(modelParameters_init_cur);
+        toEigenMap<T>(modelParameters_final_cur) = toEigenMap<T>(modelParameters_init_cur);
       } else {
         toEigenMap<T>(modelParameters_final_cur) = parameters_opt;
       }
@@ -190,9 +177,8 @@ at::Tensor solveTensorIKProblem(
   nTotalSolveIK += nBatch;
 
   if (numNaNs > 0) {
-    std::cerr
-        << "WARNING: Detected" << static_cast<uint32_t>(numNaNs)
-        << "NAN/INF values in outputs from solve_ik.  Reverting to initial parameters.";
+    std::cerr << "WARNING: Detected" << static_cast<uint32_t>(numNaNs)
+              << "NAN/INF values in outputs from solve_ik.  Reverting to initial parameters.";
   }
 
   exception.maybeThrow();
@@ -219,8 +205,8 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
       "solveTensorIKProblem()",
       &squeezeErrorFunctionWeights);
 
-  d_loss_dModelParameters = d_loss_dModelParameters.contiguous().to(
-      at::DeviceType::CPU, toScalarType<T>());
+  d_loss_dModelParameters =
+      d_loss_dModelParameters.contiguous().to(at::DeviceType::CPU, toScalarType<T>());
 
   const auto nBatch = modelParams_final.size(0);
 
@@ -232,8 +218,7 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
   std::vector<ErrorFunctionInput<T>> grad_inputs =
       buildErrorFunctionInputs(errorFunctions, weightsMap);
 
-  at::Tensor grad_errorFunctionWeights =
-      at::zeros(errorFunctionWeights.sizes(), toScalarType<T>());
+  at::Tensor grad_errorFunctionWeights = at::zeros(errorFunctionWeights.sizes(), toScalarType<T>());
 
   std::vector<T> gradient_rmse(nBatch);
 
@@ -245,19 +230,14 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
       const momentum::ParameterTransformT<T> parameterTransform =
           character.parameterTransform.cast<T>();
 
-      const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>
-          errorFunctions_cur = buildMomentumErrorFunctions(
-              characters,
-              errorFunctions,
-              errorFunctionWeights,
-              weightsMap,
-              iBatch);
-      momentum::SkeletonSolverFunctionT<T> solverFunction = buildSolverFunction(
-          *characters[iBatch], parameterTransform, errorFunctions_cur);
+      const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> errorFunctions_cur =
+          buildMomentumErrorFunctions(
+              characters, errorFunctions, errorFunctionWeights, weightsMap, iBatch);
+      momentum::SkeletonSolverFunctionT<T> solverFunction =
+          buildSolverFunction(*characters[iBatch], parameterTransform, errorFunctions_cur);
 
       at::Tensor modelParameters_cur = modelParams_final.select(0, iBatch);
-      at::Tensor dLoss_dModelParameters_cur =
-          d_loss_dModelParameters.select(0, iBatch);
+      at::Tensor dLoss_dModelParameters_cur = d_loss_dModelParameters.select(0, iBatch);
       std::vector<momentum::ErrorFunctionDerivativesT<T>> errorFunctionDerivs =
           momentum::d_modelParams_d_inputs<T>(
               character.skeleton,
@@ -274,8 +254,7 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
         return;
       }
 
-      at::Tensor grad_errorFunctionWeights_cur =
-          grad_errorFunctionWeights.select(0, iBatch);
+      at::Tensor grad_errorFunctionWeights_cur = grad_errorFunctionWeights.select(0, iBatch);
       for (size_t iErr = 0; iErr < errorFunctions.size(); ++iErr) {
         if (weightsMap[iErr] < 0) {
           continue;
@@ -286,8 +265,7 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
       }
 
       // For each differentiable input,
-      for (size_t iGlobalInput = 0; iGlobalInput < grad_inputs.size();
-           ++iGlobalInput) {
+      for (size_t iGlobalInput = 0; iGlobalInput < grad_inputs.size(); ++iGlobalInput) {
         if (grad_inputs[iGlobalInput].dLoss_dInput.empty()) {
           continue;
         }
@@ -297,14 +275,12 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
         const auto& errf = errorFunctions[iErrorFunction];
         const auto& input = errf->tensorInputs()[jInput];
 
-        auto itr = errorFunctionDerivs[iErrorFunction].gradInputs.find(
-            input.inputName);
+        auto itr = errorFunctionDerivs[iErrorFunction].gradInputs.find(input.inputName);
 
         if (itr == errorFunctionDerivs[iErrorFunction].gradInputs.end()) {
           std::ostringstream availableDerivatives;
           bool firstDeriv = true;
-          for (const auto& [name, _] :
-               errorFunctionDerivs[iErrorFunction].gradInputs) {
+          for (const auto& [name, _] : errorFunctionDerivs[iErrorFunction].gradInputs) {
             if (firstDeriv) {
               firstDeriv = false;
             } else {
@@ -334,20 +310,19 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
     grad_errorFunctionWeights = grad_errorFunctionWeights.sum(0);
   }
 
-  const size_t nExceeded = std::count_if(
-      std::begin(gradient_rmse), std::end(gradient_rmse), [](const T& value) {
+  const size_t nExceeded =
+      std::count_if(std::begin(gradient_rmse), std::end(gradient_rmse), [](const T& value) {
         return value > gradientRMSEThreshold;
       });
-  const T maxValue =
-      *std::max_element(std::begin(gradient_rmse), std::end(gradient_rmse));
+  const T maxValue = *std::max_element(std::begin(gradient_rmse), std::end(gradient_rmse));
   if (nExceeded > 0) {
     if (nGradientPrintouts < MAX_GRADIENT_PRINTOUTS) {
       // I'd like to use py::print here, but for some reason Pytorch
       // insta-crashes if I do that, I guess because we're inside the autograd
       // evaluation.
-      std::cerr << "WARNING: in backward pass of solve_ik(), " << nExceeded
-                << "/" << nBatch << " gradients exceeded the threshold "
-                << gradientRMSEThreshold << " (max: " << maxValue << ").\n";
+      std::cerr << "WARNING: in backward pass of solve_ik(), " << nExceeded << "/" << nBatch
+                << " gradients exceeded the threshold " << gradientRMSEThreshold
+                << " (max: " << maxValue << ").\n";
       ++nGradientPrintouts;
       if (nGradientPrintouts >= MAX_GRADIENT_PRINTOUTS) {
         std::cerr
@@ -391,11 +366,9 @@ at::Tensor solveTensorSequenceIKProblem(
   momentumSolverOptions.doLineSearch = solverOptions.lineSearch;
   momentumSolverOptions.multithreaded = true;
 
-  const auto nParams =
-      characters.front()->parameterTransform.numAllModelParameters();
+  const auto nParams = characters.front()->parameterTransform.numAllModelParameters();
 
-  at::Tensor modelParameters_final =
-      at::zeros({nBatch, nFrames, (int)nParams}, toScalarType<T>());
+  at::Tensor modelParameters_final = at::zeros({nBatch, nFrames, (int)nParams}, toScalarType<T>());
 
   ThreadSafeExceptionWrapper exception;
 
@@ -407,8 +380,7 @@ at::Tensor solveTensorSequenceIKProblem(
           character.parameterTransform.cast<T>();
 
       at::Tensor modelParameters_init_cur = modelParams_init.select(0, iBatch);
-      at::Tensor modelParameters_final_cur =
-          modelParameters_final.select(0, iBatch);
+      at::Tensor modelParameters_final_cur = modelParameters_final.select(0, iBatch);
 
       std::unique_ptr<momentum::SequenceSolverFunctionT<T>> solverFunction =
           buildSequenceSolverFunction(
@@ -422,36 +394,29 @@ at::Tensor solveTensorSequenceIKProblem(
               iBatch);
 
       if (solverOptions.sequenceSmoothingWeight > 0.f) {
-        auto modelParamsSequenceSmoothingErrFunc = std::make_shared<
-            momentum::ModelParametersSequenceErrorFunctionT<T>>(character);
-        modelParamsSequenceSmoothingErrFunc->setWeight(
-            solverOptions.sequenceSmoothingWeight);
+        auto modelParamsSequenceSmoothingErrFunc =
+            std::make_shared<momentum::ModelParametersSequenceErrorFunctionT<T>>(character);
+        modelParamsSequenceSmoothingErrFunc->setWeight(solverOptions.sequenceSmoothingWeight);
         solverFunction->addSequenceErrorFunction(
             momentum::kAllFrames, modelParamsSequenceSmoothingErrFunc);
       }
 
-      momentum::SequenceSolverT<T> solver(
-          momentumSolverOptions, solverFunction.get());
+      momentum::SequenceSolverT<T> solver(momentumSolverOptions, solverFunction.get());
       solver.setEnabledParameters(activeParams);
 
-      Eigen::VectorX<T> parameters_opt =
-          solverFunction->getJoinedParameterVector();
+      Eigen::VectorX<T> parameters_opt = solverFunction->getJoinedParameterVector();
       solver.solve(parameters_opt);
 
       // Nan in result, back out the solve:
-      if (parameters_opt.array().isNaN().any() ||
-          parameters_opt.array().isInf().any()) {
+      if (parameters_opt.array().isNaN().any() || parameters_opt.array().isInf().any()) {
         ++numNaNs;
-        toEigenMap<T>(modelParameters_final_cur) =
-            toEigenMap<T>(modelParameters_init_cur);
+        toEigenMap<T>(modelParameters_final_cur) = toEigenMap<T>(modelParameters_init_cur);
         return;
       }
 
       dispenso::parallel_for((size_t)0, nFrames, [&](size_t iFrame) {
-        at::Tensor modelParameters_final_frame =
-            modelParameters_final_cur.select(0, iFrame);
-        toEigenMap<T>(modelParameters_final_frame) =
-            solverFunction->getFrameParameters(iFrame).v;
+        at::Tensor modelParameters_final_frame = modelParameters_final_cur.select(0, iFrame);
+        toEigenMap<T>(modelParameters_final_frame) = solverFunction->getFrameParameters(iFrame).v;
       });
     } catch (...) {
       exception.set(std::current_exception());
@@ -459,9 +424,8 @@ at::Tensor solveTensorSequenceIKProblem(
   });
 
   if (numNaNs > 0) {
-    std::cerr
-        << "WARNING: Detected" << static_cast<uint32_t>(numNaNs)
-        << "NAN/INF values in outputs from solve_ik.  Reverting to initial parameters.";
+    std::cerr << "WARNING: Detected" << static_cast<uint32_t>(numNaNs)
+              << "NAN/INF values in outputs from solve_ik.  Reverting to initial parameters.";
   }
 
   exception.maybeThrow();
@@ -473,8 +437,7 @@ template at::Tensor solveTensorIKProblem<float>(
     const std::vector<const momentum::Character*>& characters,
     const momentum::ParameterSet& activeParams,
     at::Tensor modelParams_init,
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap,
@@ -483,32 +446,27 @@ template at::Tensor solveTensorIKProblem<double>(
     const std::vector<const momentum::Character*>& characters,
     const momentum::ParameterSet& activeParams,
     at::Tensor modelParams_init,
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap,
     const SolverOptions& options);
 
-template std::tuple<at::Tensor, torch::autograd::variable_list>
-d_solveTensorIKProblem<float>(
+template std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem<float>(
     const std::vector<const momentum::Character*>& characters,
     const momentum::ParameterSet& activeParams,
     at::Tensor modelParams_final,
     at::Tensor d_loss_dModelParameters,
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap);
-template std::tuple<at::Tensor, torch::autograd::variable_list>
-d_solveTensorIKProblem<double>(
+template std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem<double>(
     const std::vector<const momentum::Character*>& characters,
     const momentum::ParameterSet& activeParams,
     at::Tensor modelParams_final,
     at::Tensor d_loss_dModelParameters,
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap);
@@ -518,8 +476,7 @@ template at::Tensor solveTensorSequenceIKProblem<float>(
     const momentum::ParameterSet& activeParams,
     const momentum::ParameterSet& sharedParams,
     at::Tensor modelParams_init,
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap,
@@ -529,8 +486,7 @@ template at::Tensor solveTensorSequenceIKProblem<double>(
     const momentum::ParameterSet& activeParams,
     const momentum::ParameterSet& sharedParams,
     at::Tensor modelParams_init,
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap,

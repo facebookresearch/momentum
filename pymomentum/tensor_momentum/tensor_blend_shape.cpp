@@ -7,13 +7,19 @@
 
 #include "pymomentum/tensor_momentum/tensor_blend_shape.h"
 
+#include "pymomentum/tensor_utility/autograd_utility.h"
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <momentum/character/blend_shape.h>
-#include <momentum/character/character.h>
+#include <momentum/character/blend_shape_base.h>
+#include <momentum/common/exception.h>
+#include <momentum/common/log.h>
 
-#include <dispenso/parallel_for.h> // @manual
+#include <ATen/Functions.h>
+#include <dispenso/parallel_for.h>
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 #include <Eigen/Core>
 
 namespace pymomentum {
@@ -23,17 +29,14 @@ using torch::autograd::variable_list;
 
 namespace {
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 struct ApplyBlendShapeCoefficientsFunction
     : public torch::autograd::Function<ApplyBlendShapeCoefficientsFunction> {
  public:
-  static variable_list forward(
-      AutogradContext* ctx,
-      PyObject* blendShape_in,
-      at::Tensor blendShapeCoefficients);
+  static variable_list
+  forward(AutogradContext* ctx, PyObject* blendShape_in, at::Tensor blendShapeCoefficients);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_jointParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_jointParameters);
 };
 
 variable_list ApplyBlendShapeCoefficientsFunction::forward(
@@ -42,8 +45,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
     at::Tensor blendShapeCoefficients) {
   const auto nCoeffs_idx = -1;
 
-  ctx->saved_data["blendShape"] =
-      c10::ivalue::ConcretePyObjectHolder::create(blendShape_in);
+  ctx->saved_data["blendShape"] = c10::ivalue::ConcretePyObjectHolder::create(blendShape_in);
   ctx->save_for_backward({blendShapeCoefficients});
 
   TensorChecker checker("applyBlendShapeCoefficients");
@@ -62,8 +64,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
   const int64_t nCoeffs = checker.getBoundValue(nCoeffs_idx);
   const int64_t nBatch = checker.getBatchSize();
 
-  const momentum::BlendShape* blendShape =
-      py::cast<const momentum::BlendShape*>(blendShape_in);
+  const momentum::BlendShape* blendShape = py::cast<const momentum::BlendShape*>(blendShape_in);
 
   MT_THROW_IF(
       nCoeffs > blendShape->shapeSize(),
@@ -87,8 +88,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
       result_cur_map.segment<3>(3 * i) = baseShape[i];
     }
 
-    result_cur_map +=
-        shapeVectors.leftCols(nCoeffs) * toEigenMap<float>(coeffs_cur);
+    result_cur_map += shapeVectors.leftCols(nCoeffs) * toEigenMap<float>(coeffs_cur);
   });
 
   if (squeeze) {
@@ -106,11 +106,9 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
 
   const momentum::BlendShape* blendShape =
-      py::cast<const momentum::BlendShape*>(
-          ctx->saved_data["blendShape"].toPyObject());
+      py::cast<const momentum::BlendShape*>(ctx->saved_data["blendShape"].toPyObject());
 
-  auto dLoss_dPositions =
-      grad_outputs[0].contiguous().to(at::DeviceType::CPU, at::kFloat);
+  auto dLoss_dPositions = grad_outputs[0].contiguous().to(at::DeviceType::CPU, at::kFloat);
 
   bool squeeze = false;
 
@@ -137,8 +135,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
       &squeeze);
   const auto nBatch = checker.getBatchSize();
 
-  at::Tensor dLoss_dBlendShapeCoeffs =
-      at::zeros({nBatch, nBlendShapes}, at::CPU(at::kFloat));
+  at::Tensor dLoss_dBlendShapeCoeffs = at::zeros({nBatch, nBlendShapes}, at::CPU(at::kFloat));
 
   for (int64_t k = 0; k < nBatch; ++k) {
     at::Tensor dLoss_dCoeffsCur = dLoss_dBlendShapeCoeffs.select(0, k);
@@ -155,6 +152,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
 
   return {at::Tensor(), dLoss_dBlendShapeCoeffs};
 }
+#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
@@ -163,11 +161,12 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
 // problem is that to do the latter we'd end up copying the whole tensor
 // every time we apply blend shapes.  Explicitly implementing this one
 // operation seems like a reasonable compromise.
-at::Tensor applyBlendShapeCoefficients(
-    py::object blendShape,
-    at::Tensor coeffs) {
-  return ApplyBlendShapeCoefficientsFunction::apply(
-      blendShape.ptr(), coeffs)[0];
+at::Tensor applyBlendShapeCoefficients(pybind11::object blendShape, at::Tensor coeffs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+  return ApplyBlendShapeCoefficientsFunction::apply(blendShape.ptr(), coeffs)[0];
+#else
+  MT_THROW("applyBlendShapeCoefficients is not supported in limited PyTorch API mode");
+#endif
 }
 
 } // namespace pymomentum

@@ -18,7 +18,9 @@
 #include <momentum/math/mesh.h>
 
 #include <dispenso/parallel_for.h> // @manual
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 
 namespace pymomentum {
 
@@ -30,9 +32,9 @@ using torch::autograd::variable_list;
 
 namespace {
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 template <typename T>
-struct SkinPointsFunction
-    : public torch::autograd::Function<SkinPointsFunction<T>> {
+struct SkinPointsFunction : public torch::autograd::Function<SkinPointsFunction<T>> {
  public:
   static variable_list forward(
       AutogradContext* ctx,
@@ -40,17 +42,14 @@ struct SkinPointsFunction
       at::Tensor transforms,
       at::Tensor restPoints);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_jointParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_jointParameters);
 };
 
 template <typename T>
 std::vector<Eigen::Matrix4<T>> multiply(
     const std::vector<Eigen::Matrix4<T>>& lhs,
     const std::vector<Eigen::Matrix4<T>>& rhs) {
-  MT_THROW_IF(
-      lhs.size() != rhs.size(), "Mismatch in list sizes in multiply().");
+  MT_THROW_IF(lhs.size() != rhs.size(), "Mismatch in list sizes in multiply().");
   std::vector<Eigen::Matrix4<T>> result;
   result.reserve(lhs.size());
   for (size_t i = 0; i < lhs.size(); ++i) {
@@ -60,8 +59,7 @@ std::vector<Eigen::Matrix4<T>> multiply(
 }
 
 template <typename T>
-std::vector<Eigen::Matrix4<T>> affine3fToMatrixList(
-    const momentum::TransformationList& xfs) {
+std::vector<Eigen::Matrix4<T>> affine3fToMatrixList(const momentum::TransformationList& xfs) {
   std::vector<Eigen::Matrix4<T>> result;
   result.reserve(xfs.size());
   for (const auto& xf : xfs) {
@@ -82,8 +80,7 @@ variable_list SkinPointsFunction<T>::forward(
       !firstCharacter.mesh || !firstCharacter.skinWeights,
       "When skinning points, character is missing a mesh.");
 
-  ctx->saved_data["character"] =
-      c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+  ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
   ctx->save_for_backward({transforms, restPoints});
 
   const int nJoints = firstCharacter.skeleton.joints.size();
@@ -113,8 +110,7 @@ variable_list SkinPointsFunction<T>::forward(
 
   const auto nBatch = checker.getBatchSize();
 
-  const auto characters =
-      toCharacterList(characters_in, nBatch, "skin_points()");
+  const auto characters = toCharacterList(characters_in, nBatch, "skin_points()");
 
   auto result = at::zeros({nBatch, nVertices, 3}, toScalarType<T>());
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
@@ -126,8 +122,7 @@ variable_list SkinPointsFunction<T>::forward(
     if (!isEmpty(restPoints)) {
       restPoints_cur = restPoints.select(0, iBatch);
     }
-    Eigen::Map<Eigen::VectorX<T>> restPoints_map =
-        toEigenMap<T>(restPoints_cur);
+    Eigen::Map<Eigen::VectorX<T>> restPoints_map = toEigenMap<T>(restPoints_cur);
     Eigen::Map<Eigen::VectorX<T>> results_map = toEigenMap<T>(result_cur);
 
     const std::vector<Eigen::Matrix4<T>> transforms_cur =
@@ -173,12 +168,8 @@ variable_list SkinPointsFunction<T>::forward(
 }
 
 template <typename T>
-variable_list SkinPointsFunction<T>::backward(
-    AutogradContext* ctx,
-    variable_list grad_outputs) {
-  MT_THROW_IF(
-      grad_outputs.size() != 1,
-      "Invalid grad_outputs in SkinPointsFunction::backward");
+variable_list SkinPointsFunction<T>::backward(AutogradContext* ctx, variable_list grad_outputs) {
+  MT_THROW_IF(grad_outputs.size() != 1, "Invalid grad_outputs in SkinPointsFunction::backward");
 
   const auto& firstCharacter =
       anyCharacter(ctx->saved_data["character"].toPyObject(), "skin_points()");
@@ -190,8 +181,7 @@ variable_list SkinPointsFunction<T>::backward(
   auto savedItr = std::begin(saved);
   auto transforms = *savedItr++;
   auto restPoints = *savedItr++;
-  MT_THROW_IF(
-      savedItr != std::end(saved), "Mismatch in saved variable counts.");
+  MT_THROW_IF(savedItr != std::end(saved), "Mismatch in saved variable counts.");
 
   TensorChecker checker("skin_points");
 
@@ -229,16 +219,15 @@ variable_list SkinPointsFunction<T>::backward(
       &squeeze_restPoints);
 
   const auto nBatch = checker.getBatchSize();
-  const auto characters = toCharacterList(
-      ctx->saved_data["character"].toPyObject(), nBatch, "skin_points()");
+  const auto characters =
+      toCharacterList(ctx->saved_data["character"].toPyObject(), nBatch, "skin_points()");
 
   at::Tensor dLoss_dRestPositions;
   if (!isEmpty(restPoints)) {
     dLoss_dRestPositions = at::zeros({nBatch, nVertices, 3}, toScalarType<T>());
   }
 
-  at::Tensor dLoss_dTransforms =
-      at::zeros({nBatch, nJoints, 4, 4}, toScalarType<T>());
+  at::Tensor dLoss_dTransforms = at::zeros({nBatch, nJoints, 4, 4}, toScalarType<T>());
 
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
     const momentum::Character* character = characters[iBatch];
@@ -251,8 +240,7 @@ variable_list SkinPointsFunction<T>::backward(
     if (!isEmpty(restPoints)) {
       restPoints_cur = restPoints.select(0, iBatch);
     }
-    Eigen::Map<Eigen::VectorX<T>> restPoints_map =
-        toEigenMap<T>(restPoints_cur);
+    Eigen::Map<Eigen::VectorX<T>> restPoints_map = toEigenMap<T>(restPoints_cur);
 
     const std::vector<Eigen::Matrix4<T>> inverseBindPose =
         affine3fToMatrixList<T>(character->inverseBindPose);
@@ -280,13 +268,11 @@ variable_list SkinPointsFunction<T>::backward(
         }
 
         const int index = skin.index(iVert, j);
-        const Eigen::Vector4<T> p_local =
-            (inverseBindPose[index] * p_rest).template cast<T>();
+        const Eigen::Vector4<T> p_local = (inverseBindPose[index] * p_rest).template cast<T>();
 
         dLoss_dTransform_accum[index].template topLeftCorner<3, 3>() +=
             weight * dLoss_dWorldPos * p_local.template head<3>().transpose();
-        dLoss_dTransform_accum[index].template block<3, 1>(0, 3) +=
-            weight * dLoss_dWorldPos;
+        dLoss_dTransform_accum[index].template block<3, 1>(0, 3) += weight * dLoss_dWorldPos;
       }
     }
 
@@ -319,10 +305,7 @@ variable_list SkinPointsFunction<T>::backward(
 
           const int index = skin.index(iVert, j);
           dLoss_dRestPositions_map.template segment<3>(3 * iVert) +=
-              (weight *
-               transforms_full[index]
-                   .template topLeftCorner<3, 3>()
-                   .transpose() *
+              (weight * transforms_full[index].template topLeftCorner<3, 3>().transpose() *
                dLoss_dWorldPos);
         }
       }
@@ -339,6 +322,8 @@ variable_list SkinPointsFunction<T>::backward(
 
   return {at::Tensor(), dLoss_dTransforms, dLoss_dRestPositions};
 }
+#endif // PYMOMENTUM_LIMITED_TORCH_API
+
 } // namespace
 
 at::Tensor skinPoints(
@@ -348,9 +333,7 @@ at::Tensor skinPoints(
   if (skel_state.size(-1) == 8) {
     // Assumed to be a skeleton state.
     skel_state = skeletonStateToTransforms(skel_state);
-  } else if (
-      skel_state.ndimension() > 2 && skel_state.size(-1) == 4 &&
-      skel_state.size(-2) == 4) {
+  } else if (skel_state.ndimension() > 2 && skel_state.size(-1) == 4 && skel_state.size(-2) == 4) {
     // Assumed to be a matrix.
     ;
   } else {
@@ -359,13 +342,15 @@ at::Tensor skinPoints(
         formatTensorSizes(skel_state));
   }
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<SkinPointsFunction>(
       characters.ptr(), skel_state, denullify(restPoints))[0];
+#else
+  MT_THROW("skinPoints is not supported in limited PyTorch API mode");
+#endif
 }
 
-at::Tensor computeVertexNormals(
-    at::Tensor vertex_positions,
-    at::Tensor triangles) {
+at::Tensor computeVertexNormals(at::Tensor vertex_positions, at::Tensor triangles) {
   // vertex_positions shape: [..., n_vertices, 3]
   // triangles shape: [n_triangles, 3]
   MT_THROW_IF(
@@ -382,12 +367,9 @@ at::Tensor computeVertexNormals(
       formatTensorSizes(triangles));
 
   // x1, x2, x3: batch_size x n_triangles x 3
-  at::Tensor x1 =
-      at::index_select(vertex_positions, -2, triangles.select(-1, 0));
-  at::Tensor x2 =
-      at::index_select(vertex_positions, -2, triangles.select(-1, 1));
-  at::Tensor x3 =
-      at::index_select(vertex_positions, -2, triangles.select(-1, 2));
+  at::Tensor x1 = at::index_select(vertex_positions, -2, triangles.select(-1, 0));
+  at::Tensor x2 = at::index_select(vertex_positions, -2, triangles.select(-1, 1));
+  at::Tensor x3 = at::index_select(vertex_positions, -2, triangles.select(-1, 2));
 
   at::Tensor triangle_normals = at::cross(x2 - x1, x3 - x1, -1);
   at::Tensor vertex_normals = at::zeros_like(vertex_positions);
@@ -396,8 +378,7 @@ at::Tensor computeVertexNormals(
   }
 
   return torch::nn::functional::normalize(
-      vertex_normals,
-      torch::nn::functional::NormalizeFuncOptions().p(2).dim(-1));
+      vertex_normals, torch::nn::functional::NormalizeFuncOptions().p(2).dim(-1));
 }
 
 at::Tensor skinSkinnedLocators(
@@ -450,10 +431,9 @@ at::Tensor skinSkinnedLocators(
       restPositionData[i * 3 + 1] = locator.position[1];
       restPositionData[i * 3 + 2] = locator.position[2];
     }
-    restPos =
-        torch::from_blob(restPositionData.data(), {nLocators, 3}, at::kFloat)
-            .clone()
-            .to(skel_state.scalar_type());
+    restPos = torch::from_blob(restPositionData.data(), {nLocators, 3}, at::kFloat)
+                  .clone()
+                  .to(skel_state.scalar_type());
 
     // Expand to match batch size
     restPos = restPos.unsqueeze(0).expand({batchSize, nLocators, 3});
@@ -466,8 +446,7 @@ at::Tensor skinSkinnedLocators(
   for (int64_t i = 0; i < nLocators; ++i) {
     const auto& locator = character.skinnedLocators[i];
     for (int64_t j = 0; j < momentum::kMaxSkinJoints; ++j) {
-      allParentData[i * momentum::kMaxSkinJoints + j] =
-          static_cast<int>(locator.parents[j]);
+      allParentData[i * momentum::kMaxSkinJoints + j] = static_cast<int>(locator.parents[j]);
       allWeightData[i * momentum::kMaxSkinJoints + j] = locator.skinWeights[j];
     }
   }
@@ -492,26 +471,22 @@ at::Tensor skinSkinnedLocators(
     // Store the 3x4 linear part (rotation + translation)
     for (int row = 0; row < 3; ++row) {
       for (int col = 0; col < 4; ++col) {
-        inverseBindPoseData[jointIdx * 12 + row * 4 + col] =
-            invBindPose(row, col);
+        inverseBindPoseData[jointIdx * 12 + row * 4 + col] = invBindPose(row, col);
       }
     }
   }
 
-  at::Tensor inverseBindPoses = torch::from_blob(
-                                    inverseBindPoseData.data(),
-                                    {nJoints, 3, 4},
-                                    torch::TensorOptions().dtype(at::kFloat))
-                                    .clone()
-                                    .to(skel_state.scalar_type());
+  at::Tensor inverseBindPoses =
+      torch::from_blob(
+          inverseBindPoseData.data(), {nJoints, 3, 4}, torch::TensorOptions().dtype(at::kFloat))
+          .clone()
+          .to(skel_state.scalar_type());
 
   // Initialize result tensor
-  at::Tensor result =
-      at::zeros({batchSize, nLocators, 3}, skel_state.scalar_type());
+  at::Tensor result = at::zeros({batchSize, nLocators, 3}, skel_state.scalar_type());
 
   // Apply skinning for each influence per locator
-  for (int64_t influence = 0; influence < momentum::kMaxSkinJoints;
-       ++influence) {
+  for (int64_t influence = 0; influence < momentum::kMaxSkinJoints; ++influence) {
     // Get parent indices and weights for this influence
     at::Tensor parentIndices = allParents.select(1, influence); // [nLocators]
     at::Tensor weights = allWeights.select(1, influence); // [nLocators]
@@ -521,27 +496,23 @@ at::Tensor skinSkinnedLocators(
         inverseBindPoses.index_select(0, parentIndices); // [nLocators, 3, 4]
 
     // Transform rest positions to local joint space using inverse bind pose
-    at::Tensor linearPart =
-        parentInverseBindPoses.slice(2, 0, 3); // [nLocators, 3, 3]
-    at::Tensor translationPart =
-        parentInverseBindPoses.slice(2, 3, 4).squeeze(2); // [nLocators, 3]
+    at::Tensor linearPart = parentInverseBindPoses.slice(2, 0, 3); // [nLocators, 3, 3]
+    at::Tensor translationPart = parentInverseBindPoses.slice(2, 3, 4).squeeze(2); // [nLocators, 3]
 
     // restPos: [nBatch, nLocators, 3]
     at::Tensor localRestPos =
-        at::einsum("lij,...lj->...li", {linearPart, restPos}) +
-        translationPart.unsqueeze(0);
+        at::einsum("lij,...lj->...li", {linearPart, restPos}) + translationPart.unsqueeze(0);
 
     // Get skeleton states for the parent joints
     at::Tensor parentSkelStates =
         skel_state.index_select(-2, parentIndices); // [nBatch, nLocators, 8]
 
     // Transform local positions using skeleton states
-    at::Tensor transformedPos = transformPointsWithSkeletonState(
-        parentSkelStates, localRestPos); // [nBatch, nLocators, 3]
+    at::Tensor transformedPos =
+        transformPointsWithSkeletonState(parentSkelStates, localRestPos); // [nBatch, nLocators, 3]
 
     // Apply weights and accumulate
-    at::Tensor weightedPos =
-        transformedPos * weights.unsqueeze(0).unsqueeze(-1);
+    at::Tensor weightedPos = transformedPos * weights.unsqueeze(0).unsqueeze(-1);
     result += weightedPos;
   }
 

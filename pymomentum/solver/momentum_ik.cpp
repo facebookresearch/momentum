@@ -30,7 +30,9 @@
 #include "pymomentum/tensor_utility/autograd_utility.h"
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
+#endif
 
 // Details on how PyTorch works for building a custom differentiable module:
 //
@@ -86,8 +88,7 @@ namespace {
 //   (grad_modelParams, grad_errorFunctionWeights, [grad_errorFunctionInputs])
 template <typename T, template <typename> class IKFunction>
 struct IKProblemAutogradFunction
-    : public torch::autograd::Function<
-          IKProblemAutogradFunction<T, IKFunction>> {
+    : public torch::autograd::Function<IKProblemAutogradFunction<T, IKFunction>> {
  public:
   static variable_list forward(
       AutogradContext* ctx,
@@ -134,59 +135,53 @@ struct IKProblemAutogradFunction
       at::Tensor vertexProjCons_target_positions,
       at::Tensor vertexProjCons_projections);
 
-  static variable_list backward(
-      AutogradContext* ctx,
-      variable_list grad_modelParameters);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_modelParameters);
 };
 
 // Create a vector of TensorErrorFunction from given error function weights.
 template <typename T>
-std::
-    pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>>
-    createIKProblem(
-        const std::vector<const momentum::Character*>& characters,
-        const int64_t nBatch,
-        const int64_t nFrames, // Number of frames, for a sequence/multi-frame
-                               // IK problem; should be 0 otherwise
-        const std::vector<ErrorFunctionType>& activeErrorFunctions,
-        at::Tensor positionCons_parents,
-        at::Tensor positionCons_offsets,
-        at::Tensor positionCons_weights,
-        at::Tensor positionCons_targets,
-        at::Tensor orientation_parents,
-        at::Tensor orientation_offsets,
-        at::Tensor orientation_weights,
-        at::Tensor orientation_targets,
-        at::Tensor posePrior_pi,
-        at::Tensor posePrior_mu,
-        at::Tensor posePrior_W,
-        at::Tensor posePrior_sigma,
-        at::Tensor posePrior_parameterIndices,
-        const momentum::Mppca* posePrior_model,
-        at::Tensor motion_targets,
-        at::Tensor motion_weights,
-        at::Tensor projectionCons_projections,
-        at::Tensor projectionCons_parents,
-        at::Tensor projectionCons_offsets,
-        at::Tensor projectionCons_weights,
-        at::Tensor projectionCons_targets,
-        at::Tensor distanceCons_origins,
-        at::Tensor distanceCons_parents,
-        at::Tensor distanceCons_offsets,
-        at::Tensor distanceCons_weights,
-        at::Tensor distanceCons_targets,
-        at::Tensor vertexCons_vertices,
-        at::Tensor vertexCons_weights,
-        at::Tensor vertexCons_target_positions,
-        at::Tensor vertexCons_target_normals,
-        momentum::VertexConstraintType vertexCons_type,
-        at::Tensor vertexProjCons_vertices,
-        at::Tensor vertexProjCons_weights,
-        at::Tensor vertexProjCons_target_positions,
-        at::Tensor vertexProjCons_projections) {
-  MT_THROW_IF(
-      characters.size() != nBatch,
-      "Mismatch between size of Character list and nBatch.");
+std::pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>> createIKProblem(
+    const std::vector<const momentum::Character*>& characters,
+    const int64_t nBatch,
+    const int64_t nFrames, // Number of frames, for a sequence/multi-frame
+                           // IK problem; should be 0 otherwise
+    const std::vector<ErrorFunctionType>& activeErrorFunctions,
+    at::Tensor positionCons_parents,
+    at::Tensor positionCons_offsets,
+    at::Tensor positionCons_weights,
+    at::Tensor positionCons_targets,
+    at::Tensor orientation_parents,
+    at::Tensor orientation_offsets,
+    at::Tensor orientation_weights,
+    at::Tensor orientation_targets,
+    at::Tensor posePrior_pi,
+    at::Tensor posePrior_mu,
+    at::Tensor posePrior_W,
+    at::Tensor posePrior_sigma,
+    at::Tensor posePrior_parameterIndices,
+    const momentum::Mppca* posePrior_model,
+    at::Tensor motion_targets,
+    at::Tensor motion_weights,
+    at::Tensor projectionCons_projections,
+    at::Tensor projectionCons_parents,
+    at::Tensor projectionCons_offsets,
+    at::Tensor projectionCons_weights,
+    at::Tensor projectionCons_targets,
+    at::Tensor distanceCons_origins,
+    at::Tensor distanceCons_parents,
+    at::Tensor distanceCons_offsets,
+    at::Tensor distanceCons_weights,
+    at::Tensor distanceCons_targets,
+    at::Tensor vertexCons_vertices,
+    at::Tensor vertexCons_weights,
+    at::Tensor vertexCons_target_positions,
+    at::Tensor vertexCons_target_normals,
+    momentum::VertexConstraintType vertexCons_type,
+    at::Tensor vertexProjCons_vertices,
+    at::Tensor vertexProjCons_weights,
+    at::Tensor vertexProjCons_target_positions,
+    at::Tensor vertexProjCons_projections) {
+  MT_THROW_IF(characters.size() != nBatch, "Mismatch between size of Character list and nBatch.");
 
   std::vector<std::unique_ptr<TensorErrorFunction<T>>> errorFunctions;
 
@@ -214,26 +209,15 @@ std::
 
   // All characters are guaranteed to have the same skeleton sizes so it's safe
   // to compare against just the first.
-  checkValidBoneIndex(
-      positionCons_parents, *characters.front(), "position_cons_parents");
-  checkValidBoneIndex(
-      orientation_parents, *characters.front(), "orientation_cons_parents");
-  checkValidBoneIndex(
-      projectionCons_parents, *characters.front(), "projection_cons_parents");
-  checkValidBoneIndex(
-      distanceCons_parents, *characters.front(), "distance_cons_parents");
+  checkValidBoneIndex(positionCons_parents, *characters.front(), "position_cons_parents");
+  checkValidBoneIndex(orientation_parents, *characters.front(), "orientation_cons_parents");
+  checkValidBoneIndex(projectionCons_parents, *characters.front(), "projection_cons_parents");
+  checkValidBoneIndex(distanceCons_parents, *characters.front(), "distance_cons_parents");
   checkValidParameterIndex(
-      posePrior_parameterIndices,
-      *characters.front(),
-      "posePrior_parameterIndices",
-      true);
+      posePrior_parameterIndices, *characters.front(), "posePrior_parameterIndices", true);
+  checkValidVertexIndex(vertexCons_vertices, *characters.front(), "vertex_cons_vertices", false);
   checkValidVertexIndex(
-      vertexCons_vertices, *characters.front(), "vertex_cons_vertices", false);
-  checkValidVertexIndex(
-      vertexProjCons_vertices,
-      *characters.front(),
-      "vertex_cons_proj_vertices",
-      false);
+      vertexProjCons_vertices, *characters.front(), "vertex_cons_proj_vertices", false);
 
   // Build each type of error function according to enum order:
   errorFunctions.push_back(createPositionErrorFunction<T>(
@@ -253,8 +237,7 @@ std::
   errorFunctions.push_back(createLimitErrorFunction<T>(nBatch, nFrames));
   errorFunctions.push_back(createCollisionErrorFunction<T>(nBatch, nFrames));
   if (posePrior_model != nullptr) {
-    errorFunctions.push_back(
-        createPosePriorErrorFunction<T>(nBatch, nFrames, posePrior_model));
+    errorFunctions.push_back(createPosePriorErrorFunction<T>(nBatch, nFrames, posePrior_model));
   } else {
     errorFunctions.push_back(createDiffPosePriorErrorFunction<T>(
         nBatch,
@@ -266,11 +249,7 @@ std::
         posePrior_parameterIndices));
   }
   errorFunctions.push_back(createMotionErrorFunction<T>(
-      nBatch,
-      nFrames,
-      characters[0]->parameterTransform,
-      motion_targets,
-      motion_weights));
+      nBatch, nFrames, characters[0]->parameterTransform, motion_targets, motion_weights));
   errorFunctions.push_back(createProjectionErrorFunction<T>(
       nBatch,
       nFrames,
@@ -359,8 +338,7 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
   bool squeeze = false;
   int64_t nFrames = 0;
   if (IKFunction<T>::SEQUENCE) {
-    if (modelParameters_init.ndimension() == 1 ||
-        modelParameters_init.ndimension() > 3) {
+    if (modelParameters_init.ndimension() == 1 || modelParameters_init.ndimension() > 3) {
       MT_THROW(
           "In IKProblemAutogradFunction<T, IKFunction>::forward(), multi-frame problem expects a model_parameters tensor of size [nBatch] x nFrames x nModelParameters; got {}",
           formatTensorSizes(modelParameters_init));
@@ -381,8 +359,7 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
 
   const int64_t nBatch = modelParameters_init.size(0);
 
-  const auto characters =
-      toCharacterList(characters_in, nBatch, "solveBodyIKProblem()");
+  const auto characters = toCharacterList(characters_in, nBatch, "solveBodyIKProblem()");
 
   const momentum::Mppca* mppca = nullptr;
   if (posePrior_model) {
@@ -435,13 +412,9 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
   std::vector<at::Tensor> results = IKFunction<T>::forward(
       characters,
       tensorToParameterSet(
-          characters[0]->parameterTransform,
-          activeParams,
-          DefaultParameterSet::ALL_ONES),
+          characters[0]->parameterTransform, activeParams, DefaultParameterSet::ALL_ONES),
       tensorToParameterSet(
-          characters[0]->parameterTransform,
-          sharedParams,
-          DefaultParameterSet::ALL_ZEROS),
+          characters[0]->parameterTransform, sharedParams, DefaultParameterSet::ALL_ZEROS),
       solverOptions,
       modelParameters_init,
       errorFunctions,
@@ -475,13 +448,18 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
   // letting a PyObject to be held by IValue seems not a part of public
   // API and should not be used by user.
 
-  ctx->saved_data["characters"] =
-      c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+  ctx->saved_data["characters"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
 
   if (posePrior_model) {
-    ctx->saved_data["posePrior"] =
-        c10::ivalue::ConcretePyObjectHolder::create(posePrior_model);
+    ctx->saved_data["posePrior"] = c10::ivalue::ConcretePyObjectHolder::create(posePrior_model);
   }
+#else
+  // When LIMITED_TORCH_API is defined, ConcretePyObjectHolder is not available.
+  // Note: backward pass will fail in this build configuration.
+  (void)characters_in; // Suppress unused variable warning
+  (void)posePrior_model; // Suppress unused variable warning
+#endif
 
   // We convert vector<ErrorFunctionType> to vector<int> because pytorch api
   // cannot save a vector of custom enum type.
@@ -491,8 +469,7 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
   }
   ctx->saved_data["activeErrorFunctions"] = activatedErrorTypes;
 
-  ctx->saved_data["vertexCons_type"] =
-      std::vector<int64_t>(1, (int64_t)vertexCons_type);
+  ctx->saved_data["vertexCons_type"] = std::vector<int64_t>(1, (int64_t)vertexCons_type);
 
   // Save Tensors for gradient computation in backward():
   torch::autograd::variable_list to_save = {
@@ -533,8 +510,7 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
       vertexProjCons_weights,
       vertexProjCons_target_positions,
       vertexProjCons_projections};
-  std::copy(
-      std::begin(results), std::end(results), std::back_inserter(to_save));
+  std::copy(std::begin(results), std::end(results), std::back_inserter(to_save));
   ctx->save_for_backward(to_save);
 
   return results;
@@ -549,27 +525,22 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
       "Invalid grad_outputs in IKProblemAutogradFunction::backward.")
 
   const momentum::Mppca* mppca = nullptr;
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   if (ctx->saved_data.find("posePrior") != ctx->saved_data.end()) {
-    mppca = py::cast<const momentum::Mppca*>(
-        ctx->saved_data["posePrior"].toPyObject());
+    mppca = py::cast<const momentum::Mppca*>(ctx->saved_data["posePrior"].toPyObject());
   }
+#endif
 
-  const auto activatedErrorTypes =
-      ctx->saved_data["activeErrorFunctions"].toIntVector();
-  std::vector<ErrorFunctionType> activeErrorFunctions(
-      activatedErrorTypes.size());
+  const auto activatedErrorTypes = ctx->saved_data["activeErrorFunctions"].toIntVector();
+  std::vector<ErrorFunctionType> activeErrorFunctions(activatedErrorTypes.size());
   for (size_t i = 0; i < activatedErrorTypes.size(); ++i) {
-    activeErrorFunctions[i] =
-        static_cast<ErrorFunctionType>(activatedErrorTypes[i]);
+    activeErrorFunctions[i] = static_cast<ErrorFunctionType>(activatedErrorTypes[i]);
   }
 
-  const auto vertexCons_type_vec =
-      ctx->saved_data["vertexCons_type"].toIntVector();
-  momentum::VertexConstraintType vertexCons_type =
-      momentum::VertexConstraintType::Position;
+  const auto vertexCons_type_vec = ctx->saved_data["vertexCons_type"].toIntVector();
+  momentum::VertexConstraintType vertexCons_type = momentum::VertexConstraintType::Position;
   if (vertexCons_type_vec.size() == 1) {
-    vertexCons_type =
-        (momentum::VertexConstraintType)vertexCons_type_vec.front();
+    vertexCons_type = (momentum::VertexConstraintType)vertexCons_type_vec.front();
   } else {
     // Can't throw here, it causes Pytorch to crash.
     std::cerr << "WARNING: vertex constraint type improperly saved.\n";
@@ -655,10 +626,14 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
   const auto nBatch = modelParameters_init.size(0);
 
   // Restore variables:
-  const auto characters = toCharacterList(
-      ctx->saved_data["characters"].toPyObject(),
-      nBatch,
-      "solveBodyIKProblem()");
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
+  const auto characters =
+      toCharacterList(ctx->saved_data["characters"].toPyObject(), nBatch, "solveBodyIKProblem()");
+#else
+  // When LIMITED_TORCH_API is defined, toPyObject() is not available.
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+  const std::vector<const momentum::Character*> characters;
+#endif
 
   // Recreate the IK problem:
   const auto [errorFunctions, errorWeightsMap] = createIKProblem<T>(
@@ -703,38 +678,29 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
       vertexProjCons_projections);
 
   // Compute the gradient of the IK problem:
-  const auto [grad_modelParams, grad_errorFunctionWeights, grad_inputs] =
-      IKFunction<T>::backward(
-          characters,
-          tensorToParameterSet(
-              characters[0]->parameterTransform,
-              activeParams,
-              DefaultParameterSet::ALL_ONES),
-          tensorToParameterSet(
-              characters[0]->parameterTransform,
-              sharedParams,
-              DefaultParameterSet::ALL_ZEROS),
-          modelParameters_init,
-          results,
-          dLoss_dResults,
-          errorFunctions,
-          errorFunctionWeights,
-          activeErrorFunctions.size(),
-          errorWeightsMap);
+  const auto [grad_modelParams, grad_errorFunctionWeights, grad_inputs] = IKFunction<T>::backward(
+      characters,
+      tensorToParameterSet(
+          characters[0]->parameterTransform, activeParams, DefaultParameterSet::ALL_ONES),
+      tensorToParameterSet(
+          characters[0]->parameterTransform, sharedParams, DefaultParameterSet::ALL_ZEROS),
+      modelParameters_init,
+      results,
+      dLoss_dResults,
+      errorFunctions,
+      errorFunctionWeights,
+      activeErrorFunctions.size(),
+      errorWeightsMap);
 
   // Check for nan or inf:
   const char* context = "IKProblemAutogradFunction<T, IKFunction>::backward()";
-  throwIfNaNOrINF(
-      grad_modelParams,
-      context,
-      "grad_modelParams from IKFunction<T>::backward()");
+  throwIfNaNOrINF(grad_modelParams, context, "grad_modelParams from IKFunction<T>::backward()");
   throwIfNaNOrINF(
       grad_errorFunctionWeights,
       context,
       "grad_errorFunctionWeights fromIKFunction<T>::backward() ");
   for (const auto& tensor : grad_inputs) {
-    throwIfNaNOrINF(
-        tensor, context, "one grad_input from IKFunction<T>::backward()");
+    throwIfNaNOrINF(tensor, context, "one grad_input from IKFunction<T>::backward()");
   }
 
   // Insert 2 at the beginning of the list for:
@@ -768,8 +734,7 @@ class IKSolveFunction {
       [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
+      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
@@ -787,15 +752,13 @@ class IKSolveFunction {
   // Returns the tuple (grad_modelParams, grad_errorFunctionWeights,
   // [grad_input1, grad_input2, ...])
   static std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> backward(
-      [[maybe_unused]] const std::vector<const momentum::Character*>&
-          characters,
+      [[maybe_unused]] const std::vector<const momentum::Character*>& characters,
       [[maybe_unused]] const momentum::ParameterSet& activeParams,
       [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       [[maybe_unused]] const at::Tensor& modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
-      [[maybe_unused]] const std::vector<
-          std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
+      [[maybe_unused]] const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       [[maybe_unused]] at::Tensor errorFunctionWeights,
       [[maybe_unused]] size_t numActiveErrorFunctions,
       [[maybe_unused]] const std::vector<int>& weightsMap) {
@@ -830,8 +793,7 @@ class GradientFunction {
       [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
+      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
@@ -851,8 +813,7 @@ class GradientFunction {
       at::Tensor modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
+      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
@@ -884,8 +845,7 @@ class ResidualFunction {
       [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
+      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
@@ -906,8 +866,7 @@ class ResidualFunction {
       at::Tensor modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
+      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
@@ -917,8 +876,7 @@ class ResidualFunction {
     // Conveniently, the derivative of the residual wrt the model parameters is
     // just the Jacobian. J = ([nBatch] x m x nParam) grad_resid = ([nBatch] x m
     // x 1) We want to compute J^T*grad_resid = (grad_resid^T*J)^T
-    at::Tensor grad_modelParams =
-        at::bmm(grad_resid.unsqueeze(-2), jacobian).squeeze(-2);
+    at::Tensor grad_modelParams = at::bmm(grad_resid.unsqueeze(-2), jacobian).squeeze(-2);
 
     size_t nInputs = 0;
     for (const auto& e : errorFunctions) {
@@ -927,10 +885,7 @@ class ResidualFunction {
 
     // We don't know how to take the derivative of the residual wrt anything
     // except the model params.
-    return {
-        grad_modelParams,
-        at::Tensor(),
-        std::vector<at::Tensor>(nInputs, at::Tensor())};
+    return {grad_modelParams, at::Tensor(), std::vector<at::Tensor>(nInputs, at::Tensor())};
   }
 };
 
@@ -946,8 +901,7 @@ class SequenceIKSolveFunction {
       const momentum::ParameterSet& sharedParams,
       const SolverOptions options,
       at::Tensor modelParams_init,
-      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>&
-          errorFunctions,
+      const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
@@ -966,15 +920,13 @@ class SequenceIKSolveFunction {
   // Returns the tuple (grad_modelParams, grad_errorFunctionWeights,
   // [grad_input1, grad_input2, ...])
   static std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> backward(
-      [[maybe_unused]] const std::vector<const momentum::Character*>&
-          characters,
+      [[maybe_unused]] const std::vector<const momentum::Character*>& characters,
       [[maybe_unused]] const momentum::ParameterSet& activeParams,
       [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       [[maybe_unused]] const at::Tensor& modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
-      [[maybe_unused]] const std::vector<
-          std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
+      [[maybe_unused]] const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       [[maybe_unused]] const at::Tensor& errorFunctionWeights,
       [[maybe_unused]] size_t numActiveErrorFunctions,
       [[maybe_unused]] const std::vector<int>& weightsMap) {
@@ -989,8 +941,7 @@ class SequenceIKSolveFunction {
 // Version of applyTemplatedAutogradFunction that has been specialized for the
 // IK functionality.
 template <template <class> class IKFunction, class... Args>
-inline torch::autograd::variable_list applyIKProblemAutogradFunction(
-    Args... args) {
+inline torch::autograd::variable_list applyIKProblemAutogradFunction(Args... args) {
   pybind11::gil_scoped_release release;
   if (hasFloat64(args...)) {
     return IKProblemAutogradFunction<double, IKFunction>::apply(args...);
@@ -1025,8 +976,7 @@ TensorMppcaModel extractMppcaModel(py::object model_in) {
     result.mu = py::cast<at::Tensor>(PyList_GetItem(model_in.ptr(), 1));
     result.W = py::cast<at::Tensor>(PyList_GetItem(model_in.ptr(), 2));
     result.sigma = py::cast<at::Tensor>(PyList_GetItem(model_in.ptr(), 3));
-    result.parameterIndices =
-        py::cast<at::Tensor>(PyList_GetItem(model_in.ptr(), 4));
+    result.parameterIndices = py::cast<at::Tensor>(PyList_GetItem(model_in.ptr(), 4));
   } else {
     result.pi = at::empty({0});
     result.mu = at::empty({0});
@@ -1486,14 +1436,7 @@ at::Tensor transformPoseImp(
       &squeeze);
 
   transforms = checker.validateAndFixTensor(
-      transforms,
-      "transforms",
-      {8},
-      {"trans_rot"},
-      toScalarType<T>(),
-      true,
-      false,
-      &squeeze);
+      transforms, "transforms", {8}, {"trans_rot"}, toScalarType<T>(), true, false, &squeeze);
 
   const int nBatch = checker.getBatchSize();
 
@@ -1508,8 +1451,7 @@ at::Tensor transformPoseImp(
     // Eigen order is w, x, y, z
     transformsVec[iBatch] = momentum::TransformT<T>(
         skelStateVec.template head<3>(),
-        Eigen::Quaternion<T>(
-            skelStateVec[6], skelStateVec[3], skelStateVec[4], skelStateVec[5])
+        Eigen::Quaternion<T>(skelStateVec[6], skelStateVec[3], skelStateVec[4], skelStateVec[5])
             .normalized());
     if (std::abs(skelStateVec[7] - 1.0) > 1e-3) {
       hasScale = true;
@@ -1522,8 +1464,7 @@ at::Tensor transformPoseImp(
   }
 
   const std::vector<momentum::ModelParametersT<T>> resultVec =
-      momentum::transformPose(
-          character, modelParamsVec, transformsVec, ensureContinuousOutput);
+      momentum::transformPose(character, modelParamsVec, transformsVec, ensureContinuousOutput);
 
   at::Tensor result = at::zeros({nBatch, (int)nModelParam}, toScalarType<T>());
   for (size_t iBatch = 0; iBatch < nBatch; ++iBatch) {
@@ -1542,11 +1483,9 @@ at::Tensor transformPose(
     at::Tensor transforms,
     bool ensureContinuousOutput) {
   if (hasFloat64(modelParams, transforms)) {
-    return transformPoseImp<double>(
-        character, modelParams, transforms, ensureContinuousOutput);
+    return transformPoseImp<double>(character, modelParams, transforms, ensureContinuousOutput);
   } else {
-    return transformPoseImp<float>(
-        character, modelParams, transforms, ensureContinuousOutput);
+    return transformPoseImp<float>(character, modelParams, transforms, ensureContinuousOutput);
   }
 }
 

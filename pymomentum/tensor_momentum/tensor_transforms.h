@@ -22,13 +22,10 @@ at::Tensor quaternionToSkeletonState(at::Tensor q);
 at::Tensor translationToSkeletonState(at::Tensor t);
 at::Tensor scaleToSkeletonState(at::Tensor s);
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor> splitSkeletonState(
-    at::Tensor skelState);
+std::tuple<at::Tensor, at::Tensor, at::Tensor> splitSkeletonState(at::Tensor skelState);
 
 at::Tensor identitySkeletonState();
 
-at::Tensor blendSkeletonStates(
-    at::Tensor skel_states,
-    std::optional<at::Tensor> weights);
+at::Tensor blendSkeletonStates(at::Tensor skel_states, std::optional<at::Tensor> weights);
 
 } // namespace pymomentum

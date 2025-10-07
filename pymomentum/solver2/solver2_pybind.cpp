@@ -43,18 +43,15 @@ PYBIND11_MODULE(solver2, m) {
   m.attr("__name__") = "pymomentum.solver2";
   m.doc() = "Inverse kinematics and other optimizations for momentum models.";
 
-  pybind11::module_::import(
-      "pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
+  pybind11::module_::import("pymomentum.geometry"); // @dep=fbcode//pymomentum:geometry
 
   // Error functions:
-  py::class_<
-      mm::SkeletonErrorFunction,
-      std::shared_ptr<mm::SkeletonErrorFunction>>(m, "SkeletonErrorFunction")
+  py::class_<mm::SkeletonErrorFunction, std::shared_ptr<mm::SkeletonErrorFunction>>(
+      m, "SkeletonErrorFunction")
       .def(
           "__repr__",
           [](const mm::SkeletonErrorFunction& self) {
-            return fmt::format(
-                "SkeletonErrorFunction(weight={})", self.getWeight());
+            return fmt::format("SkeletonErrorFunction(weight={})", self.getWeight());
           })
       .def_property(
           "weight",
@@ -65,12 +62,10 @@ PYBIND11_MODULE(solver2, m) {
           })
       .def(
           "get_error",
-          [](mm::SkeletonErrorFunction& self,
-             const py::array_t<float>& modelParameters) -> double {
+          [](mm::SkeletonErrorFunction& self, const py::array_t<float>& modelParameters) -> double {
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(
-                pt.apply(params), self.getSkeleton());
+            const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
             return self.getError(params, state);
           },
           R"(Compute the error for a given set of model parameters.
@@ -86,10 +81,8 @@ If you want to compute the error of multiple error functions, consider wrapping 
              const py::array_t<float>& modelParameters) -> Eigen::VectorXf {
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(
-                pt.apply(params), self.getSkeleton());
-            Eigen::VectorXf gradient =
-                Eigen::VectorXf::Zero(pt.numAllModelParameters());
+            const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
+            Eigen::VectorXf gradient = Eigen::VectorXf::Zero(pt.numAllModelParameters());
             self.getGradient(params, state, gradient);
             return gradient;
           },
@@ -102,16 +95,13 @@ If you want to compute the gradient of multiple error functions, consider wrappi
           py::arg("model_parameters"))
       .def(
           "get_jacobian",
-          [](mm::SkeletonErrorFunction& self,
-             const py::array_t<float>& modelParameters)
+          [](mm::SkeletonErrorFunction& self, const py::array_t<float>& modelParameters)
               -> std::tuple<Eigen::VectorXf, Eigen::MatrixXf> {
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(
-                pt.apply(params), self.getSkeleton());
+            const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
             const auto jacSize = self.getJacobianSize();
-            Eigen::MatrixXf jacobian =
-                Eigen::MatrixXf::Zero(jacSize, pt.numAllModelParameters());
+            Eigen::MatrixXf jacobian = Eigen::MatrixXf::Zero(jacSize, pt.numAllModelParameters());
             Eigen::VectorXf residual = Eigen::VectorXf::Zero(jacSize);
             int usedRows = 0;
             self.getJacobian(params, state, jacobian, residual, usedRows);
@@ -127,15 +117,13 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
 
   addErrorFunctions(m);
 
-  py::class_<
-      mm::SequenceErrorFunction,
-      std::shared_ptr<mm::SequenceErrorFunction>>(m, "SequenceErrorFunction");
+  py::class_<mm::SequenceErrorFunction, std::shared_ptr<mm::SequenceErrorFunction>>(
+      m, "SequenceErrorFunction");
 
   addSequenceErrorFunctions(m);
 
   // Solver functions:
-  py::class_<mm::SolverFunction, std::shared_ptr<mm::SolverFunction>>(
-      m, "SolverFunction");
+  py::class_<mm::SolverFunction, std::shared_ptr<mm::SolverFunction>>(m, "SolverFunction");
 
   py::class_<
       mm::SkeletonSolverFunction,
@@ -160,21 +148,18 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
       .def(
           py::init<>(
               [](const mm::Character& character,
-                 const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>&
-                     errorFunctions) {
+                 const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>& errorFunctions) {
                 auto result = std::make_shared<mm::SkeletonSolverFunction>(
                     &character.skeleton, &character.parameterTransform);
                 for (const auto& errorFunction : errorFunctions) {
-                  validateErrorFunctionMatchesCharacter(
-                      *result, *errorFunction);
+                  validateErrorFunctionMatchesCharacter(*result, *errorFunction);
                   result->addErrorFunction(errorFunction);
                 }
                 return result;
               }),
           py::keep_alive<1, 2>(),
           py::arg("character"),
-          py::arg("error_functions") =
-              std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>())
+          py::arg("error_functions") = std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>())
       .def(
           "add_error_function",
           [](mm::SkeletonSolverFunction& self,
@@ -190,8 +175,7 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
           "error_functions",
           &mm::SkeletonSolverFunction::getErrorFunctions,
           [](mm::SkeletonSolverFunction& self,
-             const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>&
-                 errorFunctions) {
+             const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>& errorFunctions) {
             for (const auto& e : errorFunctions) {
               validateErrorFunctionMatchesCharacter(self, *e);
             }
@@ -208,8 +192,7 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
              const py::array_t<float>& modelParameters) -> double {
             const auto& pt = *self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(
-                pt.apply(params), *self.getSkeleton());
+            const momentum::SkeletonState state(pt.apply(params), *self.getSkeleton());
             return self.getError(params.v);
           },
           R"(Compute the error for a given set of model parameters.
@@ -223,10 +206,8 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
              const py::array_t<float>& modelParameters) -> Eigen::VectorXf {
             const auto& pt = *self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(
-                pt.apply(params), *self.getSkeleton());
-            Eigen::VectorXf gradient =
-                Eigen::VectorXf::Zero(pt.numAllModelParameters());
+            const momentum::SkeletonState state(pt.apply(params), *self.getSkeleton());
+            Eigen::VectorXf gradient = Eigen::VectorXf::Zero(pt.numAllModelParameters());
             self.getGradient(params.v, gradient);
             return gradient;
           },
@@ -239,13 +220,11 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           py::arg("model_parameters"))
       .def(
           "get_jacobian",
-          [](mm::SkeletonSolverFunction& self,
-             const py::array_t<float>& modelParameters)
+          [](mm::SkeletonSolverFunction& self, const py::array_t<float>& modelParameters)
               -> std::tuple<Eigen::VectorXf, Eigen::MatrixXf> {
             const auto& pt = *self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(
-                pt.apply(params), *self.getSkeleton());
+            const momentum::SkeletonState state(pt.apply(params), *self.getSkeleton());
             Eigen::MatrixXf jacobian;
             Eigen::VectorXf residual;
             size_t actualRows = 0;
@@ -263,18 +242,16 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       mm::SolverFunction,
       std::shared_ptr<mm::SequenceSolverFunction>>(m, "SequenceSolverFunction")
       .def(
-          py::init<>(
-              [](const mm::Character& character,
-                 size_t nFrames,
-                 const std::optional<py::array_t<bool>>& shared_parameters) {
-                auto result = std::make_shared<mm::SequenceSolverFunction>(
-                    &character.skeleton,
-                    &character.parameterTransform,
-                    arrayToParameterSet(
-                        shared_parameters, character.parameterTransform, false),
-                    nFrames);
-                return result;
-              }),
+          py::init<>([](const mm::Character& character,
+                        size_t nFrames,
+                        const std::optional<py::array_t<bool>>& shared_parameters) {
+            auto result = std::make_shared<mm::SequenceSolverFunction>(
+                &character.skeleton,
+                &character.parameterTransform,
+                arrayToParameterSet(shared_parameters, character.parameterTransform, false),
+                nFrames);
+            return result;
+          }),
           R"(Creates a new solver function for a sequence of poses.  This allows you to optimize a sequence of poses, where the shared parameters are the same for each frame.
 
 :param character: The character to use.
@@ -291,8 +268,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
              int iFrame,
              std::shared_ptr<mm::SkeletonErrorFunction> errorFunction) {
             if (iFrame < 0 || iFrame >= self.getNumFrames()) {
-              throw py::index_error(
-                  fmt::format("Invalid frame index {}", iFrame));
+              throw py::index_error(fmt::format("Invalid frame index {}", iFrame));
             }
             self.addErrorFunction(iFrame, errorFunction);
           },
@@ -320,8 +296,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
              int iFrame,
              std::shared_ptr<mm::SequenceErrorFunction> errorFunction) {
             if (iFrame < 0 || iFrame >= self.getNumFrames()) {
-              throw py::index_error(
-                  fmt::format("Invalid frame index {}", iFrame));
+              throw py::index_error(fmt::format("Invalid frame index {}", iFrame));
             }
             self.addSequenceErrorFunction(iFrame, errorFunction);
           },
@@ -343,10 +318,9 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           py::arg("error_function"))
       .def(
           "set_enabled_parameters",
-          [](mm::SequenceSolverFunction& self,
-             const py::array_t<bool>& activeParams) {
-            self.setEnabledParameters(arrayToParameterSet(
-                activeParams, *self.getParameterTransform(), true));
+          [](mm::SequenceSolverFunction& self, const py::array_t<bool>& activeParams) {
+            self.setEnabledParameters(
+                arrayToParameterSet(activeParams, *self.getParameterTransform(), true));
           },
           R"(Sets the active model parameters for the solver.  The array should be of size `character.parameter_transform.size()` and applies to every frame of the solve.
 
@@ -356,8 +330,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           "get_error_functions",
           [](const mm::SequenceSolverFunction& self, int frameIdx) {
             if (frameIdx < 0 || frameIdx >= self.getNumFrames()) {
-              throw py::index_error(
-                  fmt::format("Invalid frame index {}", frameIdx));
+              throw py::index_error(fmt::format("Invalid frame index {}", frameIdx));
             }
             return self.getErrorFunctions(frameIdx);
           },
@@ -370,8 +343,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           "get_sequence_error_functions",
           [](const mm::SequenceSolverFunction& self, int frameIdx) {
             if (frameIdx < 0 || frameIdx >= self.getNumFrames()) {
-              throw py::index_error(
-                  fmt::format("Invalid frame index {}", frameIdx));
+              throw py::index_error(fmt::format("Invalid frame index {}", frameIdx));
             }
             return self.getSequenceErrorFunctions(frameIdx);
           },
@@ -382,8 +354,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           py::arg("frame_idx"));
 
   // Solver options:
-  py::class_<mm::SolverOptions, std::shared_ptr<mm::SolverOptions>>(
-      m, "SolverOptions")
+  py::class_<mm::SolverOptions, std::shared_ptr<mm::SolverOptions>>(m, "SolverOptions")
       .def(py::init<>())
       .def(
           "__repr__",
@@ -408,15 +379,12 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           &mm::SolverOptions::threshold,
           "Convergence threshold for relative error change")
       .def_readwrite(
-          "verbose",
-          &mm::SolverOptions::verbose,
-          "Enable detailed logging during optimization");
+          "verbose", &mm::SolverOptions::verbose, "Enable detailed logging during optimization");
 
   py::class_<
       mm::GaussNewtonSolverOptions,
       mm::SolverOptions,
-      std::shared_ptr<mm::GaussNewtonSolverOptions>>(
-      m, "GaussNewtonSolverOptions")
+      std::shared_ptr<mm::GaussNewtonSolverOptions>>(m, "GaussNewtonSolverOptions")
       .def(py::init<>())
       .def(
           "__repr__",
@@ -458,9 +426,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       mm::GaussNewtonSolverQROptions,
       mm::SolverOptions,
       std::shared_ptr<mm::GaussNewtonSolverQROptions>>(
-      m,
-      "GaussNewtonSolverQROptions",
-      "Options specific to the Gauss-Newton QR solver")
+      m, "GaussNewtonSolverQROptions", "Options specific to the Gauss-Newton QR solver")
       .def(py::init<>())
       .def(
           "__repr__",
@@ -487,9 +453,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       mm::SubsetGaussNewtonSolverOptions,
       mm::SolverOptions,
       std::shared_ptr<mm::SubsetGaussNewtonSolverOptions>>(
-      m,
-      "SubsetGaussNewtonSolverOptions",
-      "Options specific to the Subset Gauss-Newton solver")
+      m, "SubsetGaussNewtonSolverOptions", "Options specific to the Subset Gauss-Newton solver")
       .def(py::init<>())
       .def(
           "__repr__",
@@ -553,8 +517,8 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       .def(
           "set_enabled_parameters",
           [](mm::Solver& self, const py::array_t<bool>& activeParams) {
-            self.setEnabledParameters(arrayToParameterSet(
-                activeParams, self.getNumParameters(), true));
+            self.setEnabledParameters(
+                arrayToParameterSet(activeParams, self.getNumParameters(), true));
           },
           R"(Sets the active model parameters for the solver.  The array should be of size `character.parameter_transform.size()` and applies to every frame of the solve.
 
@@ -565,8 +529,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           [](mm::Solver& self, Eigen::VectorXf parameters) -> Eigen::VectorXf {
             if (parameters.size() != self.getNumParameters()) {
               throw std::runtime_error(
-                  "Expected parameters to be of size " +
-                  std::to_string(self.getNumParameters()));
+                  "Expected parameters to be of size " + std::to_string(self.getNumParameters()));
             }
             self.solve(parameters);
             return parameters;
@@ -577,68 +540,50 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           [](mm::Solver& self) { return self.getErrorHistory(); },
           "The error after each iteration of the solver.");
 
-  py::class_<
-      mm::GaussNewtonSolver,
-      mm::Solver,
-      std::shared_ptr<mm::GaussNewtonSolver>>(
+  py::class_<mm::GaussNewtonSolver, mm::Solver, std::shared_ptr<mm::GaussNewtonSolver>>(
       m, "GaussNewtonSolver", "Basic 2nd-order Gauss-Newton solver")
       .def(
-          py::init<>(
-              [](mm::SolverFunction* solverFunction,
-                 const std::optional<mm::GaussNewtonSolverOptions>& options) {
-                return std::make_shared<mm::GaussNewtonSolver>(
-                    options.value_or(mm::GaussNewtonSolverOptions{}),
-                    solverFunction);
-              }),
+          py::init<>([](mm::SolverFunction* solverFunction,
+                        const std::optional<mm::GaussNewtonSolverOptions>& options) {
+            return std::make_shared<mm::GaussNewtonSolver>(
+                options.value_or(mm::GaussNewtonSolverOptions{}), solverFunction);
+          }),
           py::keep_alive<1, 2>(),
           py::arg("solver_function"),
           py::arg("options") = std::optional<mm::GaussNewtonSolverOptions>{});
 
-  py::class_<
-      mm::GaussNewtonSolverQR,
-      mm::Solver,
-      std::shared_ptr<mm::GaussNewtonSolverQR>>(
+  py::class_<mm::GaussNewtonSolverQR, mm::Solver, std::shared_ptr<mm::GaussNewtonSolverQR>>(
       m, "GaussNewtonSolverQR", "Gauss-Newton solver with QR decomposition")
       .def(
-          py::init<>(
-              [](mm::SkeletonSolverFunction* solverFunction,
-                 const std::optional<mm::GaussNewtonSolverQROptions>& options) {
-                return std::make_shared<mm::GaussNewtonSolverQRT<float>>(
-                    options.value_or(mm::GaussNewtonSolverQROptions{}),
-                    solverFunction);
-              }),
+          py::init<>([](mm::SkeletonSolverFunction* solverFunction,
+                        const std::optional<mm::GaussNewtonSolverQROptions>& options) {
+            return std::make_shared<mm::GaussNewtonSolverQRT<float>>(
+                options.value_or(mm::GaussNewtonSolverQROptions{}), solverFunction);
+          }),
           py::keep_alive<1, 2>(),
           py::arg("solver_function"),
           py::arg("options") = std::optional<mm::GaussNewtonSolverQROptions>{});
 
-  py::class_<
-      mm::SubsetGaussNewtonSolver,
-      mm::Solver,
-      std::shared_ptr<mm::SubsetGaussNewtonSolver>>(
+  py::class_<mm::SubsetGaussNewtonSolver, mm::Solver, std::shared_ptr<mm::SubsetGaussNewtonSolver>>(
       m,
       "SubsetGaussNewtonSolver",
       "Gauss-Newton solver that optimizes only a selected subset of parameters")
       .def(
           py::init<>([](mm::SolverFunction* solverFunction,
-                        const std::optional<mm::SubsetGaussNewtonSolverOptions>&
-                            options) {
+                        const std::optional<mm::SubsetGaussNewtonSolverOptions>& options) {
             return std::make_shared<mm::SubsetGaussNewtonSolver>(
-                options.value_or(mm::SubsetGaussNewtonSolverOptions{}),
-                solverFunction);
+                options.value_or(mm::SubsetGaussNewtonSolverOptions{}), solverFunction);
           }),
           py::keep_alive<1, 2>(),
           py::arg("solver_function"),
-          py::arg("options") =
-              std::optional<mm::SubsetGaussNewtonSolverOptions>{});
+          py::arg("options") = std::optional<mm::SubsetGaussNewtonSolverOptions>{});
 
   m.def(
       "solve_sequence",
       [](mm::SequenceSolverFunction& solverFunction,
          const py::array_t<float>& modelParams,
-         const std::optional<mm::SequenceSolverOptions>& options)
-          -> py::array_t<float> {
-        mm::SequenceSolver solver(
-            options.value_or(mm::SequenceSolverOptions{}), &solverFunction);
+         const std::optional<mm::SequenceSolverOptions>& options) -> py::array_t<float> {
+        mm::SequenceSolver solver(options.value_or(mm::SequenceSolverOptions{}), &solverFunction);
 
         if (modelParams.ndim() != 2) {
           throw std::runtime_error(
@@ -669,8 +614,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
 
         {
           py::gil_scoped_release release;
-          Eigen::VectorXf parameters =
-              solverFunction.getJoinedParameterVector();
+          Eigen::VectorXf parameters = solverFunction.getJoinedParameterVector();
           solver.solve(parameters);
           solverFunction.setJoinedParameterVector(parameters);
         }
@@ -680,8 +624,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           auto result_acc = result.mutable_unchecked<2>();
           py::gil_scoped_release release;
           for (int iFrame = 0; iFrame < nFrames; ++iFrame) {
-            const auto& modelParams_frame =
-                solverFunction.getFrameParameters(iFrame);
+            const auto& modelParams_frame = solverFunction.getFrameParameters(iFrame);
             for (int k = 0; k < nParams; ++k) {
               result_acc(iFrame, k) = modelParams_frame(k);
             }

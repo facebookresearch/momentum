@@ -30,14 +30,9 @@ std::tuple<at::Tensor, at::Tensor> computeResidual(
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap) {
   std::tie(modelParams, errorFunctionWeights) = checkIKInputs<T>(
-      characters,
-      modelParams,
-      errorFunctionWeights,
-      numActiveErrorFunctions,
-      "computeGradient()");
+      characters, modelParams, errorFunctionWeights, numActiveErrorFunctions, "computeGradient()");
   assert(!characters.empty()); // checked in checkIKInputs()
-  const auto nParams =
-      characters.front()->parameterTransform.numAllModelParameters();
+  const auto nParams = characters.front()->parameterTransform.numAllModelParameters();
   const auto nBatch = modelParams.size(0);
 
   if (nBatch == 0) {
@@ -53,33 +48,24 @@ std::tuple<at::Tensor, at::Tensor> computeResidual(
     const momentum::ParameterTransformT<T> parameterTransform =
         character.parameterTransform.cast<T>();
 
-    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>
-        errorFunctions_cur = buildMomentumErrorFunctions(
-            characters,
-            errorFunctions,
-            errorFunctionWeights,
-            weightsMap,
-            iBatch);
-    momentum::SkeletonSolverFunctionT<T> solverFunction = buildSolverFunction(
-        *characters[iBatch], parameterTransform, errorFunctions_cur);
+    const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> errorFunctions_cur =
+        buildMomentumErrorFunctions(
+            characters, errorFunctions, errorFunctionWeights, weightsMap, iBatch);
+    momentum::SkeletonSolverFunctionT<T> solverFunction =
+        buildSolverFunction(*characters[iBatch], parameterTransform, errorFunctions_cur);
     const momentum::ModelParametersT<T> modelParameters_cur =
         toEigenMap<T>(modelParams.select(0, iBatch));
 
     solverFunction.getJacobian(
-        modelParameters_cur.v,
-        jacobians[iBatch],
-        residuals[iBatch],
-        actualRows[iBatch]);
+        modelParameters_cur.v, jacobians[iBatch], residuals[iBatch], actualRows[iBatch]);
   });
 
   // Need to be able to handle the largest Jacobian (we don't assume the
   // number of residual terms is identical across the batch, since some
   // error functions may choose to drop terms with zero weights etc.).
-  const size_t maxRows =
-      *std::max_element(actualRows.begin(), actualRows.end());
+  const size_t maxRows = *std::max_element(actualRows.begin(), actualRows.end());
 
-  at::Tensor jacobian =
-      at::zeros({nBatch, (int)maxRows, (int)nParams}, toScalarType<T>());
+  at::Tensor jacobian = at::zeros({nBatch, (int)maxRows, (int)nParams}, toScalarType<T>());
   at::Tensor residual = at::zeros({nBatch, (int)maxRows}, toScalarType<T>());
 
   dispenso::parallel_for(0, nBatch, [&](size_t iBatch) {
@@ -99,8 +85,7 @@ std::tuple<at::Tensor, at::Tensor> computeResidual(
 template std::tuple<at::Tensor, at::Tensor> computeResidual<float>(
     const std::vector<const momentum::Character*>& characters,
     at::Tensor modelParams,
-    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<float>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap);
@@ -108,8 +93,7 @@ template std::tuple<at::Tensor, at::Tensor> computeResidual<float>(
 template std::tuple<at::Tensor, at::Tensor> computeResidual<double>(
     const std::vector<const momentum::Character*>& characters,
     at::Tensor modelParams,
-    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>&
-        errorFunctions,
+    const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap);

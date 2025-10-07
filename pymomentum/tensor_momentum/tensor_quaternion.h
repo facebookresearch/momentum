@@ -32,12 +32,8 @@ std::tuple<at::Tensor, at::Tensor> splitQuaternion(at::Tensor q);
 at::Tensor quaternionToRotationMatrix(at::Tensor q);
 at::Tensor rotationMatrixToQuaternion(at::Tensor q);
 
-at::Tensor blendQuaternions(
-    at::Tensor quaternions,
-    std::optional<at::Tensor> weights);
+at::Tensor blendQuaternions(at::Tensor quaternions, std::optional<at::Tensor> weights);
 
-at::Tensor checkAndNormalizeWeights(
-    at::Tensor quaternions,
-    std::optional<at::Tensor> weights);
+at::Tensor checkAndNormalizeWeights(at::Tensor quaternions, std::optional<at::Tensor> weights);
 
 } // namespace pymomentum

@@ -87,22 +87,17 @@ TensorPositionErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result =
-      std::make_unique<momentum::FullyDifferentiablePositionErrorFunctionT<T>>(
-          character.skeleton, character.parameterTransform);
+  auto result = std::make_unique<momentum::FullyDifferentiablePositionErrorFunctionT<T>>(
+      character.skeleton, character.parameterTransform);
 
-  const auto weights =
-      this->getTensorInput(FullyDifferentiablePositionErrorFunction::kWeights)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto offsets =
-      this->getTensorInput(FullyDifferentiablePositionErrorFunction::kOffsets)
-          .template toEigenMap<T>(iBatch, jFrame);
-  const auto parents =
-      this->getTensorInput(FullyDifferentiablePositionErrorFunction::kParents)
-          .template toEigenMap<int>(iBatch, jFrame);
-  const auto targets =
-      this->getTensorInput(FullyDifferentiablePositionErrorFunction::kTargets)
-          .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights = this->getTensorInput(FullyDifferentiablePositionErrorFunction::kWeights)
+                           .template toEigenMap<T>(iBatch, jFrame);
+  const auto offsets = this->getTensorInput(FullyDifferentiablePositionErrorFunction::kOffsets)
+                           .template toEigenMap<T>(iBatch, jFrame);
+  const auto parents = this->getTensorInput(FullyDifferentiablePositionErrorFunction::kParents)
+                           .template toEigenMap<int>(iBatch, jFrame);
+  const auto targets = this->getTensorInput(FullyDifferentiablePositionErrorFunction::kTargets)
+                           .template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index i = 0; i < nCons; ++i) {
@@ -179,25 +174,18 @@ TensorOrientationErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result = std::make_unique<
-      momentum::FullyDifferentiableOrientationErrorFunctionT<T>>(
+  auto result = std::make_unique<momentum::FullyDifferentiableOrientationErrorFunctionT<T>>(
       character.skeleton, character.parameterTransform);
 
-  const auto weights =
-      this->getTensorInput(
-              FullyDifferentiableOrientationErrorFunction::kWeights)
-          .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights = this->getTensorInput(FullyDifferentiableOrientationErrorFunction::kWeights)
+                           .template toEigenMap<T>(iBatch, jFrame);
   const auto orientation_offsets =
-      this->getTensorInput(
-              FullyDifferentiableOrientationErrorFunction::kOffsets)
+      this->getTensorInput(FullyDifferentiableOrientationErrorFunction::kOffsets)
           .template toEigenMap<T>(iBatch, jFrame);
-  const auto parents =
-      this->getTensorInput(
-              FullyDifferentiableOrientationErrorFunction::kParents)
-          .template toEigenMap<int>(iBatch, jFrame);
+  const auto parents = this->getTensorInput(FullyDifferentiableOrientationErrorFunction::kParents)
+                           .template toEigenMap<int>(iBatch, jFrame);
   const auto orientation_targets =
-      this->getTensorInput(
-              FullyDifferentiableOrientationErrorFunction::kTargets)
+      this->getTensorInput(FullyDifferentiableOrientationErrorFunction::kTargets)
           .template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
@@ -235,16 +223,10 @@ std::unique_ptr<TensorErrorFunction<T>> createOrientationErrorFunction(
     at::Tensor weights,
     at::Tensor orientation_targets) {
   return std::make_unique<TensorOrientationErrorFunction<T>>(
-      batchSize,
-      nFrames,
-      parents,
-      orientation_offsets,
-      weights,
-      orientation_targets);
+      batchSize, nFrames, parents, orientation_offsets, weights, orientation_targets);
 }
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createPositionErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createPositionErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor parents,
@@ -252,8 +234,7 @@ createPositionErrorFunction<float>(
     at::Tensor weights,
     at::Tensor targets);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createPositionErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createPositionErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor parents,
@@ -261,8 +242,7 @@ createPositionErrorFunction<double>(
     at::Tensor weights,
     at::Tensor targets);
 
-template std::unique_ptr<TensorErrorFunction<float>>
-createOrientationErrorFunction<float>(
+template std::unique_ptr<TensorErrorFunction<float>> createOrientationErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor parents,
@@ -270,8 +250,7 @@ createOrientationErrorFunction<float>(
     at::Tensor weights,
     at::Tensor orientation_targets);
 
-template std::unique_ptr<TensorErrorFunction<double>>
-createOrientationErrorFunction<double>(
+template std::unique_ptr<TensorErrorFunction<double>> createOrientationErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
     at::Tensor parents,

@@ -18,14 +18,10 @@
 
 namespace pymomentum {
 
-using RowMatrixf =
-    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-using RowMatrixd =
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-using RowMatrixi =
-    Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-using RowMatrixb =
-    Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMatrixf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMatrixd = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMatrixi = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMatrixb = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 at::Tensor mapModelParameters_names(
     at::Tensor motion_in,
@@ -50,14 +46,10 @@ momentum::Character loadFBXCharacterFromFile(
     const std::optional<std::string>& locatorsPath = {},
     bool permissive = false);
 std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
-loadFBXCharacterWithMotionFromFile(
-    const std::string& fbxPath,
-    bool permissive = false);
+loadFBXCharacterWithMotionFromFile(const std::string& fbxPath, bool permissive = false);
 
 std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
-loadFBXCharacterWithMotionFromBytes(
-    const pybind11::bytes& fbxBytes,
-    bool permissive = false);
+loadFBXCharacterWithMotionFromBytes(const pybind11::bytes& fbxBytes, bool permissive = false);
 
 momentum::Character loadLocatorsFromFile(
     const momentum::Character& character,
@@ -77,8 +69,7 @@ momentum::Character loadConfigFromBytes(
     const pybind11::bytes& bytes);
 
 momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath);
-momentum::Character loadURDFCharacterFromBytes(
-    const pybind11::bytes& urdfBytes);
+momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes);
 
 // Convert uniform noise to meaningful model parameters.
 // unifNoise: size: batchSize (optional) x #modelParameters, each entry
@@ -91,11 +82,9 @@ at::Tensor uniformRandomToModelParameters(
     const momentum::Character& character,
     at::Tensor unifNoise);
 
-std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(
-    const std::string& path);
+std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path);
 void savePosePriorToFile(const momentum::Mppca& mppca, const std::string& path);
-std::shared_ptr<const momentum::Mppca> loadPosePriorFromBytes(
-    const pybind11::bytes& bytes);
+std::shared_ptr<const momentum::Mppca> loadPosePriorFromBytes(const pybind11::bytes& bytes);
 
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromFile(
     const std::string& path,
@@ -106,9 +95,7 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromBytes(
     int nExpectedShapes = -1,
     int nExpectedVertices = -1);
 pybind11::bytes saveBlendShapeToBytes(const momentum::BlendShape& blendShape);
-void saveBlendShapeToFile(
-    const momentum::BlendShape& blendShape,
-    const std::string& path);
+void saveBlendShapeToFile(const momentum::BlendShape& blendShape, const std::string& path);
 
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
     pybind11::array_t<float> baseShape,
@@ -118,8 +105,7 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
 // Does not actually change the skeleton, this is so you can
 // simply apply the same motion to the new character as you did to the
 // old character.
-momentum::Character stripLowerBodyVertices(
-    const momentum::Character& character);
+momentum::Character stripLowerBodyVertices(const momentum::Character& character);
 
 std::vector<size_t> getUpperBodyJoints(const momentum::Skeleton& skeleton);
 
@@ -140,8 +126,7 @@ std::shared_ptr<momentum::Mppca> createMppcaModel(
 template <typename T, int N>
 pybind11::array_t<T> asArray(const std::vector<Eigen::Matrix<T, N, 1>>& v) {
   pybind11::array_t<T> result(
-      {static_cast<pybind11::ssize_t>(v.size()),
-       static_cast<pybind11::ssize_t>(N)});
+      {static_cast<pybind11::ssize_t>(v.size()), static_cast<pybind11::ssize_t>(N)});
   auto r = result.template mutable_unchecked<2>();
   for (size_t i = 0; i < v.size(); ++i) {
     for (int j = 0; j < N; ++j) {
@@ -152,18 +137,13 @@ pybind11::array_t<T> asArray(const std::vector<Eigen::Matrix<T, N, 1>>& v) {
 }
 
 template <typename T, int N, typename Derived>
-std::vector<Eigen::Matrix<T, N, 1>> asVectorList(
-    const Eigen::DenseBase<Derived>& b) {
+std::vector<Eigen::Matrix<T, N, 1>> asVectorList(const Eigen::DenseBase<Derived>& b) {
   std::vector<Eigen::Matrix<T, N, 1>> result;
   if (b.size() == 0) {
     return result;
   }
 
-  MT_THROW_IF(
-      b.cols() != N,
-      "Expected a matrix with {} columns, but got {}",
-      N,
-      b.cols());
+  MT_THROW_IF(b.cols() != N, "Expected a matrix with {} columns, but got {}", N, b.cols());
 
   result.reserve(b.rows());
   for (Eigen::Index i = 0; i < b.rows(); ++i) {
@@ -179,11 +159,7 @@ std::vector<Eigen::Vector<T, N>> asVectorList(const pybind11::array_t<T>& b) {
     return result;
   }
 
-  MT_THROW_IF(
-      b.shape(1) != N,
-      "Expected a matrix with {} columns, but got {}",
-      N,
-      b.shape(1));
+  MT_THROW_IF(b.shape(1) != N, "Expected a matrix with {} columns, but got {}", N, b.shape(1));
 
   result.reserve(b.shape(0));
   auto r = b.template unchecked<2>();
@@ -201,9 +177,7 @@ std::unique_ptr<momentum::Mesh> getPosedMesh(
     const momentum::Character& character,
     Eigen::Ref<const Eigen::VectorXf> jointParameters);
 
-momentum::Character replaceRestMesh(
-    const momentum::Character& character,
-    RowMatrixf positions);
+momentum::Character replaceRestMesh(const momentum::Character& character, RowMatrixf positions);
 
 std::vector<bool> jointListToBitset(
     const momentum::Character& character,
@@ -228,25 +202,18 @@ std::tuple<Eigen::VectorXi, RowMatrixf> getLocators(
 // Work with batched model params. The returned tensor's batch
 // dimension is dependent on the input tensor.
 // Differentiable, support both float and double dtypes.
-at::Tensor applyModelParameterLimits(
-    const momentum::Character& character,
-    at::Tensor modelParams);
+at::Tensor applyModelParameterLimits(const momentum::Character& character, at::Tensor modelParams);
 
 std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
     const momentum::Character& character);
 
-using MatrixX7f = Eigen::Matrix<
-    float,
-    Eigen::Dynamic,
-    momentum::kParametersPerJoint,
-    Eigen::RowMajor>;
+using MatrixX7f =
+    Eigen::Matrix<float, Eigen::Dynamic, momentum::kParametersPerJoint, Eigen::RowMajor>;
 
-std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(
-    const momentum::Character& character);
+std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(const momentum::Character& character);
 
 pybind11::array_t<float> getBindPose(const momentum::Character& character);
-pybind11::array_t<float> getInverseBindPose(
-    const momentum::Character& character);
+pybind11::array_t<float> getInverseBindPose(const momentum::Character& character);
 
 std::string formatDimensions(const pybind11::array& array);
 

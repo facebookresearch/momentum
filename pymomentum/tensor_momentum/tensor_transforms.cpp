@@ -27,13 +27,9 @@ void checkSkelState(at::Tensor skelState) {
       "Expected skeleton state to have last dimension 8 (tx, ty, tz, rx, ry, rz, rw, s)");
 }
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor> splitSkeletonState(
-    at::Tensor skelState) {
+std::tuple<at::Tensor, at::Tensor, at::Tensor> splitSkeletonState(at::Tensor skelState) {
   checkSkelState(skelState);
-  return {
-      skelState.narrow(-1, 0, 3),
-      skelState.narrow(-1, 3, 4),
-      skelState.narrow(-1, 7, 1)};
+  return {skelState.narrow(-1, 0, 3), skelState.narrow(-1, 3, 4), skelState.narrow(-1, 7, 1)};
 }
 
 at::Tensor skeletonStateToTransforms(at::Tensor skeletonState) {
@@ -44,8 +40,8 @@ at::Tensor skeletonStateToTransforms(at::Tensor skeletonState) {
   const at::Tensor affine = at::cat({linear, t.unsqueeze(-1)}, -1);
 
   const at::Tensor lastRow = [&]() {
-    at::Tensor result = to1DTensor(Eigen::Vector4f(0, 0, 0, 1))
-                            .to(skeletonState.device(), skeletonState.dtype());
+    at::Tensor result =
+        to1DTensor(Eigen::Vector4f(0, 0, 0, 1)).to(skeletonState.device(), skeletonState.dtype());
     std::vector<int64_t> result_shape;
     while (result.dim() < affine.dim()) {
       result = result.unsqueeze(0);
@@ -67,8 +63,7 @@ at::Tensor skeletonStateToTransforms(at::Tensor skeletonState) {
 // skeleton state by a single transform.
 at::Tensor matchLeadingDimensions(at::Tensor tLeft, at::Tensor tRight) {
   MT_THROW_IF(
-      tRight.dim() < tLeft.dim(),
-      "First tensor can't have larger dimensionality than the second.");
+      tRight.dim() < tLeft.dim(), "First tensor can't have larger dimensionality than the second.");
 
   while (tLeft.dim() < tRight.dim()) {
     tLeft = tLeft.unsqueeze(0);
@@ -90,9 +85,7 @@ at::Tensor matchLeadingDimensions(at::Tensor tLeft, at::Tensor tRight) {
   return tLeft.expand(new_dim);
 }
 
-at::Tensor multiplySkeletonStates(
-    at::Tensor skelState1,
-    at::Tensor skelState2) {
+at::Tensor multiplySkeletonStates(at::Tensor skelState1, at::Tensor skelState2) {
   checkSkelState(skelState1);
   checkSkelState(skelState2);
   skelState1 = matchLeadingDimensions(skelState1, skelState2);
@@ -136,8 +129,7 @@ at::Tensor translationToSkeletonState(at::Tensor t) {
   assert(sz_rot.size() > 0); // guaranteed by the sz.empty() check above.
   sz_rot.back() = 4;
 
-  return at::cat(
-      {t, quaternionIdentity().expand(sz_rot), at::ones(sz_scale)}, -1);
+  return at::cat({t, quaternionIdentity().expand(sz_rot), at::ones(sz_scale)}, -1);
 }
 
 at::Tensor scaleToSkeletonState(at::Tensor s) {
@@ -152,17 +144,12 @@ at::Tensor scaleToSkeletonState(at::Tensor s) {
   assert(sz_rot.size() > 0); // guaranteed by the sz.empty() check above.
   sz_rot.back() = 4;
 
-  return at::cat(
-      {at::zeros(sz_trans), quaternionIdentity().expand(sz_rot), s}, -1);
+  return at::cat({at::zeros(sz_trans), quaternionIdentity().expand(sz_rot), s}, -1);
 }
 
-at::Tensor transformPointsWithSkeletonState(
-    at::Tensor skelState,
-    at::Tensor p) {
+at::Tensor transformPointsWithSkeletonState(at::Tensor skelState, at::Tensor p) {
   checkSkelState(skelState);
-  MT_THROW_IF(
-      p.dim() < 1 || p.size(-1) != 3,
-      "Points tensor should have last dimension 3.");
+  MT_THROW_IF(p.dim() < 1 || p.size(-1) != 3, "Points tensor should have last dimension 3.");
   skelState = matchLeadingDimensions(skelState, p);
 
   auto [t, q, s] = splitSkeletonState(skelState);
@@ -175,23 +162,16 @@ at::Tensor inverseSkeletonStates(at::Tensor skelState) {
   auto sInv = at::reciprocal(s);
 
   return at::cat(
-      {-sInv * quaternionRotateVector(qInv, t),
-       quaternionInverse(q),
-       at::reciprocal(s)},
-      -1);
+      {-sInv * quaternionRotateVector(qInv, t), quaternionInverse(q), at::reciprocal(s)}, -1);
 }
 
 at::Tensor identitySkeletonState() {
   return at::cat(
-      {at::zeros(std::vector<int64_t>{3}),
-       quaternionIdentity(),
-       at::ones(std::vector<int64_t>{1})},
+      {at::zeros(std::vector<int64_t>{3}), quaternionIdentity(), at::ones(std::vector<int64_t>{1})},
       -1);
 }
 
-at::Tensor blendSkeletonStates(
-    at::Tensor skel_states,
-    std::optional<at::Tensor> weights_in) {
+at::Tensor blendSkeletonStates(at::Tensor skel_states, std::optional<at::Tensor> weights_in) {
   auto [t, q, s] = splitSkeletonState(skel_states);
   at::Tensor weights = checkAndNormalizeWeights(q, weights_in);
   at::Tensor t_blend = (weights.unsqueeze(-1).expand_as(t) * t).sum(-2);
