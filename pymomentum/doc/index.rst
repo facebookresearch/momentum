@@ -9,8 +9,9 @@ Welcome to PyMomentum
    quaternion
    skel_state
    trs
+   backend
    solver
    solver2
    marker_tracking
-   backend
-   gpu_character
+   torch
+   renderer
