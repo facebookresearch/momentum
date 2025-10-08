@@ -1,0 +1,622 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.torch &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.renderer" href="renderer.html" />
+    <link rel="prev" title="pymomentum.marker_tracking" href="marker_tracking.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.torch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.torch.character">pymomentum.torch.character</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.AdvancedInverseParameterTransform"><code class="docutils literal notranslate"><span class="pre">AdvancedInverseParameterTransform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.AdvancedInverseParameterTransform.__init__"><code class="docutils literal notranslate"><span class="pre">AdvancedInverseParameterTransform.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.AdvancedInverseParameterTransform.check_if_pose_scale_are_mutually_exclusive"><code class="docutils literal notranslate"><span class="pre">AdvancedInverseParameterTransform.check_if_pose_scale_are_mutually_exclusive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.AdvancedInverseParameterTransform.joint_parameters_to_model_parameters_with_known_scales"><code class="docutils literal notranslate"><span class="pre">AdvancedInverseParameterTransform.joint_parameters_to_model_parameters_with_known_scales()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.Character"><code class="docutils literal notranslate"><span class="pre">Character</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.__init__"><code class="docutils literal notranslate"><span class="pre">Character.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Character.joint_parameters_to_local_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.joint_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Character.joint_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.local_skeleton_state_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Character.local_skeleton_state_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.model_parameters_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">Character.model_parameters_to_joint_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.model_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Character.model_parameters_to_local_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.model_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Character.model_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.skin_points"><code class="docutils literal notranslate"><span class="pre">Character.skin_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Character.unpose"><code class="docutils literal notranslate"><span class="pre">Character.unpose()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.InverseParameterTransform"><code class="docutils literal notranslate"><span class="pre">InverseParameterTransform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.InverseParameterTransform.__init__"><code class="docutils literal notranslate"><span class="pre">InverseParameterTransform.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.InverseParameterTransform.joint_parameters_to_model_parameters"><code class="docutils literal notranslate"><span class="pre">InverseParameterTransform.joint_parameters_to_model_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.LinearBlendSkinning"><code class="docutils literal notranslate"><span class="pre">LinearBlendSkinning</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.LinearBlendSkinning.__init__"><code class="docutils literal notranslate"><span class="pre">LinearBlendSkinning.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.LinearBlendSkinning.forward"><code class="docutils literal notranslate"><span class="pre">LinearBlendSkinning.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.LinearBlendSkinning.skin_with_transforms"><code class="docutils literal notranslate"><span class="pre">LinearBlendSkinning.skin_with_transforms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.LinearBlendSkinning.skin_with_trs"><code class="docutils literal notranslate"><span class="pre">LinearBlendSkinning.skin_with_trs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.LinearBlendSkinning.unpose"><code class="docutils literal notranslate"><span class="pre">LinearBlendSkinning.unpose()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Mesh.__init__"><code class="docutils literal notranslate"><span class="pre">Mesh.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform"><code class="docutils literal notranslate"><span class="pre">ParameterTransform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform.__init__"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform.forward"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.Skeleton"><code class="docutils literal notranslate"><span class="pre">Skeleton</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.__init__"><code class="docutils literal notranslate"><span class="pre">Skeleton.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.forward"><code class="docutils literal notranslate"><span class="pre">Skeleton.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Skeleton.joint_parameters_to_local_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_local_trs"><code class="docutils literal notranslate"><span class="pre">Skeleton.joint_parameters_to_local_trs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_trs"><code class="docutils literal notranslate"><span class="pre">Skeleton.joint_parameters_to_trs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.local_skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">Skeleton.local_skeleton_state_to_joint_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.local_skeleton_state_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Skeleton.local_skeleton_state_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.local_trs_to_global_trs"><code class="docutils literal notranslate"><span class="pre">Skeleton.local_trs_to_global_trs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">Skeleton.skeleton_state_to_joint_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.skeleton_state_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Skeleton.skeleton_state_to_local_skeleton_state()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.torch.parameter_limits">pymomentum.torch.parameter_limits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits"><code class="docutils literal notranslate"><span class="pre">ParameterLimits</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.__init__"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_ellipsoid_error"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.evaluate_ellipsoid_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_halfplane_error"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.evaluate_halfplane_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_linear_error"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.evaluate_linear_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_linear_joint_error"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.evaluate_linear_joint_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmax_error"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.evaluate_minmax_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmaxjoint_error"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.evaluate_minmaxjoint_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.parameter_limits.ParameterLimits.forward"><code class="docutils literal notranslate"><span class="pre">ParameterLimits.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.torch.utility">pymomentum.torch.utility</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.torch</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/torch.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.torch">
+<span id="pymomentum-torch"></span><h1>pymomentum.torch<a class="headerlink" href="#module-pymomentum.torch" title="Link to this heading"></a></h1>
+<section id="module-pymomentum.torch.character">
+<span id="pymomentum-torch-character"></span><h2>pymomentum.torch.character<a class="headerlink" href="#module-pymomentum.torch.character" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.AdvancedInverseParameterTransform">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">AdvancedInverseParameterTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform" title="pymomentum.torch.character.ParameterTransform"><span class="pre">ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.AdvancedInverseParameterTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.torch.character.InverseParameterTransform" title="pymomentum.torch.character.InverseParameterTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">InverseParameterTransform</span></code></a></p>
+<p>This is a more advanced version of InverseParameterTransform that can handle
+the case where pose and scale are mutually exclusive (i.e. no joint parameter
+is affected by both pose and scale).  In this case, we can compute a pose-only
+SVD and use that to compute the inverse parameter transform.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.AdvancedInverseParameterTransform.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform" title="pymomentum.torch.character.ParameterTransform"><span class="pre">ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.AdvancedInverseParameterTransform.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.AdvancedInverseParameterTransform.check_if_pose_scale_are_mutually_exclusive">
+<span class="sig-name descname"><span class="pre">check_if_pose_scale_are_mutually_exclusive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.torch.character.AdvancedInverseParameterTransform.check_if_pose_scale_are_mutually_exclusive" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.AdvancedInverseParameterTransform.joint_parameters_to_model_parameters_with_known_scales">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_model_parameters_with_known_scales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.AdvancedInverseParameterTransform.joint_parameters_to_model_parameters_with_known_scales" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">Character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_skeleton</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_rest_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_skinning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.Character" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_skeleton</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_rest_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_skinning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.joint_parameters_to_local_skeleton_state">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.joint_parameters_to_local_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.joint_parameters_to_skeleton_state">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.joint_parameters_to_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.local_skeleton_state_to_skeleton_state">
+<span class="sig-name descname"><span class="pre">local_skeleton_state_to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.local_skeleton_state_to_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.model_parameters_to_joint_parameters">
+<span class="sig-name descname"><span class="pre">model_parameters_to_joint_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.model_parameters_to_joint_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.model_parameters_to_local_skeleton_state">
+<span class="sig-name descname"><span class="pre">model_parameters_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.model_parameters_to_local_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.model_parameters_to_skeleton_state">
+<span class="sig-name descname"><span class="pre">model_parameters_to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.model_parameters_to_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.skin_points">
+<span class="sig-name descname"><span class="pre">skin_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_vertex_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.skin_points" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Character.unpose">
+<span class="sig-name descname"><span class="pre">unpose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Character.unpose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.InverseParameterTransform">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">InverseParameterTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform" title="pymomentum.torch.character.ParameterTransform"><span class="pre">ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.InverseParameterTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.InverseParameterTransform.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.torch.character.ParameterTransform" title="pymomentum.torch.character.ParameterTransform"><span class="pre">ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.InverseParameterTransform.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.InverseParameterTransform.joint_parameters_to_model_parameters">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.InverseParameterTransform.joint_parameters_to_model_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.LinearBlendSkinning">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">LinearBlendSkinning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.LinearBlendSkinning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.LinearBlendSkinning.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.LinearBlendSkinning.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.LinearBlendSkinning.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_vertex_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.LinearBlendSkinning.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.LinearBlendSkinning.skin_with_transforms">
+<span class="sig-name descname"><span class="pre">skin_with_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_state_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_state_r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_state_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_vertex_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.LinearBlendSkinning.skin_with_transforms" title="Link to this definition"></a></dt>
+<dd><p>Apply skinning using individual global TRS tensors (legacy interface).</p>
+<p>This method provides backward compatibility for code that passes individual
+tensors instead of the TRS tuple format. Internally, it creates a tuple
+and delegates to skin_with_trs().</p>
+<dl>
+<dt>Args:</dt><dd><p>global_state_t: Global joint translations, shape (batch_size, num_joints, 3)
+global_state_r: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+global_state_s: Global joint scales, shape (batch_size, num_joints, 1)
+rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3)</p>
+<blockquote>
+<div><p>or (num_vertices, 3) which will be expanded to batch size</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>skinned_vertices: Skinned vertex positions, shape (batch_size, num_vertices, 3)</p>
+</dd>
+<dt>Note:</dt><dd><p>This method is provided for backward compatibility. New code should use
+skin_with_trs() with the TRS tuple interface.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.LinearBlendSkinning.skin_with_trs">
+<span class="sig-name descname"><span class="pre">skin_with_trs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_vertex_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.LinearBlendSkinning.skin_with_trs" title="Link to this definition"></a></dt>
+<dd><p>Apply skinning using global TRS state (Translation-Rotation-Scale).</p>
+<p>This method takes global TRS state as a tuple and applies linear blend skinning
+using the TRS backend. This is useful when working directly with TRS representations
+or when you want to avoid conversions to skeleton state format.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>global_trs: Global TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Global joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Global joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+<dt>rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3)</dt><dd><p>or (num_vertices, 3) which will be expanded to batch size</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>skinned_vertices: Skinned vertex positions, shape (batch_size, num_vertices, 3)</p>
+</dd>
+<dt>Note:</dt><dd><p>This method uses the TRS backend skinning function for efficient computation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.LinearBlendSkinning.unpose">
+<span class="sig-name descname"><span class="pre">unpose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_joint_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.LinearBlendSkinning.unpose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Mesh">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.Mesh" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Mesh.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Mesh.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.ParameterTransform">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">ParameterTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.ParameterTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.ParameterTransform.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.ParameterTransform.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.ParameterTransform.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.ParameterTransform.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.character.</span></span><span class="sig-name descname"><span class="pre">Skeleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.character.Skeleton" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.joint_parameters_to_local_skeleton_state">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_local_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.joint_parameters_to_local_trs">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_local_trs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_local_trs" title="Link to this definition"></a></dt>
+<dd><p>Convert joint parameters to local TRS (Translation-Rotation-Scale) state.</p>
+<p>This function takes joint parameters and converts them to the TRS representation
+as a tuple, consistent with the pymomentum.trs module interface.
+The TRS format is useful for applications that need explicit access to individual
+transformation components and can be more efficient than the skeleton state format.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>joint_parameters: Joint parameters tensor of shape (batch_size, num_joints * 7)</dt><dd><p>or (batch_size, num_joints, 7). Each joint has 7 parameters:
+- [0:3] translation offset
+- [3:6] euler xyz rotation angles
+- [6] log2 scale factor</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Local joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Local joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Raises:</dt><dd><p>RuntimeError: If the character has no skeleton</p>
+</dd>
+<dt>Note:</dt><dd><p>This function is equivalent to joint_parameters_to_local_skeleton_state() but
+returns the TRS format instead of the 8-parameter skeleton state format.
+It uses the TRS backend for efficient computation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.joint_parameters_to_trs">
+<span class="sig-name descname"><span class="pre">joint_parameters_to_trs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_trs" title="Link to this definition"></a></dt>
+<dd><p>Convert joint parameters directly to global TRS (Translation-Rotation-Scale) state.</p>
+<p>This function performs the full forward kinematics pipeline using the TRS backend,
+converting joint parameters to local TRS state and then to global TRS state in
+a single call. This is more efficient than calling the two-step process separately.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>joint_parameters: Joint parameters tensor of shape (batch_size, num_joints * 7)</dt><dd><p>or (batch_size, num_joints, 7). Each joint has 7 parameters:
+- [0:3] translation offset
+- [3:6] euler xyz rotation angles
+- [6] log2 scale factor</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Global joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Global joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Raises:</dt><dd><p>RuntimeError: If the character has no skeleton</p>
+</dd>
+<dt>Note:</dt><dd><p>This is equivalent to calling joint_parameters_to_local_trs() followed by
+local_trs_to_global_trs(), but more efficient as it avoids intermediate steps.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.local_skeleton_state_to_joint_parameters">
+<span class="sig-name descname"><span class="pre">local_skeleton_state_to_joint_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.local_skeleton_state_to_joint_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.local_skeleton_state_to_skeleton_state">
+<span class="sig-name descname"><span class="pre">local_skeleton_state_to_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.local_skeleton_state_to_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.local_trs_to_global_trs">
+<span class="sig-name descname"><span class="pre">local_trs_to_global_trs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.local_trs_to_global_trs" title="Link to this definition"></a></dt>
+<dd><p>Convert local TRS state to global TRS state using forward kinematics.</p>
+<p>This function performs forward kinematics on the local TRS transformations
+to compute the global joint transformations. This is useful when you have
+local TRS states from other sources and need to convert them to global states.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>local_trs: Local TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Local joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Local joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Global joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Global joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Note:</dt><dd><p>This function uses the TRS backend for efficient forward kinematics computation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.skeleton_state_to_joint_parameters">
+<span class="sig-name descname"><span class="pre">skeleton_state_to_joint_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.skeleton_state_to_joint_parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.skeleton_state_to_local_skeleton_state">
+<span class="sig-name descname"><span class="pre">skeleton_state_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.skeleton_state_to_local_skeleton_state" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pymomentum.torch.parameter_limits">
+<span id="pymomentum-torch-parameter-limits"></span><h2>pymomentum.torch.parameter_limits<a class="headerlink" href="#module-pymomentum.torch.parameter_limits" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.parameter_limits.</span></span><span class="sig-name descname"><span class="pre">ParameterLimits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.ParameterLimit" title="pymomentum.geometry.ParameterLimit"><span class="pre">ParameterLimit</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Native PyTorch implementation of momentum’s LimitErrorFunction, used to
+enforce parameter limits using a soft constraint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.ParameterLimit" title="pymomentum.geometry.ParameterLimit"><span class="pre">ParameterLimit</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.evaluate_ellipsoid_error">
+<span class="sig-name descname"><span class="pre">evaluate_ellipsoid_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_ellipsoid_error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.evaluate_halfplane_error">
+<span class="sig-name descname"><span class="pre">evaluate_halfplane_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_halfplane_error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.evaluate_linear_error">
+<span class="sig-name descname"><span class="pre">evaluate_linear_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_linear_error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.evaluate_linear_joint_error">
+<span class="sig-name descname"><span class="pre">evaluate_linear_joint_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_linear_joint_error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmax_error">
+<span class="sig-name descname"><span class="pre">evaluate_minmax_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmax_error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmaxjoint_error">
+<span class="sig-name descname"><span class="pre">evaluate_minmaxjoint_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmaxjoint_error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.parameter_limits.ParameterLimits.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.parameter_limits.ParameterLimits.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pymomentum.torch.utility">
+<span id="pymomentum-torch-utility"></span><h2>pymomentum.torch.utility<a class="headerlink" href="#module-pymomentum.torch.utility" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="marker_tracking.html" class="btn btn-neutral float-left" title="pymomentum.marker_tracking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="renderer.html" class="btn btn-neutral float-right" title="pymomentum.renderer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

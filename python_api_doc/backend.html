@@ -19,8 +19,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pymomentum.gpu_character" href="gpu_character.html" />
-    <link rel="prev" title="pymomentum.marker_tracking" href="marker_tracking.html" /> 
+    <link rel="next" title="pymomentum.solver" href="solver.html" />
+    <link rel="prev" title="pymomentum.trs" href="trs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,38 +48,52 @@
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.backend.skel_state_backend">pymomentum.backend.skel_state_backend module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.backward"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT.backward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.forward"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.setup_context"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT.setup_context()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state"><code class="docutils literal notranslate"><span class="pre">global_skel_state_from_local_skel_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state_backprop"><code class="docutils literal notranslate"><span class="pre">global_skel_state_from_local_skel_state_backprop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state_no_grad"><code class="docutils literal notranslate"><span class="pre">global_skel_state_from_local_skel_state_no_grad()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.unpose_from_momentum_global_joint_state"><code class="docutils literal notranslate"><span class="pre">unpose_from_momentum_global_joint_state()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.backend.trs_backend">pymomentum.backend.trs_backend module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT"><code class="docutils literal notranslate"><span class="pre">ForwardKinematicsFromLocalTransformationJIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.backward"><code class="docutils literal notranslate"><span class="pre">ForwardKinematicsFromLocalTransformationJIT.backward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.forward"><code class="docutils literal notranslate"><span class="pre">ForwardKinematicsFromLocalTransformationJIT.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.setup_context"><code class="docutils literal notranslate"><span class="pre">ForwardKinematicsFromLocalTransformationJIT.setup_context()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.trs_backend.global_trs_state_from_local_trs_state"><code class="docutils literal notranslate"><span class="pre">global_trs_state_from_local_trs_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.trs_backend.global_trs_state_from_local_trs_state_forward_only"><code class="docutils literal notranslate"><span class="pre">global_trs_state_from_local_trs_state_forward_only()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.trs_backend.unpose_from_global_joint_state"><code class="docutils literal notranslate"><span class="pre">unpose_from_global_joint_state()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.backend.utils">pymomentum.backend.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#backend-utility-functions-for-pymomentum">Backend Utility Functions for PyMomentum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.utils.LBSAdapter"><code class="docutils literal notranslate"><span class="pre">LBSAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.LBSAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">LBSAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.LBSAdapter.assemble_pose_and_scale_"><code class="docutils literal notranslate"><span class="pre">LBSAdapter.assemble_pose_and_scale_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.LBSAdapter.device"><code class="docutils literal notranslate"><span class="pre">LBSAdapter.device</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.LBSAdapter.to"><code class="docutils literal notranslate"><span class="pre">LBSAdapter.to()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.utils.calc_fk_prefix_multiplication_indices"><code class="docutils literal notranslate"><span class="pre">calc_fk_prefix_multiplication_indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.utils.flatten_skinning_weights_and_indices"><code class="docutils literal notranslate"><span class="pre">flatten_skinning_weights_and_indices()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.backend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-pymomentum.backend.skel_state_backend">pymomentum.backend.skel_state_backend module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state"><code class="docutils literal notranslate"><span class="pre">global_skel_state_from_local_skel_state()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state_backprop"><code class="docutils literal notranslate"><span class="pre">global_skel_state_from_local_skel_state_backprop()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state_no_grad"><code class="docutils literal notranslate"><span class="pre">global_skel_state_from_local_skel_state_no_grad()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.unpose_from_momentum_global_joint_state"><code class="docutils literal notranslate"><span class="pre">unpose_from_momentum_global_joint_state()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#module-pymomentum.backend.trs_backend">pymomentum.backend.trs_backend module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT"><code class="docutils literal notranslate"><span class="pre">ForwardKinematicsFromLocalTransformationJIT</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.global_trs_state_from_local_trs_state"><code class="docutils literal notranslate"><span class="pre">global_trs_state_from_local_trs_state()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.global_trs_state_from_local_trs_state_forward_only"><code class="docutils literal notranslate"><span class="pre">global_trs_state_from_local_trs_state_forward_only()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.trs_backend.unpose_from_global_joint_state"><code class="docutils literal notranslate"><span class="pre">unpose_from_global_joint_state()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#module-pymomentum.backend.utils">pymomentum.backend.utils module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#backend-utility-functions-for-pymomentum">Backend Utility Functions for PyMomentum</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.LBSAdapter"><code class="docutils literal notranslate"><span class="pre">LBSAdapter</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.calc_fk_prefix_multiplication_indices"><code class="docutils literal notranslate"><span class="pre">calc_fk_prefix_multiplication_indices()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.utils.flatten_skinning_weights_and_indices"><code class="docutils literal notranslate"><span class="pre">flatten_skinning_weights_and_indices()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="gpu_character.html">pymomentum.gpu_character</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
 </ul>
 
         </div>
@@ -110,10 +124,8 @@
 <span id="pymomentum-backend"></span><h1>pymomentum.backend<a class="headerlink" href="#module-pymomentum.backend" title="Link to this heading"></a></h1>
 <p>PyMomentum Backend</p>
 <p>High-performance implementations for forward kinematics and linear blend skinning operations.</p>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <section id="module-pymomentum.backend.skel_state_backend">
-<span id="pymomentum-backend-skel-state-backend-module"></span><h3>pymomentum.backend.skel_state_backend module<a class="headerlink" href="#module-pymomentum.backend.skel_state_backend" title="Link to this heading"></a></h3>
+<span id="pymomentum-backend-skel-state-backend-module"></span><h2>pymomentum.backend.skel_state_backend module<a class="headerlink" href="#module-pymomentum.backend.skel_state_backend" title="Link to this heading"></a></h2>
 <p>Skeleton State Backend for PyMomentum</p>
 <p>This module provides efficient forward kinematics and skinning operations using
 the skeleton state representation (8 parameters per joint: translation, quaternion, scale).</p>
@@ -346,7 +358,7 @@ with_high_precision: if True, use high precision solver (LDLT),</p>
 
 </section>
 <section id="module-pymomentum.backend.trs_backend">
-<span id="pymomentum-backend-trs-backend-module"></span><h3>pymomentum.backend.trs_backend module<a class="headerlink" href="#module-pymomentum.backend.trs_backend" title="Link to this heading"></a></h3>
+<span id="pymomentum-backend-trs-backend-module"></span><h2>pymomentum.backend.trs_backend module<a class="headerlink" href="#module-pymomentum.backend.trs_backend" title="Link to this heading"></a></h2>
 <p>TRS Backend for PyMomentum</p>
 <p>This module provides efficient forward kinematics and skinning operations using
 the TRS (Translation-Rotation-Scale) representation where each transformation
@@ -529,9 +541,9 @@ with_high_precision: if True, use high precision solver (LDLT),</p>
 
 </section>
 <section id="module-pymomentum.backend.utils">
-<span id="pymomentum-backend-utils-module"></span><h3>pymomentum.backend.utils module<a class="headerlink" href="#module-pymomentum.backend.utils" title="Link to this heading"></a></h3>
+<span id="pymomentum-backend-utils-module"></span><h2>pymomentum.backend.utils module<a class="headerlink" href="#module-pymomentum.backend.utils" title="Link to this heading"></a></h2>
 <section id="backend-utility-functions-for-pymomentum">
-<h4>Backend Utility Functions for PyMomentum<a class="headerlink" href="#backend-utility-functions-for-pymomentum" title="Link to this heading"></a></h4>
+<h3>Backend Utility Functions for PyMomentum<a class="headerlink" href="#backend-utility-functions-for-pymomentum" title="Link to this heading"></a></h3>
 <p>This module provides utility functions that are specific to backend operations
 and were previously available in real_lbs_pytorch but are now implemented
 within pymomentum for the backend porting effort.</p>
@@ -645,14 +657,13 @@ making them suitable for efficient skinning computation.</p>
 
 </section>
 </section>
-</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="marker_tracking.html" class="btn btn-neutral float-left" title="pymomentum.marker_tracking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="gpu_character.html" class="btn btn-neutral float-right" title="pymomentum.gpu_character" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="trs.html" class="btn btn-neutral float-left" title="pymomentum.trs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solver.html" class="btn btn-neutral float-right" title="pymomentum.solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

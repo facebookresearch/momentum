@@ -47,11 +47,12 @@
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gpu_character.html">pymomentum.gpu_character</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
 </ul>
 
         </div>
@@ -212,6 +213,12 @@
 <li class="toctree-l2"><a class="reference internal" href="trs.html#pymomentum.trs.transform_points"><code class="docutils literal notranslate"><span class="pre">transform_points()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.skel_state_backend">pymomentum.backend.skel_state_backend module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.trs_backend">pymomentum.backend.trs_backend module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.utils">pymomentum.backend.utils module</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.ErrorFunctionType"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="solver.html#pymomentum.solver.LinearSolverType"><code class="docutils literal notranslate"><span class="pre">LinearSolverType</span></code></a></li>
@@ -295,11 +302,48 @@
 <li class="toctree-l2"><a class="reference internal" href="marker_tracking.html#pymomentum.marker_tracking.save_motion"><code class="docutils literal notranslate"><span class="pre">save_motion()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="backend.html#submodules">Submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.character">pymomentum.torch.character</a></li>
+<li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.parameter_limits">pymomentum.torch.parameter_limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.utility">pymomentum.torch.utility</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gpu_character.html">pymomentum.gpu_character</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.Camera"><code class="docutils literal notranslate"><span class="pre">Camera</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.IntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.Light"><code class="docutils literal notranslate"><span class="pre">Light</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.LightType"><code class="docutils literal notranslate"><span class="pre">LightType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.OpenCVDistortionParameters"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.OpenCVIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">OpenCVIntrinsicsModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.PhongMaterial"><code class="docutils literal notranslate"><span class="pre">PhongMaterial</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.PinholeIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">PinholeIntrinsicsModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.SkeletonStyle"><code class="docutils literal notranslate"><span class="pre">SkeletonStyle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.alpha_matte"><code class="docutils literal notranslate"><span class="pre">alpha_matte()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.build_cameras_for_body"><code class="docutils literal notranslate"><span class="pre">build_cameras_for_body()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.build_cameras_for_hand"><code class="docutils literal notranslate"><span class="pre">build_cameras_for_hand()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.build_cameras_for_hand_surface"><code class="docutils literal notranslate"><span class="pre">build_cameras_for_hand_surface()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.create_index_buffer"><code class="docutils literal notranslate"><span class="pre">create_index_buffer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.create_rgb_buffer"><code class="docutils literal notranslate"><span class="pre">create_rgb_buffer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.create_shadow_projection_matrix"><code class="docutils literal notranslate"><span class="pre">create_shadow_projection_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.create_z_buffer"><code class="docutils literal notranslate"><span class="pre">create_z_buffer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_camera_frustum"><code class="docutils literal notranslate"><span class="pre">rasterize_camera_frustum()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_capsules"><code class="docutils literal notranslate"><span class="pre">rasterize_capsules()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_character"><code class="docutils literal notranslate"><span class="pre">rasterize_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_checkerboard"><code class="docutils literal notranslate"><span class="pre">rasterize_checkerboard()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_circles"><code class="docutils literal notranslate"><span class="pre">rasterize_circles()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_circles_2d"><code class="docutils literal notranslate"><span class="pre">rasterize_circles_2d()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_cylinders"><code class="docutils literal notranslate"><span class="pre">rasterize_cylinders()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_lines"><code class="docutils literal notranslate"><span class="pre">rasterize_lines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_lines_2d"><code class="docutils literal notranslate"><span class="pre">rasterize_lines_2d()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_mesh"><code class="docutils literal notranslate"><span class="pre">rasterize_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_skeleton"><code class="docutils literal notranslate"><span class="pre">rasterize_skeleton()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_spheres"><code class="docutils literal notranslate"><span class="pre">rasterize_spheres()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_transforms"><code class="docutils literal notranslate"><span class="pre">rasterize_transforms()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_wireframe"><code class="docutils literal notranslate"><span class="pre">rasterize_wireframe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.subdivide_mesh"><code class="docutils literal notranslate"><span class="pre">subdivide_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.triangulate"><code class="docutils literal notranslate"><span class="pre">triangulate()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
