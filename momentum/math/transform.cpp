@@ -6,10 +6,12 @@
  */
 
 #include "momentum/math/transform.h"
-#include <Eigen/Eigenvalues>
+
 #include "momentum/common/checks.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/random.h"
+
+#include <Eigen/Eigenvalues>
 
 namespace momentum {
 
