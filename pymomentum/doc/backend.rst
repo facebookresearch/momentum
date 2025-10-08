@@ -6,11 +6,8 @@ pymomentum.backend
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
-
 pymomentum.backend.skel\_state\_backend module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------
 
 .. automodule:: pymomentum.backend.skel_state_backend
    :members:
@@ -18,7 +15,7 @@ pymomentum.backend.skel\_state\_backend module
    :show-inheritance:
 
 pymomentum.backend.trs\_backend module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 .. automodule:: pymomentum.backend.trs_backend
    :members:
@@ -26,7 +23,7 @@ pymomentum.backend.trs\_backend module
    :show-inheritance:
 
 pymomentum.backend.utils module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 .. automodule:: pymomentum.backend.utils
    :members:
