@@ -606,11 +606,15 @@ function(mt_install_pymomentum)
     # Group files by destination directory
     set(destinations_processed "")
     foreach(file_dest_pair ${pymomentum_structured_libraries_to_install})
-      # Split "file:destination" pair
-      string(FIND "${file_dest_pair}" ":" colon_pos)
+      # Use the *last* colon as the separator; Windows paths have "C:/..."
+      string(FIND "${file_dest_pair}" ":" colon_pos REVERSE)
+      if(colon_pos EQUAL -1)
+        message(FATAL_ERROR "Malformed mapping: '${file_dest_pair}' (expected 'file:dest')")
+      endif()
       string(SUBSTRING "${file_dest_pair}" 0 ${colon_pos} file_path)
       math(EXPR dest_start "${colon_pos} + 1")
       string(SUBSTRING "${file_dest_pair}" ${dest_start} -1 dest_path)
+      file(TO_CMAKE_PATH "${file_path}" file_path)
 
       # Check if we've already processed this destination
       list(FIND destinations_processed "${dest_path}" dest_index)
@@ -618,12 +622,12 @@ function(mt_install_pymomentum)
         # New destination, collect all files for this destination
         set(files_for_dest "")
         foreach(other_pair ${pymomentum_structured_libraries_to_install})
-          string(FIND "${other_pair}" ":" other_colon_pos)
+          string(FIND "${other_pair}" ":" other_colon_pos REVERSE)
           math(EXPR other_dest_start "${other_colon_pos} + 1")
+          string(SUBSTRING "${other_pair}" 0 ${other_colon_pos} other_file_path)
           string(SUBSTRING "${other_pair}" ${other_dest_start} -1 other_dest_path)
 
           if("${other_dest_path}" STREQUAL "${dest_path}")
-            string(SUBSTRING "${other_pair}" 0 ${other_colon_pos} other_file_path)
             list(APPEND files_for_dest "${other_file_path}")
           endif()
         endforeach()
