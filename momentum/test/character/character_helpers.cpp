@@ -55,10 +55,11 @@ Eigen::MatrixX<T> randomMatrix(Eigen::Index nRows, Eigen::Index nCols) {
 // hardcoded locators for test character
 [[nodiscard]] LocatorList createDefaultLocatorList(size_t numJoints) {
   LocatorList result;
+  momentum::Random<> rng(10001);
   for (int i = 0; i < numJoints; ++i) {
     Locator loc;
     loc.parent = i;
-    loc.offset = Eigen::Vector3f::Random();
+    loc.offset = rng.uniform<Eigen::Vector3f>(-1.0f, 1.0f);
     loc.name = "l" + std::to_string(i);
     result.push_back(loc);
   }

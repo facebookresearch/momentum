@@ -20,6 +20,7 @@
 #include "momentum/character/skin_weights.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
+#include "momentum/math/random.h"
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/helpers/expect_throw.h"
 
@@ -29,6 +30,8 @@ using namespace momentum;
 class CharacterUtilityTest : public ::testing::Test {
  protected:
   void SetUp() override {
+    Random<>::GetSingleton().setSeed(42);
+
     // Create test characters with different numbers of joints
     character = createTestCharacter<float>(5);
     smallCharacter = createTestCharacter<float>(3);
