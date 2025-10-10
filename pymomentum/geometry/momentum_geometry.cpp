@@ -863,7 +863,7 @@ at::Tensor applyModelParameterLimitsTemplate(
 
   // character.parameterLimits can be empty. In this case, there is no
   // limit for all the model params.
-  if (character.parameterLimits.size() != 0) {
+  if (!character.parameterLimits.empty()) {
     // Store model param indices that have limits.
     std::vector<int64_t> limitedIndices;
     // Store the limit values.
