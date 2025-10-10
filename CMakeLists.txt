@@ -63,6 +63,7 @@ mt_option(MOMENTUM_ENABLE_FBX_SAVING "Enable FBX saving via Autodesk FBX SDK (FB
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
+mt_option(MOMENTUM_BUILD_RENDERER "Build renderer and rasterizer" ON)
 mt_option(MOMENTUM_ENABLE_PROFILING "Enable building with profiling annotations" OFF)
 mt_option(MOMENTUM_ENABLE_SIMD "Enable building with SIMD instructions" ON)
 mt_option(MOMENTUM_INSTALL_EXAMPLES "Install examples" OFF)
@@ -97,7 +98,6 @@ find_package(Dispenso CONFIG REQUIRED)
 find_package(drjit CONFIG REQUIRED)
 find_package(Eigen3 3.4.0 CONFIG REQUIRED)
 find_package(ezc3d CONFIG REQUIRED)
-find_package(Kokkos CONFIG REQUIRED) # For mdspan headers (vendored in Kokkos)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(fx-gltf CONFIG REQUIRED)
@@ -107,6 +107,10 @@ find_package(openfbx CONFIG REQUIRED)
 find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
+
+if(MOMENTUM_BUILD_RENDERER)
+  find_package(Kokkos CONFIG REQUIRED) # For mdspan headers (vendored in Kokkos)
+endif()
 
 if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
   find_package(rerun_sdk CONFIG REQUIRED)
@@ -506,19 +510,21 @@ mt_library(
     io_marker
 )
 
-mt_library(
-  NAME rasterizer
-  HEADERS_VARS
-    rasterizer_public_headers
-  SOURCES_VARS
-    rasterizer_sources
-  PUBLIC_LINK_LIBRARIES
-    common
-    drjit
-    Eigen3::Eigen
-    Kokkos::kokkos # For mdspan headers (vendored in Kokkos)
-    Microsoft.GSL::GSL
-)
+if(MOMENTUM_BUILD_RENDERER)
+  mt_library(
+    NAME rasterizer
+    HEADERS_VARS
+      rasterizer_public_headers
+    SOURCES_VARS
+      rasterizer_sources
+    PUBLIC_LINK_LIBRARIES
+      common
+      drjit
+      Eigen3::Eigen
+      Kokkos::kokkos # For mdspan headers (vendored in Kokkos)
+      Microsoft.GSL::GSL
+  )
+endif()
 
 mt_library(
   NAME rerun_eigen_adapters
