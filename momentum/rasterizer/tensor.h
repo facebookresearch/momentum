@@ -9,6 +9,7 @@
 
 #include <mdspan/mdspan.hpp>
 #include <momentum/common/aligned.h>
+#include <momentum/common/exception.h>
 #include <momentum/rasterizer/fwd.h>
 #include <algorithm>
 #include <array>
@@ -40,7 +41,31 @@ class Tensor {
   explicit Tensor(const extents_t& extents, const T& defaultValue = T{}) : _extents(extents) {
     auto size = calculateSize(extents);
     if (size > 0) {
-      _data.resize(size, defaultValue);
+      // Sanity check: if size is unreasonably large (e.g. > 1GB for floats/ints),
+      // throw a more descriptive error than std::bad_alloc
+      constexpr index_t kMaxReasonableElements =
+          256 * 1024 * 1024; // 256M elements (~1GB for floats)
+      MT_THROW_IF(
+          size > kMaxReasonableElements,
+          "Tensor allocation size is unreasonably large: {} elements. "
+          "This may indicate a configuration error with SIMD packet size. "
+          "Expected extents: [{}]",
+          size,
+          formatExtents(extents));
+      try {
+        _data.resize(size, defaultValue);
+      } catch (const std::bad_alloc& e) {
+        MT_THROW(
+            "Failed to allocate tensor of size {} elements ({} bytes). "
+            "Extents: [{}]. "
+            "This may indicate misconfigured SIMD packet size (kSimdPacketSize={}). "
+            "Original error: {}",
+            size,
+            size * sizeof(T),
+            formatExtents(extents),
+            kSimdPacketSize,
+            e.what());
+      }
     }
   }
 
@@ -130,6 +155,17 @@ class Tensor {
       size *= ext;
     }
     return size;
+  }
+
+  static std::string formatExtents(const extents_t& extents) {
+    std::string result;
+    for (size_t i = 0; i < Rank; ++i) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += std::to_string(extents[i]);
+    }
+    return result;
   }
 };
 
