@@ -16,9 +16,7 @@
 #include <momentum/character_solver/skeleton_solver_function.h>
 #include <momentum/solver/gauss_newton_solver.h>
 
-namespace pymomentum {
-
-namespace detail {
+namespace pymomentum::detail {
 
 size_t checkNumParams(
     const std::vector<const momentum::Character*>& characters,
@@ -393,6 +391,4 @@ template std::vector<at::Tensor> toTensors<double>(
     const std::vector<std::unique_ptr<TensorErrorFunction<double>>>& errorFunctions,
     const std::vector<ErrorFunctionInput<double>>& inputs_all);
 
-} // namespace detail
-
-} // namespace pymomentum
+} // namespace pymomentum::detail
