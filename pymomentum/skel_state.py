@@ -187,7 +187,11 @@ def to_matrix(skeleton_state: torch.Tensor) -> torch.Tensor:
     affine = torch.cat((linear, t.unsqueeze(-1)), -1)
 
     last_row = (
-        torch.tensor([0, 0, 0, 1], device=skeleton_state.device)
+        torch.tensor(
+            [0.0, 0.0, 0.0, 1.0],
+            device=skeleton_state.device,
+            dtype=skeleton_state.dtype,
+        )
         .unsqueeze(0)
         .expand(*affine.shape[:-2], 1, 4)
     )
