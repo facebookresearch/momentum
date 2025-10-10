@@ -196,6 +196,12 @@ TEST(SoftwareRasterizer, OneQuad) {
   const int width = 20;
   const int height = 10;
 
+  // Add diagnostic information to help debug allocation issues
+  // This can help identify when SIMD packet size is misconfigured
+  SCOPED_TRACE(
+      "SIMD Configuration: kSimdPacketSize=" + std::to_string(kSimdPacketSize) +
+      ", kSimdAlignment=" + std::to_string(kSimdAlignment));
+
   // Create OpenCV intrinsics with no distortion
   OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(

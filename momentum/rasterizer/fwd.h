@@ -23,6 +23,19 @@ using IntrinsicsModel = IntrinsicsModelT<float>;
 constexpr size_t kSimdPacketSize = drjit::DefaultSize;
 constexpr size_t kSimdAlignment = 4 * kSimdPacketSize;
 
+// Compile-time sanity check: Ensure SIMD packet size is reasonable (typically 4, 8, 16, or 32)
+// This helps catch misconfigured builds where DefaultSize might be incorrect
+static_assert(
+    kSimdPacketSize >= 1 && kSimdPacketSize <= 64,
+    "kSimdPacketSize must be between 1 and 64. If this assertion fails, "
+    "drjit::DefaultSize may be misconfigured in your build environment.");
+
+// Additional check: packet size should be a power of 2 for most SIMD implementations
+static_assert(
+    (kSimdPacketSize & (kSimdPacketSize - 1)) == 0,
+    "kSimdPacketSize should be a power of 2 (1, 2, 4, 8, 16, 32, 64). "
+    "If this fails, check your drjit configuration.");
+
 using IntP = drjit::Packet<int32_t, kSimdPacketSize>;
 using UintP = drjit::Packet<uint32_t, kSimdPacketSize>;
 using Uint8P = drjit::Packet<uint8_t, kSimdPacketSize>;
