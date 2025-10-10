@@ -53,6 +53,7 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
         gtag: {
           trackingID: 'G-NQKPMTK7XB',
         },
+        enableEditor: true,
       }),
     ],
   ],
