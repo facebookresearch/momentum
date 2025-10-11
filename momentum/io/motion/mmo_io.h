@@ -75,7 +75,7 @@ std::tuple<MatrixXf, VectorXf> loadMmo(const std::string& filename, const Charac
 /// @param poses Motion poses matrix
 /// @param parameterNames Names of all parameters
 /// @return Tuple of (auxiliary data matrix, auxiliary parameter names without underscores)
-std::tuple<MatrixXf, std::vector<std::string>> getAuxilaryDataFromMotion(
+std::tuple<MatrixXf, std::vector<std::string>> getAuxiliaryDataFromMotion(
     const MatrixXf& poses,
     gsl::span<const std::string> parameterNames);
 

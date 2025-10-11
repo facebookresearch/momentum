@@ -220,8 +220,8 @@ std::tuple<MatrixXf, VectorXf> loadMmo(const std::string& filename, const Charac
   return mapMotionToCharacter(iposes, iscale, pNames, jNames, character);
 }
 
-// get auxilary data from motion
-std::tuple<MatrixXf, std::vector<std::string>> getAuxilaryDataFromMotion(
+// get auxiliary data from motion
+std::tuple<MatrixXf, std::vector<std::string>> getAuxiliaryDataFromMotion(
     const MatrixXf& poses,
     gsl::span<const std::string> parameterNames) {
   std::tuple<MatrixXf, std::vector<std::string>> result;
