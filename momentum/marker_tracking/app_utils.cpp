@@ -47,7 +47,7 @@ void addCalibrationOptions(CLI::App& app, std::shared_ptr<CalibrationConfig> con
   debugOption->default_val(config->debug);
 
   auto* calibFramesOption = app.add_option(
-      "--calib-frames", config->calibFrames, "Numer of frames used for model calibration");
+      "--calib-frames", config->calibFrames, "Number of frames used for model calibration");
   calibFramesOption->default_val(config->calibFrames)->check(CLI::PositiveNumber);
 
   auto* majorIterOption =
@@ -61,7 +61,7 @@ void addCalibrationOptions(CLI::App& app, std::shared_ptr<CalibrationConfig> con
   auto* minVisPercentOption = app.add_option(
       "--min-calib-vis-percent",
       config->minVisPercent,
-      "Minimum percetange of visible markers used for calibration");
+      "Minimum percentage of visible markers used for calibration");
   minVisPercentOption->default_val(config->minVisPercent)->check(CLI::Range(0.0, 1.0));
 
   auto* alphaOption =
@@ -124,7 +124,7 @@ void addTrackingOptions(CLI::App& app, std::shared_ptr<TrackingConfig> config) {
   auto* minVisPercentOption = app.add_option(
       "--min-tracking-vis-percent",
       config->minVisPercent,
-      "Minimum percetange of visible markers used for tracking");
+      "Minimum percentage of visible markers used for tracking");
   minVisPercentOption->default_val(config->minVisPercent)->check(CLI::Range(0.0, 1.0));
 }
 

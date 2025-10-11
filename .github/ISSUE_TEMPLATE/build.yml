@@ -14,7 +14,7 @@ body:
     attributes:
       label: Problem description
       description: Please describe the problem.
-      value: "Please describe how you were trying to build Momentum and what issue occured"
+      value: "Please describe how you were trying to build Momentum and what issue occurred"
     validations:
       required: true
   - type: textarea

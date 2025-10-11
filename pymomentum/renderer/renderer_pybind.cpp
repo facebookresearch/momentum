@@ -753,7 +753,7 @@ PYBIND11_MODULE(renderer, m) {
       R"(triangulate the polygon mesh.
 
 :param faceOffests: numpy.ndarray defining the starting and end points of each polygon
-:param facesIndices: numpy.ndarray of the face indicies to vertex
+:param facesIndices: numpy.ndarray of the face indices to vertex
 )",
       py::arg("face_indices"),
       py::arg("face_offsets"));

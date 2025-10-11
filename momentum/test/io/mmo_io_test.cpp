@@ -116,7 +116,7 @@ TEST_F(MmoIOTest, AuxiliaryDataAndMapping) {
   std::vector<std::string> paramNames = {"joint1_tx", "__aux1__", "joint2_ty", "__aux2__"};
   MatrixXf testPoses = MatrixXf::Random(4, 3);
 
-  auto [auxData, auxNames] = getAuxilaryDataFromMotion(testPoses, paramNames);
+  auto [auxData, auxNames] = getAuxiliaryDataFromMotion(testPoses, paramNames);
 
   EXPECT_EQ(auxData.rows(), 2);
   EXPECT_EQ(auxNames.size(), 2);

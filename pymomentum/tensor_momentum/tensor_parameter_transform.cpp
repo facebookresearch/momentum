@@ -559,12 +559,12 @@ at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& param
   const at::Tensor transformDense =
       at::zeros({transformSparse.rows(), transformSparse.cols()}, at::kFloat);
 
-  auto tranformAccessor = transformDense.accessor<float, 2>();
+  auto transformAccessor = transformDense.accessor<float, 2>();
 
   for (int i = 0; i < transformSparse.outerSize(); ++i) {
     for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(transformSparse, i); it;
          ++it) {
-      tranformAccessor[static_cast<long>(it.row())][static_cast<long>(it.col())] = it.value();
+      transformAccessor[static_cast<long>(it.row())][static_cast<long>(it.col())] = it.value();
     }
   }
   return transformDense;
