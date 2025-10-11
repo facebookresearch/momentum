@@ -152,7 +152,7 @@ $(document).ready(function(){initNavTree('app__utils_8cpp_source.html',''); init
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">debugOption</a>-&gt;default_val(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;debug);</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keyword">auto</span>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">calibFramesOption</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">app</a>.add_option(</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>      <span class="stringliteral">&quot;--calib-frames&quot;</span>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;calibFrames, <span class="stringliteral">&quot;Numer of frames used for model calibration&quot;</span>);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>      <span class="stringliteral">&quot;--calib-frames&quot;</span>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;calibFrames, <span class="stringliteral">&quot;Number of frames used for model calibration&quot;</span>);</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">calibFramesOption</a>-&gt;default_val(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;calibFrames)-&gt;check(CLI::PositiveNumber);</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keyword">auto</span>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">majorIterOption</a> =</div>
@@ -166,7 +166,7 @@ $(document).ready(function(){initNavTree('app__utils_8cpp_source.html',''); init
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keyword">auto</span>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">minVisPercentOption</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">app</a>.add_option(</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>      <span class="stringliteral">&quot;--min-calib-vis-percent&quot;</span>,</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;minVisPercent,</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="stringliteral">&quot;Minimum percetange of visible markers used for calibration&quot;</span>);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="stringliteral">&quot;Minimum percentage of visible markers used for calibration&quot;</span>);</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">minVisPercentOption</a>-&gt;default_val(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;minVisPercent)-&gt;check(CLI::Range(0.0, 1.0));</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keyword">auto</span>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">alphaOption</a> =</div>
@@ -231,7 +231,7 @@ $(document).ready(function(){initNavTree('app__utils_8cpp_source.html',''); init
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keyword">auto</span>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">minVisPercentOption</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">app</a>.add_option(</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>      <span class="stringliteral">&quot;--min-tracking-vis-percent&quot;</span>,</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;minVisPercent,</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      <span class="stringliteral">&quot;Minimum percetange of visible markers used for tracking&quot;</span>);</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      <span class="stringliteral">&quot;Minimum percentage of visible markers used for tracking&quot;</span>);</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">minVisPercentOption</a>-&gt;default_val(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">config</a>-&gt;minVisPercent)-&gt;check(CLI::Range(0.0, 1.0));</div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>}</div>
 </div>
@@ -389,7 +389,7 @@ $(document).ready(function(){initNavTree('app__utils_8cpp_source.html',''); init
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_da9a4e26ab0cde1b62bca67c124a4985.html">marker_tracking</a></li><li class="navelem"><a class="el" href="app__utils_8cpp.html">app_utils.cpp</a></li>
-    <li class="footer">Generated on Fri Oct 10 2025 18:11:15 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sat Oct 11 2025 14:39:32 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
