@@ -25,7 +25,7 @@ struct PointTriangleVertexConstraintT {
   T weight = 1;
 
   template <typename T2>
-  VertexConstraintT<T2> cast() const {
+  PointTriangleVertexConstraintT<T2> cast() const {
     return {
         this->srcVertexIndex,
         this->tgtTriangleIndices,
