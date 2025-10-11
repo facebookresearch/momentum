@@ -20,7 +20,6 @@
 #include <axel/Bvh.h>
 #include <fmt/format.h>
 #include <rerun.hpp>
-#include <rerun/demo_utils.hpp>
 
 #include <array>
 #include <vector>
