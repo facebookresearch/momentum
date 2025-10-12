@@ -89,6 +89,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
         assert solver.per_iteration_errors == per_iter_errors_prev
 
+        # delete constraints and ensure they're empty
+        pos_error.clear_constraints()
+        self.assertTrue(len(pos_error.constraints) == 0)
+
     def test_incorrect_params(self) -> None:
         """Test solve_ik() with incorrect parameter transform."""
 
@@ -540,6 +544,10 @@ class TestSolver(unittest.TestCase):
             )
         )
 
+        # delete constraints and ensure they're empty
+        ptv_error_function.clear_constraints()
+        # self.assertTrue(len(ptv_error_function.constraints) == 0)
+
     def test_vertex_error_function(self) -> None:
         """Test VertexErrorFunction to ensure a vertex is targeted to a specific location."""
 
@@ -603,6 +611,10 @@ class TestSolver(unittest.TestCase):
                 atol=1e-3,
             )
         )
+
+        # delete constraints and ensure they're empty
+        vertex_error_function.clear_constraints()
+        self.assertTrue(len(vertex_error_function.constraints) == 0)
 
     def test_pose_prior_error_function(self) -> None:
         """Test PosePriorErrorFunction to ensure it can converge to multiple modes."""
@@ -726,6 +738,10 @@ class TestSolver(unittest.TestCase):
         # Assert that the final direction is close to the target direction
         self.assertTrue(np.allclose(final_dir, target_dir, rtol=1e-3, atol=1e-3))
 
+        # delete constraints and ensure they're empty
+        aim_dir_error_function.clear_constraints()
+        self.assertTrue(len(aim_dir_error_function.constraints) == 0)
+
     def test_fixed_axis_constraint(self) -> None:
         """Test FixedAxisErrorFunction to ensure a local axis aligns with a global axis."""
 
@@ -780,6 +796,10 @@ class TestSolver(unittest.TestCase):
         self.assertTrue(
             np.allclose(final_global_axis, target_global_axis, rtol=1e-3, atol=1e-3)
         )
+
+        # delete constraints and ensure they're empty
+        fixed_axis_error_function.clear_constraints()
+        self.assertTrue(len(fixed_axis_error_function.constraints) == 0)
 
     def test_normal_constraint(self) -> None:
         """Test NormalErrorFunction to ensure a point-to-plane distance is minimized."""
@@ -847,6 +867,10 @@ class TestSolver(unittest.TestCase):
 
         # Assert that the signed distance is close to zero
         self.assertAlmostEqual(signed_distance.item(), 0.0, delta=1e-3)
+
+        # delete constraints and ensure they're empty
+        normal_error_function.clear_constraints()
+        self.assertTrue(len(normal_error_function.constraints) == 0)
 
     def test_distance_constraint(self) -> None:
         """Test DistanceErrorFunction to ensure a point maintains a target distance from an origin."""
@@ -1005,6 +1029,10 @@ class TestSolver(unittest.TestCase):
             )
         )
 
+        # delete constraints and ensure they're empty
+        orientation_error_function.clear_constraints()
+        self.assertTrue(len(orientation_error_function.constraints) == 0)
+
     def test_plane_constraint(self) -> None:
         """Test PlaneErrorFunction to ensure a point stays on or above a plane."""
 
@@ -1107,6 +1135,10 @@ class TestSolver(unittest.TestCase):
         # Assert that the point is above or on the plane (distance >= 0)
         self.assertGreaterEqual(distance, -1e-3)
 
+        # delete constraints and ensure they're empty
+        plane_error_function.clear_constraints()
+        self.assertTrue(len(plane_error_function.constraints) == 0)
+
     def test_projection_constraint(self) -> None:
         """Test ProjectionErrorFunction to ensure a 3D point projects to a target 2D point."""
 
@@ -1196,6 +1228,10 @@ class TestSolver(unittest.TestCase):
             f"Projected point {projected_2d} is not close to target {target_2d}",
         )
 
+        # delete constraints and ensure they're empty
+        projection_error_function.clear_constraints()
+        self.assertTrue(len(projection_error_function.constraints) == 0)
+
     def test_vertex_projection_constraint(self) -> None:
         """Test VertexProjectionErrorFunction to ensure a 3D vertex projects to a target 2D point."""
 
@@ -1283,6 +1319,10 @@ class TestSolver(unittest.TestCase):
             np.allclose(projected_2d, target_2d, rtol=1e-3, atol=1e-3),
             f"Projected vertex {projected_2d} is not close to target {target_2d}",
         )
+
+        # delete constraints and ensure they're empty
+        vertex_projection_error_function.clear_constraints()
+        self.assertTrue(len(vertex_projection_error_function.constraints) == 0)
 
     def test_vertex_sequence_error_function(self) -> None:
         """Test VertexSequenceErrorFunction to ensure vertex velocities match target velocities."""
