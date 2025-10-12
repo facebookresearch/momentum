@@ -160,7 +160,11 @@ void defAimErrorFunction(py::module_& m, const char* name, const char* descripti
           py::arg("global_target"),
           py::arg("parent_index"),
           py::arg("weight"),
-          py::arg("name") = std::optional<std::vector<std::string>>{});
+          py::arg("name") = std::optional<std::vector<std::string>>{})
+      .def(
+          "clear_constraints",
+          &AimErrorFunctionT::clearConstraints,
+          "Clears all aim constraints from the error function.");
 }
 
 template <typename FixedAxisErrorFunctionT>
@@ -273,7 +277,11 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
           py::arg("global_axis"),
           py::arg("parent_index"),
           py::arg("weight"),
-          py::arg("name") = std::optional<std::vector<std::string>>{});
+          py::arg("name") = std::optional<std::vector<std::string>>{})
+      .def(
+          "clear_constraints",
+          &FixedAxisErrorFunctionT::clearConstraints,
+          "Clears all fixed axis constraints from the error function.");
 }
 
 void defNormalErrorFunction(py::module_& m) {
@@ -435,7 +443,11 @@ plane defined by a local point and a local normal vector.)")
           py::arg("parent"),
           py::arg("local_point") = std::nullopt,
           py::arg("weight") = std::nullopt,
-          py::arg("name") = std::optional<std::vector<std::string>>{});
+          py::arg("name") = std::optional<std::vector<std::string>>{})
+      .def(
+          "clear_constraints",
+          &mm::NormalErrorFunctionT<float>::clearConstraints,
+          "Clears all normal constraints from the error function.");
 }
 
 void defDistanceErrorFunction(py::module_& m) {
@@ -1082,7 +1094,11 @@ distance is greater than zero (ie. the point being above).)")
           py::arg("parent"),
           py::arg("offset") = std::nullopt,
           py::arg("weight") = std::nullopt,
-          py::arg("name") = std::optional<std::vector<std::string>>{});
+          py::arg("name") = std::optional<std::vector<std::string>>{})
+      .def(
+          "clear_constraints",
+          &mm::PlaneErrorFunction::clearConstraints,
+          "Clears all plane constraints from the error function.");
 }
 
 void defVertexVertexDistanceErrorFunction(py::module_& m) {
@@ -1794,6 +1810,39 @@ avoid divide-by-zero. )");
           [](const mm::VertexErrorFunction& self) { return self.getConstraints(); },
           "Returns the list of vertex constraints.");
 
+  py::class_<mm::PointTriangleVertexConstraint>(m, "PointTriangleVertexConstraint")
+      .def(
+          "__repr__",
+          [](const mm::PointTriangleVertexConstraint& self) {
+            return fmt::format(
+                "PointTriangleVertexConstraint(src_vertex_index={}, depth={:.3f}, tgt_triangle_indices=[{} {} {}], tgt_bary_coords=[{:.3f}, {:.3f}, {:.3f}], weight={:.3f})",
+                self.srcVertexIndex,
+                self.depth,
+                self.tgtTriangleIndices.x(),
+                self.tgtTriangleIndices.y(),
+                self.tgtTriangleIndices.z(),
+                self.tgtTriangleBaryCoords.x(),
+                self.tgtTriangleBaryCoords.y(),
+                self.tgtTriangleBaryCoords.z(),
+                self.weight);
+          })
+      .def_readonly(
+          "src_vertex_index",
+          &mm::PointTriangleVertexConstraint::srcVertexIndex,
+          "The index of the vertex to constrain.")
+      .def_readonly(
+          "depth", &mm::PointTriangleVertexConstraint::depth, "The depth of the constraint.")
+      .def_readonly(
+          "weight", &mm::PointTriangleVertexConstraint::weight, "The weight of the constraint.")
+      .def_readonly(
+          "tgt_triangle_indices",
+          &mm::PointTriangleVertexConstraint::tgtTriangleIndices,
+          "The target triangle indices.")
+      .def_readonly(
+          "tgt_bary_coords",
+          &mm::PointTriangleVertexConstraint::tgtTriangleBaryCoords,
+          "The target barycentric coordinates.");
+
   py::class_<
       mm::PointTriangleVertexErrorFunction,
       mm::SkeletonErrorFunction,
@@ -1880,6 +1929,10 @@ avoid divide-by-zero. )");
           py::arg("target_triangle_bary_coord"),
           py::arg("depth"),
           py::arg("weight"))
+      .def_property_readonly(
+          "constraints",
+          [](const mm::PointTriangleVertexErrorFunction& self) { return self.getConstraints(); },
+          "Returns the list of point triangle constraints.")
       .def(
           "clear_constraints",
           &mm::PointTriangleVertexErrorFunction::clearConstraints,
@@ -1930,6 +1983,28 @@ avoid divide-by-zero. )");
   :param model_parameters: The model parameters to evaluate.
   :return: The log probability value.)",
           py::arg("model_parameters"));
+
+  py::class_<mm::OrientationData>(m, "OrientationData")
+      .def(
+          "__repr__",
+          [](const mm::OrientationData& self) {
+            return fmt::format(
+                "OrientationData(parent={}, weight={}, offset=[{:.3f}, {:.3f}, {:.3f}, {:.3f}], target=[{:.3f}, {:.3f}, {:.3f}, {:.3f}])",
+                self.parent,
+                self.weight,
+                self.offset.x(),
+                self.offset.y(),
+                self.offset.z(),
+                self.offset.w(),
+                self.target.x(),
+                self.target.y(),
+                self.target.z(),
+                self.target.w());
+          })
+      .def_readonly("parent", &mm::OrientationData::parent, "The parent joint index")
+      .def_readonly("weight", &mm::OrientationData::weight, "The weight of the constraint")
+      .def_readonly("offset", &mm::OrientationData::offset, "The offset in parent space")
+      .def_readonly("target", &mm::OrientationData::target, "The target orientation");
 
   py::class_<
       mm::OrientationErrorFunctionT<float>,
@@ -1998,6 +2073,14 @@ rotation matrix to a target rotation.)")
           py::arg("offset") = std::nullopt,
           py::arg("weight") = 1.0f,
           py::arg("name") = std::string{})
+      .def(
+          "clear_constraints",
+          [](mm::OrientationErrorFunctionT<float>& self) { self.clearConstraints(); },
+          R"(Clears all constraints.)")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::OrientationErrorFunctionT<float>& self) { return self.getConstraints(); },
+          "Returns the list of orientation constraints.")
       .def(
           "add_constraints",
           [](mm::OrientationErrorFunctionT<float>& self,
