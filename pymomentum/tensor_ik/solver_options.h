@@ -34,6 +34,7 @@ struct SolverOptions {
   bool lineSearch = true;
   // Temporal smoothing of model parameters (only for the sequence solver)
   float sequenceSmoothingWeight = 0.0f;
+  bool verbose = false;
 
   bool operator==(const SolverOptions& rhs) const {
     return linearSolverType == rhs.linearSolverType && levmar_lambda == rhs.levmar_lambda &&

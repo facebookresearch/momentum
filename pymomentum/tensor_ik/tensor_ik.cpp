@@ -114,7 +114,7 @@ at::Tensor solveTensorIKProblem(
   momentumSolverOptions.threshold = solverOptions.threshold;
   // momentumSolverOptions.regularization = solverOptions.levmar_lambda;
   // momentumSolverOptions.doLineSearch = solverOptions.lineSearch;
-  // momentumSolverOptions.verbose = true;
+  momentumSolverOptions.verbose = solverOptions.verbose;
 
   const auto nParams = characters.front()->parameterTransform.numAllModelParameters();
 
@@ -365,6 +365,7 @@ at::Tensor solveTensorSequenceIKProblem(
   momentumSolverOptions.regularization = solverOptions.levmar_lambda;
   momentumSolverOptions.doLineSearch = solverOptions.lineSearch;
   momentumSolverOptions.multithreaded = true;
+  momentumSolverOptions.verbose = solverOptions.verbose;
 
   const auto nParams = characters.front()->parameterTransform.numAllModelParameters();
 

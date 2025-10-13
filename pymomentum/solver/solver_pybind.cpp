@@ -67,7 +67,8 @@ PYBIND11_MODULE(solver, m) {
                         size_t maxIter,
                         float threshold,
                         bool lineSearch,
-                        float sequenceSmoothingWeight) {
+                        float sequenceSmoothingWeight,
+                        bool verbose) {
             return SolverOptions{
                 linearSolverType,
                 levmar_lambda,
@@ -75,9 +76,8 @@ PYBIND11_MODULE(solver, m) {
                 maxIter,
                 threshold,
                 lineSearch,
-                sequenceSmoothingWeight
-
-            };
+                sequenceSmoothingWeight,
+                verbose};
           }),
           py::arg("linear_solver") = LinearSolverType::QR,
           py::arg("levmar_lambda") = 0.01f,
@@ -85,7 +85,8 @@ PYBIND11_MODULE(solver, m) {
           py::arg("max_iter") = 50,
           py::arg("threshold") = 10.0f,
           py::arg("line_search") = true,
-          py::arg("sequence_smoothing_weight") = 0.0f)
+          py::arg("sequence_smoothing_weight") = 0.0f,
+          py::arg("verbose") = false)
       .def_readwrite(
           "linear_solver",
           &SolverOptions::linearSolverType,
@@ -110,6 +111,8 @@ PYBIND11_MODULE(solver, m) {
           "line_search",
           &SolverOptions::lineSearch,
           "Whether or not to use a line search; note that only the QR solver actually uses this (default: true).")
+      .def_readwrite(
+          "verbose", &SolverOptions::verbose, "Flag to print out solver progress (default: false).")
       .def("__repr__", [](const SolverOptions& options) {
         return fmt::format(
             "SolverOptions(linear_solver=LinearSolverType.{}, levmar_lambda={}, min_iter={}, max_iter={}, threshold={}, line_search={})",
@@ -118,7 +121,8 @@ PYBIND11_MODULE(solver, m) {
             options.minIter,
             options.maxIter,
             options.threshold,
-            (options.lineSearch ? "True" : "False"));
+            (options.lineSearch ? "True" : "False"),
+            (options.verbose ? "True" : "False"));
       });
 
   m.def(
