@@ -8,6 +8,7 @@
 #include "axel/math/PointTriangleProjection.h"
 
 #include <gmock/gmock.h>
+#include <array>
 
 #include <gsl/span>
 
@@ -35,7 +36,7 @@ Eigen::Isometry3d buildTransform3D(
   return t;
 }
 
-const Eigen::Isometry3d testTransformations3D[] = {
+const auto testTransformations3D = std::to_array<Eigen::Isometry3d>({
     // Identity
     buildTransform3D(0.0, 0.0, 0.0, {0.0, 0.0, 0.0}),
     // Only rotation
@@ -44,7 +45,7 @@ const Eigen::Isometry3d testTransformations3D[] = {
     buildTransform3D(0.0, 0.0, 0.0, {1.0, 2.0, 3.0}),
     // Rotation and translation
     buildTransform3D(1.0, 0.5, 1.0, {1.0, 2.0, 3.0}),
-};
+});
 
 struct ProjectOnTriangleTestParams {
   Eigen::Vector3d particle;
@@ -141,7 +142,7 @@ TEST_P(ProjectOnTriangleVectorizedTest, checkProjection) {
   }
 }
 
-const ProjectOnTriangleTestParams projectOnTriangleTestParams[] = {
+const auto projectOnTriangleTestParams = std::to_array<ProjectOnTriangleTestParams>({
     // Particle inside triangle
     {{1.0, 1.0, 0.0},
      {Eigen::Vector3d{0.0, 0.0, 0.0}, {3.0, 0.0, 0.0}, {0.0, 3.0, 0.0}},
@@ -197,7 +198,7 @@ const ProjectOnTriangleTestParams projectOnTriangleTestParams[] = {
      {Eigen::Vector3d{0.0, 0.0, 0.0}, {2.0, 0.0, 0.0}, {0.0, 2.0, 0.0}},
      {1.0, 1.0, 0.0},
      false},
-};
+});
 
 INSTANTIATE_TEST_SUITE_P(
     ProjectOnTriangleParameterizedTest,
