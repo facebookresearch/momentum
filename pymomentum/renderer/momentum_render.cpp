@@ -71,13 +71,9 @@ momentum::rasterizer::Camera makeOutsideInCamera(
   const float film_width_mm = 36.0f;
   const float focal_length_pixels = (focal_length_mm / film_width_mm) * (double)imageWidth_pixels;
 
-  std::cout << "focal length pixels: " << focal_length_pixels << std::endl;
-
   // Create a PinholeIntrinsicsModel
   auto intrinsicsModel = std::make_shared<momentum::rasterizer::PinholeIntrinsicsModel>(
       imageWidth_pixels, imageHeight_pixels, focal_length_pixels, focal_length_pixels);
-
-  std::cout << "fx: " << intrinsicsModel->fx() << std::endl;
 
   // Create and return the camera with the intrinsics model and transform
   return momentum::rasterizer::Camera(intrinsicsModel, worldToEyeXF);
