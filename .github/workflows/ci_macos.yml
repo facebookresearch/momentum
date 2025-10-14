@@ -15,7 +15,7 @@ on:
 
 jobs:
   momentum:
-    if: false # Temporarily disabled to reduce CI cost
+    # Enabled for minimal macOS platform coverage
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -53,6 +53,7 @@ jobs:
           pixi run cmake --build momentum/examples/hello_world/build
 
   pymomentum:
+    if: false # Disabled: Redundant with Windows, macOS is most expensive
     name: py-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:
