@@ -42,10 +42,8 @@ class ArrayShapeValidator {
   std::unordered_map<int, int64_t> boundShapes_;
 };
 
-momentum::ParameterSet arrayToParameterSet(
-    const pybind11::array_t<bool>& array,
-    const size_t nParameters,
-    bool defaultValue);
+momentum::ParameterSet
+arrayToParameterSet(const pybind11::array_t<bool>& array, size_t nParameters, bool defaultValue);
 
 momentum::ParameterSet arrayToParameterSet(
     const pybind11::array_t<bool>& array,
