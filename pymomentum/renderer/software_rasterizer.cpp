@@ -1597,7 +1597,7 @@ void rasterizeTransforms(
   const float c2 = 0.3f;
   const bool backfaceCulling = true;
 
-  momentum::rasterizer::PhongMaterial materials[3] = {
+  std::array<momentum::rasterizer::PhongMaterial, 3> materials = {
       material.value_or(momentum::rasterizer::PhongMaterial(Eigen::Vector3f(c1, c2, c2))),
       material.value_or(momentum::rasterizer::PhongMaterial(Eigen::Vector3f(c2, c1, c2))),
       material.value_or(momentum::rasterizer::PhongMaterial(Eigen::Vector3f(c2, c2, c1)))};
