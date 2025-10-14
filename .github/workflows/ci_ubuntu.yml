@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        simd: ["ON", "OFF"]
+        simd: ["ON"]  # Only test SIMD=ON (production config) to reduce CI cost
         mode: [""]
     env:
       MOMENTUM_ENABLE_SIMD: ${{ matrix.simd }}

@@ -47,7 +47,7 @@ jobs:
             --parallel
 
   pymomentum:
-    if: false # Temporarily disabled to reduce CI cost
+    # Enabled: CPU-only for cost optimization (GPU disabled)
     name: py-${{ matrix.pixi_env }}-win
     runs-on: windows-latest
     strategy:
@@ -55,8 +55,9 @@ jobs:
       matrix:
         include:
           - pixi_env: "cpu"
-          - pixi_env: "gpu"
-            cuda_version: "12.9.0"
+          # GPU disabled to reduce CI cost
+          # - pixi_env: "gpu"
+          #   cuda_version: "12.9.0"
     env:
       FULL_CUDA_VERSION: ${{ matrix.cuda_version }}
     steps:
