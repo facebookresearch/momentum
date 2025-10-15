@@ -10,6 +10,7 @@
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <momentum/common/exception.h>
+#include <momentum/math/constants.h>
 #include <momentum/math/mppca.h>
 
 #include <Eigen/Core>
@@ -68,7 +69,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTe
     // so std::log(pi(c)) = Rpre(c) + 0.5 * C_logDeterminant + 0.5 *
     //      d * std::log(2.0 * PI));
     const float log_pi = mppca.Rpre(iMix) + 0.5f * C_logDeterminant +
-        0.5f * static_cast<float>(mppca.d) * std::log(2.0 * M_PI);
+        0.5f * static_cast<float>(mppca.d) * std::log(2.0 * momentum::pi<float>());
     pi[iMix] = exp(log_pi);
   }
 

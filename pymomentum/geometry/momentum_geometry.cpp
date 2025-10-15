@@ -26,6 +26,7 @@
 #include <momentum/io/skeleton/mppca_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/urdf/urdf_io.h>
+#include <momentum/math/constants.h>
 #include <momentum/math/mesh.h>
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
@@ -460,7 +461,7 @@ at::Tensor uniformRandomToModelParameters(
         res_i[iParam] = 5.0f * (unif_i[iParam] - 0.5f);
       } else {
         // Assume it's a rotation parameter
-        res_i[iParam] = (M_PI / 4.0f) * (unif_i[iParam] - 0.5f);
+        res_i[iParam] = (momentum::pi<float>() / 4.0f) * (unif_i[iParam] - 0.5f);
       }
     }
   }
@@ -690,7 +691,7 @@ std::tuple<float, Eigen::VectorXf, Eigen::MatrixXf, float> getMppcaModel(
   // so std::log(pi(c)) = Rpre(c) + 0.5 * C_logDeterminant + 0.5 *
   //      d * std::log(2.0 * PI));
   const float log_pi = mppca.Rpre(iModel) + 0.5f * C_logDeterminant +
-      0.5f * static_cast<float>(dim) * std::log(2.0 * M_PI);
+      0.5f * static_cast<float>(dim) * std::log(2.0 * momentum::pi<float>());
   const float pi = exp(log_pi);
 
   return {pi, mu, W, sigma2};

@@ -7,6 +7,7 @@
 
 #include <axel/math/RayTriangleIntersection.h>
 #include <gtest/gtest.h>
+#include <momentum/math/constants.h>
 #include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/image.h>
@@ -345,12 +346,13 @@ TEST(SoftwareRasterizer, Splats) {
   normals.push_back(splatNormal);
 
   for (size_t i = 0; i < nCircleSamples; ++i) {
-    float theta_i = 2.0f * M_PI * float(i) / float(nCircleSamples);
+    float theta_i = momentum::twopi<float>() * float(i) / float(nCircleSamples);
     vertices.emplace_back(
         splatOrigin +
         Eigen::Vector3f(splatRadius * std::cos(theta_i), splatRadius * std::sin(theta_i), 0));
     normals.push_back(splatNormal);
-    triangles.emplace_back(i + 1, 0, (i + 1) % nCircleSamples + 1);
+    triangles.emplace_back(
+        static_cast<int>(i + 1), 0, static_cast<int>((i + 1) % nCircleSamples + 1));
   }
 
   auto zBuffer_triangles = makeRasterizerZBuffer(camera);

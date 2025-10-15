@@ -73,7 +73,7 @@ PYBIND11_MODULE(renderer, m) {
               throw std::runtime_error("Expected a 2D array of shape (nPoints, 3)");
             }
 
-            py::array_t<float> result(std::vector<ssize_t>{points.shape(0), 3});
+            py::array_t<float> result(std::vector<py::ssize_t>{points.shape(0), 3});
             auto res_acc = result.mutable_unchecked<2>();
             auto pts_acc = points.unchecked<2>();
 
@@ -498,7 +498,7 @@ PYBIND11_MODULE(renderer, m) {
               throw std::runtime_error("Expected a 2D array of shape (nPoints, 3)");
             }
 
-            py::array_t<float> result(std::vector<ssize_t>{world_points.shape(0), 3});
+            py::array_t<float> result(std::vector<py::ssize_t>{world_points.shape(0), 3});
             auto res_acc = result.mutable_unchecked<2>();
             auto pts_acc = world_points.unchecked<2>();
 
@@ -529,7 +529,7 @@ PYBIND11_MODULE(renderer, m) {
                   "Expected image_points to be a 2D array of shape (nPoints, 3)");
             }
 
-            py::array_t<float> result(std::vector<ssize_t>{image_points.shape(0), 3});
+            py::array_t<float> result(std::vector<py::ssize_t>{image_points.shape(0), 3});
             auto res_acc = result.mutable_unchecked<2>();
             auto img_acc = image_points.unchecked<2>();
 
