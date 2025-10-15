@@ -13,6 +13,7 @@
 #include <Eigen/Core>
 
 #include <momentum/common/exception.h>
+#include <momentum/math/constants.h>
 
 namespace momentum::rasterizer {
 
@@ -86,7 +87,7 @@ Mesh makeSphere(int subdivisionLevel) {
   std::vector<Eigen::Vector2f> azimuthPoints;
   azimuthPoints.reserve(numAzimuthSubdivisions);
   for (int i = 0; i < numAzimuthSubdivisions; ++i) {
-    const float angle = 2.0f * M_PI * ((float)i / (float)numAzimuthSubdivisions);
+    const float angle = twopi<float>() * ((float)i / (float)numAzimuthSubdivisions);
     azimuthPoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 
@@ -103,7 +104,7 @@ Mesh makeSphere(int subdivisionLevel) {
 
   // Add middle band vertices (indices 1 to numMiddleBands * numAzimuthSubdivisions)
   for (int iPolar = 1; iPolar < numPolarSubdivisions; ++iPolar) {
-    const float polarAngle = M_PI * ((float)iPolar / (float)numPolarSubdivisions);
+    const float polarAngle = pi<float>() * ((float)iPolar / (float)numPolarSubdivisions);
     const float cosPolar = std::cos(polarAngle);
     const float sinPolar = std::sin(polarAngle);
 
@@ -185,7 +186,7 @@ Mesh makeCylinderCap(int numCircleSubdivisions, bool top, float radius = 1.0) {
 
   // Add circle vertices
   for (int i = 0; i < numCircleSubdivisions; ++i) {
-    const float angle = 2.0f * M_PI * float(i) / float(numCircleSubdivisions);
+    const float angle = twopi<float>() * float(i) / float(numCircleSubdivisions);
     result.vertices.emplace_back(xValue, radius * std::cos(angle), radius * std::sin(angle));
     result.normals.push_back(normal);
   }
@@ -210,7 +211,7 @@ Mesh makeCylinderBody(
   std::vector<Eigen::Vector2f> circlePoints;
   circlePoints.reserve(numCircleSubdivisions);
   for (int i = 0; i < numCircleSubdivisions; ++i) {
-    const float angle = 2.0f * M_PI * ((float)i / (float)numCircleSubdivisions);
+    const float angle = twopi<float>() * ((float)i / (float)numCircleSubdivisions);
     circlePoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 
@@ -269,7 +270,7 @@ Mesh makeCapsule(
   std::vector<Eigen::Vector2f> circlePoints;
   circlePoints.reserve(numCircleSubdivisions);
   for (int i = 0; i < numCircleSubdivisions; ++i) {
-    const float angle = 2.0f * M_PI * ((float)i / (float)numCircleSubdivisions);
+    const float angle = twopi<float>() * ((float)i / (float)numCircleSubdivisions);
     circlePoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 
@@ -277,7 +278,7 @@ Mesh makeCapsule(
   std::vector<Eigen::Vector2f> polarPoints;
   polarPoints.reserve(numPolarSubdivisions);
   for (int i = 0; i < numPolarSubdivisions; ++i) {
-    const float angle = M_PI * ((float)i / (float)numCircleSubdivisions);
+    const float angle = pi<float>() * ((float)i / (float)numCircleSubdivisions);
     polarPoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 
@@ -422,7 +423,7 @@ Mesh makeArrowhead(
   std::vector<Eigen::Vector2f> circlePoints;
   circlePoints.reserve(numCircleSubdivisions);
   for (int i = 0; i < numCircleSubdivisions; ++i) {
-    const float angle = 2.0f * M_PI * ((float)i / (float)numCircleSubdivisions);
+    const float angle = twopi<float>() * ((float)i / (float)numCircleSubdivisions);
     circlePoints.emplace_back(std::cos(angle), std::sin(angle));
   }
 

@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <momentum/math/constants.h>
 #include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/geometry.h>
 #include <Eigen/Core>
@@ -86,28 +87,29 @@ TEST(SoftwareRasterizer, CreateCylinder) {
   const auto cylinder = makeCylinder(20, 10);
   // dumpObjFile(cylinder, "/Users/cdtwigg/cylinder.obj");
   checkTrianglesValid(cylinder);
-  checkNormalsValid(cylinder, M_PI / 16);
+  checkNormalsValid(cylinder, momentum::pi<float>() / 16.0f);
 }
 
 TEST(SoftwareRasterizer, CreateCapsule) {
   const auto capsule = makeCapsule(20, 10, 1.0, 0.5, 2.0);
   // dumpObjFile(capsule, "/Users/cdtwigg/capsule.obj");
   checkTrianglesValid(capsule);
-  checkNormalsValid(capsule, M_PI / 16);
+  checkNormalsValid(capsule, momentum::pi<float>() / 16.0f);
 }
 
 TEST(SoftwareRasterizer, CreateArrow) {
   const auto arrowhead = makeArrow(20, 10, 0.2, 0.4, 0.5, 1.0);
   // dumpObjFile(arrowhead, "/Users/cdtwigg/arrow.obj");
   checkTrianglesValid(arrowhead);
-  checkNormalsValid(arrowhead, M_PI / 16);
+  checkNormalsValid(arrowhead, momentum::pi<float>() / 16.0f);
 }
 
 TEST(SoftwareRasterizer, CreateSphere) {
   const auto sphere = makeSphere(2);
   // dumpObjFile(sphere, "/Users/cdtwigg/sphere.obj");
   checkTrianglesValid(sphere);
-  checkNormalsValid(sphere, M_PI / 8); // Allow slightly larger angle tolerance for sphere
+  checkNormalsValid(
+      sphere, momentum::pi<float>() / 8.0f); // Allow slightly larger angle tolerance for sphere
 
   // Additional checks for sphere-specific properties
   ASSERT_GT(sphere.vertices.size(), 0);

@@ -470,7 +470,7 @@ TYPED_TEST(TransformTest, SlerpTest) {
   const TransformT<T> t1; // identity
   const Vector3<T> trans(1, 0, 0);
   const Vector3<T> rotDir(0, 0, 1);
-  const T rotAmt = static_cast<T>(M_PI / 4.0);
+  const T rotAmt = pi<T>() / static_cast<T>(4.0);
   const TransformT<T> t2(trans, Quaternion<T>(Eigen::AngleAxis<T>(rotAmt, rotDir)));
 
   // Check the endpoints:
@@ -616,7 +616,7 @@ TYPED_TEST(TransformTest, SlerpRotationOnly) {
 
   const Vector3<T> axis(0, 0, 1);
   const T angle1 = T(0);
-  const T angle2 = static_cast<T>(M_PI / 2);
+  const T angle2 = pi<T>() / static_cast<T>(2);
 
   const TransformT<T> t1 =
       TransformT<T>::makeRotation(Quaternion<T>(Eigen::AngleAxis<T>(angle1, axis)));
@@ -640,7 +640,7 @@ TYPED_TEST(TransformTest, SlerpRotationOnly) {
   {
     const TransformT<T> l3 = slerp(t1, t2, T(0.5));
     const TransformT<T> expectedMidpoint = TransformT<T>::makeRotation(
-        Quaternion<T>(Eigen::AngleAxis<T>(static_cast<T>(M_PI / 4), axis)));
+        Quaternion<T>(Eigen::AngleAxis<T>(pi<T>() / static_cast<T>(4), axis)));
     ASSERT_LT(
         (l3.toMatrix() - expectedMidpoint.toMatrix()).template lpNorm<Eigen::Infinity>(),
         Eps<T>(1e-4f, 1e-12)); // Slightly looser tolerance for rotation interpolation
