@@ -168,9 +168,9 @@ mt_library(
   HEADERS_VARS common_public_headers
   SOURCES_VARS common_sources
   PUBLIC_LINK_LIBRARIES
-    fmt::fmt
+    fmt::fmt-header-only
     indicators::indicators
-    spdlog::spdlog
+    spdlog::spdlog_header_only
   PUBLIC_COMPILE_DEFINITIONS
     MOMENTUM_WITH_SPDLOG=1
 )
@@ -187,7 +187,7 @@ mt_library(
   NAME fmt_eigen
   HEADERS_VARS fmt_eigen_public_headers
   PUBLIC_LINK_LIBRARIES
-    fmt::fmt
+    fmt::fmt-header-only
     Eigen3::Eigen
 )
 
