@@ -159,8 +159,8 @@ TEST(TensorUtility, ToMatrixList) {
 // Test to1DTensor functions
 TEST(TensorUtility, To1DTensor) {
   // Test with raw pointer
-  float rawData[] = {1.0f, 2.0f, 3.0f, 4.0f};
-  at::Tensor rawTensor = pymomentum::to1DTensor(rawData, 4);
+  std::array rawData = std::to_array({1.0f, 2.0f, 3.0f, 4.0f});
+  at::Tensor rawTensor = pymomentum::to1DTensor(rawData.data(), 4);
   EXPECT_EQ(1, rawTensor.ndimension());
   EXPECT_EQ(4, rawTensor.size(0));
   for (int i = 0; i < 4; ++i) {
