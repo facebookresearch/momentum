@@ -34,6 +34,9 @@ enum class FBXCoordSystem { RightHanded, LeftHanded };
 // KeepLocators Specifies whether Nulls in the transform hierarchy should be turned into Locators.
 enum class KeepLocators { No, Yes };
 
+// LoadBlendShapes Specifies whether blendshapes should be loaded or not
+enum class LoadBlendShapes { No, Yes };
+
 // A struct containing the up, front vectors and coordinate system
 struct FBXCoordSystemInfo {
   // Default to the same orientations as FbxAxisSystem::eMayaYUp
@@ -48,7 +51,8 @@ struct FBXCoordSystemInfo {
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false);
+    bool permissive = false,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
@@ -56,19 +60,22 @@ Character loadFbxCharacter(
 Character loadFbxCharacter(
     gsl::span<const std::byte> inputSpan,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false);
+    bool permissive = false,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false);
+    bool permissive = false,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
-    KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false);
+    KeepLocators keepLocatorss = KeepLocators::No,
+    bool permissive = false,
+    LoadBlendShapes loadBlendShape = LoadBlendShapes::No);
 
 // Permissive mode allows saving mesh-only characters (without skin weights).
 void saveFbx(
