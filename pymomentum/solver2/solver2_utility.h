@@ -95,6 +95,15 @@ void validateWeights(const Eigen::VectorXf& weights, const char* name);
 
 void validateWeights(const std::optional<Eigen::VectorXf>& weights, const char* name);
 
+Eigen::VectorXf getJointWeights(
+    const std::optional<pybind11::array_t<float>>& weights,
+    const momentum::Skeleton& character,
+    const char* name);
+Eigen::VectorXf getJointWeights(
+    const pybind11::array_t<float>& weights,
+    const momentum::Skeleton& skeleton,
+    const char* name);
+
 void validateErrorFunctionMatchesCharacter(
     const momentum::SkeletonSolverFunction& solverFunction,
     const momentum::SkeletonErrorFunction& errorFunction);

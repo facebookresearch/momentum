@@ -393,4 +393,36 @@ void validateErrorFunctionMatchesCharacter(
   }
 }
 
+Eigen::VectorXf getJointWeights(
+    const std::optional<pybind11::array_t<float>>& weights,
+    const momentum::Skeleton& character,
+    const char* name) {
+  if (!weights.has_value()) {
+    return Eigen::VectorXf::Ones(character.joints.size());
+  }
+
+  return getJointWeights(weights.value(), character, name);
+}
+
+Eigen::VectorXf getJointWeights(
+    const pybind11::array_t<float>& weights,
+    const momentum::Skeleton& skeleton,
+    const char* name) {
+  MT_THROW_IF_T(weights.ndim() != 1, py::value_error, "{} weights must be a 1D array.", name);
+
+  auto wAcc = weights.unchecked<1>();
+  MT_THROW_IF_T(
+      wAcc.shape(0) != skeleton.joints.size(),
+      py::value_error,
+      "{} weights size does not match the number of joints in the skeleton, expected {} but got {}.",
+      name,
+      skeleton.joints.size(),
+      wAcc.shape(0));
+  Eigen::VectorXf result(wAcc.shape(0));
+  for (py::ssize_t i = 0; i < wAcc.shape(0); ++i) {
+    result[i] = wAcc(i);
+  }
+  return result;
+}
+
 } // namespace pymomentum

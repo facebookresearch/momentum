@@ -72,6 +72,18 @@ void StateErrorFunctionT<T>::setTargetWeights(
 }
 
 template <typename T>
+void StateErrorFunctionT<T>::setPositionTargetWeights(const Eigen::VectorX<T>& posWeight) {
+  MT_CHECK(posWeight.size() == static_cast<Eigen::Index>(this->skeleton_.joints.size()));
+  targetPositionWeights_ = posWeight;
+}
+
+template <typename T>
+void StateErrorFunctionT<T>::setRotationTargetWeights(const Eigen::VectorX<T>& rotWeight) {
+  MT_CHECK(rotWeight.size() == static_cast<Eigen::Index>(this->skeleton_.joints.size()));
+  targetRotationWeights_ = rotWeight;
+}
+
+template <typename T>
 double StateErrorFunctionT<T>::getError(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state) {

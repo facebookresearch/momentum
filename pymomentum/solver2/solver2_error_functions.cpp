@@ -1589,31 +1589,12 @@ avoid divide-by-zero. )");
             result->setWeight(weight);
             result->setWeights(positionWeight, rotationWeight);
 
-            const size_t jointCount = character.skeleton.joints.size();
-
-            auto getWeights = [&](const std::optional<py::array_t<float>>& w,
-                                  const char* what) -> Eigen::VectorXf {
-              if (w.has_value()) {
-                auto wAcc = w->unchecked<1>();
-                if (wAcc.shape(0) != jointCount) {
-                  throw std::runtime_error(
-                      std::string(what) +
-                      " weights size does not match the number of joints in the skeleton.");
-                }
-                Eigen::VectorXf weights(jointCount);
-                for (py::ssize_t i = 0; i < jointCount; ++i) {
-                  weights[i] = wAcc(i);
-                }
-                return weights;
-              } else {
-                return Eigen::VectorXf::Ones(jointCount);
-              }
-            };
-
             if (jointPositionWeights.has_value() || jointRotationWeights.has_value()) {
               result->setTargetWeights(
-                  getWeights(jointPositionWeights, "joint_position_weights"),
-                  getWeights(jointRotationWeights, "joint_rotation_weights"));
+                  getJointWeights(
+                      jointPositionWeights, character.skeleton, "joint_position_weights"),
+                  getJointWeights(
+                      jointRotationWeights, character.skeleton, "joint_rotation_weights"));
             }
 
             return result;
@@ -1656,7 +1637,25 @@ avoid divide-by-zero. )");
 
 :param target_state: A numpy array of shape (njoints, 8) where each row contains
                      3D position, 4D quaternion (rotation), and 1D scale for each joint.)",
-          py::arg("target_state"));
+          py::arg("target_state"))
+      .def_property(
+          "joint_position_weights",
+          [](const mm::StateErrorFunction& self) { return self.getPositionWeights(); },
+          [](mm::StateErrorFunction& self, const py::array_t<float>& weights) {
+            validateWeights(weights, "weights");
+            self.setPositionTargetWeights(
+                getJointWeights(weights, self.getSkeleton(), "joint_position_weights"));
+          },
+          R"(The per-joint position weights.)")
+      .def_property(
+          "joint_rotation_weights",
+          [](const mm::StateErrorFunction& self) { return self.getRotationWeights(); },
+          [](mm::StateErrorFunction& self, const py::array_t<float>& weights) {
+            validateWeights(weights, "weights");
+            self.setRotationTargetWeights(
+                getJointWeights(weights, self.getSkeleton(), "joint_position_weights"));
+          },
+          R"(The per-joint rotation weights.)");
 
   py::enum_<mm::VertexConstraintType>(m, "VertexConstraintType")
       .value("Position", mm::VertexConstraintType::Position, "Target the vertex position")
