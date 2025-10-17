@@ -13,28 +13,36 @@
 
 namespace momentum {
 
-Character
-loadFbxCharacter(const filesystem::path& inputPath, KeepLocators keepLocators, bool permissive) {
-  return loadOpenFbxCharacter(inputPath, keepLocators, permissive);
+Character loadFbxCharacter(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators,
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
+  return loadOpenFbxCharacter(inputPath, keepLocators, permissive, loadBlendShapes);
 }
 
-Character
-loadFbxCharacter(gsl::span<const std::byte> inputSpan, KeepLocators keepLocators, bool permissive) {
-  return loadOpenFbxCharacter(inputSpan, keepLocators, permissive);
+Character loadFbxCharacter(
+    gsl::span<const std::byte> inputSpan,
+    KeepLocators keepLocators,
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
+  return loadOpenFbxCharacter(inputSpan, keepLocators, permissive, loadBlendShapes);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
-    bool permissive) {
-  return loadOpenFbxCharacterWithMotion(inputPath, keepLocators, permissive);
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
+  return loadOpenFbxCharacterWithMotion(inputPath, keepLocators, permissive, loadBlendShapes);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     gsl::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
-    bool permissive) {
-  return loadOpenFbxCharacterWithMotion(inputSpan, keepLocators, permissive);
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
+  return loadOpenFbxCharacterWithMotion(inputSpan, keepLocators, permissive, loadBlendShapes);
 }
 
 void saveFbx(

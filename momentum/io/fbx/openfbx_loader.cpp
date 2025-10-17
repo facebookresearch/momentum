@@ -7,6 +7,7 @@
 
 #include "momentum/io/fbx/openfbx_loader.h"
 
+#include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/skin_weights.h"
@@ -477,7 +478,9 @@ void parseSkinnedModel(
     Mesh& mesh,
     std::unique_ptr<SkinWeights>& skinWeights,
     TransformationList& inverseBindPoseTransforms,
-    bool permissive) {
+    BlendShape_p& blendShape,
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
   enum EMapping {
     MappingUnknown,
     MappingByPolyVertex,
@@ -625,6 +628,52 @@ void parseSkinnedModel(
   std::copy(std::begin(textureCoords), std::end(textureCoords), std::back_inserter(mesh.texcoords));
   for (const auto& t : triangulate(vertices.textureIndices, vertices.offsets)) {
     mesh.texcoord_faces.emplace_back(t + Eigen::Vector3i::Constant(textureCoordOffset));
+  }
+
+  const auto* blendshapes = geometry->getBlendShape();
+  if (loadBlendShapes == LoadBlendShapes::Yes && blendshapes) {
+    if (!blendShape) {
+      blendShape = std::make_shared<BlendShape>();
+    }
+    // first count number of shapes to add
+    int newShapes = 0;
+    int numChannels = blendshapes->getBlendShapeChannelCount();
+    for (int c = 0; c < numChannels; ++c) {
+      const auto* channel = blendshapes->getBlendShapeChannel(c);
+      newShapes += channel->getShapeCount();
+    }
+
+    MatrixXf shapes = blendShape->getShapeVectors();
+    const int currentShapes = shapes.cols();
+    shapes.conservativeResize(
+        shapes.rows() + vertexPositions.size() * 3, shapes.cols() + newShapes);
+    shapes.bottomRows(vertexPositions.size() * 3) =
+        MatrixXf::Zero(vertexPositions.size() * 3, shapes.cols());
+    shapes.rightCols(newShapes) = MatrixXf::Zero(shapes.rows(), newShapes);
+
+    // now actually fill in the data
+    int shapeIndex = 0;
+    for (int c = 0; c < numChannels; ++c) {
+      const auto channel = blendshapes->getBlendShapeChannel(c);
+      int numShapes = channel->getShapeCount();
+      for (int s = 0; s < numShapes; ++s) {
+        const auto shape = channel->getShape(s);
+        int numVertices = shape->getVertexCount();
+        const auto shapeV = shape->getVertices();
+        for (int v = 0; v < numVertices; ++v) {
+          shapes(vertexOffset * 3 + v * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
+          shapes(vertexOffset * 3 + v * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
+          shapes(vertexOffset * 3 + v * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
+        }
+        shapeIndex++;
+      }
+    }
+
+    // add shapes back to blendshapes
+    blendShape->setShapeVectors(shapes);
+
+    // set the mean shape to the mesh
+    blendShape->setBaseShape(mesh.vertices);
   }
 
   const auto* fbxskin = geometry->getSkin();
@@ -951,7 +1000,8 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     const gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool loadAnim,
-    bool permissive) {
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
   auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
   const size_t length = fbxCharDataRaw.size();
   MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
@@ -959,9 +1009,11 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   auto ofbx_deleter = [](ofbx::IScene* s) { s->destroy(); };
   // We don't currently use blend shapes for anything and they can be very
   // expensive to load. Ignore stuff in the scene that we don't support.
-  auto loadFlags = ofbx::LoadFlags::IGNORE_BLEND_SHAPES | ofbx::LoadFlags::IGNORE_CAMERAS |
-      ofbx::LoadFlags::IGNORE_LIGHTS | ofbx::LoadFlags::IGNORE_VIDEOS |
-      ofbx::LoadFlags::IGNORE_MATERIALS;
+  auto loadFlags = ofbx::LoadFlags::IGNORE_CAMERAS | ofbx::LoadFlags::IGNORE_LIGHTS |
+      ofbx::LoadFlags::IGNORE_VIDEOS | ofbx::LoadFlags::IGNORE_MATERIALS;
+  if (loadBlendShapes == LoadBlendShapes::No) {
+    loadFlags |= ofbx::LoadFlags::IGNORE_BLEND_SHAPES;
+  }
   if (!loadAnim) {
     loadFlags |= ofbx::LoadFlags::IGNORE_ANIMATIONS;
   }
@@ -984,6 +1036,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 
   Mesh mesh;
   std::unique_ptr<SkinWeights> skinWeights;
+  BlendShape_p blendShape;
 
   for (int iMesh = 0; iMesh < scene->getMeshCount(); ++iMesh) {
     parseSkinnedModel(
@@ -992,7 +1045,9 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
         mesh,
         skinWeights,
         inverseBindPoseTransforms,
-        permissive);
+        blendShape,
+        permissive,
+        loadBlendShapes);
   }
   mesh.updateNormals();
 
@@ -1014,7 +1069,9 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       keepLocators == KeepLocators::Yes ? locators : LocatorList(),
       &mesh,
       skinWeights.get(),
-      collision.empty() ? nullptr : &collision);
+      collision.empty() ? nullptr : &collision,
+      nullptr,
+      blendShape);
   result.resetJointMap();
   result.inverseBindPose = inverseBindPoseTransforms;
 
@@ -1026,32 +1083,45 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 Character loadOpenFbxCharacter(
     const gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
-    bool permissive) {
-  auto [character, motion, fps] = loadOpenFbx(inputData, keepLocators, false, permissive);
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
+  auto [character, motion, fps] =
+      loadOpenFbx(inputData, keepLocators, false, permissive, loadBlendShapes);
   return character;
 }
 
-Character
-loadOpenFbxCharacter(const filesystem::path& path, KeepLocators keepLocators, bool permissive) {
+Character loadOpenFbxCharacter(
+    const filesystem::path& path,
+    KeepLocators keepLocators,
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
   auto [buffer, length] = readFileToBuffer(path);
   return loadOpenFbxCharacter(
-      gsl::as_bytes(gsl::make_span(buffer.get(), length)), keepLocators, permissive);
+      gsl::as_bytes(gsl::make_span(buffer.get(), length)),
+      keepLocators,
+      permissive,
+      loadBlendShapes);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
-    bool permissive) {
-  return loadOpenFbx(inputData, keepLocators, true, permissive);
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
+  return loadOpenFbx(inputData, keepLocators, true, permissive, loadBlendShapes);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
-    bool permissive) {
+    bool permissive,
+    LoadBlendShapes loadBlendShapes) {
   auto [buffer, length] = readFileToBuffer(inputPath);
   return loadOpenFbxCharacterWithMotion(
-      gsl::as_bytes(gsl::make_span(buffer.get(), length)), keepLocators, permissive);
+      gsl::as_bytes(gsl::make_span(buffer.get(), length)),
+      keepLocators,
+      permissive,
+      loadBlendShapes);
 }
 
 } // namespace momentum
