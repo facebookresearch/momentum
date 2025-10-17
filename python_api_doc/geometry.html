@@ -3204,7 +3204,7 @@ The third is [nBatch x nPoints] and is a boolean tensor indicating whether a val
 <dd class="field-odd"><p>[nBatch x nPoints x 3] tensor of target faces.</p>
 </dd>
 <dt class="field-even">return<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple of three tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
+<dd class="field-even"><p>A tuple of four tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
 The second is [nBatch x nPoints x 3] and contains the actual closest point (or 0, 0, 0 if invalid).
 The third is [nBatch x nPoints] and contains the index of the closest face (or -1 if invalid).
 The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).</p>
