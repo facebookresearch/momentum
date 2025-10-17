@@ -53,7 +53,8 @@ class GltfBuilder final {
       bool addExtensions = true,
       bool addCollisions = true,
       bool addLocators = true,
-      bool addMesh = true);
+      bool addMesh = true,
+      bool addBlendShapes = true);
 
   /// Add a static mesh, such as an environment or a target scan
   void addMesh(const Mesh& mesh, const std::string& name, bool addColor = false);
