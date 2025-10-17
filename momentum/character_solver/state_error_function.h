@@ -42,6 +42,15 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
   void setTargetState(TransformListT<T> target);
   void setTargetWeight(const Eigen::VectorX<T>& weights);
   void setTargetWeights(const Eigen::VectorX<T>& posWeight, const Eigen::VectorX<T>& rotWeight);
+
+  /// Set the target position weights for each joint.
+  /// @param posWeight Per-joint position weights.
+  void setPositionTargetWeights(const Eigen::VectorX<T>& posWeight);
+
+  /// Set the target rotation weights for each joint.
+  /// @param rotWeight Per-joint rotation weights.
+  void setRotationTargetWeights(const Eigen::VectorX<T>& rotWeight);
+
   void setWeights(const float posWeight, const float rotationWeight) {
     posWgt_ = posWeight;
     rotWgt_ = rotationWeight;
