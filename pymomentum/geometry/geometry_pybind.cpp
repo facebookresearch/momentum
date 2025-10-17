@@ -2971,7 +2971,7 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
   :param points_source: [nBatch x nPoints x 3] tensor of source points.
   :param vertices_target: [nBatch x nPoints x 3] tensor of target vertices.
   :param faces_target: [nBatch x nPoints x 3] tensor of target faces.
-  :return: A tuple of three tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
+  :return: A tuple of four tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
            The second is [nBatch x nPoints x 3] and contains the actual closest point (or 0, 0, 0 if invalid).
            The third is [nBatch x nPoints] and contains the index of the closest face (or -1 if invalid).
            The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).
