@@ -459,6 +459,10 @@ io_gltf_test_sources = [
     "test/io/io_gltf_test.cpp",
 ]
 
+io_fbx_gltf_roundtrip_test_sources = [
+    "test/io/io_fbx_gltf_roundtrip_test.cpp",
+]
+
 io_usd_public_headers = [
     "io/usd/usd_io.h",
 ]

@@ -102,6 +102,19 @@ void compareMeshes(const Mesh_u& refMesh, const Mesh_u& mesh) {
       refMesh->texcoord_faces, testing::Pointwise(IntExactPointwise(), mesh->texcoord_faces));
 }
 
+void compareBlendShapes(const BlendShape_const_p& refShapes, const BlendShape_const_p& shapes) {
+  if (refShapes == nullptr) {
+    EXPECT_EQ(shapes, nullptr) << "Reference has no blendShape but character does";
+  } else if (shapes == nullptr) {
+    EXPECT_EQ(refShapes, nullptr) << "Reference has blendShape but character does not";
+  } else {
+    EXPECT_THAT(
+        refShapes->getBaseShape(),
+        testing::Pointwise(FloatNearPointwise(0.0001), shapes->getBaseShape()));
+    EXPECT_TRUE(refShapes->getShapeVectors().isApprox(shapes->getShapeVectors()));
+  }
+}
+
 void compareLocators(const LocatorList& refLocators, const LocatorList& locators) {
   EXPECT_EQ(refLocators.size(), locators.size());
   auto sortedRefLocators = refLocators;
@@ -219,6 +232,7 @@ void compareChars(const Character& refChar, const Character& character, const bo
     };
 
     compareMeshes(refChar.mesh, character.mesh);
+    compareBlendShapes(refChar.blendShape, character.blendShape);
 
     auto refCharIndices = refChar.skinWeights->index;
     auto refCharWeights = refChar.skinWeights->weight;
@@ -247,7 +261,6 @@ void compareChars(const Character& refChar, const Character& character, const bo
       return l->isApprox(*r);
     };
     ASSERT_TRUE(ptrValIsApprox(refChar.poseShapes, character.poseShapes));
-    ASSERT_TRUE(ptrValIsApprox(refChar.blendShape, character.blendShape));
   }
 }
 
