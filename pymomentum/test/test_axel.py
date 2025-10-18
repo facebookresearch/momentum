@@ -425,6 +425,51 @@ class TestAxel(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Invalid shape for resolution"):
             axel.mesh_to_sdf(vertices, triangles, invalid_resolution)
 
+    def test_fill_holes_cube_with_hole(self):
+        """Test fill_holes with a cube mesh that has a missing face (hole)."""
+        # Create a cube mesh with missing top face
+        vertices = np.array(
+            [
+                [-1, -1, -1],
+                [1, -1, -1],
+                [1, 1, -1],
+                [-1, 1, -1],  # bottom face
+                [-1, -1, 1],
+                [1, -1, 1],
+                [1, 1, 1],
+                [-1, 1, 1],  # top face
+            ],
+            dtype=np.float32,
+        )
+
+        # Missing top face triangles to create a hole
+        triangles = np.array(
+            [
+                [0, 1, 2],
+                [0, 2, 3],  # bottom face
+                # [4, 7, 6], [4, 6, 5],  # top face (missing - creates hole)
+                [0, 4, 5],
+                [0, 5, 1],  # front face
+                [2, 6, 7],
+                [2, 7, 3],  # back face
+                [0, 3, 7],
+                [0, 7, 4],  # left face
+                [1, 5, 6],
+                [1, 6, 2],  # right face
+            ],
+            dtype=np.int32,
+        )
+
+        filled_vertices, filled_triangles = axel.fill_holes(vertices, triangles)
+
+        # Should have more triangles than the original (hole was filled)
+        self.assertGreater(len(filled_triangles), len(triangles))
+        # Should have at least the original vertices (may add new ones)
+        self.assertGreaterEqual(len(filled_vertices), len(vertices))
+
+        # Original vertices should be preserved (first N vertices)
+        np.testing.assert_array_almost_equal(filled_vertices[: len(vertices)], vertices)
+
 
 if __name__ == "__main__":
     unittest.main()
