@@ -9,6 +9,7 @@
 #include "momentum/character/blend_shape.h"
 
 #include "momentum/character/joint.h"
+#include "momentum/character/pose_shape.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
@@ -741,5 +742,444 @@ VectorXf mapIdentityToCharacter(
 
   return result;
 }
+
+namespace {
+
+/// Reduces base shape vertices based on active vertex selection
+///
+/// @param baseVertices Original base shape vertices
+/// @param activeVertices Boolean vector indicating which vertices to keep
+/// @param newVertexCount Number of vertices in the reduced mesh
+/// @return Reduced base shape vertices
+std::vector<Vector3f> reduceBaseShapeVertices(
+    const std::vector<Vector3f>& baseVertices,
+    const std::vector<bool>& activeVertices,
+    size_t newVertexCount) {
+  std::vector<Vector3f> newBaseVertices;
+  newBaseVertices.reserve(newVertexCount);
+
+  for (size_t i = 0; i < activeVertices.size(); ++i) {
+    if (activeVertices[i]) {
+      newBaseVertices.push_back(baseVertices[i]);
+    }
+  }
+
+  return newBaseVertices;
+}
+
+/// Reduces blend shape vectors based on active vertex selection
+///
+/// @param shapeVectors Original shape vectors matrix [vertexCount*3 x numShapes]
+/// @param activeVertices Boolean vector indicating which vertices to keep
+/// @param newVertexCount Number of vertices in the reduced mesh
+/// @return Reduced shape vectors matrix [newVertexCount*3 x numShapes]
+MatrixXf reduceBlendShapeVectors(
+    const MatrixXf& shapeVectors,
+    const std::vector<bool>& activeVertices,
+    size_t newVertexCount) {
+  MatrixXf newShapeVectors(newVertexCount * 3, shapeVectors.cols());
+
+  size_t newIdx = 0;
+  for (size_t i = 0; i < activeVertices.size(); ++i) {
+    if (activeVertices[i]) {
+      newShapeVectors.block(newIdx * 3, 0, 3, shapeVectors.cols()) =
+          shapeVectors.block(i * 3, 0, 3, shapeVectors.cols());
+      newIdx++;
+    }
+  }
+
+  return newShapeVectors;
+}
+
+std::pair<std::vector<size_t>, std::vector<size_t>> createIndexMapping(
+    const std::vector<bool>& activeElements) {
+  std::vector<size_t> forwardMapping;
+  std::vector<size_t> reverseMapping(activeElements.size(), kInvalidIndex);
+  for (size_t i = 0; i < activeElements.size(); ++i) {
+    if (activeElements[i]) {
+      reverseMapping[i] = forwardMapping.size();
+      forwardMapping.push_back(i);
+    }
+  }
+
+  return {forwardMapping, reverseMapping};
+}
+
+template <typename T>
+std::vector<T> selectVertices(
+    const std::vector<T>& sourceVector,
+    const std::vector<size_t>& selected) {
+  std::vector<T> result;
+  result.reserve(selected.size());
+
+  for (unsigned long i : selected) {
+    MT_CHECK(i < sourceVector.size());
+    result.push_back(sourceVector[i]);
+  }
+
+  return result;
+}
+
+std::vector<Eigen::Vector3i> remapFaces(
+    const std::vector<Eigen::Vector3i>& faces,
+    const std::vector<size_t>& mapping,
+    const std::vector<bool>& activeFaces) {
+  const size_t nNewFaceCount = std::count(activeFaces.begin(), activeFaces.end(), true);
+
+  std::vector<Eigen::Vector3i> remappedFaces;
+  remappedFaces.reserve(nNewFaceCount);
+
+  for (size_t iFace = 0; iFace < faces.size(); ++iFace) {
+    if (!activeFaces[iFace]) {
+      continue;
+    }
+
+    const auto& face = faces[iFace];
+    MT_CHECK(
+        mapping[face[0]] != kInvalidIndex && mapping[face[1]] != kInvalidIndex &&
+        mapping[face[2]] != kInvalidIndex);
+
+    remappedFaces.emplace_back(mapping[face[0]], mapping[face[1]], mapping[face[2]]);
+  }
+
+  return remappedFaces;
+}
+
+std::vector<std::vector<int32_t>> remapLines(
+    const std::vector<std::vector<int32_t>>& lines,
+    const std::vector<size_t>& mapping) {
+  std::vector<std::vector<int32_t>> remappedLines;
+  remappedLines.reserve(lines.size());
+
+  for (const auto& line : lines) {
+    std::vector<int32_t> newLine;
+    newLine.reserve(line.size());
+
+    bool lineValid = true;
+    for (int32_t vertexIdx : line) {
+      if (vertexIdx >= 0 && vertexIdx < static_cast<int32_t>(mapping.size()) &&
+          mapping[vertexIdx] != kInvalidIndex) {
+        newLine.push_back(static_cast<int32_t>(mapping[vertexIdx]));
+      } else {
+        lineValid = false;
+        break;
+      }
+    }
+
+    if (lineValid && !newLine.empty()) {
+      remappedLines.push_back(std::move(newLine));
+    }
+  }
+
+  return remappedLines;
+}
+
+std::vector<bool> verticesToFaces(
+    const std::vector<Eigen::Vector3i>& faces,
+    const std::vector<bool>& activeVertices) {
+  std::vector<bool> activeFaces(faces.size(), false);
+
+  for (size_t faceIdx = 0; faceIdx < faces.size(); ++faceIdx) {
+    const auto& face = faces[faceIdx];
+    // Face is active only if all its vertices are active and within bounds
+    if (face[0] >= 0 && face[0] < static_cast<int>(activeVertices.size()) && face[1] >= 0 &&
+        face[1] < static_cast<int>(activeVertices.size()) && face[2] >= 0 &&
+        face[2] < static_cast<int>(activeVertices.size()) && activeVertices[face[0]] &&
+        activeVertices[face[1]] && activeVertices[face[2]]) {
+      activeFaces[faceIdx] = true;
+    }
+  }
+
+  return activeFaces;
+}
+
+std::vector<bool> facesToVertices(
+    const std::vector<Eigen::Vector3i>& faces,
+    const std::vector<bool>& activeFaces,
+    size_t vertexCount) {
+  MT_CHECK(
+      activeFaces.size() == faces.size(),
+      "Active faces size ({}) does not match face count ({})",
+      activeFaces.size(),
+      faces.size());
+
+  std::vector<bool> activeVertices(vertexCount, false);
+
+  for (size_t faceIdx = 0; faceIdx < activeFaces.size(); ++faceIdx) {
+    if (activeFaces[faceIdx]) {
+      const auto& face = faces[faceIdx];
+      if (face[0] >= 0 && face[0] < static_cast<int>(vertexCount)) {
+        activeVertices[face[0]] = true;
+      }
+      if (face[1] >= 0 && face[1] < static_cast<int>(vertexCount)) {
+        activeVertices[face[1]] = true;
+      }
+      if (face[2] >= 0 && face[2] < static_cast<int>(vertexCount)) {
+        activeVertices[face[2]] = true;
+      }
+    }
+  }
+
+  return activeVertices;
+}
+
+/// Reduces mesh components based on active vertices and faces
+///
+/// @param character Character to be reduced
+/// @param activeVertices Boolean vector indicating which vertices to keep
+/// @param activeFaces Boolean vector indicating which faces to keep
+/// @return A new character with all components reduced accordingly
+template <typename T>
+CharacterT<T> reduceMeshComponents(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activeVertices,
+    const std::vector<bool>& activeFaces) {
+  MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
+  MT_CHECK(
+      activeVertices.size() == character.mesh->vertices.size(),
+      "Active vertices size ({}) does not match mesh vertex count ({})",
+      activeVertices.size(),
+      character.mesh->vertices.size());
+  MT_CHECK(
+      activeFaces.size() == character.mesh->faces.size(),
+      "Active faces size ({}) does not match mesh face count ({})",
+      activeFaces.size(),
+      character.mesh->faces.size());
+
+  // Create a mapping from old vertex indices to new vertex indices using generic function
+  const auto [forwardVertexMapping, reverseVertexMapping] = createIndexMapping(activeVertices);
+
+  // Create new mesh with reduced vertices and faces
+  auto newMesh = std::make_unique<Mesh>();
+
+  // Copy active vertices using generic mapping function
+  newMesh->vertices = selectVertices(character.mesh->vertices, forwardVertexMapping);
+
+  if (!character.mesh->normals.empty()) {
+    newMesh->normals = selectVertices(character.mesh->normals, forwardVertexMapping);
+  }
+
+  if (!character.mesh->colors.empty()) {
+    newMesh->colors = selectVertices(character.mesh->colors, forwardVertexMapping);
+  }
+
+  if (!character.mesh->confidence.empty()) {
+    newMesh->confidence = selectVertices(character.mesh->confidence, forwardVertexMapping);
+  }
+
+  newMesh->faces = remapFaces(character.mesh->faces, reverseVertexMapping, activeFaces);
+
+  if (!character.mesh->lines.empty()) {
+    newMesh->lines = remapLines(character.mesh->lines, reverseVertexMapping);
+  }
+
+  // Handle texture coordinates properly using generic functions
+  if (!character.mesh->texcoord_faces.empty() && !character.mesh->texcoords.empty()) {
+    // Create active texture triangles based on active faces
+    std::vector<bool> activeTextureTriangles = activeFaces;
+    activeTextureTriangles.resize(character.mesh->texcoord_faces.size(), false);
+
+    const std::vector<bool> activeTextureVertices = facesToVertices(
+        character.mesh->texcoord_faces, activeTextureTriangles, character.mesh->texcoords.size());
+
+    auto [forwardTextureVertexMapping, reverseTextureVertexMapping] =
+        createIndexMapping(activeTextureVertices);
+
+    // Copy active texture vertices using generic mapping function
+    newMesh->texcoords = selectVertices(character.mesh->texcoords, forwardTextureVertexMapping);
+
+    newMesh->texcoord_faces = remapFaces(
+        character.mesh->texcoord_faces, reverseTextureVertexMapping, activeTextureTriangles);
+
+    newMesh->texcoord_lines =
+        remapLines(character.mesh->texcoord_lines, reverseTextureVertexMapping);
+  }
+
+  // Create new skin weights if they exist
+  std::unique_ptr<SkinWeights> newSkinWeights;
+  if (character.skinWeights) {
+    newSkinWeights = std::make_unique<SkinWeights>();
+    newSkinWeights->index.resize(forwardVertexMapping.size(), kMaxSkinJoints);
+    newSkinWeights->weight.resize(forwardVertexMapping.size(), kMaxSkinJoints);
+
+    for (size_t newRowIdx = 0; newRowIdx < forwardVertexMapping.size(); ++newRowIdx) {
+      const auto oldRowIdx = forwardVertexMapping[newRowIdx];
+      newSkinWeights->index.row(newRowIdx) = character.skinWeights->index.row(oldRowIdx);
+      newSkinWeights->weight.row(newRowIdx) = character.skinWeights->weight.row(oldRowIdx);
+    }
+  }
+
+  // Create new pose shapes if they exist
+  std::unique_ptr<PoseShape> newPoseShapes;
+  if (character.poseShapes) {
+    newPoseShapes = std::make_unique<PoseShape>(*character.poseShapes);
+
+    // Reduce the base shape (stored as flat vector [x1,y1,z1,x2,y2,z2,...])
+    VectorXf newBaseShape(forwardVertexMapping.size() * 3);
+    size_t newIdx = 0;
+    for (size_t i = 0; i < activeVertices.size(); ++i) {
+      if (activeVertices[i]) {
+        newBaseShape.template segment<3>(newIdx * 3) =
+            character.poseShapes->baseShape.template segment<3>(i * 3);
+        newIdx++;
+      }
+    }
+    newPoseShapes->baseShape = std::move(newBaseShape);
+
+    // Reduce the shape vectors matrix
+    MatrixXf newShapeVectors(
+        forwardVertexMapping.size() * 3, character.poseShapes->shapeVectors.cols());
+    newIdx = 0;
+    for (size_t i = 0; i < activeVertices.size(); ++i) {
+      if (activeVertices[i]) {
+        newShapeVectors.block(newIdx * 3, 0, 3, character.poseShapes->shapeVectors.cols()) =
+            character.poseShapes->shapeVectors.block(
+                i * 3, 0, 3, character.poseShapes->shapeVectors.cols());
+        newIdx++;
+      }
+    }
+    newPoseShapes->shapeVectors = std::move(newShapeVectors);
+  }
+
+  // Create new blend shapes if they exist
+  BlendShape_const_p newBlendShape;
+  if (character.blendShape) {
+    auto blendShape = std::make_shared<BlendShape>();
+
+    // Reduce base shape vertices
+    std::vector<Vector3f> newBaseVertices = reduceBaseShapeVertices(
+        character.blendShape->getBaseShape(), activeVertices, forwardVertexMapping.size());
+    blendShape->setBaseShape(newBaseVertices);
+
+    // Reduce shape vectors using shared function
+    MatrixXf newShapeVectors = reduceBlendShapeVectors(
+        character.blendShape->getShapeVectors(), activeVertices, forwardVertexMapping.size());
+    blendShape->setShapeVectors(newShapeVectors);
+
+    newBlendShape = blendShape;
+  }
+
+  // Create new face expression blend shapes if they exist
+  BlendShapeBase_const_p newFaceExpressionBlendShape;
+  if (character.faceExpressionBlendShape) {
+    auto faceBlendShape = std::make_shared<BlendShapeBase>(
+        forwardVertexMapping.size(), character.faceExpressionBlendShape->shapeSize());
+
+    // Reduce shape vectors using shared function
+    MatrixXf newShapeVectors = reduceBlendShapeVectors(
+        character.faceExpressionBlendShape->getShapeVectors(),
+        activeVertices,
+        forwardVertexMapping.size());
+    faceBlendShape->setShapeVectors(newShapeVectors);
+
+    newFaceExpressionBlendShape = faceBlendShape;
+  }
+
+  // Construct and return the new character with all updated components
+  return CharacterT<T>(
+      character.skeleton,
+      character.parameterTransform,
+      character.parameterLimits,
+      character.locators,
+      newMesh.get(),
+      newSkinWeights.get(),
+      character.collision.get(),
+      newPoseShapes.get(),
+      std::move(newBlendShape),
+      std::move(newFaceExpressionBlendShape),
+      character.name,
+      character.inverseBindPose);
+}
+
+} // namespace
+
+template <typename T>
+CharacterT<T> reduceMeshByVertices(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activeVertices) {
+  MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
+  MT_CHECK(
+      activeVertices.size() == character.mesh->vertices.size(),
+      "Active vertices size ({}) does not match mesh vertex count ({})",
+      activeVertices.size(),
+      character.mesh->vertices.size());
+
+  // Convert vertex selection to face selection
+  const auto activeFaces = verticesToFaces(*character.mesh, activeVertices);
+
+  return reduceMeshComponents(character, activeVertices, activeFaces);
+}
+
+template <typename T>
+CharacterT<T> reduceMeshByFaces(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activeFaces) {
+  MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
+  MT_CHECK(
+      activeFaces.size() == character.mesh->faces.size(),
+      "Active faces size ({}) does not match mesh face count ({})",
+      activeFaces.size(),
+      character.mesh->faces.size());
+
+  // Convert face selection to vertex selection
+  const auto activeVertices = facesToVertices(*character.mesh, activeFaces);
+
+  return reduceMeshComponents(character, activeVertices, activeFaces);
+}
+
+template <typename T>
+std::vector<bool> verticesToFaces(const MeshT<T>& mesh, const std::vector<bool>& activeVertices) {
+  MT_CHECK(
+      activeVertices.size() == mesh.vertices.size(),
+      "Active vertices size ({}) does not match mesh vertex count ({})",
+      activeVertices.size(),
+      mesh.vertices.size());
+
+  return verticesToFaces(mesh.faces, activeVertices);
+}
+
+template <typename T>
+std::vector<bool> facesToVertices(const MeshT<T>& mesh, const std::vector<bool>& activeFaces) {
+  MT_CHECK(
+      activeFaces.size() == mesh.faces.size(),
+      "Active faces size ({}) does not match mesh face count ({})",
+      activeFaces.size(),
+      mesh.faces.size());
+
+  return facesToVertices(mesh.faces, activeFaces, mesh.vertices.size());
+}
+
+// Explicit instantiations for commonly used types
+template CharacterT<float> reduceMeshByVertices<float>(
+    const CharacterT<float>& character,
+    const std::vector<bool>& activeVertices);
+
+template CharacterT<double> reduceMeshByVertices<double>(
+    const CharacterT<double>& character,
+    const std::vector<bool>& activeVertices);
+
+template CharacterT<float> reduceMeshByFaces<float>(
+    const CharacterT<float>& character,
+    const std::vector<bool>& activeFaces);
+
+template CharacterT<double> reduceMeshByFaces<double>(
+    const CharacterT<double>& character,
+    const std::vector<bool>& activeFaces);
+
+template std::vector<bool> verticesToFaces<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activeVertices);
+
+template std::vector<bool> verticesToFaces<double>(
+    const MeshT<double>& mesh,
+    const std::vector<bool>& activeVertices);
+
+template std::vector<bool> facesToVertices<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activeFaces);
+
+template std::vector<bool> facesToVertices<double>(
+    const MeshT<double>& mesh,
+    const std::vector<bool>& activeFaces);
 
 } // namespace momentum
