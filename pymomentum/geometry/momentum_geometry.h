@@ -217,4 +217,6 @@ pybind11::array_t<float> getInverseBindPose(const momentum::Character& character
 
 std::string formatDimensions(const pybind11::array& array);
 
+std::vector<bool> boolArrayToVector(const pybind11::array_t<bool>& array);
+
 } // namespace pymomentum
