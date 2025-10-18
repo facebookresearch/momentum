@@ -9,6 +9,7 @@
 #include <axel/MeshToSdf.h>
 #include <axel/SignedDistanceField.h>
 #include <axel/common/Types.h>
+#include <axel/math/MeshHoleFilling.h>
 #include <pymomentum/axel/axel_utility.h>
 
 #include <fmt/format.h>
@@ -466,6 +467,111 @@ Example usage::
       py::arg("resolution"),
       py::arg("padding") = 0.1f,
       py::arg("config") = axel::MeshToSdfConfig<float>{});
+
+  // Bind fill_holes function
+  m.def(
+      "fill_holes",
+      [](const py::array_t<float>& vertices, const py::array_t<int>& triangles) {
+        // Validate input arrays
+        validatePositionArray(vertices, "vertices");
+        validateIndexArray(triangles, "triangles");
+
+        // Convert numpy arrays to spans
+        const auto verticesData = vertices.unchecked<2>();
+        const auto trianglesData = triangles.unchecked<2>();
+
+        // Convert vertex data to std::vector<Eigen::Vector3f>
+        std::vector<Eigen::Vector3f> vertexVector;
+        vertexVector.reserve(verticesData.shape(0));
+        for (py::ssize_t i = 0; i < verticesData.shape(0); ++i) {
+          vertexVector.emplace_back(verticesData(i, 0), verticesData(i, 1), verticesData(i, 2));
+        }
+
+        // Convert triangle data to std::vector<Eigen::Vector3i>
+        std::vector<Eigen::Vector3i> triangleVector;
+        triangleVector.reserve(trianglesData.shape(0));
+        for (py::ssize_t i = 0; i < trianglesData.shape(0); ++i) {
+          triangleVector.emplace_back(
+              trianglesData(i, 0), trianglesData(i, 1), trianglesData(i, 2));
+        }
+
+        // Call the fillMeshHolesComplete function
+        const auto [filledVertices, filledTriangles] = axel::fillMeshHolesComplete<float>(
+            gsl::span<const Eigen::Vector3f>(vertexVector),
+            gsl::span<const Eigen::Vector3i>(triangleVector));
+
+        // Convert results back to numpy arrays
+        // Convert vertices
+        std::vector<py::ssize_t> vertexShape = {static_cast<py::ssize_t>(filledVertices.size()), 3};
+        auto resultVertices = py::array_t<float>(vertexShape);
+        auto verticesData_out = resultVertices.template mutable_unchecked<2>();
+        for (size_t i = 0; i < filledVertices.size(); ++i) {
+          verticesData_out(i, 0) = filledVertices[i].x();
+          verticesData_out(i, 1) = filledVertices[i].y();
+          verticesData_out(i, 2) = filledVertices[i].z();
+        }
+
+        // Convert triangles
+        std::vector<py::ssize_t> triangleShape = {
+            static_cast<py::ssize_t>(filledTriangles.size()), 3};
+        auto resultTriangles = py::array_t<int>(triangleShape);
+        auto trianglesData_out = resultTriangles.template mutable_unchecked<2>();
+        for (size_t i = 0; i < filledTriangles.size(); ++i) {
+          trianglesData_out(i, 0) = filledTriangles[i].x();
+          trianglesData_out(i, 1) = filledTriangles[i].y();
+          trianglesData_out(i, 2) = filledTriangles[i].z();
+        }
+
+        return py::make_tuple(resultVertices, resultTriangles);
+      },
+      R"(Fill holes in a triangle mesh to create a watertight surface.
+
+This function identifies holes in the mesh and fills them with new triangles using 
+an advancing front method. The result is a complete mesh suitable for operations 
+that require watertight surfaces, such as SDF generation.
+
+For small holes (≤6 vertices), a centroid-based fan triangulation is used.
+For larger holes, an ear clipping algorithm is applied.
+
+:param vertices: Vertex positions as 2D array of shape (N, 3) where N is number of vertices.
+:param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
+                  Indices must be valid within the vertices array.
+:param config: Configuration parameters as :class:`MeshHoleFillingConfig` (optional).
+:return: Tuple of (filled_vertices, filled_triangles) where:
+         - filled_vertices: 2D array of shape (N', 3) with original + new vertices
+         - filled_triangles: 2D array of shape (M', 3) with original + new triangles
+
+Example usage::
+
+    import numpy as np
+    import pymomentum.axel as axel
+    
+    # Create a cube mesh with a missing face (hole)
+    vertices = np.array([
+        [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],  # bottom face
+        [-1, -1,  1], [1, -1,  1], [1, 1,  1], [-1, 1,  1]   # top face
+    ], dtype=np.float32)
+    
+    # Missing top face triangles to create a hole
+    triangles = np.array([
+        [0, 1, 2], [0, 2, 3],  # bottom face
+        # [4, 7, 6], [4, 6, 5],  # top face (missing - creates hole)
+        [0, 4, 5], [0, 5, 1],  # front face
+        [2, 6, 7], [2, 7, 3],  # back face
+        [0, 3, 7], [0, 7, 4],  # left face
+        [1, 5, 6], [1, 6, 2]   # right face
+    ], dtype=np.int32)
+    
+    config = axel.MeshHoleFillingConfig()
+    config.max_edge_length_ratio = 2.0
+    config.smoothing_iterations = 3
+    
+    filled_vertices, filled_triangles = axel.fill_holes(vertices, triangles, config)
+    
+    print(f"Original mesh: {len(vertices)} vertices, {len(triangles)} triangles")
+    print(f"Filled mesh: {len(filled_vertices)} vertices, {len(filled_triangles)} triangles"))",
+      py::arg("vertices"),
+      py::arg("triangles"));
 }
 
 } // namespace pymomentum
