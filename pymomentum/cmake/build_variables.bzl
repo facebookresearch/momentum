@@ -182,3 +182,12 @@ renderer_sources = [
     "renderer/renderer_pybind.cpp",
     "renderer/software_rasterizer.cpp",
 ]
+
+axel_public_headers = [
+    "axel/axel_utility.h",
+]
+
+axel_sources = [
+    "axel/axel_pybind.cpp",
+    "axel/axel_utility.cpp",
+]

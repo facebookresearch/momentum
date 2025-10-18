@@ -221,6 +221,25 @@ mt_python_binding(
   COMPILE_OPTIONS
 )
 
+mt_python_binding(
+  NAME pymomentum_axel
+  MODULE_NAME axel
+  PYMOMENTUM_HEADERS_VARS axel_public_headers
+  PYMOMENTUM_SOURCES_VARS axel_sources
+  INCLUDE_DIRECTORIES
+    ${ATEN_INCLUDE_DIR}
+    ${TORCH_INCLUDE_DIRS}
+  LINK_LIBRARIES
+    axel
+    python_utility
+    tensor_utility
+    ${ATEN_LIBRARIES}
+    ${TORCH_LIBRARIES}
+    ${torch_python}
+  COMPILE_OPTIONS
+    ${TORCH_CXX_FLAGS}
+)
+
 if(MOMENTUM_BUILD_RENDERER)
   mt_python_binding(
     NAME renderer
