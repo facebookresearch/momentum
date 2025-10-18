@@ -31,6 +31,7 @@ set(headers
   axel/common/Types.h
   axel/common/VectorizationTypes.h
   axel/math/BoundingBoxUtils.h
+  axel/math/MeshHoleFilling.h
   axel/math/PointTriangleProjection.h
   axel/math/PointTriangleProjectionDefinitions.h
   axel/math/RayTriangleIntersection.h
@@ -38,16 +39,21 @@ set(headers
   axel/Bvh.h
   axel/BvhBase.h
   axel/BvhCommon.h
+  axel/MeshToSdf.h
   axel/Ray.h
+  axel/SignedDistanceField.h
   axel/SimdKdTree.h
   axel/TriBvh.h
 )
 
 set(sources
+  axel/math/MeshHoleFilling.cpp
   axel/math/PointTriangleProjection.cpp
   axel/math/RayTriangleIntersection.cpp
   axel/BoundingBox.cpp
   axel/Bvh.cpp
+  axel/MeshToSdf.cpp
+  axel/SignedDistanceField.cpp
   axel/SimdKdTree.cpp
   axel/TriBvh.cpp
 )
