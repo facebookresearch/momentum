@@ -52,7 +52,7 @@ std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> buildMomentumE
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
-    const int64_t iBatch);
+    int64_t iBatch);
 
 template <typename T>
 momentum::SkeletonSolverFunctionT<T> buildSolverFunction(
@@ -69,7 +69,7 @@ std::unique_ptr<momentum::SequenceSolverFunctionT<T>> buildSequenceSolverFunctio
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
-    const int64_t iBatch);
+    int64_t iBatch);
 
 // This struct is to keep track of where the individual inputs are wrt the
 // single longer list of inputs that we return from the ::backward() function.
