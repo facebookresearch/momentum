@@ -36,7 +36,7 @@ jobs:
       uses: actions/checkout@v5
 
     # 2) Build Docusaurus site with C++ docs (using Doxygen)
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
           node-version: 20
           cache: yarn
