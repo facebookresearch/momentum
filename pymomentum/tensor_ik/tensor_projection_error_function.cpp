@@ -20,7 +20,7 @@ using momentum::FullyDifferentiableProjectionErrorFunctionT;
 
 namespace {
 
-const static int NCONS_IDX = -1;
+const int NCONS_IDX = -1;
 
 template <typename T>
 class TensorProjectionErrorFunction : public TensorErrorFunction<T> {
