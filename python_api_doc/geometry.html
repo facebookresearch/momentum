@@ -380,7 +380,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.SkinWeights"><code class="docutils literal notranslate"><span class="pre">SkinWeights</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.__init__"><code class="docutils literal notranslate"><span class="pre">SkinWeights.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.from_dense"><code class="docutils literal notranslate"><span class="pre">SkinWeights.from_dense()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.index"><code class="docutils literal notranslate"><span class="pre">SkinWeights.index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.max_influences_per_vertex"><code class="docutils literal notranslate"><span class="pre">SkinWeights.max_influences_per_vertex</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.normalize_weights"><code class="docutils literal notranslate"><span class="pre">SkinWeights.normalize_weights()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.num_vertices"><code class="docutils literal notranslate"><span class="pre">SkinWeights.num_vertices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.to_dense"><code class="docutils literal notranslate"><span class="pre">SkinWeights.to_dense()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SkinWeights.weight"><code class="docutils literal notranslate"><span class="pre">SkinWeights.weight</span></code></a></li>
 </ul>
 </li>
@@ -2938,16 +2943,78 @@ Weights for each vertex typically sum to 1.0.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.from_dense">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dense_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.SkinWeights" title="pymomentum.geometry.SkinWeights"><span class="pre">pymomentum.geometry.SkinWeights</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.from_dense" title="Link to this definition"></a></dt>
+<dd><p>Create SkinWeights from dense matrix representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dense_weights</strong> – Dense numpy array of shape (num_vertices, num_joints) where entry [i,j] 
+is the weight of vertex i for joint j.</p></li>
+<li><p><strong>weight_threshold</strong> – Minimum weight value to consider. Weights below this threshold are ignored.
+Defaults to 1e-6.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SkinWeights object with sparse representation. Only the top kMaxSkinJoints influences 
+per vertex are retained, sorted by weight in descending order.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If any vertex has no weights above the threshold.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.index">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">index</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.index" title="Link to this definition"></a></dt>
-<dd><p>Returns the skinning indices.</p>
+<dd><p>Returns the skinning indices matrix. Shape: (num_vertices, kMaxSkinJoints)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.max_influences_per_vertex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_influences_per_vertex</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.max_influences_per_vertex" title="Link to this definition"></a></dt>
+<dd><p>Returns the maximum number of joint influences per vertex (kMaxSkinJoints constant).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.normalize_weights">
+<span class="sig-name descname"><span class="pre">normalize_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SkinWeights" title="pymomentum.geometry.SkinWeights"><span class="pre">pymomentum.geometry.SkinWeights</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.SkinWeights" title="pymomentum.geometry.SkinWeights"><span class="pre">pymomentum.geometry.SkinWeights</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.normalize_weights" title="Link to this definition"></a></dt>
+<dd><p>Return a normalized copy of the skin weights where each vertex’s weights sum to 1.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>New SkinWeights object with normalized weights. Vertices with zero total weight are left unchanged.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.num_vertices">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_vertices</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.num_vertices" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of vertices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.to_dense">
+<span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SkinWeights" title="pymomentum.geometry.SkinWeights"><span class="pre">pymomentum.geometry.SkinWeights</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_joints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.to_dense" title="Link to this definition"></a></dt>
+<dd><p>Convert sparse skin weights to dense matrix representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_joints</strong> – Total number of joints in the skeleton.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dense numpy array of shape (num_vertices, num_joints) where entry [i,j] 
+is the weight of vertex i for joint j. Entries are 0.0 for joints that 
+don’t influence a given vertex.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.SkinWeights.weight">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.geometry.SkinWeights.weight" title="Link to this definition"></a></dt>
-<dd><p>Returns the skinning weights.</p>
+<dd><p>Returns the skinning weights matrix. Shape: (num_vertices, kMaxSkinJoints)</p>
 </dd></dl>
 
 </dd></dl>
