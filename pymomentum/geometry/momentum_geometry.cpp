@@ -937,4 +937,16 @@ std::vector<int> bitsetToJointList(const std::vector<bool>& jointMask) {
   return jointIndices;
 }
 
+std::vector<bool> boolArrayToVector(const pybind11::array_t<bool>& array) {
+  MT_THROW_IF(array.ndim() != 1, "Expected 1D array for boolean mask");
+
+  auto acc = array.unchecked<1>();
+  std::vector<bool> result;
+  result.reserve(acc.shape(0));
+  for (size_t i = 0; i < acc.shape(0); ++i) {
+    result.push_back(acc(i));
+  }
+  return result;
+}
+
 } // namespace pymomentum

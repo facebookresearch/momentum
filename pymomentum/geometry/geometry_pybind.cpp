@@ -2909,6 +2909,42 @@ This is used e.g. to swap one character's hand skeleton with another.
       py::arg("source_root"),
       py::arg("target_root"));
 
+  // reduceMeshByVertices(character, activeVertices)
+  m.def(
+      "reduce_mesh_by_vertices",
+      [](const momentum::Character& character, const py::array_t<bool>& activeVertices) {
+        return momentum::reduceMeshByVertices(character, boolArrayToVector(activeVertices));
+      },
+      R"(Reduces the mesh to only include the specified vertices and associated faces.
+
+Creates a new character with mesh reduced to the specified vertices. This function
+handles all character components including mesh vertices/faces, skin weights,
+blend shapes, pose shapes, and other mesh-related data.
+
+:param character: Full-body character.
+:param active_vertices: A boolean array marking which vertices should be retained.
+:return: A new character whose mesh only includes the marked vertices and their associated data.)",
+      py::arg("character"),
+      py::arg("active_vertices"));
+
+  // reduceMeshByFaces(character, activeFaces)
+  m.def(
+      "reduce_mesh_by_faces",
+      [](const momentum::Character& character, const py::array_t<bool>& activeFaces) {
+        return momentum::reduceMeshByFaces(character, boolArrayToVector(activeFaces));
+      },
+      R"(Reduces the mesh to only include the specified faces and associated vertices.
+
+Creates a new character with mesh reduced to the specified faces. This function
+handles all character components including mesh vertices/faces, skin weights,
+blend shapes, pose shapes, and other mesh-related data.
+
+:param character: Full-body character.
+:param active_faces: A boolean array marking which faces should be retained.
+:return: A new character whose mesh only includes the marked faces and their associated data.)",
+      py::arg("character"),
+      py::arg("active_faces"));
+
   // reduceToSelectedModelParameters(character, activeParameters)
   m.def(
       "reduce_to_selected_model_parameters",
