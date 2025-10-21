@@ -329,6 +329,19 @@ TYPED_TEST(TransformTest, Inverse) {
   }
 }
 
+TYPED_TEST(TransformTest, InverseScalePrecision) {
+  using T = typename TestFixture::Type;
+
+  for (const T scale : {T(0.1), T(1.0), T(10.0)}) {
+    const TransformT<T> trans(Vector3<T>::Random(), Quaternion<T>::UnitRandom(), scale);
+    const TransformT<T> identity = trans * trans.inverse();
+
+    EXPECT_TRUE(identity.translation.isZero(Eps<T>(1e-4f, 1e-12)));
+    EXPECT_TRUE(identity.rotation.isApprox(Quaternion<T>::Identity(), Eps<T>(1e-4f, 1e-12)));
+    EXPECT_NEAR(identity.scale, T(1), Eps<T>(1e-4f, 1e-12));
+  }
+}
+
 TYPED_TEST(TransformTest, TransformPoint) {
   using T = typename TestFixture::Type;
 
