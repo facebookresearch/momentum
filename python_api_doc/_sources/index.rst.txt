@@ -5,6 +5,7 @@ Welcome to PyMomentum
    :maxdepth: 2
    :caption: Contents:
 
+   axel
    geometry
    quaternion
    skel_state

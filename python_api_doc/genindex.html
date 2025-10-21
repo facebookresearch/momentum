@@ -41,6 +41,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
@@ -112,9 +113,15 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="backend.html#pymomentum.backend.utils.LBSAdapter.__init__">__init__() (pymomentum.backend.utils.LBSAdapter method)</a>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox.__init__">__init__() (pymomentum.axel.BoundingBox method)</a>
 
       <ul>
+        <li><a href="axel.html#pymomentum.axel.MeshToSdfConfig.__init__">(pymomentum.axel.MeshToSdfConfig method)</a>
+</li>
+        <li><a href="axel.html#pymomentum.axel.SignedDistanceField.__init__">(pymomentum.axel.SignedDistanceField method)</a>
+</li>
+        <li><a href="backend.html#pymomentum.backend.utils.LBSAdapter.__init__">(pymomentum.backend.utils.LBSAdapter method)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.BlendShape.__init__">(pymomentum.geometry.BlendShape method)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.Character.__init__">(pymomentum.geometry.Character method)</a>
@@ -486,6 +493,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape">BlendShape (class in pymomentum.geometry)</a>
 </li>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox">BoundingBox (class in pymomentum.axel)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.bounds">bounds (pymomentum.axel.SignedDistanceField property)</a>
+</li>
       <li><a href="renderer.html#pymomentum.renderer.build_cameras_for_body">build_cameras_for_body() (in module pymomentum.renderer)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.build_cameras_for_hand">build_cameras_for_hand() (in module pymomentum.renderer)</a>
@@ -511,6 +522,8 @@
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.CalibrationConfig">CalibrationConfig (class in pymomentum.marker_tracking)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.Camera">Camera (class in pymomentum.renderer)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox.center">center (pymomentum.axel.BoundingBox property)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.Camera.center_of_projection">center_of_projection (pymomentum.renderer.Camera property)</a>
 </li>
@@ -628,6 +641,8 @@
         <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceErrorFunction.constraints">(pymomentum.solver2.VertexVertexDistanceErrorFunction property)</a>
 </li>
       </ul></li>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox.contains">contains() (pymomentum.axel.BoundingBox method)</a>
+</li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.convert_locators_to_skinned_locators">convert_locators_to_skinned_locators() (in module pymomentum.marker_tracking)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FBXCoordSystemInfo.coordSystem">coordSystem (pymomentum.geometry.FBXCoordSystemInfo property)</a>
@@ -772,6 +787,8 @@
 </li>
       <li><a href="torch.html#pymomentum.torch.parameter_limits.ParameterLimits.evaluate_minmaxjoint_error">evaluate_minmaxjoint_error() (pymomentum.torch.parameter_limits.ParameterLimits method)</a>
 </li>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox.extend">extend() (pymomentum.axel.BoundingBox method)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.GltfFileFormat.Extension">Extension (pymomentum.geometry.GltfFileFormat attribute)</a>
 </li>
   </ul></td>
@@ -789,6 +806,10 @@
       <li><a href="geometry.html#pymomentum.geometry.FBXFrontVector">FBXFrontVector (class in pymomentum.geometry)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FBXUpVector">FBXUpVector (class in pymomentum.geometry)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.fill">fill() (pymomentum.axel.SignedDistanceField method)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.fill_holes">fill_holes() (in module pymomentum.axel)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.find_closest_points">find_closest_points() (in module pymomentum.geometry)</a>
 </li>
@@ -826,14 +847,14 @@
       </ul></li>
       <li><a href="backend.html#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT">ForwardKinematicsFromLocalTransformationJIT (class in pymomentum.backend.trs_backend)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.fps">fps (pymomentum.geometry.GltfBuilder property)</a>
 
       <ul>
         <li><a href="geometry.html#pymomentum.geometry.MarkerSequence.fps">(pymomentum.geometry.MarkerSequence property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="renderer.html#pymomentum.renderer.Camera.frame">frame() (pymomentum.renderer.Camera method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerSequence.frames">frames (pymomentum.geometry.MarkerSequence property)</a>
@@ -938,10 +959,10 @@
 </li>
       <li><a href="solver2.html#pymomentum.solver2.SequenceSolverFunction.get_sequence_error_functions">get_sequence_error_functions() (pymomentum.solver2.SequenceSolverFunction method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.get_solve_ik_statistics">get_solve_ik_statistics() (in module pymomentum.solver)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.FixedAxisData.global_axis">global_axis (pymomentum.solver2.FixedAxisData property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.NormalData.global_point">global_point (pymomentum.solver2.NormalData property)</a>
@@ -971,8 +992,14 @@
       <li><a href="geometry.html#pymomentum.geometry.GltfFileFormat">GltfFileFormat (class in pymomentum.geometry)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.gradient">gradient() (in module pymomentum.solver)</a>
+
+      <ul>
+        <li><a href="axel.html#pymomentum.axel.SignedDistanceField.gradient">(pymomentum.axel.SignedDistanceField method)</a>
 </li>
+      </ul></li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.CalibrationConfig.greedy_sampling">greedy_sampling (pymomentum.marker_tracking.CalibrationConfig property)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.grid_to_world">grid_to_world() (pymomentum.axel.SignedDistanceField method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1041,6 +1068,8 @@
 </li>
       </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.is_ancestor">is_ancestor() (pymomentum.geometry.Skeleton method)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.is_valid_index">is_valid_index() (pymomentum.axel.SignedDistanceField method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1292,12 +1321,16 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerSequence">MarkerSequence (class in pymomentum.geometry)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.max">max (pymomentum.geometry.LimitMinMax property)</a>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox.max">max (pymomentum.axel.BoundingBox property)</a>
 
       <ul>
+        <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.max">(pymomentum.geometry.LimitMinMax property)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.LimitMinMaxJoint.max">(pymomentum.geometry.LimitMinMaxJoint property)</a>
 </li>
       </ul></li>
+      <li><a href="axel.html#pymomentum.axel.MeshToSdfConfig.max_distance">max_distance (pymomentum.axel.MeshToSdfConfig property)</a>
+</li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.BaseConfig.max_iter">max_iter (pymomentum.marker_tracking.BaseConfig property)</a>
 
       <ul>
@@ -1314,9 +1347,15 @@
       </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.Character.mesh">mesh (pymomentum.geometry.Character property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.min">min (pymomentum.geometry.LimitMinMax property)</a>
+      <li><a href="axel.html#pymomentum.axel.mesh_to_sdf">mesh_to_sdf() (in module pymomentum.axel)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.MeshToSdfConfig">MeshToSdfConfig (class in pymomentum.axel)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.BoundingBox.min">min (pymomentum.axel.BoundingBox property)</a>
 
       <ul>
+        <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.min">(pymomentum.geometry.LimitMinMax property)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.LimitMinMaxJoint.min">(pymomentum.geometry.LimitMinMaxJoint property)</a>
 </li>
       </ul></li>
@@ -1352,10 +1391,10 @@
         <li><a href="torch.html#pymomentum.torch.character.Character.model_parameters_to_local_skeleton_state">(pymomentum.torch.character.Character method)</a>
 </li>
       </ul></li>
-      <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_positions">model_parameters_to_positions() (in module pymomentum.geometry)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_positions">model_parameters_to_positions() (in module pymomentum.geometry)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_skeleton_state">model_parameters_to_skeleton_state() (in module pymomentum.geometry)</a>
 
       <ul>
@@ -1372,6 +1411,8 @@
     module
 
       <ul>
+        <li><a href="axel.html#module-pymomentum.axel">pymomentum.axel</a>
+</li>
         <li><a href="backend.html#module-pymomentum.backend">pymomentum.backend</a>
 </li>
         <li><a href="backend.html#module-pymomentum.backend.skel_state_backend">pymomentum.backend.skel_state_backend</a>
@@ -1495,6 +1536,8 @@
         <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.names">(pymomentum.geometry.ParameterTransform property)</a>
 </li>
       </ul></li>
+      <li><a href="axel.html#pymomentum.axel.MeshToSdfConfig.narrow_band_width">narrow_band_width (pymomentum.axel.MeshToSdfConfig property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.no_parameters">no_parameters (pymomentum.geometry.ParameterTransform property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerMesh.NoMesh">NoMesh (pymomentum.geometry.MarkerMesh attribute)</a>
@@ -1685,14 +1728,14 @@
         <li><a href="renderer.html#pymomentum.renderer.Light.position">(pymomentum.renderer.Light property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Position">Position (pymomentum.solver.ErrorFunctionType attribute)</a>
 
       <ul>
         <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.Position">(pymomentum.solver2.VertexConstraintType attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.PositionData">PositionData (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.PositionErrorFunction">PositionErrorFunction (class in pymomentum.solver2)</a>
@@ -1727,6 +1770,13 @@
 </li>
       <li><a href="solver2.html#pymomentum.solver2.ProjectionErrorFunction">ProjectionErrorFunction (class in pymomentum.solver2)</a>
 </li>
+      <li>
+    pymomentum.axel
+
+      <ul>
+        <li><a href="axel.html#module-pymomentum.axel">module</a>
+</li>
+      </ul></li>
       <li>
     pymomentum.backend
 
@@ -1909,10 +1959,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.LimitLinearJoint.reference_joint_index">reference_joint_index (pymomentum.geometry.LimitLinearJoint property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.LimitLinearJoint.reference_joint_parameter">reference_joint_parameter (pymomentum.geometry.LimitLinearJoint property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.LimitLinear.reference_model_parameter_index">reference_model_parameter_index (pymomentum.geometry.LimitLinear property)</a>
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.refine_motion">refine_motion() (in module pymomentum.marker_tracking)</a>
@@ -1943,6 +1993,8 @@
 </li>
       <li><a href="renderer.html#pymomentum.renderer.IntrinsicsModel.resize">resize() (pymomentum.renderer.IntrinsicsModel method)</a>
 </li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.resolution">resolution (pymomentum.axel.SignedDistanceField property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.FBXCoordSystem.RightHanded">RightHanded (pymomentum.geometry.FBXCoordSystem attribute)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.rigid_parameters">rigid_parameters (pymomentum.geometry.ParameterTransform property)</a>
@@ -1969,6 +2021,10 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.sample">sample() (pymomentum.axel.SignedDistanceField method)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.sample_with_gradient">sample_with_gradient() (pymomentum.axel.SignedDistanceField method)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.save">save() (pymomentum.geometry.BlendShape method)</a>
 
       <ul>
@@ -2033,6 +2089,8 @@
       </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.shape_vectors">shape_vectors (pymomentum.geometry.BlendShape property)</a>
 </li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField">SignedDistanceField (class in pymomentum.axel)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Character.simplify">simplify() (pymomentum.geometry.Character method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.simplify_parameter_transform">simplify_parameter_transform() (pymomentum.geometry.Character method)</a>
@@ -2059,12 +2117,12 @@
         <li><a href="torch.html#pymomentum.torch.character.Skeleton.skeleton_state_to_joint_parameters">(pymomentum.torch.character.Skeleton method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="torch.html#pymomentum.torch.character.Skeleton.skeleton_state_to_local_skeleton_state">skeleton_state_to_local_skeleton_state() (pymomentum.torch.character.Skeleton method)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.SkeletonErrorFunction">SkeletonErrorFunction (class in pymomentum.solver2)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.SkeletonSolverFunction">SkeletonSolverFunction (class in pymomentum.solver2)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.SkeletonStyle">SkeletonStyle (class in pymomentum.renderer)</a>
@@ -2211,14 +2269,14 @@
       </ul></li>
       <li><a href="backend.html#pymomentum.backend.utils.LBSAdapter.to">to() (pymomentum.backend.utils.LBSAdapter method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.to_bytes">to_bytes() (pymomentum.geometry.BlendShape method)</a>
 
       <ul>
         <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.to_bytes">(pymomentum.geometry.GltfBuilder method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.to_gltf">to_gltf() (pymomentum.geometry.Character static method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.to_legacy_json_string">to_legacy_json_string() (pymomentum.geometry.Character static method)</a>
@@ -2236,6 +2294,10 @@
       <li><a href="trs.html#pymomentum.trs.to_skeleton_state">to_skeleton_state() (in module pymomentum.trs)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mppca.to_tensors">to_tensors() (pymomentum.geometry.Mppca method)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.MeshToSdfConfig.tolerance">tolerance (pymomentum.axel.MeshToSdfConfig property)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.total_voxels">total_voxels (pymomentum.axel.SignedDistanceField property)</a>
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig">TrackingConfig (class in pymomentum.marker_tracking)</a>
 </li>
@@ -2347,8 +2409,6 @@
       </ul></li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Vertex">Vertex (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.VertexConstraint.vertex_index">vertex_index (pymomentum.solver2.VertexConstraint property)</a>
 
       <ul>
@@ -2357,6 +2417,8 @@
         <li><a href="solver2.html#pymomentum.solver2.VertexVelocityConstraint.vertex_index">(pymomentum.solver2.VertexVelocityConstraint property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index1">vertex_index1 (pymomentum.solver2.VertexVertexDistanceConstraint property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index2">vertex_index2 (pymomentum.solver2.VertexVertexDistanceConstraint property)</a>
@@ -2382,6 +2444,8 @@
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceErrorFunction">VertexVertexDistanceErrorFunction (class in pymomentum.solver2)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.vertices">vertices (pymomentum.geometry.Mesh property)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.voxel_size">voxel_size (pymomentum.axel.SignedDistanceField property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2446,6 +2510,8 @@
       <li><a href="geometry.html#pymomentum.geometry.Mesh.with_updated_normals">with_updated_normals() (pymomentum.geometry.Mesh method)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.Camera.world_space_principle_axis">world_space_principle_axis (pymomentum.renderer.Camera property)</a>
+</li>
+      <li><a href="axel.html#pymomentum.axel.SignedDistanceField.world_to_grid">world_to_grid() (pymomentum.axel.SignedDistanceField method)</a>
 </li>
   </ul></td>
 </tr></table>
