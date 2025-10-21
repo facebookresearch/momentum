@@ -13,6 +13,7 @@
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <momentum/character/character.h>
+#include <momentum/character/character_utility.h>
 #include <momentum/character/joint.h>
 #include <momentum/character/linear_skinning.h>
 #include <momentum/character/skeleton.h>
@@ -526,75 +527,6 @@ std::vector<bool> listToBitset(const std::vector<size_t>& list, const size_t sz)
   return result;
 }
 
-std::pair<momentum::Mesh, momentum::SkinWeights> subsetVerticesMesh(
-    const momentum::Mesh& mesh,
-    const momentum::SkinWeights& skinWeights,
-    const std::vector<bool>& activeVerts) {
-  // Forward and reverse mapping:
-  const std::vector<size_t> subsetIndexToFullIndex = bitsetToList(activeVerts);
-  std::vector<size_t> fullIndexToSubsetIndex(mesh.vertices.size(), SIZE_MAX);
-  for (size_t iSubset = 0; iSubset < subsetIndexToFullIndex.size(); ++iSubset) {
-    const size_t iFull = subsetIndexToFullIndex[iSubset];
-    assert(iFull < fullIndexToSubsetIndex.size());
-    fullIndexToSubsetIndex[iFull] = iSubset;
-  }
-
-  momentum::Mesh resultMesh;
-
-  // Not bothering to subsample the texture coords for now:
-  resultMesh.texcoords = mesh.texcoords;
-  for (const auto& iFullIndex : subsetIndexToFullIndex) {
-    assert(iFullIndex < mesh.vertices.size());
-    resultMesh.vertices.push_back(mesh.vertices[iFullIndex]);
-    resultMesh.normals.push_back(
-        iFullIndex < mesh.normals.size() ? mesh.normals[iFullIndex] : Eigen::Vector3f::Zero());
-
-    if (!mesh.colors.empty()) {
-      resultMesh.colors.push_back(mesh.colors[iFullIndex]);
-    }
-    if (!mesh.confidence.empty()) {
-      resultMesh.confidence.push_back(mesh.confidence[iFullIndex]);
-    }
-  }
-
-  for (size_t iFace = 0; iFace < mesh.faces.size(); ++iFace) {
-    Eigen::Vector3i faceFull = mesh.faces[iFace];
-    Eigen::Vector3i faceSubset;
-    bool validFace = true;
-    for (int k = 0; k < 3; ++k) {
-      const auto fullIndex = faceFull[k];
-      assert((size_t)fullIndex < fullIndexToSubsetIndex.size());
-      const auto subsetIndex = fullIndexToSubsetIndex[fullIndex];
-      if (subsetIndex == SIZE_MAX) {
-        validFace = false;
-      }
-      faceSubset[k] = subsetIndex;
-    }
-
-    if (!validFace) {
-      continue;
-    }
-
-    resultMesh.faces.push_back(faceSubset);
-    if (!mesh.texcoord_faces.empty()) {
-      resultMesh.texcoord_faces.push_back(mesh.texcoord_faces[iFace]);
-    }
-  }
-
-  momentum::SkinWeights resultSkinWeights;
-  resultSkinWeights.index =
-      momentum::IndexMatrix::Zero(subsetIndexToFullIndex.size(), momentum::kMaxSkinJoints);
-  resultSkinWeights.weight =
-      momentum::WeightMatrix::Zero(subsetIndexToFullIndex.size(), momentum::kMaxSkinJoints);
-  for (size_t iSubsetIndex = 0; iSubsetIndex < subsetIndexToFullIndex.size(); ++iSubsetIndex) {
-    const size_t iFullIndex = subsetIndexToFullIndex[iSubsetIndex];
-    resultSkinWeights.index.row(iSubsetIndex) = skinWeights.index.row(iFullIndex);
-    resultSkinWeights.weight.row(iSubsetIndex) = skinWeights.weight.row(iFullIndex);
-  }
-
-  return {resultMesh, resultSkinWeights};
-}
-
 std::vector<size_t> getUpperBodyJoints(const momentum::Skeleton& skeleton) {
   auto upperBodyRoot_idx = skeleton.getJointIdByName("b_spine0");
   MT_THROW_IF(upperBodyRoot_idx == momentum::kInvalidIndex, "Missing 'b_spine0' joint.");
@@ -627,20 +559,10 @@ momentum::Character stripLowerBodyVertices(const momentum::Character& character)
   const std::vector<bool> jointsToKeep =
       listToBitset(getUpperBodyJoints(character.skeleton), character.skeleton.joints.size());
 
-  auto [mesh_new, skinWeights_new] = subsetVerticesMesh(
-      *character.mesh,
-      *character.skinWeights,
-      bonesToVertices(*character.mesh, *character.skinWeights, jointsToKeep));
+  const std::vector<bool> verticesToKeep =
+      bonesToVertices(*character.mesh, *character.skinWeights, jointsToKeep);
 
-  return momentum::Character(
-      character.skeleton,
-      character.parameterTransform,
-      character.parameterLimits,
-      character.locators,
-      &mesh_new,
-      &skinWeights_new,
-      character.collision.get(),
-      character.poseShapes.get());
+  return momentum::reduceMeshByVertices(character, verticesToKeep);
 }
 
 std::tuple<float, Eigen::VectorXf, Eigen::MatrixXf, float> getMppcaModel(
