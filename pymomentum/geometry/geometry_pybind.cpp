@@ -8,6 +8,7 @@
 #include "pymomentum/geometry/gltf_builder_pybind.h"
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
+#include "pymomentum/geometry/skin_weights_pybind.h"
 #include "pymomentum/tensor_momentum/tensor_blend_shape.h"
 #include "pymomentum/tensor_momentum/tensor_joint_parameters_to_positions.h"
 #include "pymomentum/tensor_momentum/tensor_kd_tree.h"
@@ -1246,102 +1247,6 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def_readonly("joints", &mm::Skeleton::joints)
       .def("__repr__", [](const mm::Skeleton& s) {
         return fmt::format("Skeleton(joints={})", s.joints.size());
-      });
-
-  // =====================================================
-  // momentum::SkinWeights
-  // - weight
-  // - index
-  // =====================================================
-  skinWeightsClass
-      .def(
-          py::init(
-              [](const py::array_t<int>& index_array,
-                 const py::array_t<float>& weights_array) -> mm::SkinWeights {
-                // Validate index array dimensions
-                MT_THROW_IF_T(
-                    index_array.ndim() != 2,
-                    py::value_error,
-                    "Index array must be 2-dimensional, got {} dimensions",
-                    index_array.ndim());
-                MT_THROW_IF_T(
-                    weights_array.ndim() != 2,
-                    py::value_error,
-                    "Weights array must be 2-dimensional, got {} dimensions",
-                    index_array.ndim());
-
-                // Validate that both arrays have same number of rows
-                MT_THROW_IF_T(
-                    index_array.shape(0) != weights_array.shape(0) ||
-                        index_array.shape(1) != weights_array.shape(1),
-                    py::value_error,
-                    "Index and weights arrays must have same shape: index is {}x{}, weights is {}x{}",
-                    index_array.shape(0),
-                    index_array.shape(1),
-                    weights_array.shape(0),
-                    weights_array.shape(1));
-
-                MT_THROW_IF_T(
-                    index_array.shape(1) > mm::kMaxSkinJoints,
-                    py::value_error,
-                    "Index array has {} influence joints per vertex, but maximum allowed is {} (kMaxSkinJoints)",
-                    index_array.shape(1),
-                    mm::kMaxSkinJoints);
-
-                // Validate weights array dimensions
-                const auto num_vertices = index_array.shape(0);
-                const auto num_influences = index_array.shape(1);
-
-                // Initialize matrices with zeros - these are fixed-size
-                // matrices with kMaxSkinJoints columns
-                mm::IndexMatrix index_matrix =
-                    mm::IndexMatrix::Zero(num_vertices, mm::kMaxSkinJoints);
-                mm::WeightMatrix weight_matrix =
-                    mm::WeightMatrix::Zero(num_vertices, mm::kMaxSkinJoints);
-
-                // Copy data from numpy arrays to Eigen matrices
-                auto index_accessor = index_array.unchecked<2>();
-                auto weights_accessor = weights_array.unchecked<2>();
-
-                for (int i = 0; i < num_vertices; ++i) {
-                  for (int j = 0; j < num_influences; ++j) {
-                    auto index = index_accessor(i, j);
-                    if (index < 0) {
-                      throw py::value_error(fmt::format(
-                          "Index array contains negative index value at row {}, column {}", i, j));
-                    }
-                    index_matrix(i, j) = static_cast<uint32_t>(index);
-                  }
-                  for (int j = 0; j < num_influences; ++j) {
-                    weight_matrix(i, j) = weights_accessor(i, j);
-                  }
-                }
-
-                return {std::move(index_matrix), std::move(weight_matrix)};
-              }),
-          py::arg("index"),
-          py::arg("weights"),
-          R"(Create SkinWeights from index and weight arrays.
-
-:param index: 2D numpy array of shape (num_vertices, num_influences) containing joint indices.
-              Maximum influencing joints per vertex is defined by kMaxSkinJoints constant.
-              Values should be non-negative integers representing joint indices.
-:param weights: 2D numpy array of shape (num_vertices, num_influences) containing joint weights.
-               Maximum influencing joints per vertex is defined by kMaxSkinJoints constant.
-               Weights for each vertex typically sum to 1.0.
-:return: SkinWeights object with properly formatted index and weight matrices.
-:raises ValueError: If arrays have incompatible dimensions or exceed maximum joint limits.)")
-      .def_property_readonly(
-          "weight",
-          [](const mm::SkinWeights& skinning) { return skinning.weight; },
-          "Returns the skinning weights.")
-      .def_property_readonly(
-          "index",
-          [](const mm::SkinWeights& skinning) { return skinning.index; },
-          "Returns the skinning indices.")
-      .def("__repr__", [](const mm::SkinWeights& sw) {
-        return fmt::format(
-            "SkinWeights(vertices={}, influences={})", sw.weight.rows(), sw.weight.cols());
       });
 
   // =====================================================
@@ -3064,6 +2969,8 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.
       R"(Create a pose prior that acts on the simple 3-joint test character.
 
 :return: A simple pose prior.)");
+
+  registerSkinWeightsBindings(skinWeightsClass);
 
   // Register GltfBuilder bindings
   registerGltfBuilderBindings(m);

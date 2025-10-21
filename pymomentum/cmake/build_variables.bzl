@@ -107,6 +107,7 @@ geometry_public_headers = [
 
 geometry_sources = [
     "geometry/geometry_pybind.cpp",
+    "geometry/skin_weights_pybind.cpp",
     "geometry/momentum_geometry.cpp",
     "geometry/momentum_io.cpp",
     "geometry/gltf_builder_pybind.cpp",
