@@ -427,6 +427,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_local_skeleton_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_positions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_mesh_by_faces"><code class="docutils literal notranslate"><span class="pre">reduce_mesh_by_faces()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_mesh_by_vertices"><code class="docutils literal notranslate"><span class="pre">reduce_mesh_by_vertices()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_to_selected_model_parameters"><code class="docutils literal notranslate"><span class="pre">reduce_to_selected_model_parameters()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.replace_rest_mesh"><code class="docutils literal notranslate"><span class="pre">replace_rest_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.replace_skeleton_hierarchy"><code class="docutils literal notranslate"><span class="pre">replace_skeleton_hierarchy()</span></code></a></li>
@@ -3462,6 +3464,46 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format’s skeleton state representation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.reduce_mesh_by_faces">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_faces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_faces" title="Link to this definition"></a></dt>
+<dd><p>Reduces the mesh to only include the specified faces and associated vertices.</p>
+<p>Creates a new character with mesh reduced to the specified faces. This function
+handles all character components including mesh vertices/faces, skin weights,
+blend shapes, pose shapes, and other mesh-related data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Full-body character.</p></li>
+<li><p><strong>active_faces</strong> – A boolean array marking which faces should be retained.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new character whose mesh only includes the marked faces and their associated data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.reduce_mesh_by_vertices">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_vertices" title="Link to this definition"></a></dt>
+<dd><p>Reduces the mesh to only include the specified vertices and associated faces.</p>
+<p>Creates a new character with mesh reduced to the specified vertices. This function
+handles all character components including mesh vertices/faces, skin weights,
+blend shapes, pose shapes, and other mesh-related data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Full-body character.</p></li>
+<li><p><strong>active_vertices</strong> – A boolean array marking which vertices should be retained.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new character whose mesh only includes the marked vertices and their associated data.</p>
 </dd>
 </dl>
 </dd></dl>
