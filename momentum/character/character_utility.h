@@ -85,4 +85,44 @@ VectorXf mapIdentityToCharacter(
     const IdentityParameters& inputIdentity,
     const Character& targetCharacter);
 
+/// Reduces the mesh to only include the specified vertices and associated faces
+///
+/// @param[in] character Character to be reduced
+/// @param[in] activeVertices Boolean vector indicating which vertices to keep
+/// @return A new character with mesh reduced to the specified vertices
+template <typename T>
+[[nodiscard]] CharacterT<T> reduceMeshByVertices(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activeVertices);
+
+/// Reduces the mesh to only include the specified faces and associated vertices
+///
+/// @param[in] character Character to be reduced
+/// @param[in] activeFaces Boolean vector indicating which faces to keep
+/// @return A new character with mesh reduced to the specified faces
+template <typename T>
+[[nodiscard]] CharacterT<T> reduceMeshByFaces(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activeFaces);
+
+/// Converts vertex selection to face selection
+///
+/// @param[in] character Character containing the mesh
+/// @param[in] activeVertices Boolean vector indicating which vertices are active
+/// @return Boolean vector indicating which faces only contain active vertices
+template <typename T>
+[[nodiscard]] std::vector<bool> verticesToFaces(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeVertices);
+
+/// Converts face selection to vertex selection
+///
+/// @param[in] character Character containing the mesh
+/// @param[in] activeFaces Boolean vector indicating which faces are active
+/// @return Boolean vector indicating which vertices are used by active faces
+template <typename T>
+[[nodiscard]] std::vector<bool> facesToVertices(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeFaces);
+
 } // namespace momentum
