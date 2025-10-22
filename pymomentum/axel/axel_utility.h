@@ -32,32 +32,88 @@ std::string getArrayDimStr(const py::array& array);
 void validatePositionArray(const py::array_t<float>& positions, const char* parameterName);
 
 /**
+ * Validate array shape and index bounds for 3D indices (templated version).
+ * Expected shape: (N, 3) for N triplets or (3,) for single triplet
+ * Also validates that all indices are >= 0 and < max_valid_index
+ *
+ * @tparam T Index type (e.g., int, axel::Index)
+ * @param indices Array to validate
+ * @param parameterName Name for error messages
+ * @param max_valid_index Maximum valid index value (exclusive upper bound)
+ */
+template <typename T>
+void validateIndexArray(
+    const py::array_t<T>& indices,
+    const char* parameterName,
+    py::ssize_t max_valid_index) {
+  // Find min and max indices for efficient error reporting
+  T min_index = std::numeric_limits<T>::max();
+  T max_index = std::numeric_limits<T>::lowest();
+
+  // Access data properly based on dimensions (respects strides)
+  if (indices.ndim() == 1) {
+    // 1D array case
+    const auto data = indices.template unchecked<1>();
+    for (py::ssize_t i = 0; i < data.shape(0); ++i) {
+      const T idx = data(i);
+      min_index = std::min(min_index, idx);
+      max_index = std::max(max_index, idx);
+    }
+  } else if (indices.ndim() == 2) {
+    // 2D array case
+    const auto data = indices.template unchecked<2>();
+    for (py::ssize_t i = 0; i < data.shape(0); ++i) {
+      for (py::ssize_t j = 0; j < data.shape(1); ++j) {
+        const T idx = data(i, j);
+        min_index = std::min(min_index, idx);
+        max_index = std::max(max_index, idx);
+      }
+    }
+  } else {
+    // This should never happen due to the shape validation above,
+    // but let's be defensive
+    throw std::runtime_error(fmt::format(
+        "Internal error: {} array has unsupported dimensions: {}D", parameterName, indices.ndim()));
+  }
+
+  // Check for negative indices
+  if (min_index < 0) {
+    throw std::runtime_error(fmt::format(
+        "Invalid {} indices: found negative index {} (minimum index found: {}), but indices must be >= 0",
+        parameterName,
+        min_index,
+        min_index));
+  }
+
+  // Check for out-of-bounds indices
+  if (max_index >= max_valid_index) {
+    throw std::runtime_error(fmt::format(
+        "Invalid {} indices: found index {} >= max valid index {} (maximum index found: {}, valid range: [0, {}))",
+        parameterName,
+        max_index,
+        max_valid_index,
+        max_index,
+        max_valid_index));
+  }
+}
+
+/**
  * Validate array shape for 3D indices (templated version).
  * Expected shape: (N, 3) for N triplets or (3,) for single triplet
  *
  * @tparam T Index type (e.g., int, axel::Index)
  */
 template <typename T>
-void validateIndexArray(const py::array_t<T>& indices, const char* parameterName) {
-  if (indices.ndim() == 1) {
-    if (indices.shape(0) != 3) {
-      throw std::runtime_error(fmt::format(
-          "Invalid shape for {}: expected (3,) for single index or (N, 3) for multiple indices, got {}",
-          parameterName,
-          getArrayDimStr(indices)));
-    }
-  } else if (indices.ndim() == 2) {
-    if (indices.shape(1) != 3) {
-      throw std::runtime_error(fmt::format(
-          "Invalid shape for {}: expected (N, 3), got {}", parameterName, getArrayDimStr(indices)));
-    }
-  } else {
+void validateTriangleIndexArray(
+    const py::array_t<T>& indices,
+    const char* parameterName,
+    py::ssize_t maxIndex) {
+  if (indices.ndim() != 2 || indices.shape(1) != 3) {
     throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected 1D array (3,) or 2D array (N, 3), got {}D array {}",
-        parameterName,
-        indices.ndim(),
-        getArrayDimStr(indices)));
+        "Invalid shape for {}: expected (N, 3), got {}", parameterName, getArrayDimStr(indices)));
   }
+
+  validateIndexArray(indices, parameterName, maxIndex);
 }
 
 /**

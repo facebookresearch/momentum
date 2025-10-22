@@ -43,8 +43,6 @@ void validatePositionArray(const py::array_t<float>& positions, const char* para
   }
 }
 
-// validateIndexArray is now a template function in the header file
-
 void validateGridDimensions(
     const py::array_t<float>& grid,
     const axel::SignedDistanceField<float>& sdf,
