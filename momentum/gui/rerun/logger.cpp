@@ -349,10 +349,8 @@ void logCollisionGeometry(
   for (const auto& cg : collisionGeometry) {
     const auto& js = skeletonState.jointState.at(cg.parent);
 
-    const float halfX = 0.5f * cg.length;
-    const Transform tf =
-        js.transform * cg.transformation * Transform::makeTranslation({halfX, 0, 0});
-    const Quaternionf& q = tf.rotation;
+    const Transform tf = js.transform * cg.transformation;
+    const Quaternionf& q = tf.rotation * Eigen::AngleAxisf(0.5f * pi(), Vector3f::UnitY());
 
     translations.push_back(toRerunPosition3D(tf.translation));
     quaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
