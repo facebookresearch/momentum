@@ -850,7 +850,8 @@ void GltfBuilder::addCharacter(
     bool addExtensions /*= true*/,
     bool addCollisions /*= true*/,
     bool addLocators /*= true*/,
-    bool addMesh /*= true*/) {
+    bool addMesh /*= true*/,
+    bool addBlendShapes /*= true*/) {
   if (impl_->characterData.find(character.name) != impl_->characterData.end()) {
     // Character already exist. Doesn't allow character with the same name to be saved.
     // #TODO: proper warning
@@ -885,6 +886,15 @@ void GltfBuilder::addCharacter(
   if (addMesh) {
     characterData.meshIndex =
         addMeshToModel(impl_->document, character, characterData.nodeMap, rootNodeIdx);
+
+    // Add blendshapes if both addMesh and addBlendShapes are true
+    if (addBlendShapes && character.blendShape != nullptr) {
+      addMorphTargetsToModel(
+          impl_->document,
+          *character.blendShape,
+          character.blendShape->shapeSize(),
+          characterData.meshIndex);
+    }
   }
   if (addExtensions) {
     auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
