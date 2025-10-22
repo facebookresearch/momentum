@@ -88,7 +88,7 @@ TransformT<T> TransformT<T>::inverse() const {
   //   = scale(1/s) * rotation(invR) * translate(-t)
   //   = translate(-invR*s*t) * rotation(invR) * scale(1/s)
   const Quaternion<T> invRot = rotation.inverse();
-  const double invScale = T(1) / scale;
+  const T invScale = T(1) / scale;
   return TransformT<T>(-invScale * (invRot * translation), invRot, invScale);
 }
 
