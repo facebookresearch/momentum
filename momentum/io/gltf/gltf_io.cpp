@@ -984,23 +984,13 @@ fx::gltf::Document makeCharacterDocument(
     const float fps,
     gsl::span<const SkeletonState> skeletonStates,
     const std::vector<std::vector<Marker>>& markerSequence,
-    bool embedResource) {
+    bool embedResource,
+    const GltfOptions& options) {
   GltfBuilder fileBuilder;
-  constexpr auto kAddExtensions = true;
-  constexpr auto kAddCollision = true;
-  constexpr auto kAddLocators = true;
 
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
   if (!kCharacterIsEmpty) {
-    const auto kAddMesh = character.mesh != nullptr;
-    fileBuilder.addCharacter(
-        character,
-        Vector3f::Zero(),
-        Quaternionf::Identity(),
-        kAddExtensions,
-        kAddCollision,
-        kAddLocators,
-        kAddMesh);
+    fileBuilder.addCharacter(character, Vector3f::Zero(), Quaternionf::Identity(), options);
   }
   // Add potential motion or offsets, even if the character is empty
   // (it could be a motion database for example)
@@ -1229,28 +1219,17 @@ fx::gltf::Document makeCharacterDocument(
     const MotionParameters& motion,
     const IdentityParameters& offsets,
     const std::vector<std::vector<Marker>>& markerSequence,
-    bool embedResource) {
+    bool embedResource,
+    const GltfOptions& options) {
   GltfBuilder fileBuilder;
-  constexpr auto kAddExtensions = true;
-  constexpr auto kAddCollision = true;
-  constexpr auto kAddLocators = true;
-
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
   if (!kCharacterIsEmpty) {
-    const auto kAddMesh = character.mesh != nullptr;
-    fileBuilder.addCharacter(
-        character,
-        Vector3f::Zero(),
-        Quaternionf::Identity(),
-        kAddExtensions,
-        kAddCollision,
-        kAddLocators,
-        kAddMesh);
+    fileBuilder.addCharacter(character, Vector3f::Zero(), Quaternionf::Identity(), options);
   }
   // Add potential motion or offsets, even if the character is empty
   // (it could be a motion database for example)
   if ((!std::get<0>(motion).empty()) || (!std::get<0>(offsets).empty())) {
-    fileBuilder.addMotion(character, fps, motion, offsets, kAddExtensions);
+    fileBuilder.addMotion(character, fps, motion, offsets, options.extensions);
   }
   if (!markerSequence.empty()) {
     fileBuilder.addMarkerSequence(fps, markerSequence);
@@ -1336,11 +1315,12 @@ void saveCharacter(
     const MotionParameters& motion,
     const IdentityParameters& offsets,
     const std::vector<std::vector<Marker>>& markerSequence,
-    const GltfFileFormat fileFormat) {
+    const GltfFileFormat fileFormat,
+    const GltfOptions& options) {
   constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
   // create new model
-  fx::gltf::Document model =
-      makeCharacterDocument(character, fps, motion, offsets, markerSequence, kEmbedResources);
+  fx::gltf::Document model = makeCharacterDocument(
+      character, fps, motion, offsets, markerSequence, kEmbedResources, options);
 
   GltfBuilder::save(model, filename, fileFormat, kEmbedResources);
 }
@@ -1351,11 +1331,12 @@ void saveCharacter(
     const float fps,
     gsl::span<const SkeletonState> skeletonStates,
     const std::vector<std::vector<Marker>>& markerSequence,
-    const GltfFileFormat fileFormat) {
+    const GltfFileFormat fileFormat,
+    const GltfOptions& options) {
   constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
   // create new model
-  fx::gltf::Document model =
-      ::makeCharacterDocument(character, fps, skeletonStates, markerSequence, kEmbedResources);
+  fx::gltf::Document model = ::makeCharacterDocument(
+      character, fps, skeletonStates, markerSequence, kEmbedResources, options);
 
   GltfBuilder::save(model, filename, fileFormat, kEmbedResources);
 }
@@ -1365,10 +1346,11 @@ std::vector<std::byte> saveCharacterToBytes(
     float fps,
     const MotionParameters& motion,
     const IdentityParameters& offsets,
-    const std::vector<std::vector<Marker>>& markerSequence) {
+    const std::vector<std::vector<Marker>>& markerSequence,
+    const GltfOptions& options) {
   constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
-  fx::gltf::Document model =
-      makeCharacterDocument(character, fps, motion, offsets, markerSequence, kEmbedResources);
+  fx::gltf::Document model = makeCharacterDocument(
+      character, fps, motion, offsets, markerSequence, kEmbedResources, options);
 
   std::ostringstream output(std::ios::binary | std::ios::out);
   fx::gltf::Save(model, output, {}, true);

@@ -847,11 +847,7 @@ void GltfBuilder::addCharacter(
     const Character& character,
     const Vector3f& positionOffset /*= Vector3f::Zero()*/,
     const Quaternionf& rotationOffset /*= Quaternionf::Identity()*/,
-    bool addExtensions /*= true*/,
-    bool addCollisions /*= true*/,
-    bool addLocators /*= true*/,
-    bool addMesh /*= true*/,
-    bool addBlendShapes /*= true*/) {
+    const GltfOptions& options) {
   if (impl_->characterData.find(character.name) != impl_->characterData.end()) {
     // Character already exist. Doesn't allow character with the same name to be saved.
     // #TODO: proper warning
@@ -876,19 +872,19 @@ void GltfBuilder::addCharacter(
 
   // fill with data
   characterData.nodeMap =
-      addSkeletonToModel(impl_->document, character, addExtensions, rootNodeIdx);
-  if (addCollisions) {
-    addCollisionsToModel(impl_->document, character, characterData.nodeMap, addExtensions);
+      addSkeletonToModel(impl_->document, character, options.extensions, rootNodeIdx);
+  if (options.collisions) {
+    addCollisionsToModel(impl_->document, character, characterData.nodeMap, options.extensions);
   }
-  if (addLocators) {
-    addLocatorsToModel(impl_->document, character, characterData.nodeMap, addExtensions);
+  if (options.locators) {
+    addLocatorsToModel(impl_->document, character, characterData.nodeMap, options.extensions);
   }
-  if (addMesh) {
+  if (options.mesh) {
     characterData.meshIndex =
         addMeshToModel(impl_->document, character, characterData.nodeMap, rootNodeIdx);
 
     // Add blendshapes if both addMesh and addBlendShapes are true
-    if (addBlendShapes && character.blendShape != nullptr) {
+    if (options.blendShapes && character.blendShape != nullptr) {
       addMorphTargetsToModel(
           impl_->document,
           *character.blendShape,
@@ -896,7 +892,7 @@ void GltfBuilder::addCharacter(
           characterData.meshIndex);
     }
   }
-  if (addExtensions) {
+  if (options.extensions) {
     auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
     parameterTransformToJson(character, def["transform"]);
     parameterLimitsToJson(character, def["parameterLimits"]);

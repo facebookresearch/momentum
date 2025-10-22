@@ -60,7 +60,7 @@ void registerGltfBuilderBindings(pybind11::module& m) {
       m,
       "GltfBuilder",
       R"(A builder class for creating GLTF files with multiple characters and animations.
-      
+
 The GltfBuilder allows you to incrementally construct a GLTF scene by adding characters,
 meshes, motions, and marker data. This is useful for creating complex scenes with multiple
 characters or combining different types of data into a single GLTF file.)")
@@ -79,7 +79,7 @@ characters or combining different types of data into a single GLTF file.)")
           &mm::GltfBuilder::getFps,
           &mm::GltfBuilder::setFps,
           R"(The frame rate in frames per second used for animations.
-            
+
 This property controls the timing of all animations added to the GLTF file.
 Setting this value will affect subsequently added motions and animations.
 
@@ -90,10 +90,7 @@ Setting this value will affect subsequently added motions and animations.
              const mm::Character& character,
              const std::optional<Eigen::Vector3f>& positionOffset,
              const std::optional<Eigen::Vector4f>& rotationOffset,
-             bool addExtensions,
-             bool addCollisions,
-             bool addLocators,
-             bool addMesh) {
+             const mm::GltfOptions& options) {
             // Use defaults if not provided
             Eigen::Vector3f actualPositionOffset = positionOffset.value_or(Eigen::Vector3f::Zero());
             Eigen::Vector4f actualRotationOffset =
@@ -106,17 +103,10 @@ Setting this value will affect subsequently added motions and animations.
                 actualRotationOffset[1], // y
                 actualRotationOffset[2]); // z
 
-            builder.addCharacter(
-                character,
-                actualPositionOffset,
-                quaternionOffset,
-                addExtensions,
-                addCollisions,
-                addLocators,
-                addMesh);
+            builder.addCharacter(character, actualPositionOffset, quaternionOffset, options);
           },
           R"(Add a character to the GLTF scene.
-            
+
 Each character will have a root node with the character's name as the parent
 of the skeleton root and the character mesh. Position and rotation offsets
 can be provided as an initial transform for the character.
@@ -131,15 +121,12 @@ can be provided as an initial transform for the character.
           py::arg("character"),
           py::arg("position_offset") = std::nullopt,
           py::arg("rotation_offset") = std::nullopt,
-          py::arg("add_extensions") = true,
-          py::arg("add_collisions") = true,
-          py::arg("add_locators") = true,
-          py::arg("add_mesh") = true)
+          py::arg("options") = mm::GltfOptions{})
       .def(
           "add_mesh",
           &mm::GltfBuilder::addMesh,
           R"(Add a static mesh to the GLTF scene.
-            
+
 This can be used to add environment meshes, target scans, or other static
 geometry that doesn't require animation. The mesh will be added as a separate
 node in the scene with the specified name.
@@ -181,11 +168,11 @@ node in the scene with the specified name.
                 customName);
           },
           R"(Add a motion sequence to the specified character.
-            
+
 If addCharacter has not been called before adding the motion, the character
 will be automatically added with default settings. The motion data contains
 model parameters that animate the character over time.
-  
+
 :param character: The character to add motion for.
 :param fps: Frame rate in frames per second for the motion data.
 :param motion: Optional motion parameters as a tuple of (parameter_names, motion_data).
@@ -215,7 +202,7 @@ model parameters that animate the character over time.
             builder.addSkeletonStates(character, fps, gsl::make_span(skelStates), customName);
           },
           R"(Add skeleton states animation to the specified character.
-          
+
 If addCharacter has not been called before adding the skeleton states, the character
 will be automatically added with default settings. The skeleton states contain
 per-joint transforms that define the character's pose over time.
@@ -224,7 +211,7 @@ per-joint transforms that define the character's pose over time.
 :param fps: Frame rate in frames per second for the skeleton state data.
 :param skeleton_states: Skeleton states as a 3D array with shape [nFrames, nJoints, 8].
                        Each joint state contains [tx, ty, tz, rx, ry, rz, rw, s] where
-                       translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw) 
+                       translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw)
                        in (x,y,z,w) format, and s is scale.
 :param custom_name: Custom name for the animation in the GLTF file.)",
           py::arg("character"),
@@ -241,14 +228,14 @@ per-joint transforms that define the character's pose over time.
             builder.addMarkerSequence(fps, gsl::make_span(markerSequence), markerMesh, animName);
           },
           R"(Add marker sequence animation data to the GLTF scene.
-            
+
 This method adds motion capture marker data to the GLTF file. The marker data
 represents 3D positions of markers over time, which can be used for motion capture
 analysis or visualization. Optional marker mesh visualization can be added as unit cubes.
 
 :param fps: Frame rate in frames per second for the marker sequence data.
 :param marker_sequence: A 2D list/array with shape [numFrames][numMarkers] containing
-                       Marker objects for each frame. Each Marker contains name, 
+                       Marker objects for each frame. Each Marker contains name,
                        position, and occlusion status.
 :param marker_mesh: Type of mesh to represent markers visually using :class:`MarkerMesh` enum.
                    Default is MarkerMesh.None for no visual representation.
@@ -268,7 +255,7 @@ analysis or visualization. Optional marker mesh visualization can be added as un
             builder.save(filename, actualFileFormat);
           },
           R"(Save the GLTF scene to a file.
-          
+
 This method writes the constructed GLTF scene to the specified file. The file format
 can be explicitly specified or automatically deduced from the file extension.
 
@@ -298,8 +285,8 @@ can be explicitly specified or automatically deduced from the file extension.
             return py::bytes(str);
           },
           R"(Convert the GLTF scene to bytes in memory.
-          
-This method serializes the constructed GLTF scene to a byte array without 
+
+This method serializes the constructed GLTF scene to a byte array without
 writing to disk. This is useful for programmatic processing, network transmission,
 or when you need the GLTF data as bytes for other purposes.
 
