@@ -725,6 +725,132 @@ class TestAxel(unittest.TestCase):
                 f"Mean distance {mean_distance:.3f} too far outside sphere",
             )
 
+    def test_smooth_mesh_laplacian(self):
+        """Test basic mesh smoothing functionality."""
+        print("Testing triangle mesh smoothing...")
+
+        # Create a simple tetrahedron mesh
+        tri_vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+
+        tri_faces = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        # Test smoothing without mask (all vertices)
+        smoothed_all = axel.smooth_mesh_laplacian(
+            tri_vertices, tri_faces, np.array([]), iterations=1, step=0.5
+        )
+
+        # Check that output has same shape
+        self.assertEqual(smoothed_all.shape, tri_vertices.shape)
+
+        # Test smoothing with mask (exclude first vertex)
+        vertex_mask = np.array([False, True, True, True])
+        smoothed_partial = axel.smooth_mesh_laplacian(
+            tri_vertices, tri_faces, vertex_mask, iterations=1, step=0.5
+        )
+
+        # Check that first vertex is unchanged
+        self.assertTrue(np.allclose(smoothed_partial[0], tri_vertices[0], atol=1e-6))
+
+        # Test multiple iterations
+        smoothed_multi = axel.smooth_mesh_laplacian(
+            tri_vertices, tri_faces, np.array([]), iterations=3, step=0.3
+        )
+
+        self.assertEqual(smoothed_multi.shape, tri_vertices.shape)
+
+        print("Triangle mesh smoothing tests passed!")
+
+        print("Testing quad mesh smoothing...")
+
+        # Create a simple cube mesh with quads
+        quad_vertices = np.array(
+            [
+                [0.0, 0.0, 0.0],  # 0
+                [1.0, 0.0, 0.0],  # 1
+                [1.0, 1.0, 0.0],  # 2
+                [0.0, 1.0, 0.0],  # 3
+                [0.0, 0.0, 1.0],  # 4
+                [1.0, 0.0, 1.0],  # 5
+                [1.0, 1.0, 1.0],  # 6
+                [0.0, 1.0, 1.0],  # 7
+            ],
+            dtype=np.float32,
+        )
+
+        quad_faces = np.array(
+            [
+                [0, 1, 2, 3],  # Bottom face
+                [4, 7, 6, 5],  # Top face
+                [0, 4, 5, 1],  # Front face
+                [2, 6, 7, 3],  # Back face
+                [0, 3, 7, 4],  # Left face
+                [1, 5, 6, 2],  # Right face
+            ],
+            dtype=np.int32,
+        )
+
+        # Test smoothing without mask (all vertices)
+        quad_smoothed_all = axel.smooth_mesh_laplacian(
+            quad_vertices, quad_faces, np.array([]), iterations=1, step=0.5
+        )
+
+        # Check that output has same shape
+        self.assertEqual(quad_smoothed_all.shape, quad_vertices.shape)
+
+        # Test smoothing with mask (exclude corner vertices)
+        quad_vertex_mask = np.array(
+            [False, True, True, False, False, True, True, False]
+        )
+        quad_smoothed_partial = axel.smooth_mesh_laplacian(
+            quad_vertices, quad_faces, quad_vertex_mask, iterations=1, step=0.5
+        )
+
+        # Check that masked vertices are unchanged
+        self.assertTrue(
+            np.allclose(quad_smoothed_partial[0], quad_vertices[0], atol=1e-6)
+        )
+        self.assertTrue(
+            np.allclose(quad_smoothed_partial[3], quad_vertices[3], atol=1e-6)
+        )
+        self.assertTrue(
+            np.allclose(quad_smoothed_partial[4], quad_vertices[4], atol=1e-6)
+        )
+        self.assertTrue(
+            np.allclose(quad_smoothed_partial[7], quad_vertices[7], atol=1e-6)
+        )
+
+        print("Quad mesh smoothing tests passed!")
+
+        # Test error cases
+        with self.assertRaises(RuntimeError):
+            # Wrong mask size
+            axel.smooth_mesh_laplacian(
+                tri_vertices, tri_faces, np.array([True, False])
+            )  # Too small
+
+        with self.assertRaises(RuntimeError):
+            # Wrong face shape
+            axel.smooth_mesh_laplacian(
+                tri_vertices, np.array([[0, 1]]), np.array([])
+            )  # Wrong number of vertices per face
+
+        with self.assertRaises(RuntimeError):
+            # Out of bounds face indices
+            axel.smooth_mesh_laplacian(
+                tri_vertices, np.array([[0, 1, 99]]), np.array([])
+            )  # Index 99 >= 4 vertices
+
+        with self.assertRaises(RuntimeError):
+            # Negative face indices
+            axel.smooth_mesh_laplacian(
+                tri_vertices, np.array([[0, 1, -1]]), np.array([])
+            )  # Negative index
+
 
 if __name__ == "__main__":
     unittest.main()

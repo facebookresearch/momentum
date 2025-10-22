@@ -95,4 +95,23 @@ fillMeshHolesComplete(
     gsl::span<const Eigen::Vector3<ScalarType>> vertices,
     gsl::span<const Eigen::Vector3i> triangles);
 
+/**
+ * Apply Laplacian smoothing to mesh vertices with optional masking.
+ *
+ * @param vertices Input mesh vertices
+ * @param faces Mesh faces (triangles or quads)
+ * @param vertex_mask Optional mask to specify which vertices to smooth (if empty, all vertices are
+ * smoothed)
+ * @param iterations Number of smoothing iterations
+ * @param step Smoothing step size (0-1)
+ * @return Smoothed vertices
+ */
+template <typename ScalarType, typename FaceType>
+std::vector<Eigen::Vector3<ScalarType>> smoothMeshLaplacian(
+    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
+    gsl::span<const FaceType> faces,
+    const std::vector<bool>& vertex_mask = {},
+    Index iterations = 1,
+    ScalarType step = ScalarType{0.5});
+
 } // namespace axel

@@ -28,6 +28,90 @@ namespace py = pybind11;
 
 namespace pymomentum {
 
+namespace {
+
+py::array_t<float> smoothMeshLaplacianBinding(
+    const py::array_t<float>& vertices,
+    const py::array_t<int>& faces,
+    const py::array_t<bool>& vertex_mask,
+    int iterations,
+    float step) {
+  // Validate input arrays
+  validatePositionArray(vertices, "vertices");
+
+  // Validate faces array (but allow either 3 or 4 columns)
+  if (faces.ndim() != 2) {
+    throw std::runtime_error(fmt::format(
+        "Invalid shape for faces: expected 2-dimensional array, got {}D", faces.ndim()));
+  }
+
+  const py::ssize_t num_face_verts = faces.shape(1);
+  if (num_face_verts != 3 && num_face_verts != 4) {
+    throw std::runtime_error(fmt::format(
+        "Invalid shape for faces: expected (M, 3) for triangles or (M, 4) for quads, got ({}, {})",
+        faces.shape(0),
+        num_face_verts));
+  }
+
+  // Validate face indices are within bounds
+  const int max_vertex_index = static_cast<int>(vertices.shape(0));
+  validateIndexArray(faces, "faces", max_vertex_index);
+
+  // Convert vertices using utility function
+  const auto vertexVector = arrayToEigenVectors<float, 3>(vertices, "vertices");
+
+  // Convert vertex mask if provided
+  std::vector<bool> maskVector;
+  if (vertex_mask.size() > 0) {
+    // Validate mask array
+    if (vertex_mask.ndim() != 1) {
+      throw std::runtime_error("Vertex mask must be 1-dimensional");
+    }
+    if (vertex_mask.shape(0) != vertices.shape(0)) {
+      throw std::runtime_error(fmt::format(
+          "Vertex mask size ({}) must match number of vertices ({})",
+          vertex_mask.shape(0),
+          vertices.shape(0)));
+    }
+
+    const auto maskData = vertex_mask.unchecked<1>();
+    maskVector.reserve(maskData.shape(0));
+    for (py::ssize_t i = 0; i < maskData.shape(0); ++i) {
+      maskVector.push_back(maskData(i));
+    }
+  }
+
+  std::vector<Eigen::Vector3f> smoothedVertices;
+
+  // Handle triangles vs quads based on face array shape
+  if (num_face_verts == 3) {
+    // Triangle mesh - convert faces using utility function
+    const auto triangleVector = arrayToEigenVectors<int, 3>(faces, "faces");
+
+    smoothedVertices = axel::smoothMeshLaplacian<float, Eigen::Vector3i>(
+        gsl::span<const Eigen::Vector3f>(vertexVector),
+        gsl::span<const Eigen::Vector3i>(triangleVector),
+        maskVector,
+        static_cast<axel::Index>(iterations),
+        step);
+  } else {
+    // Quad mesh - convert faces using utility function
+    const auto quadVector = arrayToEigenVectors<int, 4>(faces, "faces");
+
+    smoothedVertices = axel::smoothMeshLaplacian<float, Eigen::Vector4i>(
+        gsl::span<const Eigen::Vector3f>(vertexVector),
+        gsl::span<const Eigen::Vector4i>(quadVector),
+        maskVector,
+        static_cast<axel::Index>(iterations),
+        step);
+  }
+
+  // Convert results back to numpy array using utility function
+  return eigenVectorsToArray<float, 3>(smoothedVertices);
+}
+
+} // namespace
+
 PYBIND11_MODULE(axel, m) {
   m.attr("__name__") = "pymomentum.axel";
   m.doc() = "Python bindings for Axel library classes including SignedDistanceField.";
@@ -292,7 +376,7 @@ More efficient than calling sample() and gradient() separately.
          const axel::MeshToSdfConfig<float>& config) {
         // Validate input arrays
         validatePositionArray(vertices, "vertices");
-        validateIndexArray(triangles, "triangles");
+        validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
 
         if (resolution.ndim() != 1 || resolution.shape(0) != 3) {
           throw std::runtime_error(fmt::format(
@@ -392,7 +476,7 @@ Example usage::
          const axel::MeshToSdfConfig<float>& config) {
         // Validate input arrays
         validatePositionArray(vertices, "vertices");
-        validateIndexArray(triangles, "triangles");
+        validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
 
         if (resolution.ndim() != 1 || resolution.shape(0) != 3) {
           throw std::runtime_error(fmt::format(
@@ -476,7 +560,7 @@ Example usage::
       [](const py::array_t<float>& vertices, const py::array_t<int>& triangles) {
         // Validate input arrays
         validatePositionArray(vertices, "vertices");
-        validateIndexArray(triangles, "triangles");
+        validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
 
         // Convert numpy arrays to spans
         const auto verticesData = vertices.unchecked<2>();
@@ -711,6 +795,82 @@ Example usage::
 
     print(f"Converted {len(quads)} quads to {len(triangles)} triangles"))",
       py::arg("quads"));
+
+  // Bind smooth_mesh_laplacian function
+  m.def(
+      "smooth_mesh_laplacian",
+      &smoothMeshLaplacianBinding,
+      R"(Smooth a triangle or quad mesh using Laplacian smoothing with optional vertex masking.
+
+This function applies Laplacian smoothing to mesh vertices, where each vertex is moved toward
+the average position of its neighboring vertices. Optionally, you can specify which vertices
+to smooth using a boolean mask. Both triangle and quad meshes are supported automatically
+based on the shape of the faces array.
+
+The smoothing is applied iteratively using the formula:
+new_position = (1 - step) * old_position + step * average_neighbor_position
+
+:param vertices: Vertex positions as 2D array of shape (N, 3) where N is number of vertices.
+:param faces: Face indices as 2D array of shape (M, 3) for triangles or (M, 4) for quads.
+              Indices must be valid within the vertices array.
+:param vertex_mask: Optional boolean mask of shape (N,) indicating which vertices to smooth.
+                   If empty array or not provided, all vertices will be smoothed.
+:param iterations: Number of smoothing iterations to apply (default: 1).
+:param step: Smoothing step size between 0.0 and 1.0 (default: 0.5).
+             Smaller values preserve original shape better, larger values smooth more aggressively.
+:return: Smoothed vertex positions as 2D array of shape (N, 3).
+
+Example usage::
+
+    import numpy as np
+    import pymomentum.axel as axel
+
+    # Example 1: Triangle mesh
+    tri_vertices = np.array([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.5, 1.0, 0.0],
+        [0.5, 0.0, 1.0]
+    ], dtype=np.float32)
+
+    tri_faces = np.array([
+        [0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]
+    ], dtype=np.int32)
+
+    # Smooth all vertices of triangle mesh
+    smoothed_tri = axel.smooth_mesh_laplacian(
+        tri_vertices, tri_faces, np.array([]), iterations=5, step=0.3)
+
+    # Example 2: Quad mesh
+    quad_vertices = np.array([
+        [0.0, 0.0, 0.0],  # 0
+        [1.0, 0.0, 0.0],  # 1
+        [1.0, 1.0, 0.0],  # 2
+        [0.0, 1.0, 0.0],  # 3
+        [0.0, 0.0, 1.0],  # 4
+        [1.0, 0.0, 1.0],  # 5
+        [1.0, 1.0, 1.0],  # 6
+        [0.0, 1.0, 1.0]   # 7
+    ], dtype=np.float32)
+
+    quad_faces = np.array([
+        [0, 1, 2, 3],  # Bottom face
+        [4, 7, 6, 5],  # Top face
+        [0, 4, 5, 1],  # Front face
+        [2, 6, 7, 3],  # Back face
+        [0, 3, 7, 4],  # Left face
+        [1, 5, 6, 2]   # Right face
+    ], dtype=np.int32)
+
+    # Smooth only internal vertices (exclude corners)
+    vertex_mask = np.array([False, True, True, False, False, True, True, False])
+    smoothed_quad = axel.smooth_mesh_laplacian(
+        quad_vertices, quad_faces, vertex_mask, iterations=3, step=0.5))",
+      py::arg("vertices"),
+      py::arg("faces"),
+      py::arg("vertex_mask") = py::array_t<bool>(),
+      py::arg("iterations") = 1,
+      py::arg("step") = 0.5f);
 }
 
 } // namespace pymomentum

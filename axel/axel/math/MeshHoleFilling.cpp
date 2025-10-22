@@ -423,52 +423,70 @@ std::pair<Eigen::Vector3<ScalarType>, ScalarType> computeHoleGeometry(
   return {center, radius};
 }
 
-template <typename ScalarType>
-void smoothHoleFilledRegion(
-    std::vector<Eigen::Vector3<ScalarType>>& vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
-    const std::unordered_set<Index>& newVertexIndices,
+} // namespace
+
+template <typename ScalarType, typename FaceType>
+std::vector<Eigen::Vector3<ScalarType>> smoothMeshLaplacian(
+    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
+    gsl::span<const FaceType> faces,
+    const std::vector<bool>& vertex_mask,
     Index iterations,
-    ScalarType factor) {
-  // Build vertex-vertex adjacency for smoothing
+    ScalarType step) {
+  std::vector<Eigen::Vector3<ScalarType>> result(vertices.begin(), vertices.end());
+
+  // Validate vertex mask size if provided
+  if (!vertex_mask.empty() && vertex_mask.size() != vertices.size()) {
+    throw std::invalid_argument("Vertex mask size must match number of vertices");
+  }
+
+  // Create adjacency information
   std::unordered_map<Index, std::vector<Index>> adjacency;
 
-  for (const auto& triangle : triangles) {
-    for (int i = 0; i < 3; ++i) {
-      const Index v1 = triangle[i];
-      const Index v2 = triangle[(i + 1) % 3];
+  // Build adjacency from faces (works for both triangles and quads)
+  for (const auto& face : faces) {
+    // Get the number of vertices in this face type
+    constexpr int faceVertexCount = FaceType::RowsAtCompileTime;
+
+    // Add edges between consecutive vertices in the face
+    for (int i = 0; i < faceVertexCount; ++i) {
+      const Index v1 = face[i];
+      const Index v2 = face[(i + 1) % faceVertexCount];
 
       adjacency[v1].push_back(v2);
       adjacency[v2].push_back(v1);
     }
   }
 
-  // Apply Laplacian smoothing iterations
+  // Perform smoothing iterations
   for (Index iter = 0; iter < iterations; ++iter) {
-    std::vector<Eigen::Vector3<ScalarType>> newPositions = vertices;
+    std::vector<Eigen::Vector3<ScalarType>> newPositions = result;
 
-    for (const auto vertexIdx : newVertexIndices) {
-      const auto& neighbors = adjacency[vertexIdx];
+    for (Index i = 0; i < static_cast<Index>(result.size()); ++i) {
+      // Skip vertices not in mask (if mask is provided) or with no neighbors
+      if (!vertex_mask.empty() && !vertex_mask[i]) {
+        continue;
+      }
+
+      const auto& neighbors = adjacency[i];
       if (neighbors.empty()) {
         continue;
       }
 
       Eigen::Vector3<ScalarType> averagePos = Eigen::Vector3<ScalarType>::Zero();
       for (const auto neighborIdx : neighbors) {
-        averagePos += vertices[neighborIdx];
+        averagePos += result[neighborIdx];
       }
       averagePos /= static_cast<ScalarType>(neighbors.size());
 
       // Blend between original and average position
-      newPositions[vertexIdx] =
-          (ScalarType{1} - factor) * vertices[vertexIdx] + factor * averagePos;
+      newPositions[i] = (ScalarType{1} - step) * result[i] + step * averagePos;
     }
 
-    vertices = std::move(newPositions);
+    result = std::move(newPositions);
   }
-}
 
-} // namespace
+  return result;
+}
 
 template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
@@ -589,5 +607,35 @@ template std::pair<std::vector<Eigen::Vector3<double>>, std::vector<Eigen::Vecto
     fillMeshHolesComplete<double>(
         gsl::span<const Eigen::Vector3<double>>,
         gsl::span<const Eigen::Vector3i>);
+
+// Triangle mesh smoothing instantiations
+template std::vector<Eigen::Vector3<float>> smoothMeshLaplacian<float, Eigen::Vector3i>(
+    gsl::span<const Eigen::Vector3<float>>,
+    gsl::span<const Eigen::Vector3i>,
+    const std::vector<bool>&,
+    Index,
+    float);
+
+template std::vector<Eigen::Vector3<double>> smoothMeshLaplacian<double, Eigen::Vector3i>(
+    gsl::span<const Eigen::Vector3<double>>,
+    gsl::span<const Eigen::Vector3i>,
+    const std::vector<bool>&,
+    Index,
+    double);
+
+// Quad mesh smoothing instantiations
+template std::vector<Eigen::Vector3<float>> smoothMeshLaplacian<float, Eigen::Vector4i>(
+    gsl::span<const Eigen::Vector3<float>>,
+    gsl::span<const Eigen::Vector4i>,
+    const std::vector<bool>&,
+    Index,
+    float);
+
+template std::vector<Eigen::Vector3<double>> smoothMeshLaplacian<double, Eigen::Vector4i>(
+    gsl::span<const Eigen::Vector3<double>>,
+    gsl::span<const Eigen::Vector4i>,
+    const std::vector<bool>&,
+    Index,
+    double);
 
 } // namespace axel
