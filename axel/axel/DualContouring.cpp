@@ -151,7 +151,7 @@ findIntersectingCellsAndCreateVertices(
         if (cellIntersectsIsosurface(cornerValues, isovalue)) {
           // This cell intersects the isosurface, create a vertex positioned on the surface
           const Eigen::Vector3<Index> cellIdx(i, j, k);
-          const auto cellCenter = sdf.gridToWorld(
+          const auto cellCenter = sdf.template gridToWorld<ScalarType>(
               cellIdx.template cast<ScalarType>() + Eigen::Vector3<ScalarType>::Constant(0.5));
 
           // Push vertex toward the zero level set using gradient descent

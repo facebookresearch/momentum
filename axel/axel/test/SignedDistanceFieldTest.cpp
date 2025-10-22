@@ -471,14 +471,14 @@ TEST_F(SignedDistanceFieldTest, AnalyticalGradientVsFiniteDifference) {
   // Helper function for finite difference gradients
   auto computeFiniteDifferenceGradient = [&](const Eigen::Vector3f& position,
                                              float h) -> Eigen::Vector3f {
-    const float gradX = (testSdf.sample(position + Eigen::Vector3f(h, 0, 0)) -
-                         testSdf.sample(position - Eigen::Vector3f(h, 0, 0))) /
+    const float gradX = (testSdf.sample<float>(position + Eigen::Vector3f(h, 0, 0)) -
+                         testSdf.sample<float>(position - Eigen::Vector3f(h, 0, 0))) /
         (2.0f * h);
-    const float gradY = (testSdf.sample(position + Eigen::Vector3f(0, h, 0)) -
-                         testSdf.sample(position - Eigen::Vector3f(0, h, 0))) /
+    const float gradY = (testSdf.sample<float>(position + Eigen::Vector3f(0, h, 0)) -
+                         testSdf.sample<float>(position - Eigen::Vector3f(0, h, 0))) /
         (2.0f * h);
-    const float gradZ = (testSdf.sample(position + Eigen::Vector3f(0, 0, h)) -
-                         testSdf.sample(position - Eigen::Vector3f(0, 0, h))) /
+    const float gradZ = (testSdf.sample<float>(position + Eigen::Vector3f(0, 0, h)) -
+                         testSdf.sample<float>(position - Eigen::Vector3f(0, 0, h))) /
         (2.0f * h);
     return {gradX, gradY, gradZ};
   };

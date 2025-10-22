@@ -53,11 +53,13 @@ void SignedDistanceField<ScalarType>::set(Index i, Index j, Index k, Scalar valu
 }
 
 template <typename ScalarType>
-ScalarType SignedDistanceField<ScalarType>::sample(const Vector3& position) const {
-  const Vector3 gridPos = worldToGrid(position);
+template <typename InputScalar>
+InputScalar SignedDistanceField<ScalarType>::sample(
+    const Eigen::Vector3<InputScalar>& position) const {
+  const Eigen::Vector3<InputScalar> gridPos = worldToGrid(position);
 
   // Clamp to valid grid bounds
-  const Vector3 clampedGridPos = clampToGrid(gridPos);
+  const Eigen::Vector3<InputScalar> clampedGridPos = clampToGrid(gridPos);
 
   // Get the integer grid coordinates of the lower corner
   const auto i0 = static_cast<Index>(std::floor(clampedGridPos.x()));
@@ -69,35 +71,39 @@ ScalarType SignedDistanceField<ScalarType>::sample(const Vector3& position) cons
   const Index j1 = std::min(j0 + 1, resolution_.y() - 1);
   const Index k1 = std::min(k0 + 1, resolution_.z() - 1);
 
-  // Calculate interpolation weights
-  const Scalar fx = clampedGridPos.x() - static_cast<Scalar>(i0);
-  const Scalar fy = clampedGridPos.y() - static_cast<Scalar>(j0);
-  const Scalar fz = clampedGridPos.z() - static_cast<Scalar>(k0);
+  // Calculate interpolation weights using InputScalar precision
+  const InputScalar fx =
+      static_cast<InputScalar>(clampedGridPos.x()) - static_cast<InputScalar>(i0);
+  const InputScalar fy =
+      static_cast<InputScalar>(clampedGridPos.y()) - static_cast<InputScalar>(j0);
+  const InputScalar fz =
+      static_cast<InputScalar>(clampedGridPos.z()) - static_cast<InputScalar>(k0);
 
-  // Get the 8 corner values
-  const Scalar c000 = at(i0, j0, k0);
-  const Scalar c001 = at(i0, j0, k1);
-  const Scalar c010 = at(i0, j1, k0);
-  const Scalar c011 = at(i0, j1, k1);
-  const Scalar c100 = at(i1, j0, k0);
-  const Scalar c101 = at(i1, j0, k1);
-  const Scalar c110 = at(i1, j1, k0);
-  const Scalar c111 = at(i1, j1, k1);
+  // Get the 8 corner values and convert to InputScalar precision for interpolation
+  const auto c000 = static_cast<InputScalar>(at(i0, j0, k0));
+  const auto c001 = static_cast<InputScalar>(at(i0, j0, k1));
+  const auto c010 = static_cast<InputScalar>(at(i0, j1, k0));
+  const auto c011 = static_cast<InputScalar>(at(i0, j1, k1));
+  const auto c100 = static_cast<InputScalar>(at(i1, j0, k0));
+  const auto c101 = static_cast<InputScalar>(at(i1, j0, k1));
+  const auto c110 = static_cast<InputScalar>(at(i1, j1, k0));
+  const auto c111 = static_cast<InputScalar>(at(i1, j1, k1));
 
-  // Trilinear interpolation for value
-  const Scalar c00 = c000 * (Scalar{1} - fx) + c100 * fx;
-  const Scalar c01 = c001 * (Scalar{1} - fx) + c101 * fx;
-  const Scalar c10 = c010 * (Scalar{1} - fx) + c110 * fx;
-  const Scalar c11 = c011 * (Scalar{1} - fx) + c111 * fx;
+  // Trilinear interpolation for value using InputScalar precision
+  const InputScalar c00 = c000 * (InputScalar{1} - fx) + c100 * fx;
+  const InputScalar c01 = c001 * (InputScalar{1} - fx) + c101 * fx;
+  const InputScalar c10 = c010 * (InputScalar{1} - fx) + c110 * fx;
+  const InputScalar c11 = c011 * (InputScalar{1} - fx) + c111 * fx;
 
-  const Scalar c0 = c00 * (Scalar{1} - fy) + c10 * fy;
-  const Scalar c1 = c01 * (Scalar{1} - fy) + c11 * fy;
+  const InputScalar c0 = c00 * (InputScalar{1} - fy) + c10 * fy;
+  const InputScalar c1 = c01 * (InputScalar{1} - fy) + c11 * fy;
 
-  Scalar value = c0 * (Scalar{1} - fz) + c1 * fz;
+  InputScalar value = c0 * (InputScalar{1} - fz) + c1 * fz;
 
   // Calculate offset from original query point to clamped point
-  if (clampedGridPos != gridPos) {
-    const Vector3 clampedWorldPos = gridToWorld(clampedGridPos);
+  const Eigen::Vector3<InputScalar> originalGridPos = worldToGrid<InputScalar>(position);
+  if (clampedGridPos != originalGridPos) {
+    const Eigen::Vector3<InputScalar> clampedWorldPos = gridToWorld<InputScalar>(clampedGridPos);
     value += (position - clampedWorldPos).norm();
   }
 
@@ -105,18 +111,21 @@ ScalarType SignedDistanceField<ScalarType>::sample(const Vector3& position) cons
 }
 
 template <typename ScalarType>
-typename SignedDistanceField<ScalarType>::Vector3 SignedDistanceField<ScalarType>::gradient(
-    const Vector3& position) const {
+template <typename InputScalar>
+Eigen::Vector3<InputScalar> SignedDistanceField<ScalarType>::gradient(
+    const Eigen::Vector3<InputScalar>& position) const {
   return sampleWithGradient(position).second;
 }
 
 template <typename ScalarType>
-std::pair<ScalarType, typename SignedDistanceField<ScalarType>::Vector3>
-SignedDistanceField<ScalarType>::sampleWithGradient(const Vector3& position) const {
-  const Vector3 gridPos = worldToGrid(position);
+template <typename InputScalar>
+std::pair<InputScalar, Eigen::Vector3<InputScalar>>
+SignedDistanceField<ScalarType>::sampleWithGradient(
+    const Eigen::Vector3<InputScalar>& position) const {
+  const Eigen::Vector3<InputScalar> gridPos = worldToGrid(position);
 
   // Clamp to valid grid bounds
-  const Vector3 clampedGridPos = clampToGrid(gridPos);
+  const Eigen::Vector3<InputScalar> clampedGridPos = clampToGrid(gridPos);
 
   // Get the integer grid coordinates of the lower corner
   const auto i0 = static_cast<Index>(std::floor(clampedGridPos.x()));
@@ -128,75 +137,85 @@ SignedDistanceField<ScalarType>::sampleWithGradient(const Vector3& position) con
   const Index j1 = std::min(j0 + 1, resolution_.y() - 1);
   const Index k1 = std::min(k0 + 1, resolution_.z() - 1);
 
-  // Calculate interpolation weights
-  const Scalar fx = clampedGridPos.x() - static_cast<Scalar>(i0);
-  const Scalar fy = clampedGridPos.y() - static_cast<Scalar>(j0);
-  const Scalar fz = clampedGridPos.z() - static_cast<Scalar>(k0);
+  // Calculate interpolation weights using InputScalar precision
+  const InputScalar fx =
+      static_cast<InputScalar>(clampedGridPos.x()) - static_cast<InputScalar>(i0);
+  const InputScalar fy =
+      static_cast<InputScalar>(clampedGridPos.y()) - static_cast<InputScalar>(j0);
+  const InputScalar fz =
+      static_cast<InputScalar>(clampedGridPos.z()) - static_cast<InputScalar>(k0);
 
-  // Get the 8 corner values
-  const Scalar c000 = at(i0, j0, k0);
-  const Scalar c001 = at(i0, j0, k1);
-  const Scalar c010 = at(i0, j1, k0);
-  const Scalar c011 = at(i0, j1, k1);
-  const Scalar c100 = at(i1, j0, k0);
-  const Scalar c101 = at(i1, j0, k1);
-  const Scalar c110 = at(i1, j1, k0);
-  const Scalar c111 = at(i1, j1, k1);
+  // Get the 8 corner values and convert to InputScalar precision for interpolation
+  const auto c000 = static_cast<InputScalar>(at(i0, j0, k0));
+  const auto c001 = static_cast<InputScalar>(at(i0, j0, k1));
+  const auto c010 = static_cast<InputScalar>(at(i0, j1, k0));
+  const auto c011 = static_cast<InputScalar>(at(i0, j1, k1));
+  const auto c100 = static_cast<InputScalar>(at(i1, j0, k0));
+  const auto c101 = static_cast<InputScalar>(at(i1, j0, k1));
+  const auto c110 = static_cast<InputScalar>(at(i1, j1, k0));
+  const auto c111 = static_cast<InputScalar>(at(i1, j1, k1));
 
-  // Trilinear interpolation for value
-  const Scalar c00 = c000 * (Scalar{1} - fx) + c100 * fx;
-  const Scalar c01 = c001 * (Scalar{1} - fx) + c101 * fx;
-  const Scalar c10 = c010 * (Scalar{1} - fx) + c110 * fx;
-  const Scalar c11 = c011 * (Scalar{1} - fx) + c111 * fx;
+  // Trilinear interpolation for value using InputScalar precision
+  const InputScalar c00 = c000 * (InputScalar{1} - fx) + c100 * fx;
+  const InputScalar c01 = c001 * (InputScalar{1} - fx) + c101 * fx;
+  const InputScalar c10 = c010 * (InputScalar{1} - fx) + c110 * fx;
+  const InputScalar c11 = c011 * (InputScalar{1} - fx) + c111 * fx;
 
-  const Scalar c0 = c00 * (Scalar{1} - fy) + c10 * fy;
-  const Scalar c1 = c01 * (Scalar{1} - fy) + c11 * fy;
+  const InputScalar c0 = c00 * (InputScalar{1} - fy) + c10 * fy;
+  const InputScalar c1 = c01 * (InputScalar{1} - fy) + c11 * fy;
 
-  Scalar value = c0 * (Scalar{1} - fz) + c1 * fz;
+  InputScalar value = c0 * (InputScalar{1} - fz) + c1 * fz;
 
   // Calculate offset from original query point to clamped point
-  if (clampedGridPos != gridPos) {
-    const Vector3 clampedWorldPos = gridToWorld(clampedGridPos);
-    const Vector3 offsetVector = position - clampedWorldPos;
-    const auto offsetDistance = offsetVector.norm();
+  const Eigen::Vector3<InputScalar> originalGridPos = worldToGrid(position);
+  if (clampedGridPos != originalGridPos) {
+    const Eigen::Vector3<InputScalar> clampedWorldPos = gridToWorld(clampedGridPos);
+    const Eigen::Vector3<InputScalar> offsetVector = position - clampedWorldPos;
+    const InputScalar offsetDistance = offsetVector.norm();
 
     // If point was outside bounds, add offset distance and use offset gradient
-    if (offsetDistance > Scalar{0}) {
+    if (offsetDistance > InputScalar{0}) {
       return {value + offsetDistance, -(offsetVector / offsetDistance)};
     }
   }
 
-  // Standard analytical gradient computation for points inside the grid bounds
-  const Scalar dfdx_term = (c100 - c000) * (Scalar{1} - fy) * (Scalar{1} - fz) +
-      (c101 - c001) * (Scalar{1} - fy) * fz + (c110 - c010) * fy * (Scalar{1} - fz) +
+  // Standard analytical gradient computation for points inside the grid bounds using InputScalar
+  // precision
+  const InputScalar dfdx_term = (c100 - c000) * (InputScalar{1} - fy) * (InputScalar{1} - fz) +
+      (c101 - c001) * (InputScalar{1} - fy) * fz + (c110 - c010) * fy * (InputScalar{1} - fz) +
       (c111 - c011) * fy * fz;
 
-  const Scalar dfdy_term = (c010 - c000) * (Scalar{1} - fx) * (Scalar{1} - fz) +
-      (c011 - c001) * (Scalar{1} - fx) * fz + (c110 - c100) * fx * (Scalar{1} - fz) +
+  const InputScalar dfdy_term = (c010 - c000) * (InputScalar{1} - fx) * (InputScalar{1} - fz) +
+      (c011 - c001) * (InputScalar{1} - fx) * fz + (c110 - c100) * fx * (InputScalar{1} - fz) +
       (c111 - c101) * fx * fz;
 
-  const Scalar dfdz_term = (c001 - c000) * (Scalar{1} - fx) * (Scalar{1} - fy) +
-      (c011 - c010) * (Scalar{1} - fx) * fy + (c101 - c100) * fx * (Scalar{1} - fy) +
+  const InputScalar dfdz_term = (c001 - c000) * (InputScalar{1} - fx) * (InputScalar{1} - fy) +
+      (c011 - c010) * (InputScalar{1} - fx) * fy + (c101 - c100) * fx * (InputScalar{1} - fy) +
       (c111 - c110) * fx * fy;
 
-  // Transform grid space gradients to world space
-  const Vector3 gradient(
-      dfdx_term / voxelSize_.x(), dfdy_term / voxelSize_.y(), dfdz_term / voxelSize_.z());
+  // Transform grid space gradients to world space using InputScalar precision
+  const Eigen::Vector3<InputScalar> gradient(
+      dfdx_term / static_cast<InputScalar>(voxelSize_.x()),
+      dfdy_term / static_cast<InputScalar>(voxelSize_.y()),
+      dfdz_term / static_cast<InputScalar>(voxelSize_.z()));
 
   return std::make_pair(value, gradient);
 }
 
 template <typename ScalarType>
-typename SignedDistanceField<ScalarType>::Vector3 SignedDistanceField<ScalarType>::worldToGrid(
-    const Vector3& position) const {
-  const Vector3 localPos = position - bounds_.min();
-  return localPos.cwiseQuotient(voxelSize_);
+template <typename InputScalar>
+Eigen::Vector3<InputScalar> SignedDistanceField<ScalarType>::worldToGrid(
+    const Eigen::Vector3<InputScalar>& position) const {
+  const auto localPos = position - bounds_.min().template cast<InputScalar>();
+  return localPos.cwiseQuotient(voxelSize_.template cast<InputScalar>());
 }
 
 template <typename ScalarType>
-typename SignedDistanceField<ScalarType>::Vector3 SignedDistanceField<ScalarType>::gridToWorld(
-    const Vector3& gridPos) const {
-  return bounds_.min() + gridPos.cwiseProduct(voxelSize_);
+template <typename InputScalar>
+typename Eigen::Vector3<InputScalar> SignedDistanceField<ScalarType>::gridToWorld(
+    const Eigen::Vector3<InputScalar>& gridPos) const {
+  return bounds_.min().template cast<InputScalar>() +
+      gridPos.cwiseProduct(voxelSize_.template cast<InputScalar>());
 }
 
 template <typename ScalarType>
@@ -261,17 +280,59 @@ Size SignedDistanceField<ScalarType>::linearIndex(Index i, Index j, Index k) con
 }
 
 template <typename ScalarType>
-typename SignedDistanceField<ScalarType>::Vector3 SignedDistanceField<ScalarType>::clampToGrid(
-    const Vector3& gridPos) const {
-  Vector3 clamped;
-  clamped.x() = std::clamp(gridPos.x(), Scalar{0}, static_cast<Scalar>(resolution_.x() - 1));
-  clamped.y() = std::clamp(gridPos.y(), Scalar{0}, static_cast<Scalar>(resolution_.y() - 1));
-  clamped.z() = std::clamp(gridPos.z(), Scalar{0}, static_cast<Scalar>(resolution_.z() - 1));
-  return clamped;
+template <typename InputScalar>
+Eigen::Vector3<InputScalar> SignedDistanceField<ScalarType>::clampToGrid(
+    const Eigen::Vector3<InputScalar>& gridPos) const {
+  return Eigen::Vector3<InputScalar>(
+      std::clamp(gridPos.x(), InputScalar{0}, static_cast<InputScalar>(resolution_.x() - 1)),
+      std::clamp(gridPos.y(), InputScalar{0}, static_cast<InputScalar>(resolution_.y() - 1)),
+      std::clamp(gridPos.z(), InputScalar{0}, static_cast<InputScalar>(resolution_.z() - 1)));
 }
 
-// Explicit instantiation
+// Explicit instantiation for classes
 template class SignedDistanceField<float>;
 template class SignedDistanceField<double>;
+
+// Explicit instantiation for SignedDistanceField templated methods
+template float SignedDistanceField<float>::sample<float>(const Eigen::Vector3<float>&) const;
+template double SignedDistanceField<float>::sample<double>(const Eigen::Vector3<double>&) const;
+template float SignedDistanceField<double>::sample<float>(const Eigen::Vector3<float>&) const;
+template double SignedDistanceField<double>::sample<double>(const Eigen::Vector3<double>&) const;
+
+template Eigen::Vector3<float> SignedDistanceField<float>::gradient<float>(
+    const Eigen::Vector3<float>&) const;
+template Eigen::Vector3<double> SignedDistanceField<float>::gradient<double>(
+    const Eigen::Vector3<double>&) const;
+template Eigen::Vector3<float> SignedDistanceField<double>::gradient<float>(
+    const Eigen::Vector3<float>&) const;
+template Eigen::Vector3<double> SignedDistanceField<double>::gradient<double>(
+    const Eigen::Vector3<double>&) const;
+
+template std::pair<float, Eigen::Vector3<float>>
+SignedDistanceField<float>::sampleWithGradient<float>(const Eigen::Vector3<float>&) const;
+template std::pair<double, Eigen::Vector3<double>>
+SignedDistanceField<float>::sampleWithGradient<double>(const Eigen::Vector3<double>&) const;
+template std::pair<float, Eigen::Vector3<float>>
+SignedDistanceField<double>::sampleWithGradient<float>(const Eigen::Vector3<float>&) const;
+template std::pair<double, Eigen::Vector3<double>>
+SignedDistanceField<double>::sampleWithGradient<double>(const Eigen::Vector3<double>&) const;
+
+template Eigen::Vector3<float> SignedDistanceField<float>::worldToGrid<float>(
+    const Eigen::Vector3<float>&) const;
+template Eigen::Vector3<double> SignedDistanceField<float>::worldToGrid<double>(
+    const Eigen::Vector3<double>&) const;
+template Eigen::Vector3<float> SignedDistanceField<double>::worldToGrid<float>(
+    const Eigen::Vector3<float>&) const;
+template Eigen::Vector3<double> SignedDistanceField<double>::worldToGrid<double>(
+    const Eigen::Vector3<double>&) const;
+
+template Eigen::Vector3<float> SignedDistanceField<float>::gridToWorld<float>(
+    const Eigen::Vector3<float>&) const;
+template Eigen::Vector3<double> SignedDistanceField<float>::gridToWorld<double>(
+    const Eigen::Vector3<double>&) const;
+template Eigen::Vector3<float> SignedDistanceField<double>::gridToWorld<float>(
+    const Eigen::Vector3<float>&) const;
+template Eigen::Vector3<double> SignedDistanceField<double>::gridToWorld<double>(
+    const Eigen::Vector3<double>&) const;
 
 } // namespace axel
