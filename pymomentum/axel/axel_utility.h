@@ -94,6 +94,80 @@ py::array_t<float> vector3fToArray(const Eigen::Vector3f& vec);
 py::array_t<axel::Index> vector3iToArray(const Eigen::Vector3<axel::Index>& vec);
 
 /**
+ * Templated helper to convert std::vector<Eigen::Vector<ScalarType, N>> to py::array_t<ScalarType>.
+ * Creates a 2D numpy array of shape (vectors.size(), N).
+ *
+ * @tparam ScalarType The scalar type (float, double, int, etc.)
+ * @tparam N The vector width (3 for Vector3, 4 for Vector4, etc.)
+ * @param vectors Vector of Eigen vectors to convert
+ * @return 2D numpy array of shape (vectors.size(), N)
+ */
+template <typename ScalarType, int N>
+py::array_t<ScalarType> eigenVectorsToArray(
+    const std::vector<Eigen::Vector<ScalarType, N>>& vectors) {
+  const std::vector<py::ssize_t> shape = {
+      static_cast<py::ssize_t>(vectors.size()), static_cast<py::ssize_t>(N)};
+  auto result = py::array_t<ScalarType>(shape);
+
+  if (vectors.empty()) {
+    return result;
+  }
+
+  auto data = result.template mutable_unchecked<2>();
+
+  for (size_t i = 0; i < vectors.size(); ++i) {
+    for (int j = 0; j < N; ++j) {
+      data(i, j) = vectors[i][j];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Templated helper to convert py::array_t<ScalarType> to std::vector<Eigen::Vector<ScalarType, N>>.
+ * Expects a 2D numpy array of shape (M, N).
+ *
+ * @tparam ScalarType The scalar type (float, double, int, etc.)
+ * @tparam N The vector width (3 for Vector3, 4 for Vector4, etc.)
+ * @param array 2D numpy array of shape (M, N)
+ * @param parameterName Name for error messages
+ * @return Vector of Eigen vectors
+ */
+template <typename ScalarType, int N>
+std::vector<Eigen::Vector<ScalarType, N>> arrayToEigenVectors(
+    const py::array_t<ScalarType>& array,
+    const char* parameterName) {
+  if (array.ndim() != 2) {
+    throw std::invalid_argument(
+        fmt::format("{} must be a 2D array, got {}D array", parameterName, array.ndim()));
+  }
+
+  if (array.shape(1) != N) {
+    throw std::invalid_argument(
+        fmt::format("{} must have shape (M, {}), got {}", parameterName, N, getArrayDimStr(array)));
+  }
+
+  std::vector<Eigen::Vector<ScalarType, N>> result;
+  result.reserve(array.shape(0));
+
+  auto data = array.template unchecked<2>();
+  for (py::ssize_t i = 0; i < array.shape(0); ++i) {
+    Eigen::Vector<ScalarType, N> vec;
+    for (int j = 0; j < N; ++j) {
+      vec[j] = data(i, j);
+    }
+    result.push_back(vec);
+  }
+
+  return result;
+}
+
+// Note: eigenVectorsToArray and arrayToEigenVectors are the main templated functions to use
+// Common instantiations: eigenVectorsToArray<float, 3>, eigenVectorsToArray<int, 3>,
+// eigenVectorsToArray<int, 4>
+
+/**
  * Validate input positions array for batching operations.
  * Input can be either:
  * - 1D array of shape (3,) for single position
