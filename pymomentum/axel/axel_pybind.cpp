@@ -189,7 +189,7 @@ More efficient than calling sample() and gradient() separately.
           py::arg("positions"))
       .def(
           "world_to_grid",
-          &axel::SignedDistanceField<float>::worldToGrid,
+          &axel::SignedDistanceField<float>::worldToGrid<float>,
           R"(Convert a 3D world-space position to continuous grid coordinates.
 
 :param position: 3D world-space position (x, y, z).
@@ -197,7 +197,7 @@ More efficient than calling sample() and gradient() separately.
           py::arg("position"))
       .def(
           "grid_to_world",
-          &axel::SignedDistanceField<float>::gridToWorld,
+          &axel::SignedDistanceField<float>::gridToWorld<float>,
           R"(Convert continuous grid coordinates to 3D world-space position.
 
 :param grid_pos: Continuous grid coordinates.

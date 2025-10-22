@@ -203,8 +203,7 @@ void rasterizeTriangleToNarrowBand(
   for (Index i = startIdx.x(); i <= endIdx.x(); ++i) {
     for (Index j = startIdx.y(); j <= endIdx.y(); ++j) {
       for (Index k = startIdx.z(); k <= endIdx.z(); ++k) {
-        const Vector3i voxelIdx(i, j, k);
-        const Vector3 worldPos = sdf.gridToWorld(voxelIdx.template cast<ScalarType>());
+        const Vector3 worldPos = sdf.gridLocation(i, j, k);
 
         // Calculate distance from voxel center to triangle
         Vector3 closestPoint;

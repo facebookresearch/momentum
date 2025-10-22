@@ -89,7 +89,8 @@ class SignedDistanceField {
    * @param position 3D world-space position to query
    * @return Interpolated signed distance value
    */
-  [[nodiscard]] Scalar sample(const Vector3& position) const;
+  template <typename InputScalar = Scalar>
+  [[nodiscard]] InputScalar sample(const Eigen::Vector3<InputScalar>& position) const;
 
   /**
    * Sample the SDF gradient at a continuous 3D position using analytical gradients
@@ -98,7 +99,9 @@ class SignedDistanceField {
    * @param position 3D world-space position to query
    * @return Gradient vector at the given position
    */
-  [[nodiscard]] Vector3 gradient(const Vector3& position) const;
+  template <typename InputScalar = Scalar>
+  [[nodiscard]] Eigen::Vector3<InputScalar> gradient(
+      const Eigen::Vector3<InputScalar>& position) const;
 
   /**
    * Sample both the SDF value and gradient at a continuous 3D position using
@@ -108,7 +111,9 @@ class SignedDistanceField {
    * @param position 3D world-space position to query
    * @return Pair of (value, gradient) at the given position
    */
-  [[nodiscard]] std::pair<Scalar, Vector3> sampleWithGradient(const Vector3& position) const;
+  template <typename InputScalar = Scalar>
+  [[nodiscard]] std::pair<InputScalar, Eigen::Vector3<InputScalar>> sampleWithGradient(
+      const Eigen::Vector3<InputScalar>& position) const;
 
   /**
    * Convert a 3D world-space position to continuous grid coordinates.
@@ -116,7 +121,9 @@ class SignedDistanceField {
    * @param position 3D world-space position
    * @return Continuous grid coordinates (may be fractional)
    */
-  [[nodiscard]] Vector3 worldToGrid(const Vector3& position) const;
+  template <typename InputScalar = Scalar>
+  [[nodiscard]] Eigen::Vector3<InputScalar> worldToGrid(
+      const Eigen::Vector3<InputScalar>& position) const;
 
   /**
    * Convert continuous grid coordinates to 3D world-space position.
@@ -124,7 +131,9 @@ class SignedDistanceField {
    * @param gridPos Continuous grid coordinates
    * @return 3D world-space position
    */
-  [[nodiscard]] Vector3 gridToWorld(const Vector3& gridPos) const;
+  template <typename InputScalar = Scalar>
+  [[nodiscard]] Eigen::Vector3<InputScalar> gridToWorld(
+      const Eigen::Vector3<InputScalar>& gridPos) const;
 
   /**
    * Get the world-space position of a grid cell center given discrete indices.
@@ -220,7 +229,9 @@ class SignedDistanceField {
    * @param gridPos Input grid coordinates
    * @return Clamped grid coordinates
    */
-  [[nodiscard]] Vector3 clampToGrid(const Vector3& gridPos) const;
+  template <typename InputScalar = Scalar>
+  [[nodiscard]] Eigen::Vector3<InputScalar> clampToGrid(
+      const Eigen::Vector3<InputScalar>& gridPos) const;
 
   BoundingBoxType bounds_;
   Eigen::Vector3<Index> resolution_;
