@@ -21,6 +21,14 @@
 
 namespace momentum {
 
+struct GltfOptions {
+  bool extensions = true;
+  bool collisions = true;
+  bool locators = true;
+  bool mesh = true;
+  bool blendShapes = true;
+};
+
 Character loadGltfCharacter(const fx::gltf::Document& model);
 
 Character loadGltfCharacter(const filesystem::path& gltfFilename);
@@ -97,7 +105,8 @@ fx::gltf::Document makeCharacterDocument(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     const std::vector<std::vector<Marker>>& markerSequence = {},
-    bool embedResource = true);
+    bool embedResource = true,
+    const GltfOptions& options = GltfOptions());
 
 /// Saves character motion to a glb file.
 ///
@@ -112,7 +121,8 @@ void saveCharacter(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     const std::vector<std::vector<Marker>>& markerSequence = {},
-    GltfFileFormat fileFormat = GltfFileFormat::Extension);
+    GltfFileFormat fileFormat = GltfFileFormat::Extension,
+    const GltfOptions& options = GltfOptions());
 
 /// Saves character skeleton states to a glb file.
 ///
@@ -124,13 +134,15 @@ void saveCharacter(
     float fps,
     gsl::span<const SkeletonState> skeletonStates,
     const std::vector<std::vector<Marker>>& markerSequence = {},
-    GltfFileFormat fileFormat = GltfFileFormat::Extension);
+    GltfFileFormat fileFormat = GltfFileFormat::Extension,
+    const GltfOptions& options = GltfOptions());
 
 std::vector<std::byte> saveCharacterToBytes(
     const Character& character,
     float fps = 120.0f,
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
-    const std::vector<std::vector<Marker>>& markerSequence = {});
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    const GltfOptions& options = GltfOptions());
 
 } // namespace momentum
