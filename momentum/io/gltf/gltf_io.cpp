@@ -419,28 +419,46 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
   MT_CHECK(col.empty() || col.size() == pos.size(), "col: {}, pos: {}", col.size(), pos.size());
   MT_LOGT_IF(col.empty(), "no vertex color found");
 
-  // load optional texcoord buffer
+  // NOTE: gltf does not support multiple texcoords per vertex, so we only load the GLTF texcoords
+  //       if we don't have our own custom extension
+  const auto& extension = getMomentumExtension(primitive);
   std::vector<Vector2f> texcoord;
-  auto texcoordId = primitive.attributes.find("TEXCOORD_0");
-  if (texcoordId != primitive.attributes.end()) {
-    texcoord = copyAccessorBuffer<Vector2f>(model, texcoordId->second);
-  }
-  MT_CHECK(
-      texcoord.empty() || texcoord.size() == pos.size(),
-      "texcoord: {}, pos: {}",
-      texcoord.size(),
-      pos.size());
-  MT_LOGT_IF(texcoord.empty(), "no texture coords found");
+  std::vector<Vector3i> texfaces;
+  if (extension.count("texcoords") > 0 && extension.count("texfaces") > 0) {
+    texcoord = copyAccessorBuffer<Vector2f>(model, extension.at("texcoords"));
 
-  const auto kVertexOffset = mesh->vertices.size();
-  // Update vertex indices of the faces!!!
-  if (kVertexOffset > 0) {
-    for (size_t iFace = 0; iFace < idx.size(); ++iFace) {
-      idx[iFace][0] += kVertexOffset;
-      idx[iFace][1] += kVertexOffset;
-      idx[iFace][2] += kVertexOffset;
+    // load "face index buffer
+    auto fidxDense = copyAccessorBuffer<uint32_t>(model, extension.at("texfaces"));
+    MT_CHECK(fidxDense.size() % 3 == 0, "{} % 3 = {}", fidxDense.size(), fidxDense.size() % 3);
+    texfaces.resize(fidxDense.size() / 3);
+    if (fidxDense.size() > 0) {
+      std::copy_n(fidxDense.data(), fidxDense.size(), &texfaces[0][0]);
     }
+  } else {
+    // load optional standard GLTF texcoord buffer
+    auto texcoordId = primitive.attributes.find("TEXCOORD_0");
+    if (texcoordId != primitive.attributes.end()) {
+      texcoord = copyAccessorBuffer<Vector2f>(model, texcoordId->second);
+    }
+    const auto kVertexOffset = mesh->vertices.size();
+    // Update vertex indices of the faces!!!
+    if (kVertexOffset > 0) {
+      for (auto&& iFace : idx) {
+        iFace[0] += kVertexOffset;
+        iFace[1] += kVertexOffset;
+        iFace[2] += kVertexOffset;
+      }
+    }
+    if (texcoord.size() == pos.size()) {
+      texfaces = idx;
+    }
+    MT_CHECK(
+        texcoord.empty() || texcoord.size() == pos.size(),
+        "texcoord: {}, pos: {}",
+        texcoord.size(),
+        pos.size());
   }
+  MT_LOGT_IF(texcoord.empty(), "no texture coords found");
 
   // append new faces
   mesh->faces.insert(mesh->faces.end(), idx.begin(), idx.end());
@@ -448,9 +466,7 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
   mesh->normals.insert(mesh->normals.end(), nml.begin(), nml.end());
   mesh->colors.insert(mesh->colors.end(), col.begin(), col.end());
   mesh->texcoords.insert(mesh->texcoords.end(), texcoord.begin(), texcoord.end());
-  if (!mesh->texcoords.empty()) {
-    mesh->texcoord_faces = mesh->faces;
-  }
+  mesh->texcoord_faces.insert(mesh->texcoord_faces.end(), texfaces.begin(), texfaces.end());
 
   // make sure we have enough normals and colors
   mesh->normals.resize(mesh->vertices.size(), Vector3f::Zero());
