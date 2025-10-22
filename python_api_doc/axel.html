@@ -76,8 +76,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.world_to_grid"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.world_to_grid()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.fill_holes"><code class="docutils literal notranslate"><span class="pre">fill_holes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.mesh_to_sdf"><code class="docutils literal notranslate"><span class="pre">mesh_to_sdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.triangulate_quads"><code class="docutils literal notranslate"><span class="pre">triangulate_quads()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
@@ -402,11 +404,67 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.dual_contouring">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isovalue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangulate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.dual_contouring" title="Link to this definition"></a></dt>
+<dd><p>Extract an isosurface from a signed distance field using dual contouring.</p>
+<p>Dual contouring places vertices inside grid cells and generates quad faces between
+adjacent cells that both contain vertices. This naturally produces quads rather than
+triangles, which better preserves surface topology and reduces mesh artifacts.</p>
+<p>The algorithm works by:
+1. Finding all cells that intersect the isosurface (sign changes across cell corners)
+2. Placing one vertex at each intersecting cell, positioned on the surface using gradient descent
+3. Generating quads for each edge crossing that connects 4 adjacent cells</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> – The <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a> to extract the isosurface from.</p></li>
+<li><p><strong>isovalue</strong> – The isovalue to extract (typically 0.0 for zero level set). Default: 0.0</p></li>
+<li><p><strong>triangulate</strong> – Whether to triangulate the quads (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (vertices, normals, quads) where:
+- vertices: 2D array of shape (N, 3) with vertex positions
+- normals: 2D array of shape (N, 3) with vertex normals (computed from SDF gradients)
+- quads: Quad indices of shape (M, 4) connecting the vertices</p>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="c1"># Create a sphere SDF</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span>
+    <span class="n">min_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">]),</span>
+    <span class="n">max_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
+<span class="p">)</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">SignedDistanceField</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+
+<span class="c1"># Fill with sphere distance values</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">resolution</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">grid_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">world_pos</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">grid_to_world</span><span class="p">(</span><span class="n">grid_pos</span><span class="p">)</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">world_pos</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>  <span class="c1"># Unit sphere</span>
+            <span class="n">sdf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span>
+
+<span class="c1"># Extract mesh (always returns quads)</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">quads</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">isovalue</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span><span class="si">}</span><span class="s2"> quads&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertex normals have shape: </span><span class="si">{</span><span class="n">normals</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.axel.fill_holes">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">fill_holes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.fill_holes" title="Link to this definition"></a></dt>
 <dd><p>Fill holes in a triangle mesh to create a watertight surface.</p>
-<p>This function identifies holes in the mesh and fills them with new triangles using 
-an advancing front method. The result is a complete mesh suitable for operations 
+<p>This function identifies holes in the mesh and fills them with new triangles using
+an advancing front method. The result is a complete mesh suitable for operations
 that require watertight surfaces, such as SDF generation.</p>
 <p>For small holes (≤6 vertices), a centroid-based fan triangulation is used.
 For larger holes, an ear clipping algorithm is applied.</p>
@@ -467,13 +525,13 @@ Indices must be valid within the vertices array.</p></li>
 <p>Convert a triangle mesh to a signed distance field using modern 3-step approach.</p>
 <p>This function creates a high-quality signed distance field from a triangle mesh using:
 1. Narrow band initialization with exact triangle distances
-2. Fast marching propagation using Eikonal equation  
+2. Fast marching propagation using Eikonal equation
 3. Sign determination using ray casting</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>vertices</strong> – Vertex positions as 2D array of shape (N, 3) where N is number of vertices.</p></li>
-<li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles. 
+<li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
 Indices must be valid within the vertices array.</p></li>
 <li><p><strong>bounds</strong> – Spatial bounds for the SDF as a <a class="reference internal" href="#pymomentum.axel.BoundingBox" title="pymomentum.axel.BoundingBox"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundingBox</span></code></a>.</p></li>
 <li><p><strong>resolution</strong> – Grid resolution as 1D array of shape (3,) containing (nx, ny, nz).</p></li>
@@ -504,7 +562,7 @@ Indices must be valid within the vertices array.</p></li>
 <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
 <span class="n">bounds</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span>
-    <span class="n">min_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">]),</span> 
+    <span class="n">min_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">]),</span>
     <span class="n">max_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>
 <span class="p">)</span>
 <span class="n">resolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
@@ -542,7 +600,7 @@ adds padding, and creates a signed distance field.</p>
 <span class="c1"># Create a simple tetrahedron mesh</span>
 <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
-    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> 
+    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
     <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
     <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
 <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -555,6 +613,37 @@ adds padding, and creates a signed distance field.</p>
 
 <span class="c1"># Automatically compute bounds with 20% padding</span>
 <span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.triangulate_quads">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">triangulate_quads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.axel.triangulate_quads" title="Link to this definition"></a></dt>
+<dd><p>Triangulate a quad mesh into triangles.</p>
+<p>Each quad is split into two triangles using the diagonal (0,2).
+This converts a quad mesh (as produced by dual contouring) into a triangle mesh
+suitable for rendering or processing with triangle-based algorithms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>quads</strong> – Quad indices as 2D array of shape (M, 4) where M is number of quads.
+Each row contains 4 vertex indices defining a quad.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Triangle indices as 2D array of shape (2M, 3) where each quad produces 2 triangles.</p>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="c1"># Get quads from dual contouring</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">quads</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Convert to triangles if needed for rendering</span>
+<span class="n">triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">triangulate_quads</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span><span class="si">}</span><span class="s2"> quads to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
