@@ -7,6 +7,7 @@
 
 #include "momentum/character_solver/trust_region_qr.h"
 
+#include "momentum/character/mesh_state.h"
 #include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/log.h"
 #include "momentum/common/profile.h"
@@ -60,6 +61,11 @@ void TrustRegionQRT<T>::doIteration() {
     skeletonState_.set(parameterTransform->apply(this->parameters_), *skeleton);
   }
 
+  if (sf->needsMeshState()) {
+    MT_PROFILE_EVENT("JtJR - update mesh state");
+    meshState_.update(this->parameters_, skeletonState_, sf->getCharacter());
+  }
+
   const auto nFullParams = gsl::narrow_cast<Eigen::Index>(this->parameters_.size());
 
   std::vector<Eigen::Index> enabledParameters;
@@ -92,7 +98,7 @@ void TrustRegionQRT<T>::doIteration() {
 
     int usedRows = 0;
     error_orig += errorFunction->getJacobian(
-        this->parameters_, skeletonState_, jacobian_.mat(), residual_.mat(), usedRows);
+        this->parameters_, skeletonState_, meshState_, jacobian_.mat(), residual_.mat(), usedRows);
     if (usedRows == 0) {
       continue;
     }

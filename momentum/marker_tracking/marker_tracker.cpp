@@ -8,7 +8,9 @@
 #include "momentum/marker_tracking/marker_tracker.h"
 
 #include "momentum/character/character.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_limits.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
@@ -276,7 +278,7 @@ Eigen::MatrixXf trackSequence(
   std::sort(sortedFrames.begin(), sortedFrames.end());
   size_t solvedFrames = sortedFrames.size();
   auto solverFunc = SequenceSolverFunction(
-      &character.skeleton, &character.parameterTransform, universalParams, solvedFrames);
+      character, character.parameterTransform, universalParams, solvedFrames);
 
   // floor penetration constraints; we assume the world is y-up and floor is y=0 for mocap data.
   const auto& floorConstraints = createFloorConstraints<float>(
@@ -477,7 +479,7 @@ Eigen::MatrixXf trackPosesPerframe(
   }
 
   // set up the solver
-  auto solverFunc = SkeletonSolverFunction(&character.skeleton, &pt);
+  auto solverFunc = SkeletonSolverFunction(character, pt);
   GaussNewtonSolverOptions solverOptions;
   solverOptions.maxIterations = config.maxIter;
   solverOptions.minIterations = 2;
@@ -664,7 +666,7 @@ Eigen::MatrixXf trackPosesForFrames(
   }
 
   // set up the solver
-  auto solverFunc = SkeletonSolverFunction(&character.skeleton, &pt);
+  auto solverFunc = SkeletonSolverFunction(character, pt);
   GaussNewtonSolverOptions solverOptions;
   solverOptions.maxIterations = config.maxIter;
   solverOptions.minIterations = 2;

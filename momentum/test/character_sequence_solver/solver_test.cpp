@@ -171,7 +171,7 @@ TYPED_TEST(SequenceSolverTest, CompareSequenceMultiPose) {
   MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
-      &character.skeleton, &castedCharacterParameterTransform, problem.universalParams, nFrames);
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     sequenceSolverFunction.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
     sequenceSolverFunction.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
@@ -235,7 +235,7 @@ TYPED_TEST(SequenceSolverTest, CompareGaussNewton) {
   MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
-      &character.skeleton, &castedCharacterParameterTransform, problem.universalParams, nFrames);
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     sequenceSolverFunction.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
     sequenceSolverFunction.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
@@ -275,7 +275,7 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
   MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
-      &character.skeleton, &castedCharacterParameterTransform, problem.universalParams, nFrames);
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     sequenceSolverFunction.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
     sequenceSolverFunction.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
@@ -327,9 +327,9 @@ TYPED_TEST(SequenceSolverTest, OnlySharedParams) {
   MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
-      &character.skeleton, &castedCharacterParameterTransform, universalParams, nFrames);
+      character, castedCharacterParameterTransform, universalParams, nFrames);
   momentum::ParameterTransformT<T> parameterTransform = character.parameterTransform.cast<T>();
-  SkeletonSolverFunctionT<T> basicSolverFunction(&character.skeleton, &parameterTransform);
+  SkeletonSolverFunctionT<T> basicSolverFunction(character, parameterTransform);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     sequenceSolverFunction.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
     sequenceSolverFunction.addErrorFunction(iFrame, problem.orientErrors[iFrame]);

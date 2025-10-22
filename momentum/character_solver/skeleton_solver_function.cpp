@@ -7,24 +7,39 @@
 
 #include "momentum/character_solver/skeleton_solver_function.h"
 
+#include "momentum/character/blend_shape.h"
+#include "momentum/character/blend_shape_base.h"
+#include "momentum/character/blend_shape_skinning.h"
+#include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/common/profile.h"
 
 namespace momentum {
 
 template <typename T>
 SkeletonSolverFunctionT<T>::SkeletonSolverFunctionT(
-    const Skeleton* skel,
-    const ParameterTransformT<T>* parameterTransform)
-    : skeleton_(skel), parameterTransform_(parameterTransform) {
-  this->numParameters_ = parameterTransform_->numAllModelParameters();
+    const Character& character,
+    const ParameterTransformT<T>& parameterTransform,
+    gsl::span<const std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions)
+    : character_(character), parameterTransform_(parameterTransform), needsMeshState_(false) {
+  this->numParameters_ = parameterTransform_.numAllModelParameters();
   this->actualParameters_ = this->numParameters_;
-  state_ = std::make_unique<SkeletonStateT<T>>(parameterTransform_->zero(), *skeleton_);
-  activeJointParams_ = parameterTransform_->activeJointParams;
+  state_ = std::make_unique<SkeletonStateT<T>>(parameterTransform_.zero(), character_.skeleton);
+  activeJointParams_ = parameterTransform_.activeJointParams;
+  meshState_ = std::make_unique<MeshStateT<T>>();
+
+  for (auto& errf : errorFunctions) {
+    addErrorFunction(std::move(errf));
+  }
 }
+
+template <typename T>
+SkeletonSolverFunctionT<T>::~SkeletonSolverFunctionT() = default;
 
 template <typename T>
 void SkeletonSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
@@ -36,7 +51,7 @@ void SkeletonSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
     }
   }
   // set the enabled joints based on the parameter set
-  activeJointParams_ = parameterTransform_->computeActiveJointParams(ps);
+  activeJointParams_ = parameterTransform_.computeActiveJointParams(ps);
 
   // give data to helper functions
   for (auto&& solvable : errorFunctions_) {
@@ -48,14 +63,19 @@ void SkeletonSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
 template <typename T>
 double SkeletonSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters) {
   // update the state according to the transformed parameters
-  state_->set(parameterTransform_->apply(parameters), *skeleton_, false);
+  state_->set(parameterTransform_.apply(parameters), character_.skeleton, false);
+
+  // Update mesh state if needed
+  if (needsMeshState()) {
+    updateMeshState(parameters, *state_);
+  }
 
   double error = 0.0;
 
   // sum up error for all solvables
   for (auto&& solvable : errorFunctions_) {
     if (solvable->getWeight() > 0.0f) {
-      error += (double)solvable->getError(parameters, *state_);
+      error += (double)solvable->getError(parameters, *state_, *meshState_);
     }
   }
 
@@ -67,7 +87,12 @@ double SkeletonSolverFunctionT<T>::getGradient(
     const Eigen::VectorX<T>& parameters,
     Eigen::VectorX<T>& gradient) {
   // update the state according to the transformed parameters
-  state_->set(parameterTransform_->apply(parameters), *skeleton_);
+  state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+
+  // Update mesh state if needed
+  if (needsMeshState()) {
+    updateMeshState(parameters, *state_);
+  }
 
   double error = 0.0;
 
@@ -78,7 +103,7 @@ double SkeletonSolverFunctionT<T>::getGradient(
   gradient.setZero();
   for (auto&& solvable : errorFunctions_) {
     if (solvable->getWeight() > 0.0f) {
-      error += solvable->getGradient(parameters, *state_, gradient);
+      error += solvable->getGradient(parameters, *state_, *meshState_, gradient);
     }
   }
 
@@ -116,7 +141,12 @@ double SkeletonSolverFunctionT<T>::getJacobian(
   // update the state according to the transformed parameters
   {
     MT_PROFILE_EVENT("Set state");
-    state_->set(parameterTransform_->apply(parameters), *skeleton_);
+    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+  }
+
+  // Update mesh state if needed
+  if (needsMeshState()) {
+    updateMeshState(parameters, *state_);
   }
 
   double error = 0.0;
@@ -151,6 +181,7 @@ double SkeletonSolverFunctionT<T>::getJacobian(
       error += solvable->getJacobian(
           parameters,
           *state_,
+          *meshState_,
           jacobian.block(position, 0, n, parameters.size()),
           residual.middleRows(position, n),
           rows);
@@ -172,7 +203,12 @@ double SkeletonSolverFunctionT<T>::getJtJR(
   // update the state according to the transformed parameters
   {
     MT_PROFILE_EVENT("JtJR - update state");
-    state_->set(parameterTransform_->apply(parameters), *skeleton_);
+    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+  }
+
+  // Update mesh state if needed
+  if (needsMeshState()) {
+    updateMeshState(parameters, *state_);
   }
 
   // calculate the jacobian size
@@ -215,6 +251,7 @@ double SkeletonSolverFunctionT<T>::getJtJR(
       error += solvable->getJacobian(
           parameters,
           *state_,
+          *meshState_,
           tJacobian_.block(position, 0, n, n_parameters),
           tResidual_.segment(position, n),
           rows);
@@ -254,7 +291,12 @@ double SkeletonSolverFunctionT<T>::getSolverDerivatives(
   // update the state according to the transformed parameters
   {
     MT_PROFILE_EVENT("UpdateState");
-    state_->set(parameterTransform_->apply(parameters), *skeleton_);
+    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+  }
+
+  // Update mesh state if needed
+  if (needsMeshState()) {
+    updateMeshState(parameters, *state_);
   }
 
   if (hess.cols() != gsl::narrow_cast<Eigen::Index>(this->actualParameters_)) {
@@ -269,8 +311,8 @@ double SkeletonSolverFunctionT<T>::getSolverDerivatives(
   for (size_t i = 0; i < errorFunctions_.size(); i++) {
     const auto& solvable = errorFunctions_[i];
     if (solvable->getWeight() > 0.0f) {
-      error +=
-          solvable->getSolverDerivatives(parameters, *state_, this->actualParameters_, hess, grad);
+      error += solvable->getSolverDerivatives(
+          parameters, *state_, *meshState_, this->actualParameters_, hess, grad);
     }
   }
 
@@ -289,6 +331,10 @@ void SkeletonSolverFunctionT<T>::updateParameters(
 template <typename T>
 void SkeletonSolverFunctionT<T>::addErrorFunction(
     std::shared_ptr<SkeletonErrorFunctionT<T>> solvable) {
+  // Update mesh state requirement if this error function needs mesh
+  if (solvable->needsMesh()) {
+    needsMeshState_ = true;
+  }
   errorFunctions_.push_back(std::move(solvable));
 }
 
@@ -301,6 +347,22 @@ template <typename T>
 const std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>>&
 SkeletonSolverFunctionT<T>::getErrorFunctions() const {
   return errorFunctions_;
+}
+
+template <typename T>
+bool SkeletonSolverFunctionT<T>::needsMeshState() const {
+  return needsMeshState_;
+}
+
+template <typename T>
+void SkeletonSolverFunctionT<T>::updateMeshState(
+    const ModelParametersT<T>& parameters,
+    const SkeletonStateT<T>& state) {
+  if (!needsMeshState()) {
+    return; // Skip if no error functions need mesh
+  }
+
+  meshState_->update(parameters, state, character_);
 }
 
 template class SkeletonSolverFunctionT<float>;

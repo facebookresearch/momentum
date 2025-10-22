@@ -234,7 +234,8 @@ void SimdCollisionErrorFunctionT<T>::computeBroadPhase(const SkeletonStateT<T>& 
 template <typename T>
 double SimdCollisionErrorFunctionT<T>::getError(
     const ModelParametersT<T>& /*unused*/,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   if (state.jointState.empty()) {
     return 0.0;
   }
@@ -283,6 +284,7 @@ template <typename T>
 double SimdCollisionErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& /*unused*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<VectorX<T>> gradient) {
   if (state.jointState.empty()) {
     return 0.0;
@@ -475,6 +477,7 @@ template <typename T>
 double SimdCollisionErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& /*unused*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<MatrixX<T>> jacobian,
     Ref<VectorX<T>> residual,
     int& usedRows) {

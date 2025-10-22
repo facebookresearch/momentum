@@ -43,14 +43,17 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
 
   [[nodiscard]] double getError(
       const momentum::ModelParametersT<T>& params,
-      const momentum::SkeletonStateT<T>& state) final;
+      const momentum::SkeletonStateT<T>& state,
+      const momentum::MeshStateT<T>& meshState) final;
   double getGradient(
       const momentum::ModelParametersT<T>& params,
       const momentum::SkeletonStateT<T>& state,
+      const momentum::MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::VectorX<T>> gradient) final;
   double getJacobian(
       const momentum::ModelParametersT<T>& params,
       const momentum::SkeletonStateT<T>& state,
+      const momentum::MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;

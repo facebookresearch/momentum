@@ -87,16 +87,21 @@ class SimdPositionErrorFunction : public SkeletonErrorFunction {
       const Character& character,
       uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
-  [[nodiscard]] double getError(const ModelParameters& params, const SkeletonState& state) override;
+  [[nodiscard]] double getError(
+      const ModelParameters& params,
+      const SkeletonState& state,
+      const MeshState& /* unused */) override;
 
   double getGradient(
       const ModelParameters& params,
       const SkeletonState& state,
+      const MeshState& /* unused */,
       Ref<VectorXf> gradient) override;
 
   double getJacobian(
       const ModelParameters& /* params */,
       const SkeletonState& state,
+      const MeshState& /* unused */,
       Ref<MatrixXf> jacobian,
       Ref<VectorXf> residual,
       int& usedRows) override;
@@ -133,16 +138,21 @@ class SimdPositionErrorFunctionAVX : public SimdPositionErrorFunction {
       const Character& character,
       uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
-  double getError(const ModelParameters& params, const SkeletonState& state) final;
+  double getError(
+      const ModelParameters& params,
+      const SkeletonState& state,
+      const MeshState& /* unused */) final;
 
   double getGradient(
       const ModelParameters& params,
       const SkeletonState& state,
+      const MeshState& /* unused */,
       Ref<VectorXf> gradient) final;
 
   double getJacobian(
       const ModelParameters& params,
       const SkeletonState& state,
+      const MeshState& /* unused */,
       Ref<MatrixXf> jacobian,
       Ref<VectorXf> residual,
       int& usedRows) final;

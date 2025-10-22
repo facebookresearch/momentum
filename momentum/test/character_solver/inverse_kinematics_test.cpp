@@ -44,7 +44,7 @@ void testSimpleTargets(const SolverOptionsT& options) {
   VectorX<T> optimizedParameters = parameters;
 
   // create skeleton solvable
-  SkeletonSolverFunctionT<T> solverFunction(&skeleton, &castedCharacterParameterTransform);
+  SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
   // create marker solvable
   auto errorFunction = std::make_shared<PositionErrorFunctionT<T>>(skeleton, transform);

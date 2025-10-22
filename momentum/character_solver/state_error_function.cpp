@@ -85,8 +85,9 @@ void StateErrorFunctionT<T>::setRotationTargetWeights(const Eigen::VectorX<T>& r
 
 template <typename T>
 double StateErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& params,
-    const SkeletonStateT<T>& state) {
+    const ModelParametersT<T>& /* parameters */,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   if (state.jointState.empty()) {
@@ -131,6 +132,7 @@ template <typename T>
 double StateErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 
@@ -242,8 +244,9 @@ size_t StateErrorFunctionT<T>::getJacobianSize() const {
 
 template <typename T>
 double StateErrorFunctionT<T>::getJacobian(
-    const ModelParametersT<T>& params,
+    const ModelParametersT<T>& /* parameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

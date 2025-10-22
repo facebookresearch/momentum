@@ -34,6 +34,12 @@ class SkeletonErrorFunctionT {
     return parameterTransform_;
   }
 
+  /// For mesh-based error functions, get access to the underlying character.  Error functions
+  /// that depend only on the skeleton can return nullptr.
+  [[nodiscard]] virtual const Character* getCharacter() const {
+    return nullptr;
+  }
+
   void setWeight(T w) {
     weight_ = w;
   }
@@ -52,13 +58,15 @@ class SkeletonErrorFunctionT {
 
   virtual double getError(
       const ModelParametersT<T>& /* params */,
-      const SkeletonStateT<T>& /* state */) {
+      const SkeletonStateT<T>& /* state */,
+      const MeshStateT<T>& /* meshState */) {
     return 0.0f;
   }
 
   virtual double getGradient(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
+      const MeshStateT<T>& /* meshState */,
       Eigen::Ref<Eigen::VectorX<T>> /* gradient */) {
     return 0.0f;
   }
@@ -66,6 +74,7 @@ class SkeletonErrorFunctionT {
   virtual double getJacobian(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
+      const MeshStateT<T>& /* meshState */,
       Eigen::Ref<Eigen::MatrixX<T>> /* jacobian */,
       Eigen::Ref<Eigen::VectorX<T>> /* residual */,
       int& usedRows) {
@@ -76,6 +85,7 @@ class SkeletonErrorFunctionT {
   virtual void getHessian(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,
+      const MeshStateT<T>& /* meshState */,
       Eigen::Ref<Eigen::MatrixX<T>> /* hessian */) {
     throw;
   }
@@ -83,6 +93,7 @@ class SkeletonErrorFunctionT {
   virtual double getSolverDerivatives(
       const ModelParametersT<T>& parameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const size_t actualParameters,
       Eigen::MatrixX<T>& hess,
       Eigen::VectorX<T>& grad) {
@@ -91,15 +102,15 @@ class SkeletonErrorFunctionT {
 
     if (useHessian_) {
       // get some ice cream, you deserve it
-      error = getGradient(parameters, state, grad);
-      getHessian(parameters, state, hess);
+      error = getGradient(parameters, state, meshState, grad);
+      getHessian(parameters, state, meshState, hess);
     } else {
       const int residualSize = static_cast<int>(getJacobianSize());
 
       Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(residualSize, paramSize);
       Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(residualSize);
       int rows = 0;
-      error = getJacobian(parameters, state, jacobian, residual, rows);
+      error = getJacobian(parameters, state, meshState, jacobian, residual, rows);
 
       // Update JtJ
       if (rows > 0) {
@@ -122,6 +133,10 @@ class SkeletonErrorFunctionT {
 
   [[nodiscard]] virtual size_t getJacobianSize() const {
     return 0;
+  }
+
+  [[nodiscard]] virtual bool needsMesh() const {
+    return false;
   }
 
  protected:

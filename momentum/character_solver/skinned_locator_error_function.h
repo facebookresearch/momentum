@@ -62,7 +62,8 @@ class SkinnedLocatorErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// @return The sum of weighted squared distances between locators and targets
   [[nodiscard]] double getError(
       const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state) final;
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */) final;
 
   /// Computes the gradient of the error function with respect to model parameters.
   ///
@@ -73,6 +74,7 @@ class SkinnedLocatorErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double getGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */,
       Eigen::Ref<Eigen::VectorX<T>> gradient) final;
 
   /// Computes the Jacobian matrix and residual vector for the error function.
@@ -86,6 +88,7 @@ class SkinnedLocatorErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double getJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;
@@ -114,8 +117,8 @@ class SkinnedLocatorErrorFunctionT : public SkeletonErrorFunctionT<T> {
   }
 
   /// Returns the character associated with this error function.
-  [[nodiscard]] const Character& getCharacter() const {
-    return character_;
+  [[nodiscard]] const Character* getCharacter() const override {
+    return &character_;
   }
 
  private:

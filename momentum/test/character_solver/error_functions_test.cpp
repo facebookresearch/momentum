@@ -14,6 +14,7 @@
 
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
@@ -104,14 +105,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(1e-7f, 1e-15));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
-      TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 1e-11));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 1e-11));
     }
   }
 
@@ -128,14 +127,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(1e-7f, 1e-15));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
-      TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-3f, 1e-10));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(5e-3f, 1e-10));
     }
   }
 
@@ -153,14 +150,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(1e-3f, 5e-12));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
-      TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 1e-10));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 1e-10));
     }
   }
 
@@ -200,18 +195,17 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
     const SkeletonStateT<T> skelStateBefore(
         character.parameterTransform.cast<T>().apply(parametersBefore), character.skeleton);
     Eigen::VectorX<T> gradBefore = VectorX<T>::Zero(transform.numAllModelParameters());
-    errorFunction.getGradient(parametersBefore, skelStateBefore, gradBefore);
+    errorFunction.getGradient(parametersBefore, skelStateBefore, MeshStateT<T>(), gradBefore);
     TEST_GRADIENT_AND_JACOBIAN(
-        T, &errorFunction, parametersBefore, skeleton, transform, Eps<T>(1e-3f, 1e-10));
+        T, &errorFunction, parametersBefore, character, Eps<T>(1e-3f, 1e-10));
 
     ModelParametersT<T> parametersAfter = VectorX<T>::Zero(transform.numAllModelParameters());
     parametersAfter(limit.data.linear.targetIndex) = -2.99f;
     const SkeletonStateT<T> skelStateAfter(
         character.parameterTransform.cast<T>().apply(parametersAfter), character.skeleton);
     Eigen::VectorX<T> gradAfter = VectorX<T>::Zero(transform.numAllModelParameters());
-    errorFunction.getGradient(parametersAfter, skelStateAfter, gradAfter);
-    TEST_GRADIENT_AND_JACOBIAN(
-        T, &errorFunction, parametersAfter, skeleton, transform, Eps<T>(1e-3f, 1e-10));
+    errorFunction.getGradient(parametersAfter, skelStateAfter, MeshStateT<T>(), gradAfter);
+    TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parametersAfter, character, Eps<T>(1e-3f, 1e-10));
 
     // Gradient won't be the same at the point 3.0:
     ModelParametersT<T> parametersMid = VectorX<T>::Zero(transform.numAllModelParameters());
@@ -220,9 +214,11 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         character.parameterTransform.cast<T>().apply(parametersMid), character.skeleton);
 
     // Verify that the error is C0 continuous:
-    const float errorBefore = errorFunction.getError(parametersBefore, skelStateBefore);
-    const float errorMid = errorFunction.getError(parametersMid, skelStateMid);
-    const float errorAfter = errorFunction.getError(parametersAfter, skelStateAfter);
+    const float errorBefore =
+        errorFunction.getError(parametersBefore, skelStateBefore, MeshStateT<T>());
+    const float errorMid = errorFunction.getError(parametersMid, skelStateMid, MeshStateT<T>());
+    const float errorAfter =
+        errorFunction.getError(parametersAfter, skelStateAfter, MeshStateT<T>());
 
     ASSERT_NEAR(errorBefore, errorMid, 0.03f);
     ASSERT_NEAR(errorMid, errorAfter, 0.03f);
@@ -279,18 +275,20 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
       const SkeletonStateT<T> skelStateBefore(
           character.parameterTransform.cast<T>().apply(parametersBefore), character.skeleton);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parametersBefore, skeleton, transform, Eps<T>(5e-2f, 1e-10));
+          T, &errorFunction, parametersBefore, character, Eps<T>(5e-2f, 1e-10));
 
       ModelParametersT<T> parametersAfter = VectorX<T>::Zero(transform.numAllModelParameters());
       parametersAfter(rz_param) = testPos + 0.001f;
       const SkeletonStateT<T> skelStateAfter(
           character.parameterTransform.cast<T>().apply(parametersAfter), character.skeleton);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parametersAfter, skeleton, transform, Eps<T>(5e-2f, 1e-10));
+          T, &errorFunction, parametersAfter, character, Eps<T>(5e-2f, 1e-10));
 
       // Verify that the error is C0 continuous:
-      const float errorBefore = errorFunction.getError(parametersBefore, skelStateBefore);
-      const float errorAfter = errorFunction.getError(parametersAfter, skelStateAfter);
+      const float errorBefore =
+          errorFunction.getError(parametersBefore, skelStateBefore, MeshStateT<T>());
+      const float errorAfter =
+          errorFunction.getError(parametersAfter, skelStateAfter, MeshStateT<T>());
       ASSERT_NEAR(errorAfter, errorBefore, 0.03f);
 
       // Make sure the parameter actually varies:
@@ -320,14 +318,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-3f, 5e-12));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
-      TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 1e-10));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 1e-10));
     }
   }
 
@@ -378,14 +374,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, StateError_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(2e-5f, 1e-3));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
-      TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(1e-2f, 5e-6));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 5e-6));
     }
   }
 }
@@ -431,8 +425,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexVertexDistanceError_GradientsAndJa
         T,
         &errorFunction,
         modelParams,
-        character_orig.skeleton,
-        character_orig.parameterTransform.cast<T>(),
+        character_orig,
         Eps<T>(5e-2f, 1e-5),
         Eps<T>(1e-6f, 1e-14),
         true,
@@ -473,8 +466,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexVertexDistanceError_GradientsAndJa
         T,
         &errorFunction,
         modelParams,
-        character_blend.skeleton,
-        character_blend.parameterTransform.cast<T>(),
+        character_blend,
         Eps<T>(1e-2f, 1e-5),
         Eps<T>(1e-6f, 1e-14),
         true,
@@ -511,7 +503,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexVertexDistanceError_GradientsAndJa
     // Add constraint with the actual distance as target
     errorFunction.addConstraint(vertexIndex1, vertexIndex2, T(1.0), actualDistance);
 
-    const double error = errorFunction.getError(modelParams, skelState);
+    const double error = errorFunction.getError(
+        modelParams, skelState, MeshStateT<T>(modelParams, skelState, character));
     EXPECT_NEAR(error, 0.0, Eps<T>(1e-10f, 1e-15));
   }
 }
@@ -539,14 +532,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ModelParametersError_GradientsAndJacobia
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(1e-7f, 1e-15));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
-      TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-3f, 1e-10));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(5e-3f, 1e-10));
     }
   }
 }
@@ -564,29 +555,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ModelParametersError_RegularizeBlendWeig
       errorFunction.getError(
           modelParams,
           SkeletonStateT<T>(
-              character.parameterTransform.cast<T>().apply(modelParams), character.skeleton)),
+              character.parameterTransform.cast<T>().apply(modelParams), character.skeleton),
+          MeshStateT<T>()),
       0);
   TEST_GRADIENT_AND_JACOBIAN(
-      T,
-      &errorFunction,
-      modelParams,
-      character.skeleton,
-      character.parameterTransform.cast<T>(),
-      Eps<T>(1e-3f, 1e-10),
-      Eps<T>(1e-7f, 1e-7),
-      true);
+      T, &errorFunction, modelParams, character, Eps<T>(1e-3f, 1e-10), Eps<T>(1e-7f, 1e-7), true);
 
   ModelParametersErrorFunctionT<T> errorFunction2(
       character, character.parameterTransform.getScalingParameters());
   TEST_GRADIENT_AND_JACOBIAN(
-      T,
-      &errorFunction2,
-      modelParams,
-      character.skeleton,
-      character.parameterTransform.cast<T>(),
-      Eps<T>(1e-3f, 5e-12),
-      Eps<T>(1e-6f, 1e-7),
-      true);
+      T, &errorFunction2, modelParams, character, Eps<T>(1e-3f, 5e-12), Eps<T>(1e-6f, 1e-7), true);
 }
 
 TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
@@ -594,32 +572,24 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PosePriorError_GradientsAndJacobians) {
 
   // create skeleton and reference values
   const Character character = createTestCharacter();
-  const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
   PosePriorErrorFunctionT<T> errorFunction(
-      skeleton, character.parameterTransform, createDefaultPosePrior<T>());
+      character.skeleton, character.parameterTransform, createDefaultPosePrior<T>());
 
   TEST_GRADIENT_AND_JACOBIAN(
       T,
       &errorFunction,
       ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-      skeleton,
-      transform,
+      character,
       Eps<T>(1e-1f, 1e-10),
       Eps<T>(1e-5f, 5e-6));
 
   for (size_t i = 0; i < 3; i++) {
     ModelParametersT<T> parameters = uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
     TEST_GRADIENT_AND_JACOBIAN(
-        T,
-        &errorFunction,
-        parameters,
-        skeleton,
-        transform,
-        Eps<T>(5e-1f, 1e-9),
-        Eps<T>(5e-5f, 5e-6));
+        T, &errorFunction, parameters, character, Eps<T>(5e-1f, 1e-9), Eps<T>(5e-5f, 5e-6));
   }
 }
 
@@ -628,7 +598,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobian
 
   // Create a test character with skinned locators
   const Character character = getSkinnedLocatorTestCharacter();
-  const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
   // Verify that the character has skinned locators
   ASSERT_GT(character.skinnedLocators.size(), 2);
@@ -646,8 +615,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobian
   // Test with random parameters
   for (size_t i = 0; i < 10; i++) {
     ModelParametersT<T> parameters = uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
-    TEST_GRADIENT_AND_JACOBIAN(
-        T, &errorFunction, parameters, skeleton, transform, Eps<T>(5e-2f, 5e-6));
+    TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(5e-2f, 5e-6));
   }
 }
 
@@ -656,7 +624,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_Gradien
 
   // Create a test character with skinned locators
   const Character character = getSkinnedLocatorTestCharacter();
-  const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // Verify that the character has skinned locators
@@ -685,7 +652,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_Gradien
       ModelParametersT<T> parameters =
           0.25 * uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, skeleton, transform, Eps<T>(0.03, 5e-4), true, true);
+          T, &errorFunction, parameters, character, Eps<T>(0.03, 5e-4), true, true);
     }
   }
 }
@@ -712,6 +679,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
   PositionErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   SkeletonStateT<T> bindState(transform.apply(parameters), skeleton);
   SkeletonStateT<T> state(transform.apply(parameters), skeleton);
+  MeshStateT<T> meshState;
   TransformationListT<T> bindpose;
   for (const auto& js : bindState.jointState) {
     bindpose.push_back(js.transform.inverse().toAffine3());
@@ -745,7 +713,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
 
       // check error
       gradient.setZero();
-      T gradientError = errorFunction.getGradient(parameters, bindState, gradient);
+      T gradientError = errorFunction.getGradient(parameters, bindState, meshState, gradient);
       EXPECT_NEAR(gradientError, 0, Eps<T>(1e-15f, 1e-15));
       EXPECT_LE(gradient.norm(), Eps<T>(1e-7f, 1e-7));
 
@@ -766,7 +734,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
         errorFunction.setConstraints(cl);
 
         gradient.setZero();
-        gradientError = errorFunction.getGradient(parameters, state, gradient);
+        gradientError = errorFunction.getGradient(parameters, state, meshState, gradient);
         auto numError = (v[vi] - target).squaredNorm();
         EXPECT_NEAR(gradientError, numError, Eps<T>(1e-5f, 1e-5));
 
@@ -871,8 +839,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
           T,
           &errorFunction,
           modelParams,
-          character_orig.skeleton,
-          character_orig.parameterTransform.cast<T>(),
+          character_orig,
           errorTol,
           Eps<T>(1e-6f, 1e-14),
           true,
@@ -924,8 +891,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
           T,
           &errorFunction,
           modelParams,
-          character_blend.skeleton,
-          character_blend.parameterTransform.cast<T>(),
+          character_blend,
           Eps<T>(1e-2f, 1e-5),
           Eps<T>(1e-6f, 1e-14),
           true,
@@ -996,8 +962,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
         T,
         &errorFunction,
         modelParams,
-        character_orig.skeleton,
-        character_orig.parameterTransform.cast<T>(),
+        character_orig,
         errorTol,
         Eps<T>(1e-6f, 1e-15),
         true,
@@ -1055,8 +1020,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
         T,
         &errorFunction,
         modelParams,
-        character_orig.skeleton,
-        character_orig.parameterTransform.cast<T>(),
+        character_orig,
         errorTol,
         Eps<T>(1e-6f, 1e-14),
         true,
@@ -1106,8 +1070,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
         T,
         &errorFunction,
         modelParams,
-        character_blend.skeleton,
-        character_blend.parameterTransform.cast<T>(),
+        character_blend,
         Eps<T>(1e-2f, 1e-5),
         Eps<T>(1e-6f, 1e-14),
         true,
@@ -1176,15 +1139,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
     SkeletonStateT<T> state(transform.apply(modelParams), skeleton);
 
     // Test error calculation
-    double error = errorFunction.getError(modelParams, state);
+    double error =
+        errorFunction.getError(modelParams, state, MeshStateT<T>(modelParams, state, character));
     EXPECT_GT(error, 0);
 
     TEST_GRADIENT_AND_JACOBIAN(
         T,
         &errorFunction,
         modelParams,
-        character.skeleton,
-        character.parameterTransform.cast<T>(),
+        character,
         Eps<T>(5e-2f, 5e-4),
         Eps<T>(1e-6f, 1e-13),
         true,
@@ -1218,8 +1181,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
           T,
           &errorFunction,
           modelParams,
-          character_blend.skeleton,
-          character_blend.parameterTransform.cast<T>(),
+          character_blend,
           Eps<T>(5e-2f, 1e-5),
           Eps<T>(1e-6f, 5e-16),
           true,
@@ -1249,8 +1211,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
           T,
           &errorFunction,
           modelParams,
-          character_blend.skeleton,
-          character_blend.parameterTransform.cast<T>(),
+          character_blend,
           Eps<T>(1e-2f, 1e-5),
           Eps<T>(1e-6f, 5e-16),
           true,
@@ -1284,20 +1245,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL2_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-2f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(5e-2f, 5e-6),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(5e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1327,8 +1281,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL1_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-2f, 5e-9),
         Eps<T>(1e-6f, 1e-7),
         false,
@@ -1340,8 +1293,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL1_GradientsAndJacobians) {
           T,
           &errorFunction,
           parameters,
-          skeleton,
-          transform,
+          character,
           Eps<T>(5e-2f, 5e-9),
           Eps<T>(1e-6f, 1e-7),
           false,
@@ -1375,8 +1327,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorCauchy_GradientsAndJacobian
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-2f, 5e-9),
         Eps<T>(1e-6f, 1e-7),
         false,
@@ -1388,8 +1339,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorCauchy_GradientsAndJacobian
           T,
           &errorFunction,
           parameters,
-          skeleton,
-          transform,
+          character,
           Eps<T>(5e-2f, 5e-9),
           Eps<T>(1e-6f, 1e-7),
           false,
@@ -1423,8 +1373,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorWelsch_GradientsAndJacobian
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-2f, 5e-9),
         Eps<T>(1e-6f, 1e-7),
         false,
@@ -1436,8 +1385,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorWelsch_GradientsAndJacobian
           T,
           &errorFunction,
           parameters,
-          skeleton,
-          transform,
+          character,
           Eps<T>(1e-1f, 5e-9),
           Eps<T>(1e-6f, 1e-7),
           false,
@@ -1471,8 +1419,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorGeneral_GradientsAndJacobia
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(1e-1f, 5e-9),
         Eps<T>(1e-6f, 1e-7),
         false,
@@ -1484,8 +1431,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorGeneral_GradientsAndJacobia
           T,
           &errorFunction,
           parameters,
-          skeleton,
-          transform,
+          character,
           Eps<T>(5e-1f, 5e-9),
           Eps<T>(1e-6f, 1e-7),
           false,
@@ -1526,21 +1472,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneErrorL2_GradientsAndJacobians) {
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-2f, 5e-6));
 
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(5e-2f, 1e-5),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(5e-2f, 1e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1577,21 +1516,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, HalfPlaneErrorL2_GradientsAndJacobians) 
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(1e-2f, 5e-6));
 
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(5e-2f, 5e-6),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(5e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1627,20 +1559,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(0.03f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(0.05f, 5e-6),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(0.05f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1669,20 +1594,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
         T,
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        character,
         Eps<T>(5e-2f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(8e-2f, 5e-6),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(8e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1693,7 +1611,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
-  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
   FixedAxisCosErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
@@ -1710,21 +1627,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
     TEST_GRADIENT_AND_JACOBIAN(
         T,
         &errorFunction,
-        ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-        skeleton,
-        transform,
+        ModelParametersT<T>::Zero(character.parameterTransform.numAllModelParameters()),
+        character,
         Eps<T>(2e-2f, 1e-4));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
+          uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(5e-2f, 1e-4),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(5e-2f, 1e-4), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1756,16 +1666,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           5e-2f);
     } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           2e-2f,
           1e-6,
           true,
@@ -1775,13 +1683,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(2e-1f, 5e-5),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(2e-1f, 5e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1791,11 +1693,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
 
   // create skeleton and reference values
   const Character character = createTestCharacter();
-  const Skeleton& skeleton = character.skeleton;
-  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   // create constraints
-  NormalErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
+  NormalErrorFunctionT<T> errorFunction(character.skeleton, character.parameterTransform);
   const T TEST_WEIGHT_VALUE = 4.5;
   {
     SCOPED_TRACE("Normal Constraint Test");
@@ -1818,17 +1718,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
-          ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          ModelParametersT<T>::Zero(character.parameterTransform.numAllModelParameters()),
+          character,
           2e-2f);
     } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
-          ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          ModelParametersT<T>::Zero(character.parameterTransform.numAllModelParameters()),
+          character,
           1e-8,
           1e-6,
           true,
@@ -1836,15 +1734,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
     }
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
+          uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(1e-1f, 2e-5),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 2e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1882,16 +1774,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           1e-2f);
     } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           1e-8,
           1e-6,
           true,
@@ -1901,13 +1791,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(1e-1f, 2e-5),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 2e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1945,16 +1829,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDirError_GradientsAndJacobians) {
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           5e-2f);
     } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           1e-8,
           1e-6,
           true,
@@ -1964,13 +1846,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDirError_GradientsAndJacobians) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(1e-1f, 3e-5),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 3e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -2005,16 +1881,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           5e-2f);
     } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           5e-3,
           1e-6,
           true,
@@ -2025,15 +1899,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), 0.0f, 1.0f);
       const momentum::SkeletonStateT<T> skelState(transform.apply(parameters), skeleton);
-      ASSERT_GT(errorFunction.getError(parameters, skelState), 0);
+      ASSERT_GT(errorFunction.getError(parameters, skelState, MeshStateT<T>()), 0);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(1e-1f, 5e-3),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 5e-3), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -2064,16 +1932,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           5e-2f);
     } else if constexpr (std::is_same_v<T, double>) {
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           ModelParametersT<T>::Zero(transform.numAllModelParameters()),
-          skeleton,
-          transform,
+          character,
           1e-8,
           1e-6,
           true,
@@ -2083,13 +1949,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
       TEST_GRADIENT_AND_JACOBIAN(
-          T,
-          &errorFunction,
-          parameters,
-          skeleton,
-          transform,
-          Eps<T>(1e-1f, 2e-5),
-          Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 2e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }

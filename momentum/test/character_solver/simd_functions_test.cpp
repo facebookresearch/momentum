@@ -19,6 +19,7 @@
 #include "momentum/character_solver/position_error_function.h"
 
 #include "momentum/character/character.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
@@ -258,10 +259,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SimdCollisionErrorFunctionIsSame) {
     const JointParametersT<T> jp = transform.apply(mp);
     const SkeletonStateT<T> skelState(jp, skeleton);
 
-    const double err_base = errf_base.getError(mp, skelState);
-    const double err_stateless = errf_stateless.getError(mp, skelState);
+    const double err_base = errf_base.getError(mp, skelState, MeshStateT<T>());
+    const double err_stateless = errf_stateless.getError(mp, skelState, MeshStateT<T>());
 #ifdef MOMENTUM_ENABLE_SIMD
-    const double err_simd = errf_simd.getError(mp, skelState);
+    const double err_simd = errf_simd.getError(mp, skelState, MeshStateT<T>());
 #endif
     ASSERT_NEAR(err_base, err_stateless, 0.0001 * err_base);
 #ifdef MOMENTUM_ENABLE_SIMD
@@ -309,8 +310,8 @@ TEST(Momentum_ErrorFunctions, DISABLED_SimdCollisionErrorFunctionIsFaster) {
     const JointParameters jp = transform.apply(mp);
     const SkeletonState skelState(jp, skeleton);
 
-    const double err_base = errf_base.getError(mp, skelState);
-    const double err_simd = errf_simd.getError(mp, skelState);
+    const double err_base = errf_base.getError(mp, skelState, MeshState());
+    const double err_simd = errf_simd.getError(mp, skelState, MeshState());
     ASSERT_NEAR(err_simd, err_base, 0.0001 * err_base);
 
     timeJacobian(character, errf_simd, mp, "Simd");

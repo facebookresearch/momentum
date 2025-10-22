@@ -105,7 +105,8 @@ SimdPositionErrorFunction::SimdPositionErrorFunction(
 
 double SimdPositionErrorFunction::getError(
     const ModelParameters& /* params */,
-    const SkeletonState& state) {
+    const SkeletonState& state,
+    const MeshState& /* unused */) {
   if (constraints_ == nullptr) {
     return 0.0f;
   }
@@ -154,6 +155,7 @@ double SimdPositionErrorFunction::getError(
 double SimdPositionErrorFunction::getGradient(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* unused */,
     Ref<VectorXf> gradient) {
   if (constraints_ == nullptr) {
     return 0.0f;
@@ -296,6 +298,7 @@ __vectorcall DRJIT_INLINE void jacobian_jointParams_to_modelParams(
 double SimdPositionErrorFunction::getJacobian(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* unused */,
     Ref<MatrixXf> jacobian,
     Ref<VectorXf> residual,
     int& usedRows) {
@@ -530,7 +533,8 @@ SimdPositionErrorFunctionAVX::SimdPositionErrorFunctionAVX(
 
 double SimdPositionErrorFunctionAVX::getError(
     const ModelParameters& /* params */,
-    const SkeletonState& state) {
+    const SkeletonState& state,
+    const MeshState& /* meshState */) {
   double error = 0.0;
 
   if (constraints_ == nullptr) {
@@ -601,6 +605,7 @@ double SimdPositionErrorFunctionAVX::getError(
 double SimdPositionErrorFunctionAVX::getGradient(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* meshState */,
     Ref<VectorXf> gradient) {
   if (constraints_ == nullptr) {
     return 0.0f;
@@ -787,6 +792,7 @@ double SimdPositionErrorFunctionAVX::getGradient(
 double SimdPositionErrorFunctionAVX::getJacobian(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* meshState */,
     Ref<MatrixXf> jacobian,
     Ref<VectorXf> residual,
     int& usedRows) {

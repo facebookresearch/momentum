@@ -132,10 +132,10 @@ class SequenceSolverT : public SolverT<T> {
       const SequenceSolverFunctionT<T>* fn,
       size_t bandwidth);
 
-  float regularization_;
-  bool doLineSearch_;
-  bool multithreaded_;
-  bool progressBar_;
+  float regularization_ = 0.05f;
+  bool doLineSearch_ = false;
+  bool multithreaded_ = false;
+  bool progressBar_ = false;
 
   // bandwidth in frames:
   size_t bandwidth_ = 0;

@@ -166,6 +166,7 @@ character_public_headers = [
     "character/locator_state.h",
     "character/locator.h",
     "character/marker.h",
+    "character/mesh_state.h",
     "character/pose_shape.h",
     "character/skinned_locator.h",
     "character/skin_weights.h",
@@ -182,6 +183,7 @@ character_sources = [
     "character/inverse_parameter_transform.cpp",
     "character/linear_skinning.cpp",
     "character/locator_state.cpp",
+    "character/mesh_state.cpp",
     "character/pose_shape.cpp",
     "character/skin_weights.cpp",
 ]

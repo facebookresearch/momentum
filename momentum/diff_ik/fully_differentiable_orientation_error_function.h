@@ -60,16 +60,21 @@ class FullyDifferentiableOrientationErrorFunctionT
       const SkeletonStateT<T>& state,
       Eigen::Ref<const Eigen::VectorX<T>> inputVec) final;
 
-  double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state) final;
+  double getError(
+      const ModelParametersT<T>& params,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */) final;
 
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */,
       Ref<Eigen::VectorX<T>> gradient) final;
 
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */,
       Ref<Eigen::MatrixX<T>> jacobian,
       Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;

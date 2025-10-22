@@ -6,6 +6,7 @@
  */
 
 #include <momentum/character/character.h>
+#include <momentum/character/mesh_state.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_sequence_solver/sequence_error_function.h>
@@ -67,7 +68,13 @@ PYBIND11_MODULE(solver2, m) {
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
             const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
-            return self.getError(params, state);
+            momentum::MeshState meshState;
+            if (self.needsMesh()) {
+              const auto* character = self.getCharacter();
+              MT_THROW_IF(character == nullptr, "Character is null but mesh is required.");
+              meshState.update(params, state, *character);
+            }
+            return self.getError(params, state, meshState);
           },
           R"(Compute the error for a given set of model parameters.
 
@@ -83,8 +90,14 @@ If you want to compute the error of multiple error functions, consider wrapping 
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
             const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
+            momentum::MeshState meshState;
+            if (self.needsMesh()) {
+              const auto* character = self.getCharacter();
+              MT_THROW_IF(character == nullptr, "Character is null but mesh is required.");
+              meshState.update(params, state, *character);
+            }
             Eigen::VectorXf gradient = Eigen::VectorXf::Zero(pt.numAllModelParameters());
-            self.getGradient(params, state, gradient);
+            self.getGradient(params, state, meshState, gradient);
             return gradient;
           },
           R"(Compute the gradient for a given set of model parameters.
@@ -101,11 +114,19 @@ If you want to compute the gradient of multiple error functions, consider wrappi
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
             const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
+
+            momentum::MeshState meshState;
+            if (self.needsMesh()) {
+              const auto* character = self.getCharacter();
+              MT_THROW_IF(character == nullptr, "Character is null but mesh is required.");
+              meshState.update(params, state, *character);
+            }
+
             const auto jacSize = self.getJacobianSize();
             Eigen::MatrixXf jacobian = Eigen::MatrixXf::Zero(jacSize, pt.numAllModelParameters());
             Eigen::VectorXf residual = Eigen::VectorXf::Zero(jacSize);
             int usedRows = 0;
-            self.getJacobian(params, state, jacobian, residual, usedRows);
+            self.getJacobian(params, state, meshState, jacobian, residual, usedRows);
             return {residual.head(usedRows), jacobian.topRows(usedRows)};
           },
           R"(Compute the jacobian and residual for a given set of model parameters.
@@ -151,7 +172,7 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
               [](const mm::Character& character,
                  const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>& errorFunctions) {
                 auto result = std::make_shared<mm::SkeletonSolverFunction>(
-                    &character.skeleton, &character.parameterTransform);
+                    character, character.parameterTransform);
                 for (const auto& errorFunction : errorFunctions) {
                   validateErrorFunctionMatchesCharacter(*result, *errorFunction);
                   result->addErrorFunction(errorFunction);
@@ -247,8 +268,8 @@ Note that if you're trying to actually solve a problem using SGD, you should con
                         size_t nFrames,
                         const std::optional<py::array_t<bool>>& shared_parameters) {
             auto result = std::make_shared<mm::SequenceSolverFunction>(
-                &character.skeleton,
-                &character.parameterTransform,
+                character,
+                character.parameterTransform,
                 arrayToParameterSet(shared_parameters, character.parameterTransform, false),
                 nFrames);
             return result;

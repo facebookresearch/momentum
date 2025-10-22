@@ -276,6 +276,12 @@ void validateVertexIndex(int vertexIndex, const char* name, const momentum::Char
   }
 }
 
+void validateVertexIndex(int vertexIndex, const char* name, const momentum::Character* character) {
+  MT_THROW_IF_T(
+      character == nullptr, py::value_error, "Character is null, cannot validate {}", name);
+  validateVertexIndex(vertexIndex, name, *character);
+}
+
 void validateVertexIndex(
     const pybind11::array_t<int>& vertexIndex,
     const char* name,
@@ -286,6 +292,15 @@ void validateVertexIndex(
   }
 
   validateIndexArray(vertexIndex, name, "vertex index", character.mesh->vertices.size());
+}
+
+void validateVertexIndex(
+    const pybind11::array_t<int>& vertexIndex,
+    const char* name,
+    const momentum::Character* character) {
+  MT_THROW_IF_T(
+      character == nullptr, py::value_error, "Character is null, cannot validate {}", name);
+  validateVertexIndex(vertexIndex, name, *character);
 }
 
 mm::TransformList toTransformList(const py::array_t<float>& array) {

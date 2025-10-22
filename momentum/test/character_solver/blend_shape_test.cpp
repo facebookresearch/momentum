@@ -155,8 +155,7 @@ TYPED_TEST(BlendShapesTest, Fitting) {
       targetMesh);
 
   // Use IK to fit the pose + blend shapes.
-  SkeletonSolverFunctionT<T> solverFunction(
-      &characterBlend.skeleton, &castedCharacterBlendParameterTransform);
+  SkeletonSolverFunctionT<T> solverFunction(characterBlend, castedCharacterBlendParameterTransform);
 
   auto errorFunction = std::make_shared<VertexErrorFunctionT<T>>(characterBlend);
   for (size_t iVert = 0; iVert < targetMesh.vertices.size(); ++iVert) {

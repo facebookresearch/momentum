@@ -116,8 +116,9 @@ std::vector<Vector2i> CollisionErrorFunctionStatelessT<T>::getCollisionPairs() c
 
 template <typename T>
 double CollisionErrorFunctionStatelessT<T>::getError(
-    const ModelParametersT<T>& /*unused*/,
-    const SkeletonStateT<T>& state) {
+    const ModelParametersT<T>& /* params */,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   if (state.jointState.empty()) {
     return 0.0;
   }
@@ -164,8 +165,9 @@ double CollisionErrorFunctionStatelessT<T>::getError(
 
 template <typename T>
 double CollisionErrorFunctionStatelessT<T>::getGradient(
-    const ModelParametersT<T>& /*unused*/,
+    const ModelParametersT<T>& /* params */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<VectorX<T>> gradient) {
   if (state.jointState.empty()) {
     return 0.0;
@@ -333,8 +335,9 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
 
 template <typename T>
 double CollisionErrorFunctionStatelessT<T>::getJacobian(
-    const ModelParametersT<T>& /*unused*/,
+    const ModelParametersT<T>& /* params */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<MatrixX<T>> jacobian,
     Ref<VectorX<T>> residual,
     int& usedRows) {

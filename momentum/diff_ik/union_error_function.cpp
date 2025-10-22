@@ -66,10 +66,11 @@ UnionErrorFunctionT<T>::UnionErrorFunctionT(
 template <typename T>
 double UnionErrorFunctionT<T>::getError(
     const ModelParametersT<T>& params,
-    const SkeletonStateT<T>& skeletonState) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState) {
   double error = 0;
   for (auto& fun : errorFunctions_) {
-    error += fun->getError(params, skeletonState);
+    error += fun->getError(params, state, meshState);
   }
   return this->weight_ * error;
 }
@@ -77,11 +78,12 @@ double UnionErrorFunctionT<T>::getError(
 template <typename T>
 double UnionErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& params,
-    const SkeletonStateT<T>& skeletonState,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
   for (auto& fun : errorFunctions_) {
-    error += fun->getGradient(params, skeletonState, gradient);
+    error += fun->getGradient(params, state, meshState, gradient);
   }
   gradient *= this->weight_;
   return this->weight_ * error;
@@ -90,7 +92,8 @@ double UnionErrorFunctionT<T>::getGradient(
 template <typename T>
 double UnionErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& params,
-    const SkeletonStateT<T>& skeletonState,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
@@ -101,7 +104,8 @@ double UnionErrorFunctionT<T>::getJacobian(
 
     error += fun->getJacobian(
         params,
-        skeletonState,
+        state,
+        meshState,
         jacobian.block(jacobianStart, 0, memberJacobianSize, jacobian.cols()),
         residual.segment(jacobianStart, memberJacobianSize),
         usedRows);

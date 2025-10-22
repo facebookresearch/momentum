@@ -9,6 +9,7 @@
 
 #include <gtest/gtest.h>
 #include <momentum/character/character.h>
+#include <momentum/character/mesh_state.h>
 #include <momentum/character/parameter_transform.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
@@ -44,12 +45,12 @@ namespace {
 // derivatives around the rest pose.
 template <typename T>
 void testConstraintDerivs(
-    const Skeleton& skeleton,
-    const ParameterTransform& paramTransform_in,
+    const Character& character,
     SkeletonErrorFunctionT<T>& errorFunction,
     const bool useRestPose,
     const Eigen::Vector3d& bodyCenter_world = Eigen::Vector3d::Zero()) {
-  const ParameterTransformT<T> paramTransform = paramTransform_in.cast<T>();
+  const ParameterTransformT<T> paramTransform = character.parameterTransform.cast<T>();
+  const Skeleton& skeleton = character.skeleton;
 
   const T w_init = errorFunction.getWeight();
   const T TEST_WEIGHT = 3.5f;
@@ -68,7 +69,7 @@ void testConstraintDerivs(
     if (iTest == 0 && useRestPose) {
       curModelParam.v.setConstant(0);
     } else {
-      curModelParam = randomBodyParameters(paramTransform_in, rng).cast<T>();
+      curModelParam = randomBodyParameters(character.parameterTransform, rng).cast<T>();
     }
 
     // Apply the global transform
@@ -83,8 +84,12 @@ void testConstraintDerivs(
 
     JointParametersT<T> curJointParams = paramTransform.apply(curModelParam);
     SkeletonStateT<T> skelState(curJointParams, skeleton);
+    MeshStateT<T> meshState;
+    if (errorFunction.needsMesh()) {
+      meshState.update(curModelParam, skelState, character);
+    }
 
-    const double curError = errorFunction.getError(curModelParam, skelState);
+    const double curError = errorFunction.getError(curModelParam, skelState, meshState);
 
     const auto nResidTerms = errorFunction.getJacobianSize();
     Eigen::VectorX<T> residualCur = Eigen::VectorX<T>::Zero(nResidTerms);
@@ -93,8 +98,8 @@ void testConstraintDerivs(
     ASSERT_EQ(nResidTerms, jacobianCur.rows());
     ASSERT_EQ(paramTransform.numAllModelParameters(), jacobianCur.cols());
     int usedRows = 0;
-    auto error3 =
-        errorFunction.getJacobian(curModelParam, skelState, jacobianCur, residualCur, usedRows);
+    auto error3 = errorFunction.getJacobian(
+        curModelParam, skelState, meshState, jacobianCur, residualCur, usedRows);
     EXPECT_LE(relativeError(curError, (double)error3), 1e-4);
 
     // make sure usedRows is correct:
@@ -118,13 +123,22 @@ void testConstraintDerivs(
       const SkeletonStateT<T> skelState_p(paramTransform.apply(modelParam_p), skeleton);
       const SkeletonStateT<T> skelState_m(paramTransform.apply(modelParam_m), skeleton);
 
+      MeshStateT<T> meshState_p;
+      MeshStateT<T> meshState_m;
+      if (errorFunction.needsMesh()) {
+        meshState_p.update(modelParam_p, skelState_p, character);
+        meshState_m.update(modelParam_m, skelState_m, character);
+      }
+
       Eigen::VectorX<T> residual_p = Eigen::VectorX<T>::Zero(nResidTerms);
       Eigen::MatrixX<T> jacobian_p = Eigen::MatrixX<T>::Zero(nResidTerms, nParam);
-      errorFunction.getJacobian(modelParam_p, skelState_p, jacobian_p, residual_p, usedRows);
+      errorFunction.getJacobian(
+          modelParam_p, skelState_p, meshState_p, jacobian_p, residual_p, usedRows);
 
       Eigen::VectorX<T> residual_m = Eigen::VectorX<T>::Zero(nResidTerms);
       Eigen::MatrixX<T> jacobian_m = Eigen::MatrixX<T>::Zero(nResidTerms, nParam);
-      errorFunction.getJacobian(modelParam_m, skelState_m, jacobian_m, residual_m, usedRows);
+      errorFunction.getJacobian(
+          modelParam_m, skelState_m, meshState_m, jacobian_m, residual_m, usedRows);
 
       for (size_t k = 0; k < nResidTerms; ++k) {
         const double jacEst = ((double)residual_p(k) - (double)residual_m(k)) / (2.0 * (double)eps);
@@ -140,7 +154,7 @@ void testConstraintDerivs(
 
     Eigen::VectorX<T> gradient(nParam);
     gradient.setZero();
-    auto error2 = errorFunction.getGradient(curModelParam, skelState, gradient);
+    auto error2 = errorFunction.getGradient(curModelParam, skelState, meshState, gradient);
     EXPECT_LE(relativeError(curError, (double)error2), 1e-4);
 
     const Eigen::VectorXd grad2 =
@@ -164,8 +178,15 @@ void testConstraintDerivs(
       const SkeletonStateT<T> skelState_p(paramTransform.apply(modelParam_p), skeleton);
       const SkeletonStateT<T> skelState_m(paramTransform.apply(modelParam_m), skeleton);
 
-      const double error_p = errorFunction.getError(modelParam_p, skelState_p);
-      const double error_m = errorFunction.getError(modelParam_m, skelState_m);
+      MeshStateT<T> meshState_p;
+      MeshStateT<T> meshState_m;
+      if (errorFunction.needsMesh()) {
+        meshState_p.update(modelParam_p, skelState_p, character);
+        meshState_m.update(modelParam_m, skelState_m, character);
+      }
+
+      const double error_p = errorFunction.getError(modelParam_p, skelState_p, meshState_p);
+      const double error_m = errorFunction.getError(modelParam_m, skelState_m, meshState_m);
 
       const double gradEst = (error_p - error_m) / (2.0 * eps);
 
@@ -181,7 +202,7 @@ void testConstraintDerivs(
     {
       const T s = 2.0f;
       errorFunction.setWeight(s * TEST_WEIGHT);
-      const double scaledError = errorFunction.getError(curModelParam, skelState);
+      const double scaledError = errorFunction.getError(curModelParam, skelState, meshState);
       EXPECT_LE(relativeError(s * curError, scaledError), 1e-4);
       errorFunction.setWeight(TEST_WEIGHT);
     }
@@ -192,23 +213,23 @@ void testConstraintDerivs(
 
 template <typename T>
 void testInputDerivs(
-    const Skeleton& skeleton,
-    const ParameterTransform& parameterTransform_in,
+    const Character& character,
     FullyDifferentiableSkeletonErrorFunctionT<T>& errorFunction,
     T maxRelativeError = 2e-2) {
-  const ParameterTransformT<T> parameterTransform = parameterTransform_in.cast<T>();
+  const ParameterTransformT<T> parameterTransform = character.parameterTransform.cast<T>();
 
   SCOPED_TRACE("testInputDerivs");
 
   const ModelParametersT<T> curModelParam =
       Eigen::VectorX<T>::Random(parameterTransform.numAllModelParameters());
   const JointParametersT<T> curJointParam = parameterTransform.apply(curModelParam);
-  SkeletonStateT<T> skelState(curJointParam, skeleton);
+  SkeletonStateT<T> skelState(curJointParam, character.skeleton);
+  MeshStateT<T> meshState;
 
   auto getGradient = [&]() {
     Eigen::VectorX<T> result = Eigen::VectorX<T>::Zero(parameterTransform.numAllModelParameters());
     dynamic_cast<SkeletonErrorFunctionT<T>&>(errorFunction)
-        .getGradient(curModelParam, skelState, result);
+        .getGradient(curModelParam, skelState, meshState, result);
     return result;
   };
 
@@ -270,28 +291,24 @@ TEST(ErrorFunction, FullyDifferentiablePositionErrorFunction) {
   SCOPED_TRACE("FullyDifferentiablePositionErrorFunction");
 
   const Character character = createTestCharacter();
-  const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   std::mt19937 rng;
   std::uniform_real_distribution<float> unif;
 
-  FullyDifferentiablePositionErrorFunction errf(skeleton, parameterTransform);
-  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+  FullyDifferentiablePositionErrorFunction errf(character.skeleton, character.parameterTransform);
+  for (size_t i = 0; i < character.skeleton.joints.size(); ++i) {
     errf.addConstraint(
         PositionConstraint(randomVec(rng, 3), randomVec(rng, 3), i, 2.5f + unif(rng)));
   }
 
-  testConstraintDerivs<float>(skeleton, parameterTransform, errf, true);
-  testInputDerivs<float>(skeleton, parameterTransform, errf);
+  testConstraintDerivs<float>(character, errf, true);
+  testInputDerivs<float>(character, errf);
 }
 
 TEST(ErrorFunction, FullyDifferentiableOrientationErrorFunction) {
   SCOPED_TRACE("FullyDifferentiableOrientationErrorFunction");
 
   const Character character = createTestCharacter();
-  const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   std::mt19937 rng;
   std::uniform_real_distribution<float> unif;
@@ -304,14 +321,15 @@ TEST(ErrorFunction, FullyDifferentiableOrientationErrorFunction) {
     return Eigen::Quaternionf(Eigen::Vector4f(randomVec(rng, 4))).normalized();
   };
 
-  FullyDifferentiableOrientationErrorFunction errf(skeleton, parameterTransform);
-  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+  FullyDifferentiableOrientationErrorFunction errf(
+      character.skeleton, character.parameterTransform);
+  for (size_t i = 0; i < character.skeleton.joints.size(); ++i) {
     errf.addConstraint(
         OrientationConstraint(makeRandomQuat(rng), makeRandomQuat(rng), i, 2.5 + unif(rng)));
   }
 
-  testConstraintDerivs<float>(skeleton, parameterTransform, errf, true);
-  testInputDerivs<float>(skeleton, parameterTransform, errf);
+  testConstraintDerivs<float>(character, errf, true);
+  testInputDerivs<float>(character, errf);
 }
 
 TEST(ErrorFunction, UnionErrorFunction) {
@@ -319,19 +337,18 @@ TEST(ErrorFunction, UnionErrorFunction) {
 
   const Character character = createTestCharacter();
   const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   std::mt19937 rng;
   std::uniform_real_distribution<float> unif;
 
-  auto errf_1 =
-      std::make_shared<FullyDifferentiablePositionErrorFunction>(skeleton, parameterTransform);
+  auto errf_1 = std::make_shared<FullyDifferentiablePositionErrorFunction>(
+      skeleton, character.parameterTransform);
   errf_1->setWeight(3);
-  auto errf_2 =
-      std::make_shared<FullyDifferentiablePositionErrorFunction>(skeleton, parameterTransform);
+  auto errf_2 = std::make_shared<FullyDifferentiablePositionErrorFunction>(
+      skeleton, character.parameterTransform);
   // empty error function just to make sure it doesn't crash:
-  auto errf_3 =
-      std::make_shared<FullyDifferentiablePositionErrorFunction>(skeleton, parameterTransform);
+  auto errf_3 = std::make_shared<FullyDifferentiablePositionErrorFunction>(
+      skeleton, character.parameterTransform);
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
     errf_1->addConstraint(
         PositionConstraint(randomVec(rng, 3), randomVec(rng, 3), i, 2.5f + unif(rng)));
@@ -339,23 +356,24 @@ TEST(ErrorFunction, UnionErrorFunction) {
         PositionConstraint(randomVec(rng, 3), randomVec(rng, 3), i, 2.5f + unif(rng)));
   }
 
-  UnionErrorFunction errf(skeleton, parameterTransform, {errf_1, errf_2, errf_3});
-  testConstraintDerivs<float>(skeleton, parameterTransform, errf, true);
-  testInputDerivs<float>(skeleton, parameterTransform, errf);
+  UnionErrorFunction errf(skeleton, character.parameterTransform, {errf_1, errf_2, errf_3});
+  testConstraintDerivs<float>(character, errf, true);
+  testInputDerivs<float>(character, errf);
 
   // Make sure it's actually the sum
   ModelParameters curModelParams =
-      Eigen::VectorXf::Zero(parameterTransform.numAllModelParameters());
-  JointParameters curJointParams = parameterTransform.apply(curModelParams);
+      Eigen::VectorXf::Zero(character.parameterTransform.numAllModelParameters());
+  JointParameters curJointParams = character.parameterTransform.apply(curModelParams);
   SkeletonState skelState(curJointParams, skeleton);
   const float w = 3;
   errf.setWeight(w);
+  MeshState emptyMeshState{};
   ASSERT_NEAR(
-      errf.getError(curModelParams, skelState),
+      errf.getError(curModelParams, skelState, emptyMeshState),
       w *
-          (errf_1->getError(curModelParams, skelState) +
-           errf_2->getError(curModelParams, skelState) +
-           errf_3->getError(curModelParams, skelState)),
+          (errf_1->getError(curModelParams, skelState, emptyMeshState) +
+           errf_2->getError(curModelParams, skelState, emptyMeshState) +
+           errf_3->getError(curModelParams, skelState, emptyMeshState)),
       1e-4);
 }
 
@@ -364,24 +382,23 @@ TEST(ErrorFunction, ModelParametersErrorFunction) {
 
   const Character character = createTestCharacter();
   const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   std::mt19937 rng;
   std::uniform_real_distribution<double> unif;
 
-  FullyDifferentiableMotionErrorFunctionT<double> errf(skeleton, parameterTransform);
-  ModelParametersT<double> targetParams(parameterTransform.numAllModelParameters());
-  Eigen::VectorXd targetWeights(parameterTransform.numAllModelParameters());
+  FullyDifferentiableMotionErrorFunctionT<double> errf(skeleton, character.parameterTransform);
+  ModelParametersT<double> targetParams(character.parameterTransform.numAllModelParameters());
+  Eigen::VectorXd targetWeights(character.parameterTransform.numAllModelParameters());
 
-  for (size_t i = 0; i < parameterTransform.numAllModelParameters(); ++i) {
+  for (size_t i = 0; i < character.parameterTransform.numAllModelParameters(); ++i) {
     targetParams(i) = unif(rng);
     targetWeights(i) = std::abs(unif(rng));
   }
 
   errf.setTargetParameters(targetParams, targetWeights);
 
-  testConstraintDerivs<double>(skeleton, parameterTransform, errf, true);
-  testInputDerivs<double>(skeleton, parameterTransform, errf);
+  testConstraintDerivs<double>(character, errf, true);
+  testInputDerivs<double>(character, errf);
 }
 
 TEST(ErrorFunction, StateErrorFunction) {
@@ -389,7 +406,6 @@ TEST(ErrorFunction, StateErrorFunction) {
 
   const Character character = createTestCharacter();
   const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   std::mt19937 rng;
   std::uniform_real_distribution<double> unif;
@@ -400,7 +416,7 @@ TEST(ErrorFunction, StateErrorFunction) {
     }
   };
 
-  ModelParametersT<double> targetParams(parameterTransform.numAllModelParameters());
+  ModelParametersT<double> targetParams(character.parameterTransform.numAllModelParameters());
   Eigen::VectorXd positionWeights(skeleton.joints.size());
   Eigen::VectorXd orientationWeights(skeleton.joints.size());
 
@@ -408,13 +424,14 @@ TEST(ErrorFunction, StateErrorFunction) {
   fillVec(positionWeights);
   fillVec(orientationWeights);
 
-  const SkeletonStated skelState(parameterTransform.cast<double>().apply(targetParams), skeleton);
-  FullyDifferentiableStateErrorFunctionT<double> stateError(skeleton, parameterTransform);
+  const SkeletonStated skelState(
+      character.parameterTransform.cast<double>().apply(targetParams), skeleton);
+  FullyDifferentiableStateErrorFunctionT<double> stateError(skeleton, character.parameterTransform);
   stateError.setTargetState(skelState);
   stateError.setTargetWeights(positionWeights, orientationWeights);
 
-  testConstraintDerivs<double>(skeleton, parameterTransform, stateError, true);
-  testInputDerivs<double>(skeleton, parameterTransform, stateError);
+  testConstraintDerivs<double>(character, stateError, true);
+  testInputDerivs<double>(character, stateError);
 }
 
 namespace {
@@ -439,7 +456,6 @@ TEST(ErrorFunction, PosePriorErrorFunction) {
 
   const Character character = createTestCharacter();
   const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   std::vector<std::string> paramNames = {"joint1_rx", "shared_rz", "joint2_rx"};
 
@@ -463,19 +479,20 @@ TEST(ErrorFunction, PosePriorErrorFunction) {
   }
 
   FullyDifferentiablePosePriorErrorFunctionT<double> posePriorError(
-      skeleton, parameterTransform, paramNames);
+      skeleton, character.parameterTransform, paramNames);
   posePriorError.setPosePrior(pi, mmu, W, sigma);
 
   auto mppca = std::make_shared<Mppcad>();
   mppca->set(pi, mmu, W, sigma.array().square());
   mppca->names = paramNames;
 
-  PosePriorErrorFunctionT<double> basicPosePriorError(skeleton, parameterTransform, mppca);
+  PosePriorErrorFunctionT<double> basicPosePriorError(
+      skeleton, character.parameterTransform, mppca);
   basicPosePriorError.setPosePrior(mppca);
-  testConstraintDerivs<double>(skeleton, parameterTransform, basicPosePriorError, true);
+  testConstraintDerivs<double>(character, basicPosePriorError, true);
 
-  testConstraintDerivs<double>(skeleton, parameterTransform, posePriorError, true);
-  testInputDerivs<double>(skeleton, parameterTransform, posePriorError);
+  testConstraintDerivs<double>(character, posePriorError, true);
+  testInputDerivs<double>(character, posePriorError);
 }
 
 TEST(ErrorFunction, ProjectionErrorFunction) {
@@ -483,7 +500,6 @@ TEST(ErrorFunction, ProjectionErrorFunction) {
 
   const Character character = createTestCharacter();
   const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   using T = double;
 
@@ -505,8 +521,8 @@ TEST(ErrorFunction, ProjectionErrorFunction) {
         rng.normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
   }
 
-  testConstraintDerivs<double>(skeleton, parameterTransform, errorFunction, true);
-  testInputDerivs<double>(skeleton, parameterTransform, errorFunction);
+  testConstraintDerivs<double>(character, errorFunction, true);
+  testInputDerivs<double>(character, errorFunction);
 }
 
 TEST(ErrorFunction, DistanceErrorFunction) {
@@ -514,7 +530,6 @@ TEST(ErrorFunction, DistanceErrorFunction) {
 
   const Character character = createTestCharacter();
   const auto& skeleton = character.skeleton;
-  const auto& parameterTransform = character.parameterTransform;
 
   using T = double;
 
@@ -534,8 +549,8 @@ TEST(ErrorFunction, DistanceErrorFunction) {
     errorFunction.addConstraint(constraintData);
   }
 
-  testConstraintDerivs<double>(skeleton, parameterTransform, errorFunction, true);
-  testInputDerivs<double>(skeleton, parameterTransform, errorFunction);
+  testConstraintDerivs<double>(character, errorFunction, true);
+  testInputDerivs<double>(character, errorFunction);
 }
 
 } // anonymous namespace

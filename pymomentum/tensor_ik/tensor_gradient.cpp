@@ -12,6 +12,7 @@
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <dispenso/parallel_for.h> // @manual
+#include <momentum/character/mesh_state.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/skeleton_solver_function.h>
@@ -125,6 +126,11 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> d_computeGradient(
     const momentum::SkeletonStateT<T> skelState(
         parameterTransform.apply(modelParameters_cur), character.skeleton);
 
+    momentum::MeshStateT<T> meshState;
+    if (solverFunction.needsMeshState()) {
+      meshState.update(modelParameters_cur, skelState, character);
+    }
+
     at::Tensor grad_errorFunctionWeights_cur = grad_errorFunctionWeights.select(0, iBatch);
 
     // Derivative of the gradient wrt the weight is just the gradient with the
@@ -135,7 +141,7 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> d_computeGradient(
       }
 
       Eigen::VectorX<T> gradient = Eigen::VectorX<T>::Zero(nParams);
-      errorFunctions_cur[iErr]->getGradient(modelParameters_cur, skelState, gradient);
+      errorFunctions_cur[iErr]->getGradient(modelParameters_cur, skelState, meshState, gradient);
       const T w = errorFunctions_cur[iErr]->getWeight();
       if (w == 0) { // avoid divide-by-zero
         continue;

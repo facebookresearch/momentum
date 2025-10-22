@@ -167,8 +167,8 @@ TEST(TensorIK, TensorIK) {
     ikProblems[iBatch].modelParameters_init =
         Eigen::VectorX<T>::Zero(character.parameterTransform.numAllModelParameters());
 
-    ikProblems[iBatch].solverFunction = std::make_unique<momentum::SkeletonSolverFunction>(
-        &character.skeleton, &character.parameterTransform);
+    ikProblems[iBatch].solverFunction =
+        std::make_unique<momentum::SkeletonSolverFunction>(character, character.parameterTransform);
 
     ikProblems[iBatch].markerError =
         std::make_shared<momentum::FullyDifferentiablePositionErrorFunctionT<T>>(

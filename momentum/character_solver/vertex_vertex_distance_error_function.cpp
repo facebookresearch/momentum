@@ -58,7 +58,8 @@ void VertexVertexDistanceErrorFunctionT<T>::clearConstraints() {
 template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   updateMeshes(modelParameters, state);
@@ -110,6 +111,7 @@ template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 
@@ -128,6 +130,7 @@ template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

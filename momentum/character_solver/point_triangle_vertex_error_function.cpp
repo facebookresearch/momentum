@@ -96,7 +96,8 @@ Eigen::Vector3<T> computeTargetPosition(
 template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   updateMeshes(modelParameters, state);
@@ -826,6 +827,7 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   updateMeshes(modelParameters, state);
 
@@ -858,6 +860,7 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

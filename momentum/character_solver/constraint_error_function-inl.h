@@ -31,7 +31,8 @@ ConstraintErrorFunctionT<T, Data, FuncDim, NumVec, NumPos>::ConstraintErrorFunct
 template <typename T, class Data, size_t FuncDim, size_t NumVec, size_t NumPos>
 double ConstraintErrorFunctionT<T, Data, FuncDim, NumVec, NumPos>::getError(
     const ModelParametersT<T>& /* params */,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   // loop over all constraints and calculate the error
@@ -172,6 +173,7 @@ template <typename T, class Data, size_t FuncDim, size_t NumVec, size_t NumPos>
 double ConstraintErrorFunctionT<T, Data, FuncDim, NumVec, NumPos>::getJacobian(
     const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<Eigen::MatrixX<T>> jacobian,
     Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
@@ -298,6 +300,7 @@ template <typename T, class Data, size_t FuncDim, size_t NumVec, size_t NumPos>
 double ConstraintErrorFunctionT<T, Data, FuncDim, NumVec, NumPos>::getGradient(
     const ModelParametersT<T>& /*unused*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 

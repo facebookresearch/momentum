@@ -7,6 +7,7 @@
 
 #include "momentum/character_sequence_solver/multipose_solver.h"
 
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_sequence_solver/multipose_solver_function.h"
 #include "momentum/character_solver/skeleton_error_function.h"
@@ -19,13 +20,16 @@ template <typename T>
 MultiposeSolverT<T>::MultiposeSolverT(
     const SolverOptions& options,
     MultiposeSolverFunctionT<T>* function)
-    : SolverT<T>(options, function) {
+    : SolverT<T>(options, function), meshState_(std::make_unique<MeshStateT<T>>()) {
   // Set default values from MultiposeSolverOptions
   regularization_ = MultiposeSolverOptions().regularization;
 
   // Update values based on provided options
   setOptions(options);
 }
+
+template <typename T>
+MultiposeSolverT<T>::~MultiposeSolverT() = default;
 
 template <typename T>
 std::string_view MultiposeSolverT<T>::getName() const {
@@ -64,9 +68,13 @@ void MultiposeSolverT<T>::doIteration() {
   this->error_ = 0;
   for (size_t f = 0; f < fn->getNumFrames(); ++f) {
     const auto& frameParameters = fn->frameParameters_[f];
-    auto& skelState = *fn->states_[f];
+    auto& skelState = fn->states_[f];
 
     skelState.set(fn->parameterTransform_->apply(frameParameters), *fn->skeleton_);
+
+    // TODO: Update mesh state for functions that need it once we have character access
+    // meshState_->update(frameParameters, skelState, character);
+
     for (auto&& solvable : fn->errorFunctions_[f]) {
       if (solvable->getWeight() <= 0.0f) {
         continue;
@@ -81,8 +89,8 @@ void MultiposeSolverT<T>::doIteration() {
       residualBlock_.resize(jacobianSize);
       residualBlock_.setZero();
       int rows = 0;
-      this->error_ +=
-          solvable->getJacobian(frameParameters, skelState, jacobianBlock_, residualBlock_, rows);
+      this->error_ += solvable->getJacobian(
+          frameParameters, skelState, *meshState_, jacobianBlock_, residualBlock_, rows);
 
       qrSolver.addMutating(
           f,

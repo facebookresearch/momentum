@@ -29,17 +29,21 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   explicit CollisionErrorFunctionT(const Character& character);
 
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& params,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState) final;
 
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Ref<VectorX<T>> gradient) override;
 
   double getJacobian(
       const ModelParametersT<T>& /*unused*/,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Ref<MatrixX<T>> jacobian,
       Ref<VectorX<T>> residual,
       int& usedRows) override;

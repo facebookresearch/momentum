@@ -7,6 +7,7 @@
 
 #include "momentum/diff_ik/fully_differentiable_body_ik.h"
 
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/log.h"
 #include "momentum/diff_ik/fully_differentiable_skeleton_error_function.h"
@@ -183,12 +184,17 @@ std::vector<ErrorFunctionDerivativesT<T>> d_modelParams_d_inputs(
 
   const JointParametersT<T> jointParameters = parameterTransform.apply(modelParameters);
   SkeletonStateT<T> skelState(jointParameters, skeleton);
+  MeshStateT<T> meshState;
+  if (solverFunction.needsMeshState()) {
+    meshState.update(modelParameters, skelState, solverFunction.getCharacter());
+  }
+
   const auto& errorFunctions = solverFunction.getErrorFunctions();
   for (size_t iErr = 0; iErr < errorFunctions.size(); ++iErr) {
     const auto errf = errorFunctions[iErr];
     Eigen::VectorX<T> dGrad_dWeight =
         Eigen::VectorX<T>::Zero(parameterTransform.numAllModelParameters());
-    errf->getGradient(modelParameters, skelState, dGrad_dWeight);
+    errf->getGradient(modelParameters, skelState, meshState, dGrad_dWeight);
     if (errf->getWeight() != 0) {
       dGrad_dWeight /= errf->getWeight();
     }

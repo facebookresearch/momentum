@@ -9,6 +9,7 @@
 
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
@@ -42,12 +43,11 @@ template <typename T>
 void testGradientAndJacobian(
     SequenceErrorFunctionT<T>& errorFunction,
     const std::vector<ModelParametersT<T>>& referenceParameters,
-    const Skeleton& skeleton,
-    const ParameterTransform& transform_in,
+    const Character& character,
     const float numThreshold = 1e-3f,
     const float jacThreshold = 1e-6f,
     bool checkJacobian = true) {
-  const ParameterTransformd transform = transform_in.cast<double>();
+  const ParameterTransformd transform = character.parameterTransform.cast<double>();
   const auto np = transform.numAllModelParameters();
 
   const auto w_orig = errorFunction.getWeight();
@@ -57,20 +57,27 @@ void testGradientAndJacobian(
 
   ASSERT_EQ(nFrames, referenceParameters.size());
 
-  auto parametersToSkelStates =
-      [&skeleton, transform, nFrames](
-          const std::vector<ModelParametersd>& modelParams) -> std::vector<SkeletonStateT<T>> {
-    std::vector<SkeletonStateT<T>> result(nFrames);
+  auto parametersToSkelAndMeshStates = [&character, transform, nFrames, &errorFunction](
+                                           const std::vector<ModelParametersd>& modelParams)
+      -> std::tuple<std::vector<SkeletonStateT<T>>, std::vector<MeshStateT<T>>> {
+    std::vector<SkeletonStateT<T>> skelStates(nFrames);
     for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-      const SkeletonStated skelStated(transform.apply(modelParams[iFrame]), skeleton);
-      result[iFrame].set(skelStated);
+      const SkeletonStated skelStated(transform.apply(modelParams[iFrame]), character.skeleton);
+      skelStates[iFrame].set(skelStated);
     }
 
-    return result;
+    std::vector<MeshStateT<T>> meshStates(nFrames);
+    if (errorFunction.needsMesh()) {
+      for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+        meshStates[iFrame].update(modelParams[iFrame], skelStates[iFrame], character);
+      }
+    }
+
+    return {skelStates, meshStates};
   };
 
-  const auto referenceSkelStates =
-      parametersToSkelStates(castModelParameters<double>(referenceParameters));
+  const auto [referenceSkelStates, referenceMeshStates] =
+      parametersToSkelAndMeshStates(castModelParameters<double>(referenceParameters));
 
   // test getError and getGradient produce the same value
   // Double precision state here limits how much errors accumulate up the
@@ -81,12 +88,13 @@ void testGradientAndJacobian(
   Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(jacobianSize, np * nFrames);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
 
-  const double functionError = errorFunction.getError(referenceParameters, referenceSkelStates);
-  const double gradientError =
-      errorFunction.getGradient(referenceParameters, referenceSkelStates, anaGradient);
+  const double functionError =
+      errorFunction.getError(referenceParameters, referenceSkelStates, referenceMeshStates);
+  const double gradientError = errorFunction.getGradient(
+      referenceParameters, referenceSkelStates, referenceMeshStates, anaGradient);
   int rows = 0;
-  const double jacobianError =
-      errorFunction.getJacobian(referenceParameters, referenceSkelStates, jacobian, residual, rows);
+  const double jacobianError = errorFunction.getJacobian(
+      referenceParameters, referenceSkelStates, referenceMeshStates, jacobian, residual, rows);
 
   const Eigen::VectorX<T> jacGradient = 2.0f * jacobian.transpose() * residual;
   const T jacError = residual.dot(residual);
@@ -110,10 +118,10 @@ void testGradientAndJacobian(
     }
   }
 
-  auto evalError = [&errorFunction,
-                    &parametersToSkelStates](const std::vector<ModelParametersd>& modelParameters) {
-    auto skelStates = parametersToSkelStates(modelParameters);
-    return errorFunction.getError(castModelParameters<T>(modelParameters), skelStates);
+  auto evalError = [&errorFunction, &parametersToSkelAndMeshStates](
+                       const std::vector<ModelParametersd>& modelParameters) {
+    auto [skelStates, meshStates] = parametersToSkelAndMeshStates(modelParameters);
+    return errorFunction.getError(castModelParameters<T>(modelParameters), skelStates, meshStates);
   };
 
   // calculate numerical gradient
@@ -141,13 +149,18 @@ void testGradientAndJacobian(
 
       std::vector<ModelParametersd> parameters = castModelParameters<double>(referenceParameters);
       parameters[iFrame](iParam) = referenceParameters[iFrame](iParam) + kStepSize;
-      const auto state = parametersToSkelStates(parameters);
+      const auto [state, meshState] = parametersToSkelAndMeshStates(parameters);
 
       Eigen::MatrixX<T> jacobianPlus = Eigen::MatrixX<T>::Zero(jacobianSize, nFrames * np);
       Eigen::VectorX<T> residualPlus = Eigen::VectorX<T>::Zero(jacobianSize);
       int usedRows = 0;
       errorFunction.getJacobian(
-          castModelParameters<T>(parameters), state, jacobianPlus, residualPlus, usedRows);
+          castModelParameters<T>(parameters),
+          state,
+          meshState,
+          jacobianPlus,
+          residualPlus,
+          usedRows);
       numJacobian.block(0, p, usedRows, 1) = (residualPlus - residual) / kStepSize;
     }
 
@@ -183,7 +196,7 @@ void testGradientAndJacobian(
     const auto w_new = s * errorFunction.getWeight();
     errorFunction.setWeight(w_new);
     const double functionError_scaled =
-        errorFunction.getError(referenceParameters, referenceSkelStates);
+        errorFunction.getError(referenceParameters, referenceSkelStates, referenceMeshStates);
 
     EXPECT_LE(
         std::abs(functionError_scaled - s * functionError) /
@@ -225,11 +238,10 @@ TEST(Momentum_SequenceErrorFunctions, ModelParametersSequenceError_GradientsAndJ
     weights(1) = 5.0f;
     weights(2) = 0;
     errorFunction.setTargetWeights(weights);
-    testGradientAndJacobian<double>(
-        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
-      testGradientAndJacobian<double>(errorFunction, parameters, skeleton, transform, 2e-3f);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f);
     }
   }
 }
@@ -256,12 +268,10 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_GradientsAndJacobians) 
     rotWeights(1) = 0.0f;
     rotWeights(2) = 3;
     errorFunction.setTargetWeights(posWeights, rotWeights);
-    testGradientAndJacobian<double>(
-        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
-      testGradientAndJacobian<double>(
-          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
     }
   }
 }
@@ -298,12 +308,10 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
     rotWeights(1) = 2.0f;
     rotWeights(2) = 0;
     errorFunction.setTargetWeights(posWeights, rotWeights);
-    testGradientAndJacobian<double>(
-        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
-      testGradientAndJacobian<double>(
-          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
     }
   }
 }
@@ -311,8 +319,6 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
 TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians) {
   // create skeleton and reference values
   const Character character = createTestCharacter();
-  const Skeleton& skeleton = character.skeleton;
-  const ParameterTransform& transform = character.parameterTransform;
 
   // create constraints
   VertexSequenceErrorFunctiond errorFunction(character);
@@ -324,13 +330,11 @@ TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians)
     errorFunction.addConstraint(1, 2.0, Eigen::Vector3d(0.0, 0.1, 0.0)); // vertex 1 moving in y
     errorFunction.addConstraint(2, 0.5, Eigen::Vector3d(0.0, 0.0, 0.1)); // vertex 2 moving in z
 
-    testGradientAndJacobian<double>(
-        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
 
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
-      testGradientAndJacobian<double>(
-          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
     }
   }
 
@@ -341,13 +345,11 @@ TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians)
     errorFunction.addConstraint(0, 1.0, Eigen::Vector3d::Zero());
     errorFunction.addConstraint(1, 1.0, Eigen::Vector3d::Zero());
 
-    testGradientAndJacobian<double>(
-        errorFunction, zeroModelParameters(character, 2), skeleton, transform);
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
 
     for (size_t i = 0; i < 5; i++) {
       auto parameters = randomModelParameters(character, 2);
-      testGradientAndJacobian<double>(
-          errorFunction, parameters, skeleton, transform, 2e-3f, 1e-6f, true);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
     }
   }
 }
@@ -459,13 +461,12 @@ void testGradientAndJacobian(
 TEST(Momentum_SequenceSolver, SequenceSolverFunction_GradientsAndJacobians) {
   // create skeleton and reference values
   const Character character = createTestCharacter();
-  const Skeleton& skeleton = character.skeleton;
   const ParameterTransform& transform = character.parameterTransform;
 
   const size_t nFrames = 3;
 
   const ParameterTransformd pt = transform.cast<double>();
-  SequenceSolverFunctiond solverFunction(&skeleton, &pt, transform.getScalingParameters(), nFrames);
+  SequenceSolverFunctiond solverFunction(character, pt, transform.getScalingParameters(), nFrames);
 
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     auto positionError = std::make_shared<PositionErrorFunctiond>(character);
@@ -505,7 +506,7 @@ TEST(Momentum_SequenceSolver, SequenceSolver_EnabledParameters) {
     universalParams.set(iParam);
   }
 
-  SequenceSolverFunctiond solverFunction(&character.skeleton, &pt, universalParams, nFrames);
+  SequenceSolverFunctiond solverFunction(character, pt, universalParams, nFrames);
 
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     auto positionError = std::make_shared<PositionErrorFunctiond>(character);

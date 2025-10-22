@@ -38,7 +38,8 @@ LimitErrorFunctionT<T>::LimitErrorFunctionT(const Character& character, const Pa
 template <typename T>
 double LimitErrorFunctionT<T>::getError(
     const ModelParametersT<T>& params,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   // check all is valid
@@ -180,7 +181,8 @@ template <typename T>
 double LimitErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
-    Eigen::Ref<Eigen::VectorX<T>> gradient) {
+    const MeshStateT<T>& /* meshState */,
+    Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 
   const auto& parameterTransform = this->parameterTransform_;
@@ -423,8 +425,9 @@ template <typename T>
 double LimitErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
-    Eigen::Ref<Eigen::MatrixX<T>> jacobian,
-    Eigen::Ref<Eigen::VectorX<T>> residual,
+    const MeshStateT<T>& /* meshState */,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
   MT_PROFILE_FUNCTION();
 

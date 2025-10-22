@@ -24,10 +24,11 @@ template <typename T>
 class SequenceSolverFunctionT : public SolverFunctionT<T> {
  public:
   SequenceSolverFunctionT(
-      const Skeleton* skel,
-      const ParameterTransformT<T>* parameterTransform,
+      const Character& character,
+      const ParameterTransformT<T>& parameterTransform,
       const ParameterSet& universal,
       size_t nFrames);
+  ~SequenceSolverFunctionT() override;
 
   double getError(const Eigen::VectorX<T>& parameters) final;
 
@@ -44,6 +45,10 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
 
   [[nodiscard]] const ParameterSet& getUniversalParameterSet() const {
     return universalParameters_;
+  }
+
+  [[nodiscard]] bool needsMesh() const {
+    return needsMesh_;
   }
 
   // Passing in the special frame index kAllFrames will add the error function to every frame; this
@@ -78,11 +83,11 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
 
   void setJoinedParameterVector(const Eigen::VectorX<T>& joinedParameters);
 
-  [[nodiscard]] const Skeleton* getSkeleton() const {
-    return skeleton_;
-  }
+  [[nodiscard]] const Skeleton* getSkeleton() const;
+  [[nodiscard]] const Character& getCharacter() const;
+
   [[nodiscard]] const ParameterTransformT<T>* getParameterTransform() const {
-    return parameterTransform_;
+    return &parameterTransform_;
   }
 
   [[nodiscard]] const auto& getErrorFunctions(size_t iFrame) const {
@@ -97,9 +102,10 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
   void setFrameParametersFromJoinedParameterVector(const Eigen::VectorX<T>& parameters);
 
  private:
-  const Skeleton* skeleton_;
-  const ParameterTransformT<T>* parameterTransform_;
+  const Character& character_;
+  const ParameterTransformT<T>& parameterTransform_;
   std::vector<SkeletonStateT<T>> states_;
+  std::vector<MeshStateT<T>> meshStates_;
   VectorX<bool> activeJointParams_;
 
   std::vector<ModelParametersT<T>> frameParameters_;
@@ -119,6 +125,8 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
 
   std::atomic<size_t> numTotalPerFrameErrorFunctions_ = 0;
   std::atomic<size_t> numTotalSequenceErrorFunctions_ = 0;
+
+  bool needsMesh_ = false;
 
   friend class SequenceSolverT<T>;
 };
