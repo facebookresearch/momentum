@@ -39,6 +39,7 @@ set(headers
   axel/Bvh.h
   axel/BvhBase.h
   axel/BvhCommon.h
+  axel/DualContouring.h
   axel/MeshToSdf.h
   axel/Ray.h
   axel/SignedDistanceField.h
@@ -52,6 +53,7 @@ set(sources
   axel/math/RayTriangleIntersection.cpp
   axel/BoundingBox.cpp
   axel/Bvh.cpp
+  axel/DualContouring.cpp
   axel/MeshToSdf.cpp
   axel/SignedDistanceField.cpp
   axel/SimdKdTree.cpp
