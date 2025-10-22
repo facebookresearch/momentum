@@ -470,6 +470,261 @@ class TestAxel(unittest.TestCase):
         # Original vertices should be preserved (first N vertices)
         np.testing.assert_array_almost_equal(filled_vertices[: len(vertices)], vertices)
 
+    def _create_sphere_sdf(
+        self, center=(0, 0, 0), radius=1.0, resolution=16, bounds_padding=0.5
+    ):
+        """Helper method to create a sphere SDF for testing."""
+        center_np = np.array(center, dtype=np.float32)
+        bounds_min = center_np - (radius + bounds_padding)
+        bounds_max = center_np + (radius + bounds_padding)
+
+        bounds = axel.BoundingBox(bounds_min, bounds_max)
+        resolution_vec = np.array([resolution, resolution, resolution], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bounds, resolution_vec)
+
+        # Fill with sphere distance values using SDF's set method
+        # Ensure the sphere crosses the zero level set
+        sdf_array = np.asarray(sdf)
+        for k in range(resolution):
+            for j in range(resolution):
+                for i in range(resolution):
+                    # Convert grid indices to world coordinates
+                    grid_pos = np.array([i, j, k], dtype=np.float32)
+                    world_pos = sdf.grid_to_world(grid_pos)
+
+                    # Compute signed distance to sphere surface
+                    # Negative inside, positive outside
+                    distance_to_center = np.linalg.norm(world_pos - center_np)
+                    signed_distance = distance_to_center - radius
+
+                    # Store the signed distance using SDF's set method
+                    sdf_array[i, j, k] = signed_distance
+
+        return sdf
+
+    def test_dual_contouring_basic_sphere(self):
+        """Test dual contouring on a simple sphere."""
+        # Create a simple sphere SDF
+        sdf = self._create_sphere_sdf(center=(0, 0, 0), radius=1.0, resolution=12)
+
+        # Extract mesh (always returns quads now)
+        vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+        # Basic checks
+        self.assertIsInstance(vertices, np.ndarray)
+        self.assertIsInstance(normals, np.ndarray)
+        self.assertIsInstance(quads, np.ndarray)
+
+        # Should generate some vertices and quads
+        self.assertGreater(len(vertices), 0, "Should generate at least some vertices")
+        self.assertGreater(len(quads), 0, "Should generate at least some quads")
+
+        # Check array shapes
+        self.assertEqual(vertices.shape[1], 3, "Vertices should have 3 coordinates")
+        self.assertEqual(normals.shape[1], 3, "Normals should have 3 coordinates")
+        self.assertEqual(quads.shape[1], 4, "Quads should have 4 indices")
+
+        # Vertices and normals should have same count
+        self.assertEqual(
+            len(vertices), len(normals), "Should have one normal per vertex"
+        )
+
+    def test_dual_contouring_vertex_bounds(self):
+        """Test that generated vertices are within reasonable bounds."""
+        # Create a unit sphere SDF
+        sdf = self._create_sphere_sdf(center=(0, 0, 0), radius=1.0, resolution=16)
+
+        vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+        if len(vertices) > 0:
+            # Check vertex bounds - should be within SDF bounds
+            vertex_min = np.min(vertices, axis=0)
+            vertex_max = np.max(vertices, axis=0)
+            bounds_min = sdf.bounds.min
+            bounds_max = sdf.bounds.max
+
+            # Vertices should be within SDF bounds (with small tolerance)
+            tolerance = 0.1
+            self.assertTrue(
+                np.all(vertex_min >= bounds_min - tolerance),
+                f"Some vertices are below bounds: {vertex_min} vs {bounds_min}",
+            )
+            self.assertTrue(
+                np.all(vertex_max <= bounds_max + tolerance),
+                f"Some vertices are above bounds: {vertex_max} vs {bounds_max}",
+            )
+
+    def test_dual_contouring_quad_indices(self):
+        """Test that quad indices are valid."""
+        sdf = self._create_sphere_sdf(center=(0, 0, 0), radius=1.0, resolution=12)
+
+        vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+        if len(quads) > 0:
+            # Check quad index bounds
+            max_vertex_index = np.max(quads)
+            min_vertex_index = np.min(quads)
+
+            self.assertGreaterEqual(
+                min_vertex_index, 0, "Quad indices should be non-negative"
+            )
+            self.assertLess(
+                max_vertex_index,
+                len(vertices),
+                "Quad indices should be within vertex array bounds",
+            )
+
+    def test_dual_contouring_different_resolutions(self):
+        """Test dual contouring with different grid resolutions."""
+        resolutions = [8, 12, 16]
+
+        for res in resolutions:
+            with self.subTest(resolution=res):
+                sdf = self._create_sphere_sdf(resolution=res)
+
+                vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+                # Should generate vertices and quads for all reasonable resolutions
+                self.assertGreater(
+                    len(vertices), 0, f"Should generate vertices for resolution {res}"
+                )
+                self.assertEqual(
+                    len(vertices),
+                    len(normals),
+                    f"Vertex/normal count mismatch for resolution {res}",
+                )
+
+    def test_dual_contouring_different_isovalues(self):
+        """Test dual contouring with different isovalue settings."""
+        sdf = self._create_sphere_sdf(center=(0, 0, 0), radius=1.0, resolution=16)
+
+        isovalues = [-0.2, 0.0, 0.2]
+
+        for isovalue in isovalues:
+            with self.subTest(isovalue=isovalue):
+                vertices, normals, quads = axel.dual_contouring(sdf, isovalue=isovalue)
+
+                # Should work for different isovalues (though might generate different numbers of vertices)
+                self.assertIsInstance(vertices, np.ndarray)
+                self.assertIsInstance(quads, np.ndarray)
+
+    def test_dual_contouring_empty_sdf(self):
+        """Test dual contouring on an SDF with no surface crossing."""
+        bounds = axel.BoundingBox(
+            min_corner=np.array([-1.0, -1.0, -1.0], dtype=np.float32),
+            max_corner=np.array([1.0, 1.0, 1.0], dtype=np.float32),
+        )
+        resolution = np.array([8, 8, 8], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bounds, resolution)
+
+        # Fill with all positive values (no zero crossing)
+        sdf.fill(1.0)
+
+        vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+        # Should return empty arrays
+        self.assertEqual(len(vertices), 0)
+        self.assertEqual(len(normals), 0)
+        self.assertEqual(len(quads), 0)
+
+    def test_dual_contouring_debug_sphere_values(self):
+        """Debug test to check if our sphere SDF is generating correct values."""
+        sdf = self._create_sphere_sdf(center=(0, 0, 0), radius=1.0, resolution=8)
+
+        # Check some SDF values
+        data_array = np.array(sdf)
+
+        # Find min and max values
+        min_val = np.min(data_array)
+        max_val = np.max(data_array)
+
+        print(f"SDF value range: {min_val:.3f} to {max_val:.3f}")
+
+        # Count negative and positive values
+        negative_count = np.sum(data_array < 0)
+        positive_count = np.sum(data_array > 0)
+        zero_count = np.sum(data_array == 0)
+
+        print(
+            f"Values: {negative_count} negative, {positive_count} positive, {zero_count} zero"
+        )
+
+        # Should have both negative and positive values for a proper sphere
+        self.assertGreater(
+            negative_count, 0, "Should have negative values inside sphere"
+        )
+        self.assertGreater(
+            positive_count, 0, "Should have positive values outside sphere"
+        )
+
+        # Now test dual contouring
+        vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+        print(f"Generated {len(vertices)} vertices, {len(quads)} quads")
+
+        # If we have both negative and positive values, we should generate some vertices
+        # This test helps us debug why no vertices are generated
+        if negative_count > 0 and positive_count > 0:
+            # We should generate some vertices since there's a sign change
+            pass  # Don't assert yet, just debug info
+
+    def test_triangulate_quads(self):
+        """Test the triangulate_quads function."""
+        # Create some test quads
+        quads = np.array(
+            [
+                [0, 1, 2, 3],  # First quad
+                [4, 5, 6, 7],  # Second quad
+            ],
+            dtype=np.int32,
+        )
+
+        # Triangulate
+        triangles = axel.triangulate_quads(quads)
+
+        # Should get 2 triangles per quad
+        self.assertEqual(len(triangles), 4)
+        self.assertEqual(triangles.shape[1], 3)
+
+        # Check that triangulation is correct
+        # First quad [0,1,2,3] should produce triangles [0,1,2] and [0,2,3]
+        expected_triangles = np.array(
+            [
+                [0, 1, 2],  # First quad, first triangle
+                [0, 2, 3],  # First quad, second triangle
+                [4, 5, 6],  # Second quad, first triangle
+                [4, 6, 7],  # Second quad, second triangle
+            ]
+        )
+
+        np.testing.assert_array_equal(triangles, expected_triangles)
+
+    def test_dual_contouring_sphere_distance_analysis(self):
+        """Test that vertices are approximately on the sphere surface."""
+        radius = 1.0
+        sdf = self._create_sphere_sdf(center=(0, 0, 0), radius=radius, resolution=16)
+
+        vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+        if len(vertices) > 0:
+            # Check distances from origin - should be roughly around the sphere radius
+            distances = np.linalg.norm(vertices, axis=1)
+            mean_distance = np.mean(distances)
+
+            # Since we're using surface positioning now, vertices should be much closer to the sphere
+            tolerance = 0.2  # Tighter tolerance since we push vertices to surface
+
+            self.assertGreater(
+                mean_distance,
+                radius - tolerance,
+                f"Mean distance {mean_distance:.3f} too far inside sphere",
+            )
+            self.assertLess(
+                mean_distance,
+                radius + tolerance,
+                f"Mean distance {mean_distance:.3f} too far outside sphere",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

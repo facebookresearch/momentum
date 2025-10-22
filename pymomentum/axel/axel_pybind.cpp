@@ -6,10 +6,12 @@
  */
 
 #include <axel/BoundingBox.h>
+#include <axel/DualContouring.h>
 #include <axel/MeshToSdf.h>
 #include <axel/SignedDistanceField.h>
 #include <axel/common/Types.h>
 #include <axel/math/MeshHoleFilling.h>
+#include <momentum/common/exception.h>
 #include <pymomentum/axel/axel_utility.h>
 
 #include <fmt/format.h>
@@ -333,11 +335,11 @@ More efficient than calling sample() and gradient() separately.
 
 This function creates a high-quality signed distance field from a triangle mesh using:
 1. Narrow band initialization with exact triangle distances
-2. Fast marching propagation using Eikonal equation  
+2. Fast marching propagation using Eikonal equation
 3. Sign determination using ray casting
 
 :param vertices: Vertex positions as 2D array of shape (N, 3) where N is number of vertices.
-:param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles. 
+:param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
                   Indices must be valid within the vertices array.
 :param bounds: Spatial bounds for the SDF as a :class:`BoundingBox`.
 :param resolution: Grid resolution as 1D array of shape (3,) containing (nx, ny, nz).
@@ -348,13 +350,13 @@ Example usage::
 
     import numpy as np
     import pymomentum.axel as axel
-    
+
     # Create a simple cube mesh
     vertices = np.array([
         [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],  # bottom face
         [-1, -1,  1], [1, -1,  1], [1, 1,  1], [-1, 1,  1]   # top face
     ], dtype=np.float32)
-    
+
     triangles = np.array([
         [0, 1, 2], [0, 2, 3],  # bottom face
         [4, 7, 6], [4, 6, 5],  # top face
@@ -363,16 +365,16 @@ Example usage::
         [0, 3, 7], [0, 7, 4],  # left face
         [1, 5, 6], [1, 6, 2]   # right face
     ], dtype=np.int32)
-    
+
     bounds = axel.BoundingBox(
-        min_corner=np.array([-1.5, -1.5, -1.5]), 
+        min_corner=np.array([-1.5, -1.5, -1.5]),
         max_corner=np.array([1.5, 1.5, 1.5])
     )
     resolution = np.array([32, 32, 32])
-    
+
     config = axel.MeshToSdfConfig()
     config.narrow_band_width = 3.0
-    
+
     sdf = axel.mesh_to_sdf(vertices, triangles, bounds, resolution, config))",
       py::arg("vertices"),
       py::arg("triangles"),
@@ -445,21 +447,21 @@ Example usage::
 
     import numpy as np
     import pymomentum.axel as axel
-    
+
     # Create a simple tetrahedron mesh
     vertices = np.array([
         [0.0, 0.0, 0.0],
-        [1.0, 0.0, 0.0], 
+        [1.0, 0.0, 0.0],
         [0.5, 1.0, 0.0],
         [0.5, 0.5, 1.0]
     ], dtype=np.float32)
-    
+
     triangles = np.array([
         [0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]
     ], dtype=np.int32)
-    
+
     resolution = np.array([32, 32, 32])
-    
+
     # Automatically compute bounds with 20% padding
     sdf = axel.mesh_to_sdf(vertices, triangles, resolution, padding=0.2))",
       py::arg("vertices"),
@@ -526,8 +528,8 @@ Example usage::
       },
       R"(Fill holes in a triangle mesh to create a watertight surface.
 
-This function identifies holes in the mesh and fills them with new triangles using 
-an advancing front method. The result is a complete mesh suitable for operations 
+This function identifies holes in the mesh and fills them with new triangles using
+an advancing front method. The result is a complete mesh suitable for operations
 that require watertight surfaces, such as SDF generation.
 
 For small holes (≤6 vertices), a centroid-based fan triangulation is used.
@@ -545,13 +547,13 @@ Example usage::
 
     import numpy as np
     import pymomentum.axel as axel
-    
+
     # Create a cube mesh with a missing face (hole)
     vertices = np.array([
         [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],  # bottom face
         [-1, -1,  1], [1, -1,  1], [1, 1,  1], [-1, 1,  1]   # top face
     ], dtype=np.float32)
-    
+
     # Missing top face triangles to create a hole
     triangles = np.array([
         [0, 1, 2], [0, 2, 3],  # bottom face
@@ -561,17 +563,154 @@ Example usage::
         [0, 3, 7], [0, 7, 4],  # left face
         [1, 5, 6], [1, 6, 2]   # right face
     ], dtype=np.int32)
-    
+
     config = axel.MeshHoleFillingConfig()
     config.max_edge_length_ratio = 2.0
     config.smoothing_iterations = 3
-    
+
     filled_vertices, filled_triangles = axel.fill_holes(vertices, triangles, config)
-    
+
     print(f"Original mesh: {len(vertices)} vertices, {len(triangles)} triangles")
     print(f"Filled mesh: {len(filled_vertices)} vertices, {len(filled_triangles)} triangles"))",
       py::arg("vertices"),
       py::arg("triangles"));
+
+  // Bind dual_contouring function (always returns quads)
+  m.def(
+      "dual_contouring",
+      [](const axel::SignedDistanceField<float>& sdf, float isovalue, bool triangulate) {
+        // Call the dual contouring function
+        const auto result = axel::dualContouring<float>(sdf, isovalue);
+
+        if (!result.success) {
+          throw std::runtime_error("Dual contouring failed");
+        }
+
+        // Convert vertices to numpy array using helper
+        auto vertices = pymomentum::eigenVectorsToArray<float, 3>(result.vertices);
+
+        // Compute normals at vertices by sampling SDF gradients
+        std::vector<Eigen::Vector3f> normals;
+        normals.reserve(result.vertices.size());
+        for (const auto& vertex : result.vertices) {
+          normals.push_back(sdf.gradient(vertex));
+        }
+        auto normalsArray = pymomentum::eigenVectorsToArray<float, 3>(normals);
+
+        // Convert quads to numpy array using helper
+        auto faces = triangulate
+            ? pymomentum::eigenVectorsToArray<int, 3>(axel::triangulateQuads(result.quads))
+            : pymomentum::eigenVectorsToArray<int, 4>(result.quads);
+
+        return py::make_tuple(vertices, normalsArray, faces);
+      },
+      R"(Extract an isosurface from a signed distance field using dual contouring.
+
+Dual contouring places vertices inside grid cells and generates quad faces between
+adjacent cells that both contain vertices. This naturally produces quads rather than
+triangles, which better preserves surface topology and reduces mesh artifacts.
+
+The algorithm works by:
+1. Finding all cells that intersect the isosurface (sign changes across cell corners)
+2. Placing one vertex at each intersecting cell, positioned on the surface using gradient descent
+3. Generating quads for each edge crossing that connects 4 adjacent cells
+
+:param sdf: The :class:`SignedDistanceField` to extract the isosurface from.
+:param isovalue: The isovalue to extract (typically 0.0 for zero level set). Default: 0.0
+:param triangulate: Whether to triangulate the quads (default: False).
+:return: Tuple of (vertices, normals, quads) where:
+         - vertices: 2D array of shape (N, 3) with vertex positions
+         - normals: 2D array of shape (N, 3) with vertex normals (computed from SDF gradients)
+         - quads: Quad indices of shape (M, 4) connecting the vertices
+
+Example usage::
+
+    import numpy as np
+    import pymomentum.axel as axel
+
+    # Create a sphere SDF
+    bounds = axel.BoundingBox(
+        min_corner=np.array([-2.0, -2.0, -2.0]),
+        max_corner=np.array([2.0, 2.0, 2.0])
+    )
+    resolution = np.array([32, 32, 32])
+    sdf = axel.SignedDistanceField(bounds, resolution)
+
+    # Fill with sphere distance values
+    for k in range(resolution[2]):
+        for j in range(resolution[1]):
+            for i in range(resolution[0]):
+                grid_pos = np.array([i, j, k], dtype=np.float32)
+                world_pos = sdf.grid_to_world(grid_pos)
+                distance = np.linalg.norm(world_pos) - 1.0  # Unit sphere
+                sdf.set(i, j, k, distance)
+
+    # Extract mesh (always returns quads)
+    vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
+
+    print(f"Extracted {len(vertices)} vertices, {len(quads)} quads")
+    print(f"Vertex normals have shape: {normals.shape}"))",
+      py::arg("sdf"),
+      py::arg("isovalue") = 0.0f,
+      py::arg("triangulate") = false);
+
+  // Bind triangulate_quads function
+  m.def(
+      "triangulate_quads",
+      [](const py::array_t<int>& quads) {
+        // Validate input array - need custom validation for quads (N, 4)
+        MT_THROW_IF_T(quads.ndim() != 2, py::value_error, "Quads array must be 2-dimensional");
+
+        MT_THROW_IF_T(quads.shape(1) != 4, py::value_error, "Quads array must have shape (N, 4)");
+
+        const auto quadsData = quads.unchecked<2>();
+
+        // Convert to std::vector<Eigen::Vector4i>
+        std::vector<Eigen::Vector4i> quadVector;
+        quadVector.reserve(quadsData.shape(0));
+        for (py::ssize_t i = 0; i < quadsData.shape(0); ++i) {
+          quadVector.emplace_back(
+              quadsData(i, 0), quadsData(i, 1), quadsData(i, 2), quadsData(i, 3));
+        }
+
+        // Triangulate
+        const auto triangles = axel::triangulateQuads(quadVector);
+
+        // Convert back to numpy array
+        std::vector<py::ssize_t> triangleShape = {static_cast<py::ssize_t>(triangles.size()), 3};
+        auto resultTriangles = py::array_t<int>(triangleShape);
+        auto trianglesData = resultTriangles.template mutable_unchecked<2>();
+        for (size_t i = 0; i < triangles.size(); ++i) {
+          trianglesData(i, 0) = triangles[i].x();
+          trianglesData(i, 1) = triangles[i].y();
+          trianglesData(i, 2) = triangles[i].z();
+        }
+
+        return resultTriangles;
+      },
+      R"(Triangulate a quad mesh into triangles.
+
+Each quad is split into two triangles using the diagonal (0,2).
+This converts a quad mesh (as produced by dual contouring) into a triangle mesh
+suitable for rendering or processing with triangle-based algorithms.
+
+:param quads: Quad indices as 2D array of shape (M, 4) where M is number of quads.
+              Each row contains 4 vertex indices defining a quad.
+:return: Triangle indices as 2D array of shape (2M, 3) where each quad produces 2 triangles.
+
+Example usage::
+
+    import numpy as np
+    import pymomentum.axel as axel
+
+    # Get quads from dual contouring
+    vertices, normals, quads = axel.dual_contouring(sdf, config)
+
+    # Convert to triangles if needed for rendering
+    triangles = axel.triangulate_quads(quads)
+
+    print(f"Converted {len(quads)} quads to {len(triangles)} triangles"))",
+      py::arg("quads"));
 }
 
 } // namespace pymomentum
