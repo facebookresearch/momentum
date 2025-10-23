@@ -130,22 +130,16 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
 
   // add texcoord attribute
   if (!mesh.texcoords.empty()) {
-    // we have to switch texcoord_faces ordering to match faces/vertices indexing
-    std::vector<Vector2f> ordered_coords(mesh.vertices.size(), Vector2f::Zero());
-    for (size_t i = 0; i < mesh.faces.size(); i++) {
-      for (size_t d = 0; d < 3; d++) {
-        // some texture coords may not be valid
-        const int texcoordIndex = mesh.texcoord_faces[i][d];
-        if (texcoordIndex >= 0 && texcoordIndex < mesh.texcoords.size()) {
-          ordered_coords.at(mesh.faces[i][d]) = mesh.texcoords[texcoordIndex];
-        }
-      }
-    }
+    // NOTE: GLTF doesn't support storing multiple texture coordinates per vertex, so instead of
+    //       using the standard GLTF texture arrays we store the data in a custom location
+    auto& def = addMomentumExtension(prim.extensionsAndExtras);
+    def["texcoords"] = createAccessorBuffer<const Vector2f>(model, mesh.texcoords, true);
+    setBufferView(model, def["texcoords"], fx::gltf::BufferView::TargetType::ArrayBuffer);
 
-    prim.attributes["TEXCOORD_0"] =
-        createAccessorBuffer<const Vector2f>(model, ordered_coords, true);
-    setBufferView(
-        model, prim.attributes["TEXCOORD_0"], fx::gltf::BufferView::TargetType::ArrayBuffer);
+    const gsl::span<const int32_t> texFaces(
+        &mesh.texcoord_faces[0][0], mesh.texcoord_faces.size() * 3);
+    def["texfaces"] = createAccessorBuffer<const int32_t>(model, texFaces);
+    setBufferView(model, def["texfaces"], fx::gltf::BufferView::TargetType::ArrayBuffer);
   }
 
   if (mesh.colors.size() == mesh.vertices.size() && addColor) {
