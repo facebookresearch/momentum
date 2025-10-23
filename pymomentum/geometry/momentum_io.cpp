@@ -106,7 +106,8 @@ void saveGLTFCharacterToFile(
     const float fps,
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const momentum::IdentityParameters>& offsets,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
+    const momentum::GltfOptions& options) {
   if (motion.has_value()) {
     const auto& [parameters, poses] = motion.value();
     MT_THROW_IF(
@@ -122,7 +123,9 @@ void saveGLTFCharacterToFile(
       fps,
       transpose(motion.value_or(momentum::MotionParameters{})),
       offsets.value_or(momentum::IdentityParameters{}),
-      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      momentum::GltfFileFormat::Extension,
+      options);
 }
 
 void saveGLTFCharacterToFileFromSkelStates(
@@ -130,7 +133,8 @@ void saveGLTFCharacterToFileFromSkelStates(
     const momentum::Character& character,
     const float fps,
     const pybind11::array_t<float>& skel_states,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
+    const momentum::GltfOptions& options) {
   const auto numFrames = skel_states.shape(0);
 
   MT_THROW_IF(
@@ -148,7 +152,9 @@ void saveGLTFCharacterToFileFromSkelStates(
       character,
       fps,
       skeletonStates,
-      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      momentum::GltfFileFormat::Extension,
+      options);
 }
 
 void saveFBXCharacterToFile(

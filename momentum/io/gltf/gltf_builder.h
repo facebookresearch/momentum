@@ -50,11 +50,7 @@ class GltfBuilder final {
       const Character& character,
       const Vector3f& positionOffset = Vector3f::Zero(),
       const Quaternionf& rotationOffset = Quaternionf::Identity(),
-      bool addExtensions = true,
-      bool addCollisions = true,
-      bool addLocators = true,
-      bool addMesh = true,
-      bool addBlendShapes = true);
+      const GltfOptions& options = GltfOptions());
 
   /// Add a static mesh, such as an environment or a target scan
   void addMesh(const Mesh& mesh, const std::string& name, bool addColor = false);

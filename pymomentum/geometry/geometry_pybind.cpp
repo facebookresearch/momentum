@@ -28,6 +28,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/io/fbx/fbx_io.h>
+#include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/legacy_json/legacy_json_io.h>
 #include <momentum/io/marker/coordinate_system.h>
 #include <momentum/io/shape/blend_shape_io.h>
@@ -204,6 +205,33 @@ PYBIND11_MODULE(geometry, m) {
       "LimitEllipsoid",
       "Ellipsoid constraint data for model parameters. Enforces that parameters "
       "lie within an ellipsoid defined by a transformation matrix and offset.");
+  auto gltfOptionsClass =
+      py::class_<mm::GltfOptions>(m, "GltfOptions", "Storage options for Gltf export.");
+
+  gltfOptionsClass.def(py::init<>())
+      .def(
+          py::init<bool, bool, bool, bool, bool>(),
+          py::arg("extensions") = true,
+          py::arg("collisions") = true,
+          py::arg("locators") = true,
+          py::arg("mesh") = true,
+          py::arg("blendShapes") = true)
+      .def(
+          "__repr__",
+          [](const mm::GltfOptions& self) {
+            return fmt::format(
+                "GltfData(extensions={}, collisions={}, locators={}, mesh={}, blendShapes={})",
+                self.extensions,
+                self.collisions,
+                self.locators,
+                self.mesh,
+                self.blendShapes);
+          })
+      .def_readwrite("extensions", &mm::GltfOptions::extensions, "Save momentum extensions")
+      .def_readwrite("collisions", &mm::GltfOptions::collisions, "Save collision geometry")
+      .def_readwrite("locators", &mm::GltfOptions::locators, "Save locator data")
+      .def_readwrite("mesh", &mm::GltfOptions::mesh, "Save mesh data")
+      .def_readwrite("blend_shapes", &mm::GltfOptions::blendShapes, "Save blend shape data");
 
   // =====================================================
   // momentum::Character
@@ -246,9 +274,9 @@ PYBIND11_MODULE(geometry, m) {
   // - load_gltf_with_motion(gltfFilename)
   // - load_urdf(urdf_filename)
   // - load_urdf_from_bytes(urdf_bytes)
-  // - save_gltf(path, character, fps, motion, offsets, markers)
+  // - save_gltf(path, character, fps, motion, offsets, markers, options)
   // - save_gltf_from_skel_states(path, character, fps, skel_states,
-  // joint_params, markers)
+  // joint_params, markers, options)
   // - save_fbx(path, character, fps, motion, offsets)
   // - save_fbx_with_joint_params(path, character, fps, joint_params)
   // =====================================================
@@ -865,7 +893,8 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("fps") = 120.f,
           py::arg("motion") = std::optional<momentum::MotionParameters>{},
           py::arg("offsets") = std::optional<const momentum::IdentityParameters>{},
-          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
+          py::arg("options") = momentum::GltfOptions{})
       .def_static(
           "save_gltf_from_skel_states",
           &saveGLTFCharacterToFileFromSkelStates,
@@ -882,7 +911,8 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("character"),
           py::arg("fps"),
           py::arg("skel_states"),
-          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
+          py::arg("options") = momentum::GltfOptions{})
       .def_static(
           "save_fbx",
           &saveFBXCharacterToFile,
