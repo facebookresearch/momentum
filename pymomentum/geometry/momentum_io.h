@@ -39,7 +39,7 @@ momentum::MotionParameters transpose(const momentum::MotionParameters& motionPar
 void saveGLTFCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
-    const float fps,
+    float fps,
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const momentum::IdentityParameters>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
@@ -48,7 +48,7 @@ void saveGLTFCharacterToFile(
 void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
     const momentum::Character& character,
-    const float fps,
+    float fps,
     const pybind11::array_t<float>& skel_states,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const momentum::GltfOptions& options);
@@ -56,7 +56,7 @@ void saveGLTFCharacterToFileFromSkelStates(
 void saveFBXCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
-    const float fps,
+    float fps,
     std::optional<const Eigen::MatrixXf> motion,
     std::optional<const Eigen::VectorXf> offsets,
     std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo);
@@ -64,7 +64,7 @@ void saveFBXCharacterToFile(
 void saveFBXCharacterToFileWithJointParams(
     const std::string& path,
     const momentum::Character& character,
-    const float fps,
+    float fps,
     std::optional<const Eigen::MatrixXf> jointParams,
     std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo);
 
@@ -87,8 +87,8 @@ loadMotion(const std::string& gltfFilename);
 
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     const std::string& path,
-    const bool mainSubjectOnly = true,
-    const momentum::UpVector up = momentum::UpVector::Y);
+    bool mainSubjectOnly = true,
+    momentum::UpVector up = momentum::UpVector::Y);
 
 /// Utility function to convert pybind11::array_t<float> to SkeletonState vector
 /// This is shared between saveGLTFCharacterToFileFromSkelStates and
