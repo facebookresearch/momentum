@@ -24,13 +24,14 @@ std::vector<PlaneDataT<T>> createFloorConstraints(
   std::vector<PlaneDataT<T>> result;
   for (const auto& loc : locators) {
     if (loc.name.find(prefix) == 0) {
-      result.emplace_back(PlaneDataT<T>(
-          loc.offset.cast<T>(),
-          floorNormal,
-          floorOffset,
-          loc.parent,
-          loc.weight * weight,
-          loc.name));
+      result.emplace_back(
+          PlaneDataT<T>(
+              loc.offset.cast<T>(),
+              floorNormal,
+              floorOffset,
+              loc.parent,
+              loc.weight * weight,
+              loc.name));
     }
   }
   return result;

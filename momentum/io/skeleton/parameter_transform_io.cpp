@@ -160,10 +160,11 @@ void parseParameter(
       pt.name.push_back(parameterName);
 
       // add triplet
-      triplets.push_back(Eigen::Triplet<float>(
-          static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
-          static_cast<int>(parameterIndex),
-          weight));
+      triplets.push_back(
+          Eigen::Triplet<float>(
+              static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
+              static_cast<int>(parameterIndex),
+              weight));
     } else if (
         parameterIndex == kInvalidIndex && refJointIndex != kInvalidIndex &&
         refJointParameter != kInvalidIndex) {
@@ -173,18 +174,21 @@ void parseParameter(
       for (size_t tr = 0; tr < triplets.size(); tr++) {
         const auto& t = triplets[tr];
         if (static_cast<size_t>(t.row()) == refJointId) {
-          triplets.push_back(Eigen::Triplet<float>(
-              static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
-              static_cast<int>(t.col()),
-              t.value() * weight));
+          triplets.push_back(
+              Eigen::Triplet<float>(
+                  static_cast<int>(jointIndex) * kParametersPerJoint +
+                      static_cast<int>(attributeIndex),
+                  static_cast<int>(t.col()),
+                  t.value() * weight));
         }
       }
     } else if (parameterIndex != kInvalidIndex) {
       // add triplet
-      triplets.push_back(Eigen::Triplet<float>(
-          static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
-          static_cast<int>(parameterIndex),
-          weight));
+      triplets.push_back(
+          Eigen::Triplet<float>(
+              static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
+              static_cast<int>(parameterIndex),
+              weight));
     } else {
       MT_THROW("Could not parse channel expression : {}", line);
     }

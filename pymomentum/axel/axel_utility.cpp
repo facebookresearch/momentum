@@ -30,16 +30,20 @@ std::string getArrayDimStr(const py::array& array) {
 
 void validatePositionArray(const py::array_t<float>& positions, const char* parameterName) {
   if (positions.ndim() != 2) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected 2D array (N, 3), got {}D array {}",
-        parameterName,
-        positions.ndim(),
-        getArrayDimStr(positions)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected 2D array (N, 3), got {}D array {}",
+            parameterName,
+            positions.ndim(),
+            getArrayDimStr(positions)));
   }
 
   if (positions.shape(1) != 3) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected (N, 3), got {}", parameterName, getArrayDimStr(positions)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected (N, 3), got {}",
+            parameterName,
+            getArrayDimStr(positions)));
   }
 }
 
@@ -48,38 +52,42 @@ void validateGridDimensions(
     const axel::SignedDistanceField<float>& sdf,
     const char* parameterName) {
   if (grid.ndim() != 3) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected 3D array (nx, ny, nz), got {}D array {}",
-        parameterName,
-        grid.ndim(),
-        getArrayDimStr(grid)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected 3D array (nx, ny, nz), got {}D array {}",
+            parameterName,
+            grid.ndim(),
+            getArrayDimStr(grid)));
   }
 
   const auto& resolution = sdf.resolution();
   if (grid.shape(0) != resolution.x() || grid.shape(1) != resolution.y() ||
       grid.shape(2) != resolution.z()) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected ({}, {}, {}) to match SDF resolution, got {}",
-        parameterName,
-        resolution.x(),
-        resolution.y(),
-        resolution.z(),
-        getArrayDimStr(grid)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected ({}, {}, {}) to match SDF resolution, got {}",
+            parameterName,
+            resolution.x(),
+            resolution.y(),
+            resolution.z(),
+            getArrayDimStr(grid)));
   }
 }
 
 Eigen::Vector3f arrayToVector3f(const py::array_t<float>& array, const char* parameterName) {
   if (array.ndim() != 1) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected 1D array (3,), got {}D array {}",
-        parameterName,
-        array.ndim(),
-        getArrayDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected 1D array (3,), got {}D array {}",
+            parameterName,
+            array.ndim(),
+            getArrayDimStr(array)));
   }
 
   if (array.shape(0) != 3) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected (3,), got {}", parameterName, getArrayDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected (3,), got {}", parameterName, getArrayDimStr(array)));
   }
 
   auto acc = array.unchecked<1>();
@@ -90,16 +98,18 @@ Eigen::Vector3<axel::Index> arrayToVector3i(
     const py::array_t<axel::Index>& array,
     const char* parameterName) {
   if (array.ndim() != 1) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected 1D array (3,), got {}D array {}",
-        parameterName,
-        array.ndim(),
-        getArrayDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected 1D array (3,), got {}D array {}",
+            parameterName,
+            array.ndim(),
+            getArrayDimStr(array)));
   }
 
   if (array.shape(0) != 3) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected (3,), got {}", parameterName, getArrayDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected (3,), got {}", parameterName, getArrayDimStr(array)));
   }
 
   auto acc = array.unchecked<1>();
@@ -128,25 +138,28 @@ void validateBatchPositionArray(const py::array_t<float>& positions, const char*
   if (positions.ndim() == 1) {
     // Single position: shape (3,)
     if (positions.shape(0) != 3) {
-      throw std::runtime_error(fmt::format(
-          "Invalid shape for {}: expected (3,) for single position or (N, 3) for batch of positions, got {}",
-          parameterName,
-          getArrayDimStr(positions)));
+      throw std::runtime_error(
+          fmt::format(
+              "Invalid shape for {}: expected (3,) for single position or (N, 3) for batch of positions, got {}",
+              parameterName,
+              getArrayDimStr(positions)));
     }
   } else if (positions.ndim() == 2) {
     // Batch of positions: shape (N, 3)
     if (positions.shape(1) != 3) {
-      throw std::runtime_error(fmt::format(
-          "Invalid shape for {}: expected (N, 3) for batch of positions, got {}",
-          parameterName,
-          getArrayDimStr(positions)));
+      throw std::runtime_error(
+          fmt::format(
+              "Invalid shape for {}: expected (N, 3) for batch of positions, got {}",
+              parameterName,
+              getArrayDimStr(positions)));
     }
   } else {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected 1D array (3,) for single position or 2D array (N, 3) for batch of positions, got {}D array {}",
-        parameterName,
-        positions.ndim(),
-        getArrayDimStr(positions)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected 1D array (3,) for single position or 2D array (N, 3) for batch of positions, got {}D array {}",
+            parameterName,
+            positions.ndim(),
+            getArrayDimStr(positions)));
   }
 }
 

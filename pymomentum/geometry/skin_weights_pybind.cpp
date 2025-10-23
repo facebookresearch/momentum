@@ -85,8 +85,11 @@ void registerSkinWeightsBindings(py::class_<mm::SkinWeights>& skinWeightsClass) 
                   for (int j = 0; j < num_influences; ++j) {
                     auto index = index_accessor(i, j);
                     if (index < 0) {
-                      throw py::value_error(fmt::format(
-                          "Index array contains negative index value at row {}, column {}", i, j));
+                      throw py::value_error(
+                          fmt::format(
+                              "Index array contains negative index value at row {}, column {}",
+                              i,
+                              j));
                     }
                     index_matrix(i, j) = static_cast<uint32_t>(index);
                   }

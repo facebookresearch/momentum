@@ -42,10 +42,11 @@ Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const at::Ten
   }
 
   if (t.dim() != R) {
-    throw std::runtime_error(fmt::format(
-        "Incorrect dimension in mdspan conversion; expected ndim={} but got {}",
-        R,
-        formatTensorSizes(t)));
+    throw std::runtime_error(
+        fmt::format(
+            "Incorrect dimension in mdspan conversion; expected ndim={} but got {}",
+            R,
+            formatTensorSizes(t)));
   }
 
   if (!t.device().is_cpu()) {
@@ -76,10 +77,11 @@ Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const py::buf
   }
 
   if (info.ndim != R) {
-    throw std::runtime_error(fmt::format(
-        "Incorrect dimension in mdspan conversion; expected ndim={} but got {}",
-        R,
-        formatTensorSizes(info.shape)));
+    throw std::runtime_error(
+        fmt::format(
+            "Incorrect dimension in mdspan conversion; expected ndim={} but got {}",
+            R,
+            formatTensorSizes(info.shape)));
   }
 
   std::array<std::ptrdiff_t, R> extents{};
@@ -171,14 +173,15 @@ validateRasterizerBuffers(
   // Write a custom error message rather than relying on the tensor checker so
   // we can warn people about the padding requirement.
   if (zBufferHeight != imageHeight || zBufferWidth != paddedWidth) {
-    throw std::runtime_error(fmt::format(
-        "Expected z buffer of size {} x {} but got {} x {}.  "
-        "Note that the width must be padded out to the nearest {} to ensure fast SIMD code.  ",
-        imageHeight,
-        paddedWidth,
-        zBufferHeight,
-        zBufferWidth,
-        momentum::rasterizer::kSimdPacketSize));
+    throw std::runtime_error(
+        fmt::format(
+            "Expected z buffer of size {} x {} but got {} x {}.  "
+            "Note that the width must be padded out to the nearest {} to ensure fast SIMD code.  ",
+            imageHeight,
+            paddedWidth,
+            zBufferHeight,
+            zBufferWidth,
+            momentum::rasterizer::kSimdPacketSize));
   }
 
   return {zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer};
@@ -604,8 +607,9 @@ void rasterizeCylinders(
       const float length = (endPos - startPos).norm();
       Eigen::Affine3f transform = Eigen::Affine3f::Identity();
       transform.translate(startPos);
-      transform.rotate(Eigen::Quaternionf::FromTwoVectors(
-          Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
+      transform.rotate(
+          Eigen::Quaternionf::FromTwoVectors(
+              Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
       transform.scale(Eigen::Vector3f(length, radiusVal, radiusVal));
 
       momentum::rasterizer::rasterizeMesh(

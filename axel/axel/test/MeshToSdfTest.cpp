@@ -43,24 +43,25 @@ class MeshToSdfTest : public ::testing::Test {
     };
 
     // Define faces (12 triangles, 2 per cube face) as vector
-    cubeFaces = {// Bottom face (z = -0.5)
-                 Eigen::Vector3i(0, 1, 2),
-                 Eigen::Vector3i(0, 2, 3),
-                 // Top face (z = +0.5)
-                 Eigen::Vector3i(4, 6, 5),
-                 Eigen::Vector3i(4, 7, 6),
-                 // Front face (y = -0.5)
-                 Eigen::Vector3i(0, 5, 1),
-                 Eigen::Vector3i(0, 4, 5),
-                 // Back face (y = +0.5)
-                 Eigen::Vector3i(2, 7, 3),
-                 Eigen::Vector3i(2, 6, 7),
-                 // Left face (x = -0.5)
-                 Eigen::Vector3i(0, 3, 7),
-                 Eigen::Vector3i(0, 7, 4),
-                 // Right face (x = +0.5)
-                 Eigen::Vector3i(1, 6, 2),
-                 Eigen::Vector3i(1, 5, 6)};
+    cubeFaces = {
+        // Bottom face (z = -0.5)
+        Eigen::Vector3i(0, 1, 2),
+        Eigen::Vector3i(0, 2, 3),
+        // Top face (z = +0.5)
+        Eigen::Vector3i(4, 6, 5),
+        Eigen::Vector3i(4, 7, 6),
+        // Front face (y = -0.5)
+        Eigen::Vector3i(0, 5, 1),
+        Eigen::Vector3i(0, 4, 5),
+        // Back face (y = +0.5)
+        Eigen::Vector3i(2, 7, 3),
+        Eigen::Vector3i(2, 6, 7),
+        // Left face (x = -0.5)
+        Eigen::Vector3i(0, 3, 7),
+        Eigen::Vector3i(0, 7, 4),
+        // Right face (x = +0.5)
+        Eigen::Vector3i(1, 6, 2),
+        Eigen::Vector3i(1, 5, 6)};
   }
 
   void createTetrahedronMesh() {

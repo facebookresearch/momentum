@@ -239,8 +239,9 @@ ParameterTransformT<T> mapParameterTransformJoints(
         continue;
       }
 
-      triplets.push_back(Eigen::Triplet<float>(
-          mappedJoint * kParametersPerJoint + jOffset, static_cast<int>(it.col()), it.value()));
+      triplets.push_back(
+          Eigen::Triplet<float>(
+              mappedJoint * kParametersPerJoint + jOffset, static_cast<int>(it.col()), it.value()));
 
       // enable joint channels
       mappedTransform.activeJointParams[mappedJoint * kParametersPerJoint + jOffset] = true;
@@ -373,11 +374,12 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
       auto paramNew = oldParamToNewParam[paramOld];
       for (int k = 0; k < 3; ++k) {
         if (oldParamToNewParam[paramOld + k] != paramNew + k) {
-          throw std::runtime_error(fmt::format(
-              "When mapping skinned locator parameters, must retain all 3 parameters for each locator. Locator {} is missing parameter {} ({}).",
-              iSkinnedLocator,
-              paramOld + k,
-              paramTransformOld.name[paramOld + k]));
+          throw std::runtime_error(
+              fmt::format(
+                  "When mapping skinned locator parameters, must retain all 3 parameters for each locator. Locator {} is missing parameter {} ({}).",
+                  iSkinnedLocator,
+                  paramOld + k,
+                  paramTransformOld.name[paramOld + k]));
         }
       }
 
