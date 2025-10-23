@@ -27,42 +27,41 @@ struct EdgePairHash {
   }
 };
 
-using EdgeCountMap = std::unordered_map<std::pair<Index, Index>, size_t, EdgePairHash>;
+using DirectedEdgeSet = std::unordered_set<std::pair<Index, Index>, EdgePairHash>;
 
 /**
- * Build edge-to-triangle count map for hole detection.
- * Much more efficient than storing full triangle lists - we only need counts.
+ * Build directed edge set for hole detection.
+ * Tracks each directed edge separately to preserve winding information.
  */
-EdgeCountMap buildEdgeCountMap(gsl::span<const Eigen::Vector3i> triangles) {
-  EdgeCountMap edgeCountMap;
+DirectedEdgeSet buildDirectedEdgeSet(gsl::span<const Eigen::Vector3i> triangles) {
+  DirectedEdgeSet directedEdgeSet;
 
   for (const auto& triangle : triangles) {
-    // Add three edges of the triangle
+    // Add three directed edges of the triangle (preserving winding order)
     const std::array<Edge, 3> edges = {
         {{triangle[0], triangle[1]}, {triangle[1], triangle[2]}, {triangle[2], triangle[0]}}};
 
     for (const auto& edge : edges) {
-      // Normalize edge orientation (smaller index first)
-      const auto normalizedEdge =
-          std::make_pair(std::min(edge.first, edge.second), std::max(edge.first, edge.second));
-
-      // Simply increment the count - much more efficient than storing triangle IDs
-      edgeCountMap[normalizedEdge]++;
+      directedEdgeSet.insert(edge);
     }
   }
 
-  return edgeCountMap;
+  return directedEdgeSet;
 }
 
 /**
- * Find boundary edges (edges that belong to only one triangle).
+ * Find boundary edges (directed edges that have no reverse edge).
+ * These are edges from triangles at the mesh boundary.
  */
-std::vector<std::pair<Index, Index>> findBoundaryEdges(const EdgeCountMap& edgeCountMap) {
+std::vector<std::pair<Index, Index>> findBoundaryEdges(const DirectedEdgeSet& directedEdgeSet) {
   std::vector<std::pair<Index, Index>> boundaryEdges;
 
-  for (const auto& [edge, count] : edgeCountMap) {
-    if (count == 1) {
-      // This edge belongs to only one triangle, so it's a boundary edge
+  for (const auto& edge : directedEdgeSet) {
+    // Check if the reverse edge exists
+    const auto reverseEdge = std::make_pair(edge.second, edge.first);
+
+    // If reverse edge doesn't exist, this is a boundary edge
+    if (directedEdgeSet.find(reverseEdge) == directedEdgeSet.end()) {
       boundaryEdges.push_back(edge);
     }
   }
@@ -71,7 +70,7 @@ std::vector<std::pair<Index, Index>> findBoundaryEdges(const EdgeCountMap& edgeC
 }
 
 /**
- * Group boundary edges into connected hole loops.
+ * Group boundary edges into connected hole loops, preserving edge direction.
  */
 std::vector<std::vector<std::pair<Index, Index>>> groupBoundaryEdgesIntoLoops(
     const std::vector<std::pair<Index, Index>>& boundaryEdges) {
@@ -79,12 +78,11 @@ std::vector<std::vector<std::pair<Index, Index>>> groupBoundaryEdgesIntoLoops(
     return {};
   }
 
-  // Build adjacency map for vertices
-  std::unordered_map<Index, std::vector<Index>> vertexEdgeMap;
+  // Build adjacency map: vertex -> list of edge indices where vertex is the start
+  std::unordered_map<Index, std::vector<Index>> vertexToOutgoingEdges;
   for (size_t i = 0; i < boundaryEdges.size(); ++i) {
     const auto& edge = boundaryEdges[i];
-    vertexEdgeMap[edge.first].push_back(static_cast<Index>(i));
-    vertexEdgeMap[edge.second].push_back(static_cast<Index>(i));
+    vertexToOutgoingEdges[edge.first].push_back(static_cast<Index>(i));
   }
 
   std::vector<std::vector<std::pair<Index, Index>>> loops;
@@ -96,25 +94,25 @@ std::vector<std::vector<std::pair<Index, Index>>> groupBoundaryEdgesIntoLoops(
     }
 
     std::vector<std::pair<Index, Index>> currentLoop;
-
-    // Start new loop
     size_t currentEdgeIdx = startEdgeIdx;
-    Index currentVertex = boundaryEdges[startEdgeIdx].first;
 
+    // Follow directed edges to form a loop
     do {
       usedEdges[currentEdgeIdx] = true;
       currentLoop.push_back(boundaryEdges[currentEdgeIdx]);
 
-      // Find next edge
-      const auto& currentEdge = boundaryEdges[currentEdgeIdx];
-      currentVertex = (currentVertex == currentEdge.first) ? currentEdge.second : currentEdge.first;
+      // Move to the vertex at the end of current edge
+      const Index nextVertex = boundaryEdges[currentEdgeIdx].second;
 
-      // Find next unused edge connected to currentVertex
+      // Find the next unused edge starting from nextVertex
       size_t nextEdgeIdx = SIZE_MAX;
-      for (const auto edgeIdx : vertexEdgeMap[currentVertex]) {
-        if (!usedEdges[edgeIdx] && edgeIdx != currentEdgeIdx) {
-          nextEdgeIdx = edgeIdx;
-          break;
+      const auto it = vertexToOutgoingEdges.find(nextVertex);
+      if (it != vertexToOutgoingEdges.end()) {
+        for (const auto edgeIdx : it->second) {
+          if (!usedEdges[edgeIdx]) {
+            nextEdgeIdx = edgeIdx;
+            break;
+          }
         }
       }
 
@@ -124,7 +122,7 @@ std::vector<std::vector<std::pair<Index, Index>>> groupBoundaryEdgesIntoLoops(
 
       currentEdgeIdx = nextEdgeIdx;
 
-    } while (currentEdgeIdx != startEdgeIdx && !usedEdges[currentEdgeIdx]);
+    } while (!usedEdges[currentEdgeIdx]);
 
     if (!currentLoop.empty()) {
       loops.push_back(std::move(currentLoop));
@@ -149,7 +147,8 @@ HoleFillingResult fillSingleHole(
 
   // For very small holes (triangles), just create one triangle
   if (hole.vertices.size() == 3) {
-    result.newTriangles.emplace_back(hole.vertices[0], hole.vertices[1], hole.vertices[2]);
+    // Reverse winding to match mesh exterior
+    result.newTriangles.emplace_back(hole.vertices[2], hole.vertices[1], hole.vertices[0]);
     result.success = true;
     return result;
   }
@@ -193,8 +192,8 @@ HoleFillingResult fillSingleHole(
       const Index v1 = hole.vertices[i];
       const Index v2 = hole.vertices[nextI];
 
-      // Create triangle with consistent winding order
-      result.newTriangles.emplace_back(v1, v2, centroidIdx);
+      // Create triangle with reversed winding to match mesh exterior
+      result.newTriangles.emplace_back(v2, v1, centroidIdx);
     }
 
     result.success = true;
@@ -276,15 +275,17 @@ HoleFillingResult fillSingleHole(
       const size_t prevI = (bestEarIndex + remainingVertices.size() - 1) % remainingVertices.size();
       const size_t nextI = (bestEarIndex + 1) % remainingVertices.size();
 
+      // Reverse winding to match mesh exterior
       result.newTriangles.emplace_back(
-          remainingVertices[prevI], remainingVertices[bestEarIndex], remainingVertices[nextI]);
+          remainingVertices[nextI], remainingVertices[bestEarIndex], remainingVertices[prevI]);
 
       remainingVertices.erase(remainingVertices.begin() + bestEarIndex);
     } else {
       // Fallback: just create a triangle from first three vertices
       if (remainingVertices.size() >= 3) {
+        // Reverse winding to match mesh exterior
         result.newTriangles.emplace_back(
-            remainingVertices[0], remainingVertices[1], remainingVertices[2]);
+            remainingVertices[2], remainingVertices[1], remainingVertices[0]);
         remainingVertices.erase(remainingVertices.begin() + 1);
       } else {
         break;
@@ -294,8 +295,9 @@ HoleFillingResult fillSingleHole(
 
   // Add final triangle
   if (remainingVertices.size() == 3) {
+    // Reverse winding to match mesh exterior
     result.newTriangles.emplace_back(
-        remainingVertices[0], remainingVertices[1], remainingVertices[2]);
+        remainingVertices[2], remainingVertices[1], remainingVertices[0]);
   }
 
   result.success = !result.newTriangles.empty();
@@ -330,8 +332,8 @@ void smoothHoleFilledRegion(
 std::vector<HoleBoundary> detectMeshHoles(
     gsl::span<const Eigen::Vector3f> vertices,
     gsl::span<const Eigen::Vector3i> triangles) {
-  const auto edgeCountMap = buildEdgeCountMap(triangles);
-  const auto boundaryEdges = findBoundaryEdges(edgeCountMap);
+  const auto directedEdgeSet = buildDirectedEdgeSet(triangles);
+  const auto boundaryEdges = findBoundaryEdges(directedEdgeSet);
   const auto edgeLoops = groupBoundaryEdgesIntoLoops(boundaryEdges);
 
   std::vector<HoleBoundary> holes;
@@ -345,36 +347,12 @@ std::vector<HoleBoundary> detectMeshHoles(
     HoleBoundary hole;
     hole.edges = loop;
 
-    // Extract ordered vertex list from edge loop
-    std::unordered_set<Index> visitedVertices;
+    // Extract ordered vertex list from directed edge loop
+    // Since edges are already directed and ordered in the loop, just extract the first vertex of
+    // each edge
     hole.vertices.reserve(loop.size());
-
-    // Start with first edge
-    hole.vertices.push_back(loop[0].first);
-    hole.vertices.push_back(loop[0].second);
-    visitedVertices.insert(loop[0].first);
-    visitedVertices.insert(loop[0].second);
-
-    // Follow the loop
-    Index currentVertex = loop[0].second;
-    for (size_t i = 1; i < loop.size(); ++i) {
-      // Find next edge that starts with currentVertex
-      for (const auto& edge : loop) {
-        if (edge.first == currentVertex &&
-            visitedVertices.find(edge.second) == visitedVertices.end()) {
-          hole.vertices.push_back(edge.second);
-          visitedVertices.insert(edge.second);
-          currentVertex = edge.second;
-          break;
-        } else if (
-            edge.second == currentVertex &&
-            visitedVertices.find(edge.first) == visitedVertices.end()) {
-          hole.vertices.push_back(edge.first);
-          visitedVertices.insert(edge.first);
-          currentVertex = edge.first;
-          break;
-        }
-      }
+    for (const auto& edge : loop) {
+      hole.vertices.push_back(edge.first);
     }
 
     // Compute hole geometry

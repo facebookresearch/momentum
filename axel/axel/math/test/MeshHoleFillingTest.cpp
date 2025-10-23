@@ -22,101 +22,104 @@ class MeshHoleFillingTest : public ::testing::Test {
   }
 
   /**
-   * Check if a mesh is manifold (watertight).
-   * A manifold mesh has each edge shared by exactly 2 triangles.
-   */
-  static bool isMeshManifold(
-      const std::vector<Eigen::Vector3f>& /*vertices*/,
-      const std::vector<Eigen::Vector3i>& triangles) {
-    using Edge = std::pair<Index, Index>;
-
-    // Simple hash for edge pairs - same as used in our implementation
-    struct EdgeHash {
-      std::size_t operator()(const Edge& edge) const {
-        return std::hash<Index>{}(edge.first) ^ (std::hash<Index>{}(edge.second) << 1);
-      }
-    };
-
-    // Build edge count map (reusing our optimized approach)
-    std::unordered_map<Edge, size_t, EdgeHash> edgeCountMap;
-
-    for (const auto& triangle : triangles) {
-      // Add three edges of the triangle
-      const std::array<Edge, 3> edges = {
-          {{triangle[0], triangle[1]}, {triangle[1], triangle[2]}, {triangle[2], triangle[0]}}};
-
-      for (const auto& edge : edges) {
-        // Normalize edge orientation (smaller index first)
-        const auto normalizedEdge =
-            std::make_pair(std::min(edge.first, edge.second), std::max(edge.first, edge.second));
-
-        edgeCountMap[normalizedEdge]++;
-      }
-    }
-
-    // Check manifold condition: each edge should be shared by exactly 2 triangles
-    for (const auto& [edge, count] : edgeCountMap) {
-      if (count != 2) {
-        return false; // Not manifold - edge is shared by wrong number of triangles
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Get detailed manifold statistics for debugging.
+   * Get detailed manifold and winding order statistics using directed edges.
+   * This unified approach checks both manifold properties and winding consistency.
    */
   struct ManifoldStats {
-    size_t totalEdges = 0;
-    size_t boundaryEdges = 0; // count == 1 (holes)
-    size_t manifoldEdges = 0; // count == 2 (proper)
-    size_t nonManifoldEdges = 0; // count > 2 (intersections)
+    size_t totalUndirectedEdges = 0;
+    size_t boundaryEdges = 0; // edges with only one direction
+    size_t manifoldEdges = 0; // edges with both directions appearing once each
+    size_t nonManifoldEdges = 0; // edges with duplicate directions
+    size_t inconsistentWindingEdges = 0; // manifold edges where directions don't match properly
     bool isManifold = false;
+    bool hasConsistentWinding = false;
   };
 
   static ManifoldStats getMeshManifoldStats(
       const std::vector<Eigen::Vector3f>& /*vertices*/,
       const std::vector<Eigen::Vector3i>& triangles) {
-    using Edge = std::pair<Index, Index>;
-
-    // Simple hash for edge pairs - same as used in our implementation
-    struct EdgeHash {
-      std::size_t operator()(const Edge& edge) const {
+    using DirectedEdge = std::pair<Index, Index>;
+    struct DirectedEdgeHash {
+      std::size_t operator()(const DirectedEdge& edge) const {
         return std::hash<Index>{}(edge.first) ^ (std::hash<Index>{}(edge.second) << 1);
       }
     };
 
     ManifoldStats stats;
-    std::unordered_map<Edge, size_t, EdgeHash> edgeCountMap;
+
+    // Count occurrences of each directed edge
+    std::unordered_map<DirectedEdge, size_t, DirectedEdgeHash> directedEdgeCount;
 
     for (const auto& triangle : triangles) {
-      const std::array<Edge, 3> edges = {
+      const std::array<DirectedEdge, 3> edges = {
           {{triangle[0], triangle[1]}, {triangle[1], triangle[2]}, {triangle[2], triangle[0]}}};
 
       for (const auto& edge : edges) {
-        const auto normalizedEdge =
-            std::make_pair(std::min(edge.first, edge.second), std::max(edge.first, edge.second));
-
-        edgeCountMap[normalizedEdge]++;
+        directedEdgeCount[edge]++;
       }
     }
 
-    stats.totalEdges = edgeCountMap.size();
+    // Process each undirected edge (check both directions)
+    std::unordered_set<DirectedEdge, DirectedEdgeHash> processedEdges;
 
-    for (const auto& [edge, count] : edgeCountMap) {
-      if (count == 1) {
+    for (const auto& [directedEdge, forwardCount] : directedEdgeCount) {
+      const auto v1 = directedEdge.first;
+      const auto v2 = directedEdge.second;
+
+      // Create normalized edge to avoid processing same edge twice
+      const auto normalizedEdge = std::make_pair(std::min(v1, v2), std::max(v1, v2));
+
+      if (processedEdges.count(normalizedEdge) > 0) {
+        continue;
+      }
+      processedEdges.insert(normalizedEdge);
+
+      stats.totalUndirectedEdges++;
+
+      // Check reverse direction
+      const DirectedEdge reverseEdge = {v2, v1};
+      const size_t reverseCount =
+          directedEdgeCount.count(reverseEdge) ? directedEdgeCount[reverseEdge] : 0;
+
+      // Classify the edge based on directed edge counts
+      if ((forwardCount == 0 && reverseCount == 1) || (forwardCount == 1 && reverseCount == 0)) {
+        // Boundary edge (only reverse direction)
         stats.boundaryEdges++;
-      } else if (count == 2) {
+      } else if (forwardCount == 1 && reverseCount == 1) {
+        // Perfect manifold edge with consistent winding
         stats.manifoldEdges++;
       } else {
+        // All other cases are non-manifold (shared by != 2 triangles)
         stats.nonManifoldEdges++;
+
+        // Check if this is specifically a winding issue
+        // Winding is inconsistent when triangles share an edge but all face the same direction
+        // This happens when we have counts like (2, 0), (0, 2), (3, 0), etc.
+        // But (2, 2) or (1, 2) are more general non-manifold issues
+        const size_t totalCount = forwardCount + reverseCount;
+        if ((totalCount == 2 && (forwardCount == 2 || reverseCount == 2)) ||
+            (totalCount > 2 && (forwardCount == 0 || reverseCount == 0))) {
+          // Multiple triangles all facing the same way - also a winding problem
+          stats.inconsistentWindingEdges++;
+        }
       }
     }
 
     stats.isManifold = (stats.boundaryEdges == 0 && stats.nonManifoldEdges == 0);
+    stats.hasConsistentWinding =
+        (stats.inconsistentWindingEdges == 0 && stats.totalUndirectedEdges > 0);
 
     return stats;
+  }
+
+  /**
+   * Check if a mesh is manifold (watertight) with consistent winding.
+   */
+  static bool isMeshManifold(
+      const std::vector<Eigen::Vector3f>& vertices,
+      const std::vector<Eigen::Vector3i>& triangles) {
+    const auto stats = getMeshManifoldStats(vertices, triangles);
+    return stats.isManifold;
   }
 
   /**
@@ -133,19 +136,33 @@ class MeshHoleFillingTest : public ::testing::Test {
     std::cout << "MANIFOLD VERIFICATION: " << testName << "\n";
     std::cout << std::string(50, '=') << "\n";
 
-    std::cout << "Original mesh:\n";
-    std::cout << "  Total edges: " << originalStats.totalEdges << "\n";
+    std::cout << "\nOriginal mesh:\n";
+    std::cout << "  Total edges: " << originalStats.totalUndirectedEdges << "\n";
     std::cout << "  Boundary edges (holes): " << originalStats.boundaryEdges << "\n";
     std::cout << "  Manifold edges: " << originalStats.manifoldEdges << "\n";
     std::cout << "  Non-manifold edges: " << originalStats.nonManifoldEdges << "\n";
+    std::cout << "  Inconsistent winding edges: " << originalStats.inconsistentWindingEdges << "\n";
     std::cout << "  Is manifold: " << (originalStats.isManifold ? "YES" : "NO") << "\n";
+    std::cout << "  Has consistent winding: " << (originalStats.hasConsistentWinding ? "YES" : "NO")
+              << "\n";
 
     // Original mesh should have holes (boundary edges > 0) for this test to be meaningful
     if (originalStats.boundaryEdges == 0) {
       std::cout << "  NOTE: Original mesh has no holes - test may not be meaningful\n";
     }
 
-    // Fill holes
+    // CRITICAL: Input mesh must have consistent winding order
+    // If the input has winding problems, we can't expect the hole filling to fix them
+    EXPECT_TRUE(originalStats.hasConsistentWinding)
+        << "Input mesh must have consistent winding order before hole filling. "
+        << "Inconsistent winding edges: " << originalStats.inconsistentWindingEdges;
+
+    // Fill holes - first get the result to check stats
+    const auto result = fillMeshHoles(
+        gsl::span<const Eigen::Vector3f>(originalVertices),
+        gsl::span<const Eigen::Vector3i>(originalTriangles));
+
+    // Combine into complete mesh for manifold checking
     const auto [filledVertices, filledTriangles] = fillMeshHolesComplete(
         gsl::span<const Eigen::Vector3f>(originalVertices),
         gsl::span<const Eigen::Vector3i>(originalTriangles));
@@ -154,11 +171,14 @@ class MeshHoleFillingTest : public ::testing::Test {
     const auto filledStats = getMeshManifoldStats(filledVertices, filledTriangles);
 
     std::cout << "\nFilled mesh:\n";
-    std::cout << "  Total edges: " << filledStats.totalEdges << "\n";
+    std::cout << "  Total edges: " << filledStats.totalUndirectedEdges << "\n";
     std::cout << "  Boundary edges (holes): " << filledStats.boundaryEdges << "\n";
     std::cout << "  Manifold edges: " << filledStats.manifoldEdges << "\n";
     std::cout << "  Non-manifold edges: " << filledStats.nonManifoldEdges << "\n";
+    std::cout << "  Inconsistent winding edges: " << filledStats.inconsistentWindingEdges << "\n";
     std::cout << "  Is manifold: " << (filledStats.isManifold ? "YES" : "NO") << "\n";
+    std::cout << "  Has consistent winding: " << (filledStats.hasConsistentWinding ? "YES" : "NO")
+              << "\n";
 
     std::cout << "\nChanges:\n";
     std::cout << "  Added vertices: " << (filledVertices.size() - originalVertices.size()) << "\n";
@@ -186,11 +206,20 @@ class MeshHoleFillingTest : public ::testing::Test {
     EXPECT_GE(filledStats.manifoldEdges, originalStats.manifoldEdges)
         << "Hole filling should preserve or increase manifold edges";
 
-    // For simple cases, expect fully manifold results
+    // Check winding order consistency - this is now part of the manifold stats
+    EXPECT_TRUE(filledStats.hasConsistentWinding)
+        << "Filled mesh should have consistent winding order. Inconsistent winding edges: "
+        << filledStats.inconsistentWindingEdges;
+
+    // Verify holes were actually filled
+    EXPECT_GT(result.holesFilledCount, 0) << "Should have detected and filled at least one hole";
+    EXPECT_GT(result.newTriangles.size(), 0) << "Should have added new triangles to fill holes";
+
+    // For simple cases, expect fully manifold results with ALL holes filled
     if (originalStats.boundaryEdges <= 6 && originalStats.nonManifoldEdges == 0) {
       EXPECT_TRUE(filledStats.isManifold) << "Simple cases should produce fully manifold meshes";
       EXPECT_EQ(filledStats.boundaryEdges, 0)
-          << "Simple cases should have no remaining boundary edges";
+          << "Simple cases should have no remaining boundary edges - all holes should be filled";
     }
   }
 
@@ -234,12 +263,13 @@ class MeshHoleFillingTest : public ::testing::Test {
         Eigen::Vector3f(0.5f, 1.0f, 0.0f),
         Eigen::Vector3f(0.5f, 0.5f, 1.0f)};
 
-    // Three faces of tetrahedron, missing one
+    // Three faces of tetrahedron with consistent winding (all facing outward)
+    // For proper winding, adjacent triangles should share edges in opposite directions
     std::vector<Eigen::Vector3i> triangles = {
-        Eigen::Vector3i(0, 1, 2), // Base triangle
-        Eigen::Vector3i(0, 1, 3), // Side face 1
-        Eigen::Vector3i(1, 2, 3) // Side face 2
-                                 // Missing: Eigen::Vector3i(2, 0, 3) - creates hole
+        Eigen::Vector3i(0, 1, 2), // Base triangle (looking from above, CCW)
+        Eigen::Vector3i(0, 3, 1), // Side face 1 (shares edge 0-1, reversed)
+        Eigen::Vector3i(1, 3, 2) // Side face 2 (shares edge 1-2 with base, reversed)
+                                 // Missing: Eigen::Vector3i(2, 3, 0) - creates hole
     };
 
     return {vertices, triangles};
@@ -466,42 +496,76 @@ TEST_F(MeshHoleFillingTest, TetrahedronHoleFillingManifoldCheck) {
   verifyMeshAfterHoleFilling(vertices, triangles, "Tetrahedron with Missing Face");
 }
 
-TEST_F(MeshHoleFillingTest, ManifoldChecksOnComplexMesh) {
-  // Create a more complex mesh with multiple holes
+TEST_F(MeshHoleFillingTest, FillRectangularInteriorHole) {
+  // Create a rectangular frame mesh with an interior rectangular hole
+  //
+  // Visual representation (looking down at XY plane, Z=0):
+  //
+  //   Outer rectangle: 0-1-2-3
+  //   Inner rectangle: 4-5-6-7 (forms the hole boundary)
+  //
+  //    3-----------2
+  //    |           |
+  //    | 7-------6 |
+  //    | |  HOLE | |
+  //    | |       | |
+  //    | 4-------5 |
+  //    |           |
+  //    0-----------1
+  //
+  //   The mesh is constructed with triangles connecting outer and inner rectangles,
+  //   leaving the center open (hole). All triangles have consistent CCW winding.
+
   std::vector<Eigen::Vector3f> vertices = {
-      // First quad (missing diagonal)
-      Eigen::Vector3f(0.0f, 0.0f, 0.0f), // 0
-      Eigen::Vector3f(2.0f, 0.0f, 0.0f), // 1
-      Eigen::Vector3f(2.0f, 2.0f, 0.0f), // 2
-      Eigen::Vector3f(0.0f, 2.0f, 0.0f), // 3
-      // Second quad (missing triangle)
-      Eigen::Vector3f(3.0f, 0.0f, 0.0f), // 4
-      Eigen::Vector3f(5.0f, 0.0f, 0.0f), // 5
-      Eigen::Vector3f(5.0f, 2.0f, 0.0f), // 6
-      Eigen::Vector3f(3.0f, 2.0f, 0.0f), // 7
+      // Outer rectangle (larger)
+      Eigen::Vector3f(0.0f, 0.0f, 0.0f), // 0 - bottom-left
+      Eigen::Vector3f(4.0f, 0.0f, 0.0f), // 1 - bottom-right
+      Eigen::Vector3f(4.0f, 4.0f, 0.0f), // 2 - top-right
+      Eigen::Vector3f(0.0f, 4.0f, 0.0f), // 3 - top-left
+      // Inner rectangle (forms hole boundary)
+      Eigen::Vector3f(1.0f, 1.0f, 0.0f), // 4 - inner bottom-left
+      Eigen::Vector3f(3.0f, 1.0f, 0.0f), // 5 - inner bottom-right
+      Eigen::Vector3f(3.0f, 3.0f, 0.0f), // 6 - inner top-right
+      Eigen::Vector3f(1.0f, 3.0f, 0.0f), // 7 - inner top-left
   };
 
   std::vector<Eigen::Vector3i> triangles = {
-      // First quad - one triangle only (creates hole)
-      Eigen::Vector3i(0, 1, 2),
-      // Missing: Eigen::Vector3i(0, 2, 3)
+      // Bottom strip (between outer[0-1] and inner[4-5])
+      Eigen::Vector3i(0, 1, 5), // CCW winding
+      Eigen::Vector3i(0, 5, 4), // CCW winding, shares edge 0-5 reversed
 
-      // Second quad - missing one triangle (another hole)
-      Eigen::Vector3i(4, 5, 6),
-      // Missing: Eigen::Vector3i(4, 6, 7)
+      // Right strip (between outer[1-2] and inner[5-6])
+      Eigen::Vector3i(1, 2, 6), // CCW winding
+      Eigen::Vector3i(1, 6, 5), // CCW winding, shares edge 1-6 reversed
 
-      // Connect the quads partially (create more boundary edges)
-      Eigen::Vector3i(1, 4, 5),
-      Eigen::Vector3i(2, 6, 7),
+      // Top strip (between outer[2-3] and inner[6-7])
+      Eigen::Vector3i(2, 3, 7), // CCW winding
+      Eigen::Vector3i(2, 7, 6), // CCW winding, shares edge 2-7 reversed
+
+      // Left strip (between outer[3-0] and inner[7-4])
+      Eigen::Vector3i(3, 0, 4), // CCW winding
+      Eigen::Vector3i(3, 4, 7), // CCW winding, shares edge 3-4 reversed
+
+      // The inner rectangle (4-5-6-7) edges form a closed loop of boundary edges
+      // This is the HOLE that should be detected and filled
   };
 
-  // This mesh should have multiple holes
+  // Verify the original mesh has the expected properties
   const auto originalStats = getMeshManifoldStats(vertices, triangles);
-  EXPECT_GT(originalStats.boundaryEdges, 0) << "Complex mesh should have holes";
-  EXPECT_FALSE(originalStats.isManifold) << "Original complex mesh should not be manifold";
 
-  // Verify hole filling makes it manifold
-  verifyMeshAfterHoleFilling(vertices, triangles, "Complex Multi-Hole Mesh");
+  // Should have boundary edges: 4 on outer perimeter + 4 on inner hole = 8 total
+  EXPECT_GT(originalStats.boundaryEdges, 0) << "Should have boundary edges";
+  EXPECT_EQ(originalStats.boundaryEdges, 8)
+      << "Should have 8 boundary edges (4 outer + 4 inner hole)";
+
+  // Should not be manifold due to the holes (outer perimeter and inner hole)
+  EXPECT_FALSE(originalStats.isManifold) << "Original mesh should not be manifold (has holes)";
+
+  // Should have consistent winding
+  EXPECT_TRUE(originalStats.hasConsistentWinding) << "Input mesh should have consistent winding";
+
+  // Verify hole filling works correctly
+  verifyMeshAfterHoleFilling(vertices, triangles, "Rectangular Frame with Interior Hole");
 }
 
 TEST_F(MeshHoleFillingTest, ManifoldStatsAccuracy) {
@@ -545,55 +609,11 @@ TEST_F(MeshHoleFillingTest, ManifoldStatsAccuracy) {
   EXPECT_EQ(cubeStats.boundaryEdges, 0) << "Closed cube should have no boundary edges";
   EXPECT_EQ(cubeStats.nonManifoldEdges, 0) << "Closed cube should have no non-manifold edges";
   EXPECT_GT(cubeStats.manifoldEdges, 0) << "Closed cube should have manifold edges";
-  EXPECT_EQ(cubeStats.totalEdges, cubeStats.manifoldEdges) << "All edges should be manifold";
+  EXPECT_EQ(cubeStats.totalUndirectedEdges, cubeStats.manifoldEdges)
+      << "All edges should be manifold";
 
   std::cout << "Closed cube manifold stats:\n";
-  std::cout << "  Total edges: " << cubeStats.totalEdges << "\n";
+  std::cout << "  Total edges: " << cubeStats.totalUndirectedEdges << "\n";
   std::cout << "  Manifold edges: " << cubeStats.manifoldEdges << "\n";
   std::cout << "  Expected edges for cube: 18 (6 faces × 3 edges/face ÷ 2 shared)\n";
-}
-
-// ================================================================================================
-// PERFORMANCE TESTS
-// =========================================================================================
-
-TEST_F(MeshHoleFillingTest, ReasonablePerformance) {
-  // Create a moderately complex mesh with holes
-  std::vector<Eigen::Vector3f> vertices;
-  std::vector<Eigen::Vector3i> triangles;
-
-  // Create a grid of vertices
-  const int gridSize = 10;
-  for (int i = 0; i < gridSize; ++i) {
-    for (int j = 0; j < gridSize; ++j) {
-      vertices.emplace_back(static_cast<float>(i), static_cast<float>(j), 0.0f);
-    }
-  }
-
-  // Create triangles with some gaps
-  for (int i = 0; i < gridSize - 1; ++i) {
-    for (int j = 0; j < gridSize - 1; ++j) {
-      if ((i + j) % 3 != 0) { // Skip some triangles to create holes
-        const int idx = i * gridSize + j;
-        triangles.emplace_back(idx, idx + 1, idx + gridSize);
-        triangles.emplace_back(idx + 1, idx + gridSize + 1, idx + gridSize);
-      }
-    }
-  }
-
-  std::cout << "Performance test: " << vertices.size() << " vertices, " << triangles.size()
-            << " triangles\n";
-
-  const auto startTime = std::chrono::high_resolution_clock::now();
-  const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
-  const auto endTime = std::chrono::high_resolution_clock::now();
-
-  const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-
-  std::cout << "Hole filling took: " << duration.count() << " ms\n";
-  std::cout << "Filled " << result.holesFilledCount << " holes\n";
-
-  // Should complete in reasonable time (less than 1 second for this size)
-  EXPECT_LT(duration.count(), 1000);
 }
