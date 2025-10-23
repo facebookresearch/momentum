@@ -76,6 +76,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.world_to_grid"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.world_to_grid()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.TriBvh"><code class="docutils literal notranslate"><span class="pre">TriBvh</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.__init__"><code class="docutils literal notranslate"><span class="pre">TriBvh.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.all_hits"><code class="docutils literal notranslate"><span class="pre">TriBvh.all_hits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.any_hit"><code class="docutils literal notranslate"><span class="pre">TriBvh.any_hit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.box_query"><code class="docutils literal notranslate"><span class="pre">TriBvh.box_query()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.closest_hit"><code class="docutils literal notranslate"><span class="pre">TriBvh.closest_hit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.closest_surface_point"><code class="docutils literal notranslate"><span class="pre">TriBvh.closest_surface_point()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.line_hits"><code class="docutils literal notranslate"><span class="pre">TriBvh.line_hits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.node_count"><code class="docutils literal notranslate"><span class="pre">TriBvh.node_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.primitive_count"><code class="docutils literal notranslate"><span class="pre">TriBvh.primitive_count</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.fill_holes"><code class="docutils literal notranslate"><span class="pre">fill_holes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.mesh_to_sdf"><code class="docutils literal notranslate"><span class="pre">mesh_to_sdf()</span></code></a></li>
@@ -400,6 +412,187 @@
 <dd class="field-even"><p>Continuous grid coordinates (may be fractional).</p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">TriBvh</span></span><a class="headerlink" href="#pymomentum.axel.TriBvh" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounding_box_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a BVH (Bounding Volume Hierarchy) for triangle mesh ray and proximity queries.</p>
+<p>The TriBvh accelerates spatial queries on triangle meshes including:
+- Ray casting (closest hit, all hits, any hit)
+- Closest point queries
+- Bounding box overlap tests</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> – Vertex positions as 2D array of shape (N, 3) where N is number of vertices.</p></li>
+<li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
+Indices must be valid within the vertices array.</p></li>
+<li><p><strong>bounding_box_thickness</strong> – Optional thickness to add to triangle bounding boxes for more robust queries.
+Useful when triangles are very thin. Default: 0.0</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="c1"># Create a simple tetrahedron mesh</span>
+<span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+<span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+<span class="c1"># Build BVH</span>
+<span class="n">bvh</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">TriBvh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">)</span>
+
+<span class="c1"># Query closest point</span>
+<span class="n">query_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">bvh</span><span class="o">.</span><span class="n">closest_surface_point</span><span class="p">(</span><span class="n">query_point</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closest point: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="si">}</span><span class="s2">, on triangle: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">triangle_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.all_hits">
+<span class="sig-name descname"><span class="pre">all_hits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.all_hits" title="Link to this definition"></a></dt>
+<dd><p>Find all intersections for a single ray.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin</strong> – Ray origin as 1D array of shape (3,).</p></li>
+<li><p><strong>direction</strong> – Ray direction as 1D array of shape (3,).</p></li>
+<li><p><strong>max_distance</strong> – Optional maximum distance for the ray. If not provided, uses infinity.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (triangle_ids, hit_distances, hit_points, bary_coords) where:
+- triangle_ids: int32 array of shape (M,) with hit triangle indices
+- hit_distances: float array of shape (M,) with hit distances
+- hit_points: float array of shape (M, 3) with hit point positions
+- bary_coords: float array of shape (M, 3) with barycentric coordinates
+where M is the number of hits for this ray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.any_hit">
+<span class="sig-name descname"><span class="pre">any_hit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">origins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distances</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float32)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.any_hit" title="Link to this definition"></a></dt>
+<dd><p>Test if rays intersect the mesh for a batch of rays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origins</strong> – Ray origins as 2D array of shape (N, 3).</p></li>
+<li><p><strong>directions</strong> – Ray directions as 2D array of shape (N, 3).</p></li>
+<li><p><strong>max_distances</strong> – Optional maximum distances per ray as 1D array of shape (N,).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Boolean numpy array of shape (N,) indicating if each ray hits the mesh.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.box_query">
+<span class="sig-name descname"><span class="pre">box_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.BoundingBox" title="pymomentum.axel.BoundingBox"><span class="pre">pymomentum.axel.BoundingBox</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.box_query" title="Link to this definition"></a></dt>
+<dd><p>Find all triangles whose bounding boxes intersect with the query box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>box</strong> – Query bounding box.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of triangle indices that intersect the box.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.closest_hit">
+<span class="sig-name descname"><span class="pre">closest_hit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">origins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distances</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float32)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.closest_hit" title="Link to this definition"></a></dt>
+<dd><p>Find closest intersections for a batch of rays.</p>
+<p>Supports batched queries for better performance when testing multiple rays.
+Returns numpy arrays for efficient downstream processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origins</strong> – Ray origins as 2D array of shape (N, 3).</p></li>
+<li><p><strong>directions</strong> – Ray directions as 2D array of shape (N, 3).</p></li>
+<li><p><strong>max_distances</strong> – Optional maximum distances per ray as 1D array of shape (N,).
+If not provided, uses default maximum distance.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (triangle_ids, hit_distances, hit_points, bary_coords) where:
+- triangle_ids: int32 array of shape (N,) with hit triangle indices (-1 if no hit)
+- hit_distances: float array of shape (N,) with hit distances (inf if no hit)
+- hit_points: float array of shape (N, 3) with hit point positions
+- bary_coords: float array of shape (N, 3) with barycentric coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.closest_surface_point">
+<span class="sig-name descname"><span class="pre">closest_surface_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">queries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.closest_surface_point" title="Link to this definition"></a></dt>
+<dd><p>Find the closest points on the mesh surface for a batch of query points.</p>
+<p>Returns numpy arrays for efficient downstream processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>queries</strong> – Query points as 2D array of shape (N, 3).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (valid, points, triangle_indices, bary_coords) where:
+- valid: bool array of shape (N,) indicating if query succeeded
+- points: float array of shape (N, 3) with closest points on the mesh surface
+- triangle_indices: uint32 array of shape (N,) with triangle indices (kInvalidTriangleIdx if invalid)
+- bary_coords: float array of shape (N, 3) with barycentric coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.line_hits">
+<span class="sig-name descname"><span class="pre">line_hits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.TriBvh" title="pymomentum.axel.TriBvh"><span class="pre">pymomentum.axel.TriBvh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.line_hits" title="Link to this definition"></a></dt>
+<dd><p>Find all triangles hit by the infinite line defined by the ray direction.</p>
+<p>Note: This queries the infinite line, not just the ray segment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin</strong> – Line origin as 1D array of shape (3,).</p></li>
+<li><p><strong>direction</strong> – Line direction as 1D array of shape (3,).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>int32 array of triangle indices hit by the line.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.node_count">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_count</span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.node_count" title="Link to this definition"></a></dt>
+<dd><p>Total number of internal nodes in the BVH tree.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.TriBvh.primitive_count">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">primitive_count</span></span><a class="headerlink" href="#pymomentum.axel.TriBvh.primitive_count" title="Link to this definition"></a></dt>
+<dd><p>Total number of primitives (triangles) in the BVH.</p>
 </dd></dl>
 
 </dd></dl>
