@@ -13,6 +13,7 @@
 #include <axel/math/MeshHoleFilling.h>
 #include <momentum/common/exception.h>
 #include <pymomentum/axel/axel_utility.h>
+#include <pymomentum/axel/tri_bvh_pybind.h>
 
 #include <fmt/format.h>
 #include <pybind11/buffer_info.h>
@@ -871,6 +872,9 @@ Example usage::
       py::arg("vertex_mask") = py::array_t<bool>(),
       py::arg("iterations") = 1,
       py::arg("step") = 0.5f);
+
+  // Register TriBvh bindings
+  registerTriBvhBindings(m);
 }
 
 } // namespace pymomentum

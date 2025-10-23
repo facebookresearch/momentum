@@ -851,6 +851,286 @@ class TestAxel(unittest.TestCase):
                 tri_vertices, np.array([[0, 1, -1]]), np.array([])
             )  # Negative index
 
+    def test_tribvh_creation(self):
+        """Test TriBvh creation with valid mesh."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        self.assertEqual(bvh.primitive_count, 4)
+        self.assertGreater(bvh.node_count, 0)
+
+    def test_tribvh_invalid_triangle_indices(self):
+        """Test TriBvh with invalid triangle indices."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0]], dtype=np.float32
+        )
+
+        # Triangle with out-of-bounds index
+        invalid_triangles = np.array([[0, 1, 5]], dtype=np.int32)
+        with self.assertRaisesRegex(RuntimeError, "Invalid.*indices"):
+            axel.TriBvh(vertices, invalid_triangles)
+
+        # Triangle with negative index
+        negative_triangles = np.array([[0, 1, -1]], dtype=np.int32)
+        with self.assertRaisesRegex(RuntimeError, "Invalid.*indices"):
+            axel.TriBvh(vertices, negative_triangles)
+
+    def test_tribvh_closest_hit(self):
+        """Test ray-triangle intersection with TriBvh."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Ray pointing down at first triangle (use batched API with single ray)
+        origins = np.array([[0.5, 0.3, 1.0]], dtype=np.float32)
+        directions = np.array([[0.0, 0.0, -1.0]], dtype=np.float32)
+
+        triangle_ids, hit_distances, hit_points, bary_coords = bvh.closest_hit(
+            origins, directions
+        )
+
+        self.assertGreaterEqual(triangle_ids[0], 0)
+        self.assertLess(triangle_ids[0], 4)
+        self.assertGreater(hit_distances[0], 0)
+
+    def test_tribvh_closest_hit_miss(self):
+        """Test ray that misses all triangles."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Ray pointing away from mesh (use batched API)
+        origins = np.array([[5.0, 5.0, 5.0]], dtype=np.float32)
+        directions = np.array([[1.0, 1.0, 1.0]], dtype=np.float32)
+
+        triangle_ids, hit_distances, hit_points, bary_coords = bvh.closest_hit(
+            origins, directions
+        )
+
+        # Should return -1 for triangle ID indicating miss
+        self.assertEqual(triangle_ids[0], -1)
+
+    def test_tribvh_any_hit(self):
+        """Test fast occlusion test with TriBvh."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Rays that hit and miss (batched)
+        origins = np.array([[0.5, 0.3, 1.0], [5.0, 5.0, 5.0]], dtype=np.float32)
+        directions = np.array([[0.0, 0.0, -1.0], [1.0, 1.0, 1.0]], dtype=np.float32)
+        results = bvh.any_hit(origins, directions)
+
+        self.assertTrue(results[0])
+        self.assertFalse(results[1])
+
+    def test_tribvh_all_hits(self):
+        """Test finding all ray-triangle intersections."""
+        vertices = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 0.0, 1.0],
+                [1.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0],
+            ],
+            dtype=np.float32,
+        )
+
+        # Create two parallel triangles at z=0 and z=1
+        triangles = np.array([[0, 1, 2], [4, 6, 5]], dtype=np.int32)
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Ray that goes through both triangles
+        origin = np.array([0.5, 0.5, -1.0], dtype=np.float32)
+        direction = np.array([0.0, 0.0, 1.0], dtype=np.float32)
+
+        triangle_ids, hit_distances, hit_points, bary_coords = bvh.all_hits(
+            origin, direction
+        )
+
+        # Should hit both triangles
+        self.assertGreaterEqual(len(triangle_ids), 1)
+        self.assertEqual(len(triangle_ids), len(hit_distances))
+        self.assertEqual(len(triangle_ids), len(hit_points))
+        self.assertEqual(len(triangle_ids), len(bary_coords))
+
+    def test_tribvh_closest_surface_point_single(self):
+        """Test closest surface point query with single point (using batched API)."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Query point near the mesh (reshape to 2D for batched API)
+        query = np.array([[0.5, 0.3, 0.5]], dtype=np.float32)
+        valid, points, triangle_indices, bary_coords = bvh.closest_surface_point(query)
+
+        self.assertTrue(valid[0])
+        self.assertGreaterEqual(triangle_indices[0], 0)
+        self.assertLess(triangle_indices[0], 4)
+        self.assertEqual(points[0].shape, (3,))
+
+    def test_tribvh_closest_surface_point_batched(self):
+        """Test closest surface point query with batch of points."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Query multiple points
+        queries = np.array(
+            [[0.5, 0.3, 0.5], [0.2, 0.2, 0.2], [0.7, 0.4, 0.6]], dtype=np.float32
+        )
+        valid, points, triangle_indices, bary_coords = bvh.closest_surface_point(
+            queries
+        )
+
+        # Check array types and shapes
+        self.assertIsInstance(valid, np.ndarray)
+        self.assertIsInstance(points, np.ndarray)
+        self.assertEqual(valid.shape, (3,))
+        self.assertEqual(points.shape, (3, 3))
+        self.assertEqual(triangle_indices.shape, (3,))
+        self.assertEqual(bary_coords.shape, (3, 3))
+
+        # Check all queries succeeded
+        self.assertTrue(np.all(valid))
+
+        # Check all queries found valid triangles
+        for i in range(3):
+            self.assertGreaterEqual(triangle_indices[i], 0)
+            self.assertLess(triangle_indices[i], 4)
+
+    def test_tribvh_closest_hit_batched(self):
+        """Test batched ray-triangle intersection queries."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        # Test multiple rays
+        origins = np.array(
+            [[0.5, 0.3, 1.0], [0.2, 0.2, 1.0], [5.0, 5.0, 5.0]], dtype=np.float32
+        )
+        directions = np.array(
+            [[0.0, 0.0, -1.0], [0.0, 0.0, -1.0], [1.0, 1.0, 1.0]], dtype=np.float32
+        )
+
+        triangle_ids, hit_distances, hit_points, bary_coords = bvh.closest_hit(
+            origins, directions
+        )
+
+        # Check array types and shapes
+        self.assertIsInstance(triangle_ids, np.ndarray)
+        self.assertEqual(triangle_ids.shape, (3,))
+        self.assertEqual(hit_distances.shape, (3,))
+        self.assertEqual(hit_points.shape, (3, 3))
+        self.assertEqual(bary_coords.shape, (3, 3))
+
+        # First two should hit (valid triangle ID), third should miss (triangle ID == -1)
+        self.assertGreaterEqual(triangle_ids[0], 0)
+        self.assertLess(triangle_ids[0], 4)
+        self.assertGreaterEqual(triangle_ids[1], 0)
+        self.assertLess(triangle_ids[1], 4)
+        self.assertEqual(triangle_ids[2], -1)  # Miss indicated by -1
+
+    def test_tribvh_any_hit_batched(self):
+        """Test batched occlusion queries."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        origins = np.array(
+            [[0.5, 0.3, 1.0], [5.0, 5.0, 5.0], [0.2, 0.2, 1.0]], dtype=np.float32
+        )
+        directions = np.array(
+            [[0.0, 0.0, -1.0], [1.0, 1.0, 1.0], [0.0, 0.0, -1.0]], dtype=np.float32
+        )
+
+        results = bvh.any_hit(origins, directions)
+
+        self.assertIsInstance(results, np.ndarray)
+        self.assertEqual(results.shape, (3,))
+        self.assertTrue(results[0])
+        self.assertFalse(results[1])
+        self.assertTrue(results[2])
+
+    def test_tribvh_with_max_distances(self):
+        """Test batched queries with maximum distances."""
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        bvh = axel.TriBvh(vertices, triangles)
+
+        origins = np.array([[0.5, 0.3, 1.0], [0.5, 0.3, 1.0]], dtype=np.float32)
+        directions = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, -1.0]], dtype=np.float32)
+        # First ray has short max distance, second has long
+        max_distances = np.array([0.3, 10.0], dtype=np.float32)
+
+        triangle_ids, hit_distances, hit_points, bary_coords = bvh.closest_hit(
+            origins, directions, max_distances
+        )
+
+        # First should miss due to max distance (triangle_id == -1), second should hit
+        self.assertEqual(triangle_ids[0], -1)
+        self.assertGreaterEqual(triangle_ids[1], 0)
+
 
 if __name__ == "__main__":
     unittest.main()
