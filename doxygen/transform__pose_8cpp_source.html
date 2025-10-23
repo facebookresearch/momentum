@@ -212,7 +212,7 @@ $(document).ready(function(){initNavTree('transform__pose_8cpp_source.html','');
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      std::make_shared&lt;momentum::OrientationErrorFunctionT&lt;T&gt;&gt;(characterSimplified_);</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  solverFunction_ = std::make_unique&lt;momentum::SkeletonSolverFunctionT&lt;T&gt;&gt;(</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      &amp;characterSimplified_.skeleton, &amp;parameterTransformSimplified_);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      characterSimplified_, parameterTransformSimplified_);</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  solverFunction_-&gt;addErrorFunction(positionError_);</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  solverFunction_-&gt;addErrorFunction(orientationError_);</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
@@ -439,7 +439,7 @@ $(document).ready(function(){initNavTree('transform__pose_8cpp_source.html','');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="transform__pose_8cpp.html">transform_pose.cpp</a></li>
-    <li class="footer">Generated on Thu Oct 23 2025 03:30:13 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 23 2025 03:43:55 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

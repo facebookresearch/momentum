@@ -115,6 +115,8 @@ $(document).ready(function(){initNavTree('classmomentum_1_1MultiposeSolverFuncti
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a5e36781629d3b7b0184e15d22d4cd21a" id="r_a5e36781629d3b7b0184e15d22d4cd21a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html#a5e36781629d3b7b0184e15d22d4cd21a">MultiposeSolverFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ParameterTransformT.html">ParameterTransformT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; *<a class="el" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>, gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">universal</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> frames)</td></tr>
 <tr class="separator:a5e36781629d3b7b0184e15d22d4cd21a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09fc772a57f8210484c30819b1359515" id="r_a09fc772a57f8210484c30819b1359515"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html#a09fc772a57f8210484c30819b1359515">~MultiposeSolverFunctionT</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a09fc772a57f8210484c30819b1359515"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7992cacf058d98c569d86d349ef49ff2" id="r_a7992cacf058d98c569d86d349ef49ff2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html#a7992cacf058d98c569d86d349ef49ff2">getError</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
 <tr class="separator:a7992cacf058d98c569d86d349ef49ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a610d1efa0106937d855d6dff057a2f49" id="r_a610d1efa0106937d855d6dff057a2f49"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html#a610d1efa0106937d855d6dff057a2f49">getGradient</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
@@ -241,9 +243,36 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00019">19</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00020">20</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="solver__function_8h_source.html#l00123">momentum::SolverFunctionT&lt; T &gt;::actualParameters_</a>, <a class="el" href="multipose__solver__function_8h_source.html#l00043">momentum::MultiposeSolverFunctionT&lt; T &gt;::getNumFrames()</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="solver__function_8h_source.html#l00118">momentum::SolverFunctionT&lt; T &gt;::numParameters_</a>.</p>
+<p class="reference">References <a class="el" href="solver__function_8h_source.html#l00123">momentum::SolverFunctionT&lt; T &gt;::actualParameters_</a>, <a class="el" href="multipose__solver__function_8h_source.html#l00044">momentum::MultiposeSolverFunctionT&lt; T &gt;::getNumFrames()</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="solver__function_8h_source.html#l00118">momentum::SolverFunctionT&lt; T &gt;::numParameters_</a>.</p>
+
+</div>
+</div>
+<a id="a09fc772a57f8210484c30819b1359515" name="a09fc772a57f8210484c30819b1359515"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09fc772a57f8210484c30819b1359515">&#9670;&#160;</a></span>~MultiposeSolverFunctionT()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html">momentum::MultiposeSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::~<a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html">MultiposeSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -276,7 +305,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00360">360</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00366">366</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -308,7 +337,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00171">171</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00175">175</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -340,7 +369,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8h_source.html#l00047">47</a> of file <a class="el" href="multipose__solver__function_8h_source.html">multipose_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8h_source.html#l00048">48</a> of file <a class="el" href="multipose__solver__function_8h_source.html">multipose_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -380,7 +409,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00196">196</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00200">200</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -434,7 +463,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00238">238</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00243">243</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="profile_8h_source.html#l00067">MT_PROFILE_EVENT</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
 
@@ -457,7 +486,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00101">101</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00105">105</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -486,9 +515,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8h_source.html#l00043">43</a> of file <a class="el" href="multipose__solver__function_8h_source.html">multipose_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8h_source.html#l00044">44</a> of file <a class="el" href="multipose__solver__function_8h_source.html">multipose_solver_function.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="multipose__solver__function_8cpp_source.html#l00019">momentum::MultiposeSolverFunctionT&lt; T &gt;::MultiposeSolverFunctionT()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="multipose__solver__function_8cpp_source.html#l00020">momentum::MultiposeSolverFunctionT&lt; T &gt;::MultiposeSolverFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -509,7 +538,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00154">154</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00158">158</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -530,7 +559,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00096">96</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00100">100</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
@@ -553,7 +582,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00143">143</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00147">147</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -593,7 +622,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SolverFunctionT.html#aa75eca8db9c61ec8af90fb9ff76522c1">momentum::SolverFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00056">56</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00060">60</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -625,7 +654,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00086">86</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00090">90</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="character_2types_8h_source.html#l00091">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>.</p>
 
@@ -649,7 +678,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00120">120</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00124">124</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -689,7 +718,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00346">346</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8cpp_source.html#l00352">352</a> of file <a class="el" href="multipose__solver__function_8cpp_source.html">multipose_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -718,7 +747,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8h_source.html#l00075">75</a> of file <a class="el" href="multipose__solver__function_8h_source.html">multipose_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multipose__solver__function_8h_source.html#l00077">77</a> of file <a class="el" href="multipose__solver__function_8h_source.html">multipose_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -733,7 +762,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1MultiposeSolverFunctionT.html">MultiposeSolverFunctionT</a></li>
-    <li class="footer">Generated on Thu Oct 23 2025 03:30:14 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 23 2025 03:43:56 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
