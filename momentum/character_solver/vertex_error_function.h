@@ -102,6 +102,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculatePositionJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexConstraintT<T>& constr,
       Ref<Eigen::MatrixX<T>> jac,
       Ref<Eigen::VectorX<T>> res) const;
@@ -109,6 +110,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculateNormalJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexConstraintT<T>& constr,
       T sourceNormalWeight,
       T targetNormalWeight,
@@ -118,12 +120,14 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculatePositionGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexConstraintT<T>& constr,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   double calculateNormalGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexConstraintT<T>& constr,
       T sourceNormalWeight,
       T targetNormalWeight,
@@ -143,20 +147,9 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   std::vector<VertexConstraintT<T>> constraints_;
 
-  std::unique_ptr<MeshT<T>>
-      neutralMesh_; // Rest mesh without facial expression basis,
-                    // used to restore the neutral shape after facial expressions are applied.
-                    // Not used with there is a shape basis.
-  std::unique_ptr<MeshT<T>> restMesh_; // The rest positions of the mesh after shape basis
-                                       // (and potentially facial expression) has been applied
-  std::unique_ptr<MeshT<T>>
-      posedMesh_; // The posed mesh after the skeleton transforms have been applied.
-
   const VertexConstraintType constraintType_;
 
   uint32_t maxThreads_;
-
-  void updateMeshes(const ModelParametersT<T>& modelParameters, const SkeletonStateT<T>& state);
 };
 
 } // namespace momentum

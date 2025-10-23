@@ -12,6 +12,7 @@
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
@@ -47,9 +48,6 @@ VertexErrorFunctionT<T>::VertexErrorFunctionT(
       character_in.faceExpressionBlendShape && (type != VertexConstraintType::Position),
       "Constraint type {} not implemented yet for face. Only Position type is supported.",
       toString(type));
-  this->neutralMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->restMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->posedMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
 }
 
 template <typename T>
@@ -74,10 +72,10 @@ template <typename T>
 double VertexErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */) {
+    const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   // loop over all constraints and calculate the error
   double error = 0.0;
@@ -87,7 +85,7 @@ double VertexErrorFunctionT<T>::getError(
       const VertexConstraintT<T>& constr = constraints_[i];
 
       const Eigen::Vector3<T> diff =
-          this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
+          meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
       error += constr.weight * diff.squaredNorm() * kPositionWeight;
     }
   } else {
@@ -95,7 +93,7 @@ double VertexErrorFunctionT<T>::getError(
     for (size_t i = 0; i < constraints_.size(); ++i) {
       const VertexConstraintT<T>& constr = constraints_[i];
 
-      const Eigen::Vector3<T> sourceNormal = this->posedMesh_->normals[constr.vertexIndex];
+      const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.vertexIndex];
       Eigen::Vector3<T> targetNormal = constr.targetNormal;
       if (sourceNormal.dot(constr.targetNormal) < 0) {
         targetNormal *= -1;
@@ -105,7 +103,7 @@ double VertexErrorFunctionT<T>::getError(
 
       // calculate point->plane distance and error
       const Eigen::Vector3<T> diff =
-          this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
+          meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
       const T dist = normal.dot(diff);
       error += constr.weight * dist * dist * kPlaneWeight;
     }
@@ -138,16 +136,17 @@ template <typename T>
 double VertexErrorFunctionT<T>::calculatePositionGradient(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexConstraintT<T>& constr,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   const Eigen::Vector3<T> diff =
-      this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
+      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
 
   // calculate the difference between target and position and error
   const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *this->restMesh_, state, constr.vertexIndex);
+      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
@@ -243,17 +242,18 @@ template <typename T>
 double VertexErrorFunctionT<T>::calculatePositionJacobian(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexConstraintT<T>& constr,
     Ref<Eigen::MatrixX<T>> jac,
     Ref<Eigen::VectorX<T>> res) const {
   // calculate the difference between target and position and error
   const Eigen::Vector3<T> diff =
-      this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
+      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
 
   const T wgt = std::sqrt(constr.weight * kPositionWeight * this->weight_);
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *this->restMesh_, state, constr.vertexIndex);
+      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
@@ -349,13 +349,14 @@ template <typename T>
 double VertexErrorFunctionT<T>::calculateNormalGradient(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexConstraintT<T>& constr,
     const T sourceNormalWeight,
     const T targetNormalWeight,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   const auto& skinWeights = *character_.skinWeights;
 
-  const Eigen::Vector3<T> sourceNormal = posedMesh_->normals[constr.vertexIndex];
+  const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.vertexIndex];
   Eigen::Vector3<T> targetNormal = constr.targetNormal;
   if (sourceNormal.dot(constr.targetNormal) < 0) {
     targetNormal *= -1;
@@ -364,14 +365,14 @@ double VertexErrorFunctionT<T>::calculateNormalGradient(
       sourceNormalWeight * sourceNormal + targetNormalWeight * targetNormal;
 
   const Eigen::Vector3<T> diff =
-      this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
+      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
   const T dist = diff.dot(normal);
 
   // calculate the difference between target and position and error
   const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *this->restMesh_, state, constr.vertexIndex);
+      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
@@ -457,6 +458,7 @@ template <typename T>
 double VertexErrorFunctionT<T>::calculateNormalJacobian(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexConstraintT<T>& constr,
     const T sourceNormalWeight,
     const T targetNormalWeight,
@@ -464,7 +466,7 @@ double VertexErrorFunctionT<T>::calculateNormalJacobian(
     T& res) const {
   const auto& skinWeights = *character_.skinWeights;
 
-  const Eigen::Vector3<T> sourceNormal = posedMesh_->normals[constr.vertexIndex];
+  const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.vertexIndex];
   Eigen::Vector3<T> targetNormal = constr.targetNormal;
   if (sourceNormal.dot(constr.targetNormal) < 0) {
     targetNormal *= -1;
@@ -474,13 +476,13 @@ double VertexErrorFunctionT<T>::calculateNormalJacobian(
 
   // calculate the difference between target and position and error
   const Eigen::Vector3<T> diff =
-      this->posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
+      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
   const T dist = diff.dot(normal);
 
   const T wgt = std::sqrt(constr.weight * kPlaneWeight * this->weight_);
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *this->restMesh_, state, constr.vertexIndex);
+      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
@@ -579,9 +581,9 @@ template <typename T>
 double VertexErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0;
   std::vector<std::tuple<double, VectorX<T>>> errorGradThread;
@@ -600,8 +602,8 @@ double VertexErrorFunctionT<T>::getGradient(
         [&](std::tuple<double, VectorX<T>>& errorGradLocal, const size_t iCons) {
           double& errorLocal = std::get<0>(errorGradLocal);
           auto& gradLocal = std::get<1>(errorGradLocal);
-          errorLocal +=
-              calculatePositionGradient(modelParameters, state, constraints_[iCons], gradLocal);
+          errorLocal += calculatePositionGradient(
+              modelParameters, state, meshState, constraints_[iCons], gradLocal);
         },
         dispensoOptions);
   } else {
@@ -622,6 +624,7 @@ double VertexErrorFunctionT<T>::getGradient(
           errorLocal += calculateNormalGradient(
               modelParameters,
               state,
+              meshState,
               constraints_[iCons],
               sourceNormalWeight,
               targetNormalWeight,
@@ -651,7 +654,7 @@ template <typename T>
 double VertexErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
@@ -660,7 +663,7 @@ double VertexErrorFunctionT<T>::getJacobian(
   MT_CHECK(jacobian.rows() >= (Eigen::Index)(1 * constraints_.size()));
   MT_CHECK(residual.rows() >= (Eigen::Index)(1 * constraints_.size()));
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0;
   std::vector<double> errorThread;
@@ -680,6 +683,7 @@ double VertexErrorFunctionT<T>::getJacobian(
           errorLocal += calculatePositionJacobian(
               modelParameters,
               state,
+              meshState,
               constraints_[iCons],
               jacobian.block(3 * iCons, 0, 3, modelParameters.size()),
               residual.middleRows(3 * iCons, 3));
@@ -701,6 +705,7 @@ double VertexErrorFunctionT<T>::getJacobian(
           errorLocal += calculateNormalJacobian(
               modelParameters,
               state,
+              meshState,
               constraints_[iCons],
               sourceNormalWeight,
               targetNormalWeight,
@@ -730,49 +735,6 @@ size_t VertexErrorFunctionT<T>::getJacobianSize() const {
     default:
       return constraints_.size();
   }
-}
-
-template <typename T>
-void VertexErrorFunctionT<T>::updateMeshes(
-    const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
-  MT_PROFILE_FUNCTION();
-
-  bool doUpdateNormals = false;
-  if (this->character_.blendShape) {
-    const BlendWeightsT<T> blendWeights =
-        extractBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.blendShape->computeShape(blendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (this->character_.faceExpressionBlendShape) {
-    if (!this->character_.blendShape) {
-      // Set restMesh back to neutral, removing potential previous expressions.
-      // Note that if the character comes with (shape) blendShape, the previous if block already
-      // takes care of this step.
-      Eigen::Map<Eigen::VectorX<T>> outputVec(
-          &this->restMesh_->vertices[0][0], this->restMesh_->vertices.size() * 3);
-      const Eigen::Map<Eigen::VectorX<T>> baseVec(
-          &this->neutralMesh_->vertices[0][0], this->neutralMesh_->vertices.size() * 3);
-      outputVec = baseVec.template cast<T>();
-    }
-    const BlendWeightsT<T> faceExpressionBlendWeights =
-        extractFaceExpressionBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.faceExpressionBlendShape->applyDeltas(
-        faceExpressionBlendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (doUpdateNormals) {
-    this->restMesh_->updateNormals();
-  }
-
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *this->character_.skinWeights,
-      *this->restMesh_,
-      state,
-      *this->posedMesh_);
-  // TODO should we call updateNormals() here too or trust the ones from skinning?
 }
 
 template class VertexErrorFunctionT<float>;
