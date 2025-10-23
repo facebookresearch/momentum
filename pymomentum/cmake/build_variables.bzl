@@ -186,9 +186,11 @@ renderer_sources = [
 
 axel_public_headers = [
     "axel/axel_utility.h",
+    "axel/tri_bvh_pybind.h",
 ]
 
 axel_sources = [
     "axel/axel_pybind.cpp",
     "axel/axel_utility.cpp",
+    "axel/tri_bvh_pybind.cpp",
 ]
