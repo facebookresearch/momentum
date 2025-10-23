@@ -7,6 +7,7 @@
 
 #include "momentum/io/gltf/gltf_io.h"
 
+#include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/character_state.h"
 #include "momentum/character/character_utility.h"
@@ -475,6 +476,117 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
   return pos.size();
 }
 
+// Return the number of blend shapes newly loaded
+size_t addBlendShapes(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    BlendShape_u& blendShape) {
+  if (primitive.targets.empty()) {
+    return 0;
+  }
+
+  const size_t numNewTargets = primitive.targets.size();
+
+  // Read the base mesh vertices from the primitive
+  auto baseVertices = copyAccessorBuffer<Vector3f>(model, primitive.attributes.at("POSITION"));
+  toMomentumVec3f(baseVertices);
+  const size_t kNumNewVertices = baseVertices.size();
+
+  // Create the BlendShape if it doesn't exist yet
+  if (blendShape == nullptr) {
+    // Initialize with the base mesh vertices
+    blendShape =
+        std::make_unique<BlendShape>(gsl::span<const Vector3f>(baseVertices), numNewTargets);
+
+    // Load each morph target
+    for (size_t iTarget = 0; iTarget < numNewTargets; ++iTarget) {
+      const auto& target = primitive.targets[iTarget];
+
+      // Look for POSITION attribute in the morph target
+      auto posId = target.find("POSITION");
+      if (posId == target.end()) {
+        MT_LOGW("Morph target {} has no POSITION attribute", iTarget);
+        continue;
+      }
+
+      // Load the position deltas
+      auto deltas = copyAccessorBuffer<Vector3f>(model, posId->second);
+      toMomentumVec3f(deltas);
+
+      MT_CHECK(
+          deltas.size() == kNumNewVertices,
+          "Morph target {} has {} vertices but mesh has {} vertices",
+          iTarget,
+          deltas.size(),
+          kNumNewVertices);
+
+      // Set the shape vector for this target
+      blendShape->setShapeVector(iTarget, gsl::span<const Vector3f>(deltas));
+    }
+  } else {
+    // Append to existing BlendShape
+    const size_t kNumExistingVertices = blendShape->modelSize();
+    const size_t kNumExistingTargets = blendShape->shapeSize();
+    const size_t kTotalVertices = kNumExistingVertices + kNumNewVertices;
+    const size_t kMaxTargets = std::max(kNumExistingTargets, numNewTargets);
+
+    // Get the existing data
+    auto existingBaseShape = blendShape->getBaseShape();
+    const auto& existingShapeVectors = blendShape->getShapeVectors();
+
+    // Create new base shape by appending new vertices to existing ones
+    std::vector<Vector3f> newBaseShape;
+    newBaseShape.reserve(kTotalVertices);
+    newBaseShape.insert(newBaseShape.end(), existingBaseShape.begin(), existingBaseShape.end());
+    newBaseShape.insert(newBaseShape.end(), baseVertices.begin(), baseVertices.end());
+
+    // Create new shape vectors matrix
+    MatrixXf newShapeVectors(kTotalVertices * 3, kMaxTargets);
+    newShapeVectors.setZero();
+
+    // Copy existing shape vectors to the top rows
+    newShapeVectors.topRows(kNumExistingVertices * 3).leftCols(kNumExistingTargets) =
+        existingShapeVectors;
+
+    // Load and append new morph target deltas
+    for (size_t iTarget = 0; iTarget < numNewTargets; ++iTarget) {
+      const auto& target = primitive.targets[iTarget];
+
+      // Look for POSITION attribute in the morph target
+      auto posId = target.find("POSITION");
+      if (posId == target.end()) {
+        MT_LOGW("Morph target {} has no POSITION attribute", iTarget);
+        continue;
+      }
+
+      // Load the position deltas
+      auto deltas = copyAccessorBuffer<Vector3f>(model, posId->second);
+      toMomentumVec3f(deltas);
+
+      MT_CHECK(
+          deltas.size() == kNumNewVertices,
+          "Morph target {} has {} vertices but mesh has {} vertices",
+          iTarget,
+          deltas.size(),
+          kNumNewVertices);
+
+      // Copy deltas into the new shape vectors matrix
+      for (size_t iVert = 0; iVert < kNumNewVertices; ++iVert) {
+        const size_t rowOffset = (kNumExistingVertices + iVert) * 3;
+        newShapeVectors(rowOffset + 0, iTarget) = deltas[iVert].x();
+        newShapeVectors(rowOffset + 1, iTarget) = deltas[iVert].y();
+        newShapeVectors(rowOffset + 2, iTarget) = deltas[iVert].z();
+      }
+    }
+
+    // Create a new BlendShape with the combined data
+    blendShape = std::make_unique<BlendShape>(gsl::span<const Vector3f>(newBaseShape), kMaxTargets);
+    blendShape->setShapeVectors(newShapeVectors);
+  }
+
+  return numNewTargets;
+}
+
 void addSkinWeights(
     const fx::gltf::Document& model,
     const fx::gltf::Skin& skin,
@@ -558,8 +670,8 @@ void addSkinWeights(
   }
 }
 
-// Load mesh and skinning information together so we can validate correctness
-std::tuple<Mesh_u, SkinWeights_u> loadSkinnedMesh(
+// Load mesh, skinning information, and blendshapes together so we can validate correctness
+std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
     const fx::gltf::Document& model,
     const std::vector<size_t>& meshNodes,
     const std::vector<size_t>& nodeToObjectMap) {
@@ -587,6 +699,8 @@ std::tuple<Mesh_u, SkinWeights_u> loadSkinnedMesh(
       unskinnedNodes.size());
   auto resultMesh = std::make_unique<Mesh>();
   auto skinWeights = std::make_unique<SkinWeights>();
+  BlendShape_u blendShape = nullptr;
+
   if (!skinnedNodes.empty()) {
     for (auto nodeId : skinnedNodes) {
       // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
@@ -596,6 +710,7 @@ std::tuple<Mesh_u, SkinWeights_u> loadSkinnedMesh(
       for (const auto& primitive : mesh.primitives) {
         const auto kNumVertices = addMesh(model, primitive, resultMesh);
         addSkinWeights(model, skin, primitive, nodeToObjectMap, kNumVertices, skinWeights);
+        addBlendShapes(model, primitive, blendShape);
         MT_CHECK(
             resultMesh->vertices.size() == skinWeights->index.rows(),
             "vertices: {}, skinWeights: {}",
@@ -610,13 +725,14 @@ std::tuple<Mesh_u, SkinWeights_u> loadSkinnedMesh(
       const auto& mesh = model.meshes[node.mesh];
       for (const auto& primitive : mesh.primitives) {
         addMesh(model, primitive, resultMesh);
+        addBlendShapes(model, primitive, blendShape);
       }
     }
-    return {std::move(resultMesh), nullptr};
+    return {std::move(resultMesh), nullptr, std::move(blendShape)};
   } else {
     return {};
   }
-  return {std::move(resultMesh), std::move(skinWeights)};
+  return {std::move(resultMesh), std::move(skinWeights), std::move(blendShape)};
 }
 
 JointList createSkeletonWithOnlyRoot() {
@@ -698,8 +814,15 @@ Character populateCharacterFromModel(
     }
   }
 
-  std::tie(result.mesh, result.skinWeights) =
+  BlendShape_u loadedBlendShape;
+  std::tie(result.mesh, result.skinWeights, loadedBlendShape) =
       loadSkinnedMesh(model, remainingNodes, nodeToObjectMap);
+
+  // Set the blendShape if we loaded any
+  if (loadedBlendShape != nullptr) {
+    result.blendShape = std::move(loadedBlendShape);
+  }
+
   // No skinning nodes found but there are meshes in the scene. We will create a joint to parent
   // them.
   if (result.mesh != nullptr && result.skinWeights == nullptr) {
