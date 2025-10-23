@@ -12,6 +12,7 @@
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
@@ -38,9 +39,6 @@ PointTriangleVertexErrorFunctionT<T>::PointTriangleVertexErrorFunctionT(
       character_in.faceExpressionBlendShape && (type != VertexConstraintType::Position),
       "Constraint type {} not implemented yet for face. Only Position type is supported.",
       toString(type));
-  this->neutralMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->restMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->posedMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
 }
 
 template <typename T>
@@ -97,10 +95,10 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */) {
+    const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   // loop over all constraints and calculate the error
   double error = 0.0;
@@ -109,8 +107,8 @@ double PointTriangleVertexErrorFunctionT<T>::getError(
     for (size_t i = 0; i < constraints_.size(); ++i) {
       const PointTriangleVertexConstraintT<T>& constr = constraints_[i];
 
-      const Eigen::Vector3<T> srcPoint = this->posedMesh_->vertices[constr.srcVertexIndex];
-      const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*this->posedMesh_, constr);
+      const Eigen::Vector3<T> srcPoint = meshState.posedMesh_->vertices[constr.srcVertexIndex];
+      const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*meshState.posedMesh_, constr);
       const Eigen::Vector3<T> diff = srcPoint - tgtPoint;
       error += constr.weight * diff.squaredNorm() * kPositionWeight;
     }
@@ -119,13 +117,13 @@ double PointTriangleVertexErrorFunctionT<T>::getError(
     for (size_t i = 0; i < constraints_.size(); ++i) {
       const PointTriangleVertexConstraintT<T>& constr = constraints_[i];
 
-      const Eigen::Vector3<T> srcPoint = this->posedMesh_->vertices[constr.srcVertexIndex];
+      const Eigen::Vector3<T> srcPoint = meshState.posedMesh_->vertices[constr.srcVertexIndex];
 
-      const Eigen::Vector3<T> sourceNormal = this->posedMesh_->normals[constr.srcVertexIndex];
-      Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*this->posedMesh_, constr);
+      const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.srcVertexIndex];
+      Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*meshState.posedMesh_, constr);
 
       const Eigen::Vector3<T> tgtPoint =
-          computeTargetBaryPosition(*this->posedMesh_, constr) + constr.depth * targetNormal;
+          computeTargetBaryPosition(*meshState.posedMesh_, constr) + constr.depth * targetNormal;
 
       if (sourceNormal.dot(targetNormal) < 0) {
         targetNormal *= -1;
@@ -215,10 +213,11 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculatePositionGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const Eigen::Vector3<T> srcPos = this->posedMesh_->vertices[constr.srcVertexIndex];
-  const Eigen::Vector3<T> tgtPos = computeTargetPosition(*this->posedMesh_, constr);
+  const Eigen::Vector3<T> srcPos = meshState.posedMesh_->vertices[constr.srcVertexIndex];
+  const Eigen::Vector3<T> tgtPos = computeTargetPosition(*meshState.posedMesh_, constr);
 
   const Eigen::Vector3<T> diff = srcPos - tgtPos;
 
@@ -226,7 +225,7 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionGradient(
   const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
 
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->posedMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
 
   // To simplify things we'll have one loop that goes through all 3 target triangle vertices _and_
   // the source vertex.
@@ -240,7 +239,8 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionGradient(
         ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
         : Eigen::Matrix3<T>::Identity();
 
-    SkinningWeightIteratorT<T> skinningIter(this->character_, *this->restMesh_, state, vertexIndex);
+    SkinningWeightIteratorT<T> skinningIter(
+        this->character_, *meshState.restMesh_, state, vertexIndex);
 
     // IN handle derivatives wrt jointParameters
     while (!skinningIter.finished()) {
@@ -394,22 +394,23 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
     Ref<Eigen::MatrixX<T>> jac,
     Ref<Eigen::VectorX<T>> res) const {
   // calculate the difference between target and position and error
-  const Eigen::Vector3<T> srcPos = this->posedMesh_->vertices[constr.srcVertexIndex];
-  const Eigen::Vector3<T> tgtPos = computeTargetPosition(*this->posedMesh_, constr);
+  const Eigen::Vector3<T> srcPos = meshState.posedMesh_->vertices[constr.srcVertexIndex];
+  const Eigen::Vector3<T> tgtPos = computeTargetPosition(*meshState.posedMesh_, constr);
 
   // The derivative of the target position wrt the triangle vertices:
   //   p_tgt = bary_0 * p_0 + bary_1 * p_1 + bary_2 * p_2 + depth * n
 
-  const Eigen::Vector3<T> diff = this->posedMesh_->vertices[constr.srcVertexIndex] - tgtPos;
+  const Eigen::Vector3<T> diff = meshState.posedMesh_->vertices[constr.srcVertexIndex] - tgtPos;
 
   const T wgt = std::sqrt(constr.weight * kPositionWeight * this->weight_);
 
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->posedMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
 
 // Verify derivative:
 #if 0
@@ -450,7 +451,8 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
         ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
         : Eigen::Matrix3<T>::Identity();
 
-    SkinningWeightIteratorT<T> skinningIter(this->character_, *this->restMesh_, state, vertexIndex);
+    SkinningWeightIteratorT<T> skinningIter(
+        this->character_, *meshState.restMesh_, state, vertexIndex);
 
     // IN handle derivatives wrt jointParameters
     while (!skinningIter.finished()) {
@@ -547,13 +549,14 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculateNormalGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
     const T sourceNormalWeight,
     const T targetNormalWeight,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const Eigen::Vector3<T> sourceNormal = posedMesh_->normals[constr.srcVertexIndex];
-  Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*this->posedMesh_, constr);
-  const Eigen::Vector3<T> tgtPosition = computeTargetPosition(*this->posedMesh_, constr);
+  const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.srcVertexIndex];
+  Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*meshState.posedMesh_, constr);
+  const Eigen::Vector3<T> tgtPosition = computeTargetPosition(*meshState.posedMesh_, constr);
 
   T targetNormalSign = 1;
   if (sourceNormal.dot(targetNormal) < 0) {
@@ -564,15 +567,16 @@ double PointTriangleVertexErrorFunctionT<T>::calculateNormalGradient(
       sourceNormalWeight * sourceNormal + targetNormalWeight * targetNormal;
 
   // calculate the difference between target and position and error
-  const Eigen::Vector3<T> diff = this->posedMesh_->vertices[constr.srcVertexIndex] - tgtPosition;
+  const Eigen::Vector3<T> diff =
+      meshState.posedMesh_->vertices[constr.srcVertexIndex] - tgtPosition;
   const T dist = diff.dot(normal);
 
   const T wgt = constr.weight * 2.0f * kPlaneWeight * this->weight_;
 
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->posedMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
   const auto d_targetNormal_d_tgtTriVertexPos =
-      compute_d_targetNormal_d_vertexPos(constr, *this->posedMesh_);
+      compute_d_targetNormal_d_vertexPos(constr, *meshState.posedMesh_);
 
   for (int iTriVert = 0; iTriVert < 4; ++iTriVert) {
     const auto vertexIndex =
@@ -582,7 +586,8 @@ double PointTriangleVertexErrorFunctionT<T>::calculateNormalGradient(
         ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
         : Eigen::Matrix3<T>::Identity();
 
-    SkinningWeightIteratorT<T> skinningIter(this->character_, *this->restMesh_, state, vertexIndex);
+    SkinningWeightIteratorT<T> skinningIter(
+        this->character_, *meshState.restMesh_, state, vertexIndex);
 
     // IN handle derivatives wrt jointParameters
     while (!skinningIter.finished()) {
@@ -681,14 +686,15 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculateNormalJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
     const T sourceNormalWeight,
     const T targetNormalWeight,
     Ref<Eigen::MatrixX<T>> jac,
     T& res) const {
-  const Eigen::Vector3<T> sourceNormal = posedMesh_->normals[constr.srcVertexIndex];
-  Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*this->posedMesh_, constr);
-  const Eigen::Vector3<T> tgtPosition = computeTargetPosition(*this->posedMesh_, constr);
+  const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.srcVertexIndex];
+  Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*meshState.posedMesh_, constr);
+  const Eigen::Vector3<T> tgtPosition = computeTargetPosition(*meshState.posedMesh_, constr);
 
   T targetNormalSign = 1;
   if (sourceNormal.dot(targetNormal) < 0) {
@@ -699,15 +705,16 @@ double PointTriangleVertexErrorFunctionT<T>::calculateNormalJacobian(
       sourceNormalWeight * sourceNormal + targetNormalWeight * targetNormal;
 
   // calculate the difference between target and position and error
-  const Eigen::Vector3<T> diff = this->posedMesh_->vertices[constr.srcVertexIndex] - tgtPosition;
+  const Eigen::Vector3<T> diff =
+      meshState.posedMesh_->vertices[constr.srcVertexIndex] - tgtPosition;
   const T dist = diff.dot(normal);
 
   const T wgt = std::sqrt(constr.weight * kPositionWeight * this->weight_);
 
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->posedMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
   const auto d_targetNormal_d_tgtTriVertexPos =
-      compute_d_targetNormal_d_vertexPos(constr, *this->posedMesh_);
+      compute_d_targetNormal_d_vertexPos(constr, *meshState.posedMesh_);
 
   for (int iTriVert = 0; iTriVert < 4; ++iTriVert) {
     const auto vertexIndex =
@@ -717,7 +724,8 @@ double PointTriangleVertexErrorFunctionT<T>::calculateNormalJacobian(
         ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
         : Eigen::Matrix3<T>::Identity();
 
-    SkinningWeightIteratorT<T> skinningIter(this->character_, *this->restMesh_, state, vertexIndex);
+    SkinningWeightIteratorT<T> skinningIter(
+        this->character_, *meshState.restMesh_, state, vertexIndex);
 
     // IN handle derivatives wrt jointParameters
     while (!skinningIter.finished()) {
@@ -827,15 +835,16 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0;
 
   if (constraintType_ == VertexConstraintType::Position) {
     for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
-      error += calculatePositionGradient(modelParameters, state, constraints_[iCons], gradient);
+      error += calculatePositionGradient(
+          modelParameters, state, meshState, constraints_[iCons], gradient);
     }
   } else {
     T sourceNormalWeight;
@@ -846,6 +855,7 @@ double PointTriangleVertexErrorFunctionT<T>::getGradient(
       error += calculateNormalGradient(
           modelParameters,
           state,
+          meshState,
           constraints_[iCons],
           sourceNormalWeight,
           targetNormalWeight,
@@ -860,7 +870,7 @@ template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
@@ -869,7 +879,7 @@ double PointTriangleVertexErrorFunctionT<T>::getJacobian(
   MT_CHECK(jacobian.rows() >= (Eigen::Index)(1 * constraints_.size()));
   MT_CHECK(residual.rows() >= (Eigen::Index)(1 * constraints_.size()));
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0;
 
@@ -880,6 +890,7 @@ double PointTriangleVertexErrorFunctionT<T>::getJacobian(
       error += calculatePositionJacobian(
           modelParameters,
           state,
+          meshState,
           constraints_[iCons],
           jacobian.block(3 * iCons, 0, 3, modelParameters.size()),
           residual.middleRows(3 * iCons, 3));
@@ -895,6 +906,7 @@ double PointTriangleVertexErrorFunctionT<T>::getJacobian(
       error += calculateNormalJacobian(
           modelParameters,
           state,
+          meshState,
           constraints_[iCons],
           sourceNormalWeight,
           targetNormalWeight,
@@ -919,49 +931,6 @@ size_t PointTriangleVertexErrorFunctionT<T>::getJacobianSize() const {
     default:
       return constraints_.size();
   }
-}
-
-template <typename T>
-void PointTriangleVertexErrorFunctionT<T>::updateMeshes(
-    const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
-  MT_PROFILE_FUNCTION();
-
-  bool doUpdateNormals = false;
-  if (this->character_.blendShape) {
-    const BlendWeightsT<T> blendWeights =
-        extractBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.blendShape->computeShape(blendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (this->character_.faceExpressionBlendShape) {
-    if (!this->character_.blendShape) {
-      // Set restMesh back to neutral, removing potential previous expressions.
-      // Note that if the character comes with (shape) blendShape, the previous if block already
-      // takes care of this step.
-      Eigen::Map<Eigen::VectorX<T>> outputVec(
-          &this->restMesh_->vertices[0][0], this->restMesh_->vertices.size() * 3);
-      const Eigen::Map<Eigen::VectorX<T>> baseVec(
-          &this->neutralMesh_->vertices[0][0], this->neutralMesh_->vertices.size() * 3);
-      outputVec = baseVec.template cast<T>();
-    }
-    const BlendWeightsT<T> faceExpressionBlendWeights =
-        extractFaceExpressionBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.faceExpressionBlendShape->applyDeltas(
-        faceExpressionBlendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (doUpdateNormals) {
-    this->restMesh_->updateNormals();
-  }
-
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *this->character_.skinWeights,
-      *this->restMesh_,
-      state,
-      *this->posedMesh_);
-  // TODO should we call updateNormals() here too or trust the ones from skinning?
 }
 
 template class PointTriangleVertexErrorFunctionT<float>;
