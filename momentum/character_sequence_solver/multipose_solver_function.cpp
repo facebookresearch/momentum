@@ -7,6 +7,7 @@
 
 #include "momentum/character_sequence_solver/multipose_solver_function.h"
 
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/skeleton_error_function.h"
@@ -24,11 +25,11 @@ MultiposeSolverFunctionT<T>::MultiposeSolverFunctionT(
     : skeleton_(skel), parameterTransform_(parameterTransform) {
   MT_CHECK(universal.size() == static_cast<size_t>(parameterTransform_->numAllModelParameters()));
 
-  states_.reserve(frames);
-  for (size_t i = 0; i < frames; i++) {
-    states_.push_back(std::make_unique<SkeletonStateT<T>>());
-    states_[states_.size() - 1]->set(parameterTransform_->zero(), *skeleton_);
+  states_.resize(frames);
+  for (auto& s : states_) {
+    s.set(parameterTransform_->zero(), *skeleton_);
   }
+  meshStates_.resize(frames);
   errorFunctions_.resize(frames);
   frameParameters_.resize(
       frames, ModelParametersT<T>::Zero(parameterTransform_->numAllModelParameters()));
@@ -51,6 +52,9 @@ MultiposeSolverFunctionT<T>::MultiposeSolverFunctionT(
   this->numParameters_ = genericParameters_.size() * getNumFrames() + universalParameters_.size();
   this->actualParameters_ = this->numParameters_;
 }
+
+template <typename T>
+MultiposeSolverFunctionT<T>::~MultiposeSolverFunctionT<T>() = default;
 
 template <typename T>
 void MultiposeSolverFunctionT<T>::setEnabledParameters(const ParameterSet& parameterSet) {
@@ -175,7 +179,7 @@ double MultiposeSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters
 
   // update the state according to the transformed parameters
   for (size_t f = 0; f < getNumFrames(); f++) {
-    states_[f]->set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+    states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
   }
 
   double error = 0.0;
@@ -184,7 +188,7 @@ double MultiposeSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters
   for (size_t f = 0; f < getNumFrames(); f++) {
     for (auto&& solvable : errorFunctions_[f]) {
       if (solvable->getWeight() > 0.0f) {
-        error += solvable->getError(frameParameters_[f], *states_[f]);
+        error += solvable->getError(frameParameters_[f], states_[f], meshStates_[f]);
       }
     }
   }
@@ -205,7 +209,7 @@ double MultiposeSolverFunctionT<T>::getGradient(
 
   // update the state according to the transformed parameters
   for (size_t f = 0; f < getNumFrames(); f++) {
-    states_[f]->set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+    states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
   }
 
   double error = 0.0;
@@ -217,7 +221,8 @@ double MultiposeSolverFunctionT<T>::getGradient(
         Eigen::VectorX<T>::Zero(parameterTransform_->numAllModelParameters());
     for (auto&& solvable : errorFunctions_[f]) {
       if (solvable->getWeight() > 0.0f) {
-        error += solvable->getGradient(frameParameters_[f], *states_[f], subGradient);
+        error +=
+            solvable->getGradient(frameParameters_[f], states_[f], meshStates_[f], subGradient);
       }
     }
     // put the subGradient at the right positions
@@ -252,7 +257,7 @@ double MultiposeSolverFunctionT<T>::getJacobian(
   {
     MT_PROFILE_EVENT("UpdateState");
     for (size_t f = 0; f < getNumFrames(); f++) {
-      states_[f]->set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+      states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
     }
   }
 
@@ -308,7 +313,8 @@ double MultiposeSolverFunctionT<T>::getJacobian(
           const size_t n = solvable->getJacobianSize();
           error += solvable->getJacobian(
               frameParameters_[f],
-              *states_[f],
+              states_[f],
+              meshStates_[f],
               tempJac.block(localPosition, 0, n, parameterSize),
               residual.middleRows(position, n),
               rows);

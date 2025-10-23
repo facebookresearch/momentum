@@ -52,7 +52,8 @@ Eigen::Index FullyDifferentiableOrientationErrorFunctionT<T>::getInputSize(
 template <typename T>
 double FullyDifferentiableOrientationErrorFunctionT<T>::getError(
     const ModelParametersT<T>& /*params*/,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   // loop over all constraints and calculate the error
   double error = 0.0;
 
@@ -76,6 +77,7 @@ template <typename T>
 double FullyDifferentiableOrientationErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<Eigen::VectorX<T>> gradient) {
   const auto& parameterTransform = this->parameterTransform_;
 
@@ -105,6 +107,7 @@ template <typename T>
 double FullyDifferentiableOrientationErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Ref<Eigen::MatrixX<T>> jacobian,
     Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

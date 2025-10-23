@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character/mesh_state.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_solver_function.h>
@@ -68,6 +69,7 @@ class TrustRegionQRT : public SolverT<T> {
   OnlineHouseholderQR<T> qrSolver_;
 
   SkeletonStateT<T> skeletonState_;
+  MeshStateT<T> meshState_;
 
   T trustRegionRadius_;
   T maxTrustRegionRadius_ = 10.0;

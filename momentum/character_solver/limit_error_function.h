@@ -24,17 +24,21 @@ class LimitErrorFunctionT : public SkeletonErrorFunctionT<T> {
   explicit LimitErrorFunctionT(const Character& character);
   LimitErrorFunctionT(const Character& character, const ParameterLimits& pl);
 
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& params,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState) final;
 
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Ref<Eigen::VectorX<T>> gradient) final;
 
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Ref<Eigen::MatrixX<T>> jacobian,
       Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;

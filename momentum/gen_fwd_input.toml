@@ -36,6 +36,7 @@ template_structs = [
     "ParameterTransform",
     "Skeleton",
     "SkeletonState",
+    "MeshState",
     "TaperedCapsule"
 ]
 

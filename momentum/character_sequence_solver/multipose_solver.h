@@ -30,6 +30,7 @@ template <typename T>
 class MultiposeSolverT : public SolverT<T> {
  public:
   MultiposeSolverT(const SolverOptions& options, MultiposeSolverFunctionT<T>* function);
+  ~MultiposeSolverT() override;
 
   [[nodiscard]] std::string_view getName() const override;
 
@@ -56,6 +57,7 @@ class MultiposeSolverT : public SolverT<T> {
  private:
   Eigen::MatrixX<T> jacobianBlock_;
   Eigen::VectorX<T> residualBlock_;
+  std::unique_ptr<MeshStateT<T>> meshState_;
 
   float regularization_;
 };

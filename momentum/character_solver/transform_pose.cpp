@@ -109,7 +109,7 @@ PoseTransformSolverT<T>::PoseTransformSolverT(const Character& character) {
       std::make_shared<momentum::OrientationErrorFunctionT<T>>(characterSimplified_);
 
   solverFunction_ = std::make_unique<momentum::SkeletonSolverFunctionT<T>>(
-      &characterSimplified_.skeleton, &parameterTransformSimplified_);
+      characterSimplified_, parameterTransformSimplified_);
   solverFunction_->addErrorFunction(positionError_);
   solverFunction_->addErrorFunction(orientationError_);
 

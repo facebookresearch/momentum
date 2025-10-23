@@ -160,7 +160,8 @@ std::array<Eigen::Matrix3<T>, 3> compute_d_targetPos_d_vertexPos(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& /* ignored */) {
+    const SkeletonStateT<T>& /*state*/,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   updateMeshes(modelParameters);
@@ -461,7 +462,8 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneJacobian(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& /* ignored */,
+    const SkeletonStateT<T>& /*state*/,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   updateMeshes(modelParameters);
 
@@ -481,7 +483,8 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getGradient(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& /* ignored */,
+    const SkeletonStateT<T>& /*state*/,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

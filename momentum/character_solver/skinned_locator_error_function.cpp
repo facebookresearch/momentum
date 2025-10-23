@@ -98,7 +98,8 @@ Eigen::Vector3<T> SkinnedLocatorErrorFunctionT<T>::calculateSkinnedLocatorPositi
 template <typename T>
 double SkinnedLocatorErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
   // loop over all constraints and calculate the error
@@ -303,6 +304,7 @@ template <typename T>
 double SkinnedLocatorErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
 
@@ -318,6 +320,7 @@ template <typename T>
 double SkinnedLocatorErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

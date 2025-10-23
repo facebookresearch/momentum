@@ -7,6 +7,8 @@
 
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
 
+#include "momentum/character/character.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_sequence_solver/sequence_error_function.h"
@@ -23,30 +25,33 @@ namespace momentum {
 
 template <typename T>
 SequenceSolverFunctionT<T>::SequenceSolverFunctionT(
-    const Skeleton* skel,
-    const ParameterTransformT<T>* parameterTransform,
+    const Character& character,
+    const ParameterTransformT<T>& parameterTransform,
     const ParameterSet& universal,
     const size_t nFrames)
-    : skeleton_(skel), parameterTransform_(parameterTransform), universalParameters_(universal) {
-  MT_CHECK(skeleton_ != nullptr);
-  MT_CHECK(parameterTransform_ != nullptr);
-
+    : character_(character),
+      parameterTransform_(parameterTransform),
+      universalParameters_(universal) {
   states_.resize(nFrames);
+  meshStates_.resize(nFrames);
   perFrameErrorFunctions_.resize(nFrames);
   sequenceErrorFunctions_.resize(nFrames);
   frameParameters_.resize(
-      nFrames, ModelParametersT<T>::Zero(parameterTransform_->numAllModelParameters()));
-  activeJointParams_ = parameterTransform_->activeJointParams;
+      nFrames, ModelParametersT<T>::Zero(parameterTransform_.numAllModelParameters()));
+  activeJointParams_ = parameterTransform_.activeJointParams;
 
   updateParameterSets(allParams());
 }
+
+template <typename T>
+SequenceSolverFunctionT<T>::~SequenceSolverFunctionT() = default;
 
 template <typename T>
 void SequenceSolverFunctionT<T>::setEnabledParameters(const ParameterSet& parameterSet) {
   updateParameterSets(parameterSet);
 
   // set the enabled joints based on the parameter set
-  activeJointParams_ = parameterTransform_->computeActiveJointParams(parameterSet);
+  activeJointParams_ = parameterTransform_.computeActiveJointParams(parameterSet);
 
   // give data to helper functions
   for (size_t f = 0; f < getNumFrames(); f++) {
@@ -69,7 +74,7 @@ void SequenceSolverFunctionT<T>::updateParameterSets(const ParameterSet& activeP
   this->numParameters_ = 0;
   this->actualParameters_ = 0;
 
-  const auto np = parameterTransform_->numAllModelParameters();
+  const auto np = parameterTransform_.numAllModelParameters();
 
   // calculate needed offsets and indices
   for (Eigen::Index i = 0; i < np; i++) {
@@ -95,13 +100,13 @@ void SequenceSolverFunctionT<T>::setFrameParameters(
     const ModelParametersT<T>& parameters) {
   MT_CHECK(frame < states_.size());
   MT_CHECK(
-      parameters.size() == gsl::narrow<Eigen::Index>(parameterTransform_->numAllModelParameters()));
+      parameters.size() == gsl::narrow<Eigen::Index>(parameterTransform_.numAllModelParameters()));
   frameParameters_[frame] = parameters;
 }
 
 template <typename T>
 ModelParametersT<T> SequenceSolverFunctionT<T>::getUniversalParameters() const {
-  const auto np = this->parameterTransform_->numAllModelParameters();
+  const auto np = this->parameterTransform_.numAllModelParameters();
   ModelParametersT<T> result = ModelParametersT<T>::Zero(np);
   for (Eigen::Index i = 0; i < np; ++i) {
     if (this->universalParameters_.test(i)) {
@@ -119,7 +124,7 @@ Eigen::VectorX<T> SequenceSolverFunctionT<T>::getJoinedParameterVectorFromFrameP
 
   Eigen::VectorX<T> res = Eigen::VectorX<T>::Zero(this->numParameters_);
   for (size_t f = 0; f < frameParameters.size(); f++) {
-    MT_CHECK(frameParameters[f].size() == parameterTransform_->numAllModelParameters());
+    MT_CHECK(frameParameters[f].size() == parameterTransform_.numAllModelParameters());
 
     // Fill in all the per-frame parameters:
     for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
@@ -140,6 +145,16 @@ Eigen::VectorX<T> SequenceSolverFunctionT<T>::getJoinedParameterVectorFromFrameP
 template <typename T>
 Eigen::VectorX<T> SequenceSolverFunctionT<T>::getJoinedParameterVector() const {
   return this->getJoinedParameterVectorFromFrameParameters(frameParameters_);
+}
+
+template <typename T>
+const Skeleton* SequenceSolverFunctionT<T>::getSkeleton() const {
+  return &character_.skeleton;
+}
+
+template <typename T>
+const Character& SequenceSolverFunctionT<T>::getCharacter() const {
+  return character_;
 }
 
 template <typename T>
@@ -176,7 +191,7 @@ double SequenceSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters)
 
   // update the state according to the transformed parameters
   dispenso::parallel_for(0, nFrames, [&](size_t f) {
-    states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+    states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
   });
 
   // sum up error for all per-frame error functions
@@ -187,7 +202,7 @@ double SequenceSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters)
         continue;
       }
 
-      perFrameErrors[f] += errf->getError(frameParameters_[f], states_[f]);
+      perFrameErrors[f] += errf->getError(frameParameters_[f], states_[f], meshStates_[f]);
     }
   });
 
@@ -201,7 +216,8 @@ double SequenceSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters)
 
       perFrameErrors[f] += errf->getError(
           gsl::make_span(frameParameters_).subspan(f, nFramesSubset),
-          gsl::make_span(states_).subspan(f, nFramesSubset));
+          gsl::make_span(states_).subspan(f, nFramesSubset),
+          gsl::make_span(meshStates_).subspan(f, nFramesSubset));
     }
   });
 
@@ -213,7 +229,7 @@ double SequenceSolverFunctionT<T>::getGradient(
     const Eigen::VectorX<T>& parameters,
     Eigen::VectorX<T>& gradient) {
   const auto nFrames = getNumFrames();
-  const auto np = this->parameterTransform_->numAllModelParameters();
+  const auto np = this->parameterTransform_.numAllModelParameters();
 
   // update states
   MT_CHECK(parameters.size() == gsl::narrow_cast<Eigen::Index>(this->numParameters_));
@@ -221,7 +237,10 @@ double SequenceSolverFunctionT<T>::getGradient(
 
   // update the state according to the transformed parameters
   dispenso::parallel_for(0, nFrames, [&](size_t f) {
-    states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+    states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
+    if (needsMesh_) {
+      meshStates_[f].update(frameParameters_[f], states_[f], character_);
+    }
   });
 
   double error = 0.0;
@@ -233,7 +252,8 @@ double SequenceSolverFunctionT<T>::getGradient(
       if (errf->getWeight() <= 0) {
         continue;
       }
-      error += errf->getGradient(frameParameters_[f], states_[f], fullGradient.segment(f * np, np));
+      error += errf->getGradient(
+          frameParameters_[f], states_[f], meshStates_[f], fullGradient.segment(f * np, np));
     }
   }
 
@@ -247,6 +267,7 @@ double SequenceSolverFunctionT<T>::getGradient(
       error += errf->getGradient(
           gsl::make_span(frameParameters_).subspan(f, nFramesSubset),
           gsl::make_span(states_).subspan(f, nFramesSubset),
+          gsl::make_span(meshStates_).subspan(f, nFramesSubset),
           fullGradient.segment(f * np, nFramesSubset * np));
     }
   }
@@ -276,7 +297,7 @@ double SequenceSolverFunctionT<T>::getJacobian(
     Eigen::MatrixX<T>& jacobian,
     Eigen::VectorX<T>& residual,
     size_t& actualRows) {
-  const auto np = this->parameterTransform_->numAllModelParameters();
+  const auto np = this->parameterTransform_.numAllModelParameters();
   const auto nFrames = this->getNumFrames();
 
   MT_PROFILE_EVENT("GetMultiposeJacobian");
@@ -288,7 +309,10 @@ double SequenceSolverFunctionT<T>::getJacobian(
   {
     MT_PROFILE_EVENT("UpdateState");
     dispenso::parallel_for(0, nFrames, [&](size_t f) {
-      states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+      states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
+      if (needsMesh_) {
+        meshStates_[f].update(frameParameters_[f], states_[f], character_);
+      }
     });
   }
 
@@ -345,7 +369,12 @@ double SequenceSolverFunctionT<T>::getJacobian(
 
       int rows = 0;
       error += errf->getJacobian(
-          frameParameters_[f], states_[f], tempJac.mat(), residual.middleRows(position, n), rows);
+          frameParameters_[f],
+          states_[f],
+          meshStates_[f],
+          tempJac.mat(),
+          residual.middleRows(position, n),
+          rows);
 
       // move values to correct columns in actual jacobian according to the structure
       {
@@ -379,6 +408,7 @@ double SequenceSolverFunctionT<T>::getJacobian(
       error += errf->getJacobian(
           gsl::make_span(frameParameters_).subspan(f, nFramesSubset),
           gsl::make_span(states_).subspan(f, nFramesSubset),
+          gsl::make_span(meshStates_).subspan(f, nFramesSubset),
           tempJac.mat(),
           residual.middleRows(position, js),
           rows);
@@ -421,6 +451,7 @@ template <typename T>
 void SequenceSolverFunctionT<T>::addErrorFunction(
     const size_t frame,
     std::shared_ptr<SkeletonErrorFunctionT<T>> errorFunction) {
+  needsMesh_ = needsMesh_ || errorFunction->needsMesh();
   if (frame == kAllFrames) {
     dispenso::parallel_for(0, getNumFrames(), [this, errorFunction](size_t iFrame) {
       addErrorFunction(iFrame, errorFunction);
@@ -436,6 +467,7 @@ template <typename T>
 void SequenceSolverFunctionT<T>::addSequenceErrorFunction(
     const size_t frame,
     std::shared_ptr<SequenceErrorFunctionT<T>> errorFunction) {
+  needsMesh_ = needsMesh_ || errorFunction->needsMesh();
   if (frame == kAllFrames) {
     if (getNumFrames() >= errorFunction->numFrames()) {
       dispenso::parallel_for(

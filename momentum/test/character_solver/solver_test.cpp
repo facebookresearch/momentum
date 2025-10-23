@@ -73,7 +73,7 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
   gaussNewtonSolverQROptions.regularization = 0.05;
 
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-    SkeletonSolverFunctionT<T> solverFunction(&skeleton, &castedCharacterParameterTransform);
+    SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
     ModelParametersT<T> randomParams_cur =
         VectorX<T>::Random(parameterTransform.numAllModelParameters());
@@ -138,7 +138,7 @@ TYPED_TEST(TrustRegionTest, PerfectQuadratic) {
   const size_t nFrames = 10;
 
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-    SkeletonSolverFunctionT<T> solverFunction(&skeleton, &castedCharacterParameterTransform);
+    SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
     ModelParametersT<T> randomParams_cur =
         VectorX<T>::Random(parameterTransform.numAllModelParameters());
@@ -179,7 +179,7 @@ TYPED_TEST(TrustRegionTest, SanityCheck) {
   std::vector<Eigen::VectorX<T>> targetParams;
 
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-    SkeletonSolverFunctionT<T> solverFunction(&skeleton, &castedCharacterParameterTransform);
+    SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
     ModelParametersT<T> randomParams_cur =
         VectorX<T>::Random(character.parameterTransform.numAllModelParameters());

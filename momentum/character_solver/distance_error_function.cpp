@@ -20,8 +20,9 @@ DistanceErrorFunctionT<T>::DistanceErrorFunctionT(
 
 template <typename T>
 double DistanceErrorFunctionT<T>::getError(
-    const momentum::ModelParametersT<T>& /*params*/,
-    const momentum::SkeletonStateT<T>& skeletonState) {
+    const ModelParametersT<T>& /*parameters*/,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& /* meshState */) {
   double error = 0;
 
   const auto& jointState = skeletonState.jointState;
@@ -40,8 +41,9 @@ double DistanceErrorFunctionT<T>::getError(
 
 template <typename T>
 double DistanceErrorFunctionT<T>::getGradient(
-    const momentum::ModelParametersT<T>& /*params*/,
-    const momentum::SkeletonStateT<T>& skeletonState,
+    const ModelParametersT<T>& /*params*/,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
 
@@ -116,8 +118,9 @@ double DistanceErrorFunctionT<T>::getGradient(
 
 template <typename T>
 double DistanceErrorFunctionT<T>::getJacobian(
-    const momentum::ModelParametersT<T>& /*params*/,
-    const momentum::SkeletonStateT<T>& skeletonState,
+    const ModelParametersT<T>& /*parameters*/,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

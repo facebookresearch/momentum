@@ -116,22 +116,27 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   ///
   /// @param[in] params: current model parameters
   /// @param[in] state: curren global skeleton joint states computed from the model parameters
+  /// @param[in] meshState: current mesh state (unused by this base class)
   ///
   /// @return the error function value l
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& params,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */) final;
 
   /// The gradient of the error function: dl/dq = dl/d[f^2] * 2f * df/dv * dv/dq. It gets df/dv from
   /// the derived class, and implements the rest.
   ///
   /// @param[in] params: current model parameters
   /// @param[in] state: curren global skeleton joint states computed from the model parameters
+  /// @param[in] meshState: current mesh state (unused by this base class)
   /// @param[out] gradient: the gradient vector to accumulate into
   ///
   /// @return the error function value l
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */,
       Ref<VectorX<T>> gradient) final;
 
   /// For least-square problems, we assume l is the square of a vector function F. The jacobian is
@@ -142,6 +147,7 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   ///
   /// @param[in] params: current model parameters
   /// @param[in] state: curren global skeleton joint states computed from the model parameters
+  /// @param[in] meshState: current mesh state (unused by this base class)
   /// @param[out] jacobian: the output jacobian matrix
   /// @param[out] residual: the output function residual (ie. f scaled by the loss gradient)
   /// @param[out] usedRows: number of rows in the jacobian/residual used by this error function
@@ -150,6 +156,7 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& /* meshState */,
       Ref<MatrixX<T>> jacobian,
       Ref<VectorX<T>> residual,
       int& usedRows) final;

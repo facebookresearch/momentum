@@ -7,6 +7,7 @@
 
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
 
+#include "momentum/character/mesh_state.h"
 #include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/profile.h"
 
@@ -20,6 +21,7 @@ GaussNewtonSolverQRT<T>::GaussNewtonSolverQRT(
     SkeletonSolverFunctionT<T>* solverFun)
     : SolverT<T>(options, solverFun),
       skeletonState_(std::make_unique<SkeletonStateT<T>>()),
+      meshState_(std::make_unique<MeshStateT<T>>()),
       qrSolver_(0) {
   // Set default values from GaussNewtonSolverQROptions
   regularization_ = GaussNewtonSolverQROptions().regularization;
@@ -28,6 +30,9 @@ GaussNewtonSolverQRT<T>::GaussNewtonSolverQRT(
   // Update values based on provided options
   setOptions(options);
 }
+
+template <typename T>
+GaussNewtonSolverQRT<T>::~GaussNewtonSolverQRT() = default;
 
 template <typename T>
 std::string_view GaussNewtonSolverQRT<T>::getName() const {
@@ -61,6 +66,11 @@ void GaussNewtonSolverQRT<T>::doIteration() {
     skeletonState_->set(parameterTransform->apply(this->parameters_), *skeleton);
   }
 
+  if (sf->needsMeshState()) {
+    MT_PROFILE_EVENT("JtJR - update mesh state");
+    meshState_->update(this->parameters_, *skeletonState_, sf->getCharacter());
+  }
+
   const auto nFullParams = gsl::narrow<Eigen::Index>(this->parameters_.size());
 
   std::vector<Eigen::Index> enabledParameters;
@@ -90,7 +100,12 @@ void GaussNewtonSolverQRT<T>::doIteration() {
 
     int usedRows = 0;
     error_orig += errorFunction->getJacobian(
-        this->parameters_, *skeletonState_, jacobian_.mat(), residual_.mat(), usedRows);
+        this->parameters_,
+        *skeletonState_,
+        *meshState_,
+        jacobian_.mat(),
+        residual_.mat(),
+        usedRows);
     if (usedRows == 0) {
       continue;
     }

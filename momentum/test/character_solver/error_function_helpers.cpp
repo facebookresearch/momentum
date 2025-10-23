@@ -8,6 +8,7 @@
 #include "momentum/test/character_solver/error_function_helpers.h"
 
 #include "momentum/character/character.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
@@ -26,12 +27,13 @@ void testGradientAndJacobian(
     int line,
     SkeletonErrorFunctionT<T>* errorFunction,
     const ModelParametersT<T>& referenceParameters,
-    const Skeleton& skeleton,
-    const ParameterTransformT<T>& transform,
+    const Character& character,
     const T& numThreshold,
     const T& jacThreshold,
     bool checkJacError,
     bool checkJacobian) {
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
   // Create a scoped trace with file and line information
   SCOPED_TRACE(::testing::Message() << "Called from file: " << file << ", line: " << line);
 
@@ -41,8 +43,14 @@ void testGradientAndJacobian(
   // test getError and getGradient produce the same value
   // Double precision state here limits how much errors accumulate up the
   // kinematic chain.
-  SkeletonStateT<T> stated(transform.apply(referenceParameters), skeleton);
-  const SkeletonStateT<T> referenceState(stated);
+  SkeletonStateT<T> state(transform.apply(referenceParameters), character.skeleton);
+  MeshStateT<T> meshState{};
+  MeshStateT<T> referenceMeshState{};
+  if (errorFunction->needsMesh()) {
+    meshState.update(referenceParameters, state, character);
+    referenceMeshState.update(referenceParameters, state, character);
+  }
+  const SkeletonStateT<T> referenceState(state);
   Eigen::VectorX<T> anaGradient = Eigen::VectorX<T>::Zero(transform.numAllModelParameters());
   const size_t jacobianSize = errorFunction->getJacobianSize();
   const size_t paddedJacobianSize = jacobianSize + 8 - (jacobianSize % 8);
@@ -50,13 +58,15 @@ void testGradientAndJacobian(
       Eigen::MatrixX<T>::Zero(paddedJacobianSize, transform.numAllModelParameters());
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(paddedJacobianSize);
 
-  const T functionError = errorFunction->getError(referenceParameters, referenceState);
-  const T gradientError =
-      errorFunction->getGradient(referenceParameters, referenceState, anaGradient);
+  const T functionError =
+      errorFunction->getError(referenceParameters, referenceState, referenceMeshState);
+  const T gradientError = errorFunction->getGradient(
+      referenceParameters, referenceState, referenceMeshState, anaGradient);
   int rows = 0;
   const T jacobianError = errorFunction->getJacobian(
       referenceParameters,
       referenceState,
+      meshState,
       jacobian.topRows(jacobianSize),
       residual.topRows(jacobianSize),
       rows);
@@ -89,7 +99,6 @@ void testGradientAndJacobian(
   }
 
   // calculate numerical gradient
-  SkeletonStateT<T> state(stated);
   constexpr T kStepSize = 1e-5;
   Eigen::VectorX<T> numGradient = Eigen::VectorX<T>::Zero(transform.numAllModelParameters());
   for (auto p = 0; p < transform.numAllModelParameters(); p++) {
@@ -99,13 +108,17 @@ void testGradientAndJacobian(
     // state.set(transform.apply(parameters), skeleton);
     // const T h_2 = errorFunction->getError(parameters, state);
     parameters(p) = referenceParameters(p) - kStepSize;
-    stated.set(transform.apply(parameters), skeleton);
-    state.set(stated);
-    const T h_1 = errorFunction->getError(parameters, state);
+    state.set(transform.apply(parameters), character.skeleton);
+    if (errorFunction->needsMesh()) {
+      meshState.update(parameters, state, character);
+    }
+    const T h_1 = errorFunction->getError(parameters, state, meshState);
     parameters(p) = referenceParameters(p) + kStepSize;
-    stated.set(transform.apply(parameters), skeleton);
-    state.set(stated);
-    const T h1 = errorFunction->getError(parameters, state);
+    state.set(transform.apply(parameters), character.skeleton);
+    if (errorFunction->needsMesh()) {
+      meshState.update(parameters, state, character);
+    }
+    const T h1 = errorFunction->getError(parameters, state, meshState);
     // parameters(p) = static_cast<float>(referenceParameters(p) + 2.0f * kStepSize);
     // state.set(transform.apply(parameters), skeleton);
     // const T h2 = errorFunction->getError(parameters, state);
@@ -120,14 +133,17 @@ void testGradientAndJacobian(
     for (auto k = 0; k < transform.numAllModelParameters(); ++k) {
       ModelParametersT<T> parameters = referenceParameters.template cast<T>();
       parameters(k) = referenceParameters(k) + kStepSize;
-      stated.set(transform.apply(parameters), skeleton);
-      state.set(stated);
+      state.set(transform.apply(parameters), character.skeleton);
+      if (errorFunction->needsMesh()) {
+        meshState.update(parameters, state, character);
+      }
 
       Eigen::MatrixX<T> jacobianPlus =
           Eigen::MatrixX<T>::Zero(paddedJacobianSize, transform.numAllModelParameters());
       Eigen::MatrixX<T> residualPlus = Eigen::VectorX<T>::Zero(paddedJacobianSize);
       int usedRows = 0;
-      errorFunction->getJacobian(parameters, state, jacobianPlus, residualPlus, usedRows);
+      errorFunction->getJacobian(
+          parameters, state, meshState, jacobianPlus, residualPlus, usedRows);
       numJacobian.col(k) = (residualPlus - residual) / kStepSize;
     }
 
@@ -200,7 +216,8 @@ void testGradientAndJacobian(
     const T s = 2.0;
     const T w_new = s * errorFunction->getWeight();
     errorFunction->setWeight(w_new);
-    const T functionError_scaled = errorFunction->getError(referenceParameters, referenceState);
+    const T functionError_scaled =
+        errorFunction->getError(referenceParameters, referenceState, referenceMeshState);
 
     EXPECT_LE(
         std::abs(functionError_scaled - s * functionError) /
@@ -228,9 +245,12 @@ void validateIdentical(
 
   SkeletonStateT<T> state(transform.apply(parameters), skeleton);
 
+  // Create empty mesh state for test functions
+  MeshStateT<T> emptyMeshState{};
+
   {
-    auto e1 = err1.getError(parameters, state);
-    auto e2 = err2.getError(parameters, state);
+    auto e1 = err1.getError(parameters, state, emptyMeshState);
+    auto e2 = err2.getError(parameters, state, emptyMeshState);
     if (verbose) {
       fmt::print("getError(): {} {}\n", e1, e2);
     }
@@ -240,8 +260,8 @@ void validateIdentical(
   {
     VectorX<T> grad1 = VectorX<T>::Zero(transform.numAllModelParameters());
     VectorX<T> grad2 = VectorX<T>::Zero(transform.numAllModelParameters());
-    auto e1 = err1.getGradient(parameters, state, grad1);
-    auto e2 = err2.getGradient(parameters, state, grad2);
+    auto e1 = err1.getGradient(parameters, state, emptyMeshState, grad1);
+    auto e2 = err2.getGradient(parameters, state, emptyMeshState, grad2);
 
     const T diff = (grad1 - grad2).template lpNorm<Eigen::Infinity>();
     if (verbose) {
@@ -268,9 +288,9 @@ void validateIdentical(
     Eigen::VectorX<T> r2 = Eigen::VectorX<T>::Zero(m2);
 
     int rows1 = 0;
-    auto e1 = err1.getJacobian(parameters, state, j1, r1, rows1);
+    auto e1 = err1.getJacobian(parameters, state, emptyMeshState, j1, r1, rows1);
     int rows2 = 0;
-    auto e2 = err2.getJacobian(parameters, state, j2, r2, rows2);
+    auto e2 = err2.getJacobian(parameters, state, emptyMeshState, j2, r2, rows2);
 
     // Can't trust the Jacobian ordering here, so only look at JtJ and Jt*r.
     const Eigen::MatrixX<T> JtJ1 = j1.transpose() * j1;
@@ -316,7 +336,9 @@ void timeJacobian(
     int usedRows = 0;
     jacobian.setZero();
     residual.setZero();
-    errorFunction.getJacobian(modelParams, skelState, jacobian, residual, usedRows);
+    // Create empty mesh state for test functions
+    MeshState emptyMeshState{};
+    errorFunction.getJacobian(modelParams, skelState, emptyMeshState, jacobian, residual, usedRows);
   }
   const auto endTime = std::chrono::high_resolution_clock::now();
 
@@ -337,7 +359,9 @@ void timeError(
   const size_t nTests = 5000;
   const auto startTime = std::chrono::high_resolution_clock::now();
   for (size_t i = 0; i < nTests; ++i) {
-    errorFunction.getError(modelParams, skelState);
+    // Create empty mesh state for test functions
+    MeshState emptyMeshState{};
+    errorFunction.getError(modelParams, skelState, emptyMeshState);
   }
   const auto endTime = std::chrono::high_resolution_clock::now();
 
@@ -356,8 +380,7 @@ template void testGradientAndJacobian<float>(
     int line,
     SkeletonErrorFunction* errorFunction,
     const ModelParameters& referenceParameters,
-    const Skeleton& skeleton,
-    const ParameterTransform& transform,
+    const Character& character,
     const float& numThreshold,
     const float& jacThreshold,
     bool checkJacError,
@@ -368,8 +391,7 @@ template void testGradientAndJacobian<double>(
     int line,
     SkeletonErrorFunctiond* errorFunction,
     const ModelParametersd& referenceParameters,
-    const Skeleton& skeleton,
-    const ParameterTransformd& transform,
+    const Character& character,
     const double& numThreshold,
     const double& jacThreshold,
     bool checkJacError,

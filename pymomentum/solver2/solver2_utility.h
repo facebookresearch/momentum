@@ -80,10 +80,17 @@ void validateJointIndex(
 
 void validateVertexIndex(int vertexIndex, const char* name, const momentum::Character& character);
 
+void validateVertexIndex(int vertexIndex, const char* name, const momentum::Character* character);
+
 void validateVertexIndex(
     const pybind11::array_t<int>& vertexIndex,
     const char* name,
     const momentum::Character& character);
+
+void validateVertexIndex(
+    const pybind11::array_t<int>& vertexIndex,
+    const char* name,
+    const momentum::Character* character);
 
 void validateWeight(float weight, const char* name);
 

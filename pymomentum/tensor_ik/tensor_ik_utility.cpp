@@ -175,12 +175,7 @@ momentum::SkeletonSolverFunctionT<T> buildSolverFunction(
     const momentum::Character& character,
     const momentum::ParameterTransformT<T>& parameterTransform,
     const std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>>& errorFunctions) {
-  momentum::SkeletonSolverFunctionT<T> result(&character.skeleton, &parameterTransform);
-  for (const auto& errf : errorFunctions) {
-    result.addErrorFunction(errf);
-  }
-
-  return result;
+  return {character, parameterTransform, errorFunctions};
 }
 
 template <typename T>
@@ -197,7 +192,7 @@ std::unique_ptr<momentum::SequenceSolverFunctionT<T>> buildSequenceSolverFunctio
   assert(modelParams_init.size(-1) == parameterTransform.numAllModelParameters());
   const auto nFrames = modelParams_init.size(0);
   auto result = std::make_unique<momentum::SequenceSolverFunctionT<T>>(
-      &character.skeleton, &parameterTransform, sharedParams, nFrames);
+      character, parameterTransform, sharedParams, nFrames);
 
   assert(modelParams_init.ndimension() == 2);
   assert(errorFunctionWeights.ndimension() == 2);

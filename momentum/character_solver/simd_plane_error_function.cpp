@@ -106,7 +106,8 @@ SimdPlaneErrorFunction::SimdPlaneErrorFunction(const Character& character, uint3
 
 double SimdPlaneErrorFunction::getError(
     const ModelParameters& /* params */,
-    const SkeletonState& state) {
+    const SkeletonState& state,
+    const MeshState& /* unused */) {
   if (constraints_ == nullptr) {
     return 0.0f;
   }
@@ -155,6 +156,7 @@ double SimdPlaneErrorFunction::getError(
 double SimdPlaneErrorFunction::getGradient(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* unused */,
     Ref<VectorXf> gradient) {
   if (constraints_ == nullptr) {
     return 0.0f;
@@ -299,6 +301,7 @@ __vectorcall DRJIT_INLINE void jacobian_jointParams_to_modelParams(
 double SimdPlaneErrorFunction::getJacobian(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* unused */,
     Ref<MatrixXf> jacobian,
     Ref<VectorXf> residual,
     int& usedRows) {
@@ -479,7 +482,8 @@ SimdPlaneErrorFunctionAVX::SimdPlaneErrorFunctionAVX(
 
 double SimdPlaneErrorFunctionAVX::getError(
     const ModelParameters& /* params */,
-    const SkeletonState& state) {
+    const SkeletonState& state,
+    const MeshState& /* unused */) {
   // do all summations in double to prevent rounding errors
   double error = 0.0;
   if (constraints_ == nullptr) {
@@ -548,6 +552,7 @@ double SimdPlaneErrorFunctionAVX::getError(
 double SimdPlaneErrorFunctionAVX::getGradient(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* unused */,
     Ref<VectorXf> gradient) {
   if (constraints_ == nullptr) {
     return 0.0f;
@@ -747,6 +752,7 @@ double SimdPlaneErrorFunctionAVX::getGradient(
 double SimdPlaneErrorFunctionAVX::getJacobian(
     const ModelParameters& /* params */,
     const SkeletonState& state,
+    const MeshState& /* meshState */,
     Ref<MatrixXf> jacobian,
     Ref<VectorXf> residual,
     int& usedRows) {

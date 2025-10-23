@@ -7,6 +7,8 @@
 
 #include "momentum/character_sequence_solver/sequence_solver.h"
 
+#include "momentum/character/character.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_sequence_solver/sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
@@ -97,10 +99,17 @@ std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t>
 SequenceSolverT<T>::computePerFrameJacobian(SequenceSolverFunctionT<T>* fn, size_t iFrame) {
   const auto& frameParameters = fn->frameParameters_[iFrame];
   auto& skelState = fn->states_[iFrame];
+  auto& meshState = fn->meshStates_[iFrame];
 
-  skelState.set(fn->parameterTransform_->apply(frameParameters), *fn->skeleton_);
+  const auto& character = fn->getCharacter();
 
-  const auto nFullParameters = fn->parameterTransform_->numAllModelParameters();
+  skelState.set(fn->parameterTransform_.apply(frameParameters), character.skeleton);
+
+  if (fn->needsMesh()) {
+    meshState.update(frameParameters, skelState, character);
+  }
+
+  const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
   const size_t jacobianSize = padForSSE(computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(jacobianSize, nFullParameters);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
@@ -118,6 +127,7 @@ SequenceSolverT<T>::computePerFrameJacobian(SequenceSolverFunctionT<T>* fn, size
     errorCur += errf->getJacobian(
         frameParameters,
         skelState,
+        meshState,
         jacobian.block(offset, 0, n, nFullParameters),
         residual.middleRows(offset, n),
         rows);
@@ -137,7 +147,7 @@ std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> SequenceSolverT
     T>::computeSequenceJacobian(SequenceSolverFunctionT<T>* fn, size_t iFrame, size_t bandwidth) {
   const size_t bandwidth_cur = std::min(fn->getNumFrames() - iFrame, bandwidth);
 
-  const auto nFullParameters = fn->parameterTransform_->numAllModelParameters();
+  const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
   const size_t jacobianSize = padForSSE(computeJacobianSize(fn->sequenceErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian =
       Eigen::MatrixX<T>::Zero(jacobianSize, bandwidth_cur * nFullParameters);
@@ -157,6 +167,7 @@ std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> SequenceSolverT
     errorCur += errf->getJacobian(
         gsl::make_span(fn->frameParameters_).subspan(iFrame, nFrames),
         gsl::make_span(fn->states_).subspan(iFrame, nFrames),
+        gsl::make_span(fn->meshStates_).subspan(iFrame, nFrames),
         jacobian.block(offset, 0, n, nFrames * nFullParameters),
         residual.middleRows(offset, n),
         rows);
@@ -192,7 +203,7 @@ std::vector<Eigen::Index> SequenceSolverT<T>::buildSequenceColumnIndices(
         fn->perFrameParameterIndices_.begin(),
         fn->perFrameParameterIndices_.end(),
         std::back_inserter(result),
-        [offset = iSubFrame * fn->parameterTransform_->numAllModelParameters()](
+        [offset = iSubFrame * fn->parameterTransform_.numAllModelParameters()](
             Eigen::Index kParam) -> Eigen::Index { return kParam + offset; });
   }
 

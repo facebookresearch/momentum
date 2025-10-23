@@ -26,12 +26,15 @@ class PosePriorErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   void setPosePrior(std::shared_ptr<const MppcaT<T>> pp);
 
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& params,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState) final;
 
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::VectorX<T>> gradient) final;
 
   [[nodiscard]] double logProbability(const ModelParametersT<T>& params) const;
@@ -39,6 +42,7 @@ class PosePriorErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;

@@ -222,6 +222,25 @@ using SkeletonStated_const_u = ::std::unique_ptr<const SkeletonStated>;
 using SkeletonStated_const_w = ::std::weak_ptr<const SkeletonStated>;
 
 template <typename T>
+struct MeshStateT;
+using MeshState = MeshStateT<float>;
+using MeshStated = MeshStateT<double>;
+
+using MeshState_p = ::std::shared_ptr<MeshState>;
+using MeshState_u = ::std::unique_ptr<MeshState>;
+using MeshState_w = ::std::weak_ptr<MeshState>;
+using MeshState_const_p = ::std::shared_ptr<const MeshState>;
+using MeshState_const_u = ::std::unique_ptr<const MeshState>;
+using MeshState_const_w = ::std::weak_ptr<const MeshState>;
+
+using MeshStated_p = ::std::shared_ptr<MeshStated>;
+using MeshStated_u = ::std::unique_ptr<MeshStated>;
+using MeshStated_w = ::std::weak_ptr<MeshStated>;
+using MeshStated_const_p = ::std::shared_ptr<const MeshStated>;
+using MeshStated_const_u = ::std::unique_ptr<const MeshStated>;
+using MeshStated_const_w = ::std::weak_ptr<const MeshStated>;
+
+template <typename T>
 struct TaperedCapsuleT;
 using TaperedCapsule = TaperedCapsuleT<float>;
 using TaperedCapsuled = TaperedCapsuleT<double>;

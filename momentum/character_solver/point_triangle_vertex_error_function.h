@@ -50,16 +50,19 @@ class PointTriangleVertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   [[nodiscard]] double getError(
       const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state) final;
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState) final;
 
   double getGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::VectorX<T>> gradient) final;
 
   double getJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;
@@ -82,8 +85,13 @@ class PointTriangleVertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
 
   size_t getNumVertices() const;
-  [[nodiscard]] const Character& getCharacter() const {
-    return character_;
+  [[nodiscard]] const Character* getCharacter() const override {
+    return &character_;
+  }
+
+  /// Override to indicate this function requires mesh state
+  [[nodiscard]] bool needsMesh() const override {
+    return true;
   }
 
  private:

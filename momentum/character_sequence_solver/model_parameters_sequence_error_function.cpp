@@ -30,7 +30,8 @@ ModelParametersSequenceErrorFunctionT<T>::ModelParametersSequenceErrorFunctionT(
 template <typename T>
 double ModelParametersSequenceErrorFunctionT<T>::getError(
     gsl::span<const ModelParametersT<T>> modelParameters,
-    gsl::span<const SkeletonStateT<T>> /* skelStates */) const {
+    gsl::span<const SkeletonStateT<T>> /* skelStates */,
+    gsl::span<const MeshStateT<T>> /* meshStates */) const {
   // ignore if we don't have any reasonable data
   if (targetWeights_.size() !=
       gsl::narrow_cast<Eigen::Index>(this->parameterTransform_.numAllModelParameters())) {
@@ -60,6 +61,7 @@ template <typename T>
 double ModelParametersSequenceErrorFunctionT<T>::getGradient(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> /* skelStates */,
+    gsl::span<const MeshStateT<T>> /* meshStates */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   // ignore if we don't have any reasonable data
   if (targetWeights_.size() !=
@@ -99,6 +101,7 @@ template <typename T>
 double ModelParametersSequenceErrorFunctionT<T>::getJacobian(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> /* skelStates */,
+    gsl::span<const MeshStateT<T>> /* meshStates */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) const {

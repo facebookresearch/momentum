@@ -23,15 +23,19 @@ class UnionErrorFunctionT : public SkeletonErrorFunctionT<T>,
       const ParameterTransform& pt,
       const std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>>& errorFunctions);
 
-  [[nodiscard]] double getError(const ModelParametersT<T>& params, const SkeletonStateT<T>& state)
-      final;
+  [[nodiscard]] double getError(
+      const ModelParametersT<T>& params,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState) final;
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::VectorX<T>> gradient) final;
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) final;

@@ -24,6 +24,7 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
       const ParameterTransformT<T>* parameterTransform,
       gsl::span<const int> universal,
       size_t frames);
+  ~MultiposeSolverFunctionT() override;
 
   double getError(const Eigen::VectorX<T>& parameters) final;
 
@@ -62,7 +63,8 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
  private:
   const Skeleton* skeleton_;
   const ParameterTransformT<T>* parameterTransform_;
-  std::vector<std::unique_ptr<SkeletonStateT<T>>> states_;
+  std::vector<SkeletonStateT<T>> states_;
+  std::vector<MeshStateT<T>> meshStates_;
   VectorX<bool> activeJointParams_;
 
   std::vector<ModelParametersT<T>> frameParameters_;

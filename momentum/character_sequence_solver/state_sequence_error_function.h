@@ -29,10 +29,12 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
 
   double getError(
       gsl::span<const ModelParametersT<T>> modelParameters,
-      gsl::span<const SkeletonStateT<T>> skelStates) const final;
+      gsl::span<const SkeletonStateT<T>> skelStates,
+      gsl::span<const MeshStateT<T>> /* meshStates */) const final;
   double getGradient(
       gsl::span<const ModelParametersT<T>> modelParameters,
       gsl::span<const SkeletonStateT<T>> skelStates,
+      gsl::span<const MeshStateT<T>> /* meshStates */,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const final;
 
   // modelParameters: [numFrames() * parameterTransform] parameter vector
@@ -42,6 +44,7 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   double getJacobian(
       gsl::span<const ModelParametersT<T>> modelParameters,
       gsl::span<const SkeletonStateT<T>> skelStates,
+      gsl::span<const MeshStateT<T>> /* meshStates */,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) const final;

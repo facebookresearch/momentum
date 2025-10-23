@@ -38,6 +38,7 @@ template <typename T>
 class GaussNewtonSolverQRT : public SolverT<T> {
  public:
   GaussNewtonSolverQRT(const SolverOptions& options, SkeletonSolverFunctionT<T>* solver);
+  ~GaussNewtonSolverQRT() override;
 
   [[nodiscard]] std::string_view getName() const override;
 
@@ -49,6 +50,7 @@ class GaussNewtonSolverQRT : public SolverT<T> {
 
  private:
   std::unique_ptr<SkeletonStateT<T>> skeletonState_;
+  std::unique_ptr<MeshStateT<T>> meshState_;
 
   ResizeableMatrix<T> jacobian_;
   ResizeableMatrix<T> residual_;

@@ -21,8 +21,9 @@ ProjectionErrorFunctionT<T>::ProjectionErrorFunctionT(
 
 template <typename T>
 double ProjectionErrorFunctionT<T>::getError(
-    const momentum::ModelParametersT<T>& /*params*/,
-    const momentum::SkeletonStateT<T>& skeletonState) {
+    const ModelParametersT<T>& /*parameters*/,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& /* meshState */) {
   double error = 0;
 
   const auto& jointState = skeletonState.jointState;
@@ -56,6 +57,7 @@ template <typename T>
 double ProjectionErrorFunctionT<T>::getGradient(
     const momentum::ModelParametersT<T>& /*params*/,
     const momentum::SkeletonStateT<T>& skeletonState,
+    const momentum::MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
 
@@ -135,8 +137,9 @@ double ProjectionErrorFunctionT<T>::getGradient(
 
 template <typename T>
 double ProjectionErrorFunctionT<T>::getJacobian(
-    const momentum::ModelParametersT<T>& /*params*/,
-    const momentum::SkeletonStateT<T>& skeletonState,
+    const ModelParametersT<T>& /*parameters*/,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& /* meshState */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {

@@ -105,7 +105,8 @@ void VertexSequenceErrorFunctionT<T>::updateMeshes(
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::getError(
     gsl::span<const ModelParametersT<T>> modelParameters,
-    gsl::span<const SkeletonStateT<T>> skelStates) const {
+    gsl::span<const SkeletonStateT<T>> skelStates,
+    gsl::span<const MeshStateT<T>> /*meshStates*/) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
   MT_CHECK(skelStates.size() == 2);
@@ -244,6 +245,7 @@ template <typename T>
 double VertexSequenceErrorFunctionT<T>::getGradient(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> skelStates,
+    gsl::span<const MeshStateT<T>> /*meshStates*/,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
@@ -373,6 +375,7 @@ template <typename T>
 double VertexSequenceErrorFunctionT<T>::getJacobian(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> skelStates,
+    gsl::span<const MeshStateT<T>> /*meshStates*/,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) const {
