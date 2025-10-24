@@ -67,6 +67,10 @@ class VertexSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) const final;
 
+  bool needsMesh() const final {
+    return true;
+  }
+
   [[nodiscard]] size_t getJacobianSize() const final;
 
   /// Add a vertex velocity constraint.
@@ -99,30 +103,21 @@ class VertexSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   /// Calculate gradient for a single vertex velocity constraint.
   double calculateVelocityGradient(
       gsl::span<const SkeletonStateT<T>> skelStates,
+      gsl::span<const MeshStateT<T>> meshStates,
       const VertexVelocityConstraintT<T>& constraint,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   /// Calculate Jacobian for a single vertex velocity constraint.
   double calculateVelocityJacobian(
       gsl::span<const SkeletonStateT<T>> skelStates,
+      gsl::span<const MeshStateT<T>> meshStates,
       const VertexVelocityConstraintT<T>& constraint,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       Eigen::Index startRow) const;
 
-  /// Update meshes for both frames.
-  void updateMeshes(
-      gsl::span<const ModelParametersT<T>> modelParameters,
-      gsl::span<const SkeletonStateT<T>> skelStates) const;
-
   const Character& character_;
   std::vector<VertexVelocityConstraintT<T>> constraints_;
-
-  // Meshes for the two frames
-  mutable std::unique_ptr<MeshT<T>> neutralMesh_;
-  mutable std::unique_ptr<MeshT<T>> restMesh_; // Single rest mesh used for both frames
-  mutable std::unique_ptr<MeshT<T>> posedMesh0_;
-  mutable std::unique_ptr<MeshT<T>> posedMesh1_;
 };
 
 } // namespace momentum
