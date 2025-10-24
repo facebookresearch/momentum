@@ -37,9 +37,9 @@ class TensorDiffPosePriorErrorFunction : public TensorErrorFunction<T> {
       size_t /* unused nFrames */) const override;
 };
 
-const static int NMIXTURES_IDX = -1;
-const static int NPARAMETERS_IDX = -2;
-const static int NCOMPONENTS_IDX = -3;
+const int NMIXTURES_IDX = -1;
+const int NPARAMETERS_IDX = -2;
+const int NCOMPONENTS_IDX = -3;
 
 template <typename T>
 TensorDiffPosePriorErrorFunction<T>::TensorDiffPosePriorErrorFunction(

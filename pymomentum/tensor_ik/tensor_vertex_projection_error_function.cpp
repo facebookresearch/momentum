@@ -16,11 +16,11 @@ namespace pymomentum {
 
 namespace {
 
-const static int NCONS_IDX = -1;
-static constexpr const char* kVerticesName = "vertices";
-static constexpr const char* kWeightsName = "weights";
-static constexpr const char* kTargetPositionsName = "target_positions";
-static constexpr const char* kProjectionsName = "projections";
+const int NCONS_IDX = -1;
+constexpr const char* kVerticesName = "vertices";
+constexpr const char* kWeightsName = "weights";
+constexpr const char* kTargetPositionsName = "target_positions";
+constexpr const char* kProjectionsName = "projections";
 
 template <typename T>
 class TensorVertexProjectionErrorFunction : public TensorErrorFunction<T> {
