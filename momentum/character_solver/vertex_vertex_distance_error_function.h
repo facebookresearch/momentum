@@ -101,6 +101,7 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculateJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexVertexDistanceConstraintT<T>& constraint,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       T& residual) const;
@@ -109,6 +110,7 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculateGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexVertexDistanceConstraintT<T>& constraint,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
@@ -116,6 +118,7 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   void calculateVertexGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       int vertexIndex,
       const Eigen::Vector3<T>& gradientDirection,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
@@ -124,6 +127,7 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   void calculateVertexJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       int vertexIndex,
       const Eigen::Vector3<T>& jacobianDirection,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian) const;
@@ -135,17 +139,9 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Eigen::Vector3<T>& d_restPos,
       Eigen::Vector3<T>& d_worldPos) const;
 
-  /// Update the meshes with current parameters and state
-  void updateMeshes(const ModelParametersT<T>& modelParameters, const SkeletonStateT<T>& state);
-
   const Character& character_;
 
   std::vector<VertexVertexDistanceConstraintT<T>> constraints_;
-
-  /// Mesh used to store rest positions
-  std::unique_ptr<MeshT<T>> restMesh_;
-  /// Mesh used to store posed positions
-  std::unique_ptr<MeshT<T>> posedMesh_;
 };
 
 } // namespace momentum
