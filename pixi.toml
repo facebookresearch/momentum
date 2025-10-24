@@ -22,14 +22,17 @@ rerun-sdk = ">=0.23.3,<0.24"
 pip = ">=25.2,<26"
 pybind11 = ">=2.13.6,<4"
 pytest = ">=8.4.2,<9"
+ruff = ">=0.14.0,<0.15"
 scikit-build-core = ">=0.10.0,<0.11"
 scipy = ">=1.10.0,<2"
 setuptools = ">=80.9.0,<81"
 setuptools-scm = ">=8.0.0,<9"
 sphinx = ">=7.0.0,<9"
 sphinx-rtd-theme = ">=3.0.2,<4"
+taplo = ">=0.9.3,<0.10"
 tracy-profiler-gui = ">=0.11.1,<0.13"
 twine = ">=6.1.0,<7"
+yamllint = ">=1.37.0,<2"
 
 # runtime dependencies
 blas = ">=2.135,<3"
@@ -60,8 +63,40 @@ clean = { cmd = """
     && rm -rf .pixi \
     && rm pixi.lock
     """, description = "Clean all build artifacts and pixi cache" }
-lint = { cmd = "clang-format -i axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Format C++ code using clang-format" }
-lint-check = { cmd = "clang-format --dry-run --Werror axel/**/*.h axel/**/*.cpp momentum/**/*.h momentum/**/*.cpp pymomentum/**/*.h pymomentum/**/*.cpp", description = "Check if code is properly formatted without modifying files" }
+
+# Linting tasks
+lint_cpp = { cmd = """
+    clang-format -i \
+        axel/**/*.h axel/**/*.cpp \
+        momentum/**/*.h momentum/**/*.cpp \
+        pymomentum/**/*.h pymomentum/**/*.cpp
+    """, description = "Format C++ code using clang-format" }
+
+lint_toml = { cmd = """
+    taplo format *.toml
+    """, description = "Format TOML files using taplo" }
+
+lint_yaml = { cmd = """
+    yamllint -d relaxed .github/workflows/*.yml || true
+    """, description = "Lint YAML files using yamllint" }
+
+lint_python = { cmd = """
+    if [ -d scripts ]; then ruff check --fix scripts/**/*.py || true; fi
+    """, description = "Lint Python files using ruff (if scripts/ exists)" }
+
+lint = { depends-on = [
+  "lint_cpp",
+  "lint_toml",
+  "lint_yaml",
+  "lint_python",
+], description = "Run all linters (C++, TOML, YAML, Python)" }
+
+lint-check = { cmd = """
+    clang-format --dry-run --Werror \
+        axel/**/*.h axel/**/*.cpp \
+        momentum/**/*.h momentum/**/*.cpp \
+        pymomentum/**/*.h pymomentum/**/*.cpp
+    """, description = "Check if code is properly formatted without modifying files" }
 config = { cmd = """
     cmake \
         -S . \
@@ -103,62 +138,62 @@ config_dev = { cmd = """
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, description = "Configure CMake for Debug build" }
 build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target all", depends-on = [
-    "config",
+  "config",
 ], description = "Build Release version" }
 build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/debug -j --target all", depends-on = [
-    "config_dev",
+  "config_dev",
 ], description = "Build Debug version" }
 build_fast = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j4 --target all", depends-on = [
-    "config",
+  "config",
 ], description = "Build Release version with limited parallelism" }
 test = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp/release --output-on-failure", depends-on = [
-    "build",
+  "build",
 ], description = "Run C++ tests (Release)" }
 test_dev = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp/debug --output-on-failure", depends-on = [
-    "build_dev",
+  "build_dev",
 ], description = "Run C++ tests (Debug)" }
 test_verbose = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp/release --output-on-failure --verbose", depends-on = [
-    "build",
+  "build",
 ], description = "Run C++ tests with verbose output" }
 hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/hello_world", depends-on = [
-    "build",
+  "build",
 ], description = "Run hello world example" }
 convert_model = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/convert_model", depends-on = [
-    "build",
+  "build",
 ], description = "Run model conversion tool" }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/c3d_viewer", depends-on = [
-    "build",
+  "build",
 ], description = "Run C3D file viewer" }
 fbx_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/fbx_viewer", depends-on = [
-    "build",
+  "build",
 ], description = "Run FBX file viewer" }
 glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/glb_viewer", depends-on = [
-    "build",
+  "build",
 ], description = "Run GLB file viewer" }
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/urdf_viewer", depends-on = [
-    "build",
+  "build",
 ], description = "Run URDF file viewer" }
 process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/process_markers_app", depends-on = [
-    "build",
+  "build",
 ], description = "Run marker processing application" }
 refine_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/refine_motion", depends-on = [
-    "build",
+  "build",
 ], description = "Run motion refinement tool" }
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target install", depends-on = [
-    "build",
+  "build",
 ], description = "Install built libraries and executables" }
 tracy = { cmd = "tracy-profiler", description = "Launch Tracy profiler GUI" }
 test_py = { cmd = "pytest pymomentum/test/*.py", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py",
+  "build_py",
 ], description = "Run Python tests" }
 test_py_verbose = { cmd = "pytest pymomentum/test/*.py -v", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py",
+  "build_py",
 ], description = "Run Python tests with verbose output" }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
-    "build_py",
+  "build_py",
 ], description = "Build Python API documentation" }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
-    "doc_py",
+  "doc_py",
 ], description = "Open Python documentation in browser" }
 
 # ==================
@@ -239,7 +274,7 @@ description = "Publish to TestPyPI for testing"
 #===========
 
 [target.linux-64.dependencies]
-nvtx-c = ">=3.1.0" # TODO: Add to pytorch as run dep
+nvtx-c = ">=3.1.0"             # TODO: Add to pytorch as run dep
 sysroot_linux-64 = ">=2.28,<3"
 patchelf = ">=0.17.2,<0.18"
 auditwheel = ">=6.4.2,<7"
@@ -257,7 +292,7 @@ install_fbxsdk = { cmd = """
         && yes yes | .deps/fbxsdk_download/fbx202037_fbxsdk_linux .deps/fbxsdk/2020.3.7 \
         && rm -rf .deps/fbxsdk_download/fbx202037_fbxsdk_linux
 """, outputs = [
-    ".deps/fbxsdk/2020.3.7",
+  ".deps/fbxsdk/2020.3.7",
 ] }
 install_deps = { depends-on = ["install_fbxsdk"] }
 config = { cmd = """
@@ -280,7 +315,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { FBXSDK_PATH = ".deps/fbxsdk", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, depends-on = [
-    "install_deps",
+  "install_deps",
 ] }
 config_dev = { cmd = """
     cmake \
@@ -302,7 +337,7 @@ config_dev = { cmd = """
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { FBXSDK_PATH = ".deps/fbxsdk", MOMENTUM_ENABLE_SIMD = "ON", MOMENTUM_BUILD_PYMOMENTUM = "ON" }, depends-on = [
-    "install_deps",
+  "install_deps",
 ] }
 build_py = { cmd = "pip install . -v --no-build-isolation", env = { FBXSDK_PATH = ".deps/fbxsdk", CMAKE_ARGS = """
     -DMOMENTUM_ENABLE_FBX_SAVING=ON \
@@ -312,16 +347,16 @@ build_py = { cmd = "pip install . -v --no-build-isolation", env = { FBXSDK_PATH 
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
     -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" }, depends-on = [
-    "install_deps",
+  "install_deps",
 ] }
 test_py = { cmd = "pytest pymomentum/test/*.py", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py",
+  "build_py",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
-    "build_py",
+  "build_py",
 ] }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
-    "doc_py",
+  "doc_py",
 ] }
 
 #============
@@ -341,13 +376,14 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
 """, MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py", "install",
+  "build_py",
+  "install",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
-    "build_py",
+  "build_py",
 ] }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
-    "doc_py",
+  "doc_py",
 ] }
 
 #============
@@ -367,13 +403,14 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
 """, MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py", "install",
+  "build_py",
+  "install",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
-    "build_py",
+  "build_py",
 ] }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
-    "doc_py",
+  "doc_py",
 ] }
 
 #=========
@@ -403,46 +440,46 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
-    "config",
+  "config",
 ] }
 build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel", depends-on = [
-    "config",
+  "config",
 ] }
 build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Debug --parallel", depends-on = [
-    "config",
+  "config",
 ] }
 test = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Release;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release\"", depends-on = [
-    "build",
+  "build",
 ] }
 test_dev = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Debug;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug\"", depends-on = [
-    "build_dev",
+  "build_dev",
 ] }
 hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/hello_world.exe", depends-on = [
-    "build",
+  "build",
 ] }
 convert_model = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/convert_model.exe", depends-on = [
-    "build",
+  "build",
 ] }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/c3d_viewer.exe", depends-on = [
-    "build",
+  "build",
 ] }
 fbx_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/fbx_viewer.exe", depends-on = [
-    "build",
+  "build",
 ] }
 glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/glb_viewer.exe", depends-on = [
-    "build",
+  "build",
 ] }
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/urdf_viewer.exe", depends-on = [
-    "build",
+  "build",
 ] }
 process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/process_markers_app.exe", depends-on = [
-    "build",
+  "build",
 ] }
 refine_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/refine_motion.exe", depends-on = [
-    "build",
+  "build",
 ] }
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --target install --config Release --parallel", depends-on = [
-    "build",
+  "build",
 ] }
 tracy = { cmd = "tracy-profiler.exe" }
 build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
@@ -456,7 +493,8 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
 # TODO: Remove test_lighting skip once stack overflow issue on Windows is resolved (currently causes crash with CMake build)
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py", "install",
+  "build_py",
+  "install",
 ] }
 
 #==============

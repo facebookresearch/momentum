@@ -9,7 +9,7 @@ description = "A library providing foundational algorithms for human kinematic m
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Meta Reality Labs Research", email = "jeongseok@meta.com" },
+  { name = "Meta Reality Labs Research", email = "jeongseok@meta.com" },
 ]
 classifiers = ["License :: OSI Approved :: MIT License"]
 dependencies = []
@@ -20,29 +20,29 @@ Homepage = "https://github.com/facebookresearch/momentum"
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=ON",
+  "-DBUILD_SHARED_LIBS=OFF",
+  "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+  "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+  "-DMOMENTUM_BUILD_TESTING=ON",
 ]
 minimum-version = "0.10"
 sdist.exclude = [
-    "cmake/",
-    "test/",
-    "*.h",
-    "*.cpp",
-    "*.cmake",
-    ".clang-format",
-    "CMakeLists.txt",
+  "cmake/",
+  "test/",
+  "*.h",
+  "*.cpp",
+  "*.cmake",
+  ".clang-format",
+  "CMakeLists.txt",
 ]
 wheel.exclude = ["geometry_test_helper.*"]
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 17 2022",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=ON",
+  "-DBUILD_SHARED_LIBS=OFF",
+  "-G Visual Studio 17 2022",
+  "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+  "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+  "-DMOMENTUM_BUILD_TESTING=ON",
 ]
