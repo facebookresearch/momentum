@@ -46,6 +46,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <utility>
 
 #include <fmt/format.h>
 
@@ -53,6 +54,57 @@ namespace py = pybind11;
 namespace mm = momentum;
 
 using namespace pymomentum;
+
+namespace {
+
+mm::Character createCharacterWithMeshAndSkinWeights(
+    const mm::Character& character,
+    const mm::Mesh& mesh,
+    const std::optional<mm::SkinWeights>& skinWeights) {
+  if (skinWeights) {
+    MT_THROW_IF(
+        skinWeights->index.rows() != skinWeights->weight.rows(),
+        "The number of rows in the index and weight matrices should match; got {} and {}.",
+        skinWeights->index.rows(),
+        skinWeights->weight.rows());
+
+    MT_THROW_IF(
+        skinWeights->index.maxCoeff() >= character.skeleton.joints.size(),
+        "Skin weight index is out of range; max index is {}, but there are only {} joints.",
+        skinWeights->index.maxCoeff(),
+        character.skeleton.joints.size());
+  }
+
+  const mm::SkinWeights* skinWeightsPtr = character.skinWeights.get();
+  if (skinWeights) {
+    skinWeightsPtr = &skinWeights.value();
+  }
+
+  if (skinWeightsPtr) {
+    MT_THROW_IF(
+        skinWeightsPtr->weight.rows() != mesh.vertices.size(),
+        "The number of mesh vertices and skin weight index/weight matrix rows should be the same {} vs {}",
+        mesh.vertices.size(),
+        skinWeightsPtr->index.rows());
+  }
+
+  return momentum::Character{
+      character.skeleton,
+      character.parameterTransform,
+      character.parameterLimits,
+      character.locators,
+      &mesh,
+      skinWeightsPtr,
+      character.collision.get(),
+      character.poseShapes.get(),
+      character.blendShape,
+      character.faceExpressionBlendShape,
+      character.name,
+      character.inverseBindPose,
+      character.skinnedLocators};
+}
+
+} // namespace
 
 PYBIND11_MODULE(geometry, m) {
   // TODO more explanation
@@ -298,51 +350,7 @@ PYBIND11_MODULE(geometry, m) {
           py::arg("locators") = mm::LocatorList())
       .def(
           "with_mesh_and_skin_weights",
-          [](const mm::Character& character,
-             const mm::Mesh& mesh,
-             const std::optional<mm::SkinWeights>& skinWeights) {
-            if (skinWeights) {
-              MT_THROW_IF(
-                  skinWeights->index.rows() != skinWeights->weight.rows(),
-                  "The number of rows in the index and weight matrices should match; got {} and {}.",
-                  skinWeights->index.rows(),
-                  skinWeights->weight.rows());
-
-              MT_THROW_IF(
-                  skinWeights->index.maxCoeff() >= character.skeleton.joints.size(),
-                  "Skin weight index is out of range; max index is {}, but there are only {} joints.",
-                  skinWeights->index.maxCoeff(),
-                  character.skeleton.joints.size());
-            }
-
-            const mm::SkinWeights* skinWeightsPtr = character.skinWeights.get();
-            if (skinWeights) {
-              skinWeightsPtr = &skinWeights.value();
-            }
-
-            if (skinWeightsPtr) {
-              MT_THROW_IF(
-                  skinWeightsPtr->weight.rows() != mesh.vertices.size(),
-                  "The number of mesh vertices and skin weight index/weight matrix rows should be the same {} vs {}",
-                  mesh.vertices.size(),
-                  skinWeightsPtr->index.rows());
-            }
-
-            return momentum::Character(
-                character.skeleton,
-                character.parameterTransform,
-                character.parameterLimits,
-                character.locators,
-                &mesh,
-                skinWeightsPtr,
-                character.collision.get(),
-                character.poseShapes.get(),
-                character.blendShape,
-                character.faceExpressionBlendShape,
-                character.name,
-                character.inverseBindPose,
-                character.skinnedLocators);
-          },
+          &createCharacterWithMeshAndSkinWeights,
           "Adds mesh and skin weight to the character and return a new character instance",
           py::arg("mesh"),
           py::arg("skin_weights") = std::optional<mm::SkinWeights>{})
@@ -1052,7 +1060,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           [](const momentum::Character& character,
              at::Tensor enabledParameters) -> momentum::Character {
             return character.simplifyParameterTransform(
-                tensorToParameterSet(character.parameterTransform, enabledParameters));
+                tensorToParameterSet(character.parameterTransform, std::move(enabledParameters)));
           },
           "Simplifies the character by removing unwanted parameters.",
           py::arg("enabled_parameters"))
@@ -1068,8 +1076,8 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def(
           "joints_for_parameters",
           [](const momentum::Character& character, at::Tensor enabledParamsTensor) {
-            return bitsetToJointList(character.parametersToActiveJoints(
-                tensorToParameterSet(character.parameterTransform, enabledParamsTensor)));
+            return bitsetToJointList(character.parametersToActiveJoints(tensorToParameterSet(
+                character.parameterTransform, std::move(enabledParamsTensor))));
           },
           "Maps a list of parameter indices to a list of joints driven by those parameters.",
           py::arg("active_parameters"))
@@ -1535,7 +1543,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def(
           "compute_shape",
           [](py::object blendShape, at::Tensor coeffs) {
-            return applyBlendShapeCoefficients(blendShape, coeffs);
+            return applyBlendShapeCoefficients(std::move(blendShape), std::move(coeffs));
           },
           R"(Apply the blend shape coefficients to compute the rest shape.
 
@@ -1947,7 +1955,7 @@ Create a parameter limit with min and max values for a joint parameter.
       .def_readonly("linear_joint", &mm::LimitData::linearJoint, "Data for LinearJoint limit.")
       .def_readonly("halfplane", &mm::LimitData::halfPlane, "Data for HalfPlane limit.")
       .def_readonly("ellipsoid", &mm::LimitData::ellipsoid, "Data for Ellipsoid limit.")
-      .def("__repr__", [](const mm::LimitData& ld) { return fmt::format("LimitData()"); });
+      .def("__repr__", [](const mm::LimitData& /*ld*/) { return fmt::format("LimitData()"); });
 
   parameterLimitMinMaxClass
       .def_readonly(
@@ -2167,8 +2175,10 @@ Create a parameter limit with min and max values for a joint parameter.
           "Size of the model parameter vector.")
       .def(
           "apply",
-          [](const mm::ParameterTransform* paramTransform, torch::Tensor modelParams)
-              -> torch::Tensor { return applyParamTransform(paramTransform, modelParams); },
+          [](const mm::ParameterTransform* paramTransform,
+             torch::Tensor modelParams) -> torch::Tensor {
+            return applyParamTransform(paramTransform, std::move(modelParams));
+          },
           R"(Apply the parameter transform to a k-dimensional model parameter vector (returns the 7*nJoints joint parameter vector).
 
 The modelParameters store the reduced set of parameters (typically around 50) that are actually
@@ -2619,7 +2629,7 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
   m.def(
       "apply_parameter_transform",
       [](py::object character, at::Tensor modelParameters) {
-        return applyParamTransform(character, modelParameters);
+        return applyParamTransform(std::move(character), std::move(modelParameters));
       },
       R"(Apply the parameter transform to a [nBatch x nParams] tensor of model parameters.
 This is functionally identical to :meth:`ParameterTransform.apply` except that it allows
@@ -2893,7 +2903,7 @@ blend shapes, pose shapes, and other mesh-related data.
       "reduce_to_selected_model_parameters",
       [](const momentum::Character& character, at::Tensor activeParameters) {
         return character.simplifyParameterTransform(
-            tensorToParameterSet(character.parameterTransform, activeParameters));
+            tensorToParameterSet(character.parameterTransform, std::move(activeParameters)));
       },
       R"(Strips out unused parameters from the parameter transform.
 
