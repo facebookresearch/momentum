@@ -11,6 +11,7 @@
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/error_function_utils.h"
@@ -28,9 +29,6 @@ VertexVertexDistanceErrorFunctionT<T>::VertexVertexDistanceErrorFunctionT(
       character_(character) {
   MT_CHECK(static_cast<bool>(character.mesh));
   MT_CHECK(static_cast<bool>(character.skinWeights));
-
-  this->restMesh_ = std::make_unique<MeshT<T>>(character.mesh->template cast<T>());
-  this->posedMesh_ = std::make_unique<MeshT<T>>(character.mesh->template cast<T>());
 }
 
 template <typename T>
@@ -59,16 +57,16 @@ template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */) {
+    const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0.0;
 
   for (const auto& constraint : constraints_) {
-    const auto& pos1 = posedMesh_->vertices[constraint.vertexIndex1];
-    const auto& pos2 = posedMesh_->vertices[constraint.vertexIndex2];
+    const auto& pos1 = meshState.posedMesh_->vertices[constraint.vertexIndex1];
+    const auto& pos2 = meshState.posedMesh_->vertices[constraint.vertexIndex2];
 
     const T actualDistance = (pos1 - pos2).norm();
     const T distanceDiff = actualDistance - constraint.targetDistance;
@@ -80,47 +78,20 @@ double VertexVertexDistanceErrorFunctionT<T>::getError(
 }
 
 template <typename T>
-void VertexVertexDistanceErrorFunctionT<T>::updateMeshes(
-    const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
-  MT_PROFILE_FUNCTION();
-
-  // Update rest mesh with blend shapes if present
-  bool doUpdateNormals = false;
-  if (this->character_.blendShape) {
-    const BlendWeightsT<T> blendWeights =
-        extractBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.blendShape->computeShape(blendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-
-  if (doUpdateNormals) {
-    this->restMesh_->updateNormals();
-  }
-
-  // Apply skinning to get the posed mesh
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *this->character_.skinWeights,
-      *this->restMesh_,
-      state,
-      *this->posedMesh_);
-}
-
-template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK(
+      meshState.posedMesh_, "MeshState must have posed mesh for VertexVertexDistanceErrorFunction");
 
   double error = 0.0;
 
   for (const auto& constraint : constraints_) {
-    error += calculateGradient(modelParameters, state, constraint, gradient);
+    error += calculateGradient(modelParameters, state, meshState, constraint, gradient);
   }
 
   return error * this->weight_;
@@ -130,7 +101,7 @@ template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
@@ -141,7 +112,7 @@ double VertexVertexDistanceErrorFunctionT<T>::getJacobian(
   MT_CHECK(jacobian.rows() >= static_cast<Eigen::Index>(constraints_.size()));
   MT_CHECK(residual.rows() >= static_cast<Eigen::Index>(constraints_.size()));
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0.0;
 
@@ -150,6 +121,7 @@ double VertexVertexDistanceErrorFunctionT<T>::getJacobian(
     error += calculateJacobian(
         modelParameters,
         state,
+        meshState,
         constraints_[i],
         jacobian.block(i, 0, 1, modelParameters.size()),
         residualValue);
@@ -169,13 +141,14 @@ template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::calculateJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexVertexDistanceConstraintT<T>& constraint,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     T& residual) const {
   MT_PROFILE_FUNCTION();
 
-  const auto& pos1 = posedMesh_->vertices[constraint.vertexIndex1];
-  const auto& pos2 = posedMesh_->vertices[constraint.vertexIndex2];
+  const auto& pos1 = meshState.posedMesh_->vertices[constraint.vertexIndex1];
+  const auto& pos2 = meshState.posedMesh_->vertices[constraint.vertexIndex2];
 
   const Eigen::Vector3<T> diff = pos1 - pos2;
   const T actualDistance = diff.norm();
@@ -197,11 +170,16 @@ double VertexVertexDistanceErrorFunctionT<T>::calculateJacobian(
 
   // Calculate jacobian contribution from vertex1 (positive contribution)
   calculateVertexJacobian(
-      modelParameters, state, constraint.vertexIndex1, wgt * distanceGradient, jacobian);
+      modelParameters, state, meshState, constraint.vertexIndex1, wgt * distanceGradient, jacobian);
 
   // Calculate jacobian contribution from vertex2 (negative contribution)
   calculateVertexJacobian(
-      modelParameters, state, constraint.vertexIndex2, -wgt * distanceGradient, jacobian);
+      modelParameters,
+      state,
+      meshState,
+      constraint.vertexIndex2,
+      -wgt * distanceGradient,
+      jacobian);
 
   return wgt * wgt * distanceDiff * distanceDiff;
 }
@@ -210,12 +188,14 @@ template <typename T>
 void VertexVertexDistanceErrorFunctionT<T>::calculateVertexJacobian(
     const ModelParametersT<T>& /*modelParameters*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     int vertexIndex,
     const Eigen::Vector3<T>& jacobianDirection,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian) const {
   MT_PROFILE_FUNCTION();
 
-  SkinningWeightIteratorT<T> skinningIter(this->character_, *this->restMesh_, state, vertexIndex);
+  SkinningWeightIteratorT<T> skinningIter(
+      this->character_, *meshState.restMesh_, state, vertexIndex);
 
   // Handle derivatives wrt joint parameters
   while (!skinningIter.finished()) {
@@ -307,12 +287,13 @@ template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::calculateGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexVertexDistanceConstraintT<T>& constraint,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
 
-  const auto& pos1 = posedMesh_->vertices[constraint.vertexIndex1];
-  const auto& pos2 = posedMesh_->vertices[constraint.vertexIndex2];
+  const auto& pos1 = meshState.posedMesh_->vertices[constraint.vertexIndex1];
+  const auto& pos2 = meshState.posedMesh_->vertices[constraint.vertexIndex2];
 
   const Eigen::Vector3<T> diff = pos1 - pos2;
   const T actualDistance = diff.norm();
@@ -330,11 +311,16 @@ double VertexVertexDistanceErrorFunctionT<T>::calculateGradient(
 
   // Calculate gradient contribution from vertex1 (positive contribution)
   calculateVertexGradient(
-      modelParameters, state, constraint.vertexIndex1, wgt * distanceGradient, gradient);
+      modelParameters, state, meshState, constraint.vertexIndex1, wgt * distanceGradient, gradient);
 
   // Calculate gradient contribution from vertex2 (negative contribution)
   calculateVertexGradient(
-      modelParameters, state, constraint.vertexIndex2, -wgt * distanceGradient, gradient);
+      modelParameters,
+      state,
+      meshState,
+      constraint.vertexIndex2,
+      -wgt * distanceGradient,
+      gradient);
 
   return constraint.weight * distanceDiff * distanceDiff;
 }
@@ -343,12 +329,14 @@ template <typename T>
 void VertexVertexDistanceErrorFunctionT<T>::calculateVertexGradient(
     const ModelParametersT<T>& /*modelParameters*/,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     int vertexIndex,
     const Eigen::Vector3<T>& gradientDirection,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
 
-  SkinningWeightIteratorT<T> skinningIter(this->character_, *this->restMesh_, state, vertexIndex);
+  SkinningWeightIteratorT<T> skinningIter(
+      this->character_, *meshState.restMesh_, state, vertexIndex);
 
   // Handle derivatives wrt joint parameters
   while (!skinningIter.finished()) {
