@@ -109,23 +109,27 @@ class SkinnedLocatorTriangleErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   double calculatePositionJacobian(
       const ModelParametersT<T>& modelParameters,
+      const MeshStateT<T>& meshState,
       const SkinnedLocatorTriangleConstraintT<T>& constr,
       Ref<Eigen::MatrixX<T>> jac,
       Ref<Eigen::VectorX<T>> res) const;
 
   double calculatePlaneJacobian(
       const ModelParametersT<T>& modelParameters,
+      const MeshStateT<T>& meshState,
       const SkinnedLocatorTriangleConstraintT<T>& constr,
       Ref<Eigen::MatrixX<T>> jac,
       T& res) const;
 
   double calculatePositionGradient(
       const ModelParametersT<T>& modelParameters,
+      const MeshStateT<T>& meshState,
       const SkinnedLocatorTriangleConstraintT<T>& constr,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   double calculatePlaneGradient(
       const ModelParametersT<T>& modelParameters,
+      const MeshStateT<T>& meshState,
       const SkinnedLocatorTriangleConstraintT<T>& constr,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
@@ -136,11 +140,7 @@ class SkinnedLocatorTriangleErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   std::vector<SkinnedLocatorTriangleConstraintT<T>> constraints_;
 
-  std::unique_ptr<MeshT<T>> neutralMesh_; // Rest mesh without facial expression basis
-  std::unique_ptr<MeshT<T>> restMesh_; // Rest positions after shape basis is applied
-
   const VertexConstraintType constraintType_;
-  void updateMeshes(const ModelParametersT<T>& modelParameters);
 };
 
 } // namespace momentum
