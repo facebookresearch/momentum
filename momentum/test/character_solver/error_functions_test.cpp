@@ -698,11 +698,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
           continue;
         }
         const auto parent = skin.index(vi, si);
-        cl.push_back(PositionDataT<T>(
-            (target - bindState.jointState[parent].translation()),
-            target,
-            parent,
-            skin.weight(vi, si)));
+        cl.push_back(
+            PositionDataT<T>(
+                (target - bindState.jointState[parent].translation()),
+                target,
+                parent,
+                skin.weight(vi, si)));
       }
       errorFunction.setConstraints(cl);
 
@@ -1095,7 +1096,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleVertexErrorFunction) {
   // altogether or figure out where this very weird issue comes from.
 
   for (const auto& constraintType : {
-           VertexConstraintType::Position, VertexConstraintType::Plane,
+           VertexConstraintType::Position,
+           VertexConstraintType::Plane,
            // VertexConstraintType::Normal,
            // VertexConstraintType::SymmetricNormal
        }) {
@@ -1868,12 +1870,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, ProjectionError_GradientsAndJacobians) {
     // Make a few projection constraints to ensure that at least one of them is active, since
     // projections are ignored behind the camera
     for (int i = 0; i < 5; ++i) {
-      errorFunction.addConstraint(ProjectionConstraintDataT<T>{
-          (projection + uniformAffine3<T>().matrix()).topRows(3),
-          uniform<size_t>(0, 2),
-          normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
-          uniform<T>(0.1, 2.0),
-          normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
+      errorFunction.addConstraint(
+          ProjectionConstraintDataT<T>{
+              (projection + uniformAffine3<T>().matrix()).topRows(3),
+              uniform<size_t>(0, 2),
+              normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones()),
+              uniform<T>(0.1, 2.0),
+              normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones())});
     }
 
     if constexpr (std::is_same_v<T, float>) {

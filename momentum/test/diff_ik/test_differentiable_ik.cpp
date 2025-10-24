@@ -87,12 +87,13 @@ TEST(DifferentiableIK, Basic) {
     auto positionError = std::make_shared<FullyDifferentiablePositionErrorFunctionT<T>>(
         skeleton, character.parameterTransform);
     for (size_t iJoint = 0; iJoint < skelState_target.jointState.size(); ++iJoint) {
-      positionError->addConstraint(PositionConstraintT<T>(
-          Eigen::Vector3<T>::Zero(),
-          skelState_target.jointState[iJoint].translation().cast<T>() +
-              4.0 * randomVec(rng, 3).cast<T>(),
-          iJoint,
-          1.f));
+      positionError->addConstraint(
+          PositionConstraintT<T>(
+              Eigen::Vector3<T>::Zero(),
+              skelState_target.jointState[iJoint].translation().cast<T>() +
+                  4.0 * randomVec(rng, 3).cast<T>(),
+              iJoint,
+              1.f));
     }
     positionError->setWeight(j + 1);
     errorFunctions.push_back(positionError);
@@ -103,11 +104,12 @@ TEST(DifferentiableIK, Basic) {
     auto rotationError = std::make_shared<FullyDifferentiableOrientationErrorFunctionT<T>>(
         skeleton, character.parameterTransform);
     for (size_t iJoint = 0; iJoint < skelState_target.jointState.size(); ++iJoint) {
-      rotationError->addConstraint(OrientationConstraintT<T>(
-          Eigen::Quaternion<T>::Identity(),
-          skelState_target.jointState[iJoint].rotation().cast<T>(),
-          iJoint,
-          1.0));
+      rotationError->addConstraint(
+          OrientationConstraintT<T>(
+              Eigen::Quaternion<T>::Identity(),
+              skelState_target.jointState[iJoint].rotation().cast<T>(),
+              iJoint,
+              1.0));
     }
     rotationError->setWeight(3);
     errorFunctions.push_back(rotationError);

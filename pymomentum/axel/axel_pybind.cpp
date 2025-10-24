@@ -42,16 +42,18 @@ py::array_t<float> smoothMeshLaplacianBinding(
 
   // Validate faces array (but allow either 3 or 4 columns)
   if (faces.ndim() != 2) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for faces: expected 2-dimensional array, got {}D", faces.ndim()));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for faces: expected 2-dimensional array, got {}D", faces.ndim()));
   }
 
   const py::ssize_t num_face_verts = faces.shape(1);
   if (num_face_verts != 3 && num_face_verts != 4) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for faces: expected (M, 3) for triangles or (M, 4) for quads, got ({}, {})",
-        faces.shape(0),
-        num_face_verts));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for faces: expected (M, 3) for triangles or (M, 4) for quads, got ({}, {})",
+            faces.shape(0),
+            num_face_verts));
   }
 
   // Validate face indices are within bounds
@@ -69,10 +71,11 @@ py::array_t<float> smoothMeshLaplacianBinding(
       throw std::runtime_error("Vertex mask must be 1-dimensional");
     }
     if (vertex_mask.shape(0) != vertices.shape(0)) {
-      throw std::runtime_error(fmt::format(
-          "Vertex mask size ({}) must match number of vertices ({})",
-          vertex_mask.shape(0),
-          vertices.shape(0)));
+      throw std::runtime_error(
+          fmt::format(
+              "Vertex mask size ({}) must match number of vertices ({})",
+              vertex_mask.shape(0),
+              vertices.shape(0)));
     }
 
     const auto maskData = vertex_mask.unchecked<1>();
@@ -380,8 +383,10 @@ More efficient than calling sample() and gradient() separately.
         validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
 
         if (resolution.ndim() != 1 || resolution.shape(0) != 3) {
-          throw std::runtime_error(fmt::format(
-              "Invalid shape for resolution: expected (3,), got {}", getArrayDimStr(resolution)));
+          throw std::runtime_error(
+              fmt::format(
+                  "Invalid shape for resolution: expected (3,), got {}",
+                  getArrayDimStr(resolution)));
         }
 
         // Convert numpy arrays to spans
@@ -480,8 +485,10 @@ Example usage::
         validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
 
         if (resolution.ndim() != 1 || resolution.shape(0) != 3) {
-          throw std::runtime_error(fmt::format(
-              "Invalid shape for resolution: expected (3,), got {}", getArrayDimStr(resolution)));
+          throw std::runtime_error(
+              fmt::format(
+                  "Invalid shape for resolution: expected (3,), got {}",
+                  getArrayDimStr(resolution)));
         }
 
         // Convert numpy arrays to spans

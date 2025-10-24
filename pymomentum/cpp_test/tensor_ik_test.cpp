@@ -201,16 +201,18 @@ TEST(TensorIK, TensorIK) {
     const auto positionTensors =
         toPositionTensors<T>(ikProblems[iBatch].markerError->getConstraints());
     std::vector<std::unique_ptr<pymomentum::TensorErrorFunction<T>>> tensorErrorFunctions;
-    tensorErrorFunctions.push_back(pymomentum::createPositionErrorFunction<T>(
-        1,
-        0,
-        positionTensors.parents,
-        positionTensors.offsets,
-        positionTensors.weights,
-        positionTensors.targets));
+    tensorErrorFunctions.push_back(
+        pymomentum::createPositionErrorFunction<T>(
+            1,
+            0,
+            positionTensors.parents,
+            positionTensors.offsets,
+            positionTensors.weights,
+            positionTensors.targets));
     tensorErrorFunctions.push_back(pymomentum::createLimitErrorFunction<T>(1, 0));
-    tensorErrorFunctions.push_back(pymomentum::createOrientationErrorFunction<T>(
-        1, 0, at::Tensor(), at::Tensor(), at::Tensor(), at::Tensor()));
+    tensorErrorFunctions.push_back(
+        pymomentum::createOrientationErrorFunction<T>(
+            1, 0, at::Tensor(), at::Tensor(), at::Tensor(), at::Tensor()));
 
     auto tensorErrorFunctionWeights =
         toTensor(extractErrorFunctionWeights<T>(*ikProblems[iBatch].solverFunction));
