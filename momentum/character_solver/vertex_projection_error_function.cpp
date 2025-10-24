@@ -12,6 +12,7 @@
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
@@ -36,9 +37,6 @@ VertexProjectionErrorFunctionT<T>::VertexProjectionErrorFunctionT(
       maxThreads_(maxThreads) {
   MT_CHECK(static_cast<bool>(character_in.mesh));
   MT_CHECK(static_cast<bool>(character_in.skinWeights));
-  this->neutralMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->restMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->posedMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
 }
 
 template <typename T>
@@ -64,10 +62,11 @@ template <typename T>
 double VertexProjectionErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */) {
+    const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
   // loop over all constraints and calculate the error
   double error = 0.0;
@@ -76,7 +75,7 @@ double VertexProjectionErrorFunctionT<T>::getError(
     const VertexProjectionConstraintT<T>& constr = constraints_[i];
 
     const Eigen::Vector3<T> p_projected =
-        constr.projection * this->posedMesh_->vertices[constr.vertexIndex].homogeneous();
+        constr.projection * meshState.posedMesh_->vertices[constr.vertexIndex].homogeneous();
 
     // Behind camera:
     if (p_projected.z() < _nearClip) {
@@ -115,9 +114,10 @@ template <typename T>
 double VertexProjectionErrorFunctionT<T>::calculateGradient(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexProjectionConstraintT<T>& constr,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const Eigen::Vector3<T>& p_world_cm = this->posedMesh_->vertices[constr.vertexIndex];
+  const Eigen::Vector3<T>& p_world_cm = meshState.posedMesh_->vertices[constr.vertexIndex];
   const Eigen::Vector3<T> p_projected_cm = constr.projection * p_world_cm.homogeneous();
 
   // Behind camera:
@@ -148,7 +148,7 @@ double VertexProjectionErrorFunctionT<T>::calculateGradient(
   };
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *this->restMesh_, state, constr.vertexIndex);
+      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
@@ -244,10 +244,11 @@ template <typename T>
 double VertexProjectionErrorFunctionT<T>::calculateJacobian(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
     const VertexProjectionConstraintT<T>& constr,
     Ref<Eigen::MatrixX<T>> jac,
     Ref<Eigen::VectorX<T>> res) const {
-  const Eigen::Vector3<T>& p_world_cm = this->posedMesh_->vertices[constr.vertexIndex];
+  const Eigen::Vector3<T>& p_world_cm = meshState.posedMesh_->vertices[constr.vertexIndex];
   const Eigen::Vector3<T> p_projected_cm = constr.projection * p_world_cm.homogeneous();
 
   // Behind camera:
@@ -277,7 +278,7 @@ double VertexProjectionErrorFunctionT<T>::calculateJacobian(
   };
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *this->restMesh_, state, constr.vertexIndex);
+      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
 
   // IN handle derivatives wrt jointParameters
   while (!skinningIter.finished()) {
@@ -373,9 +374,10 @@ template <typename T>
 double VertexProjectionErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
-  updateMeshes(modelParameters, state);
+  MT_CHECK(
+      meshState.posedMesh_, "MeshState must have posed mesh for VertexProjectionErrorFunction");
 
   double error = 0;
   std::vector<std::tuple<double, VectorX<T>>> errorGradThread;
@@ -393,7 +395,8 @@ double VertexProjectionErrorFunctionT<T>::getGradient(
       [&](std::tuple<double, VectorX<T>>& errorGradLocal, const size_t iCons) {
         double& errorLocal = std::get<0>(errorGradLocal);
         auto& gradLocal = std::get<1>(errorGradLocal);
-        errorLocal += calculateGradient(modelParameters, state, constraints_[iCons], gradLocal);
+        errorLocal +=
+            calculateGradient(modelParameters, state, meshState, constraints_[iCons], gradLocal);
       },
       dispensoOptions);
 
@@ -418,7 +421,7 @@ template <typename T>
 double VertexProjectionErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
@@ -427,7 +430,8 @@ double VertexProjectionErrorFunctionT<T>::getJacobian(
   MT_CHECK(jacobian.rows() >= (Eigen::Index)(1 * constraints_.size()));
   MT_CHECK(residual.rows() >= (Eigen::Index)(1 * constraints_.size()));
 
-  updateMeshes(modelParameters, state);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK(meshState.restMesh_);
 
   double error = 0;
   std::vector<double> errorThread;
@@ -444,6 +448,7 @@ double VertexProjectionErrorFunctionT<T>::getJacobian(
         errorLocal += calculateJacobian(
             modelParameters,
             state,
+            meshState,
             constraints_[iCons],
             jacobian.block(2 * iCons, 0, 2, modelParameters.size()),
             residual.middleRows(2 * iCons, 2));
@@ -461,49 +466,6 @@ double VertexProjectionErrorFunctionT<T>::getJacobian(
 template <typename T>
 size_t VertexProjectionErrorFunctionT<T>::getJacobianSize() const {
   return 2 * constraints_.size();
-}
-
-template <typename T>
-void VertexProjectionErrorFunctionT<T>::updateMeshes(
-    const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state) {
-  MT_PROFILE_FUNCTION();
-
-  bool doUpdateNormals = false;
-  if (this->character_.blendShape) {
-    const BlendWeightsT<T> blendWeights =
-        extractBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.blendShape->computeShape(blendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (this->character_.faceExpressionBlendShape) {
-    if (!this->character_.blendShape) {
-      // Set restMesh back to neutral, removing potential previous expressions.
-      // Note that if the character comes with (shape) blendShape, the previous if block already
-      // takes care of this step.
-      Eigen::Map<Eigen::VectorX<T>> outputVec(
-          &this->restMesh_->vertices[0][0], this->restMesh_->vertices.size() * 3);
-      const Eigen::Map<Eigen::VectorX<T>> baseVec(
-          &this->neutralMesh_->vertices[0][0], this->neutralMesh_->vertices.size() * 3);
-      outputVec = baseVec.template cast<T>();
-    }
-    const BlendWeightsT<T> faceExpressionBlendWeights =
-        extractFaceExpressionBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.faceExpressionBlendShape->applyDeltas(
-        faceExpressionBlendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (doUpdateNormals) {
-    this->restMesh_->updateNormals();
-  }
-
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *this->character_.skinWeights,
-      *this->restMesh_,
-      state,
-      *this->posedMesh_);
-  // TODO should we call updateNormals() here too or trust the ones from skinning?
 }
 
 template class VertexProjectionErrorFunctionT<float>;

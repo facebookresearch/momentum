@@ -85,6 +85,7 @@ class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculateJacobian(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexProjectionConstraintT<T>& constr,
       Ref<Eigen::MatrixX<T>> jac,
       Ref<Eigen::VectorX<T>> res) const;
@@ -92,6 +93,7 @@ class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double calculateGradient(
       const ModelParametersT<T>& modelParameters,
       const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
       const VertexProjectionConstraintT<T>& constr,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
@@ -103,20 +105,9 @@ class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Eigen::Vector3<T>& d_restPos,
       Eigen::Vector3<T>& d_worldPos) const;
 
-  void updateMeshes(const ModelParametersT<T>& modelParameters, const SkeletonStateT<T>& state);
-
   const Character& character_;
 
   std::vector<VertexProjectionConstraintT<T>> constraints_;
-
-  std::unique_ptr<MeshT<T>>
-      neutralMesh_; // Rest mesh without facial expression basis,
-                    // used to restore the neutral shape after facial expressions are applied.
-                    // Not used with there is a shape basis.
-  std::unique_ptr<MeshT<T>> restMesh_; // The rest positions of the mesh after shape basis
-                                       // (and potentially facial expression) has been applied
-  std::unique_ptr<MeshT<T>>
-      posedMesh_; // The posed mesh after the skeleton transforms have been applied.
 
   uint32_t maxThreads_;
 
