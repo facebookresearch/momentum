@@ -6,6 +6,14 @@
 *.egg-info/
 *.cpython-*.so
 *.pyc
+__pycache__/
+
+# auto-generated version file
+*/_version.py
 
 # build artifacts
 build/
+dist/
+
+# temporary files
+.tmp/

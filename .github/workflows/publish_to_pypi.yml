@@ -1,0 +1,179 @@
+# (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+
+name: Publish to PyPI
+
+on:
+  # Trigger on version tags (e.g., v0.1.0)
+  # Publishes BOTH pymomentum-cpu AND pymomentum-gpu
+  push:
+    tags:
+      - 'v*'
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      test_pypi:
+        description: 'Publish to TestPyPI instead of PyPI'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build_cpu_wheels:
+    name: Build CPU wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-13, macos-14, windows-latest]
+        python-version: ['3.12', '3.13']
+        include:
+          - python-version: '3.12'
+            pixi-environment: py312
+          - python-version: '3.13'
+            pixi-environment: py313
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: ${{ matrix.pixi-environment }}
+
+      - name: Clean distribution artifacts
+        run: pixi run -e ${{ matrix.pixi-environment }} clean_dist
+
+      - name: Build CPU wheel
+        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel_cpu
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-cpu-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: dist/*.whl
+          retention-days: 7
+
+  build_gpu_wheels:
+    name: Build GPU wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.12', '3.13']
+        include:
+          - python-version: '3.12'
+            pixi-environment: py312-cuda129
+          - python-version: '3.13'
+            pixi-environment: py313-cuda129
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up CUDA (Linux)
+        if: runner.os == 'Linux'
+        uses: Jimver/cuda-toolkit@v0.2.21
+        with:
+          cuda: '12.9.0'
+          method: 'network'
+
+      - name: Set up CUDA (Windows)
+        if: runner.os == 'Windows'
+        uses: Jimver/cuda-toolkit@v0.2.21
+        with:
+          cuda: '12.9.0'
+          method: 'network'
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: ${{ matrix.pixi-environment }}
+
+      - name: Clean distribution artifacts
+        run: pixi run -e ${{ matrix.pixi-environment }} clean_dist
+
+      - name: Build GPU wheel
+        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel_gpu
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-gpu-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: dist/*.whl
+          retention-days: 7
+
+  publish_cpu:
+    name: Publish pymomentum-cpu to PyPI
+    needs: [build_cpu_wheels]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi-cpu
+      url: https://pypi.org/p/pymomentum-cpu
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Download CPU wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-cpu-*
+          merge-multiple: true
+
+      - name: List CPU distributions
+        run: ls -lh dist/
+
+      - name: Publish CPU to TestPyPI
+        if: github.event.inputs.test_pypi == 'true' || github.event_name == 'workflow_dispatch'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+      - name: Publish CPU to PyPI
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish_gpu:
+    name: Publish pymomentum-gpu to PyPI
+    needs: [build_gpu_wheels]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi-gpu
+      url: https://pypi.org/p/pymomentum-gpu
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Download GPU wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-gpu-*
+          merge-multiple: true
+
+      - name: List GPU distributions
+        run: ls -lh dist/
+
+      - name: Publish GPU to TestPyPI
+        if: github.event.inputs.test_pypi == 'true' || github.event_name == 'workflow_dispatch'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+      - name: Publish GPU to PyPI
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: pypa/gh-action-pypi-publish@release/v1
