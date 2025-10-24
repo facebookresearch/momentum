@@ -103,6 +103,7 @@ geometry_public_headers = [
     "geometry/momentum_geometry.h",
     "geometry/momentum_io.h",
     "geometry/gltf_builder_pybind.h",
+    "geometry/parameter_transform_pybind.h",
 ]
 
 geometry_sources = [
@@ -111,6 +112,7 @@ geometry_sources = [
     "geometry/momentum_geometry.cpp",
     "geometry/momentum_io.cpp",
     "geometry/gltf_builder_pybind.cpp",
+    "geometry/parameter_transform_pybind.cpp",
 ]
 
 solver_public_headers = [
