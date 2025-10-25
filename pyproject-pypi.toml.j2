@@ -64,16 +64,13 @@ dependencies = [
     "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
     "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
 {% else %}
-    # CPU package for Linux and macOS
+    # CPU package for Linux and macOS ARM64 (Apple Silicon only - Intel Macs not supported)
     # Linux uses latest PyTorch
     "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
     "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
     # macOS ARM64 (Apple Silicon) - PyTorch 2.8+ available
     "torch>={{ torch_min_py312_macos }},<{{ torch_max_py312_macos }}; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.12'",
     "torch>={{ torch_min_py313_macos }},<{{ torch_max_py313_macos }}; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.13'",
-    # macOS x86_64 (Intel) - Limited to PyTorch 2.2.x (latest available for Intel Mac)
-    "torch>=2.2.0,<2.3; platform_system == 'Darwin' and platform_machine == 'x86_64' and python_version == '3.12'",
-    "torch>=2.6.0,<2.7; platform_system == 'Darwin' and platform_machine == 'x86_64' and python_version == '3.13'",
 {% endif %}
 ]
 
