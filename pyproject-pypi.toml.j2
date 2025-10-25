@@ -1,0 +1,158 @@
+# (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+
+[build-system]
+requires = ["scikit-build-core", "pybind11", "setuptools-scm"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pymomentum-{{ variant }}"
+dynamic = ["version"]
+description = "A library providing foundational algorithms for human kinematic motion and numerical optimization solvers to apply human motion in various applications ({{ description_suffix }})"
+readme = "README.md"
+requires-python = ">={{ python_version_min }},<{{ python_version_max }}"
+authors = [
+    { name = "Meta Reality Labs Research", email = "jeongseok@meta.com" },
+]
+license = { text = "MIT" }
+keywords = [
+    "kinematics",
+    "motion",
+    "optimization",
+    "human-motion",
+    "inverse-kinematics",
+    "forward-kinematics",
+    "body-tracking",
+    "motion-capture",
+    "character-animation",
+    "robotics",
+{% if variant == "gpu" %}
+    "gpu",
+    "cuda",
+{% else %}
+    "cpu",
+{% endif %}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+{% if variant == "gpu" %}
+    "Operating System :: POSIX :: Linux",
+{% else %}
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+{% endif %}
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "numpy>=1.20.0",
+    "scipy>=1.7.0",
+    # PyTorch version constraints - platform and Python version specific
+    # Linux: Support latest PyTorch with CUDA
+    # macOS: Limited to older PyTorch versions (CPU only)
+{% if variant == "gpu" %}
+    # GPU package only for Linux
+    "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
+    "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
+{% else %}
+    # CPU package for Linux and macOS
+    # Linux uses latest PyTorch
+    "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
+    "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
+    # macOS ARM64 (Apple Silicon) - PyTorch 2.8+ available
+    "torch>={{ torch_min_py312_macos }},<{{ torch_max_py312_macos }}; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.12'",
+    "torch>={{ torch_min_py313_macos }},<{{ torch_max_py313_macos }}; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.13'",
+    # macOS x86_64 (Intel) - Limited to PyTorch 2.2.x (latest available for Intel Mac)
+    "torch>=2.2.0,<2.3; platform_system == 'Darwin' and platform_machine == 'x86_64' and python_version == '3.12'",
+    "torch>=2.6.0,<2.7; platform_system == 'Darwin' and platform_machine == 'x86_64' and python_version == '3.13'",
+{% endif %}
+]
+
+[project.urls]
+Homepage = "https://github.com/facebookresearch/momentum"
+Documentation = "https://facebookresearch.github.io/momentum/"
+Repository = "https://github.com/facebookresearch/momentum"
+"Bug Tracker" = "https://github.com/facebookresearch/momentum/issues"
+Changelog = "https://github.com/facebookresearch/momentum/releases"
+
+[tool.scikit-build]
+build-dir = "build/{wheel_tag}"
+cmake.args = [
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD={{ 'ON' if variant == 'gpu' else 'OFF' }}",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+]
+minimum-version = "0.10"
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+sdist.exclude = [
+    ".github/",
+    ".pixi/",
+    "build/",
+    "dist/",
+    "*.lock",
+]
+wheel.exclude = ["geometry_test_helper.*"]
+
+{% if variant == "cpu" %}
+[[tool.scikit-build.overrides]]
+if.platform-system = "^darwin"
+cmake.args = [
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+]
+{% endif %}
+
+{% if variant == "gpu" %}
+[[tool.scikit-build.overrides]]
+if.platform-system = "^linux"
+cmake.args = [
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=ON",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+]
+{% endif %}
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "^win32"
+cmake.args = [
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-G Visual Studio 17 2022",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD={{ 'ON' if variant == 'gpu' else 'OFF' }}",
+{% if variant == "cpu" %}
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+{% endif %}
+]
+
+[tool.setuptools_scm]
+# Automatically determine version from git tags
+# Tags should follow the pattern: v1.2.3
+# Will generate versions like: 1.2.3 (on tag), 1.2.4.post12 (between tags)
+version_scheme = "post-release"
+local_scheme = "no-local-version"
+version_file = "pymomentum/_version.py"

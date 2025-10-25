@@ -13,6 +13,10 @@ on:
       - "**/website/**"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   momentum:
     # Enabled for minimal macOS platform coverage

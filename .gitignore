@@ -6,6 +6,17 @@
 *.egg-info/
 *.cpython-*.so
 *.pyc
+__pycache__/
+
+# auto-generated version file
+*/_version.py
 
 # build artifacts
 build/
+dist/
+
+# temporary files
+.tmp/
+
+# Generated PyPI config files (generated from template during build)
+pyproject-pypi*.toml

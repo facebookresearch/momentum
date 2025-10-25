@@ -505,6 +505,21 @@ function(mt_python_binding)
     OUTPUT_NAME "${_ARG_MODULE_NAME}"
   )
 
+  # Set RPATH for PyPI wheels to find torch libraries
+  # Directory structure: site-packages/pymomentum/*.so needs site-packages/torch/lib/
+  # Skip for conda builds - conda packages have proper library paths already
+  if(NOT DEFINED ENV{CONDA_BUILD})
+    set_target_properties(${_ARG_NAME} PROPERTIES
+      # $ORIGIN = site-packages/pymomentum/
+      # $ORIGIN/../torch/lib = site-packages/torch/lib/
+      INSTALL_RPATH "$ORIGIN/../torch/lib"
+      # Build with install RPATH so it's set immediately
+      BUILD_WITH_INSTALL_RPATH TRUE
+      # Don't add link-time library paths to RPATH
+      INSTALL_RPATH_USE_LINK_PATH FALSE
+    )
+  endif()
+
   if(NOT ${_ARG_NO_INSTALL})
     set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_TARGETS_TO_INSTALL ${_ARG_NAME})
   endif()

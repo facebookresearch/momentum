@@ -14,10 +14,14 @@ if(NOT DEFINED ENV{CONDA_PREFIX})
   )
 endif()
 
-if(WIN32)
-  set(libtorch_base_path ${Python3_SITELIB}/torch)
-else()
+# For PyPI builds (pip wheel), look in site-packages
+# For conda builds, look in CONDA_PREFIX
+if(DEFINED ENV{CONDA_BUILD})
+  # Conda build - use CONDA_PREFIX
   set(libtorch_base_path $ENV{CONDA_PREFIX})
+else()
+  # PyPI build (pip wheel) - use site-packages/torch
+  set(libtorch_base_path ${Python3_SITELIB}/torch)
 endif()
 
 if(NOT EXISTS "${libtorch_base_path}")
@@ -27,8 +31,15 @@ if(NOT EXISTS "${libtorch_base_path}")
   )
 endif()
 
-find_package(ATen CONFIG REQUIRED HINTS ${libtorch_base_path})
-find_package(Torch CONFIG REQUIRED HINTS ${libtorch_base_path})
+# Try both locations for CMake files (conda and PyPI have different structures)
+find_package(ATen CONFIG REQUIRED HINTS
+  ${libtorch_base_path}/share/cmake/ATen
+  ${libtorch_base_path}
+)
+find_package(Torch CONFIG REQUIRED HINTS
+  ${libtorch_base_path}/share/cmake/Torch
+  ${libtorch_base_path}
+)
 find_library(torch_python
   NAMES torch_python
   HINTS ${libtorch_base_path}/lib/
