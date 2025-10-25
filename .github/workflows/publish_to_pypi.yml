@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-latest, macos-14]
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
@@ -52,8 +52,6 @@ jobs:
             pixi-environment: py313
           - os: ubuntu-latest
             os-short: ubuntu
-          - os: macos-13
-            os-short: mac-x64
           - os: macos-14
             os-short: mac-arm64
 
