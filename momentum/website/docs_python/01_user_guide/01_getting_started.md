@@ -8,24 +8,95 @@ This page guides you through the process of installing and using PyMomentum, the
 
 ## Installing PyMomentum
 
-PyMomentum binary builds are available for Windows, macOS, and Linux via [Pixi](https://prefix.dev/) or the Conda package manager.
+PyMomentum is available through multiple package managers. Pre-built binaries are provided for Windows, macOS, and Linux.
 
-### [Pixi](https://prefix.dev/channels/conda-forge/packages/momentum)
+:::info Version Support Policy
+
+**We support only current stable versions** of Python, PyTorch, and CUDA as available on conda-forge and PyPI. Maintaining compatibility across all historical version combinations is not feasible, as neither conda-forge nor PyPI provide long-term support for older dependency combinations. If you require an older environment, you may build from source at your own discretion, but compatibility and support are not guaranteed.
+
+:::
+
+### Quick Installation
+
+Choose your preferred installation method based on your workflow:
+
+#### PyPI (pip, uv)
+
+**Best for:** Standard Python projects, virtual environments, pip-based workflows.
 
 ```bash
-# Auto-detects GPU/CPU
-pixi add pymomentum
+# Install CPU version
+pip install pymomentum-cpu
 
-# With specific backend
-pixi add pymomentum-gpu  # or pymomentum-cpu
+# Install GPU version (requires CUDA)
+pip install pymomentum-gpu
+
+# Alternative: Using uv (faster pip replacement)
+uv pip install pymomentum-cpu
+uv pip install pymomentum-gpu
 ```
 
-### [Conda](https://anaconda.org/conda-forge/momentum)
+**Browse packages:** [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
+
+:::caution Experimental PyPI Support
+
+PyPI support is currently **experimental**. We encourage you to report any issues you encounter, but please note that our support may be limited. **Use at your own risk.**
+
+- **Found a bug?** We welcome you to investigate and submit a fix! See our [Contributing Guide](https://github.com/facebookresearch/momentum/blob/main/CONTRIBUTING.md).
+
+<FbInternalOnly>
+- **Want to publish packages directly?** If you need to publish PyMomentum packages to PyPI yourself, please reach out to us—we can share publishing tokens with trusted contributors.
+</FbInternalOnly>
+
+For the most stable and well-tested installation experience, we recommend using **Conda** or **Pixi**.
+
+:::
+
+#### Pixi
+
+**Best for:** Development, reproducible environments, managing C++ dependencies alongside Python.
 
 ```bash
-# Replace 'pixi add' with 'conda install -c conda-forge'
+# Auto-detects GPU/CPU based on system
+pixi add pymomentum
+
+# Explicit backend selection
+pixi add pymomentum-cpu  # CPU-only
+pixi add pymomentum-gpu  # GPU (CUDA) support
+```
+
+**Browse packages:** [prefix.dev/channels/conda-forge/packages/momentum](https://prefix.dev/channels/conda-forge/packages/momentum)
+
+#### Conda
+
+**Best for:** Existing conda workflows, scientific Python environments.
+
+```bash
+# Auto-detects GPU/CPU based on system
 conda install -c conda-forge pymomentum
-conda install -c conda-forge pymomentum-gpu  # or pymomentum-cpu
+
+# Explicit backend selection
+conda install -c conda-forge pymomentum-cpu  # CPU-only
+conda install -c conda-forge pymomentum-gpu  # GPU (CUDA) support
+```
+
+**Browse packages:** [anaconda.org/conda-forge/momentum](https://anaconda.org/conda-forge/momentum)
+
+### Checking Available Versions
+
+To see which PyMomentum versions are available for your package manager:
+
+**PyPI:**
+```bash
+pip index versions pymomentum-cpu
+pip index versions pymomentum-gpu
+```
+
+**Conda/Pixi:**
+```bash
+pixi search -c conda-forge pymomentum
+# or
+conda search -c conda-forge pymomentum
 ```
 
 ## Building PyMomentum from Source

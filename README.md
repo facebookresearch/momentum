@@ -23,146 +23,56 @@ numerical optimization solvers to apply human motion in various applications.
   <img src="momentum/website/static/img/momentum_4.png" width="30%" alt="Monocular RGB Body Tracking Solver" />
 </p>
 
-## Getting Started
+## Quick Start
 
-This page guides you through the process of building Momentum and running the examples.
+### Installation
 
-### Installing Momentum and PyMomentum
+Pre-built binaries are available for Windows, macOS, and Linux:
 
-Momentum binary builds are available for Windows, macOS, and Linux via [Pixi](https://prefix.dev/) or the Conda package manager.
+```bash
+# Python (PyPI)
+pip install pymomentum-cpu      # CPU version
+pip install pymomentum-gpu      # GPU version with CUDA
 
-For Windows, please install [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or greater.
-
-#### [Pixi](https://prefix.dev/channels/conda-forge/packages/momentum)
-
-```
-# C++ only
-pixi add momentum-cpp
-
-# Python only (auto-detects GPU/CPU)
-pixi add pymomentum
-
-# Python with specific backend
-pixi add pymomentum-gpu  # or pymomentum-cpu
-
-# Both C++ and Python
-pixi add momentum
-```
-
-#### [Conda](https://anaconda.org/conda-forge/momentum)
-
-```
-# Replace 'pixi add' with 'conda install -c conda-forge'
-conda install -c conda-forge momentum-cpp
+# Python (Conda/Pixi)
+pixi add pymomentum             # Auto-detects GPU/CPU
 conda install -c conda-forge pymomentum
-conda install -c conda-forge pymomentum-gpu  # or pymomentum-cpu
-conda install -c conda-forge momentum
+
+# C++ (Conda/Pixi only)
+pixi add momentum-cpp
+conda install -c conda-forge momentum-cpp
 ```
 
-### Building Momentum from Source
+**📦 Browse packages:** [PyPI](https://pypi.org/search/?q=pymomentum) • [conda-forge](https://anaconda.org/conda-forge/momentum) • [prefix.dev](https://prefix.dev/channels/conda-forge/packages/momentum)
 
-#### Prerequisite
+### Quick Example
 
-Complete the following steps only once:
-
-1. Install Pixi by following the instructions on https://prefix.dev/
-
-1. Clone the repository and navigate to the root directory:
-
-   ```
-   git clone https://github.com/facebookresearch/momentum
-   cd momentum
-   ```
-
-   Ensure that all subsequent commands are executed in the project's root directory unless specified otherwise.
-
-#### Build and Test
-
-- Build the project with the following command (note that the first run may take a few minutes as it installs all dependencies):
-
-  ```
-  pixi run build
-  ```
-
-- Run the tests with:
-
-  ```
-  pixi run test
-  ```
-
-To view all available command lines, run `pixi task list`.
-
-#### Hello World Example
-
-To run the `hello_world` example:
-
-```
-pixi run hello_world
+```bash
+# Install and run
+pip install pymomentum-cpu
+python -c "import pymomentum as pm; print(pm.__version__)"
 ```
 
-Alternatively, you can directly run the executable:
+### Building from Source
 
-```
-# Linux and macOS
-./build/hello_world
-
-# Windows
-./build/Release/hello_world.exe
-```
-
-#### Running Other Examples
-
-To run other examples:
-
-```
-pixi run glb_viewer --help
+```bash
+git clone https://github.com/facebookresearch/momentum
+cd momentum
+pixi run build      # Builds C++ library and Python bindings
+pixi run test       # Runs tests
+pixi run hello_world  # Runs example
 ```
 
-For more examples, please refer to the [Examples](https://facebookresearch.github.io/momentum/docs/examples/viewers) page.
-
-#### Clean Up
-
-If you need to start over for any reason:
-
-```
-pixi run clean
-```
-
-Momentum uses the `build/` directory for CMake builds, and `.pixi/` for the Pixi virtual environment. You can clean up everything by either manually removing these directories or by running the command above.
-
-#### FBX Support
-
-Momentum uses OpenFBX to load Autodesk's FBX file format, which is enabled by default. To save files in FBX format, you must install the FBX SDK 2020.3.
-
-##### Linux
-
-The FBX SDK will be automatically installed when you run `pixi run config`, so no additional steps are required.
-
-##### macOS and Windows
-
-You can download it from Autodesk's [website](https://aps.autodesk.com/developer/overview/fbx-sdk) or use direct links ([macOS](https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_clang_mac.pkg.tgz), [Windows](https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_vs2019_win.exe)). After installing the SDK, build Momentum from source with `MOMENTUM_BUILD_WITH_FBXSDK=ON` option as:
-
-```
-# macOS
-MOMENTUM_BUILD_WITH_FBXSDK=ON pixi run <target>
-
-# Windows (Powershell)
-$env:MOMENTUM_BUILD_WITH_FBXSDK = "ON"; pixi run <target>
-
-# Windows (cmd)
-set MOMENTUM_BUILD_WITH_FBXSDK=ON && pixi run <target>
-```
-
-For example, file conversion can be run as follows:
-
-```
-# Windows (Powershell)
-$env:MOMENTUM_BUILD_WITH_FBXSDK = "ON"; pixi run convert_model -d <input.glb> -o <out.fbx>
-```
+**For detailed instructions**, see the comprehensive guides on our website:
+- 📘 [**Python Getting Started**](https://facebookresearch.github.io/momentum/pymomentum/user_guide/getting_started) - Installation, building from source, troubleshooting
+- 📗 [**C++ Getting Started**](https://facebookresearch.github.io/momentum/docs/user_guide/getting_started) - Full build instructions, FBX support, examples
 
 ## 📖 Documentation
 
-The full documentation for Momentum can be found on our [website](https://facebookresearch.github.io/momentum/) and the C++ API documentation is available [here](https://facebookresearch.github.io/momentum/doxygen/index.html).
+Visit our [**documentation website**](https://facebookresearch.github.io/momentum/) for comprehensive guides, examples, and API references:
+
+- 🐍 [**Python API Reference**](https://facebookresearch.github.io/momentum/python_api_doc/index.html) - Complete Python API documentation
+- ⚙️ [**C++ API Reference**](https://facebookresearch.github.io/momentum/doxygen/index.html) - Complete C++ API documentation
 
 ## Contributing
 
