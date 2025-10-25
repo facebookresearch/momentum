@@ -195,7 +195,7 @@ publish_pypi_test = { cmd = "twine upload --repository testpypi --skip-existing 
 # CPU environments (py312, py313) use these tasks
 build_pypi_wheel = { cmd = """
     python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
-    pip wheel . --no-build-isolation --wheel-dir=dist && \
+    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = [
     "generate_pyproject",
@@ -463,7 +463,7 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 # GPU-specific PyPI tasks - build GPU wheels
 build_pypi_wheel = { cmd = """
     python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
-    pip wheel . --no-build-isolation --wheel-dir=dist && \
+    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = [
     "generate_pyproject",
@@ -491,7 +491,7 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 # GPU-specific PyPI tasks - build GPU wheels
 build_pypi_wheel = { cmd = """
     python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
-    pip wheel . --no-build-isolation --wheel-dir=dist && \
+    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = [
     "generate_pyproject",
