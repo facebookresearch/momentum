@@ -113,6 +113,7 @@ mt_library(
     ${ATEN_LIBRARIES}
     pybind11::pybind11
   PRIVATE_LINK_LIBRARIES
+    axel
     python_utility
     tensor_utility
     Ceres::ceres
