@@ -7089,6 +7089,7 @@ packages:
   depends:
   - binutils_impl_linux-64 >=2.44,<2.45.0a0
   license: GPL-3.0-only
+  license_family: GPL
   size: 34979
   timestamp: 1761335222402
 - conda: https://conda.anaconda.org/conda-forge/linux-64/binutils_impl_linux-64-2.44-h9d8b0ac_4.conda
@@ -7099,6 +7100,7 @@ packages:
   - sysroot_linux-64
   - zstd >=1.5.7,<1.6.0a0
   license: GPL-3.0-only
+  license_family: GPL
   size: 3715763
   timestamp: 1761335193784
 - conda: https://conda.anaconda.org/conda-forge/linux-64/binutils_linux-64-2.44-h4852527_4.conda
@@ -7107,6 +7109,7 @@ packages:
   depends:
   - binutils_impl_linux-64 2.44 h9d8b0ac_4
   license: GPL-3.0-only
+  license_family: GPL
   size: 36084
   timestamp: 1761335225100
 - conda: https://conda.anaconda.org/conda-forge/linux-64/blas-2.137-mkl.conda
@@ -11070,6 +11073,7 @@ packages:
   constrains:
   - binutils_impl_linux-64 2.44
   license: GPL-3.0-only
+  license_family: GPL
   size: 742501
   timestamp: 1761335175964
 - conda: https://conda.anaconda.org/conda-forge/linux-64/lerc-4.0.0-h0aef613_1.conda

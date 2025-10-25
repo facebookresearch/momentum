@@ -54,7 +54,7 @@ MultiposeSolverFunctionT<T>::MultiposeSolverFunctionT(
 }
 
 template <typename T>
-MultiposeSolverFunctionT<T>::~MultiposeSolverFunctionT<T>() = default;
+MultiposeSolverFunctionT<T>::~MultiposeSolverFunctionT() = default;
 
 template <typename T>
 void MultiposeSolverFunctionT<T>::setEnabledParameters(const ParameterSet& parameterSet) {
