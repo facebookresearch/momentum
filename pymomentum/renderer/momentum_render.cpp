@@ -20,9 +20,12 @@
 #include <momentum/rasterizer/camera.h>
 
 #include <dispenso/parallel_for.h> // @manual
+#include <pybind11/numpy.h>
 #include <Eigen/Core>
 
 #include <string.h>
+
+namespace py = pybind11;
 
 namespace pymomentum {
 
@@ -244,6 +247,104 @@ std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
   } // end for iBatch
 
   return result;
+}
+
+momentum::rasterizer::Camera createCameraForBody(
+    const momentum::Character& character,
+    const py::array_t<float>& skeletonStates,
+    int imageHeight,
+    int imageWidth,
+    float focalLength_mm,
+    bool horizontal,
+    float cameraAngle) {
+  const size_t nJoints = character.skeleton.joints.size();
+
+  if (skeletonStates.ndim() < 2 || skeletonStates.ndim() > 3) {
+    throw std::runtime_error(fmt::format(
+        "create_camera_for_body: skeleton_states must be 2D (nJoints x 8), 3D (nFrames x nJoints x 8). Got {} dimensions.",
+        skeletonStates.ndim()));
+  }
+
+  // Verify the last dimension is 8 (tx, ty, tz, rx, ry, rz, rw, s)
+  const size_t lastDim = skeletonStates.shape(skeletonStates.ndim() - 1);
+  if (lastDim != 8) {
+    throw std::runtime_error(fmt::format(
+        "create_camera_for_body: Expected last dimension to be 8 (tx, ty, tz, rx, ry, rz, rw, s), but got {}.",
+        lastDim));
+  }
+
+  // Verify the second-to-last dimension matches the number of joints
+  const size_t jointsDim = skeletonStates.shape(skeletonStates.ndim() - 2);
+  if (jointsDim != nJoints) {
+    throw std::runtime_error(fmt::format(
+        "create_camera_for_body: Expected {} joints (second-to-last dimension), but got {}.",
+        nJoints,
+        jointsDim));
+  }
+
+  // Handle different dimensionalities with appropriate accessors
+  if (skeletonStates.ndim() == 2) {
+    // Unbatched: (nJoints, 8)
+    auto accessor = skeletonStates.unchecked<2>();
+
+    std::vector<momentum::SkeletonState> skelStates;
+    skelStates.reserve(1);
+
+    momentum::SkeletonState skelState;
+    skelState.jointState.resize(nJoints);
+
+    for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+      Eigen::Vector3f translation(accessor(iJoint, 0), accessor(iJoint, 1), accessor(iJoint, 2));
+
+      Eigen::Quaternionf rotation(
+          accessor(iJoint, 6), // rw
+          accessor(iJoint, 3), // rx
+          accessor(iJoint, 4), // ry
+          accessor(iJoint, 5)); // rz
+
+      float scale = accessor(iJoint, 7);
+
+      skelState.jointState[iJoint].transform.translation = translation;
+      skelState.jointState[iJoint].transform.rotation = rotation;
+      skelState.jointState[iJoint].transform.scale = scale;
+    }
+
+    skelStates.push_back(skelState);
+    return makeOutsideInCameraForBody(
+        character, skelStates, imageHeight, imageWidth, focalLength_mm, horizontal, cameraAngle);
+
+  } else { // skeletonStates.ndim() == 3
+    // Batched: (nBatch, nJoints, 8)
+    auto accessor = skeletonStates.unchecked<3>();
+
+    std::vector<momentum::SkeletonState> skelStates;
+    skelStates.reserve(accessor.shape(0));
+    for (size_t iPose = 0; iPose < accessor.shape(0); ++iPose) {
+      momentum::SkeletonState skelState;
+      skelState.jointState.resize(nJoints);
+
+      for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+        Eigen::Vector3f translation(
+            accessor(iPose, iJoint, 0), accessor(iPose, iJoint, 1), accessor(iPose, iJoint, 2));
+
+        Eigen::Quaternionf rotation(
+            accessor(iPose, iJoint, 6), // rw
+            accessor(iPose, iJoint, 3), // rx
+            accessor(iPose, iJoint, 4), // ry
+            accessor(iPose, iJoint, 5)); // rz
+
+        float scale = accessor(iPose, iJoint, 7);
+
+        skelState.jointState[iJoint].transform.translation = translation;
+        skelState.jointState[iJoint].transform.rotation = rotation;
+        skelState.jointState[iJoint].transform.scale = scale;
+      }
+
+      skelStates.push_back(skelState);
+    }
+    return makeOutsideInCameraForBody(
+        character, skelStates, imageHeight, imageWidth, focalLength_mm, horizontal, cameraAngle);
+  }
 }
 
 template <typename T2, typename T1>
