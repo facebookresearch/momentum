@@ -45,11 +45,27 @@ void registerParameterTransformBindings(
           py::init([](const std::vector<std::string>& names,
                       const mm::Skeleton& skeleton,
                       const Eigen::SparseMatrix<float, Eigen::RowMajor>& transform) {
+            const auto nJoints = skeleton.joints.size();
+            const auto nJointParams = nJoints * mm::kParametersPerJoint;
+            const auto nModelParams = names.size();
+
+            MT_THROW_IF_T(
+                transform.rows() != nJointParams,
+                py::value_error,
+                "Expected parameter transform to have {} rows (7*{} joints), but got {}",
+                nJointParams,
+                nJoints,
+                transform.rows());
+            MT_THROW_IF_T(
+                transform.cols() != nModelParams,
+                py::value_error,
+                "Expected parameter transform to have {} columns (matching parameter names), but got {}",
+                nModelParams,
+                transform.cols());
+
             mm::ParameterTransform parameterTransform;
             parameterTransform.name = names;
-            parameterTransform.transform.resize(
-                static_cast<int>(skeleton.joints.size()) * mm::kParametersPerJoint,
-                static_cast<int>(names.size()));
+            parameterTransform.transform.resize(nJointParams, nModelParams);
 
             for (int i = 0; i < transform.outerSize(); ++i) {
               for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(transform, i); it;
@@ -59,9 +75,70 @@ void registerParameterTransformBindings(
               }
             }
 
-            parameterTransform.offsets.setZero(skeleton.joints.size() * mm::kParametersPerJoint);
+            parameterTransform.offsets.setZero(nJointParams);
             return parameterTransform;
           }),
+          R"(Create a parameter transform from a sparse matrix.
+
+:param names: List of model parameter names.
+:param skeleton: The skeleton that this parameter transform operates on.
+:param transform: A sparse matrix of size (7*n_joints x n_params) that maps from model parameters to joint parameters.)",
+          py::arg("names"),
+          py::arg("skeleton"),
+          py::arg("transform"))
+      .def(
+          py::init([](const std::vector<std::string>& names,
+                      const mm::Skeleton& skeleton,
+                      const py::array_t<float>& transform) {
+            const auto nJoints = skeleton.joints.size();
+            const auto nJointParams = nJoints * mm::kParametersPerJoint;
+            const auto nModelParams = names.size();
+
+            MT_THROW_IF_T(
+                transform.ndim() != 2,
+                py::value_error,
+                "Expected parameter transform to be a 2D array, but got {}D array",
+                transform.ndim());
+            MT_THROW_IF_T(
+                transform.shape(0) != nJointParams,
+                py::value_error,
+                "Expected parameter transform to have {} rows (7*{} joints), but got {}",
+                nJointParams,
+                nJoints,
+                transform.shape(0));
+            MT_THROW_IF_T(
+                transform.shape(1) != nModelParams,
+                py::value_error,
+                "Expected parameter transform to have {} columns (matching {} parameter names), but got {}",
+                nModelParams,
+                nModelParams,
+                transform.shape(1));
+
+            mm::ParameterTransform parameterTransform;
+            parameterTransform.name = names;
+
+            std::vector<Eigen::Triplet<float>> triplets;
+            auto accessor = transform.unchecked<2>();
+            for (int i = 0; i < accessor.shape(0); ++i) {
+              for (int j = 0; j < accessor.shape(1); ++j) {
+                if (accessor(i, j) != 0) {
+                  triplets.emplace_back(i, j, accessor(i, j));
+                }
+              }
+            }
+
+            parameterTransform.transform.resize(nJointParams, nModelParams);
+            parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
+            parameterTransform.offsets.setZero(nJointParams);
+            return parameterTransform;
+          }),
+          R"(Create a parameter transform from a dense numpy array.
+
+The array will be converted to a sparse matrix internally for efficient storage and computation.
+
+:param names: List of model parameter names.
+:param skeleton: The skeleton that this parameter transform operates on.
+:param transform: A dense numpy array of size (7*n_joints x n_params) that maps from model parameters to joint parameters.)",
           py::arg("names"),
           py::arg("skeleton"),
           py::arg("transform"))
