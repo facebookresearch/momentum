@@ -723,6 +723,27 @@ PYBIND11_MODULE(renderer, m) {
       py::arg("camera_angle") = 0.0f);
 
   m.def(
+      "create_camera_for_body",
+      &createCameraForBody,
+      R"(Create a camera that roughly faces the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.
+
+:param character: Character to use.
+:param skeleton_states: numpy.ndarray of skeleton states with shape (nJoints, 8), (nBatch, nJoints, 8), or (nBatch, nFrames, nJoints, 8). Each joint has 8 values: (tx, ty, tz, rx, ry, rz, rw, s) representing translation, quaternion rotation (x, y, z, w), and uniform scale.
+:param image_height: Height of the target image.
+:param image_width: Width of the target image.
+:param focal_length_mm: 35mm-equivalent focal length; e.g. focal_length_mm=50 corresponds to a "normal" lens.  Specified in millimeters because this is what photographers use.
+:param horizontal: whether the cameras are placed horizontally, assuming the Y axis is the world up direction.
+:param camera_angle: what direction the camera looks at the body. default: 0, looking at front of body. pi/2: at left side of body.
+:return: a :class:`Camera`.)",
+      py::arg("character"),
+      py::arg("skeleton_states"),
+      py::arg("image_height"),
+      py::arg("image_width"),
+      py::arg("focal_length_mm") = 50.0f,
+      py::arg("horizontal") = false,
+      py::arg("camera_angle") = 0.0f);
+
+  m.def(
       "build_cameras_for_hand",
       &buildCamerasForHand,
       R"(Build a vector of cameras that roughly face inward from the front of the hand.

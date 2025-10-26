@@ -8,7 +8,7 @@
 import unittest
 
 import numpy as np
-
+import pymomentum.geometry as pym_geometry
 import pymomentum.renderer as pym_renderer
 import torch
 from numpy.typing import NDArray
@@ -260,3 +260,121 @@ class TestRendering(unittest.TestCase):
             p_proj = p[0:3] + t * light_vec
             self.assertTrue(np.allclose(p_proj, p_proj_normalized))
             self.assertAlmostEqual(p_proj[1], -1)
+
+    def _create_test_character_for_camera(self) -> pym_geometry.Character:
+        joints = [
+            pym_geometry.Joint(
+                name="b_root",
+                parent=-1,
+                pre_rotation=np.asarray([0, 0, 0, 1], dtype=np.float32),
+                translation_offset=np.asarray([0, 0, 1], dtype=np.float32),
+            ),
+            pym_geometry.Joint(
+                name="b_spine1",
+                parent=0,
+                pre_rotation=np.asarray([0, 0, 0, 1], dtype=np.float32),
+                translation_offset=np.asarray([0, 0, 1], dtype=np.float32),
+            ),
+            pym_geometry.Joint(
+                name="b_spine3",
+                parent=0,
+                pre_rotation=np.asarray([0, 0, 0, 1], dtype=np.float32),
+                translation_offset=np.asarray([0, 0, 1], dtype=np.float32),
+            ),
+            pym_geometry.Joint(
+                name="b_left_arm",
+                parent=1,
+                pre_rotation=np.asarray([0, 0, 0, 1], dtype=np.float32),
+                translation_offset=np.asarray([0, 0, 1], dtype=np.float32),
+            ),
+        ]
+
+        skeleton = pym_geometry.Skeleton(joints)
+
+        # Create an empty parameter transform (no model parameters)
+        # Transform matrix shape: (7 * n_joints) x n_params = (7 * 3) x 0 = 21 x 0
+        n_joints = len(joints)
+        empty_transform = np.zeros((7 * n_joints, 0), dtype=np.float32)
+
+        return pym_geometry.Character(
+            name="test_camera",
+            skeleton=skeleton,
+            parameter_transform=pym_geometry.ParameterTransform(
+                names=[], skeleton=skeleton, transform=empty_transform
+            ),
+        )
+
+    def test_create_camera_for_body_single_frame(self) -> None:
+        """Test that create_camera_for_body matches build_cameras_for_body for unbatched input."""
+        character = self._create_test_character_for_camera()
+
+        # Create random joint parameters
+        torch.manual_seed(42)
+        joint_parameters = torch.randn(character.skeleton.size * 7)
+        skeleton_states = pym_geometry.joint_parameters_to_skeleton_state(
+            character, joint_parameters
+        )
+
+        # Create cameras using old function
+        cameras_old = pym_renderer.build_cameras_for_body(
+            character, joint_parameters, 512, 512
+        )
+
+        # Create cameras using new function
+        camera_new = pym_renderer.create_camera_for_body(
+            character, skeleton_states.numpy(), 512, 512
+        )
+
+        # Verify we got the same number of cameras
+        self.assertEqual(len(cameras_old), 1)
+
+        # Verify camera properties match
+        self._compare_cameras(cameras_old[0], camera_new)
+
+    def test_create_camera_for_body_multiple_frames(self) -> None:
+        """Test that create_camera_for_body matches build_cameras_for_body for batched input."""
+        character = self._create_test_character_for_camera()
+
+        # Create random joint parameters with batch size 3
+        torch.manual_seed(42)
+        n_frames = 3
+        joint_parameters = torch.randn(n_frames, character.skeleton.size * 7)
+        skeleton_states = pym_geometry.joint_parameters_to_skeleton_state(
+            character, joint_parameters
+        )
+
+        # Create cameras using old function
+        cameras_old = pym_renderer.build_cameras_for_body(
+            character, joint_parameters.unsqueeze(0), 512, 512
+        )
+
+        # Create cameras using new function
+        camera_new = pym_renderer.create_camera_for_body(
+            character, skeleton_states.numpy(), 512, 512
+        )
+
+        # Verify we got the same number of cameras
+        self.assertEqual(len(cameras_old), 1)
+
+        # Verify camera properties match for each batch
+        self._compare_cameras(cameras_old[0], camera_new)
+
+    def _compare_cameras(
+        self, camera_old: pym_renderer.Camera, camera_new: pym_renderer.Camera
+    ) -> None:
+        """Compare two cameras to ensure they have matching properties."""
+        # Compare basic properties
+        self.assertEqual(camera_old.image_width, camera_new.image_width)
+        self.assertEqual(camera_old.image_height, camera_new.image_height)
+        self.assertAlmostEqual(camera_old.fx, camera_new.fx, places=4)
+        self.assertAlmostEqual(camera_old.fy, camera_new.fy, places=4)
+
+        # Compare camera transforms
+        T_old = camera_old.T_eye_from_world
+        T_new = camera_new.T_eye_from_world
+        np.testing.assert_allclose(T_old, T_new, rtol=1e-4, atol=1e-4)
+
+        # Compare center of projection
+        cop_old = camera_old.center_of_projection
+        cop_new = camera_new.center_of_projection
+        np.testing.assert_allclose(cop_old, cop_new, rtol=1e-4, atol=1e-4)
