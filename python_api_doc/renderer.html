@@ -154,6 +154,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.build_cameras_for_body"><code class="docutils literal notranslate"><span class="pre">build_cameras_for_body()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.build_cameras_for_hand"><code class="docutils literal notranslate"><span class="pre">build_cameras_for_hand()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.build_cameras_for_hand_surface"><code class="docutils literal notranslate"><span class="pre">build_cameras_for_hand_surface()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_camera_for_body"><code class="docutils literal notranslate"><span class="pre">create_camera_for_body()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_index_buffer"><code class="docutils literal notranslate"><span class="pre">create_index_buffer()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_rgb_buffer"><code class="docutils literal notranslate"><span class="pre">create_rgb_buffer()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_shadow_projection_matrix"><code class="docutils literal notranslate"><span class="pre">create_shadow_projection_matrix()</span></code></a></li>
@@ -918,6 +919,28 @@
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of cameras, one for each element of the batch.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.renderer.create_camera_for_body">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_camera_for_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focal_length_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizontal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.renderer.Camera" title="pymomentum.renderer.Camera"><span class="pre">pymomentum.renderer.Camera</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_camera_for_body" title="Link to this definition"></a></dt>
+<dd><p>Create a camera that roughly faces the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character to use.</p></li>
+<li><p><strong>skeleton_states</strong> – numpy.ndarray of skeleton states with shape (nJoints, 8), (nBatch, nJoints, 8), or (nBatch, nFrames, nJoints, 8). Each joint has 8 values: (tx, ty, tz, rx, ry, rz, rw, s) representing translation, quaternion rotation (x, y, z, w), and uniform scale.</p></li>
+<li><p><strong>image_height</strong> – Height of the target image.</p></li>
+<li><p><strong>image_width</strong> – Width of the target image.</p></li>
+<li><p><strong>focal_length_mm</strong> – 35mm-equivalent focal length; e.g. focal_length_mm=50 corresponds to a “normal” lens.  Specified in millimeters because this is what photographers use.</p></li>
+<li><p><strong>horizontal</strong> – whether the cameras are placed horizontally, assuming the Y axis is the world up direction.</p></li>
+<li><p><strong>camera_angle</strong> – what direction the camera looks at the body. default: 0, looking at front of body. pi/2: at left side of body.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#pymomentum.renderer.Camera" title="pymomentum.renderer.Camera"><code class="xref py py-class docutils literal notranslate"><span class="pre">Camera</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>

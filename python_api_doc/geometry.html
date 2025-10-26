@@ -2748,8 +2748,36 @@ where q is the dimensionality of the PCA subspace.</p>
 <p>Maps reduced model parameters to full joint parameters for character animation. This class handles the transformation from a compact set of model parameters (typically ~50) used in optimization to the full 7*nJoints parameters needed for skeleton posing.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Skeleton" title="pymomentum.geometry.Skeleton"><span class="pre">pymomentum.geometry.Skeleton</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">scipy.sparse.csr_matrix</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.geometry.ParameterTransform, names: list[str], skeleton: pymomentum.geometry.Skeleton, transform: scipy.sparse.csr_matrix[numpy.float32]) -&gt; None</p></li>
+</ol>
+<p>Create a parameter transform from a sparse matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> – List of model parameter names.</p></li>
+<li><p><strong>skeleton</strong> – The skeleton that this parameter transform operates on.</p></li>
+<li><p><strong>transform</strong> – A sparse matrix of size (7*n_joints x n_params) that maps from model parameters to joint parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<ol class="arabic simple" start="2">
+<li><p>__init__(self: pymomentum.geometry.ParameterTransform, names: list[str], skeleton: pymomentum.geometry.Skeleton, transform: numpy.ndarray[numpy.float32]) -&gt; None</p></li>
+</ol>
+<p>Create a parameter transform from a dense numpy array.</p>
+<p>The array will be converted to a sparse matrix internally for efficient storage and computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> – List of model parameter names.</p></li>
+<li><p><strong>skeleton</strong> – The skeleton that this parameter transform operates on.</p></li>
+<li><p><strong>transform</strong> – A dense numpy array of size (7*n_joints x n_params) that maps from model parameters to joint parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.all_parameters">
