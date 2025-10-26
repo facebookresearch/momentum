@@ -11,6 +11,8 @@
 #include <momentum/rasterizer/camera.h>
 
 #include <ATen/ATen.h>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 
 #include <memory>
 #include <vector>
@@ -33,6 +35,15 @@ std::vector<momentum::rasterizer::Camera> buildCamerasForBodyJoints(
 std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
     const momentum::Character& character,
     at::Tensor jointParameters,
+    int imageHeight,
+    int imageWidth,
+    float focalLength_mm,
+    bool horizontal,
+    float cameraAngle = 0.0f);
+
+momentum::rasterizer::Camera createCameraForBody(
+    const momentum::Character& character,
+    const pybind11::array_t<float>& skeletonStates,
     int imageHeight,
     int imageWidth,
     float focalLength_mm,
