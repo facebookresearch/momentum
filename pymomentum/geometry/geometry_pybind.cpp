@@ -55,6 +55,16 @@ namespace mm = momentum;
 
 using namespace pymomentum;
 
+namespace {
+mm::Character createTestCharacter(int num_joints, bool with_blendshapes) {
+  auto character = momentum::createTestCharacter<float>(num_joints);
+  if (with_blendshapes) {
+    character = momentum::withTestBlendShapes(character);
+  }
+  return character;
+}
+} // namespace
+
 PYBIND11_MODULE(geometry, m) {
   // TODO more explanation
   m.doc() = "Geometry and forward kinematics for momentum models.  ";
@@ -2849,12 +2859,11 @@ Computes vertex normals for a triangle mesh given its positions.
       py::arg("vertex_positions"),
       py::arg("triangles"));
 
-  // createTestCharacter()
   m.def(
       "create_test_character",
-      &momentum::createTestCharacter<float>,
-      R"(Create a simple 3-joint test character.  This is useful for writing confidence tests that
-execute quickly and don't rely on outside files.
+      &createTestCharacter,
+      R"(Create a simple 3-joint test character with blendshapes.  This is useful for writing
+confidence tests that execute quickly and don't rely on outside files.
 
 The mesh is made by a few vertices on the line segment from (1,0,0) to (1,1,0) and a few dummy
 faces. The skeleton has three joints: root at (0,0,0), joint1 parented by root, at world-space
@@ -2862,9 +2871,10 @@ faces. The skeleton has three joints: root at (0,0,0), joint1 parented by root, 
 The character has only one parameter limit: min-max type [-0.1, 0.1] for root.
 
 :parameter numJoints: The number of joints in the resulting character.
-:return: A simple character with 3 joints and 10 model parameters.
+:return: A simple character with 3 joints, 10 model parameters, and 5 blendshapes.
       )",
-      py::arg("num_joints") = 3);
+      py::arg("num_joints") = 3,
+      py::arg("with_blendshapes") = false);
 
   // createTestPosePrior()
   m.def(
