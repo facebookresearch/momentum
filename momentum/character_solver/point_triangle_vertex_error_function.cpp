@@ -62,8 +62,9 @@ void PointTriangleVertexErrorFunctionT<T>::addConstraint(
     float depth,
     T weight) {
   MT_CHECK(vertexIndex >= 0 && ((size_t)vertexIndex) < character_.mesh->vertices.size());
-  constraints_.push_back(PointTriangleVertexConstraintT<T>{
-      vertexIndex, triangleIndices, triangleBaryCoords, depth, weight});
+  constraints_.push_back(
+      PointTriangleVertexConstraintT<T>{
+          vertexIndex, triangleIndices, triangleBaryCoords, depth, weight});
 }
 
 template <typename T>

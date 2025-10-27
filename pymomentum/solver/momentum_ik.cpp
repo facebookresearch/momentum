@@ -220,67 +220,75 @@ std::pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>
       vertexProjCons_vertices, *characters.front(), "vertex_cons_proj_vertices", false);
 
   // Build each type of error function according to enum order:
-  errorFunctions.push_back(createPositionErrorFunction<T>(
-      nBatch,
-      nFrames,
-      positionCons_parents,
-      positionCons_offsets,
-      positionCons_weights,
-      positionCons_targets));
-  errorFunctions.push_back(createOrientationErrorFunction<T>(
-      nBatch,
-      nFrames,
-      orientation_parents,
-      orientation_offsets,
-      orientation_weights,
-      orientation_targets));
+  errorFunctions.push_back(
+      createPositionErrorFunction<T>(
+          nBatch,
+          nFrames,
+          positionCons_parents,
+          positionCons_offsets,
+          positionCons_weights,
+          positionCons_targets));
+  errorFunctions.push_back(
+      createOrientationErrorFunction<T>(
+          nBatch,
+          nFrames,
+          orientation_parents,
+          orientation_offsets,
+          orientation_weights,
+          orientation_targets));
   errorFunctions.push_back(createLimitErrorFunction<T>(nBatch, nFrames));
   errorFunctions.push_back(createCollisionErrorFunction<T>(nBatch, nFrames));
   if (posePrior_model != nullptr) {
     errorFunctions.push_back(createPosePriorErrorFunction<T>(nBatch, nFrames, posePrior_model));
   } else {
-    errorFunctions.push_back(createDiffPosePriorErrorFunction<T>(
-        nBatch,
-        nFrames,
-        posePrior_pi,
-        posePrior_mu,
-        posePrior_W,
-        posePrior_sigma,
-        posePrior_parameterIndices));
+    errorFunctions.push_back(
+        createDiffPosePriorErrorFunction<T>(
+            nBatch,
+            nFrames,
+            posePrior_pi,
+            posePrior_mu,
+            posePrior_W,
+            posePrior_sigma,
+            posePrior_parameterIndices));
   }
-  errorFunctions.push_back(createMotionErrorFunction<T>(
-      nBatch, nFrames, characters[0]->parameterTransform, motion_targets, motion_weights));
-  errorFunctions.push_back(createProjectionErrorFunction<T>(
-      nBatch,
-      nFrames,
-      projectionCons_projections,
-      projectionCons_parents,
-      projectionCons_offsets,
-      projectionCons_weights,
-      projectionCons_targets));
-  errorFunctions.push_back(createDistanceErrorFunction<T>(
-      nBatch,
-      nFrames,
-      distanceCons_origins,
-      distanceCons_parents,
-      distanceCons_offsets,
-      distanceCons_weights,
-      distanceCons_targets));
-  errorFunctions.push_back(createVertexErrorFunction<T>(
-      nBatch,
-      nFrames,
-      vertexCons_vertices,
-      vertexCons_weights,
-      vertexCons_target_positions,
-      vertexCons_target_normals,
-      vertexCons_type));
-  errorFunctions.push_back(createVertexProjectionErrorFunction<T>(
-      nBatch,
-      nFrames,
-      vertexProjCons_vertices,
-      vertexProjCons_weights,
-      vertexProjCons_target_positions,
-      vertexProjCons_projections));
+  errorFunctions.push_back(
+      createMotionErrorFunction<T>(
+          nBatch, nFrames, characters[0]->parameterTransform, motion_targets, motion_weights));
+  errorFunctions.push_back(
+      createProjectionErrorFunction<T>(
+          nBatch,
+          nFrames,
+          projectionCons_projections,
+          projectionCons_parents,
+          projectionCons_offsets,
+          projectionCons_weights,
+          projectionCons_targets));
+  errorFunctions.push_back(
+      createDistanceErrorFunction<T>(
+          nBatch,
+          nFrames,
+          distanceCons_origins,
+          distanceCons_parents,
+          distanceCons_offsets,
+          distanceCons_weights,
+          distanceCons_targets));
+  errorFunctions.push_back(
+      createVertexErrorFunction<T>(
+          nBatch,
+          nFrames,
+          vertexCons_vertices,
+          vertexCons_weights,
+          vertexCons_target_positions,
+          vertexCons_target_normals,
+          vertexCons_type));
+  errorFunctions.push_back(
+      createVertexProjectionErrorFunction<T>(
+          nBatch,
+          nFrames,
+          vertexProjCons_vertices,
+          vertexProjCons_weights,
+          vertexProjCons_target_positions,
+          vertexProjCons_projections));
 
   return std::make_pair(std::move(errorFunctions), std::move(errorFunctionMap));
 }

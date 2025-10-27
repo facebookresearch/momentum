@@ -170,12 +170,17 @@ void PoseTransformSolverT<T>::transformPose(
       transform * skelStateSimplified_.jointState[rootJointSimplified_].transform;
 
   positionError_->clearConstraints();
-  positionError_->addConstraint(PositionDataT<T>(
-      Eigen::Vector3<T>::Zero(), worldFromRootTarget.translation, rootJointSimplified_, 100.0));
+  positionError_->addConstraint(
+      PositionDataT<T>(
+          Eigen::Vector3<T>::Zero(), worldFromRootTarget.translation, rootJointSimplified_, 100.0));
 
   orientationError_->clearConstraints();
-  orientationError_->addConstraint(OrientationDataT<T>(
-      Eigen::Quaternion<T>::Identity(), worldFromRootTarget.rotation, rootJointSimplified_, 10.0));
+  orientationError_->addConstraint(
+      OrientationDataT<T>(
+          Eigen::Quaternion<T>::Identity(),
+          worldFromRootTarget.rotation,
+          rootJointSimplified_,
+          10.0));
 
   // The momentum solver has a lot of local minima issues related to the use
   // of Euler angles.  As a result for any given solve there is a chance if will

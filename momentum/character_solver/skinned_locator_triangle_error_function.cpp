@@ -60,8 +60,9 @@ void SkinnedLocatorTriangleErrorFunctionT<T>::addConstraint(
     float depth,
     T weight) {
   MT_CHECK(locatorIndex >= 0 && ((size_t)locatorIndex) < character_.skinnedLocators.size());
-  constraints_.push_back(SkinnedLocatorTriangleConstraintT<T>{
-      locatorIndex, triangleIndices, triangleBaryCoords, depth, weight});
+  constraints_.push_back(
+      SkinnedLocatorTriangleConstraintT<T>{
+          locatorIndex, triangleIndices, triangleBaryCoords, depth, weight});
 }
 
 template <typename T>

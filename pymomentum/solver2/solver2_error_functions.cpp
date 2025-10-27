@@ -122,8 +122,11 @@ void defAimErrorFunction(py::module_& m, const char* name, const char* descripti
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
             }
 
             py::gil_scoped_release release;
@@ -137,14 +140,16 @@ void defAimErrorFunction(py::module_& m, const char* name, const char* descripti
 
             for (py::ssize_t i = 0; i < localPoint.shape(0); ++i) {
               validateJointIndex(parentAcc(i), "parent", self.getSkeleton());
-              self.addConstraint(mm::AimDataT<float>(
-                  Eigen::Vector3f(localPointAcc(i, 0), localPointAcc(i, 1), localPointAcc(i, 2)),
-                  Eigen::Vector3f(localDirAcc(i, 0), localDirAcc(i, 1), localDirAcc(i, 2)),
-                  Eigen::Vector3f(
-                      globalTargetAcc(i, 0), globalTargetAcc(i, 1), globalTargetAcc(i, 2)),
-                  parentAcc(i),
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
-                  name.has_value() ? name->at(i) : std::string{}));
+              self.addConstraint(
+                  mm::AimDataT<float>(
+                      Eigen::Vector3f(
+                          localPointAcc(i, 0), localPointAcc(i, 1), localPointAcc(i, 2)),
+                      Eigen::Vector3f(localDirAcc(i, 0), localDirAcc(i, 1), localDirAcc(i, 2)),
+                      Eigen::Vector3f(
+                          globalTargetAcc(i, 0), globalTargetAcc(i, 1), globalTargetAcc(i, 2)),
+                      parentAcc(i),
+                      weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                      name.has_value() ? name->at(i) : std::string{}));
             }
           },
           R"(Adds multiple aim constraints to the error function.
@@ -247,8 +252,11 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
             }
 
             auto localAxisAcc = localAxis.unchecked<2>();
@@ -258,12 +266,14 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
                 weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             for (py::ssize_t i = 0; i < localAxis.shape(0); ++i) {
-              self.addConstraint(mm::FixedAxisDataT<float>(
-                  Eigen::Vector3f(localAxisAcc(i, 0), localAxisAcc(i, 1), localAxisAcc(i, 2)),
-                  Eigen::Vector3f(globalAxisAcc(i, 0), globalAxisAcc(i, 1), globalAxisAcc(i, 2)),
-                  parentAcc(i),
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
-                  name.has_value() ? name->at(i) : std::string{}));
+              self.addConstraint(
+                  mm::FixedAxisDataT<float>(
+                      Eigen::Vector3f(localAxisAcc(i, 0), localAxisAcc(i, 1), localAxisAcc(i, 2)),
+                      Eigen::Vector3f(
+                          globalAxisAcc(i, 0), globalAxisAcc(i, 1), globalAxisAcc(i, 2)),
+                      parentAcc(i),
+                      weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                      name.has_value() ? name->at(i) : std::string{}));
             }
           },
           R"(Adds multiple fixed axis constraints to the error function.
@@ -359,13 +369,14 @@ plane defined by a local point and a local normal vector.)")
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
             validateWeight(weight, "weight");
-            self.addConstraint(mm::NormalDataT<float>(
-                localPoint.value_or(Eigen::Vector3f::Zero()),
-                localNormal,
-                globalPoint,
-                parent,
-                weight,
-                name));
+            self.addConstraint(
+                mm::NormalDataT<float>(
+                    localPoint.value_or(Eigen::Vector3f::Zero()),
+                    localNormal,
+                    globalPoint,
+                    parent,
+                    weight,
+                    name));
           },
           R"(Adds a normal constraint to the error function.
 
@@ -404,8 +415,11 @@ plane defined by a local point and a local normal vector.)")
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
             }
 
             auto localPointAcc = localPoint.has_value()
@@ -418,16 +432,20 @@ plane defined by a local point and a local normal vector.)")
                 weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
 
             for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
-              self.addConstraint(mm::NormalDataT<float>(
-                  localPointAcc.has_value()
-                      ? Eigen::Vector3f(
-                            (*localPointAcc)(i, 0), (*localPointAcc)(i, 1), (*localPointAcc)(i, 2))
-                      : Eigen::Vector3f::Zero(),
-                  Eigen::Vector3f(localNormalAcc(i, 0), localNormalAcc(i, 1), localNormalAcc(i, 2)),
-                  Eigen::Vector3f(globalPointAcc(i, 0), globalPointAcc(i, 1), globalPointAcc(i, 2)),
-                  parentAcc(i),
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
-                  name.has_value() ? name->at(i) : std::string{}));
+              self.addConstraint(
+                  mm::NormalDataT<float>(
+                      localPointAcc.has_value() ? Eigen::Vector3f(
+                                                      (*localPointAcc)(i, 0),
+                                                      (*localPointAcc)(i, 1),
+                                                      (*localPointAcc)(i, 2))
+                                                : Eigen::Vector3f::Zero(),
+                      Eigen::Vector3f(
+                          localNormalAcc(i, 0), localNormalAcc(i, 1), localNormalAcc(i, 2)),
+                      Eigen::Vector3f(
+                          globalPointAcc(i, 0), globalPointAcc(i, 1), globalPointAcc(i, 2)),
+                      parentAcc(i),
+                      weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                      name.has_value() ? name->at(i) : std::string{}));
             }
           },
           R"(Adds multiple normal constraints to the error function.
@@ -1055,8 +1073,11 @@ distance is greater than zero (ie. the point being above).)")
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
             }
 
             auto offsetAcc =
@@ -1070,15 +1091,17 @@ distance is greater than zero (ie. the point being above).)")
             py::gil_scoped_release release;
 
             for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
-              self.addConstraint(mm::PlaneDataT<float>(
-                  offsetAcc.has_value()
-                      ? Eigen::Vector3f((*offsetAcc)(i, 0), (*offsetAcc)(i, 1), (*offsetAcc)(i, 2))
-                      : Eigen::Vector3f::Zero(),
-                  Eigen::Vector3f(normalAcc(i, 0), normalAcc(i, 1), normalAcc(i, 2)),
-                  dAcc(i),
-                  parentAcc(i),
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
-                  name.has_value() ? name->at(i) : std::string{}));
+              self.addConstraint(
+                  mm::PlaneDataT<float>(
+                      offsetAcc.has_value()
+                          ? Eigen::Vector3f(
+                                (*offsetAcc)(i, 0), (*offsetAcc)(i, 1), (*offsetAcc)(i, 2))
+                          : Eigen::Vector3f::Zero(),
+                      Eigen::Vector3f(normalAcc(i, 0), normalAcc(i, 1), normalAcc(i, 2)),
+                      dAcc(i),
+                      parentAcc(i),
+                      weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                      name.has_value() ? name->at(i) : std::string{}));
             }
           },
           R"(Adds multiple plane constraints to the error function.
@@ -1401,8 +1424,9 @@ Uses a generalized loss function that support various forms of losses such as L1
              const std::string& name) {
             validateJointIndex(parent, "parent", errf.getSkeleton());
             validateWeight(weight, "weight");
-            errf.addConstraint(mm::PositionData(
-                offset.value_or(Eigen::Vector3f::Zero()), target, parent, weight, name));
+            errf.addConstraint(
+                mm::PositionData(
+                    offset.value_or(Eigen::Vector3f::Zero()), target, parent, weight, name));
           },
           R"(Adds a new constraint to the error function.
 
@@ -1444,8 +1468,11 @@ Uses a generalized loss function that support various forms of losses such as L1
             validateWeights(weight, "weight");
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
             }
 
             auto parent_acc = parent.unchecked<1>();
@@ -1458,16 +1485,18 @@ Uses a generalized loss function that support various forms of losses such as L1
             py::gil_scoped_release release;
 
             for (size_t iCons = 0; iCons < parent_acc.shape(0); ++iCons) {
-              errf.addConstraint(mm::PositionData(
-                  offset_acc.has_value() ? Eigen::Vector3f(
-                                               (*offset_acc)(iCons, 0),
-                                               (*offset_acc)(iCons, 1),
-                                               (*offset_acc)(iCons, 2))
-                                         : Eigen::Vector3f::Zero(),
-                  Eigen::Vector3f(target_acc(iCons, 0), target_acc(iCons, 1), target_acc(iCons, 2)),
-                  parent_acc(iCons),
-                  weight_acc.has_value() ? (*weight_acc)(iCons) : 1.0f,
-                  name.has_value() ? name->at(iCons) : std::string{}));
+              errf.addConstraint(
+                  mm::PositionData(
+                      offset_acc.has_value() ? Eigen::Vector3f(
+                                                   (*offset_acc)(iCons, 0),
+                                                   (*offset_acc)(iCons, 1),
+                                                   (*offset_acc)(iCons, 2))
+                                             : Eigen::Vector3f::Zero(),
+                      Eigen::Vector3f(
+                          target_acc(iCons, 0), target_acc(iCons, 1), target_acc(iCons, 2)),
+                      parent_acc(iCons),
+                      weight_acc.has_value() ? (*weight_acc)(iCons) : 1.0f,
+                      name.has_value() ? name->at(iCons) : std::string{}));
             }
           },
           R"(Adds a new constraint to the error function.
@@ -1625,10 +1654,11 @@ avoid divide-by-zero. )");
 
             const auto targetTransforms = toTransformList(targetStateArray);
             if (targetTransforms.size() != self.getSkeleton().joints.size()) {
-              throw std::runtime_error(fmt::format(
-                  "Expected target state array of shape (njoints, 8) where nJoints={} but got {}.",
-                  self.getSkeleton().joints.size(),
-                  getDimStr(targetStateArray)));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Expected target state array of shape (njoints, 8) where nJoints={} but got {}.",
+                      self.getSkeleton().joints.size(),
+                      getDimStr(targetStateArray)));
             }
 
             self.setTargetState(targetTransforms);
@@ -2053,12 +2083,13 @@ rotation matrix to a target rotation.)")
              const std::string& name) {
             validateJointIndex(parent, "parent", self.getSkeleton());
             validateWeight(weight, "weight");
-            self.addConstraint(mm::OrientationDataT<float>(
-                offset.has_value() ? toQuaternion(*offset) : Eigen::Quaternionf::Identity(),
-                toQuaternion(target),
-                parent,
-                weight,
-                name));
+            self.addConstraint(
+                mm::OrientationDataT<float>(
+                    offset.has_value() ? toQuaternion(*offset) : Eigen::Quaternionf::Identity(),
+                    toQuaternion(target),
+                    parent,
+                    weight,
+                    name));
           },
           R"(Adds an orientation constraint to the error function.
 
@@ -2097,8 +2128,11 @@ rotation matrix to a target rotation.)")
             validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
 
             if (name.has_value() && name->size() != parent.shape(0)) {
-              throw std::runtime_error(fmt::format(
-                  "Invalid names; expected {} names but got {}", parent.shape(0), name->size()));
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
             }
 
             auto offsetAcc =
@@ -2112,21 +2146,22 @@ rotation matrix to a target rotation.)")
 
             for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
               validateJointIndex(parentAcc(i), "parent", self.getSkeleton());
-              self.addConstraint(mm::OrientationDataT<float>(
-                  offsetAcc.has_value() ? Eigen::Quaternionf(
-                                              (*offsetAcc)(i, 3), // w
-                                              (*offsetAcc)(i, 0), // x
-                                              (*offsetAcc)(i, 1), // y
-                                              (*offsetAcc)(i, 2))
-                                        : Eigen::Quaternionf::Identity(), // z
-                  Eigen::Quaternionf(
-                      targetAcc(i, 3), // w
-                      targetAcc(i, 0), // x
-                      targetAcc(i, 1), // y
-                      targetAcc(i, 2)), // z
-                  parentAcc(i),
-                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
-                  name.has_value() ? name->at(i) : std::string{}));
+              self.addConstraint(
+                  mm::OrientationDataT<float>(
+                      offsetAcc.has_value() ? Eigen::Quaternionf(
+                                                  (*offsetAcc)(i, 3), // w
+                                                  (*offsetAcc)(i, 0), // x
+                                                  (*offsetAcc)(i, 1), // y
+                                                  (*offsetAcc)(i, 2))
+                                            : Eigen::Quaternionf::Identity(), // z
+                      Eigen::Quaternionf(
+                          targetAcc(i, 3), // w
+                          targetAcc(i, 0), // x
+                          targetAcc(i, 1), // y
+                          targetAcc(i, 2)), // z
+                      parentAcc(i),
+                      weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                      name.has_value() ? name->at(i) : std::string{}));
             }
           },
           R"(Adds multiple orientation constraints to the error function.

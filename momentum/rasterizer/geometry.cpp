@@ -537,8 +537,9 @@ Eigen::Matrix4f makeCylinderTransform(
     float radius) {
   Eigen::Affine3f cylinderXF = Eigen::Affine3f::Identity();
   cylinderXF.translate(startPos);
-  cylinderXF.rotate(Eigen::Quaternionf::FromTwoVectors(
-      Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
+  cylinderXF.rotate(
+      Eigen::Quaternionf::FromTwoVectors(
+          Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
   cylinderXF.scale(Eigen::Vector3f((endPos - startPos).norm(), radius, radius));
   return cylinderXF.matrix();
 }

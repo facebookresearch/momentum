@@ -72,28 +72,33 @@ void validateIndexArray(
   } else {
     // This should never happen due to the shape validation above,
     // but let's be defensive
-    throw std::runtime_error(fmt::format(
-        "Internal error: {} array has unsupported dimensions: {}D", parameterName, indices.ndim()));
+    throw std::runtime_error(
+        fmt::format(
+            "Internal error: {} array has unsupported dimensions: {}D",
+            parameterName,
+            indices.ndim()));
   }
 
   // Check for negative indices
   if (min_index < 0) {
-    throw std::runtime_error(fmt::format(
-        "Invalid {} indices: found negative index {} (minimum index found: {}), but indices must be >= 0",
-        parameterName,
-        min_index,
-        min_index));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid {} indices: found negative index {} (minimum index found: {}), but indices must be >= 0",
+            parameterName,
+            min_index,
+            min_index));
   }
 
   // Check for out-of-bounds indices
   if (max_index >= max_valid_index) {
-    throw std::runtime_error(fmt::format(
-        "Invalid {} indices: found index {} >= max valid index {} (maximum index found: {}, valid range: [0, {}))",
-        parameterName,
-        max_index,
-        max_valid_index,
-        max_index,
-        max_valid_index));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid {} indices: found index {} >= max valid index {} (maximum index found: {}, valid range: [0, {}))",
+            parameterName,
+            max_index,
+            max_valid_index,
+            max_index,
+            max_valid_index));
   }
 }
 
@@ -109,8 +114,11 @@ void validateTriangleIndexArray(
     const char* parameterName,
     py::ssize_t maxIndex) {
   if (indices.ndim() != 2 || indices.shape(1) != 3) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected (N, 3), got {}", parameterName, getArrayDimStr(indices)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected (N, 3), got {}",
+            parameterName,
+            getArrayDimStr(indices)));
   }
 
   validateIndexArray(indices, parameterName, maxIndex);

@@ -261,24 +261,25 @@ TYPED_TEST(MeshTest, ComplexMesh) {
   };
 
   // Define the faces of the cube (6 faces, 2 triangles each)
-  mesh.faces = {// Front face
-                Eigen::Vector3i(0, 1, 2),
-                Eigen::Vector3i(0, 2, 3),
-                // Right face
-                Eigen::Vector3i(1, 5, 6),
-                Eigen::Vector3i(1, 6, 2),
-                // Back face
-                Eigen::Vector3i(5, 4, 7),
-                Eigen::Vector3i(5, 7, 6),
-                // Left face
-                Eigen::Vector3i(4, 0, 3),
-                Eigen::Vector3i(4, 3, 7),
-                // Top face
-                Eigen::Vector3i(3, 2, 6),
-                Eigen::Vector3i(3, 6, 7),
-                // Bottom face
-                Eigen::Vector3i(4, 5, 1),
-                Eigen::Vector3i(4, 1, 0)};
+  mesh.faces = {
+      // Front face
+      Eigen::Vector3i(0, 1, 2),
+      Eigen::Vector3i(0, 2, 3),
+      // Right face
+      Eigen::Vector3i(1, 5, 6),
+      Eigen::Vector3i(1, 6, 2),
+      // Back face
+      Eigen::Vector3i(5, 4, 7),
+      Eigen::Vector3i(5, 7, 6),
+      // Left face
+      Eigen::Vector3i(4, 0, 3),
+      Eigen::Vector3i(4, 3, 7),
+      // Top face
+      Eigen::Vector3i(3, 2, 6),
+      Eigen::Vector3i(3, 6, 7),
+      // Bottom face
+      Eigen::Vector3i(4, 5, 1),
+      Eigen::Vector3i(4, 1, 0)};
 
   // Define the edges of the cube
   mesh.lines = {

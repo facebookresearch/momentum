@@ -260,26 +260,29 @@ momentum::rasterizer::Camera createCameraForBody(
   const size_t nJoints = character.skeleton.joints.size();
 
   if (skeletonStates.ndim() < 2 || skeletonStates.ndim() > 3) {
-    throw std::runtime_error(fmt::format(
-        "create_camera_for_body: skeleton_states must be 2D (nJoints x 8), 3D (nFrames x nJoints x 8). Got {} dimensions.",
-        skeletonStates.ndim()));
+    throw std::runtime_error(
+        fmt::format(
+            "create_camera_for_body: skeleton_states must be 2D (nJoints x 8), 3D (nFrames x nJoints x 8). Got {} dimensions.",
+            skeletonStates.ndim()));
   }
 
   // Verify the last dimension is 8 (tx, ty, tz, rx, ry, rz, rw, s)
   const size_t lastDim = skeletonStates.shape(skeletonStates.ndim() - 1);
   if (lastDim != 8) {
-    throw std::runtime_error(fmt::format(
-        "create_camera_for_body: Expected last dimension to be 8 (tx, ty, tz, rx, ry, rz, rw, s), but got {}.",
-        lastDim));
+    throw std::runtime_error(
+        fmt::format(
+            "create_camera_for_body: Expected last dimension to be 8 (tx, ty, tz, rx, ry, rz, rw, s), but got {}.",
+            lastDim));
   }
 
   // Verify the second-to-last dimension matches the number of joints
   const size_t jointsDim = skeletonStates.shape(skeletonStates.ndim() - 2);
   if (jointsDim != nJoints) {
-    throw std::runtime_error(fmt::format(
-        "create_camera_for_body: Expected {} joints (second-to-last dimension), but got {}.",
-        nJoints,
-        jointsDim));
+    throw std::runtime_error(
+        fmt::format(
+            "create_camera_for_body: Expected {} joints (second-to-last dimension), but got {}.",
+            nJoints,
+            jointsDim));
   }
 
   // Handle different dimensionalities with appropriate accessors

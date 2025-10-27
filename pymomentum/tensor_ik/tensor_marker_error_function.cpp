@@ -101,11 +101,12 @@ TensorPositionErrorFunction<T>::createErrorFunctionImp(
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index i = 0; i < nCons; ++i) {
-    result->addConstraint(momentum::PositionConstraintT<T>(
-        extractVector<T, 3>(offsets, i, Eigen::Vector3<T>::Zero()),
-        extractVector<T, 3>(targets, i),
-        extractScalar<int>(parents, i),
-        extractScalar<T>(weights, i, T(1))));
+    result->addConstraint(
+        momentum::PositionConstraintT<T>(
+            extractVector<T, 3>(offsets, i, Eigen::Vector3<T>::Zero()),
+            extractVector<T, 3>(targets, i),
+            extractScalar<int>(parents, i),
+            extractScalar<T>(weights, i, T(1))));
   }
 
   return result;
@@ -190,11 +191,12 @@ TensorOrientationErrorFunction<T>::createErrorFunctionImp(
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index i = 0; i < nCons; ++i) {
-    result->addConstraint(momentum::OrientationConstraintT<T>(
-        extractQuaternion<T>(orientation_offsets, i),
-        extractQuaternion<T>(orientation_targets, i),
-        extractScalar<int>(parents, i),
-        extractScalar<T>(weights, i, T(1))));
+    result->addConstraint(
+        momentum::OrientationConstraintT<T>(
+            extractQuaternion<T>(orientation_offsets, i),
+            extractQuaternion<T>(orientation_targets, i),
+            extractScalar<int>(parents, i),
+            extractScalar<T>(weights, i, T(1))));
   }
 
   return result;

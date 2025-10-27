@@ -36,8 +36,11 @@ void validateTriangleIndices(
     py::ssize_t num_vertices,
     const char* parameterName) {
   if (triangles.ndim() != 2 || triangles.shape(1) != 3) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected (N, 3), got {}", parameterName, getArrayDimStr(triangles)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected (N, 3), got {}",
+            parameterName,
+            getArrayDimStr(triangles)));
   }
 
   validateIndexArray(triangles, parameterName, num_vertices);
@@ -103,10 +106,11 @@ auto performBatchedClosestHitQuery(
 
   const py::ssize_t numRays = origins.shape(0);
   if (directions.shape(0) != numRays) {
-    throw std::runtime_error(fmt::format(
-        "origins and directions must have same number of rays: {} vs {}",
-        numRays,
-        directions.shape(0)));
+    throw std::runtime_error(
+        fmt::format(
+            "origins and directions must have same number of rays: {} vs {}",
+            numRays,
+            directions.shape(0)));
   }
 
   // Validate maxDistances if provided
@@ -117,10 +121,11 @@ auto performBatchedClosestHitQuery(
           fmt::format("maxDistances must be 1-dimensional, got {}D", maxDistances.ndim()));
     }
     if (maxDistances.shape(0) != numRays) {
-      throw std::runtime_error(fmt::format(
-          "maxDistances must have same length as number of rays: {} vs {}",
-          numRays,
-          maxDistances.shape(0)));
+      throw std::runtime_error(
+          fmt::format(
+              "maxDistances must have same length as number of rays: {} vs {}",
+              numRays,
+              maxDistances.shape(0)));
     }
   }
 
@@ -217,10 +222,11 @@ auto performBatchedAnyHitQuery(
 
   const py::ssize_t numRays = origins.shape(0);
   if (directions.shape(0) != numRays) {
-    throw std::runtime_error(fmt::format(
-        "origins and directions must have same number of rays: {} vs {}",
-        numRays,
-        directions.shape(0)));
+    throw std::runtime_error(
+        fmt::format(
+            "origins and directions must have same number of rays: {} vs {}",
+            numRays,
+            directions.shape(0)));
   }
 
   // Validate maxDistances if provided
@@ -231,10 +237,11 @@ auto performBatchedAnyHitQuery(
           fmt::format("maxDistances must be 1-dimensional, got {}D", maxDistances.ndim()));
     }
     if (maxDistances.shape(0) != numRays) {
-      throw std::runtime_error(fmt::format(
-          "maxDistances must have same length as number of rays: {} vs {}",
-          numRays,
-          maxDistances.shape(0)));
+      throw std::runtime_error(
+          fmt::format(
+              "maxDistances must have same length as number of rays: {} vs {}",
+              numRays,
+              maxDistances.shape(0)));
     }
   }
 
@@ -282,8 +289,9 @@ auto performAllHitsQuery(
         fmt::format("origin must be a 1D array of shape (3,), got {}", getArrayDimStr(origin)));
   }
   if (direction.ndim() != 1 || direction.shape(0) != 3) {
-    throw std::runtime_error(fmt::format(
-        "direction must be a 1D array of shape (3,), got {}", getArrayDimStr(direction)));
+    throw std::runtime_error(
+        fmt::format(
+            "direction must be a 1D array of shape (3,), got {}", getArrayDimStr(direction)));
   }
 
   auto originData = origin.unchecked<1>();
@@ -339,8 +347,9 @@ auto performLineHitsQuery(
         fmt::format("origin must be a 1D array of shape (3,), got {}", getArrayDimStr(origin)));
   }
   if (direction.ndim() != 1 || direction.shape(0) != 3) {
-    throw std::runtime_error(fmt::format(
-        "direction must be a 1D array of shape (3,), got {}", getArrayDimStr(direction)));
+    throw std::runtime_error(
+        fmt::format(
+            "direction must be a 1D array of shape (3,), got {}", getArrayDimStr(direction)));
   }
 
   auto originData = origin.unchecked<1>();

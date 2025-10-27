@@ -892,9 +892,10 @@ void rasterizeMeshImp(
 
     Matrix3fP n_tri_eye;
     if (normals_world.size() == 0) {
-      const Vector3fP n_eye = drjit::normalize(drjit::cross(
-          extractColumn(p_tri_eye, 1) - extractColumn(p_tri_eye, 0),
-          extractColumn(p_tri_eye, 2) - extractColumn(p_tri_eye, 0)));
+      const Vector3fP n_eye = drjit::normalize(
+          drjit::cross(
+              extractColumn(p_tri_eye, 1) - extractColumn(p_tri_eye, 0),
+              extractColumn(p_tri_eye, 2) - extractColumn(p_tri_eye, 0)));
       n_tri_eye = toUniformMat(n_eye);
     } else {
       for (int i = 0; i < 3; ++i) {

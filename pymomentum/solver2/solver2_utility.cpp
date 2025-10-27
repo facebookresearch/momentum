@@ -79,21 +79,23 @@ void ArrayShapeValidator::validate(
     const std::vector<int>& expectedShape,
     const std::vector<std::string>& expectedNames) {
   if (array.ndim() != expectedShape.size()) {
-    throw std::runtime_error(fmt::format(
-        "Invalid shape for {}: expected {}, got {}",
-        name,
-        getDimStr(expectedShape, expectedNames),
-        getDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid shape for {}: expected {}, got {}",
+            name,
+            getDimStr(expectedShape, expectedNames),
+            getDimStr(array)));
   }
 
   for (size_t i = 0; i < expectedShape.size(); ++i) {
     if (expectedShape[i] >= 0) {
       if (array.shape(i) != expectedShape[i]) {
-        throw std::runtime_error(fmt::format(
-            "Invalid shape for {}: expected {}, got {}",
-            name,
-            getDimStr(expectedShape, expectedNames),
-            getDimStr(array)));
+        throw std::runtime_error(
+            fmt::format(
+                "Invalid shape for {}: expected {}, got {}",
+                name,
+                getDimStr(expectedShape, expectedNames),
+                getDimStr(array)));
       }
     } else if (expectedShape[i] < 0) {
       auto bindingIdx = expectedShape[i];
@@ -101,11 +103,12 @@ void ArrayShapeValidator::validate(
       if (itr == boundShapes_.end()) {
         boundShapes_.emplace(bindingIdx, array.shape(i));
       } else if (itr->second != array.shape(i)) {
-        throw std::runtime_error(fmt::format(
-            "Invalid shape for {}: expected {}, got {}",
-            name,
-            getDimStr(expectedShape, expectedNames),
-            getDimStr(array)));
+        throw std::runtime_error(
+            fmt::format(
+                "Invalid shape for {}: expected {}, got {}",
+                name,
+                getDimStr(expectedShape, expectedNames),
+                getDimStr(array)));
       }
     }
   }
@@ -132,10 +135,11 @@ arrayToParameterSet(const py::array_t<bool>& array, const size_t nParameters, bo
   }
 
   if (array.shape(0) != nParameters) {
-    throw std::runtime_error(fmt::format(
-        "Parameter set size does not match parameter transform, expected {} but got {}",
-        nParameters,
-        array.shape(0)));
+    throw std::runtime_error(
+        fmt::format(
+            "Parameter set size does not match parameter transform, expected {} but got {}",
+            nParameters,
+            array.shape(0)));
   }
 
   auto a = array.unchecked<1>();
@@ -154,11 +158,12 @@ arrayToVec(const py::array_t<float>& array, py::ssize_t expectedSize, const char
   }
 
   if (expectedSize >= 0 && array.shape(0) != expectedSize) {
-    throw std::runtime_error(fmt::format(
-        "Invalid size for {}; expected {} but got {}",
-        parameterName,
-        expectedSize,
-        getDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid size for {}; expected {} but got {}",
+            parameterName,
+            expectedSize,
+            getDimStr(array)));
   }
 
   auto a = array.unchecked<1>();
@@ -210,8 +215,13 @@ void validateIndexArray(
     size_t maxIndex) {
   auto validateIndex = [&](int idx) {
     if (idx < 0 || idx >= maxIndex) {
-      throw std::runtime_error(fmt::format(
-          "Invalid {} for {}: {}; expected a value between 0 and {}", type, name, idx, maxIndex));
+      throw std::runtime_error(
+          fmt::format(
+              "Invalid {} for {}: {}; expected a value between 0 and {}",
+              type,
+              name,
+              idx,
+              maxIndex));
     }
   };
 
@@ -228,8 +238,9 @@ void validateIndexArray(
       }
     }
   } else {
-    throw std::runtime_error(fmt::format(
-        "Invalid {} array; expected 1D or 2D array, got {}", name, getDimStr(indexArray)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid {} array; expected 1D or 2D array, got {}", name, getDimStr(indexArray)));
   }
 }
 
@@ -239,11 +250,12 @@ void validateJointIndex(int jointIndex, const char* name, const mm::Skeleton& sk
   }
 
   if (jointIndex >= static_cast<int>(skeleton.joints.size())) {
-    throw std::runtime_error(fmt::format(
-        "Invalid {} index: {}; skeleton has only {} joints",
-        name,
-        jointIndex,
-        skeleton.joints.size()));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid {} index: {}; skeleton has only {} joints",
+            name,
+            jointIndex,
+            skeleton.joints.size()));
   }
 }
 
@@ -268,11 +280,12 @@ void validateVertexIndex(int vertexIndex, const char* name, const momentum::Char
   }
 
   if (vertexIndex < 0 || vertexIndex >= character.mesh->vertices.size()) {
-    throw std::runtime_error(fmt::format(
-        "Invalid {} index: {}; expected a value between 0 and {}",
-        name,
-        vertexIndex,
-        character.mesh->vertices.size()));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid {} index: {}; expected a value between 0 and {}",
+            name,
+            vertexIndex,
+            character.mesh->vertices.size()));
   }
 }
 
@@ -339,10 +352,11 @@ momentum::ModelParameters toModelParameters(
   const auto nParams = array.shape(0);
 
   if (nParams != pt.numAllModelParameters()) {
-    throw std::runtime_error(fmt::format(
-        "Invalid size for model parameters; expected {} but got {}",
-        pt.numAllModelParameters(),
-        getDimStr(array)));
+    throw std::runtime_error(
+        fmt::format(
+            "Invalid size for model parameters; expected {} but got {}",
+            pt.numAllModelParameters(),
+            getDimStr(array)));
   }
 
   auto a = array.unchecked<1>();
@@ -367,8 +381,12 @@ void validateWeights(const py::array_t<float>& weights, const char* name) {
   auto weightsAcc = weights.unchecked<1>();
   for (py::ssize_t i = 0; i < weights.shape(0); ++i) {
     if (weightsAcc(i) < 0.0f) {
-      throw py::value_error(fmt::format(
-          "Invalid {} at index {}: {}; all weights must be non-negative", name, i, weightsAcc(i)));
+      throw py::value_error(
+          fmt::format(
+              "Invalid {} at index {}: {}; all weights must be non-negative",
+              name,
+              i,
+              weightsAcc(i)));
     }
   }
 }
@@ -382,8 +400,9 @@ void validateWeights(const std::optional<py::array_t<float>>& weights, const cha
 void validateWeights(const Eigen::VectorXf& weights, const char* name) {
   for (int i = 0; i < weights.size(); ++i) {
     if (weights(i) < 0.0f) {
-      throw py::value_error(fmt::format(
-          "Invalid {} at index {}: {}; all weights must be non-negative", name, i, weights(i)));
+      throw py::value_error(
+          fmt::format(
+              "Invalid {} at index {}: {}; all weights must be non-negative", name, i, weights(i)));
     }
   }
 }

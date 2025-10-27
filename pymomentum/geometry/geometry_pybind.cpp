@@ -414,11 +414,12 @@ PYBIND11_MODULE(geometry, m) {
             for (const auto& skinnedLocator : skinnedLocators) {
               for (Eigen::Index i = 0; i < skinnedLocator.parents.size(); ++i) {
                 if (skinnedLocator.parents[i] >= character.skeleton.joints.size()) {
-                  throw py::index_error(fmt::format(
-                      "Skinned locator {} has parent index {} which is out of range (there are only {} joints).",
-                      skinnedLocator.name,
-                      skinnedLocator.parents[i],
-                      character.skeleton.joints.size()));
+                  throw py::index_error(
+                      fmt::format(
+                          "Skinned locator {} has parent index {} which is out of range (there are only {} joints).",
+                          skinnedLocator.name,
+                          skinnedLocator.parents[i],
+                          character.skeleton.joints.size()));
                 }
               }
             }
@@ -1620,8 +1621,10 @@ The resulting shape is equal to the base shape plus a linear combination of the 
             }
 
             if (parents.size() > mm::kMaxSkinJoints) {
-              throw std::runtime_error(fmt::format(
-                  "parents and skin_weights must have at most {} elements", mm::kMaxSkinJoints));
+              throw std::runtime_error(
+                  fmt::format(
+                      "parents and skin_weights must have at most {} elements",
+                      mm::kMaxSkinJoints));
             }
 
             Eigen::Matrix<uint32_t, mm::kMaxSkinJoints, 1> parentsTmp =

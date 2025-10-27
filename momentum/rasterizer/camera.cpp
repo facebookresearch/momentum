@@ -19,11 +19,12 @@ namespace momentum::rasterizer {
 // Default constructor is VGA res.
 template <typename T>
 CameraT<T>::CameraT()
-    : intrinsicsModel_(std::make_shared<PinholeIntrinsicsModelT<T>>(
-          640,
-          480,
-          (5.0 / 3.6) * 640,
-          (5.0 / 3.6) * 640)) {}
+    : intrinsicsModel_(
+          std::make_shared<PinholeIntrinsicsModelT<T>>(
+              640,
+              480,
+              (5.0 / 3.6) * 640,
+              (5.0 / 3.6) * 640)) {}
 
 /// Constructor implementation for CameraT.
 /// @param intrinsicsModel Shared pointer to the camera's intrinsics model
