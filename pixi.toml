@@ -13,7 +13,7 @@ repository = "https://github.com/facebookresearch/momentum"
 # build and test dependencies
 boost = ">=1.84.0,<2"
 c-compiler = ">=1.11.0,<2"
-clang-format = "==18.1.3"
+clang-format = "==21.1.2"
 cmake = ">=3.28.0,<4"
 cxx-compiler = ">=1.11.0,<2"
 gtest = ">=1.17.0,<2"
