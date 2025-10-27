@@ -50,7 +50,7 @@ conda install -c conda-forge momentum-cpp
 ```bash
 # Install and run
 pip install pymomentum-cpu
-python -c "import pymomentum as pm; print(pm.__version__)"
+python -c "import pymomentum.geometry as geom; print(dir(geom))"
 ```
 
 ### Building from Source

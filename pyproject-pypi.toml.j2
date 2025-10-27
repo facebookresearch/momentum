@@ -89,7 +89,7 @@ cmake.args = [
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD={{ 'ON' if variant == 'gpu' else 'OFF' }}",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 ]
 minimum-version = "0.10"
@@ -126,7 +126,7 @@ cmake.args = [
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD=ON",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 ]
 {% endif %}
@@ -140,7 +140,7 @@ cmake.args = [
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD={{ 'ON' if variant == 'gpu' else 'OFF' }}",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
 {% if variant == "cpu" %}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {% endif %}

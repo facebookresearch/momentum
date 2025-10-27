@@ -186,9 +186,13 @@ clean_dist = { cmd = """
 # Check wheel files with twine
 check_pypi = { cmd = "twine check dist/pymomentum_*.whl", description = "Check wheel files with twine" }
 
+# Test wheel imports in a clean environment using uv
+test_pypi_wheel = { cmd = "python scripts/test_wheel.py", description = "Test wheel imports in a clean virtual environment using uv" }
+
 # Publish to TestPyPI for testing
 publish_pypi_test = { cmd = "twine upload --repository testpypi --skip-existing dist/pymomentum_*.whl", depends-on = [
     "check_pypi",
+    "test_pypi_wheel",
 ], description = "Publish to TestPyPI for testing" }
 
 # CPU-specific PyPI tasks - build CPU wheels (default)
@@ -211,6 +215,7 @@ build_pypi_repair = { cmd = """
 
 publish_pypi = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
     "check_pypi",
+    "test_pypi_wheel",
 ], description = "Publish CPU wheels to PyPI" }
 
 #===========
@@ -480,6 +485,7 @@ build_pypi_repair = { cmd = """
 
 publish_pypi = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "check_pypi",
+    "test_pypi_wheel",
 ], description = "Publish GPU wheels to PyPI" }
 
 [feature.py313-cuda129]
@@ -508,6 +514,7 @@ build_pypi_repair = { cmd = """
 
 publish_pypi = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "check_pypi",
+    "test_pypi_wheel",
 ], description = "Publish GPU wheels to PyPI" }
 
 #==============
