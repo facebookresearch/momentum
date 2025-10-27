@@ -190,3 +190,18 @@ TEST(C3DTest, DataFormatVariantTest) {
   const auto& characterTemplate = firstSequence.frames[0];
   ASSERT_EQ(characterTemplate.size(), 36);
 }
+
+TEST(C3DTest, TestLimitedLoading) {
+  std::vector<filesystem::path> paths;
+  loadC3dFiles(filesystem::path("compatibility_test"), paths);
+  EXPECT_EQ(paths.size(), 5);
+
+  const std::vector<std::string> validMarkers = {
+      "LTH1", "LTH2", "LTH3", "LTH4", "RTH1", "RTH2", "RTH3", "RTH4"};
+
+  std::vector<MarkerSequence> result = loadC3d(paths[0].string());
+  std::vector<MarkerSequence> limitedResult = loadC3d(paths[0].string(), UpVector::Y, validMarkers);
+
+  ASSERT_LT(limitedResult[0].frames[0].size(), result[0].frames[0].size());
+  ASSERT_EQ(limitedResult[0].frames[0].size(), 8);
+}

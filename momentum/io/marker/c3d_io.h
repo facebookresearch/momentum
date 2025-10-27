@@ -24,6 +24,7 @@ namespace momentum {
 /// @return std::vector<MarkerSequence> A vector containing the marker sequences from the C3D file.
 [[nodiscard]] std::vector<MarkerSequence> loadC3d(
     const std::string& filename,
-    UpVector up = UpVector::Y);
+    UpVector up = UpVector::Y,
+    std::span<const std::string> validMarkerNames = {});
 
 } // namespace momentum
