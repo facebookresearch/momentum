@@ -3272,9 +3272,9 @@ batching on the character.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.create_test_character">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">create_test_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_joints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.create_test_character" title="Link to this definition"></a></dt>
-<dd><p>Create a simple 3-joint test character.  This is useful for writing confidence tests that
-execute quickly and don’t rely on outside files.</p>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">create_test_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_joints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_blendshapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.create_test_character" title="Link to this definition"></a></dt>
+<dd><p>Create a simple 3-joint test character with blendshapes.  This is useful for writing
+confidence tests that execute quickly and don’t rely on outside files.</p>
 <p>The mesh is made by a few vertices on the line segment from (1,0,0) to (1,1,0) and a few dummy
 faces. The skeleton has three joints: root at (0,0,0), joint1 parented by root, at world-space
 (0,1,0), and joint2 parented by joint1, at world-space (0,2,0).
@@ -3284,7 +3284,7 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.</
 <dd class="field-odd"><p><strong>numJoints</strong> – The number of joints in the resulting character.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A simple character with 3 joints and 10 model parameters.</p>
+<dd class="field-even"><p>A simple character with 3 joints, 10 model parameters, and 5 blendshapes.</p>
 </dd>
 </dl>
 </dd></dl>
