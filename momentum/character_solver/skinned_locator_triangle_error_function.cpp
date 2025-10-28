@@ -12,6 +12,7 @@
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
@@ -33,9 +34,6 @@ SkinnedLocatorTriangleErrorFunctionT<T>::SkinnedLocatorTriangleErrorFunctionT(
   MT_THROW_IF(
       type != VertexConstraintType::Position && type != VertexConstraintType::Plane,
       "SkinnedLocatorTriangleErrorFunction only supports Position and Plane constraint types");
-
-  this->neutralMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
-  this->restMesh_ = std::make_unique<MeshT<T>>(character_in.mesh->template cast<T>());
 }
 
 template <typename T>
@@ -161,55 +159,52 @@ std::array<Eigen::Matrix3<T>, 3> compute_d_targetPos_d_vertexPos(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::getError(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& /*state*/,
-    const MeshStateT<T>& /* meshState */) {
+    const SkeletonStateT<T>& /* state */,
+    const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 
-  updateMeshes(modelParameters);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
-  // loop over all constraints and calculate the error
   double error = 0.0;
 
   if (constraintType_ == VertexConstraintType::Position) {
-    for (size_t i = 0; i < constraints_.size(); ++i) {
-      const SkinnedLocatorTriangleConstraintT<T>& constr = constraints_[i];
-
+    for (const auto& constr : constraints_) {
       // Get the skinned locator position
       const Eigen::Vector3<T> locatorRestPos =
           getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
       // Get the target position on the triangle
-      const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*this->restMesh_, constr);
+      const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*meshState.restMesh_, constr);
 
       // Calculate position error
       const Eigen::Vector3<T> diff = locatorRestPos - tgtPoint;
       error += constr.weight * diff.squaredNorm();
     }
-  } else if (constraintType_ == VertexConstraintType::Plane) {
-    for (size_t i = 0; i < constraints_.size(); ++i) {
-      const SkinnedLocatorTriangleConstraintT<T>& constr = constraints_[i];
-
+  } else {
+    MT_CHECK(constraintType_ == VertexConstraintType::Plane);
+    for (const auto& constr : constraints_) {
       // Get the skinned locator position
       const Eigen::Vector3<T> locatorRestPos =
           getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
       // Get the target position and normal
-      const Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*this->restMesh_, constr);
+      const Eigen::Vector3<T> targetNormal =
+          computeTargetTriangleNormal(*meshState.restMesh_, constr);
       const Eigen::Vector3<T> tgtPoint =
-          computeTargetBaryPosition(*this->restMesh_, constr) + constr.depth * targetNormal;
+          computeTargetBaryPosition(*meshState.restMesh_, constr) + constr.depth * targetNormal;
       // Calculate plane error (projection onto normal)
       const T dist = targetNormal.dot(locatorRestPos - tgtPoint);
       error += constr.weight * dist * dist;
     }
   }
 
-  // return error
   return error * this->weight_;
 }
 
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionGradient(
     const ModelParametersT<T>& modelParameters,
+    const MeshStateT<T>& meshState,
     const SkinnedLocatorTriangleConstraintT<T>& constr,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   // Get the skinned locator position
@@ -217,7 +212,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionGradient(
       getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
   // Get the target position on the triangle
-  const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*this->restMesh_, constr);
+  const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*meshState.restMesh_, constr);
 
   // Calculate position error
   const Eigen::Vector3<T> diff = locatorRestPos - tgtPoint;
@@ -227,7 +222,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionGradient(
 
   // Get the derivative of the target position with respect to the triangle vertices
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->restMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.restMesh_);
 
   // Apply gradient for locator parameter if it exists
   int paramIndex = getSkinnedLocatorParameterIndex(constr.locatorIndex);
@@ -271,6 +266,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionGradient(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneGradient(
     const ModelParametersT<T>& modelParameters,
+    const MeshStateT<T>& meshState,
     const SkinnedLocatorTriangleConstraintT<T>& constr,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   // Get the skinned locator position
@@ -278,9 +274,9 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneGradient(
       getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
   // Get the target position and normal
-  const Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*this->restMesh_, constr);
+  const Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*meshState.restMesh_, constr);
   const Eigen::Vector3<T> tgtPoint =
-      computeTargetBaryPosition(*this->restMesh_, constr) + constr.depth * targetNormal;
+      computeTargetBaryPosition(*meshState.restMesh_, constr) + constr.depth * targetNormal;
 
   // Calculate plane error (projection onto normal)
   const Vector3<T> diff = locatorRestPos - tgtPoint;
@@ -289,9 +285,9 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneGradient(
 
   // Get the derivative of the target position with respect to the triangle vertices
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->restMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.restMesh_);
   const auto d_targetNormal_d_tgtTriVertexPos =
-      compute_d_targetNormal_d_vertexPos(constr, *this->restMesh_);
+      compute_d_targetNormal_d_vertexPos(constr, *meshState.restMesh_);
 
   // Apply gradient for locator parameter if it exists
   int paramIndex = getSkinnedLocatorParameterIndex(constr.locatorIndex);
@@ -335,6 +331,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneGradient(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionJacobian(
     const ModelParametersT<T>& modelParameters,
+    const MeshStateT<T>& meshState,
     const SkinnedLocatorTriangleConstraintT<T>& constr,
     Ref<Eigen::MatrixX<T>> jac,
     Ref<Eigen::VectorX<T>> res) const {
@@ -343,7 +340,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionJacobian(
       getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
   // Get the target position on the triangle
-  const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*this->restMesh_, constr);
+  const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*meshState.restMesh_, constr);
 
   // Calculate position error
   const Eigen::Vector3<T> diff = locatorRestPos - tgtPoint;
@@ -354,7 +351,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionJacobian(
 
   // Get the derivative of the target position with respect to the triangle vertices
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->restMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.restMesh_);
 
   // Apply Jacobian for locator parameter if it exists
   int paramIndex = getSkinnedLocatorParameterIndex(constr.locatorIndex);
@@ -396,6 +393,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionJacobian(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneJacobian(
     const ModelParametersT<T>& modelParameters,
+    const MeshStateT<T>& meshState,
     const SkinnedLocatorTriangleConstraintT<T>& constr,
     Ref<Eigen::MatrixX<T>> jac,
     T& res) const {
@@ -404,23 +402,22 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneJacobian(
       getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
   // Get the target position and normal
-  const Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*this->restMesh_, constr);
+  const Eigen::Vector3<T> targetNormal = computeTargetTriangleNormal(*meshState.restMesh_, constr);
   const Eigen::Vector3<T> tgtPoint =
-      computeTargetBaryPosition(*this->restMesh_, constr) + constr.depth * targetNormal;
+      computeTargetBaryPosition(*meshState.restMesh_, constr) + constr.depth * targetNormal;
 
   // Calculate plane error (projection onto normal)
   const Eigen::Vector3<T> diff = locatorRestPos - tgtPoint;
   const T dist = targetNormal.dot(diff);
 
-  // Set residual
   const T wgt = std::sqrt(constr.weight * this->weight_);
   res = wgt * dist;
 
   // Get the derivative of the target position with respect to the triangle vertices
   const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *this->restMesh_);
+      compute_d_targetPos_d_vertexPos(constr, *meshState.restMesh_);
   const auto d_targetNormal_d_tgtTriVertexPos =
-      compute_d_targetNormal_d_vertexPos(constr, *this->restMesh_);
+      compute_d_targetNormal_d_vertexPos(constr, *meshState.restMesh_);
 
   // Apply Jacobian for locator parameter if it exists
   int paramIndex = getSkinnedLocatorParameterIndex(constr.locatorIndex);
@@ -463,58 +460,68 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePlaneJacobian(
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& /*state*/,
-    const MeshStateT<T>& /* meshState */,
+    const SkeletonStateT<T>& /* state */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
-  updateMeshes(modelParameters);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
-  double error = 0.0;
+  double error = 0;
 
-  for (const auto& constraint : constraints_) {
-    if (constraintType_ == VertexConstraintType::Position) {
-      error += calculatePositionGradient(modelParameters, constraint, gradient);
-    } else if (constraintType_ == VertexConstraintType::Plane) {
-      error += calculatePlaneGradient(modelParameters, constraint, gradient);
+  if (constraintType_ == VertexConstraintType::Position) {
+    for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
+      error += calculatePositionGradient(modelParameters, meshState, constraints_[iCons], gradient);
+    }
+  } else {
+    MT_CHECK(constraintType_ == VertexConstraintType::Plane);
+    for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
+      error += calculatePlaneGradient(modelParameters, meshState, constraints_[iCons], gradient);
     }
   }
 
-  return error * this->weight_;
+  return this->weight_ * error;
 }
 
 template <typename T>
 double SkinnedLocatorTriangleErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& /*state*/,
-    const MeshStateT<T>& /* meshState */,
+    const SkeletonStateT<T>& /* state */,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
   MT_CHECK(
       jacobian.cols() == static_cast<Eigen::Index>(this->parameterTransform_.transform.cols()));
+  MT_CHECK(jacobian.rows() >= (Eigen::Index)(1 * constraints_.size()));
+  MT_CHECK(residual.rows() >= (Eigen::Index)(1 * constraints_.size()));
 
-  updateMeshes(modelParameters);
+  MT_CHECK(
+      meshState.restMesh_, "MeshState must have rest mesh for SkinnedLocatorTriangleErrorFunction");
 
-  double error = 0.0;
-  usedRows = 0;
+  double error = 0;
 
-  for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
-    if (constraintType_ == VertexConstraintType::Position) {
+  if (constraintType_ == VertexConstraintType::Position) {
+    for (size_t i = 0; i < constraints_.size(); ++i) {
       error += calculatePositionJacobian(
           modelParameters,
-          constraints_[iCons],
-          jacobian.block(usedRows, 0, 3, modelParameters.size()),
-          residual.middleRows(usedRows, 3));
-      usedRows += 3;
-    } else if (constraintType_ == VertexConstraintType::Plane) {
-      T res;
+          meshState,
+          constraints_[i],
+          jacobian.block(3 * i, 0, 3, modelParameters.size()),
+          residual.middleRows(3 * i, 3));
+    }
+    usedRows = 3 * constraints_.size();
+  } else {
+    MT_CHECK(constraintType_ == VertexConstraintType::Plane);
+    for (size_t i = 0; i < constraints_.size(); ++i) {
+      T residualValue;
       error += calculatePlaneJacobian(
           modelParameters,
-          constraints_[iCons],
-          jacobian.block(usedRows, 0, 1, modelParameters.size()),
-          res);
-      residual[usedRows] = res;
-      usedRows += 1;
+          meshState,
+          constraints_[i],
+          jacobian.block(i, 0, 1, modelParameters.size()),
+          residualValue);
+      residual(i) = residualValue;
     }
+    usedRows = constraints_.size();
   }
 
   return error;
@@ -530,42 +537,8 @@ size_t SkinnedLocatorTriangleErrorFunctionT<T>::getJacobianSize() const {
   return 0;
 }
 
-template <typename T>
-void SkinnedLocatorTriangleErrorFunctionT<T>::updateMeshes(
-    const ModelParametersT<T>& modelParameters) {
-  MT_PROFILE_FUNCTION();
-
-  bool doUpdateNormals = false;
-  if (this->character_.blendShape) {
-    const BlendWeightsT<T> blendWeights =
-        extractBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.blendShape->computeShape(blendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (this->character_.faceExpressionBlendShape) {
-    if (!this->character_.blendShape) {
-      // Set restMesh back to neutral, removing potential previous expressions.
-      // Note that if the character comes with (shape) blendShape, the previous if block already
-      // takes care of this step.
-      Eigen::Map<Eigen::VectorX<T>> outputVec(
-          &this->restMesh_->vertices[0][0], this->restMesh_->vertices.size() * 3);
-      const Eigen::Map<Eigen::VectorX<T>> baseVec(
-          &this->neutralMesh_->vertices[0][0], this->neutralMesh_->vertices.size() * 3);
-      outputVec = baseVec.template cast<T>();
-    }
-    const BlendWeightsT<T> faceExpressionBlendWeights =
-        extractFaceExpressionBlendWeights(this->parameterTransform_, modelParameters);
-    this->character_.faceExpressionBlendShape->applyDeltas(
-        faceExpressionBlendWeights, this->restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (doUpdateNormals) {
-    this->restMesh_->updateNormals();
-  }
-}
+} // namespace momentum
 
 // Explicit template instantiations
-template class SkinnedLocatorTriangleErrorFunctionT<float>;
-template class SkinnedLocatorTriangleErrorFunctionT<double>;
-
-} // namespace momentum
+template class momentum::SkinnedLocatorTriangleErrorFunctionT<float>;
+template class momentum::SkinnedLocatorTriangleErrorFunctionT<double>;
