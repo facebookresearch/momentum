@@ -98,6 +98,10 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
 
+      - name: Repair CPU wheel (Linux only)
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
+
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
         uses: actions/upload-artifact@v4
@@ -199,6 +203,10 @@ jobs:
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
+
+      - name: Repair GPU wheel (Linux only)
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
