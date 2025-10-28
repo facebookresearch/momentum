@@ -11,6 +11,7 @@
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
+#include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
@@ -30,11 +31,6 @@ VertexSequenceErrorFunctionT<T>::VertexSequenceErrorFunctionT(const Character& c
       character_(character) {
   MT_CHECK(static_cast<bool>(character_.mesh));
   MT_CHECK(static_cast<bool>(character_.skinWeights));
-
-  neutralMesh_ = std::make_unique<MeshT<T>>(character_.mesh->template cast<T>());
-  restMesh_ = std::make_unique<MeshT<T>>(character_.mesh->template cast<T>());
-  posedMesh0_ = std::make_unique<MeshT<T>>(character_.mesh->template cast<T>());
-  posedMesh1_ = std::make_unique<MeshT<T>>(character_.mesh->template cast<T>());
 }
 
 template <typename T>
@@ -52,73 +48,23 @@ void VertexSequenceErrorFunctionT<T>::addConstraint(
 }
 
 template <typename T>
-void VertexSequenceErrorFunctionT<T>::updateMeshes(
-    gsl::span<const ModelParametersT<T>> modelParameters,
-    gsl::span<const SkeletonStateT<T>> skelStates) const {
-  MT_PROFILE_FUNCTION();
-  MT_CHECK(modelParameters.size() == 2);
-  MT_CHECK(skelStates.size() == 2);
-
-  // Since the rest mesh is the same for both frames, we only need to update it once
-  // We'll use the blend shape parameters from frame 0 (could be either frame)
-  bool doUpdateNormals = false;
-  if (character_.blendShape) {
-    const BlendWeightsT<T> blendWeights =
-        extractBlendWeights(this->parameterTransform_, modelParameters[0]);
-    character_.blendShape->computeShape(blendWeights, restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (character_.faceExpressionBlendShape) {
-    if (!character_.blendShape) {
-      Eigen::Map<Eigen::VectorX<T>> outputVec(
-          &restMesh_->vertices[0][0], restMesh_->vertices.size() * 3);
-      const Eigen::Map<Eigen::VectorX<T>> baseVec(
-          &neutralMesh_->vertices[0][0], neutralMesh_->vertices.size() * 3);
-      outputVec = baseVec.template cast<T>();
-    }
-    const BlendWeightsT<T> faceExpressionBlendWeights =
-        extractFaceExpressionBlendWeights(this->parameterTransform_, modelParameters[0]);
-    character_.faceExpressionBlendShape->applyDeltas(
-        faceExpressionBlendWeights, restMesh_->vertices);
-    doUpdateNormals = true;
-  }
-  if (doUpdateNormals) {
-    restMesh_->updateNormals();
-  }
-
-  // Apply skinning for both frames using the same rest mesh
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *character_.skinWeights,
-      *restMesh_,
-      skelStates[0],
-      *posedMesh0_);
-
-  applySSD(
-      cast<T>(character_.inverseBindPose),
-      *character_.skinWeights,
-      *restMesh_,
-      skelStates[1],
-      *posedMesh1_);
-}
-
-template <typename T>
 double VertexSequenceErrorFunctionT<T>::getError(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> /*meshStates*/) const {
+    gsl::span<const MeshStateT<T>> meshStates) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
   MT_CHECK(skelStates.size() == 2);
-
-  updateMeshes(modelParameters, skelStates);
+  MT_CHECK(meshStates.size() == 2);
+  MT_CHECK_NOTNULL(meshStates[0].posedMesh_);
+  MT_CHECK_NOTNULL(meshStates[1].posedMesh_);
 
   double error = 0.0;
 
   // Calculate vertex velocities and compare with target velocities
   for (const auto& constraint : constraints_) {
-    const Eigen::Vector3<T>& vertex0 = posedMesh0_->vertices[constraint.vertexIndex];
-    const Eigen::Vector3<T>& vertex1 = posedMesh1_->vertices[constraint.vertexIndex];
+    const Eigen::Vector3<T>& vertex0 = meshStates[0].posedMesh_->vertices[constraint.vertexIndex];
+    const Eigen::Vector3<T>& vertex1 = meshStates[1].posedMesh_->vertices[constraint.vertexIndex];
 
     // Compute actual velocity (difference between frames)
     const Eigen::Vector3<T> actualVelocity = vertex1 - vertex0;
@@ -135,10 +81,11 @@ double VertexSequenceErrorFunctionT<T>::getError(
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::calculateVelocityGradient(
     gsl::span<const SkeletonStateT<T>> skelStates,
+    gsl::span<const MeshStateT<T>> meshStates,
     const VertexVelocityConstraintT<T>& constraint,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const Eigen::Vector3<T>& vertex0 = posedMesh0_->vertices[constraint.vertexIndex];
-  const Eigen::Vector3<T>& vertex1 = posedMesh1_->vertices[constraint.vertexIndex];
+  const Eigen::Vector3<T>& vertex0 = meshStates[0].posedMesh_->vertices[constraint.vertexIndex];
+  const Eigen::Vector3<T>& vertex1 = meshStates[1].posedMesh_->vertices[constraint.vertexIndex];
 
   const Eigen::Vector3<T> actualVelocity = vertex1 - vertex0;
   const Eigen::Vector3<T> velocityDiff = actualVelocity - constraint.targetVelocity;
@@ -153,7 +100,7 @@ double VertexSequenceErrorFunctionT<T>::calculateVelocityGradient(
   // Gradient with respect to frame 0 (negative contribution to velocity)
   {
     SkinningWeightIteratorT<T> skinningIter(
-        character_, *restMesh_, skelStates[0], constraint.vertexIndex);
+        character_, *meshStates[0].restMesh_, skelStates[0], constraint.vertexIndex);
 
     while (!skinningIter.finished()) {
       size_t jointIndex = 0;
@@ -197,7 +144,7 @@ double VertexSequenceErrorFunctionT<T>::calculateVelocityGradient(
   // Gradient with respect to frame 1 (positive contribution to velocity)
   {
     SkinningWeightIteratorT<T> skinningIter(
-        character_, *restMesh_, skelStates[1], constraint.vertexIndex);
+        character_, *meshStates[1].restMesh_, skelStates[1], constraint.vertexIndex);
 
     while (!skinningIter.finished()) {
       size_t jointIndex = 0;
@@ -245,19 +192,20 @@ template <typename T>
 double VertexSequenceErrorFunctionT<T>::getGradient(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> /*meshStates*/,
+    gsl::span<const MeshStateT<T>> meshStates,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
   MT_CHECK(skelStates.size() == 2);
-
-  updateMeshes(modelParameters, skelStates);
+  MT_CHECK(meshStates.size() == 2);
+  MT_CHECK_NOTNULL(meshStates[0].posedMesh_);
+  MT_CHECK_NOTNULL(meshStates[1].posedMesh_);
 
   double error = 0.0;
 
   // Process constraints sequentially without multithreading
   for (const auto& constraint : constraints_) {
-    error += calculateVelocityGradient(skelStates, constraint, gradient);
+    error += calculateVelocityGradient(skelStates, meshStates, constraint, gradient);
   }
 
   return this->weight_ * error;
@@ -266,12 +214,13 @@ double VertexSequenceErrorFunctionT<T>::getGradient(
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::calculateVelocityJacobian(
     gsl::span<const SkeletonStateT<T>> skelStates,
+    gsl::span<const MeshStateT<T>> meshStates,
     const VertexVelocityConstraintT<T>& constraint,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     Eigen::Index startRow) const {
-  const Eigen::Vector3<T>& vertex0 = posedMesh0_->vertices[constraint.vertexIndex];
-  const Eigen::Vector3<T>& vertex1 = posedMesh1_->vertices[constraint.vertexIndex];
+  const Eigen::Vector3<T>& vertex0 = meshStates[0].posedMesh_->vertices[constraint.vertexIndex];
+  const Eigen::Vector3<T>& vertex1 = meshStates[1].posedMesh_->vertices[constraint.vertexIndex];
 
   const Eigen::Vector3<T> actualVelocity = vertex1 - vertex0;
   const Eigen::Vector3<T> velocityDiff = actualVelocity - constraint.targetVelocity;
@@ -283,7 +232,7 @@ double VertexSequenceErrorFunctionT<T>::calculateVelocityJacobian(
   // Jacobian with respect to frame 0 (negative contribution to velocity)
   {
     SkinningWeightIteratorT<T> skinningIter(
-        character_, *restMesh_, skelStates[0], constraint.vertexIndex);
+        character_, *meshStates[0].restMesh_, skelStates[0], constraint.vertexIndex);
 
     while (!skinningIter.finished()) {
       size_t jointIndex = 0;
@@ -326,7 +275,7 @@ double VertexSequenceErrorFunctionT<T>::calculateVelocityJacobian(
   // Jacobian with respect to frame 1 (positive contribution to velocity)
   {
     SkinningWeightIteratorT<T> skinningIter(
-        character_, *restMesh_, skelStates[1], constraint.vertexIndex);
+        character_, *meshStates[1].restMesh_, skelStates[1], constraint.vertexIndex);
 
     while (!skinningIter.finished()) {
       size_t jointIndex = 0;
@@ -375,27 +324,28 @@ template <typename T>
 double VertexSequenceErrorFunctionT<T>::getJacobian(
     gsl::span<const ModelParametersT<T>> modelParameters,
     gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> /*meshStates*/,
+    gsl::span<const MeshStateT<T>> meshStates,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
   MT_CHECK(skelStates.size() == 2);
+  MT_CHECK(meshStates.size() == 2);
+  MT_CHECK_NOTNULL(meshStates[0].posedMesh_);
+  MT_CHECK_NOTNULL(meshStates[1].posedMesh_);
 
   const Eigen::Index nParam = this->parameterTransform_.numAllModelParameters();
   MT_CHECK(jacobian.cols() == 2 * nParam);
   MT_CHECK(jacobian.rows() >= (Eigen::Index)(3 * constraints_.size()));
   MT_CHECK(residual.rows() >= (Eigen::Index)(3 * constraints_.size()));
 
-  updateMeshes(modelParameters, skelStates);
-
   double error = 0.0;
 
   // Process constraints sequentially without multithreading
   for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
-    error +=
-        calculateVelocityJacobian(skelStates, constraints_[iCons], jacobian, residual, 3 * iCons);
+    error += calculateVelocityJacobian(
+        skelStates, meshStates, constraints_[iCons], jacobian, residual, 3 * iCons);
   }
 
   usedRows = gsl::narrow_cast<int>(3 * constraints_.size());
