@@ -451,7 +451,9 @@ template <typename T>
 void SequenceSolverFunctionT<T>::addErrorFunction(
     const size_t frame,
     std::shared_ptr<SkeletonErrorFunctionT<T>> errorFunction) {
-  needsMesh_ = needsMesh_ || errorFunction->needsMesh();
+  if (errorFunction->needsMesh()) {
+    needsMesh_.store(true, std::memory_order_relaxed);
+  }
   if (frame == kAllFrames) {
     dispenso::parallel_for(0, getNumFrames(), [this, errorFunction](size_t iFrame) {
       addErrorFunction(iFrame, errorFunction);
@@ -467,7 +469,9 @@ template <typename T>
 void SequenceSolverFunctionT<T>::addSequenceErrorFunction(
     const size_t frame,
     std::shared_ptr<SequenceErrorFunctionT<T>> errorFunction) {
-  needsMesh_ = needsMesh_ || errorFunction->needsMesh();
+  if (errorFunction->needsMesh()) {
+    needsMesh_.store(true, std::memory_order_relaxed);
+  }
   if (frame == kAllFrames) {
     if (getNumFrames() >= errorFunction->numFrames()) {
       dispenso::parallel_for(

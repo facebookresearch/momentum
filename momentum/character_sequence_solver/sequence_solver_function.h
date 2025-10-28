@@ -126,7 +126,7 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
   std::atomic<size_t> numTotalPerFrameErrorFunctions_ = 0;
   std::atomic<size_t> numTotalSequenceErrorFunctions_ = 0;
 
-  bool needsMesh_ = false;
+  std::atomic<bool> needsMesh_{false};
 
   friend class SequenceSolverT<T>;
 };
