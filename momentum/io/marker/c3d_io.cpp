@@ -46,9 +46,31 @@ std::string findSubjectName(const std::string& markerLabelIn) {
   return markerLabelIn.substr(0, sepPos);
 }
 
+bool isMarkerValid(const std::string_view label, std::span<const std::string> validMarkerNames) {
+  // there might be dangling markers with suffix, eg.
+  // an official label "T10", but also "T10-1", "T10-2" for a few stray frames
+  // We will just ignore these because they probably have been interpolated to the official
+  // label #TODO: see if we still want to keep this
+  if ((label.size() >= 2 && label[label.size() - 2] == '-') ||
+      (label.size() >= 3 && label[label.size() - 3] == '-')) {
+    return false;
+  }
+
+  // check if the label is in the valid list
+  if (!validMarkerNames.empty()) {
+    if (std::find(validMarkerNames.begin(), validMarkerNames.end(), label) ==
+        validMarkerNames.end()) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 } // namespace
 
-std::vector<MarkerSequence> loadC3d(const std::string& filename, UpVector up) {
+std::vector<MarkerSequence>
+loadC3d(const std::string& filename, UpVector up, std::span<const std::string> validMarkerNames) {
   std::vector<MarkerSequence> resultAnim;
   float fps = 0.0f;
 
@@ -143,22 +165,15 @@ std::vector<MarkerSequence> loadC3d(const std::string& filename, UpVector up) {
           pointLabel = pointLabel.substr(subjectName.size() + 1);
         }
 
-        // there might be dangling markers with suffix, eg.
-        // an official label "T10", but also "T10-1", "T10-2" for a few stray frames
-        // We will just ignore these because they probably have been interpolated to the official
-        // label #TODO: see if we still want to keep this
-        if ((pointLabel.size() >= 2 && pointLabel[pointLabel.size() - 2] == '-') ||
-            (pointLabel.size() >= 3 && pointLabel[pointLabel.size() - 3] == '-')) {
-          continue;
+        if (isMarkerValid(pointLabel, validMarkerNames)) {
+          markerMap[kPointIdx] = std::make_pair(actorId, markerCount);
+
+          Marker marker;
+          marker.name = pointLabel;
+          marker.occluded = true;
+          templateActor.push_back(marker);
+          markerCount++;
         }
-
-        markerMap[kPointIdx] = std::make_pair(actorId, markerCount);
-
-        Marker marker;
-        marker.name = pointLabel;
-        marker.occluded = true;
-        templateActor.push_back(marker);
-        markerCount++;
       }
       actorId++;
     }

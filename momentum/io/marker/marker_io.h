@@ -26,7 +26,8 @@ namespace momentum {
 /// the file.
 [[nodiscard]] std::vector<MarkerSequence> loadMarkers(
     const std::string& filename,
-    UpVector up = UpVector::Y);
+    UpVector up = UpVector::Y,
+    std::span<const std::string> validMarkerNames = {});
 
 /// Loads the main subject's marker data from a marker file (c3d, trc, glb) and converts the
 /// positions to the target coordinate system. Default target coordinate system is: (Y-up,
@@ -40,7 +41,8 @@ namespace momentum {
 /// data, or an empty optional if no main subject is found.
 [[nodiscard]] std::optional<MarkerSequence> loadMarkersForMainSubject(
     const std::string& filename,
-    UpVector up = UpVector::Y);
+    UpVector up = UpVector::Y,
+    std::span<const std::string> validMarkerNames = {});
 
 /// Finds the "main subject" from a vector of MarkerSequences. The main subject is currently defined
 /// as a named actor with the maximum number of visible markers in the sequence.

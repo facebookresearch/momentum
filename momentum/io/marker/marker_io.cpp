@@ -28,11 +28,14 @@ size_t markerCount(const std::vector<std::vector<Marker>>& frames) {
 }
 } // namespace
 
-std::vector<MarkerSequence> loadMarkers(const std::string& filename, UpVector up) {
+std::vector<MarkerSequence> loadMarkers(
+    const std::string& filename,
+    UpVector up,
+    std::span<const std::string> validMarkerNames) {
   const std::string ext = filesystem::path(filename).extension().string();
   try {
     if (ext == ".c3d") {
-      return loadC3d(filename, up);
+      return loadC3d(filename, up, validMarkerNames);
     } else if (ext == ".trc") {
       return {loadTrc(filename, up)};
     } else if (ext == ".glb") {
@@ -47,8 +50,11 @@ std::vector<MarkerSequence> loadMarkers(const std::string& filename, UpVector up
   }
 }
 
-std::optional<MarkerSequence> loadMarkersForMainSubject(const std::string& filename, UpVector up) {
-  const std::vector<MarkerSequence> markerSequences = loadMarkers(filename, up);
+std::optional<MarkerSequence> loadMarkersForMainSubject(
+    const std::string& filename,
+    UpVector up,
+    std::span<const std::string> validMarkerNames) {
+  const std::vector<MarkerSequence> markerSequences = loadMarkers(filename, up, validMarkerNames);
   const int subjectID = findMainSubjectIndex(markerSequences);
   if (subjectID < 0) {
     return {};

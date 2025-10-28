@@ -87,7 +87,11 @@ void processMarkerFile(
   auto [character, identity] = loadCharacterWithIdentity(modelOptions);
 
   // read marker data
-  const auto actors = momentum::loadMarkers(inputMarkerFile);
+  std::vector<std::string> validMarkerNames;
+  for (const auto& locator : character.locators) {
+    validMarkerNames.push_back(locator.name);
+  }
+  const auto actors = momentum::loadMarkers(inputMarkerFile, UpVector::Y, validMarkerNames);
 
   // first try to see if we have an actor with the same name as the character
   std::optional<MarkerSequence> actor;
