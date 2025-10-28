@@ -485,6 +485,40 @@ class Mesh(torch.nn.Module):
         )
 
 
+class BlendShape(torch.nn.Module):
+    def __init__(
+        self,
+        character: pym_geometry.Character,
+        *,
+        dtype: torch.dtype = torch.float32,
+    ) -> None:
+        super().__init__()
+
+        assert character.blend_shape is not None
+        self.register_buffer(
+            "base_shape",
+            torch.tensor(character.blend_shape.base_shape, dtype=dtype)
+            .clone()
+            .detach(),
+        )
+
+        assert character.blend_shape is not None
+        self.register_buffer(
+            "shape_vectors",
+            torch.tensor(character.blend_shape.shape_vectors, dtype=dtype)
+            .clone()
+            .detach(),
+        )
+
+    def forward(self, coeffs: torch.Tensor) -> torch.Tensor:
+        if not hasattr(self, "base_shape"):
+            raise RuntimeError("Character has no blendshapes")
+        return (
+            torch.einsum("nvd, ...n -> ...vd", self.shape_vectors, coeffs)
+            + self.base_shape
+        )
+
+
 class ParameterTransform(torch.nn.Module):
     def __init__(
         self,
@@ -735,6 +769,9 @@ class Character(torch.nn.Module):
                 character.parameter_limits, dtype=dtype
             )
 
+        if has_rest_mesh and character.blend_shape is not None:
+            self.blend_shape: BlendShape = BlendShape(character, dtype=dtype)
+
     def joint_parameters_to_local_skeleton_state(
         self, joint_parameters: torch.Tensor
     ) -> torch.Tensor:
@@ -780,6 +817,16 @@ class Character(torch.nn.Module):
     ) -> torch.Tensor:
         return self.joint_parameters_to_skeleton_state(
             self.model_parameters_to_joint_parameters(model_parameters)
+        )
+
+    def model_parameters_to_blendshape_coefficients(
+        self, model_parameters: torch.Tensor
+    ) -> torch.Tensor:
+        return model_parameters[..., self.parameter_transform.blendshape_parameters]
+
+    def bind_pose(self) -> torch.Tensor:
+        return self.joint_parameters_to_skeleton_state(
+            torch.zeros((1, len(self.skeleton.joint_names), 7))
         )
 
     def skin_points(
