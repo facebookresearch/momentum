@@ -677,6 +677,10 @@ animate_shapes_sources = [
     "examples/animate_shapes/animate_shapes.cpp",
 ]
 
+export_objs_sources = [
+    "examples/export_objs/export_objs.cpp",
+]
+
 process_markers_app_sources = [
     "examples/process_markers_app/process_markers_app.cpp",
 ]

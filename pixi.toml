@@ -146,6 +146,13 @@ process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/process_mark
 refine_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/refine_motion", depends-on = [
     "build",
 ], description = "Run motion refinement tool" }
+export_objs = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/export_objs", depends-on = [
+    "build",
+], description = "Export animated mesh sequence as objs" }
+animate_shapes = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/animate_shapes", depends-on = [
+    "build",
+], description = "Export animation of blendshapes" }
+
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target install", depends-on = [
     "build",
 ], description = "Install built libraries and executables" }
@@ -424,6 +431,12 @@ process_markers = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/process_mark
     "build",
 ] }
 refine_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/refine_motion.exe", depends-on = [
+    "build",
+] }
+export_objs = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/export_objs.exe", depends-on = [
+    "build",
+] }
+animate_shapes = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/animate_shapes.exe", depends-on = [
     "build",
 ] }
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --target install --config Release --parallel", depends-on = [
