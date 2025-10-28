@@ -76,6 +76,7 @@ double VertexErrorFunctionT<T>::getError(
   MT_PROFILE_FUNCTION();
 
   MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
   // loop over all constraints and calculate the error
   double error = 0.0;
@@ -584,6 +585,7 @@ double VertexErrorFunctionT<T>::getGradient(
     const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
   double error = 0;
   std::vector<std::tuple<double, VectorX<T>>> errorGradThread;
@@ -664,6 +666,7 @@ double VertexErrorFunctionT<T>::getJacobian(
   MT_CHECK(residual.rows() >= (Eigen::Index)(1 * constraints_.size()));
 
   MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
   double error = 0;
   std::vector<double> errorThread;
