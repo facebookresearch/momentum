@@ -69,8 +69,9 @@ void registerLocatorBindings(
           "Defines the limit reference position. equal to offset on loading.")
       .def_readonly(
           "limit_weight",
-          &mm::Locator::limitOrigin,
-          "Defines how close an unlocked locator should stay to it's original position")
+          &mm::Locator::limitWeight,
+          "Controls how strongly the locator should maintain its original position.  "
+          "Higher values create stronger constraints, zero means completely free.")
       .def("__repr__", [](const mm::Locator& l) {
         return fmt::format(
             "Locator(name={}, parent={}, offset=[{}, {}, {}])",
@@ -81,7 +82,7 @@ void registerLocatorBindings(
             l.offset.z());
       });
 
-  // ==============================================>>>>>>> REPLACE
+  // =====================================================
   // momentum::SkinnedLocator
   // - name
   // - parents
