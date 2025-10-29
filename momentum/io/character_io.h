@@ -66,11 +66,13 @@ enum class CharacterFormat : uint8_t {
 /// @param[in] offsets Offset values per joint capturing skeleton bone lengths (7*numJoints, 1).
 /// @param[in] markerSequence Optional marker sequence data to save with the character.
 /// @param[in] fps Frame rate for the animation (default: 120.0).
+/// @param[in] fbxNamespace Namespace in the fbx file if saved as fbx format.
 void saveCharacterToFile(
     const filesystem::path& filename,
     const Character& character,
     const MatrixXf& motion = MatrixXf(),
     const VectorXf& offsets = VectorXf(),
     const std::vector<std::vector<Marker>>& markerSequence = {},
-    float fps = 120.0f);
+    float fps = 120.0f,
+    const std::string& fbxNamespace = "");
 } // namespace momentum

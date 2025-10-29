@@ -145,7 +145,8 @@ void saveCharacterToFile(
     const MatrixXf& motion,
     const VectorXf& offsets,
     const std::vector<std::vector<Marker>>& markerSequence,
-    float fps) {
+    float fps,
+    const std::string& fbxNamespace) {
   // Parse format from file extension
   const auto format = parseCharacterFormat(filename);
   MT_THROW_IF(
@@ -172,7 +173,8 @@ void saveCharacterToFile(
         true, // saveMesh
         FBXCoordSystemInfo(),
         false, // permissive
-        markerSequence);
+        markerSequence,
+        fbxNamespace);
   } else if (format == CharacterFormat::Usd) {
     MT_THROW("USD format is not yet supported for saving. Supported formats: .fbx, .glb, .gltf");
   }
