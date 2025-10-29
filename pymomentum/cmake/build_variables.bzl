@@ -101,22 +101,25 @@ tensor_ik_test_sources = [
 
 geometry_public_headers = [
     "geometry/character_pybind.h",
+    "geometry/gltf_builder_pybind.h",
+    "geometry/limit_pybind.h",
     "geometry/momentum_geometry.h",
     "geometry/momentum_io.h",
-    "geometry/gltf_builder_pybind.h",
     "geometry/parameter_transform_pybind.h",
     "geometry/skeleton_pybind.h",
+    "geometry/skin_weights_pybind.h",
 ]
 
 geometry_sources = [
     "geometry/character_pybind.cpp",
     "geometry/geometry_pybind.cpp",
-    "geometry/skeleton_pybind.cpp",
-    "geometry/skin_weights_pybind.cpp",
+    "geometry/gltf_builder_pybind.cpp",
+    "geometry/limit_pybind.cpp",
     "geometry/momentum_geometry.cpp",
     "geometry/momentum_io.cpp",
-    "geometry/gltf_builder_pybind.cpp",
     "geometry/parameter_transform_pybind.cpp",
+    "geometry/skeleton_pybind.cpp",
+    "geometry/skin_weights_pybind.cpp",
 ]
 
 solver_public_headers = [
