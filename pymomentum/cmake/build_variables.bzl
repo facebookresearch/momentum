@@ -100,6 +100,7 @@ tensor_ik_test_sources = [
 ]
 
 geometry_public_headers = [
+    "geometry/character_pybind.h",
     "geometry/momentum_geometry.h",
     "geometry/momentum_io.h",
     "geometry/gltf_builder_pybind.h",
@@ -107,6 +108,7 @@ geometry_public_headers = [
 ]
 
 geometry_sources = [
+    "geometry/character_pybind.cpp",
     "geometry/geometry_pybind.cpp",
     "geometry/skin_weights_pybind.cpp",
     "geometry/momentum_geometry.cpp",
