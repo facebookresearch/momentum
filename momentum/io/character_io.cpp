@@ -139,4 +139,43 @@ Character loadFullCharacterFromBuffer(
   return character.value();
 }
 
+void saveCharacterToFile(
+    const filesystem::path& filename,
+    const Character& character,
+    const MatrixXf& motion,
+    const VectorXf& offsets,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    float fps) {
+  // Parse format from file extension
+  const auto format = parseCharacterFormat(filename);
+  MT_THROW_IF(
+      format == CharacterFormat::Unknown,
+      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf",
+      filename.string());
+
+  if (format == CharacterFormat::Gltf) {
+    saveCharacter(
+        filename,
+        character,
+        fps,
+        {character.parameterTransform.name, motion},
+        {character.skeleton.getJointNames(), offsets},
+        markerSequence);
+  } else if (format == CharacterFormat::Fbx) {
+    // Save as FBX
+    saveFbx(
+        filename,
+        character,
+        motion,
+        offsets,
+        static_cast<double>(fps),
+        true, // saveMesh
+        FBXCoordSystemInfo(),
+        false, // permissive
+        markerSequence);
+  } else if (format == CharacterFormat::Usd) {
+    MT_THROW("USD format is not yet supported for saving. Supported formats: .fbx, .glb, .gltf");
+  }
+}
+
 } // namespace momentum
