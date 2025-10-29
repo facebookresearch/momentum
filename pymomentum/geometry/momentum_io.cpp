@@ -175,6 +175,7 @@ void saveFBXCharacterToFile(
         true, /*saveMesh*/
         coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
         false, /*permissive*/
+        {}, /*markerSequence*/
         fbxNamespace);
   } else {
     momentum::saveFbxModel(
@@ -202,6 +203,7 @@ void saveFBXCharacterToFileWithJointParams(
         true, /*saveMesh*/
         coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
         false, /*permissive*/
+        {}, /*markerSequence*/
         fbxNamespace);
   } else {
     momentum::saveFbxModel(
