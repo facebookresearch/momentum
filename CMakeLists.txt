@@ -864,6 +864,17 @@ if(MOMENTUM_BUILD_EXAMPLES)
       io
       marker_tracker
   )
+
+  mt_executable(
+    NAME export_objs
+    SOURCES_VARS export_objs_sources
+    LINK_LIBRARIES
+      character
+      io_fbx
+      io_gltf
+      CLI11::CLI11
+  )
+
 endif()
 
 #===============================================================================
