@@ -50,6 +50,20 @@ function(mt_append_pymomentum_filelist name outputvar)
   set(${outputvar} "${${outputvar}}" PARENT_SCOPE)
 endfunction()
 
+# Helper function to validate list parameters
+# Usage: mt_validate_list(function_name param_name list_values...)
+# Currently checks for:
+# - Commas in list items (invalid CMake list separator)
+function(mt_validate_list function_name param_name)
+  foreach(item ${ARGN})
+    if("${item}" MATCHES ",")
+      message(FATAL_ERROR "${function_name}: ${param_name} contains comma-separated values: '${item}'. "
+        "Please use space-separated or semicolon-separated values instead. "
+        "Commas are not valid separators for CMake lists and will cause errors.")
+    endif()
+  endforeach()
+endfunction()
+
 # mt_get_max(var [value1 value2...])
 function(mt_get_max var)
   set(first YES)
@@ -191,6 +205,19 @@ function(mt_library)
     ${ARGN}
   )
 
+  # Validate all list parameters
+  mt_validate_list("mt_library(${_ARG_NAME})" "HEADERS" ${_ARG_HEADERS})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PRIVATE_HEADERS" ${_ARG_PRIVATE_HEADERS})
+  mt_validate_list("mt_library(${_ARG_NAME})" "SOURCES" ${_ARG_SOURCES})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PUBLIC_INCLUDE_DIRECTORIES" ${_ARG_PUBLIC_INCLUDE_DIRECTORIES})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PRIVATE_INCLUDE_DIRECTORIES" ${_ARG_PRIVATE_INCLUDE_DIRECTORIES})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PUBLIC_LINK_LIBRARIES" ${_ARG_PUBLIC_LINK_LIBRARIES})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PRIVATE_LINK_LIBRARIES" ${_ARG_PRIVATE_LINK_LIBRARIES})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PUBLIC_COMPILE_DEFINITIONS" ${_ARG_PUBLIC_COMPILE_DEFINITIONS})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PRIVATE_COMPILE_DEFINITIONS" ${_ARG_PRIVATE_COMPILE_DEFINITIONS})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PUBLIC_COMPILE_OPTIONS" ${_ARG_PUBLIC_COMPILE_OPTIONS})
+  mt_validate_list("mt_library(${_ARG_NAME})" "PRIVATE_COMPILE_OPTIONS" ${_ARG_PRIVATE_COMPILE_OPTIONS})
+
   foreach(var ${_ARG_HEADERS_VARS})
     mt_append_momentum_filelist("${var}" _ARG_HEADERS)
   endforeach()
@@ -317,6 +344,12 @@ function(mt_executable)
     ${ARGN}
   )
 
+  # Validate all list parameters
+  mt_validate_list("mt_executable(${_ARG_NAME})" "HEADERS" ${_ARG_HEADERS})
+  mt_validate_list("mt_executable(${_ARG_NAME})" "SOURCES" ${_ARG_SOURCES})
+  mt_validate_list("mt_executable(${_ARG_NAME})" "INCLUDE_DIRECTORIES" ${_ARG_INCLUDE_DIRECTORIES})
+  mt_validate_list("mt_executable(${_ARG_NAME})" "LINK_LIBRARIES" ${_ARG_LINK_LIBRARIES})
+
   foreach(var ${_ARG_SOURCES_VARS})
     mt_append_momentum_filelist("${var}" _ARG_SOURCES)
   endforeach()
@@ -404,6 +437,13 @@ function(mt_test)
     ${ARGN}
   )
 
+  # Validate all list parameters
+  mt_validate_list("mt_test(${_ARG_NAME})" "HEADERS" ${_ARG_HEADERS})
+  mt_validate_list("mt_test(${_ARG_NAME})" "SOURCES" ${_ARG_SOURCES})
+  mt_validate_list("mt_test(${_ARG_NAME})" "INCLUDE_DIRECTORIES" ${_ARG_INCLUDE_DIRECTORIES})
+  mt_validate_list("mt_test(${_ARG_NAME})" "LINK_LIBRARIES" ${_ARG_LINK_LIBRARIES})
+  mt_validate_list("mt_test(${_ARG_NAME})" "ENV" ${_ARG_ENV})
+
   foreach(var ${_ARG_SOURCES_VARS})
     mt_append_momentum_filelist("${var}" _ARG_SOURCES)
   endforeach()
@@ -464,6 +504,13 @@ function(mt_python_binding)
     "${multiValueArgs}"
     ${ARGN}
   )
+
+  # Validate all list parameters
+  mt_validate_list("mt_python_binding(${_ARG_NAME})" "HEADERS" ${_ARG_HEADERS})
+  mt_validate_list("mt_python_binding(${_ARG_NAME})" "SOURCES" ${_ARG_SOURCES})
+  mt_validate_list("mt_python_binding(${_ARG_NAME})" "INCLUDE_DIRECTORIES" ${_ARG_INCLUDE_DIRECTORIES})
+  mt_validate_list("mt_python_binding(${_ARG_NAME})" "LINK_LIBRARIES" ${_ARG_LINK_LIBRARIES})
+  mt_validate_list("mt_python_binding(${_ARG_NAME})" "COMPILE_OPTIONS" ${_ARG_COMPILE_OPTIONS})
 
   foreach(var ${_ARG_HEADERS_VARS})
     mt_append_momentum_filelist("${var}" _ARG_HEADERS)
