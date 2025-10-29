@@ -29,7 +29,9 @@
 
 #include <cmath>
 #include <fstream>
+#include <functional>
 #include <numeric>
+#include <set>
 #include <unordered_map>
 #include <variant>
 
@@ -317,6 +319,18 @@ std::vector<double> extractPropertyFloatArray(const ofbx::IElement* element, con
         "For property {}, expected float array but got {}.",
         what,
         propertyTypeStr(prop->getType()));
+  }
+}
+
+void stripNamespace(const ofbx::Object* obj) {
+  // Find the last colon in the name
+  const char* lastColon = std::strrchr(obj->name, ':');
+  // If we found a colon, strip the namespace by moving the string
+  if (lastColon) {
+    // Point to the character after the last colon (the actual name without namespace)
+    const char* newName = lastColon + 1;
+    // Move the name portion to the beginning of the string, including null terminator (+1)
+    std::memmove(const_cast<char*>(obj->name), newName, std::strlen(newName) + 1);
   }
 }
 
@@ -865,21 +879,30 @@ MatrixXf parseAnimation(
     bool permissive) {
   // Return motion in numJointParameters X numFrames
   MatrixXf motion;
-  std::vector<const ofbx::AnimationCurveNode*> animCurves;
+  std::vector<const ofbx::AnimationCurveNode*> skeletonAnimCurves;
 
-  // Collect all anim curves
+  // Collect animation curves only for skeleton joints (not markers)
   int iLayer = 0;
   while (const ofbx::AnimationLayer* animLayer = animStack->getLayer(iLayer++)) {
     int iCurve = 0;
     while (const ofbx::AnimationCurveNode* curve = animLayer->getCurveNode(iCurve++)) {
-      animCurves.push_back(curve);
+      // Only collect curves that belong to skeleton joints
+      const ofbx::Object* bone = curve->getBone();
+      if (bone) {
+        for (const ofbx::Object* jointNode : boneFbxNodes) {
+          if (bone == jointNode) {
+            skeletonAnimCurves.push_back(curve);
+            break;
+          }
+        }
+      }
     }
   }
-  if (animCurves.empty()) {
+  if (skeletonAnimCurves.empty()) {
     return {};
   }
 
-  const double totalSeconds = getMaxSeconds(animCurves);
+  const double totalSeconds = getMaxSeconds(skeletonAnimCurves);
   const size_t numFrames = ceil(totalSeconds * fps) + 1;
   motion.setZero(skeleton.joints.size() * kParametersPerJoint, numFrames);
 
@@ -903,7 +926,7 @@ MatrixXf parseAnimation(
   std::vector<bool> writtenJoints(skeleton.joints.size() * kParametersPerJoint, false);
 
   // Curves on the same node will be added together.
-  for (const ofbx::AnimationCurveNode* curveNode : animCurves) {
+  for (const ofbx::AnimationCurveNode* curveNode : skeletonAnimCurves) {
     // Find the skeleton joint
     const size_t jointIndex = findJointIndex(curveNode->getBone(), boneFbxNodes);
     if (jointIndex == kInvalidIndex) {
@@ -996,6 +1019,160 @@ std::tuple<std::unique_ptr<ofbx::u8[]>, size_t> readFileToBuffer(const filesyste
   return std::make_tuple(std::move(buffer), length);
 }
 
+// Parse marker sequence from FBX animation data
+MarkerSequence
+parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const float fps) {
+  MarkerSequence result;
+  result.fps = fps;
+
+  if (!scene || scene->getAnimationStackCount() == 0) {
+    return result;
+  }
+
+  // Find the "Markers" node in the scene hierarchy
+  const ofbx::Object* markersRoot = nullptr;
+  std::function<const ofbx::Object*(const ofbx::Object*)> findMarkersRoot =
+      [&](const ofbx::Object* node) -> const ofbx::Object* {
+    if (!node) {
+      return nullptr;
+    }
+
+    if (std::string(node->name) == "Markers") {
+      // Check if this is a Momentum markers root by looking for the custom property
+      auto* markerRootProp = resolveProperty(*node, kMomentumMarkersRootProperty);
+      if (markerRootProp) {
+        return node;
+      }
+    }
+
+    int childIndex = 0;
+    while (const ofbx::Object* child = node->resolveObjectLink(childIndex++)) {
+      if (auto* found = findMarkersRoot(child)) {
+        return found;
+      }
+    }
+    return nullptr;
+  };
+
+  markersRoot = findMarkersRoot(root);
+  if (!markersRoot) {
+    return result;
+  }
+
+  // Collect marker nodes (children of Markers root)
+  // Only include nodes with the Momentum_Marker custom property
+  std::vector<const ofbx::Object*> markerNodes;
+  std::vector<std::string> markerNames;
+  int childIndex = 0;
+  while (const ofbx::Object* child = markersRoot->resolveObjectLink(childIndex++)) {
+    // Check if this is a Momentum marker by looking for the custom property
+    auto* markerProp = resolveProperty(*child, kMomentumMarkerProperty);
+    if (markerProp) {
+      markerNodes.push_back(child);
+      markerNames.push_back(std::string(child->name));
+    }
+  }
+
+  if (markerNodes.empty()) {
+    return result;
+  }
+
+  // Get animation data for all marker nodes
+  const ofbx::AnimationStack* animStack = scene->getAnimationStack(0);
+  if (!animStack) {
+    return result;
+  }
+
+  // Collect animation curves only for marker nodes
+  std::vector<const ofbx::AnimationCurveNode*> markerAnimCurves;
+  int iLayer = 0;
+  while (const ofbx::AnimationLayer* animLayer = animStack->getLayer(iLayer++)) {
+    int iCurve = 0;
+    while (const ofbx::AnimationCurveNode* curve = animLayer->getCurveNode(iCurve++)) {
+      // Only collect curves that belong to marker nodes
+      const ofbx::Object* bone = curve->getBone();
+      if (bone) {
+        for (const ofbx::Object* markerNode : markerNodes) {
+          if (bone == markerNode) {
+            markerAnimCurves.push_back(curve);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (markerAnimCurves.empty()) {
+    return result;
+  }
+
+  // Determine the total number of frames based on marker animation only
+  const double totalSeconds = getMaxSeconds(markerAnimCurves);
+  const size_t numFrames = std::ceil(totalSeconds * fps) + 1;
+  result.frames.resize(numFrames);
+
+  // Parse animation curves for each marker
+  for (size_t markerIndex = 0; markerIndex < markerNodes.size(); ++markerIndex) {
+    const ofbx::Object* markerNode = markerNodes[markerIndex];
+    const std::string& markerName = markerNames[markerIndex];
+
+    // Find animation curves for this marker's translation
+    const ofbx::AnimationCurveNode* translationCurve = nullptr;
+    for (const ofbx::AnimationCurveNode* curveNode : markerAnimCurves) {
+      if (curveNode->getBone() == markerNode) {
+        const auto& property = curveNode->getBoneLinkProperty();
+        if (property == "Lcl Translation") {
+          translationCurve = curveNode;
+          break;
+        }
+      }
+    }
+
+    if (translationCurve) {
+      // Collect all unique keyframe times across X, Y, Z channels
+      std::set<ofbx::i64> keyframeTimes;
+      for (size_t iChannel = 0; iChannel < 3; ++iChannel) {
+        const ofbx::AnimationCurve* channel = translationCurve->getCurve(iChannel);
+        if (channel == nullptr) {
+          continue;
+        }
+        const int keyCount = channel->getKeyCount();
+        if (keyCount <= 0) {
+          continue;
+        }
+        const ofbx::i64* times = channel->getKeyTime();
+        for (int i = 0; i < keyCount; ++i) {
+          keyframeTimes.insert(times[i]);
+        }
+      }
+
+      // For each unique keyframe time, add a marker at that frame
+      // This matches GLTF behavior: only add markers at explicitly keyed frames
+      for (ofbx::i64 fbxTime : keyframeTimes) {
+        const double timeInSeconds = ofbx::fbxTimeToSeconds(fbxTime);
+        const auto frameIndex = static_cast<size_t>(std::lround(timeInSeconds * fps));
+
+        // Skip if frame index is out of bounds
+        if (frameIndex >= numFrames) {
+          continue;
+        }
+
+        // Evaluate position at this specific keyframe time
+        const ofbx::DVec3 position = translationCurve->getNodeLocalTransform(timeInSeconds);
+
+        Marker marker;
+        marker.name = markerName;
+        marker.pos = toEigen(position);
+        marker.occluded = false;
+
+        result.frames[frameIndex].push_back(marker);
+      }
+    }
+  }
+
+  return result;
+}
+
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     const gsl::span<const std::byte> inputData,
     KeepLocators keepLocators,
@@ -1021,6 +1198,14 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       ofbx::load(fbxCharDataRaw.data(), (int32_t)length, (ofbx::u16)loadFlags), ofbx_deleter);
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
+
+  // Strip all namespaces from all node names in the scene
+  for (int i = 0; i < scene->getAllObjectCount(); ++i) {
+    const ofbx::Object* obj = scene->getAllObjects()[i];
+    if (obj && obj->name[0] != '\0') {
+      stripNamespace(obj);
+    }
+  }
 
   const auto [skeleton, jointFbxNodes, locators, collision] =
       parseSkeleton(scene->getRoot(), {}, permissive);
@@ -1122,6 +1307,34 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
       keepLocators,
       permissive,
       loadBlendShapes);
+}
+
+MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename) {
+  auto [buffer, length] = readFileToBuffer(filename);
+  MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
+  auto fbxCharDataRaw = gsl::make_span(buffer.get(), length);
+
+  auto ofbx_deleter = [](ofbx::IScene* s) { s->destroy(); };
+  // We don't currently use blend shapes for anything and they can be very
+  // expensive to load. Ignore stuff in the scene that we don't support.
+  auto loadFlags = ofbx::LoadFlags::IGNORE_CAMERAS | ofbx::LoadFlags::IGNORE_LIGHTS |
+      ofbx::LoadFlags::IGNORE_VIDEOS | ofbx::LoadFlags::IGNORE_MATERIALS |
+      ofbx::LoadFlags::IGNORE_BLEND_SHAPES;
+
+  std::unique_ptr<ofbx::IScene, decltype(ofbx_deleter)> scene(
+      ofbx::load(fbxCharDataRaw.data(), (int32_t)length, (ofbx::u16)loadFlags), ofbx_deleter);
+  MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
+  MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
+
+  // Strip all namespaces from all node names in the scene
+  for (int i = 0; i < scene->getAllObjectCount(); ++i) {
+    const ofbx::Object* obj = scene->getAllObjects()[i];
+    if (obj && obj->name[0] != '\0') {
+      stripNamespace(obj);
+    }
+  }
+
+  return parseMarkerSequence(scene.get(), scene->getRoot(), scene->getSceneFrameRate());
 }
 
 } // namespace momentum

@@ -17,6 +17,17 @@
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
 
+// Forward declaration for unified save function
+namespace momentum {
+void saveCharacterToFile(
+    const filesystem::path& filename,
+    const Character& character,
+    const MatrixXf& motion,
+    const VectorXf& offsets,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    float fps);
+} // namespace momentum
+
 namespace pymomentum {
 
 momentum::Character loadGLTFCharacterFromFile(const std::string& path) {
@@ -163,7 +174,9 @@ void saveFBXCharacterToFile(
     const float fps,
     std::optional<const Eigen::MatrixXf> motion,
     std::optional<const Eigen::VectorXf> offsets,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo) {
+    std::optional<const std::vector<std::vector<momentum::Marker>>> markers,
+    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    const std::string& fbxNamespace) {
   if (motion.has_value() && offsets.has_value()) {
     momentum::saveFbx(
         path,
@@ -172,9 +185,17 @@ void saveFBXCharacterToFile(
         offsets.value(),
         fps,
         true, /*saveMesh*/
-        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo());
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+        fbxNamespace);
   } else {
-    momentum::saveFbxModel(path, character);
+    momentum::saveFbxModel(
+        path,
+        character,
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        fbxNamespace);
   }
 }
 
@@ -183,7 +204,9 @@ void saveFBXCharacterToFileWithJointParams(
     const momentum::Character& character,
     const float fps,
     std::optional<const Eigen::MatrixXf> jointParams,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo) {
+    std::optional<const std::vector<std::vector<momentum::Marker>>> markers,
+    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    const std::string& fbxNamespace) {
   if (jointParams.has_value()) {
     momentum::saveFbxWithJointParams(
         path,
@@ -191,10 +214,34 @@ void saveFBXCharacterToFileWithJointParams(
         jointParams.value().transpose(),
         fps,
         true, /*saveMesh*/
-        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo());
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+        fbxNamespace);
   } else {
-    momentum::saveFbxModel(path, character);
+    momentum::saveFbxModel(
+        path,
+        character,
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        fbxNamespace);
   }
+}
+
+void saveCharacterToFile(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    std::optional<const Eigen::MatrixXf> motion,
+    std::optional<const Eigen::VectorXf> offsets,
+    std::optional<const std::vector<std::vector<momentum::Marker>>> markers) {
+  momentum::saveCharacterToFile(
+      path,
+      character,
+      motion.has_value() ? motion.value().transpose() : Eigen::MatrixXf{},
+      offsets.value_or(Eigen::VectorXf{}),
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      fps);
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(

@@ -59,14 +59,26 @@ void saveFBXCharacterToFile(
     float fps,
     std::optional<const Eigen::MatrixXf> motion,
     std::optional<const Eigen::VectorXf> offsets,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo);
+    std::optional<const std::vector<std::vector<momentum::Marker>>> markers,
+    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    const std::string& fbxNamespace = "");
 
 void saveFBXCharacterToFileWithJointParams(
     const std::string& path,
     const momentum::Character& character,
     float fps,
     std::optional<const Eigen::MatrixXf> jointParams,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo);
+    std::optional<const std::vector<std::vector<momentum::Marker>>> markers,
+    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    const std::string& fbxNamespace = "");
+
+void saveCharacterToFile(
+    const std::string& path,
+    const momentum::Character& character,
+    float fps,
+    std::optional<const Eigen::MatrixXf> motion,
+    std::optional<const Eigen::VectorXf> offsets,
+    std::optional<const std::vector<std::vector<momentum::Marker>>> markers);
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(
     const std::string& gltfFilename);

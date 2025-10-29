@@ -8,6 +8,7 @@
 #pragma once
 
 #include <momentum/character/fwd.h>
+#include <momentum/character/marker.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/math/types.h>
 
@@ -77,7 +78,17 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     bool permissive = false,
     LoadBlendShapes loadBlendShape = LoadBlendShapes::No);
 
-// Permissive mode allows saving mesh-only characters (without skin weights).
+/// Save a character with animation to an FBX file.
+/// @param filename Path to the output FBX file
+/// @param character The character to save
+/// @param poses Model parameters for each frame (empty for bind pose only)
+/// @param identity Identity pose parameters (empty to use bind pose)
+/// @param framerate Animation framerate in frames per second
+/// @param saveMesh Whether to include mesh geometry in the output
+/// @param coordSystemInfo Coordinate system configuration for the FBX file
+/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
+/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
+/// "ns:")
 void saveFbx(
     const filesystem::path& filename,
     const Character& character,
@@ -86,9 +97,21 @@ void saveFbx(
     double framerate = 120.0,
     bool saveMesh = false,
     const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
-    bool permissive = false);
+    bool permissive = false,
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    const std::string& fbxNamespace = "");
 
-// Permissive mode allows saving mesh-only characters (without skin weights).
+/// Save a character with animation using joint parameters directly.
+/// @param filename Path to the output FBX file
+/// @param character The character to save
+/// @param jointParams Joint parameters for each frame (empty for bind pose only)
+/// @param framerate Animation framerate in frames per second
+/// @param saveMesh Whether to include mesh geometry in the output
+/// @param coordSystemInfo Coordinate system configuration for the FBX file
+/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
+/// @param markerSequence Optional marker sequence data to save with the character
+/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
+/// "ns:")
 void saveFbxWithJointParams(
     const filesystem::path& filename,
     const Character& character,
@@ -96,14 +119,35 @@ void saveFbxWithJointParams(
     double framerate = 120.0,
     bool saveMesh = false,
     const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
-    bool permissive = false);
+    bool permissive = false,
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    const std::string& fbxNamespace = "");
 
-// A shorthand of saveFbx() to save both the skeleton and mesh as a model but without any animation
-// Permissive mode allows saving mesh-only characters (without skin weights).
+/// Save a character model (skeleton and mesh) without animation.
+/// @param filename Path to the output FBX file
+/// @param character The character to save
+/// @param coordSystemInfo Coordinate system configuration for the FBX file
+/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
+/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
+/// "ns:")
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
     const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
-    bool permissive = false);
+    bool permissive = false,
+    const std::string& fbxNamespace = "");
 
+/// Loads a MarkerSequence from an FBX file.
+///
+/// This function reads motion capture marker data from an FBX file and returns
+/// it as a MarkerSequence. The markers must be stored in the FBX scene hierarchy
+/// under a "Markers" root node, and each marker node must have the custom property
+/// "Momentum_Marker" to be recognized. The Markers root node must have the custom
+/// property "Momentum_Markers_Root" to be identified.
+///
+/// @param[in] filename Path to the FBX file containing marker data.
+/// @return A MarkerSequence object containing the marker animation data, including
+///         marker positions per frame and fps. Returns an empty sequence if no
+///         markers or animations are found.
+MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename);
 } // namespace momentum
