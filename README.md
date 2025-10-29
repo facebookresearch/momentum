@@ -30,9 +30,11 @@ numerical optimization solvers to apply human motion in various applications.
 Pre-built binaries are available for Windows, macOS, and Linux:
 
 ```bash
-# Python (PyPI)
-pip install pymomentum-cpu      # CPU version
-pip install pymomentum-gpu      # GPU version with CUDA
+# Python (PyPI) - uv preferred over pip
+uv add pymomentum-cpu           # CPU version
+uv add pymomentum-gpu           # GPU version with CUDA
+pip install pymomentum-cpu      # Alternative: using pip
+pip install pymomentum-gpu
 
 # Python (Conda/Pixi)
 pixi add pymomentum             # Auto-detects GPU/CPU

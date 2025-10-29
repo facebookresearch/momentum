@@ -25,15 +25,13 @@ Choose your preferred installation method based on your workflow:
 **Best for:** Standard Python projects, virtual environments, pip-based workflows.
 
 ```bash
-# Install CPU version
+# Using uv (preferred over pip)
+uv add pymomentum-cpu   # CPU version
+uv add pymomentum-gpu   # GPU version (requires CUDA)
+
+# Alternative: Using pip
 pip install pymomentum-cpu
-
-# Install GPU version (requires CUDA)
 pip install pymomentum-gpu
-
-# Alternative: Using uv (faster pip replacement)
-uv pip install pymomentum-cpu
-uv pip install pymomentum-gpu
 ```
 
 **Browse packages:** [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
