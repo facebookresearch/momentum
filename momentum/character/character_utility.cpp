@@ -598,7 +598,7 @@ Character replaceSkeletonHierarchy(
       tgtCharacter.blendShape};
 }
 
-Character removeJoints(const Character& character, gsl::span<const size_t> jointsToRemove) {
+Character removeJoints(const Character& character, std::span<const size_t> jointsToRemove) {
   std::vector<bool> toRemove(character.skeleton.joints.size(), false);
   for (const auto& j : jointsToRemove) {
     MT_THROW_IF(j >= character.skeleton.joints.size(), "Invalid joint found in removeJoints.");

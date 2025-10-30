@@ -16,11 +16,11 @@
 namespace momentum {
 
 std::vector<std::vector<momentum::PositionData>> createConstraintData(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const momentum::LocatorList& locators);
 
 std::vector<std::vector<momentum::SkinnedLocatorConstraint>> createSkinnedConstraintData(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const momentum::SkinnedLocatorList& locators);
 
 // TODO: remove the one in momentum

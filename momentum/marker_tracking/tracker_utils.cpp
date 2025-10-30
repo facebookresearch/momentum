@@ -27,7 +27,7 @@ using namespace momentum;
 namespace momentum {
 
 std::vector<std::vector<PositionData>> createConstraintData(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const LocatorList& locators) {
   std::vector<std::vector<PositionData>> results(markerData.size());
 
@@ -62,7 +62,7 @@ std::vector<std::vector<PositionData>> createConstraintData(
 }
 
 std::vector<std::vector<SkinnedLocatorConstraint>> createSkinnedConstraintData(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const SkinnedLocatorList& locators) {
   std::vector<std::vector<SkinnedLocatorConstraint>> results(markerData.size());
 

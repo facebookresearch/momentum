@@ -9,7 +9,7 @@
 
 #include <momentum/math/types.h>
 
-#include <gsl/span>
+#include <span>
 
 #include <string>
 #include <vector>
@@ -54,7 +54,7 @@ struct PolygonData {
 };
 
 std::vector<Eigen::Vector3i> triangulate(
-    gsl::span<const uint32_t> indices,
-    gsl::span<const uint32_t> offsets);
+    std::span<const uint32_t> indices,
+    std::span<const uint32_t> offsets);
 
 } // namespace momentum

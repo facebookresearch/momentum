@@ -51,7 +51,7 @@ namespace momentum {
 std::vector<size_t> sampleFrames(
     momentum::Character& character,
     const MatrixXf& initialMotion,
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const ParameterSet& parameters,
     const size_t frameStride,
     const size_t numSamples) {
@@ -185,7 +185,7 @@ std::vector<size_t> sampleFrames(
 /// @param firstFramePoseConstraintSet Name of pose constraint set for first frame
 /// @return Solved motion parameters matrix (parameters x frames)
 Eigen::MatrixXf trackSequence(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const Character& character,
     const ParameterSet& globalParams,
     const MatrixXf& initialMotion,
@@ -231,7 +231,7 @@ Eigen::MatrixXf trackSequence(
 /// @param firstFramePoseConstraintSet Name of pose constraint set for first frame
 /// @return Solved motion parameters matrix (parameters x frames)
 Eigen::MatrixXf trackSequence(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const Character& character,
     const ParameterSet& globalParams,
     const MatrixXf& initialMotion,
@@ -455,7 +455,7 @@ Eigen::MatrixXf trackSequence(
 /// @param frameStride Process every frameStride-th frame (1 = all frames)
 /// @return Solved motion parameters matrix (parameters x frames) with fixed identity
 Eigen::MatrixXf trackPosesPerframe(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const Character& character,
     const ModelParameters& globalParams,
     const TrackingConfig& config,
@@ -639,7 +639,7 @@ Eigen::MatrixXf trackPosesPerframe(
 /// @param frameIndices Vector of specific frame indices to solve
 /// @return Solved motion parameters matrix (parameters x frames) with poses for selected frames
 Eigen::MatrixXf trackPosesForFrames(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const Character& character,
     const MatrixXf& initialMotion,
     const TrackingConfig& config,
@@ -810,7 +810,7 @@ Character addSkinnedLocatorParametersToTransform(Character character) {
 /// @param character Character model to calibrate (modified in-place)
 /// @param identity Output identity parameters (scaling, blend shapes)
 void calibrateModel(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
     Character& character,
     ModelParameters& identity) {
@@ -1044,7 +1044,7 @@ void calibrateModel(
 /// @param identity Fixed identity parameters (scaling, blend shapes)
 /// @param character Character model to calibrate (locators modified in-place)
 void calibrateLocators(
-    const gsl::span<const std::vector<Marker>> markerData,
+    const std::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
     const ModelParameters& identity,
     Character& character) {
@@ -1151,7 +1151,7 @@ void calibrateLocators(
 /// @param character Character model (may be modified if calibration is enabled)
 /// @return Refined motion parameters matrix with improved temporal consistency
 MatrixXf refineMotion(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const MatrixXf& motion,
     const RefineConfig& config,
     momentum::Character& character) {
@@ -1211,7 +1211,7 @@ MatrixXf refineMotion(
 /// @param character Character model with locators
 /// @return Pair of (average_error, max_error) in world units
 std::pair<float, float> getLocatorError(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const MatrixXf& motion,
     momentum::Character& character) {
   const size_t numFrames = markerData.size();

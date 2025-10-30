@@ -103,7 +103,7 @@ void logJoints(
 void logMarkers(
     const rerun::RecordingStream& rec,
     const std::string& streamName,
-    gsl::span<const Marker> markers) {
+    std::span<const Marker> markers) {
   const rerun::Color kPurple(120, 120, 255);
   std::vector<rerun::Position3D> points3d;
   std::vector<std::string> labels;
@@ -166,7 +166,7 @@ void logMarkerLocatorCorrespondence(
     const std::string& streamName,
     const std::map<std::string, size_t>& locatorLookup,
     const LocatorState& locatorState,
-    gsl::span<const Marker> markers,
+    std::span<const Marker> markers,
     const float kPositionErrorThreshold) {
   if (locatorLookup.empty()) {
     // No correspondence provided.
@@ -215,7 +215,7 @@ void logModelParams(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names,
+    std::span<const std::string> names,
     const Eigen::VectorXf& params) {
   // TODO: check names and params have the same size
   const size_t nParams = params.size();
@@ -233,7 +233,7 @@ void logJointParams(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names,
+    std::span<const std::string> names,
     const Eigen::VectorXf& params) {
   // TODO: check names vs params size
 
@@ -255,7 +255,7 @@ void logModelParamNames(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names) {
+    std::span<const std::string> names) {
   for (const auto& name : names) {
     if (name.find("root") != std::string::npos) {
       rec.log_static(fmt::format("{}/{}", worldPrefix, name), rerun::SeriesLine().with_name(name));
@@ -269,7 +269,7 @@ void logJointParamNames(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names) {
+    std::span<const std::string> names) {
   for (const auto& name : names) {
     for (const auto& jointParameterName : kJointParameterNames) {
       const std::string channelName = name + "_" + jointParameterName;

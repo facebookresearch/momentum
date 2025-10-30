@@ -22,7 +22,7 @@ Character loadFbxCharacter(
 }
 
 Character loadFbxCharacter(
-    gsl::span<const std::byte> inputSpan,
+    std::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
     bool permissive,
     LoadBlendShapes loadBlendShapes) {
@@ -38,7 +38,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
-    gsl::span<const std::byte> inputSpan,
+    std::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
     bool permissive,
     LoadBlendShapes loadBlendShapes) {

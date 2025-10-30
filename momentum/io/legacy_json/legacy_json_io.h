@@ -13,7 +13,7 @@
 #include <momentum/math/fwd.h>
 
 #include <nlohmann/json.hpp>
-#include <gsl/span>
+#include <span>
 #include <string>
 
 namespace momentum {
@@ -36,7 +36,7 @@ namespace momentum {
 /// @param[in] jsonBuffer Buffer containing the legacy JSON data
 /// @return The loaded Character object
 /// @throws std::runtime_error if the buffer cannot be parsed
-[[nodiscard]] Character loadCharacterFromLegacyJsonBuffer(gsl::span<const std::byte> jsonBuffer);
+[[nodiscard]] Character loadCharacterFromLegacyJsonBuffer(std::span<const std::byte> jsonBuffer);
 
 /// Loads a Character from a legacy JSON string.
 ///

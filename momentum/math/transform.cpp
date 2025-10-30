@@ -94,8 +94,8 @@ TransformT<T> TransformT<T>::inverse() const {
 
 template <typename T>
 TransformT<T> blendTransforms(
-    gsl::span<const TransformT<T>> transforms,
-    gsl::span<const T> weights) {
+    std::span<const TransformT<T>> transforms,
+    std::span<const T> weights) {
   assert(transforms.size() == weights.size());
   if (transforms.empty()) {
     return TransformT<T>();
@@ -149,11 +149,11 @@ TransformT<T> slerp(const TransformT<T>& t1, const TransformT<T>& t2, T weight) 
 }
 
 template TransformT<float> blendTransforms(
-    gsl::span<const TransformT<float>> transforms,
-    gsl::span<const float> weights);
+    std::span<const TransformT<float>> transforms,
+    std::span<const float> weights);
 template TransformT<double> blendTransforms(
-    gsl::span<const TransformT<double>> transforms,
-    gsl::span<const double> weights);
+    std::span<const TransformT<double>> transforms,
+    std::span<const double> weights);
 
 template TransformT<float> slerp(const TransformT<float>&, const TransformT<float>&, float);
 template TransformT<double> slerp(const TransformT<double>&, const TransformT<double>&, double);

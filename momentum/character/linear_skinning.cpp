@@ -14,6 +14,7 @@
 #include "momentum/math/mesh.h"
 
 #include <dispenso/parallel_for.h>
+#include <gsl/narrow>
 
 namespace momentum {
 
@@ -246,7 +247,7 @@ Affine3f getInverseSSDTransformation(
 void applyInverseSSD(
     const TransformationList& inverseBindPose,
     const SkinWeights& skin,
-    gsl::span<const Vector3f> points,
+    std::span<const Vector3f> points,
     const SkeletonState& state,
     Mesh& mesh) {
   // some sanity checks
@@ -258,7 +259,7 @@ void applyInverseSSD(
 std::vector<Vector3f> applyInverseSSD(
     const TransformationList& inverseBindPose,
     const SkinWeights& skin,
-    gsl::span<const Vector3f> points,
+    std::span<const Vector3f> points,
     const SkeletonState& state) {
   MT_CHECK(
       state.jointState.size() == inverseBindPose.size(),

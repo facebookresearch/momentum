@@ -9,6 +9,8 @@
 
 #include "momentum/common/checks.h"
 
+#include <gsl/util>
+
 namespace momentum {
 
 void SkinWeights::set(

@@ -52,7 +52,7 @@ struct BlendShapeBase {
 
   /// @param index Index of the shape vector to set
   /// @param shapeVector Vector of vertex offsets
-  void setShapeVector(size_t index, gsl::span<const Vector3f> shapeVector);
+  void setShapeVector(size_t index, std::span<const Vector3f> shapeVector);
 
   [[nodiscard]] Eigen::Index shapeSize() const {
     return shapeVectors_.cols();

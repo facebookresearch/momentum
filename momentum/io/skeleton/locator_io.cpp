@@ -99,13 +99,13 @@ LocatorList loadLocators(
   instream.read((char*)buffer.get(), length);
 
   return loadLocatorsFromBuffer(
-      gsl::make_span<const std::byte>(reinterpret_cast<const std::byte*>(buffer.get()), length),
+      std::span<const std::byte>(reinterpret_cast<const std::byte*>(buffer.get()), length),
       skeleton,
       parameterTransform);
 }
 
 LocatorList loadLocatorsFromBuffer(
-    gsl::span<const std::byte> rawData,
+    std::span<const std::byte> rawData,
     const Skeleton& skeleton,
     const ParameterTransform& parameterTransform) {
   const std::string_view input(reinterpret_cast<const char*>(rawData.data()), rawData.size());

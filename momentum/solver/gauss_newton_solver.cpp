@@ -10,6 +10,8 @@
 #include "momentum/common/profile.h"
 #include "momentum/solver/solver_function.h"
 
+#include <gsl/util>
+
 namespace momentum {
 
 template <typename T>

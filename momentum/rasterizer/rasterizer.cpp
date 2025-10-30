@@ -20,7 +20,7 @@
 #include <cfloat>
 #include <cmath>
 #include <cstddef>
-#include <gsl/span>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -57,7 +57,7 @@ namespace {
 
 template <typename T, int N>
 Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> mapVector(
-    gsl::span<const Eigen::Matrix<T, N, 1>> vec) {
+    std::span<const Eigen::Matrix<T, N, 1>> vec) {
   if (vec.empty()) {
     return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>>(nullptr, 0);
   } else {
@@ -236,7 +236,7 @@ inline void rasterizeOneTriangle(
     const Matrix3f& uv,
     const Matrix3f& perVertexDiffuseColor,
     const PhongMaterial& material,
-    gsl::span<const Light> lights_eye,
+    std::span<const Light> lights_eye,
     float nearClip,
     index_t zBufferRowStride,
     float depthOffset,
@@ -1538,11 +1538,11 @@ void rasterizeMesh(
 }
 
 void rasterizeMesh(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3f> normals_world,
-    gsl::span<const Eigen::Matrix<uint32_t, 3, 1>> triangles,
-    gsl::span<const Eigen::Vector2f> textureCoords,
-    gsl::span<const Eigen::Matrix<uint32_t, 3, 1>> textureTriangles,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> normals_world,
+    std::span<const Eigen::Matrix<uint32_t, 3, 1>> triangles,
+    std::span<const Eigen::Vector2f> textureCoords,
+    std::span<const Eigen::Matrix<uint32_t, 3, 1>> textureTriangles,
     const Eigen::Ref<const Eigen::VectorXf>& perVertexDiffuseColor,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
@@ -1617,11 +1617,11 @@ void rasterizeMesh(
 }
 
 void rasterizeMesh(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3f> normals_world,
-    gsl::span<const Eigen::Vector3i> triangles,
-    gsl::span<const Eigen::Vector2f> textureCoords,
-    gsl::span<const Eigen::Vector3i> textureTriangles,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> normals_world,
+    std::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector2f> textureCoords,
+    std::span<const Eigen::Vector3i> textureTriangles,
     const Eigen::Ref<const Eigen::VectorXf>& perVertexDiffuseColor,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
@@ -1659,7 +1659,7 @@ void rasterizeMesh(
 }
 
 void rasterizeLines(
-    gsl::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> positions_world,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -1707,7 +1707,7 @@ void rasterizeLines(
 }
 
 void rasterizeCircles(
-    gsl::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> positions_world,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -1763,8 +1763,8 @@ void rasterizeCircles(
 }
 
 void rasterizeSplats(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3f> normals_world,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> normals_world,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -1793,8 +1793,8 @@ void rasterizeSplats(
 }
 
 void rasterizeWireframe(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3i> triangles,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -2093,7 +2093,7 @@ void rasterizeCircles2DImp(
 } // namespace
 
 void rasterizeLines2D(
-    gsl::span<const Eigen::Vector2f> positions_image,
+    std::span<const Eigen::Vector2f> positions_image,
     const Eigen::Vector3f& color,
     float thickness,
     Span3f rgbBuffer,
@@ -2114,7 +2114,7 @@ void rasterizeLines2D(
 }
 
 void rasterizeCircles2D(
-    gsl::span<const Eigen::Vector2f> positions_image,
+    std::span<const Eigen::Vector2f> positions_image,
     const std::optional<Eigen::Vector3f>& lineColor,
     const std::optional<Eigen::Vector3f>& fillColor,
     float lineThickness,

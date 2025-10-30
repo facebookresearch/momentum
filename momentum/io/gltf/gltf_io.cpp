@@ -496,7 +496,7 @@ size_t addBlendShapes(
   if (blendShape == nullptr) {
     // Initialize with the base mesh vertices
     blendShape =
-        std::make_unique<BlendShape>(gsl::span<const Vector3f>(baseVertices), numNewTargets);
+        std::make_unique<BlendShape>(std::span<const Vector3f>(baseVertices), numNewTargets);
 
     // Load each morph target
     for (size_t iTarget = 0; iTarget < numNewTargets; ++iTarget) {
@@ -521,7 +521,7 @@ size_t addBlendShapes(
           kNumNewVertices);
 
       // Set the shape vector for this target
-      blendShape->setShapeVector(iTarget, gsl::span<const Vector3f>(deltas));
+      blendShape->setShapeVector(iTarget, std::span<const Vector3f>(deltas));
     }
   } else {
     // Append to existing BlendShape
@@ -580,7 +580,7 @@ size_t addBlendShapes(
     }
 
     // Create a new BlendShape with the combined data
-    blendShape = std::make_unique<BlendShape>(gsl::span<const Vector3f>(newBaseShape), kMaxTargets);
+    blendShape = std::make_unique<BlendShape>(std::span<const Vector3f>(newBaseShape), kMaxTargets);
     blendShape->setShapeVectors(newShapeVectors);
   }
 
@@ -885,7 +885,7 @@ std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Do
 }
 
 fx::gltf::Document loadModel(
-    const std::variant<filesystem::path, gsl::span<const std::byte>>& input) {
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   fx::gltf::Document model;
   constexpr uint32_t kMax = std::numeric_limits<uint32_t>::max();
   constexpr fx::gltf::ReadQuotas kQuotas = {8, kMax, kMax};
@@ -905,7 +905,7 @@ fx::gltf::Document loadModel(
           } else {
             model = fx::gltf::LoadFromText(arg.string(), kQuotas);
           }
-        } else if constexpr (std::is_same_v<T, gsl::span<const std::byte>>) {
+        } else if constexpr (std::is_same_v<T, std::span<const std::byte>>) {
           ispanstream inputStream(arg);
           model = fx::gltf::LoadFromBinary(inputStream, "", kQuotas);
         }
@@ -916,7 +916,7 @@ fx::gltf::Document loadModel(
 }
 
 Character loadModelAndCharacter(
-    const std::variant<filesystem::path, gsl::span<const std::byte>>& input) {
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   Character result;
   try {
     // Set maximum filesize to 4 gigabyte (glb hard limit due to uint32).
@@ -946,7 +946,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(fx::gltf::Doc
 }
 
 std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotionCommon(
-    const std::variant<filesystem::path, gsl::span<const std::byte>>& input) {
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   // ---------------------------------------------
   // load Skeleton and Mesh
   // ---------------------------------------------
@@ -970,7 +970,7 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotionCommon(
 }
 
 std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacterCommon(
-    const std::variant<filesystem::path, gsl::span<const std::byte>>& input,
+    const std::variant<filesystem::path, std::span<const std::byte>>& input,
     const Character& character) {
   const auto [loadedChar, motion, identity, fps] = loadCharacterWithMotionCommon(input);
   return {
@@ -982,7 +982,7 @@ std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacterCommon(
 fx::gltf::Document makeCharacterDocument(
     const Character& character,
     const float fps,
-    gsl::span<const SkeletonState> skeletonStates,
+    std::span<const SkeletonState> skeletonStates,
     const std::vector<std::vector<Marker>>& markerSequence,
     bool embedResource,
     const GltfOptions& options) {
@@ -1032,7 +1032,7 @@ Character loadGltfCharacterInternal(
 // Function to load a glTF file and extract motion data stored in the native GLTF format
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
 loadCharacterWithSkeletonStatesCommon(
-    const std::variant<filesystem::path, gsl::span<const std::byte>>& input) {
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   const fx::gltf::Document model = loadModel(input);
   std::vector<size_t> nodeToObjectMap;
   Character character = loadGltfCharacterInternal(model, nodeToObjectMap);
@@ -1162,7 +1162,7 @@ Character loadGltfCharacter(const filesystem::path& gltfFilename) {
   return loadModelAndCharacter(gltfFilename);
 }
 
-Character loadGltfCharacter(gsl::span<const std::byte> byteSpan) {
+Character loadGltfCharacter(std::span<const std::byte> byteSpan) {
   return loadModelAndCharacter(byteSpan);
 }
 
@@ -1187,12 +1187,12 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
 }
 
 std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
-    gsl::span<const std::byte> byteSpan) {
+    std::span<const std::byte> byteSpan) {
   return loadCharacterWithMotionCommon(byteSpan);
 }
 
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
-loadCharacterWithSkeletonStates(gsl::span<const std::byte> byteSpan) {
+loadCharacterWithSkeletonStates(std::span<const std::byte> byteSpan) {
   return loadCharacterWithSkeletonStatesCommon(byteSpan);
 }
 
@@ -1208,7 +1208,7 @@ std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
 }
 
 std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
-    const gsl::span<const std::byte> byteSpan,
+    const std::span<const std::byte> byteSpan,
     const Character& character) {
   return loadMotionOnCharacterCommon(byteSpan, character);
 }
@@ -1329,7 +1329,7 @@ void saveCharacter(
     const filesystem::path& filename,
     const Character& character,
     const float fps,
-    gsl::span<const SkeletonState> skeletonStates,
+    std::span<const SkeletonState> skeletonStates,
     const std::vector<std::vector<Marker>>& markerSequence,
     const GltfFileFormat fileFormat,
     const GltfOptions& options) {

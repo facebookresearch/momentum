@@ -51,6 +51,6 @@ namespace momentum {
 /// @return int The main subject's index in the input vector. If no main subject found, -1 is
 /// returned.
 /// @note This function is exposed mainly for unit tests.
-[[nodiscard]] int findMainSubjectIndex(gsl::span<const MarkerSequence> markerSequences);
+[[nodiscard]] int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences);
 
 } // namespace momentum

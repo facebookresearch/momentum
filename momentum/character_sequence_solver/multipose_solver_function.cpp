@@ -20,7 +20,7 @@ template <typename T>
 MultiposeSolverFunctionT<T>::MultiposeSolverFunctionT(
     const Skeleton* skel,
     const ParameterTransformT<T>* parameterTransform,
-    gsl::span<const int> universal,
+    std::span<const int> universal,
     const size_t frames)
     : skeleton_(skel), parameterTransform_(parameterTransform) {
   MT_CHECK(universal.size() == static_cast<size_t>(parameterTransform_->numAllModelParameters()));

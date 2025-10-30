@@ -64,9 +64,9 @@ void StateSequenceErrorFunctionT<T>::setRotationTargetWeights(const Eigen::Vecto
 
 template <typename T>
 double StateSequenceErrorFunctionT<T>::getError(
-    gsl::span<const ModelParametersT<T>> /* modelParameters */,
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> /* meshStates */) const {
+    std::span<const ModelParametersT<T>> /* modelParameters */,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> /* meshStates */) const {
   MT_PROFILE_FUNCTION();
 
   // loop over all joints and check for smoothness
@@ -104,9 +104,9 @@ double StateSequenceErrorFunctionT<T>::getError(
 
 template <typename T>
 double StateSequenceErrorFunctionT<T>::getGradient(
-    gsl::span<const ModelParametersT<T>> /* modelParameters */,
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> /* meshStates */,
+    std::span<const ModelParametersT<T>> /* modelParameters */,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> /* meshStates */,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
 
@@ -235,9 +235,9 @@ size_t StateSequenceErrorFunctionT<T>::getJacobianSize() const {
 
 template <typename T>
 double StateSequenceErrorFunctionT<T>::getJacobian(
-    gsl::span<const ModelParametersT<T>> /* modelParameters */,
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> /* meshStates */,
+    std::span<const ModelParametersT<T>> /* modelParameters */,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> /* meshStates */,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian_full,
     Eigen::Ref<Eigen::VectorX<T>> residual_full,
     int& usedRows) const {

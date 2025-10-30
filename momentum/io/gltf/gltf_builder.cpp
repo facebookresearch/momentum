@@ -98,7 +98,7 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
   // Add faces to mesh
   if ((!mesh.faces.empty()) && (mesh.faces[0].size() > 0)) {
     prim.mode = fx::gltf::Primitive::Mode::Triangles;
-    const gsl::span<const int32_t> faces(&mesh.faces[0][0], mesh.faces.size() * 3);
+    const std::span<const int32_t> faces(&mesh.faces[0][0], mesh.faces.size() * 3);
     prim.indices = createAccessorBuffer<const int32_t>(model, faces);
     setBufferView(model, prim.indices, fx::gltf::BufferView::TargetType::ElementArrayBuffer);
   } else {
@@ -136,7 +136,7 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
     def["texcoords"] = createAccessorBuffer<const Vector2f>(model, mesh.texcoords, true);
     setBufferView(model, def["texcoords"], fx::gltf::BufferView::TargetType::ArrayBuffer);
 
-    const gsl::span<const int32_t> texFaces(
+    const std::span<const int32_t> texFaces(
         &mesh.texcoord_faces[0][0], mesh.texcoord_faces.size() * 3);
     def["texfaces"] = createAccessorBuffer<const int32_t>(model, texFaces);
     setBufferView(model, def["texfaces"], fx::gltf::BufferView::TargetType::ArrayBuffer);
@@ -177,7 +177,7 @@ void addMorphTargetsToModel(
     prim.targets.emplace_back();
     auto& attr = prim.targets.back();
 
-    gsl::span<const Eigen::Vector3f> span(
+    std::span<const Eigen::Vector3f> span(
         reinterpret_cast<Eigen::Vector3f*>(deltas.data()), static_cast<size_t>(deltas.size() / 3));
     attr["POSITION"] = createAccessorBuffer<const Vector3f>(model, span, true);
     setBufferView(model, attr["POSITION"], fx::gltf::BufferView::TargetType::ArrayBuffer);
@@ -249,7 +249,10 @@ void addMorphWeightsToModel(
   animation.channels.emplace_back();
   auto& channel = animation.channels.back();
   channel.sampler = createSampler<const float>(
-      model, animation, gsl::make_span(weights.data(), numWeights * numFrames), timestampIdx);
+      model,
+      animation,
+      std::span<const float>(weights.data(), numWeights * numFrames),
+      timestampIdx);
   channel.target.node = meshIndex;
   channel.target.path = "weights";
 }
@@ -287,7 +290,7 @@ const auto kUnitCubeGreen = createUnitCube(Eigen::Vector3b(0, 255, 0));
 void addActorAnimationToModel(
     fx::gltf::Document& model,
     const float fps,
-    gsl::span<const std::vector<momentum::Marker>> markerSequence,
+    std::span<const std::vector<momentum::Marker>> markerSequence,
     const GltfBuilder::MarkerMesh markerMesh,
     const std::string& animName) {
   if (markerSequence.empty()) {
@@ -457,8 +460,8 @@ void addSkeletonStatesToModel(
     fx::gltf::Document& model,
     const Character& character,
     const float fps,
-    gsl::span<const SkeletonState> skeletonStates,
-    gsl::span<const size_t> jointToNodeMap,
+    std::span<const SkeletonState> skeletonStates,
+    std::span<const size_t> jointToNodeMap,
     const std::string& motionName = "default") {
   const auto numFrames = skeletonStates.size();
   if (numFrames == 0) {
@@ -582,14 +585,14 @@ void addMotionToModel(
     if (!parameterNames.empty() && motion.size() > 0) {
       def["motion"]["parameterNames"] = parameterNames;
       def["motion"]["poses"] = createAccessorBuffer<const float>(
-          model, gsl::span<const float>(motion.data(), motion.size()));
+          model, std::span<const float>(motion.data(), motion.size()));
       fullAnimation = true;
     }
 
     if (!jointNames.empty() && identity.size() > 0) {
       def["motion"]["jointNames"] = jointNames;
       def["motion"]["offsets"] = createAccessorBuffer<const float>(
-          model, gsl::span<const float>(identity.data(), identity.size()));
+          model, std::span<const float>(identity.data(), identity.size()));
       fullAnimation = true;
     }
   } else {
@@ -1011,7 +1014,7 @@ std::vector<size_t> GltfBuilder::getCharacterMotions(const std::string& characte
 
 void GltfBuilder::addMarkerSequence(
     const float fps,
-    gsl::span<const std::vector<momentum::Marker>> markers,
+    std::span<const std::vector<momentum::Marker>> markers,
     const MarkerMesh markerMesh,
     const std::string& animName) {
   setFps(fps);
@@ -1053,7 +1056,7 @@ void GltfBuilder::save(
 void GltfBuilder::addSkeletonStates(
     const Character& character,
     const float fps,
-    gsl::span<const SkeletonState> skeletonStates,
+    std::span<const SkeletonState> skeletonStates,
     const std::string& customName) {
   setFps(fps);
   if (impl_->characterData.find(character.name) == impl_->characterData.end()) {

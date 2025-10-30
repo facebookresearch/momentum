@@ -91,7 +91,7 @@ struct RefineConfig : public TrackingConfig {
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
 Eigen::MatrixXf trackSequence(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const momentum::Character& character,
     const momentum::ParameterSet& globalParams,
     const Eigen::MatrixXf& initialMotion,
@@ -119,7 +119,7 @@ Eigen::MatrixXf trackSequence(
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
 Eigen::MatrixXf trackSequence(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const momentum::Character& character,
     const momentum::ParameterSet& globalParams,
     const Eigen::MatrixXf& initialMotion,
@@ -141,7 +141,7 @@ Eigen::MatrixXf trackSequence(
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
 Eigen::MatrixXf trackPosesPerframe(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const momentum::Character& character,
     const momentum::ModelParameters& globalParams,
     const TrackingConfig& config,
@@ -159,7 +159,7 @@ Eigen::MatrixXf trackPosesPerframe(
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
 Eigen::MatrixXf trackPosesForFrames(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const momentum::Character& character,
     const Eigen::MatrixXf& initialMotion,
     const TrackingConfig& config,
@@ -174,7 +174,7 @@ Eigen::MatrixXf trackPosesForFrames(
 /// @param[in,out] identity Initial identity parameters that get updated in return. It could also
 /// hold the pose of the first frame for better initialization for tracking later.
 void calibrateModel(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const CalibrationConfig& config,
     momentum::Character& character,
     momentum::ModelParameters& identity);
@@ -188,13 +188,13 @@ void calibrateModel(
 /// updated in return. We overwrite the locators in the input character so we don't have to
 /// duplicate the character object inside the function.
 void calibrateLocators(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const CalibrationConfig& config,
     const momentum::ModelParameters& identity,
     momentum::Character& character);
 
 Eigen::MatrixXf refineMotion(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const Eigen::MatrixXf& motion,
     const RefineConfig& config,
     momentum::Character& character);
@@ -206,7 +206,7 @@ Eigen::MatrixXf refineMotion(
 /// @param[in] character Character definition
 /// @return average per frame error and max marker error
 std::pair<float, float> getLocatorError(
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const Eigen::MatrixXf& motion,
     momentum::Character& character);
 

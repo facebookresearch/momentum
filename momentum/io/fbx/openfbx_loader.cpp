@@ -997,7 +997,7 @@ std::tuple<std::unique_ptr<ofbx::u8[]>, size_t> readFileToBuffer(const filesyste
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
-    const gsl::span<const std::byte> inputData,
+    const std::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool loadAnim,
     bool permissive,
@@ -1081,7 +1081,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 } // namespace
 
 Character loadOpenFbxCharacter(
-    const gsl::span<const std::byte> inputData,
+    const std::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool permissive,
     LoadBlendShapes loadBlendShapes) {
@@ -1104,7 +1104,7 @@ Character loadOpenFbxCharacter(
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
-    gsl::span<const std::byte> inputData,
+    std::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool permissive,
     LoadBlendShapes loadBlendShapes) {
