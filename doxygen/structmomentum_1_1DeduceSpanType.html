@@ -97,33 +97,33 @@ $(document).ready(function(){initNavTree('structmomentum_1_1DeduceSpanType.html'
 </div><!--header-->
 <div class="contents">
 
-<p>A utility struct that facilitates the deduction of a <code>gsl::span</code> type from a given type.  
+<p>A utility struct that facilitates the deduction of a <code>std::span</code> type from a given type.  
  <a href="structmomentum_1_1DeduceSpanType.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="math_2types_8h_source.html">types.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:aedb313fa27f505f279e70acfdf598786" id="r_aedb313fa27f505f279e70acfdf598786"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786">type</a> = gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;</td></tr>
-<tr class="separator:aedb313fa27f505f279e70acfdf598786"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55526ce2f828cd93971d418331af2bfa" id="r_a55526ce2f828cd93971d418331af2bfa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa">type</a> = std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;</td></tr>
+<tr class="separator:a55526ce2f828cd93971d418331af2bfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-struct momentum::DeduceSpanType&lt; T &gt;</div><p>A utility struct that facilitates the deduction of a <code>gsl::span</code> type from a given type. </p>
-<p>This utility is particularly useful when a function accepts a <code>gsl::span&lt;Vector3&lt;T&gt;&gt;</code> as an argument, where the template argument of <code>gsl::span</code> is also a template. In such cases, direct deduction of the <code>gsl::span</code> type from other container types (e.g., <code>std::vector&lt;Vector3&lt;T&gt;&gt;</code>) at the call site may fail.</p>
-<p>By using this utility, the appropriate <code>gsl::span</code> type can be deduced automatically, ensuring smoother function calls and enhancing code readability.</p>
-<p>Example usage: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">foo</a>(<a class="code hl_typedef" href="structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786">DeduceSpanType&lt;Vector3f&gt;::type</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">points</a>); <span class="comment">// Equivalent to gsl::span&lt;Vector3f&gt;</span></div>
+struct momentum::DeduceSpanType&lt; T &gt;</div><p>A utility struct that facilitates the deduction of a <code>std::span</code> type from a given type. </p>
+<p>This utility is particularly useful when a function accepts a <code>std::span&lt;Vector3&lt;T&gt;&gt;</code> as an argument, where the template argument of <code>std::span</code> is also a template. In such cases, direct deduction of the <code>std::span</code> type from other container types (e.g., <code>std::vector&lt;Vector3&lt;T&gt;&gt;</code>) at the call site may fail.</p>
+<p>By using this utility, the appropriate <code>std::span</code> type can be deduced automatically, ensuring smoother function calls and enhancing code readability.</p>
+<p>Example usage: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">foo</a>(<a class="code hl_typedef" href="structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa">DeduceSpanType&lt;Vector3f&gt;::type</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">points</a>); <span class="comment">// Equivalent to std::span&lt;Vector3f&gt;</span></div>
 <div class="line"> </div>
 <div class="line">std::vector&lt;Vector3f&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">points</a>;</div>
 <div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">foo</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">points</a>);                                     <span class="comment">// This line will compile without any issues.</span></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
-<div class="ttc" id="astructmomentum_1_1DeduceSpanType_html_aedb313fa27f505f279e70acfdf598786"><div class="ttname"><a href="structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786">momentum::DeduceSpanType::type</a></div><div class="ttdeci">gsl::span&lt; T &gt; type</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00426">types.h:426</a></div></div>
-</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>The <code>gsl::span</code> generated by this utility gives a mutable view into the sequence. If an immutable view is needed, consider using <code>gsl::span&lt;const T&gt;</code> instead. </dd></dl>
+<div class="ttc" id="astructmomentum_1_1DeduceSpanType_html_a55526ce2f828cd93971d418331af2bfa"><div class="ttname"><a href="structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa">momentum::DeduceSpanType::type</a></div><div class="ttdeci">std::span&lt; T &gt; type</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00426">types.h:426</a></div></div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>The <code>std::span</code> generated by this utility gives a mutable view into the sequence. If an immutable view is needed, consider using <code>std::span&lt;const T&gt;</code> instead. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="math_2types_8h_source.html#l00425">425</a> of file <a class="el" href="math_2types_8h_source.html">types.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="aedb313fa27f505f279e70acfdf598786" name="aedb313fa27f505f279e70acfdf598786"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedb313fa27f505f279e70acfdf598786">&#9670;&#160;</a></span>type</h2>
+<a id="a55526ce2f828cd93971d418331af2bfa" name="a55526ce2f828cd93971d418331af2bfa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55526ce2f828cd93971d418331af2bfa">&#9670;&#160;</a></span>type</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -131,7 +131,7 @@ struct momentum::DeduceSpanType&lt; T &gt;</div><p>A utility struct that facilit
 template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a> <a class="el" href="structmomentum_1_1DeduceSpanType.html">momentum::DeduceSpanType</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::type =  gsl::span&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;</td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a> <a class="el" href="structmomentum_1_1DeduceSpanType.html">momentum::DeduceSpanType</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::type =  std::span&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -149,7 +149,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1DeduceSpanType.html">DeduceSpanType</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:43 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

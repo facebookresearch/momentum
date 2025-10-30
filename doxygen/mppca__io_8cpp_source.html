@@ -116,7 +116,7 @@ $(document).ready(function(){initNavTree('mppca__io_8cpp_source.html',''); initR
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemomentum.html">momentum</a> {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
 <div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">   18</a></span>std::shared_ptr&lt;const Mppca&gt; <a class="code hl_function" href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">loadMppca</a>(<span class="keyword">const</span> gsl::span&lt;const unsigned char&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posePriorDataRaw</a>) {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">   18</a></span>std::shared_ptr&lt;const Mppca&gt; <a class="code hl_function" href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">loadMppca</a>(<span class="keyword">const</span> std::span&lt;const unsigned char&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posePriorDataRaw</a>) {</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="comment">// Load from passed file data</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  std::stringstream <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">instream</a>;</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  std::copy(</div>
@@ -124,21 +124,21 @@ $(document).ready(function(){initNavTree('mppca__io_8cpp_source.html',''); initR
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posePriorDataRaw</a>.end(),</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>      std::ostream_iterator&lt;unsigned char&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">instream</a>));</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">loadMppca</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">instream</a>);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">loadMppca</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">instream</a>);</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>}</div>
 </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a56de99579d44e8209b54b3107dc3039e">   29</a></span>std::shared_ptr&lt;const Mppca&gt; <a class="code hl_function" href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">loadMppca</a>(<span class="keyword">const</span> std::string&amp; name) {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a56de99579d44e8209b54b3107dc3039e">   29</a></span>std::shared_ptr&lt;const Mppca&gt; <a class="code hl_function" href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">loadMppca</a>(<span class="keyword">const</span> std::string&amp; name) {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  std::ifstream data(name, std::ios::in | std::ios::binary);</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <a class="code hl_define" href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a>(!data.good(), <span class="stringliteral">&quot;Error loading Mppca model: could not open file &#39;{}&#39;.&quot;</span>, name);</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">loadMppca</a>(data);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">loadMppca</a>(data);</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}</div>
 </div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a451522ca4c242443fcf19ac0e3ce4df7">   36</a></span>std::shared_ptr&lt;const Mppca&gt; <a class="code hl_function" href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">loadMppca</a>(std::istream&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputStream</a>) {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a451522ca4c242443fcf19ac0e3ce4df7">   36</a></span>std::shared_ptr&lt;const Mppca&gt; <a class="code hl_function" href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">loadMppca</a>(std::istream&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputStream</a>) {</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keyword">auto</span> result = std::make_shared&lt;Mppca&gt;();</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="comment">// try to load file</span></div>
@@ -232,8 +232,8 @@ $(document).ready(function(){initNavTree('mppca__io_8cpp_source.html',''); initR
 <div class="ttc" id="amppca_8h_html"><div class="ttname"><a href="mppca_8h.html">mppca.h</a></div></div>
 <div class="ttc" id="amppca__io_8h_html"><div class="ttname"><a href="mppca__io_8h.html">mppca_io.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a12d28033968b3ef64224546abcb5552e"><div class="ttname"><a href="namespacemomentum.html#a12d28033968b3ef64224546abcb5552e">momentum::loadMppca</a></div><div class="ttdeci">std::shared_ptr&lt; const Mppca &gt; loadMppca(const std::span&lt; const unsigned char &gt; posePriorDataRaw)</div><div class="ttdef"><b>Definition</b> <a href="mppca__io_8cpp_source.html#l00018">mppca_io.cpp:18</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a5b92d655cbc8999154eb70b27554afb3"><div class="ttname"><a href="namespacemomentum.html#a5b92d655cbc8999154eb70b27554afb3">momentum::loadMppca</a></div><div class="ttdeci">std::shared_ptr&lt; const Mppca &gt; loadMppca(const gsl::span&lt; const unsigned char &gt; posePriorDataRaw)</div><div class="ttdef"><b>Definition</b> <a href="mppca__io_8cpp_source.html#l00018">mppca_io.cpp:18</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a946ab1953d1fb51ba0a9d204ed46b68e"><div class="ttname"><a href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">momentum::MatrixXf</a></div><div class="ttdeci">MatrixX&lt; float &gt; MatrixXf</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00084">types.h:84</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a954f7505066845a67c868e1ae88a5b1e"><div class="ttname"><a href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">momentum::VectorXf</a></div><div class="ttdeci">VectorX&lt; float &gt; VectorXf</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00201">types.h:201</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ad0778f4670c7fffe2ed4cbdd0ef39ac1"><div class="ttname"><a href="namespacemomentum.html#ad0778f4670c7fffe2ed4cbdd0ef39ac1">momentum::saveMppca</a></div><div class="ttdeci">void saveMppca(const Mppca &amp;mppca, const std::string &amp;name)</div><div class="ttdef"><b>Definition</b> <a href="mppca__io_8cpp_source.html#l00084">mppca_io.cpp:84</a></div></div>
@@ -244,7 +244,7 @@ $(document).ready(function(){initNavTree('mppca__io_8cpp_source.html',''); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_be408ddeaaae0a91adcdd3f13093f868.html">skeleton</a></li><li class="navelem"><a class="el" href="mppca__io_8cpp.html">mppca_io.cpp</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

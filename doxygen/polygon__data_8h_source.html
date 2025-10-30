@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('polygon__data_8h_source.html',''); ini
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="math_2types_8h.html">momentum/math/types.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;gsl/span&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;span&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
@@ -155,15 +155,15 @@ $(document).ready(function(){initNavTree('polygon__data_8h_source.html',''); ini
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
 </div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>std::vector&lt;Eigen::Vector3i&gt; <a class="code hl_function" href="namespacemomentum.html#a0c7058ccedb98f23f526927835ac3d5d">triangulate</a>(</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    gsl::span&lt;const uint32_t&gt; indices,</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    gsl::span&lt;const uint32_t&gt; offsets);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>std::vector&lt;Eigen::Vector3i&gt; <a class="code hl_function" href="namespacemomentum.html#aa7598274bca20ed8c4e65a0f6a2901c2">triangulate</a>(</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    std::span&lt;const uint32_t&gt; indices,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    std::span&lt;const uint32_t&gt; offsets);</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="amath_2types_8h_html"><div class="ttname"><a href="math_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a0c7058ccedb98f23f526927835ac3d5d"><div class="ttname"><a href="namespacemomentum.html#a0c7058ccedb98f23f526927835ac3d5d">momentum::triangulate</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; triangulate(gsl::span&lt; const uint32_t &gt; indices, gsl::span&lt; const uint32_t &gt; offsets)</div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8cpp_source.html#l00017">polygon_data.cpp:17</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_aa7598274bca20ed8c4e65a0f6a2901c2"><div class="ttname"><a href="namespacemomentum.html#aa7598274bca20ed8c4e65a0f6a2901c2">momentum::triangulate</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; triangulate(std::span&lt; const uint32_t &gt; indices, std::span&lt; const uint32_t &gt; offsets)</div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8cpp_source.html#l00017">polygon_data.cpp:17</a></div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html"><div class="ttname"><a href="structmomentum_1_1PolygonData.html">momentum::PolygonData</a></div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8h_source.html#l00023">polygon_data.h:23</a></div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html_a2f93dfb7fbae4e7435ad1e8e92335c05"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a2f93dfb7fbae4e7435ad1e8e92335c05">momentum::PolygonData::errorMessage</a></div><div class="ttdeci">std::string errorMessage(size_t numVertices) const</div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8cpp_source.html#l00049">polygon_data.cpp:49</a></div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html_a56ed40b35d3af3d2e5ae3501f9b12ae1"><div class="ttname"><a href="structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1">momentum::PolygonData::offsets</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; offsets</div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8h_source.html#l00034">polygon_data.h:34</a></div></div>
@@ -178,7 +178,7 @@ $(document).ready(function(){initNavTree('polygon__data_8h_source.html',''); ini
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="polygon__data_8h.html">polygon_data.h</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

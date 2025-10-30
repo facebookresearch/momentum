@@ -1,1 +1,1 @@
-var structmomentum_1_1DeduceSpanType=[["type","structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786",null]];
+var structmomentum_1_1DeduceSpanType=[["type","structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa",null]];

@@ -126,7 +126,7 @@ $(document).ready(function(){initNavTree('math_2types_8h_source.html',''); initR
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#pragma warning(pop)</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;gsl/gsl&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;span&gt;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">//------------------------------------------------------------------------------</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// Define some additional Eigen types</span></div>
@@ -506,7 +506,7 @@ $(document).ready(function(){initNavTree('math_2types_8h_source.html',''); initR
 <div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00425" data-start="{" data-end="};">
 <div class="line"><a id="l00425" name="l00425"></a><span class="lineno"><a class="line" href="structmomentum_1_1DeduceSpanType.html">  425</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmomentum_1_1DeduceSpanType.html">DeduceSpanType</a> {</div>
-<div class="line"><a id="l00426" name="l00426"></a><span class="lineno"><a class="line" href="structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786">  426</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786">type</a> = gsl::span&lt;T&gt;;</div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno"><a class="line" href="structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa">  426</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa">type</a> = std::span&lt;T&gt;;</div>
 <div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>};</div>
 </div>
 <div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span> </div>
@@ -791,15 +791,15 @@ $(document).ready(function(){initNavTree('math_2types_8h_source.html',''); initR
 <div class="ttc" id="anamespacemomentum_html_afa9fb53c2986d77d519070c4498aa9ca"><div class="ttname"><a href="namespacemomentum.html#afa9fb53c2986d77d519070c4498aa9ca">momentum::Matrix1u</a></div><div class="ttdeci">Matrix1&lt; std::uint32_t &gt; Matrix1u</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00139">types.h:139</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_afbd341cee3af361a777645d84f812337"><div class="ttname"><a href="namespacemomentum.html#afbd341cee3af361a777645d84f812337">momentum::Vector2d</a></div><div class="ttdeci">Vector2&lt; double &gt; Vector2d</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00252">types.h:252</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_afecfda30cafd8f5044cec1756e93b9bb"><div class="ttname"><a href="namespacemomentum.html#afecfda30cafd8f5044cec1756e93b9bb">momentum::RowVector</a></div><div class="ttdeci">Eigen::Matrix&lt; T, 1, Dim &gt; RowVector</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00291">types.h:291</a></div></div>
-<div class="ttc" id="astructmomentum_1_1DeduceSpanType_html"><div class="ttname"><a href="structmomentum_1_1DeduceSpanType.html">momentum::DeduceSpanType</a></div><div class="ttdoc">A utility struct that facilitates the deduction of a gsl::span type from a given type.</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00425">types.h:425</a></div></div>
-<div class="ttc" id="astructmomentum_1_1DeduceSpanType_html_aedb313fa27f505f279e70acfdf598786"><div class="ttname"><a href="structmomentum_1_1DeduceSpanType.html#aedb313fa27f505f279e70acfdf598786">momentum::DeduceSpanType::type</a></div><div class="ttdeci">gsl::span&lt; T &gt; type</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00426">types.h:426</a></div></div>
+<div class="ttc" id="astructmomentum_1_1DeduceSpanType_html"><div class="ttname"><a href="structmomentum_1_1DeduceSpanType.html">momentum::DeduceSpanType</a></div><div class="ttdoc">A utility struct that facilitates the deduction of a std::span type from a given type.</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00425">types.h:425</a></div></div>
+<div class="ttc" id="astructmomentum_1_1DeduceSpanType_html_a55526ce2f828cd93971d418331af2bfa"><div class="ttname"><a href="structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa">momentum::DeduceSpanType::type</a></div><div class="ttdeci">std::span&lt; T &gt; type</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00426">types.h:426</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li><li class="navelem"><a class="el" href="math_2types_8h.html">types.h</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

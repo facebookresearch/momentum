@@ -424,7 +424,7 @@ $(document).ready(function(){initNavTree('urdf__io_8cpp_source.html',''); initRe
 <div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
 <div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00324" data-start="{" data-end="}">
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a7f6b6cd639265b24c0ee86dfef388e9f">  324</a></span><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterT&lt;T&gt;</a> <a class="code hl_function" href="namespacemomentum.html#a57701e5947a0a6f8c8cbbe33ba67d96b">loadUrdfCharacter</a>(gsl::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>) {</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a078ce9604575c703fe300b0d02597d9e">  324</a></span><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterT&lt;T&gt;</a> <a class="code hl_function" href="namespacemomentum.html#a57701e5947a0a6f8c8cbbe33ba67d96b">loadUrdfCharacter</a>(std::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>) {</div>
 <div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>  urdf::ModelInterfaceSharedPtr <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">urdfModel</a>;</div>
 <div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
 <div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>  <span class="keywordflow">try</span> {</div>
@@ -448,8 +448,8 @@ $(document).ready(function(){initNavTree('urdf__io_8cpp_source.html',''); initRe
 <div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>}</div>
 </div>
 <div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a8ff5a408ce1a2bed112a02de93428bbf">  347</a></span><span class="keyword">template</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterT&lt;float&gt;</a> <a class="code hl_function" href="namespacemomentum.html#a57701e5947a0a6f8c8cbbe33ba67d96b">loadUrdfCharacter</a>(gsl::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>);</div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="keyword">template</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterT&lt;double&gt;</a> <a class="code hl_function" href="namespacemomentum.html#a57701e5947a0a6f8c8cbbe33ba67d96b">loadUrdfCharacter</a>(gsl::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>);</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno"><a class="line" href="namespacemomentum.html#aaf7d8943fd1764cda3b4710f6158321d">  347</a></span><span class="keyword">template</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterT&lt;float&gt;</a> <a class="code hl_function" href="namespacemomentum.html#a57701e5947a0a6f8c8cbbe33ba67d96b">loadUrdfCharacter</a>(std::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>);</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="keyword">template</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CharacterT&lt;double&gt;</a> <a class="code hl_function" href="namespacemomentum.html#a57701e5947a0a6f8c8cbbe33ba67d96b">loadUrdfCharacter</a>(std::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>);</div>
 <div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
 <div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="aconstants_8h_html"><div class="ttname"><a href="constants_8h.html">constants.h</a></div></div>
@@ -485,7 +485,7 @@ $(document).ready(function(){initNavTree('urdf__io_8cpp_source.html',''); initRe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_4297f711d4568e603196250a862d58ff.html">urdf</a></li><li class="navelem"><a class="el" href="urdf__io_8cpp.html">urdf_io.cpp</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

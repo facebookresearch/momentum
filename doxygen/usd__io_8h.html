@@ -99,7 +99,7 @@ $(document).ready(function(){initNavTree('usd__io_8h.html',''); initResizable();
 <div class="textblock"><code>#include &lt;<a class="el" href="character_2fwd_8h_source.html">momentum/character/fwd.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="filesystem_8h_source.html">momentum/common/filesystem.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
-<code>#include &lt;gsl/span&gt;</code><br />
+<code>#include &lt;span&gt;</code><br />
 </div>
 <p><a href="usd__io_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -113,9 +113,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a92772fd591cc0c5fc3c7d934eb1a6260" id="r_a92772fd591cc0c5fc3c7d934eb1a6260"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a92772fd591cc0c5fc3c7d934eb1a6260">momentum::loadUsdCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputPath</a>)</td></tr>
 <tr class="memdesc:a92772fd591cc0c5fc3c7d934eb1a6260"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a USD character from a local file path.  <br /></td></tr>
 <tr class="separator:a92772fd591cc0c5fc3c7d934eb1a6260"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ca3ed94716088afceb78c7767a0b9a3" id="r_a7ca3ed94716088afceb78c7767a0b9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7ca3ed94716088afceb78c7767a0b9a3">momentum::loadUsdCharacter</a> (gsl::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>)</td></tr>
-<tr class="memdesc:a7ca3ed94716088afceb78c7767a0b9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a USD character from a buffer.  <br /></td></tr>
-<tr class="separator:a7ca3ed94716088afceb78c7767a0b9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68cff700ed3926d401caf0e54b10ec32" id="r_a68cff700ed3926d401caf0e54b10ec32"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a68cff700ed3926d401caf0e54b10ec32">momentum::loadUsdCharacter</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>)</td></tr>
+<tr class="memdesc:a68cff700ed3926d401caf0e54b10ec32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a USD character from a buffer.  <br /></td></tr>
+<tr class="separator:a68cff700ed3926d401caf0e54b10ec32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0eab2884ae866d71746c202ae61f32f" id="r_aa0eab2884ae866d71746c202ae61f32f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aa0eab2884ae866d71746c202ae61f32f">momentum::saveUsd</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
 <tr class="memdesc:aa0eab2884ae866d71746c202ae61f32f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save a character to a USD file.  <br /></td></tr>
 <tr class="separator:aa0eab2884ae866d71746c202ae61f32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,7 +126,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_b80d2ac3e54057ed5222b59115afcc36.html">usd</a></li><li class="navelem"><a class="el" href="usd__io_8h.html">usd_io.h</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

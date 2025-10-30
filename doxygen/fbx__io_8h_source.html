@@ -111,7 +111,7 @@ $(document).ready(function(){initNavTree('fbx__io_8h_source.html',''); initResiz
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="filesystem_8h.html">momentum/common/filesystem.h</a>&gt;</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;<a class="code" href="math_2types_8h.html">momentum/math/types.h</a>&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;gsl/span&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;span&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemomentum.html">momentum</a> {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
@@ -160,7 +160,7 @@ $(document).ready(function(){initNavTree('fbx__io_8h_source.html',''); initResiz
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// This is different from historical momentum behavior so it&#39;s off by default.</span></div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// Permissive mode allows loading  mesh-only characters (without skin weights).</span></div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a> <a class="code hl_function" href="namespacemomentum.html#a5d29f1b84ed406b58964fdde4c296f96">loadFbxCharacter</a>(</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    gsl::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    std::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>,</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocators</a> = <a class="code hl_enumvalue" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90cabafd7322c6e97d25b6299b5d6fe8920b">KeepLocators::No</a>,</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordtype">bool</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a> = <span class="keyword">false</span>,</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">loadBlendShapes</a> = <a class="code hl_enumvalue" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b">LoadBlendShapes::No</a>);</div>
@@ -174,7 +174,7 @@ $(document).ready(function(){initNavTree('fbx__io_8h_source.html',''); initResiz
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment">// Permissive mode allows loading mesh-only characters (without skin weights).</span></div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; <a class="code hl_function" href="namespacemomentum.html#ab405e96c5f9bb389aeb21096f3396f89">loadFbxCharacterWithMotion</a>(</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    gsl::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>,</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    std::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputSpan</a>,</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">keepLocatorss</a> = <a class="code hl_enumvalue" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90cabafd7322c6e97d25b6299b5d6fe8920b">KeepLocators::No</a>,</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordtype">bool</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">permissive</a> = <span class="keyword">false</span>,</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> <a class="code hl_function" href="namespacemomentum.html#a8fdaa36b2e45269350a6dd3302fa4e98">loadBlendShape</a> = <a class="code hl_enumvalue" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b">LoadBlendShapes::No</a>);</div>
@@ -248,7 +248,7 @@ $(document).ready(function(){initNavTree('fbx__io_8h_source.html',''); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="fbx__io_8h.html">fbx_io.h</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('fbx__memory__stream_8h_source.html',''
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;fbxsdk.h&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;fbxsdk/core/fbxstream.h&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;gsl/span&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;span&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
@@ -127,7 +127,7 @@ $(document).ready(function(){initNavTree('fbx__memory__stream_8h_source.html',''
 <div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classmomentum_1_1FbxMemoryStream.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="classmomentum_1_1FbxMemoryStream.html">FbxMemoryStream</a> : <span class="keyword">public</span> FbxStream {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <a class="code hl_class" href="classmomentum_1_1FbxMemoryStream.html">FbxMemoryStream</a>(gsl::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">buffer</a>, <span class="keywordtype">int</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pReaderId</a>);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <a class="code hl_class" href="classmomentum_1_1FbxMemoryStream.html">FbxMemoryStream</a>(std::span&lt;const std::byte&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">buffer</a>, <span class="keywordtype">int</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pReaderId</a>);</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <a class="code hl_function" href="classmomentum_1_1FbxMemoryStream.html#a6df00ecdfc5bd709ff18dbe997aab03b">~FbxMemoryStream</a>() <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">EState</a> <a class="code hl_function" href="classmomentum_1_1FbxMemoryStream.html#abc57af85c48f3248afa2814cfc759e47">GetState</a>() <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classmomentum_1_1FbxMemoryStream.html#a3cc5ae5105f2ad994a8d7c3e9b3ff805">Open</a>(<span class="keywordtype">void</span>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pStreamData</a>) <span class="keyword">override</span>;</div>
@@ -154,7 +154,7 @@ $(document).ready(function(){initNavTree('fbx__memory__stream_8h_source.html',''
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1FbxMemoryStream.html#aee03209e9cd9eed58f37d0e764a62327">ClearError</a>() <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  gsl::span&lt;const std::byte&gt; buffer_;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  std::span&lt;const std::byte&gt; buffer_;</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordtype">long</span> length_;</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#if FBX_VERSION_GE(2020, 3, 2)</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keyword">mutable</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">FbxInt64</a> position_{0};</div>
@@ -191,7 +191,7 @@ $(document).ready(function(){initNavTree('fbx__memory__stream_8h_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="fbx__memory__stream_8h.html">fbx_memory_stream.h</a></li>
-    <li class="footer">Generated on Thu Oct 30 2025 17:03:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Oct 30 2025 18:47:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
