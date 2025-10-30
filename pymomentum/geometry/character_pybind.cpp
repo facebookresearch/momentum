@@ -783,7 +783,7 @@ this is a legacy format that has historically been used in previous Python libra
           "load_legacy_json_from_bytes",
           [](const py::bytes& jsonBytes) {
             std::string jsonString(jsonBytes);
-            gsl::span<const std::byte> buffer(
+            std::span<const std::byte> buffer(
                 reinterpret_cast<const std::byte*>(jsonString.data()), jsonString.size());
             return mm::loadCharacterFromLegacyJsonBuffer(buffer);
           },

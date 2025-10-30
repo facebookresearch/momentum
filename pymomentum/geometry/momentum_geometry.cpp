@@ -47,7 +47,7 @@ using torch::autograd::variable_list;
 namespace pymomentum {
 
 template <typename T>
-gsl::span<const T> toSpan(const pybind11::bytes& bytes) {
+std::span<const T> toSpan(const pybind11::bytes& bytes) {
   pybind11::gil_scoped_acquire acquire;
   py::buffer_info info(py::buffer(bytes).request());
   const T* data = reinterpret_cast<const T*>(info.ptr);
@@ -55,7 +55,7 @@ gsl::span<const T> toSpan(const pybind11::bytes& bytes) {
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
-  return gsl::make_span<const T>(data, length);
+  return std::span<const T>(data, length);
 }
 
 // Use tensor.index_select() and tensor.index_copy() to copy data from srcTensor
