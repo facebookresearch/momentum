@@ -85,9 +85,9 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - save_gltf(path, character, fps, motion, offsets, markers, options)
   // - save_gltf_from_skel_states(path, character, fps, skel_states,
   // joint_params, markers, options)
-  // - save_fbx(path, character, fps, motion, offsets, coord_system_info, fbx_namespace)
+  // - save_fbx(path, character, fps, motion, offsets, coord_system_info, markers, fbx_namespace)
   // - save_fbx_with_joint_params(path, character, fps, joint_params, coord_system_info,
-  // fbx_namespace)
+  // markers, fbx_namespace)
   // =====================================================
   characterClass
       .def(
@@ -743,6 +743,7 @@ support the proprietary momentum motion format for storing model parameters in G
 :param motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
 :param offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
 :param coord_system_info: [Optional] FBX coordinate system info
+:param markers: Additional marker (3d positions) data in [n_frames][n_markers]
 :param fbx_namespace: [Optional] Namespace prefix for all node names (e.g., "ns" becomes "ns:")
       )",
           py::arg("path"),
@@ -750,6 +751,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("fps") = 120.f,
           py::arg("motion") = std::optional<const Eigen::MatrixXf>{},
           py::arg("offsets") = std::optional<const Eigen::VectorXf>{},
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
           py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{},
           py::arg("fbx_namespace") = "")
       .def_static(
@@ -763,12 +765,14 @@ support the proprietary momentum motion format for storing model parameters in G
 :param fps: Frequency in frames per second
 :param joint_params: [Optional] 2D pose matrix in [n_frames x n_parameters]
 :param coord_system_info: [Optional] FBX coordinate system info
+:param markers: Additional marker (3d positions) data in [n_frames][n_markers]
 :param fbx_namespace: [Optional] Namespace prefix for all node names (e.g., "ns" becomes "ns:")
       )",
           py::arg("path"),
           py::arg("character"),
           py::arg("fps") = 120.f,
           py::arg("joint_params") = std::optional<const Eigen::MatrixXf>{},
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
           py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{},
           py::arg("fbx_namespace") = "")
       // Legacy JSON I/O methods

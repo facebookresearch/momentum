@@ -8,6 +8,7 @@
 #pragma once
 
 #include <momentum/character/fwd.h>
+#include <momentum/character/marker.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/math/types.h>
@@ -15,6 +16,10 @@
 #include <span>
 
 namespace momentum {
+
+// Custom property names for identifying Momentum-specific FBX nodes
+constexpr const char* kMomentumMarkersRootProperty = "Momentum_Markers_Root";
+constexpr const char* kMomentumMarkerProperty = "Momentum_Marker";
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
@@ -45,5 +50,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+
+MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename);
 
 } // namespace momentum

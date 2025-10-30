@@ -59,6 +59,7 @@ void saveFBXCharacterToFile(
     float fps,
     std::optional<const Eigen::MatrixXf> motion,
     std::optional<const Eigen::VectorXf> offsets,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
     std::string_view fbxNamespace = "");
 
@@ -67,6 +68,7 @@ void saveFBXCharacterToFileWithJointParams(
     const momentum::Character& character,
     float fps,
     std::optional<const Eigen::MatrixXf> jointParams,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
     std::string_view fbxNamespace = "");
 
