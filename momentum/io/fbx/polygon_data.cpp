@@ -15,8 +15,8 @@ namespace momentum {
 inline constexpr uint32_t kInvalidTexCoord = static_cast<uint32_t>(-1);
 
 std::vector<Eigen::Vector3i> triangulate(
-    gsl::span<const uint32_t> indices,
-    gsl::span<const uint32_t> offsets) {
+    std::span<const uint32_t> indices,
+    std::span<const uint32_t> offsets) {
   if (indices.empty()) {
     return {};
   }

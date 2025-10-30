@@ -11,7 +11,7 @@
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/math/mppca.h>
 
-#include <gsl/span>
+#include <span>
 
 namespace momentum {
 

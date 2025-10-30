@@ -191,7 +191,7 @@ void saveMotion(
     const momentum::Character& character,
     const momentum::ModelParameters& identity,
     Eigen::MatrixXf& finalMotion,
-    gsl::span<const std::vector<momentum::Marker>> markerData,
+    std::span<const std::vector<momentum::Marker>> markerData,
     const double fps,
     const bool saveMarkerMesh) {
   const filesystem::path output(outFile);

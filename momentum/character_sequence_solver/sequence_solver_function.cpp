@@ -118,7 +118,7 @@ ModelParametersT<T> SequenceSolverFunctionT<T>::getUniversalParameters() const {
 
 template <typename T>
 Eigen::VectorX<T> SequenceSolverFunctionT<T>::getJoinedParameterVectorFromFrameParameters(
-    gsl::span<const ModelParametersT<T>> frameParameters) const {
+    std::span<const ModelParametersT<T>> frameParameters) const {
   MT_CHECK(frameParameters.size() == frameParameters_.size());
   const auto nFrames = getNumFrames();
 

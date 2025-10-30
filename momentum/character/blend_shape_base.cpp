@@ -9,6 +9,8 @@
 
 #include "momentum/common/checks.h"
 
+#include <gsl/narrow>
+
 namespace momentum {
 
 template <typename T>
@@ -33,7 +35,7 @@ void BlendShapeBase::applyDeltas(
 BlendShapeBase::BlendShapeBase(const size_t modelSize, const size_t numShapes)
     : shapeVectors_(MatrixXf::Zero(modelSize * 3, numShapes)) {}
 
-void BlendShapeBase::setShapeVector(const size_t index, gsl::span<const Vector3f> shape) {
+void BlendShapeBase::setShapeVector(const size_t index, std::span<const Vector3f> shape) {
   MT_CHECK(modelSize() == shape.size(), "{} is not {}", modelSize(), shape.size());
   MT_CHECK(
       gsl::narrow<Eigen::Index>(shape.size()) * 3 == shapeVectors_.rows(),

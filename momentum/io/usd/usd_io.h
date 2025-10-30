@@ -11,7 +11,7 @@
 #include <momentum/common/filesystem.h>
 #include <momentum/math/types.h>
 
-#include <gsl/span>
+#include <span>
 
 namespace momentum {
 
@@ -25,7 +25,7 @@ Character loadUsdCharacter(const filesystem::path& inputPath);
 ///
 /// @param[in] inputSpan The buffer containing the USD character data.
 /// @return The loaded Character object.
-Character loadUsdCharacter(gsl::span<const std::byte> inputSpan);
+Character loadUsdCharacter(std::span<const std::byte> inputSpan);
 
 /// Save a character to a USD file.
 ///

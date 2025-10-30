@@ -11,16 +11,16 @@
 #include <momentum/common/filesystem.h>
 #include <momentum/math/types.h>
 
-#include <gsl/span>
+#include <span>
 
 namespace momentum {
 
 /// Loads a character from a URDF file.
 template <typename T = float>
-[[nodiscard]] CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath);
+CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath);
 
 /// Loads a character from a URDF file using the provided byte data.
 template <typename T = float>
-[[nodiscard]] CharacterT<T> loadUrdfCharacter(gsl::span<const std::byte> bytes);
+[[nodiscard]] CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes);
 
 } // namespace momentum

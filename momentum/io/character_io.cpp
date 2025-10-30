@@ -69,7 +69,7 @@ namespace {
 
 [[nodiscard]] std::optional<Character> loadCharacterByFormatFromBuffer(
     const CharacterFormat format,
-    const gsl::span<const std::byte> fileBuffer) {
+    const std::span<const std::byte> fileBuffer) {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(fileBuffer);
   } else if (format == CharacterFormat::Fbx) {
@@ -117,9 +117,9 @@ Character loadFullCharacter(
 
 Character loadFullCharacterFromBuffer(
     CharacterFormat format,
-    const gsl::span<const std::byte> characterBuffer,
-    const gsl::span<const std::byte> paramBuffer,
-    const gsl::span<const std::byte> locBuffer) {
+    const std::span<const std::byte> characterBuffer,
+    const std::span<const std::byte> paramBuffer,
+    const std::span<const std::byte> locBuffer) {
   // Load character
   auto character = loadCharacterByFormatFromBuffer(format, characterBuffer);
   MT_THROW_IF(!character, "Failed to load buffered character");

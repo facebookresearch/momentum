@@ -85,7 +85,7 @@ momentum::rasterizer::Camera makeOutsideInCamera(
 momentum::rasterizer::Camera frameMesh(
     const momentum::rasterizer::Camera& cam_in,
     const momentum::Character& character,
-    gsl::span<const momentum::SkeletonState> skelStates) {
+    std::span<const momentum::SkeletonState> skelStates) {
   const float min_z = 5;
   std::vector<Eigen::Vector3f> positions;
   for (const auto& s : skelStates) {
@@ -106,7 +106,7 @@ momentum::rasterizer::Camera frameMesh(
 
 momentum::rasterizer::Camera makeOutsideInCameraForBody(
     const momentum::Character& character,
-    gsl::span<const momentum::SkeletonState> skelStates,
+    std::span<const momentum::SkeletonState> skelStates,
     const int imageHeight_pixels,
     const int imageWidth_pixels,
     const float focalLength_mm,
@@ -143,8 +143,8 @@ momentum::rasterizer::Camera makeOutsideInCameraForBody(
   }
   const std::vector<double> weights(skelStates.size(), 1.0 / skelStates.size());
   const auto blendedTransform = momentum::blendTransforms(
-      gsl::span<const momentum::TransformT<double>>(spineLocalToWorldTransforms),
-      gsl::span<const double>(weights));
+      std::span<const momentum::TransformT<double>>(spineLocalToWorldTransforms),
+      std::span<const double>(weights));
   const Eigen::Affine3f spineLocalToWorldXF = blendedTransform.toAffine3().cast<float>();
 
   const Eigen::Vector3f body_center_world_cm = spineLocalToWorldXF.translation();

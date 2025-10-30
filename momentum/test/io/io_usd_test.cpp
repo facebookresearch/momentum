@@ -144,7 +144,7 @@ TEST_F(UsdIoTest, LoadFromBuffer) {
   file.close();
 
   // Load from buffer
-  const auto character = loadUsdCharacter(gsl::span<const std::byte>(buffer));
+  const auto character = loadUsdCharacter(std::span<const std::byte>(buffer));
 
   // Verify character was loaded correctly
   EXPECT_GT(character.skeleton.joints.size(), 0);

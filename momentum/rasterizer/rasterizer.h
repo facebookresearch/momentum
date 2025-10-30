@@ -15,8 +15,8 @@
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/tensor.h>
 #include <Eigen/Geometry>
-#include <gsl/span>
 #include <optional>
+#include <span>
 
 namespace momentum::rasterizer {
 
@@ -227,7 +227,7 @@ void rasterizeMesh(
 /// depthOffset Depth offset for layered rendering @param imageOffset Pixel offset for comparative
 /// rendering
 void rasterizeLines(
-    gsl::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> positions_world,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -240,7 +240,7 @@ void rasterizeLines(
 
 /// Rasterize 3D line segments (flat array version)
 ///
-/// @see rasterizeLines(gsl::span<const Eigen::Vector3f>&, const Camera&, const Eigen::Matrix4f&,
+/// @see rasterizeLines(std::span<const Eigen::Vector3f>&, const Camera&, const Eigen::Matrix4f&,
 /// float, const Eigen::Vector3f&, float, Span2f, Span3f, float, const Eigen::Vector2f&)
 ///
 /// @param positions_world Flat array of 3D positions (x1,y1,z1,x2,y2,z2,...)
@@ -276,7 +276,7 @@ void rasterizeLines(
 /// @param depthOffset Depth offset for layered rendering
 /// @param imageOffset Pixel offset for comparative rendering
 void rasterizeCircles(
-    gsl::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> positions_world,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -291,7 +291,7 @@ void rasterizeCircles(
 
 /// Rasterize 3D circles (flat array version)
 ///
-/// @see rasterizeCircles(gsl::span<const Eigen::Vector3f>, const Camera&, const Eigen::Matrix4f&,
+/// @see rasterizeCircles(std::span<const Eigen::Vector3f>, const Camera&, const Eigen::Matrix4f&,
 /// float, const std::optional<Eigen::Vector3f>&, const std::optional<Eigen::Vector3f>&, float,
 /// float, Span2f, Span3f, float, const Eigen::Vector2f&)
 ///
@@ -322,11 +322,11 @@ void rasterizeCircles(
 /// @param normals_world Vector of 3D vertex normals in world space
 /// @param triangles Vector of triangles with uint32 indices
 void rasterizeMesh(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3f> normals_world,
-    gsl::span<const Eigen::Matrix<uint32_t, 3, 1>> triangles,
-    gsl::span<const Eigen::Vector2f> textureCoords,
-    gsl::span<const Eigen::Matrix<uint32_t, 3, 1>> textureTriangles,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> normals_world,
+    std::span<const Eigen::Matrix<uint32_t, 3, 1>> triangles,
+    std::span<const Eigen::Vector2f> textureCoords,
+    std::span<const Eigen::Matrix<uint32_t, 3, 1>> textureTriangles,
     const Eigen::Ref<const Eigen::VectorXf>& perVertexDiffuseColor,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
@@ -379,11 +379,11 @@ void rasterizeMesh(
 /// @param normals_world Vector of 3D vertex normals in world space
 /// @param triangles Vector of triangles with int32 indices
 void rasterizeMesh(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3f> normals_world,
-    gsl::span<const Eigen::Vector3i> triangles,
-    gsl::span<const Eigen::Vector2f> textureCoords,
-    gsl::span<const Eigen::Vector3i> textureTriangles,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> normals_world,
+    std::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector2f> textureCoords,
+    std::span<const Eigen::Vector3i> textureTriangles,
     const Eigen::Ref<const Eigen::VectorXf>& perVertexDiffuseColor,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
@@ -418,8 +418,8 @@ void rasterizeMesh(
 /// @param depthOffset Depth offset for layered rendering
 /// @param imageOffset Pixel offset for comparative rendering
 void rasterizeWireframe(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3i> triangles,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -433,7 +433,7 @@ void rasterizeWireframe(
 
 /// Rasterize mesh wireframe (flat array version)
 ///
-/// @see rasterizeWireframe(gsl::span<const Eigen::Vector3f>, gsl::span<const Eigen::Vector3i>,
+/// @see rasterizeWireframe(std::span<const Eigen::Vector3f>, std::span<const Eigen::Vector3i>,
 /// const Camera&, const Eigen::Matrix4f&, float, const Eigen::Vector3f&, float, Span2f, Span3f,
 /// bool, float, const Eigen::Vector2f&)
 ///
@@ -473,8 +473,8 @@ void rasterizeWireframe(
 /// @param depthOffset Depth offset for layered rendering
 /// @param imageOffset Pixel offset for comparative rendering
 void rasterizeSplats(
-    gsl::span<const Eigen::Vector3f> positions_world,
-    gsl::span<const Eigen::Vector3f> normals_world,
+    std::span<const Eigen::Vector3f> positions_world,
+    std::span<const Eigen::Vector3f> normals_world,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -499,7 +499,7 @@ void rasterizeSplats(
 /// pixels @param rgbBuffer Input/output RGB color buffer @param zBuffer **Optional** depth buffer
 /// (fills with zeros when provided) @param imageOffset Pixel offset for positioning
 void rasterizeLines2D(
-    gsl::span<const Eigen::Vector2f> positions_image,
+    std::span<const Eigen::Vector2f> positions_image,
     const Eigen::Vector3f& color,
     float thickness,
     Span3f rgbBuffer,
@@ -508,7 +508,7 @@ void rasterizeLines2D(
 
 /// Rasterize 2D line segments (flat array version)
 ///
-/// @see rasterizeLines2D(gsl::span<const Eigen::Vector2f>, const Eigen::Vector3f&, float, Span3f,
+/// @see rasterizeLines2D(std::span<const Eigen::Vector2f>, const Eigen::Vector3f&, float, Span3f,
 /// Span2f, const Eigen::Vector2f&)
 ///
 /// @param positions_image Flat array of 2D positions (x1,y1,x2,y2,...)
@@ -537,7 +537,7 @@ void rasterizeLines2D(
 /// @param zBuffer **Optional** depth buffer (fills with zeros when provided)
 /// @param imageOffset Pixel offset for positioning
 void rasterizeCircles2D(
-    gsl::span<const Eigen::Vector2f> positions_image,
+    std::span<const Eigen::Vector2f> positions_image,
     const std::optional<Eigen::Vector3f>& lineColor,
     const std::optional<Eigen::Vector3f>& fillColor,
     float lineThickness,
@@ -548,7 +548,7 @@ void rasterizeCircles2D(
 
 /// Rasterize 2D circles (flat array version)
 ///
-/// @see rasterizeCircles2D(gsl::span<const Eigen::Vector2f>, const std::optional<Eigen::Vector3f>&,
+/// @see rasterizeCircles2D(std::span<const Eigen::Vector2f>, const std::optional<Eigen::Vector3f>&,
 /// const std::optional<Eigen::Vector3f>&, float, float, Span3f, Span2f, const Eigen::Vector2f&)
 ///
 /// @param positions_image Flat array of 2D positions (x1,y1,x2,y2,...)

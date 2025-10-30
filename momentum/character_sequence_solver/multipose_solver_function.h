@@ -22,7 +22,7 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
   MultiposeSolverFunctionT(
       const Skeleton* skel,
       const ParameterTransformT<T>* parameterTransform,
-      gsl::span<const int> universal,
+      std::span<const int> universal,
       size_t frames);
   ~MultiposeSolverFunctionT() override;
 

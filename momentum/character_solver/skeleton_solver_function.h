@@ -13,7 +13,7 @@
 #include <momentum/character/types.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/solver/solver_function.h>
-#include <gsl/span>
+#include <span>
 
 namespace momentum {
 
@@ -23,7 +23,7 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
   SkeletonSolverFunctionT(
       const Character& character,
       const ParameterTransformT<T>& parameterTransform,
-      gsl::span<const std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions = {});
+      std::span<const std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions = {});
   ~SkeletonSolverFunctionT() override;
 
   double getError(const Eigen::VectorX<T>& parameters) final;

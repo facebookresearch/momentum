@@ -82,7 +82,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsFloat) {
       Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f)};
 
   // Apply identity transforms - points should remain the same
-  auto result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+  auto result = applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   ASSERT_EQ(result.size(), 3);
   EXPECT_TRUE(result[0].isApprox(Vector3f(1.0f, 0.0f, 0.0f)));
@@ -92,7 +92,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsFloat) {
   // Apply translation to joint 0
   skeletonState.jointState[0].transform.translation += Vector3f(1.0f, 2.0f, 3.0f);
 
-  result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+  result = applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   ASSERT_EQ(result.size(), 3);
   // Vertex 0: 100% influenced by joint 0
@@ -110,7 +110,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsFloat) {
   // Apply translation to joint 1
   skeletonState.jointState[1].transform.translation += Vector3f(2.0f, 0.0f, 1.0f);
 
-  result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+  result = applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   ASSERT_EQ(result.size(), 3);
   // Vertex 0: 100% influenced by joint 0
@@ -146,7 +146,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsDouble) {
 
   // Apply identity transforms - points should remain the same
   auto result =
-      applySSD(inverseBindPoseDouble, skin, gsl::span<const Vector3d>(points), skeletonStateDouble);
+      applySSD(inverseBindPoseDouble, skin, std::span<const Vector3d>(points), skeletonStateDouble);
 
   ASSERT_EQ(result.size(), 3);
   EXPECT_TRUE(result[0].isApprox(Vector3d(1.0, 0.0, 0.0)));
@@ -157,7 +157,7 @@ TEST_F(LinearSkinningTest, ApplySSDPointsDouble) {
   skeletonStateDouble.jointState[0].transform.translation += Vector3d(1.0, 2.0, 3.0);
 
   result =
-      applySSD(inverseBindPoseDouble, skin, gsl::span<const Vector3d>(points), skeletonStateDouble);
+      applySSD(inverseBindPoseDouble, skin, std::span<const Vector3d>(points), skeletonStateDouble);
 
   ASSERT_EQ(result.size(), 3);
   EXPECT_TRUE(result[0].isApprox(Vector3d(2.0, 2.0, 3.0)));
@@ -323,7 +323,7 @@ TEST_F(LinearSkinningTest, GetInverseSSDTransformation) {
   Vector3f transformedPoint = applySSD(
       inverseBindPose,
       singlePointSkin,
-      gsl::span<const Vector3f>(&originalPoint, 1),
+      std::span<const Vector3f>(&originalPoint, 1),
       skeletonState)[0];
   Vector3f recoveredPoint = inverseTransform * transformedPoint;
 
@@ -338,7 +338,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDPoints) {
 
   // Apply identity transforms - points should remain the same
   auto result =
-      applyInverseSSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+      applyInverseSSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   ASSERT_EQ(result.size(), 3);
   EXPECT_TRUE(result[0].isApprox(Vector3f(1.0f, 0.0f, 0.0f)));
@@ -350,11 +350,11 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDPoints) {
 
   // First apply forward skinning to get transformed points
   auto transformedPoints =
-      applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+      applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   // Then apply inverse skinning to get back original points
   result = applyInverseSSD(
-      inverseBindPose, skin, gsl::span<const Vector3f>(transformedPoints), skeletonState);
+      inverseBindPose, skin, std::span<const Vector3f>(transformedPoints), skeletonState);
 
   ASSERT_EQ(result.size(), 3);
   EXPECT_TRUE(result[0].isApprox(Vector3f(1.0f, 0.0f, 0.0f)));
@@ -377,14 +377,14 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDMesh) {
 
   // First apply forward skinning to get transformed points
   std::vector<Vector3f> transformedPoints =
-      applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(mesh.vertices), skeletonState);
+      applySSD(inverseBindPose, skin, std::span<const Vector3f>(mesh.vertices), skeletonState);
 
   // Then apply inverse skinning to mesh
   Mesh resultMesh = mesh;
   applyInverseSSD(
       inverseBindPose,
       skin,
-      gsl::span<const Vector3f>(transformedPoints),
+      std::span<const Vector3f>(transformedPoints),
       skeletonState,
       resultMesh);
 
@@ -405,7 +405,7 @@ TEST_F(LinearSkinningTest, ApplySSDErrors) {
   smallState.jointState.resize(1); // Only one joint
 
   MOMENTUM_EXPECT_DEATH(
-      applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), smallState), ".*");
+      applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), smallState), ".*");
 
   // Test with mismatched skin weights and points sizes
   SkinWeights smallSkin;
@@ -413,14 +413,14 @@ TEST_F(LinearSkinningTest, ApplySSDErrors) {
   smallSkin.weight.resize(2, kMaxSkinJoints);
 
   MOMENTUM_EXPECT_DEATH(
-      applySSD(inverseBindPose, smallSkin, gsl::span<const Vector3f>(points), skeletonState), ".*");
+      applySSD(inverseBindPose, smallSkin, std::span<const Vector3f>(points), skeletonState), ".*");
 
   // Test with invalid joint index in skin weights
   SkinWeights invalidSkin = skin;
   invalidSkin.index(0, 0) = 99; // Invalid joint index
 
   MOMENTUM_EXPECT_DEATH(
-      applySSD(inverseBindPose, invalidSkin, gsl::span<const Vector3f>(points), skeletonState),
+      applySSD(inverseBindPose, invalidSkin, std::span<const Vector3f>(points), skeletonState),
       ".*");
 }
 
@@ -480,7 +480,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDErrors) {
   smallState.jointState.resize(1); // Only one joint
 
   MOMENTUM_EXPECT_DEATH(
-      applyInverseSSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), smallState), ".*");
+      applyInverseSSD(inverseBindPose, skin, std::span<const Vector3f>(points), smallState), ".*");
 
   // Test with mismatched skin weights and points sizes
   SkinWeights smallSkin;
@@ -488,7 +488,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDErrors) {
   smallSkin.weight.resize(2, kMaxSkinJoints);
 
   MOMENTUM_EXPECT_DEATH(
-      applyInverseSSD(inverseBindPose, smallSkin, gsl::span<const Vector3f>(points), skeletonState),
+      applyInverseSSD(inverseBindPose, smallSkin, std::span<const Vector3f>(points), skeletonState),
       ".*");
 
   // Test with invalid joint index in skin weights
@@ -497,7 +497,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDErrors) {
 
   MOMENTUM_EXPECT_DEATH(
       applyInverseSSD(
-          inverseBindPose, invalidSkin, gsl::span<const Vector3f>(points), skeletonState),
+          inverseBindPose, invalidSkin, std::span<const Vector3f>(points), skeletonState),
       ".*");
 }
 
@@ -517,7 +517,7 @@ TEST_F(LinearSkinningTest, ApplyInverseSSDMeshErrors) {
 
   MOMENTUM_EXPECT_DEATH(
       applyInverseSSD(
-          inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState, smallMesh),
+          inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState, smallMesh),
       ".*");
 }
 
@@ -542,11 +542,11 @@ TEST_F(LinearSkinningTest, ComplexTransformations) {
   skeletonState.jointState[1].transform = TransformT<float>(transform1);
 
   // Apply SSD
-  auto result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+  auto result = applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   // Apply inverse SSD
   auto inverseResult =
-      applyInverseSSD(inverseBindPose, skin, gsl::span<const Vector3f>(result), skeletonState);
+      applyInverseSSD(inverseBindPose, skin, std::span<const Vector3f>(result), skeletonState);
 
   // Check that we get back the original points
   ASSERT_EQ(inverseResult.size(), 3);
@@ -571,7 +571,7 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
   }
 
   // Apply SSD
-  auto result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+  auto result = applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   // Points should be transformed by inverse bind pose
   ASSERT_EQ(result.size(), 3);
@@ -588,11 +588,11 @@ TEST_F(LinearSkinningTest, NonIdentityInverseBindPose) {
       Quaternionf(Eigen::AngleAxisf(pi() / 2, Vector3f::UnitY()));
 
   // Apply SSD again
-  result = applySSD(inverseBindPose, skin, gsl::span<const Vector3f>(points), skeletonState);
+  result = applySSD(inverseBindPose, skin, std::span<const Vector3f>(points), skeletonState);
 
   // Apply inverse SSD
   auto inverseResult =
-      applyInverseSSD(inverseBindPose, skin, gsl::span<const Vector3f>(result), skeletonState);
+      applyInverseSSD(inverseBindPose, skin, std::span<const Vector3f>(result), skeletonState);
 
   // Check that we get back the original points
   ASSERT_EQ(inverseResult.size(), 3);
@@ -618,7 +618,7 @@ TEST_F(LinearSkinningTest, ZeroWeights) {
 
   // Apply SSD
   auto result =
-      applySSD(inverseBindPose, zeroSkin, gsl::span<const Vector3f>(points), skeletonState);
+      applySSD(inverseBindPose, zeroSkin, std::span<const Vector3f>(points), skeletonState);
 
   ASSERT_EQ(result.size(), 3);
   // Vertex 0: 100% influenced by joint 0

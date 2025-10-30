@@ -20,7 +20,7 @@ namespace momentum {
 /// @param character Character definition for parameter mapping
 void saveMmo(
     const std::string& filename,
-    gsl::span<const VectorXf> poses,
+    std::span<const VectorXf> poses,
     const VectorXf& scale,
     const Character& character);
 
@@ -38,7 +38,7 @@ void saveMmo(
     const VectorXf& scale,
     const Character& character,
     const MatrixXf& additionalParameters = MatrixXf(),
-    gsl::span<const std::string> additionalParameterNames = std::vector<std::string>());
+    std::span<const std::string> additionalParameterNames = std::vector<std::string>());
 
 /// Save motion data with explicit parameter and joint names
 ///
@@ -51,8 +51,8 @@ void saveMmo(
     const std::string& filename,
     const MatrixXf& poses,
     const VectorXf& scale,
-    gsl::span<const std::string> parameterNames,
-    gsl::span<const std::string> jointNames);
+    std::span<const std::string> parameterNames,
+    std::span<const std::string> jointNames);
 
 /// Load motion data from file
 ///
@@ -77,7 +77,7 @@ std::tuple<MatrixXf, VectorXf> loadMmo(const std::string& filename, const Charac
 /// @return Tuple of (auxiliary data matrix, auxiliary parameter names without underscores)
 std::tuple<MatrixXf, std::vector<std::string>> getAuxiliaryDataFromMotion(
     const MatrixXf& poses,
-    gsl::span<const std::string> parameterNames);
+    std::span<const std::string> parameterNames);
 
 /// Map motion data from one parameter space to character parameter space
 ///
@@ -90,8 +90,8 @@ std::tuple<MatrixXf, std::vector<std::string>> getAuxiliaryDataFromMotion(
 std::tuple<MatrixXf, VectorXf> mapMotionToCharacter(
     const MatrixXf& poses,
     const VectorXf& offsets,
-    gsl::span<const std::string> parameterNames,
-    gsl::span<const std::string> jointNames,
+    std::span<const std::string> parameterNames,
+    std::span<const std::string> jointNames,
     const Character& character);
 
 } // namespace momentum

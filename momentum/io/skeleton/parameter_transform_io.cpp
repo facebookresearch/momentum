@@ -208,7 +208,7 @@ std::unordered_map<std::string, std::string> loadMomentumModel(const filesystem:
 }
 
 std::unordered_map<std::string, std::string> loadMomentumModelFromBuffer(
-    gsl::span<const std::byte> buffer) {
+    std::span<const std::byte> buffer) {
   if (buffer.empty()) {
     return {};
   }
@@ -412,7 +412,7 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
 }
 
 std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
-    gsl::span<const std::byte> rawData,
+    std::span<const std::byte> rawData,
     const Skeleton& skeleton) {
   if (rawData.empty()) {
     return {};

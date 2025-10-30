@@ -47,7 +47,7 @@ struct MppcaT {
   void set(
       const VectorX<T>& pi,
       const MatrixX<T>& mmu,
-      gsl::span<const MatrixX<T>> W,
+      std::span<const MatrixX<T>> W,
       const VectorX<T>& sigma2);
 
   /// Converts to a different scalar type

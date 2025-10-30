@@ -22,8 +22,8 @@ namespace momentum {
 struct spanstreambuf : std::streambuf {
   /// Construct a spanstreambuf with an optional buffer.
   ///
-  /// @param buffer A gsl::span of const std::byte (default: empty span).
-  spanstreambuf(gsl::span<const std::byte> buffer = {});
+  /// @param buffer A std::span of const std::byte (default: empty span).
+  spanstreambuf(std::span<const std::byte> buffer = {});
 
   /// Destructor.
   virtual ~spanstreambuf() override;
@@ -41,8 +41,8 @@ struct spanstreambuf : std::streambuf {
 struct ispanstream : std::istream {
   /// Construct an ispanstream with a buffer.
   ///
-  /// @param buffer A gsl::span of const std::byte.
-  explicit ispanstream(gsl::span<const std::byte> buffer);
+  /// @param buffer A std::span of const std::byte.
+  explicit ispanstream(std::span<const std::byte> buffer);
 
   /// Destructor.
   virtual ~ispanstream();

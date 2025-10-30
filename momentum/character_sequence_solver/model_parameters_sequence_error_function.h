@@ -24,13 +24,13 @@ class ModelParametersSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   }
 
   double getError(
-      gsl::span<const ModelParametersT<T>> modelParameters,
-      gsl::span<const SkeletonStateT<T>> skelStates,
-      gsl::span<const MeshStateT<T>> meshStates) const final;
+      std::span<const ModelParametersT<T>> modelParameters,
+      std::span<const SkeletonStateT<T>> skelStates,
+      std::span<const MeshStateT<T>> meshStates) const final;
   double getGradient(
-      gsl::span<const ModelParametersT<T>> modelParameters,
-      gsl::span<const SkeletonStateT<T>> skelStates,
-      gsl::span<const MeshStateT<T>> meshStates,
+      std::span<const ModelParametersT<T>> modelParameters,
+      std::span<const SkeletonStateT<T>> skelStates,
+      std::span<const MeshStateT<T>> meshStates,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const final;
 
   // modelParameters: [numFrames() * parameterTransform] parameter vector
@@ -38,9 +38,9 @@ class ModelParametersSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   // jacobian: [getJacobianSize()] x [numFrames() * parameterTransform] Jacobian matrix
   // residual: [getJacobianSize()] residual vector.
   double getJacobian(
-      gsl::span<const ModelParametersT<T>> modelParameters,
-      gsl::span<const SkeletonStateT<T>> skelStates,
-      gsl::span<const MeshStateT<T>> meshStates,
+      std::span<const ModelParametersT<T>> modelParameters,
+      std::span<const SkeletonStateT<T>> skelStates,
+      std::span<const MeshStateT<T>> meshStates,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) const final;

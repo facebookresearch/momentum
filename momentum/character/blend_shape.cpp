@@ -9,6 +9,8 @@
 
 #include "momentum/common/checks.h"
 
+#include <gsl/narrow>
+
 namespace momentum {
 
 template <typename T>
@@ -37,7 +39,7 @@ void BlendShape::computeShape(
 }
 
 VectorXf BlendShape::estimateCoefficients(
-    gsl::span<const Vector3f> vertices,
+    std::span<const Vector3f> vertices,
     const float regularization,
     const VectorXf& weights) const {
   MT_CHECK(
@@ -86,12 +88,12 @@ VectorXf BlendShape::estimateCoefficients(
   }
 }
 
-BlendShape::BlendShape(gsl::span<const Vector3f> baseShape, const size_t numShapes)
+BlendShape::BlendShape(std::span<const Vector3f> baseShape, const size_t numShapes)
     : BlendShapeBase(baseShape.size(), numShapes),
       baseShape_(baseShape.begin(), baseShape.end()),
       factorizationValid_(false) {}
 
-void BlendShape::setShapeVector(const size_t index, gsl::span<const Vector3f> shape) {
+void BlendShape::setShapeVector(const size_t index, std::span<const Vector3f> shape) {
   BlendShapeBase::setShapeVector(index, shape);
 
   // mark as not up to date

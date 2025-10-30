@@ -37,7 +37,7 @@ void logJoints(
 void logMarkers(
     const rerun::RecordingStream& rec,
     const std::string& streamName,
-    gsl::span<const Marker> markers);
+    std::span<const Marker> markers);
 
 void logLocators(
     const rerun::RecordingStream& rec,
@@ -50,7 +50,7 @@ void logMarkerLocatorCorrespondence(
     const std::string& streamName,
     const std::map<std::string, size_t>& locatorLookup,
     const LocatorState& locatorState,
-    gsl::span<const Marker> markers,
+    std::span<const Marker> markers,
     float kPositionErrorThreshold);
 
 void logBvh(
@@ -77,26 +77,26 @@ void logModelParams(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names,
+    std::span<const std::string> names,
     const Eigen::VectorXf& params);
 
 void logJointParams(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names,
+    std::span<const std::string> names,
     const Eigen::VectorXf& params);
 
 void logModelParamNames(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names);
+    std::span<const std::string> names);
 
 void logJointParamNames(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
     const std::string& posePrefix,
-    gsl::span<const std::string> names);
+    std::span<const std::string> names);
 
 } // namespace momentum

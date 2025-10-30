@@ -9,7 +9,7 @@
 
 #include <momentum/math/fwd.h>
 
-#include <gsl/span>
+#include <span>
 
 #include <istream>
 
@@ -19,7 +19,7 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream);
 
 std::shared_ptr<const Mppca> loadMppca(const std::string& name);
 
-std::shared_ptr<const Mppca> loadMppca(gsl::span<const unsigned char> posePriorDataRaw);
+std::shared_ptr<const Mppca> loadMppca(std::span<const unsigned char> posePriorDataRaw);
 
 void saveMppca(const Mppca& mppca, const std::string& name);
 

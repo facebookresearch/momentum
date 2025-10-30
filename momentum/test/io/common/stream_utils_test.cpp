@@ -13,7 +13,7 @@ using namespace momentum;
 
 TEST(StreamUtilsTest, SpanStreamTest_ReadFromSpanStreamBuffer) {
   std::string data = "Test data";
-  gsl::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(data.data()), data.size());
+  std::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(data.data()), data.size());
   spanstreambuf sbuf(buffer);
 
   std::istream inputStream(&sbuf);
@@ -25,7 +25,7 @@ TEST(StreamUtilsTest, SpanStreamTest_ReadFromSpanStreamBuffer) {
 
 TEST(StreamUtilsTest, SpanStreamTest_ReadFromISpanStream) {
   std::string data = "Test data";
-  gsl::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(data.data()), data.size());
+  std::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(data.data()), data.size());
   ispanstream inputStream(buffer);
 
   std::string output;
@@ -36,7 +36,7 @@ TEST(StreamUtilsTest, SpanStreamTest_ReadFromISpanStream) {
 
 TEST(StreamUtilsTest, SpanStreamTest_ReadMultipleWordsFromISpanStream) {
   std::string data = "Hello World!";
-  gsl::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(data.data()), data.size());
+  std::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(data.data()), data.size());
   ispanstream inputStream(buffer);
 
   std::string word1, word2;
@@ -47,7 +47,7 @@ TEST(StreamUtilsTest, SpanStreamTest_ReadMultipleWordsFromISpanStream) {
 }
 
 TEST(StreamUtilsTest, SpanStreamTest_ReadFromEmptyISpanStream) {
-  gsl::span<const std::byte> buffer;
+  std::span<const std::byte> buffer;
   ispanstream inputStream(buffer);
 
   std::string output;

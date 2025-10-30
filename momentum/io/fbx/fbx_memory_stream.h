@@ -9,7 +9,7 @@
 
 #include <fbxsdk.h>
 #include <fbxsdk/core/fbxstream.h>
-#include <gsl/span>
+#include <span>
 
 #include <string_view>
 
@@ -24,7 +24,7 @@ namespace momentum {
 // Simplest FbxStream to read file from a string_view memory buffer
 class FbxMemoryStream : public FbxStream {
  public:
-  FbxMemoryStream(gsl::span<const std::byte> buffer, int pReaderId);
+  FbxMemoryStream(std::span<const std::byte> buffer, int pReaderId);
   ~FbxMemoryStream() override;
   EState GetState() override;
   bool Open(void* pStreamData) override;
@@ -51,7 +51,7 @@ class FbxMemoryStream : public FbxStream {
   void ClearError() override;
 
  private:
-  gsl::span<const std::byte> buffer_;
+  std::span<const std::byte> buffer_;
   long length_;
 #if FBX_VERSION_GE(2020, 3, 2)
   mutable FbxInt64 position_{0};

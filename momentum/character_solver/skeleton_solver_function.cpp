@@ -25,7 +25,7 @@ template <typename T>
 SkeletonSolverFunctionT<T>::SkeletonSolverFunctionT(
     const Character& character,
     const ParameterTransformT<T>& parameterTransform,
-    gsl::span<const std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions)
+    std::span<const std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions)
     : character_(character), parameterTransform_(parameterTransform), needsMeshState_(false) {
   this->numParameters_ = parameterTransform_.numAllModelParameters();
   this->actualParameters_ = this->numParameters_;

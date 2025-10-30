@@ -36,7 +36,7 @@ Eigen::MatrixXf processMarkers(
       markerData.size());
   const size_t lastFrame =
       maxFrames > 0 ? std::min(firstFrame + maxFrames, markerData.size()) : markerData.size();
-  const gsl::span<const std::vector<momentum::Marker>> inputData(
+  const std::span<const std::vector<momentum::Marker>> inputData(
       markerData.data() + firstFrame, lastFrame - firstFrame);
   // calibrate model and locators
   if (calibrate) {
@@ -137,7 +137,7 @@ void processMarkerFile(
         character,
         identity,
         finalMotion,
-        gsl::span<const std::vector<momentum::Marker>>(
+        std::span<const std::vector<momentum::Marker>>(
             actor->frames.data() + firstFrame, actor->frames.data() + lastFrame),
         actor->fps);
     MT_LOGI("{} saved", outputFile);

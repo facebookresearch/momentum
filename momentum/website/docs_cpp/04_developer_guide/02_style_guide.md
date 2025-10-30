@@ -54,9 +54,9 @@ When accessing elements within arrays, the Momentum codebase employs two methods
 
 ## Design Decisions
 
-### Prefer `gsl::span` over typed container like `std::vector` as function argument
+### Prefer `std::span` over typed container like `std::vector` as function argument
 
-Using `std::vector<T>` as a function argument requires the call site to create an `std::vector<T>` instance even when the data is already stored in a compatible memory layout, such as contiguous memory. By switching to `gsl::span<T>`, call sites can avoid creating an additional `std::vector<T>` object and benefit from improved performance by not requiring an unnecessary data copy.
+Using `std::vector<T>` as a function argument requires the call site to create an `std::vector<T>` instance even when the data is already stored in a compatible memory layout, such as contiguous memory. By switching to `std::span<T>`, call sites can avoid creating an additional `std::vector<T>` object and benefit from improved performance by not requiring an unnecessary data copy.
 
 ### Header Include Style
 
