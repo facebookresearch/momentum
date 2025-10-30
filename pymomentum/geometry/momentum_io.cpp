@@ -30,7 +30,7 @@ momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
-  return momentum::loadGltfCharacter(gsl::make_span<const std::byte>(data, length));
+  return momentum::loadGltfCharacter(std::span<const std::byte>(data, length));
 }
 
 momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters) {
@@ -212,12 +212,12 @@ loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes) {
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
   const auto [character, motion, identity, fps] =
-      momentum::loadCharacterWithMotion(gsl::make_span<const std::byte>(data, length));
+      momentum::loadCharacterWithMotion(std::span<const std::byte>(data, length));
   return std::make_tuple(character, motion.transpose(), identity, fps);
 }
 
 pybind11::array_t<float> skelStatesToTensor(
-    gsl::span<const momentum::SkeletonState> states,
+    std::span<const momentum::SkeletonState> states,
     const momentum::Character& character) {
   pybind11::array_t<float> result({(int)states.size(), (int)character.skeleton.joints.size(), 8});
 
@@ -259,7 +259,7 @@ loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes) {
   {
     pybind11::gil_scoped_release release;
     std::tie(character, states, timestamps) =
-        momentum::loadCharacterWithSkeletonStates(gsl::make_span<const std::byte>(data, length));
+        momentum::loadCharacterWithSkeletonStates(std::span<const std::byte>(data, length));
   }
 
   return std::make_tuple(character, skelStatesToTensor(states, character), timestamps);

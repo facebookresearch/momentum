@@ -199,7 +199,7 @@ model parameters that animate the character over time.
                 pymomentum::arrayToSkeletonStates(skeletonStates, character);
 
             // Call the addSkeletonStates method
-            builder.addSkeletonStates(character, fps, gsl::make_span(skelStates), customName);
+            builder.addSkeletonStates(character, fps, std::span(skelStates), customName);
           },
           R"(Add skeleton states animation to the specified character.
 
@@ -225,7 +225,7 @@ per-joint transforms that define the character's pose over time.
              const std::vector<std::vector<mm::Marker>>& markerSequence,
              mm::GltfBuilder::MarkerMesh markerMesh,
              const std::string& animName) {
-            builder.addMarkerSequence(fps, gsl::make_span(markerSequence), markerMesh, animName);
+            builder.addMarkerSequence(fps, std::span(markerSequence), markerMesh, animName);
           },
           R"(Add marker sequence animation data to the GLTF scene.
 
