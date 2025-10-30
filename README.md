@@ -4,6 +4,7 @@
 [![CI macOS][ci-macos-badge]][ci-macos]
 [![CI Ubuntu][ci-ubuntu-badge]][ci-ubuntu]
 [![Publish Website][website-badge]][website]
+[![PyPI Wheels][pypi-wheels-badge]][pypi-wheels]
 
 [ci-windows-badge]: https://github.com/facebookresearch/momentum/actions/workflows/ci_windows.yml/badge.svg
 [ci-windows]: https://github.com/facebookresearch/momentum/actions/workflows/ci_windows.yml
@@ -13,6 +14,8 @@
 [ci-ubuntu]: https://github.com/facebookresearch/momentum/actions/workflows/ci_ubuntu.yml
 [website-badge]: https://github.com/facebookresearch/momentum/actions/workflows/publish_website.yml/badge.svg
 [website]: https://github.com/facebookresearch/momentum/actions/workflows/publish_website.yml
+[pypi-wheels-badge]: https://github.com/facebookresearch/momentum/actions/workflows/publish_to_pypi.yml/badge.svg
+[pypi-wheels]: https://github.com/facebookresearch/momentum/actions/workflows/publish_to_pypi.yml
 
 Momentum provides foundational algorithms for human kinematic motion and
 numerical optimization solvers to apply human motion in various applications.
