@@ -33,7 +33,7 @@ using DirectedEdgeSet = std::unordered_set<std::pair<Index, Index>, EdgePairHash
  * Build directed edge set for hole detection.
  * Tracks each directed edge separately to preserve winding information.
  */
-DirectedEdgeSet buildDirectedEdgeSet(gsl::span<const Eigen::Vector3i> triangles) {
+DirectedEdgeSet buildDirectedEdgeSet(std::span<const Eigen::Vector3i> triangles) {
   DirectedEdgeSet directedEdgeSet;
 
   for (const auto& triangle : triangles) {
@@ -138,7 +138,7 @@ std::vector<std::vector<std::pair<Index, Index>>> groupBoundaryEdgesIntoLoops(
 template <typename ScalarType>
 HoleFillingResult fillSingleHole(
     const HoleBoundary& hole,
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices) {
+    std::span<const Eigen::Vector3<ScalarType>> vertices) {
   HoleFillingResult result;
 
   if (hole.vertices.size() < 3) {
@@ -310,7 +310,7 @@ HoleFillingResult fillSingleHole(
 template <typename ScalarType>
 std::pair<Eigen::Vector3<ScalarType>, ScalarType> computeHoleGeometry(
     const std::vector<Index>& boundaryVertices,
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices);
+    std::span<const Eigen::Vector3<ScalarType>> vertices);
 
 /**
  * Apply Laplacian smoothing to newly added vertices.
@@ -318,7 +318,7 @@ std::pair<Eigen::Vector3<ScalarType>, ScalarType> computeHoleGeometry(
 template <typename ScalarType>
 void smoothHoleFilledRegion(
     std::vector<Eigen::Vector3<ScalarType>>& vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3i> triangles,
     const std::unordered_set<Index>& newVertexIndices,
     Index iterations,
     ScalarType factor);
@@ -330,8 +330,8 @@ void smoothHoleFilledRegion(
 // ================================================================================================
 
 std::vector<HoleBoundary> detectMeshHoles(
-    gsl::span<const Eigen::Vector3f> vertices,
-    gsl::span<const Eigen::Vector3i> triangles) {
+    std::span<const Eigen::Vector3f> vertices,
+    std::span<const Eigen::Vector3i> triangles) {
   const auto directedEdgeSet = buildDirectedEdgeSet(triangles);
   const auto boundaryEdges = findBoundaryEdges(directedEdgeSet);
   const auto edgeLoops = groupBoundaryEdgesIntoLoops(boundaryEdges);
@@ -379,7 +379,7 @@ namespace {
 template <typename ScalarType>
 std::pair<Eigen::Vector3<ScalarType>, ScalarType> computeHoleGeometry(
     const std::vector<Index>& boundaryVertices,
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices) {
+    std::span<const Eigen::Vector3<ScalarType>> vertices) {
   if (boundaryVertices.empty()) {
     return {Eigen::Vector3<ScalarType>::Zero(), ScalarType{0}};
   }
@@ -405,8 +405,8 @@ std::pair<Eigen::Vector3<ScalarType>, ScalarType> computeHoleGeometry(
 
 template <typename ScalarType, typename FaceType>
 std::vector<Eigen::Vector3<ScalarType>> smoothMeshLaplacian(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const FaceType> faces,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const FaceType> faces,
     const std::vector<bool>& vertex_mask,
     Index iterations,
     ScalarType step) {
@@ -468,8 +468,8 @@ std::vector<Eigen::Vector3<ScalarType>> smoothMeshLaplacian(
 
 template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles) {
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles) {
   HoleFillingResult result;
 
   // Convert vertices to float for hole detection (detectMeshHoles expects float)
@@ -533,8 +533,8 @@ HoleFillingResult fillMeshHoles(
 template <typename ScalarType>
 std::pair<std::vector<Eigen::Vector3<ScalarType>>, std::vector<Eigen::Vector3i>>
 fillMeshHolesComplete(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles) {
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles) {
   const auto result = fillMeshHoles(vertices, triangles);
 
   // Combine original and new vertices
@@ -569,49 +569,49 @@ fillMeshHolesComplete(
 // ================================================================================================
 
 template HoleFillingResult fillMeshHoles<float>(
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>);
 
 template HoleFillingResult fillMeshHoles<double>(
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>);
 
 template std::pair<std::vector<Eigen::Vector3<float>>, std::vector<Eigen::Vector3i>>
     fillMeshHolesComplete<float>(
-        gsl::span<const Eigen::Vector3<float>>,
-        gsl::span<const Eigen::Vector3i>);
+        std::span<const Eigen::Vector3<float>>,
+        std::span<const Eigen::Vector3i>);
 
 template std::pair<std::vector<Eigen::Vector3<double>>, std::vector<Eigen::Vector3i>>
     fillMeshHolesComplete<double>(
-        gsl::span<const Eigen::Vector3<double>>,
-        gsl::span<const Eigen::Vector3i>);
+        std::span<const Eigen::Vector3<double>>,
+        std::span<const Eigen::Vector3i>);
 
 // Triangle mesh smoothing instantiations
 template std::vector<Eigen::Vector3<float>> smoothMeshLaplacian<float, Eigen::Vector3i>(
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
     const std::vector<bool>&,
     Index,
     float);
 
 template std::vector<Eigen::Vector3<double>> smoothMeshLaplacian<double, Eigen::Vector3i>(
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
     const std::vector<bool>&,
     Index,
     double);
 
 // Quad mesh smoothing instantiations
 template std::vector<Eigen::Vector3<float>> smoothMeshLaplacian<float, Eigen::Vector4i>(
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector4i>,
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector4i>,
     const std::vector<bool>&,
     Index,
     float);
 
 template std::vector<Eigen::Vector3<double>> smoothMeshLaplacian<double, Eigen::Vector4i>(
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector4i>,
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector4i>,
     const std::vector<bool>&,
     Index,
     double);

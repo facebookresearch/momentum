@@ -12,7 +12,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <gsl/span>
+#include <span>
 
 #ifdef AXEL_ENABLE_AVX
 #include <immintrin.h>
@@ -60,9 +60,9 @@ class SimdKdTreef {
 
   /// Constructs k-d tree from points, normals, and colors.
   explicit SimdKdTreef(
-      gsl::span<const Vec> points = gsl::span<Vec>{},
-      gsl::span<const Vec> normals = gsl::span<Vec>{},
-      gsl::span<const Col> colors = gsl::span<Col>{});
+      std::span<const Vec> points = std::span<Vec>{},
+      std::span<const Vec> normals = std::span<Vec>{},
+      std::span<const Col> colors = std::span<Col>{});
 
   /// Destructor.
   virtual ~SimdKdTreef();
@@ -147,8 +147,8 @@ class SimdKdTreef {
   /// Returns the index of that new node.
   SizeType split(
       std::vector<std::pair<SizeType, Vec>>& points,
-      gsl::span<const Vec> normals,
-      gsl::span<const Col> colors,
+      std::span<const Vec> normals,
+      std::span<const Col> colors,
       SizeType start,
       SizeType end,
       SizeType depth);
@@ -156,8 +156,8 @@ class SimdKdTreef {
   /// Creates a leaf node when the number of points is equal to or greater than 8 SIMD blocks.
   virtual SizeType createLeafNode(
       std::vector<std::pair<SizeType, Vec>>& points,
-      gsl::span<const Vec> normals,
-      gsl::span<const Col> colors,
+      std::span<const Vec> normals,
+      std::span<const Col> colors,
       SizeType start,
       SizeType end,
       const Box& box);
@@ -227,9 +227,9 @@ class SimdKdTreef {
  private:
   /// Initializes the k-d tree. This function is intended to be only called by the constructor.
   void init(
-      gsl::span<const Vec> points_in,
-      gsl::span<const Vec> normals_in,
-      gsl::span<const Col> colors_in);
+      std::span<const Vec> points_in,
+      std::span<const Vec> normals_in,
+      std::span<const Col> colors_in);
 
   /// PIMPL idiom to hide the SIMD specific implementation.
   struct Implementation;
@@ -267,9 +267,9 @@ class SimdKdTreeAvxf : public SimdKdTreef<nDim> {
 
   /// Constructs k-d tree from points, normals, and colors
   explicit SimdKdTreeAvxf(
-      gsl::span<const Vec> points = gsl::span<Vec>{},
-      gsl::span<const Vec> normals = gsl::span<Vec>{},
-      gsl::span<const Col> colors = gsl::span<Col>{});
+      std::span<const Vec> points = std::span<Vec>{},
+      std::span<const Vec> normals = std::span<Vec>{},
+      std::span<const Col> colors = std::span<Col>{});
 
   /// Destructor
   ~SimdKdTreeAvxf() override;
@@ -350,8 +350,8 @@ class SimdKdTreeAvxf : public SimdKdTreef<nDim> {
   // Documentation inherited
   SizeType createLeafNode(
       std::vector<std::pair<SizeType, Vec>>& points,
-      gsl::span<const Vec> normals,
-      gsl::span<const Col> colors,
+      std::span<const Vec> normals,
+      std::span<const Col> colors,
       SizeType start,
       SizeType end,
       const Box& box) override;
@@ -380,9 +380,9 @@ class SimdKdTreeAvxf : public SimdKdTreef<nDim> {
 
   /// Initializes the k-d tree. This function is intended to be only called by the constructor.
   void init(
-      gsl::span<const Vec> points_in,
-      gsl::span<const Vec> normals_in,
-      gsl::span<const Col> colors_in);
+      std::span<const Vec> points_in,
+      std::span<const Vec> normals_in,
+      std::span<const Col> colors_in);
 
   std::vector<PointBlock> pointBlocks_;
   std::vector<NormalBlock> normalBlocks_;

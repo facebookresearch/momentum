@@ -105,8 +105,8 @@ bool isPointInsideByRayCasting(
 
 template <typename ScalarType>
 SignedDistanceField<ScalarType> meshToSdf(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
     const BoundingBox<ScalarType>& bounds,
     const Eigen::Vector3<Index>& resolution,
     const MeshToSdfConfig<ScalarType>& config) {
@@ -146,8 +146,8 @@ SignedDistanceField<ScalarType> meshToSdf(
 
 template <typename ScalarType>
 SignedDistanceField<ScalarType> meshToSdf(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
     const Eigen::Vector3<Index>& resolution,
     ScalarType padding,
     const MeshToSdfConfig<ScalarType>& config) {
@@ -222,8 +222,8 @@ void rasterizeTriangleToNarrowBand(
 
 template <typename ScalarType>
 void initializeNarrowBand(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
     SignedDistanceField<ScalarType>& sdf,
     ScalarType bandWidth) {
   // Initialize SDF with maximum values
@@ -605,8 +605,8 @@ bool isPointInsideByRayCasting(
 template <typename ScalarType>
 void applySignsToDistanceField(
     SignedDistanceField<ScalarType>& sdf,
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles) {
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles) {
   const auto& resolution = sdf.resolution();
 
   // BUILD BVH ONCE for efficient ray casting
@@ -665,7 +665,7 @@ void applySignsToDistanceField(
 // ================================================================================================
 
 template <typename ScalarType>
-BoundingBox<ScalarType> computeMeshBounds(gsl::span<const Eigen::Vector3<ScalarType>> vertices) {
+BoundingBox<ScalarType> computeMeshBounds(std::span<const Eigen::Vector3<ScalarType>> vertices) {
   if (vertices.empty()) {
     // Return unit cube centered at origin as fallback
     return BoundingBox<ScalarType>(
@@ -691,29 +691,29 @@ BoundingBox<ScalarType> computeMeshBounds(gsl::span<const Eigen::Vector3<ScalarT
 
 // Explicit instantiations for float and double
 template SignedDistanceField<float> meshToSdf<float>(
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
     const BoundingBox<float>&,
     const Eigen::Vector3<Index>&,
     const MeshToSdfConfig<float>&);
 
 template SignedDistanceField<double> meshToSdf<double>(
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
     const BoundingBox<double>&,
     const Eigen::Vector3<Index>&,
     const MeshToSdfConfig<double>&);
 
 template SignedDistanceField<float> meshToSdf<float>(
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
     const Eigen::Vector3<Index>&,
     float,
     const MeshToSdfConfig<float>&);
 
 template SignedDistanceField<double> meshToSdf<double>(
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
     const Eigen::Vector3<Index>&,
     double,
     const MeshToSdfConfig<double>&);
@@ -722,14 +722,14 @@ template SignedDistanceField<double> meshToSdf<double>(
 namespace detail {
 
 template void initializeNarrowBand<float>(
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
     SignedDistanceField<float>&,
     float);
 
 template void initializeNarrowBand<double>(
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector3i>,
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
     SignedDistanceField<double>&,
     double);
 
@@ -739,17 +739,17 @@ template void fastMarchingPropagate<double>(SignedDistanceField<double>&);
 
 template void applySignsToDistanceField<float>(
     SignedDistanceField<float>&,
-    gsl::span<const Eigen::Vector3<float>>,
-    gsl::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>);
 
 template void applySignsToDistanceField<double>(
     SignedDistanceField<double>&,
-    gsl::span<const Eigen::Vector3<double>>,
-    gsl::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>);
 
-template BoundingBox<float> computeMeshBounds<float>(gsl::span<const Eigen::Vector3<float>>);
+template BoundingBox<float> computeMeshBounds<float>(std::span<const Eigen::Vector3<float>>);
 
-template BoundingBox<double> computeMeshBounds<double>(gsl::span<const Eigen::Vector3<double>>);
+template BoundingBox<double> computeMeshBounds<double>(std::span<const Eigen::Vector3<double>>);
 
 } // namespace detail
 

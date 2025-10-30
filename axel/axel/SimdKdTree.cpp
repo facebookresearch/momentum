@@ -105,9 +105,9 @@ struct SimdKdTreef<nDim>::Implementation {
 
 template <int32_t nDim>
 SimdKdTreef<nDim>::SimdKdTreef(
-    gsl::span<const Vec> points_in,
-    gsl::span<const Vec> normals_in,
-    gsl::span<const Col> colors_in)
+    std::span<const Vec> points_in,
+    std::span<const Vec> normals_in,
+    std::span<const Col> colors_in)
     : impl_(std::make_unique<Implementation>()) {
   init(points_in, normals_in, colors_in);
 }
@@ -733,8 +733,8 @@ void SimdKdTreef<nDim>::validate() const {
 template <int32_t nDim>
 typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::split(
     std::vector<std::pair<SizeType, Vec>>& points,
-    gsl::span<const Vec> normals,
-    gsl::span<const Col> colors,
+    std::span<const Vec> normals,
+    std::span<const Col> colors,
     SizeType start,
     SizeType end,
     SizeType depth) {
@@ -829,8 +829,8 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::split(
 template <int32_t nDim>
 typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     std::vector<std::pair<SizeType, Vec>>& points,
-    gsl::span<const Vec> normals,
-    gsl::span<const Col> colors,
+    std::span<const Vec> normals,
+    std::span<const Col> colors,
     SizeType start,
     SizeType end,
     const Box& box) {
@@ -912,9 +912,9 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
 // Ideally we would replace this with a c++11 forwarding constructor.
 template <int32_t nDim>
 void SimdKdTreef<nDim>::init(
-    gsl::span<const Vec> points_in,
-    gsl::span<const Vec> normals_in,
-    gsl::span<const Col> colors_in) {
+    std::span<const Vec> points_in,
+    std::span<const Vec> normals_in,
+    std::span<const Col> colors_in) {
   XR_CHECK(points_in.size() < std::numeric_limits<SizeType>::max());
   XR_CHECK(normals_in.empty() || normals_in.size() == points_in.size());
   XR_CHECK(colors_in.empty() || colors_in.size() == points_in.size());
@@ -1043,9 +1043,9 @@ template class SimdKdTreef<2>;
 
 template <int32_t nDim>
 SimdKdTreeAvxf<nDim>::SimdKdTreeAvxf(
-    gsl::span<const Vec> points_in,
-    gsl::span<const Vec> normals_in,
-    gsl::span<const Col> colors_in) {
+    std::span<const Vec> points_in,
+    std::span<const Vec> normals_in,
+    std::span<const Col> colors_in) {
   init(points_in, normals_in, colors_in);
 }
 
@@ -1057,8 +1057,8 @@ SimdKdTreeAvxf<nDim>::~SimdKdTreeAvxf() {
 template <int32_t nDim>
 typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
     std::vector<std::pair<SizeType, Vec>>& points,
-    gsl::span<const Vec> normals,
-    gsl::span<const Col> colors,
+    std::span<const Vec> normals,
+    std::span<const Col> colors,
     SizeType start,
     SizeType end,
     const Box& box) {
@@ -1680,9 +1680,9 @@ void SimdKdTreeAvxf<nDim>::validateInternal(
 // Ideally we would replace this with a c++11 forwarding constructor.
 template <int32_t nDim>
 void SimdKdTreeAvxf<nDim>::init(
-    gsl::span<const Vec> points_in,
-    gsl::span<const Vec> normals_in,
-    gsl::span<const Col> colors_in) {
+    std::span<const Vec> points_in,
+    std::span<const Vec> normals_in,
+    std::span<const Col> colors_in) {
   XR_CHECK(points_in.size() < std::numeric_limits<SizeType>::max());
   XR_CHECK(normals_in.empty() || normals_in.size() == points_in.size());
   XR_CHECK(colors_in.empty() || colors_in.size() == points_in.size());

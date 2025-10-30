@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <Eigen/Core>
-#include <gsl/span>
+#include <span>
 
 using namespace axel;
 
@@ -159,13 +159,13 @@ class MeshHoleFillingTest : public ::testing::Test {
 
     // Fill holes - first get the result to check stats
     const auto result = fillMeshHoles(
-        gsl::span<const Eigen::Vector3f>(originalVertices),
-        gsl::span<const Eigen::Vector3i>(originalTriangles));
+        std::span<const Eigen::Vector3f>(originalVertices),
+        std::span<const Eigen::Vector3i>(originalTriangles));
 
     // Combine into complete mesh for manifold checking
     const auto [filledVertices, filledTriangles] = fillMeshHolesComplete(
-        gsl::span<const Eigen::Vector3f>(originalVertices),
-        gsl::span<const Eigen::Vector3i>(originalTriangles));
+        std::span<const Eigen::Vector3f>(originalVertices),
+        std::span<const Eigen::Vector3i>(originalTriangles));
 
     // Get filled mesh stats
     const auto filledStats = getMeshManifoldStats(filledVertices, filledTriangles);
@@ -333,7 +333,7 @@ TEST_F(MeshHoleFillingTest, FillNoHoles) {
   const auto [vertices, triangles] = createTriangle();
 
   const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   EXPECT_TRUE(result.success);
   // A single triangle will be detected as having a hole (the perimeter), so it will be filled
@@ -346,7 +346,7 @@ TEST_F(MeshHoleFillingTest, FillSingleSmallHole) {
   const auto [vertices, triangles] = createSquareWithHole();
 
   const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   EXPECT_TRUE(result.success);
   EXPECT_EQ(result.holesFilledCount, 1);
@@ -393,7 +393,7 @@ TEST_F(MeshHoleFillingTest, FillLargerHole) {
   };
 
   const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   EXPECT_TRUE(result.success);
   EXPECT_GT(result.holesFilledCount, 0);
@@ -411,7 +411,7 @@ TEST_F(MeshHoleFillingTest, FillMeshHolesComplete) {
   const auto [vertices, triangles] = createSquareWithHole();
 
   const auto [allVertices, allTriangles] = fillMeshHolesComplete(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   // Should have original + new triangles (vertices may be same for small holes using direct
   // triangulation)
@@ -442,7 +442,7 @@ TEST_F(MeshHoleFillingTest, EmptyMesh) {
   EXPECT_TRUE(holes.empty());
 
   const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   EXPECT_TRUE(result.success); // Should succeed with no work to do
   EXPECT_EQ(result.holesFilledCount, 0);
@@ -457,7 +457,7 @@ TEST_F(MeshHoleFillingTest, SingleTriangleMesh) {
 
   // Hole filling will fill the perimeter
   const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   EXPECT_TRUE(result.success);
   EXPECT_EQ(result.holesFilledCount, 1);
@@ -478,7 +478,7 @@ TEST_F(MeshHoleFillingTest, DegenerateTriangles) {
   // May or may not detect holes depending on tolerance, but shouldn't crash
 
   const auto result = fillMeshHoles(
-      gsl::span<const Eigen::Vector3f>(vertices), gsl::span<const Eigen::Vector3i>(triangles));
+      std::span<const Eigen::Vector3f>(vertices), std::span<const Eigen::Vector3i>(triangles));
 
   // Should not crash, may or may not succeed
   // Just check that result is valid and doesn't crash accessing it

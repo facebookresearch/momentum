@@ -13,7 +13,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <gsl/span>
+#include <span>
 
 #include "axel/common/Types.h"
 
@@ -64,8 +64,8 @@ struct HoleFillingResult {
  * @return List of detected hole boundaries
  */
 std::vector<HoleBoundary> detectMeshHoles(
-    gsl::span<const Eigen::Vector3f> vertices,
-    gsl::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3f> vertices,
+    std::span<const Eigen::Vector3i> triangles);
 
 /**
  * Fill holes in a triangle mesh using advancing front method.
@@ -79,8 +79,8 @@ std::vector<HoleBoundary> detectMeshHoles(
  */
 template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles);
 
 /**
  * Convenience function that fills holes and returns complete mesh.
@@ -92,8 +92,8 @@ HoleFillingResult fillMeshHoles(
 template <typename ScalarType>
 std::pair<std::vector<Eigen::Vector3<ScalarType>>, std::vector<Eigen::Vector3i>>
 fillMeshHolesComplete(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles);
 
 /**
  * Apply Laplacian smoothing to mesh vertices with optional masking.
@@ -108,8 +108,8 @@ fillMeshHolesComplete(
  */
 template <typename ScalarType, typename FaceType>
 std::vector<Eigen::Vector3<ScalarType>> smoothMeshLaplacian(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const FaceType> faces,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const FaceType> faces,
     const std::vector<bool>& vertex_mask = {},
     Index iterations = 1,
     ScalarType step = ScalarType{0.5});
