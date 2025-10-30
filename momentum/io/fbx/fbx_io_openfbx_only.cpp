@@ -53,7 +53,8 @@ void saveFbx(
     double /* framerate */,
     bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
-    bool /* permissive */) {
+    bool /* permissive */,
+    std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
@@ -65,7 +66,8 @@ void saveFbxWithJointParams(
     double /* framerate */,
     bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
-    bool /* permissive */) {
+    bool /* permissive */,
+    std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
@@ -74,7 +76,8 @@ void saveFbxModel(
     const filesystem::path& /* filename */,
     const Character& /* character */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
-    bool /* permissive */) {
+    bool /* permissive */,
+    std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }

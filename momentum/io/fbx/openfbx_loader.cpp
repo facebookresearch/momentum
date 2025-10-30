@@ -320,6 +320,18 @@ std::vector<double> extractPropertyFloatArray(const ofbx::IElement* element, con
   }
 }
 
+void stripNamespace(const ofbx::Object* obj) {
+  // Find the last colon in the name
+  const char* lastColon = std::strrchr(obj->name, ':');
+  // If we found a colon, strip the namespace by moving the string
+  if (lastColon) {
+    // Point to the character after the last colon (the actual name without namespace)
+    const char* newName = lastColon + 1;
+    // Move the name portion to the beginning of the string, including null terminator (+1)
+    std::memmove(const_cast<char*>(obj->name), newName, std::strlen(newName) + 1);
+  }
+}
+
 void parseSkeleton(
     const ofbx::Object* curSkelNode,
     const size_t parent,
@@ -1021,6 +1033,14 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       ofbx::load(fbxCharDataRaw.data(), (int32_t)length, (ofbx::u16)loadFlags), ofbx_deleter);
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
+
+  // Strip all namespaces from all node names in the scene
+  for (int i = 0; i < scene->getAllObjectCount(); ++i) {
+    const ofbx::Object* obj = scene->getAllObjects()[i];
+    if (obj && obj->name[0] != '\0') {
+      stripNamespace(obj);
+    }
+  }
 
   const auto [skeleton, jointFbxNodes, locators, collision] =
       parseSkeleton(scene->getRoot(), {}, permissive);
