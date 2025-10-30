@@ -13,7 +13,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#include <gsl/span>
+#include <span>
 
 #include "axel/BoundingBox.h"
 #include "axel/SignedDistanceField.h"

@@ -8,7 +8,7 @@
 #include "axel/math/CoplanarityCheck.h"
 
 namespace axel {
-int solveP3(gsl::span<double, 3> x, double a, const double b, const double c) {
+int solveP3(std::span<double, 3> x, double a, const double b, const double c) {
   static const double halfSqrt3 = 0.5 * std::sqrt(3.0);
   constexpr double divBy3 = 1.0 / 3.0;
   constexpr double divBy9 = 1.0 / 9.0;
@@ -53,7 +53,7 @@ int solveP3(gsl::span<double, 3> x, double a, const double b, const double c) {
   return 1;
 }
 
-int solveP2(gsl::span<double, 2> x, const double a, const double b, const double c) {
+int solveP2(std::span<double, 2> x, const double a, const double b, const double c) {
   const double discriminant = b * b - 4.0 * a * c;
   if (discriminant < 0.0) {
     // We're not interested in imaginary roots
@@ -74,7 +74,7 @@ int solveP2(gsl::span<double, 2> x, const double a, const double b, const double
 // NOTE: Do not remove the manual AVX code unless benchmarked and no performance degradation is
 // shown.
 int timesCoplanar(
-    gsl::span<double, 3> t,
+    std::span<double, 3> t,
     const Eigen::Vector3d& x1,
     const Eigen::Vector3d& x2,
     const Eigen::Vector3d& x3,

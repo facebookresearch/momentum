@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <gsl/span>
+#include <span>
 
 #include "axel/SignedDistanceField.h"
 #include "axel/TriBvh.h"
@@ -85,8 +85,8 @@ class MeshToSdfTest : public ::testing::Test {
   // Helper function: Compute brute force distance from point to all triangles
   static float bruteForceDistanceToMesh(
       const Eigen::Vector3f& point,
-      gsl::span<const Eigen::Vector3f> vertices,
-      gsl::span<const Eigen::Vector3i> triangles) {
+      std::span<const Eigen::Vector3f> vertices,
+      std::span<const Eigen::Vector3i> triangles) {
     float minDistance = std::numeric_limits<float>::max();
 
     for (const auto& triangle : triangles) {
@@ -148,8 +148,8 @@ TEST_F(MeshToSdfTest, Step1_NarrowBandInitialization_ExactDistances) {
 
   // Initialize narrow band
   detail::initializeNarrowBand(
-      gsl::span<const Eigen::Vector3f>(cubeVertices),
-      gsl::span<const Eigen::Vector3i>(cubeFaces),
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
       sdf,
       bandWidth);
 
@@ -182,8 +182,8 @@ TEST_F(MeshToSdfTest, Step1_NarrowBandInitialization_ExactDistances) {
         // Compute exact distance using brute force
         const float exactDistance = bruteForceDistanceToMesh(
             worldPos,
-            gsl::span<const Eigen::Vector3f>(cubeVertices),
-            gsl::span<const Eigen::Vector3i>(cubeFaces));
+            std::span<const Eigen::Vector3f>(cubeVertices),
+            std::span<const Eigen::Vector3i>(cubeFaces));
 
         if (exactDistance > bandWidth) {
           continue;
@@ -220,8 +220,8 @@ TEST_F(MeshToSdfTest, Step2_FastMarchingPropagation_NearSurfaceAccuracy) {
 
   // Step 1: Initialize narrow band
   detail::initializeNarrowBand(
-      gsl::span<const Eigen::Vector3f>(cubeVertices),
-      gsl::span<const Eigen::Vector3i>(cubeFaces),
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
       sdf,
       bandWidth);
 
@@ -248,8 +248,8 @@ TEST_F(MeshToSdfTest, Step2_FastMarchingPropagation_NearSurfaceAccuracy) {
         // Compute exact distance using brute force
         const float exactDistance = bruteForceDistanceToMesh(
             worldPos,
-            gsl::span<const Eigen::Vector3f>(cubeVertices),
-            gsl::span<const Eigen::Vector3i>(cubeFaces));
+            std::span<const Eigen::Vector3f>(cubeVertices),
+            std::span<const Eigen::Vector3i>(cubeFaces));
 
         // Only test voxels that are near the surface
         if (exactDistance <= bandWidth) {
@@ -296,8 +296,8 @@ TEST_F(MeshToSdfTest, Step2_FastMarchingPropagation_EikonalEquation) {
 
   // Step 1: Initialize narrow band
   detail::initializeNarrowBand(
-      gsl::span<const Eigen::Vector3f>(cubeVertices),
-      gsl::span<const Eigen::Vector3i>(cubeFaces),
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
       sdf,
       bandWidth);
 
@@ -318,8 +318,8 @@ TEST_F(MeshToSdfTest, Step2_FastMarchingPropagation_EikonalEquation) {
         // Compute exact distance to determine if we're far from surface
         const float exactDistance = bruteForceDistanceToMesh(
             worldPos,
-            gsl::span<const Eigen::Vector3f>(cubeVertices),
-            gsl::span<const Eigen::Vector3i>(cubeFaces));
+            std::span<const Eigen::Vector3f>(cubeVertices),
+            std::span<const Eigen::Vector3i>(cubeFaces));
 
         // Only test Eikonal equation for voxels far from surface
         if (exactDistance >= farFromSurfaceThreshold) {
@@ -367,8 +367,8 @@ TEST_F(MeshToSdfTest, Step3_SignDetermination_InsideOutsideAccuracy) {
 
   // Generate complete SDF
   const auto sdf = meshToSdf<float>(
-      gsl::span<const Eigen::Vector3f>(cubeVertices),
-      gsl::span<const Eigen::Vector3i>(cubeFaces),
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
       bounds,
       resolution,
       config);
@@ -459,8 +459,8 @@ TEST_F(MeshToSdfTest, Step3_SignDetermination_WindingNumbers) {
 
   // Generate complete SDF
   const auto sdf = meshToSdf<float>(
-      gsl::span<const Eigen::Vector3f>(cubeVertices),
-      gsl::span<const Eigen::Vector3i>(cubeFaces),
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
       bounds,
       resolution,
       config);
@@ -505,8 +505,8 @@ TEST_F(MeshToSdfTest, IntegratedTest_CubeSDFProperties) {
   config.narrowBandWidth = 3.0f;
 
   const auto sdf = meshToSdf<float>(
-      gsl::span<const Eigen::Vector3f>(cubeVertices),
-      gsl::span<const Eigen::Vector3i>(cubeFaces),
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
       bounds,
       resolution,
       config);

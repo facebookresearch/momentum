@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <gsl/span>
+#include <span>
 
 #include "axel/BoundingBox.h"
 #include "axel/SignedDistanceField.h"
@@ -53,8 +53,8 @@ struct MeshToSdfConfig {
  */
 template <typename ScalarType>
 SignedDistanceField<ScalarType> meshToSdf(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
     const BoundingBox<ScalarType>& bounds,
     const Eigen::Vector3<Index>& resolution,
     const MeshToSdfConfig<ScalarType>& config = {});
@@ -71,8 +71,8 @@ SignedDistanceField<ScalarType> meshToSdf(
  */
 template <typename ScalarType>
 SignedDistanceField<ScalarType> meshToSdf(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
     const Eigen::Vector3<Index>& resolution,
     ScalarType padding = ScalarType{0.1},
     const MeshToSdfConfig<ScalarType>& config = {});
@@ -88,8 +88,8 @@ namespace detail {
  */
 template <typename ScalarType>
 void initializeNarrowBand(
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
     SignedDistanceField<ScalarType>& sdf,
     ScalarType bandWidth);
 
@@ -105,14 +105,14 @@ void fastMarchingPropagate(SignedDistanceField<ScalarType>& sdf);
 template <typename ScalarType>
 void applySignsToDistanceField(
     SignedDistanceField<ScalarType>& sdf,
-    gsl::span<const Eigen::Vector3<ScalarType>> vertices,
-    gsl::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles);
 
 /**
  * Compute mesh bounding box from vertex spans.
  */
 template <typename ScalarType>
-BoundingBox<ScalarType> computeMeshBounds(gsl::span<const Eigen::Vector3<ScalarType>> vertices);
+BoundingBox<ScalarType> computeMeshBounds(std::span<const Eigen::Vector3<ScalarType>> vertices);
 
 } // namespace detail
 

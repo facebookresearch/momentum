@@ -8,16 +8,16 @@
 #pragma once
 
 #include <Eigen/Core>
-#include <gsl/span>
+#include <span>
 
 namespace axel {
 
-int solveP3(gsl::span<double, 3> x, double a, double b, double c);
-int solveP2(gsl::span<double, 2> x, double a, double b, double c);
+int solveP3(std::span<double, 3> x, double a, double b, double c);
+int solveP2(std::span<double, 2> x, double a, double b, double c);
 
 /* Find times when the four points with given velocities are coplanar in 3D space */
 int timesCoplanar(
-    gsl::span<double, 3> t,
+    std::span<double, 3> t,
     const Eigen::Vector3d& x1,
     const Eigen::Vector3d& x2,
     const Eigen::Vector3d& x3,

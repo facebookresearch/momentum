@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 #include <array>
 
-#include <gsl/span>
+#include <span>
 
 #include <perception/test_helpers/EigenChecks.h>
 #include <test_helpers/EigenMatchers.h>
@@ -79,7 +79,7 @@ Eigen::Vector3d toEigenVector(const WideVec3d& wideVec, const size_t laneIdx) {
 }
 
 std::vector<ProjectOnTriangleVectorizedTestParams> createVectorizedTestParams(
-    const gsl::span<const ProjectOnTriangleTestParams> params) {
+    const std::span<const ProjectOnTriangleTestParams> params) {
   constexpr size_t N = kNativeLaneWidth<double>;
   const auto elementCount = static_cast<int32_t>(params.size());
   std::vector<ProjectOnTriangleVectorizedTestParams> vectParams((elementCount - 1) / N + 1);

@@ -26,7 +26,7 @@ bool ccdEdgeEdge(
     const double dt) {
   // Find times that triangle and point are coplanar.
   std::array<double, 4> t{0.0, 0.0, 0.0, 0.0};
-  const int solutions = timesCoplanar(gsl::span{t}.first<3>(), x1, x2, x3, x4, v1, v2, v3, v4);
+  const int solutions = timesCoplanar(std::span{t}.first<3>(), x1, x2, x3, x4, v1, v2, v3, v4);
   // Include dt as a potential solution in case numerical imprecisions do not account for it.
   t[solutions] = dt;
   for (int32_t sol = 0; sol <= solutions; sol++) {
@@ -63,7 +63,7 @@ bool ccdVertexTriangle(
     const double dt) {
   // Find times that triangle and point are coplanar.
   std::array<double, 4> t{0.0, 0.0, 0.0, 0.0};
-  const int solutions = timesCoplanar(gsl::span{t}.first<3>(), x1, x2, x3, x4, v1, v2, v3, v4);
+  const int solutions = timesCoplanar(std::span{t}.first<3>(), x1, x2, x3, x4, v1, v2, v3, v4);
   // Include dt as a potential solution in case numerical imprecisions do not account for it.
   t[solutions] = dt;
 

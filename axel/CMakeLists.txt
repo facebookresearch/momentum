@@ -73,7 +73,7 @@ target_include_directories(${target_name}
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_compile_features(${target_name} PUBLIC cxx_std_17)
+target_compile_features(${target_name} PUBLIC cxx_std_20)
 
 target_link_libraries(${target_name}
   PUBLIC
