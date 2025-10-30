@@ -163,7 +163,8 @@ void saveFBXCharacterToFile(
     const float fps,
     std::optional<const Eigen::MatrixXf> motion,
     std::optional<const Eigen::VectorXf> offsets,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo) {
+    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    std::string_view fbxNamespace) {
   if (motion.has_value() && offsets.has_value()) {
     momentum::saveFbx(
         path,
@@ -172,9 +173,16 @@ void saveFBXCharacterToFile(
         offsets.value(),
         fps,
         true, /*saveMesh*/
-        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo());
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        fbxNamespace);
   } else {
-    momentum::saveFbxModel(path, character);
+    momentum::saveFbxModel(
+        path,
+        character,
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        fbxNamespace);
   }
 }
 
@@ -183,7 +191,8 @@ void saveFBXCharacterToFileWithJointParams(
     const momentum::Character& character,
     const float fps,
     std::optional<const Eigen::MatrixXf> jointParams,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo) {
+    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    std::string_view fbxNamespace) {
   if (jointParams.has_value()) {
     momentum::saveFbxWithJointParams(
         path,
@@ -191,9 +200,16 @@ void saveFBXCharacterToFileWithJointParams(
         jointParams.value().transpose(),
         fps,
         true, /*saveMesh*/
-        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo());
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        fbxNamespace);
   } else {
-    momentum::saveFbxModel(path, character);
+    momentum::saveFbxModel(
+        path,
+        character,
+        coordSystemInfo.has_value() ? coordSystemInfo.value() : momentum::FBXCoordSystemInfo(),
+        false, /*permissive*/
+        fbxNamespace);
   }
 }
 
