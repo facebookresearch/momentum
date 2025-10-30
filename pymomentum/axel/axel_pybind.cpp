@@ -93,8 +93,8 @@ py::array_t<float> smoothMeshLaplacianBinding(
     const auto triangleVector = arrayToEigenVectors<int, 3>(faces, "faces");
 
     smoothedVertices = axel::smoothMeshLaplacian<float, Eigen::Vector3i>(
-        gsl::span<const Eigen::Vector3f>(vertexVector),
-        gsl::span<const Eigen::Vector3i>(triangleVector),
+        std::span<const Eigen::Vector3f>(vertexVector),
+        std::span<const Eigen::Vector3i>(triangleVector),
         maskVector,
         static_cast<axel::Index>(iterations),
         step);
@@ -103,8 +103,8 @@ py::array_t<float> smoothMeshLaplacianBinding(
     const auto quadVector = arrayToEigenVectors<int, 4>(faces, "faces");
 
     smoothedVertices = axel::smoothMeshLaplacian<float, Eigen::Vector4i>(
-        gsl::span<const Eigen::Vector3f>(vertexVector),
-        gsl::span<const Eigen::Vector4i>(quadVector),
+        std::span<const Eigen::Vector3f>(vertexVector),
+        std::span<const Eigen::Vector4i>(quadVector),
         maskVector,
         static_cast<axel::Index>(iterations),
         step);
@@ -415,8 +415,8 @@ More efficient than calling sample() and gradient() separately.
 
         // Call the mesh_to_sdf function
         return axel::meshToSdf<float>(
-            gsl::span<const Eigen::Vector3f>(vertexVector),
-            gsl::span<const Eigen::Vector3i>(triangleVector),
+            std::span<const Eigen::Vector3f>(vertexVector),
+            std::span<const Eigen::Vector3i>(triangleVector),
             bounds,
             resolutionVector,
             config);
@@ -517,8 +517,8 @@ Example usage::
 
         // Call the mesh_to_sdf function with automatic bounds
         return axel::meshToSdf<float>(
-            gsl::span<const Eigen::Vector3f>(vertexVector),
-            gsl::span<const Eigen::Vector3i>(triangleVector),
+            std::span<const Eigen::Vector3f>(vertexVector),
+            std::span<const Eigen::Vector3i>(triangleVector),
             resolutionVector,
             padding,
             config);
@@ -591,8 +591,8 @@ Example usage::
 
         // Call the fillMeshHolesComplete function
         const auto [filledVertices, filledTriangles] = axel::fillMeshHolesComplete<float>(
-            gsl::span<const Eigen::Vector3f>(vertexVector),
-            gsl::span<const Eigen::Vector3i>(triangleVector));
+            std::span<const Eigen::Vector3f>(vertexVector),
+            std::span<const Eigen::Vector3i>(triangleVector));
 
         // Convert results back to numpy arrays
         // Convert vertices
