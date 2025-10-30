@@ -289,6 +289,22 @@ void createAnimationCurves(
   }
 }
 
+// Post-process function to prepend namespace to all nodes in the scene
+void prependNamespaceToAllNodes(::fbxsdk::FbxNode* node, const std::string& namespacePrefix) {
+  if (namespacePrefix.empty() || node == nullptr) {
+    return;
+  }
+
+  // Prepend namespace to the node name
+  const std::string currentName = node->GetName();
+  const std::string newName = namespacePrefix + currentName;
+  node->SetName(newName.c_str());
+
+  // Recursively process all children
+  for (int i = 0; i < node->GetChildCount(); ++i) {
+    prependNamespaceToAllNodes(node->GetChild(i), namespacePrefix);
+  }
+}
 void saveFbxCommon(
     const filesystem::path& filename,
     const Character& character,
@@ -297,7 +313,8 @@ void saveFbxCommon(
     const bool saveMesh,
     const bool skipActiveJointParamCheck,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
+    bool permissive,
+    std::string_view fbxNamespace) {
   // ---------------------------------------------
   // initialize FBX SDK and prepare for export
   // ---------------------------------------------
@@ -323,6 +340,12 @@ void saveFbxCommon(
       !lExportStatus,
       "Unable to initialize fbx exporter {}",
       lExporter->GetStatus().GetErrorString());
+
+  // Normalize namespace: ensure it ends with ':' if not empty
+  std::string namespacePrefix(fbxNamespace);
+  if (!namespacePrefix.empty() && namespacePrefix.back() != ':') {
+    namespacePrefix += ":";
+  }
 
   // ---------------------------------------------
   // create the scene
@@ -537,6 +560,13 @@ void saveFbxCommon(
   }
 
   // ---------------------------------------------
+  // apply namespace prefix to all nodes
+  // ---------------------------------------------
+  if (!namespacePrefix.empty()) {
+    prependNamespaceToAllNodes(scene->GetRootNode(), namespacePrefix);
+  }
+
+  // ---------------------------------------------
   // close the fbx exporter
   // ---------------------------------------------
 
@@ -593,7 +623,8 @@ void saveFbx(
     const double framerate,
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
+    bool permissive,
+    std::string_view fbxNamespace) {
   CharacterParameters params;
   if (identity.size() == character.parameterTransform.numJointParameters()) {
     params.offsets = identity;
@@ -626,7 +657,15 @@ void saveFbx(
 
   // Call the helper function to save FBX file with joint values
   saveFbxCommon(
-      filename, character, jointValues, framerate, saveMesh, false, coordSystemInfo, permissive);
+      filename,
+      character,
+      jointValues,
+      framerate,
+      saveMesh,
+      false,
+      coordSystemInfo,
+      permissive,
+      fbxNamespace);
 }
 
 void saveFbxWithJointParams(
@@ -636,20 +675,39 @@ void saveFbxWithJointParams(
     const double framerate,
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
+    bool permissive,
+    std::string_view fbxNamespace) {
   // Call the helper function to save FBX file with joint values.
   // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
   // passed in directly from user.
   saveFbxCommon(
-      filename, character, jointParams, framerate, saveMesh, true, coordSystemInfo, permissive);
+      filename,
+      character,
+      jointParams,
+      framerate,
+      saveMesh,
+      true,
+      coordSystemInfo,
+      permissive,
+      fbxNamespace);
 }
 
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive) {
-  saveFbx(filename, character, MatrixXf(), VectorXf(), 120.0, true, coordSystemInfo, permissive);
+    bool permissive,
+    std::string_view fbxNamespace) {
+  saveFbx(
+      filename,
+      character,
+      MatrixXf(),
+      VectorXf(),
+      120.0,
+      true,
+      coordSystemInfo,
+      permissive,
+      fbxNamespace);
 }
 
 } // namespace momentum
