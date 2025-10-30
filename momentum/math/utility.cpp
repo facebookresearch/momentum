@@ -500,4 +500,196 @@ template std::tuple<bool, double, Eigen::Vector2<double>> closestPointsOnSegment
     const Eigen::Vector3<double>& d2,
     const double maxDist);
 
+namespace {
+
+/// Computes a rotation matrix for a single axis rotation.
+template <typename T>
+Matrix3<T> singleAxisRotationMatrix(int axis, T angle) {
+  return AngleAxis<T>(angle, Vector3<T>::Unit(axis)).toRotationMatrix();
+}
+
+/// Computes the derivative of a single axis rotation matrix with respect to the angle.
+template <typename T>
+Matrix3<T> singleAxisRotationMatrixDerivative(int axis, T angle) {
+  Matrix3<T> dR = Matrix3<T>::Zero();
+  const T c = std::cos(angle);
+  const T s = std::sin(angle);
+
+  if (axis == 0) { // X-axis
+    dR(1, 1) = -s;
+    dR(1, 2) = -c;
+    dR(2, 1) = c;
+    dR(2, 2) = -s;
+  } else if (axis == 1) { // Y-axis
+    dR(0, 0) = -s;
+    dR(0, 2) = c;
+    dR(2, 0) = -c;
+    dR(2, 2) = -s;
+  } else { // Z-axis
+    dR(0, 0) = -s;
+    dR(0, 1) = -c;
+    dR(1, 0) = c;
+    dR(1, 1) = -s;
+  }
+
+  return dR;
+}
+
+/// Computes a rotation matrix for two axis rotations.
+template <typename T>
+Matrix3<T> twoAxisRotationMatrix(int axis0, int axis1, const Vector2<T>& angles) {
+  return singleAxisRotationMatrix(axis1, angles[1]) * singleAxisRotationMatrix(axis0, angles[0]);
+}
+
+/// Computes the derivatives of a two axis rotation matrix with respect to both angles.
+template <typename T>
+std::pair<Matrix3<T>, Matrix3<T>>
+twoAxisRotationMatrixDerivatives(int axis0, int axis1, const Vector2<T>& angles) {
+  const Matrix3<T> R0 = singleAxisRotationMatrix(axis0, angles[0]);
+  const Matrix3<T> R1 = singleAxisRotationMatrix(axis1, angles[1]);
+  const Matrix3<T> dR0 = singleAxisRotationMatrixDerivative(axis0, angles[0]);
+  const Matrix3<T> dR1 = singleAxisRotationMatrixDerivative(axis1, angles[1]);
+
+  return {R1 * dR0, dR1 * R0};
+}
+
+/// Levenberg-Marquardt solver for scalar optimization.
+template <typename T>
+T levenbergMarquardtSolveScalar(
+    const Matrix3<T>& target,
+    int axis,
+    T initialGuess = T(0),
+    int maxIterations = 20,
+    T tolerance = eulerTol<T>()) {
+  T angle = initialGuess;
+
+  T previousResidual = std::numeric_limits<T>::max();
+  for (int iter = 0; iter < maxIterations; ++iter) {
+    // Compute current rotation matrix and derivative
+    const Matrix3<T> R = singleAxisRotationMatrix(axis, angle);
+
+    // Compute residual (vectorized matrix difference)
+    const Matrix3<T> residualMatrix = R - target;
+    const T residual = residualMatrix.squaredNorm();
+
+    // Check convergence
+    if (residual < tolerance || (previousResidual - residual) < tolerance) {
+      break;
+    }
+    previousResidual = residual;
+
+    // Compute Jacobian (derivative of squared norm with respect to angle)
+    // d/da ||R(a) - target||^2 = 2 * trace((R(a) - target)^T * dR/da)
+    const Matrix3<T> dR = singleAxisRotationMatrixDerivative(axis, angle);
+    const Eigen::Matrix<T, 9, 1> jacobian = dR.reshaped(9, 1);
+
+    const Eigen::Vector<T, 9> residualVector = residualMatrix.reshaped(9, 1);
+
+    // Levenberg-Marquardt step
+    const Eigen::Vector<T, 1> delta = jacobian.householderQr().solve(-residualVector);
+
+    // Update with step size control
+    angle += delta(0);
+  }
+
+  return angle;
+}
+
+/// Levenberg-Marquardt solver for two-parameter optimization using proper vector residuals.
+template <typename T>
+Vector2<T> levenbergMarquardtSolveTwoAxis(
+    const Matrix3<T>& target,
+    int axis0,
+    int axis1,
+    const Vector2<T>& initialGuess = Vector2<T>::Zero(),
+    int maxIterations = 20,
+    T tolerance = eulerTol<T>()) {
+  Vector2<T> angles = initialGuess;
+
+  T previousResidualNorm = std::numeric_limits<T>::max();
+  for (int iter = 0; iter < maxIterations; ++iter) {
+    // Compute current rotation matrix and derivatives
+    const Matrix3<T> R = twoAxisRotationMatrix(axis0, axis1, angles);
+    const auto [dR0, dR1] = twoAxisRotationMatrixDerivatives(axis0, axis1, angles);
+
+    // Compute residual matrix and flatten to vector (9x1)
+    const Matrix3<T> residualMatrix = R - target;
+    const T residualNorm = residualMatrix.squaredNorm();
+
+    // Check convergence
+    if (residualNorm < tolerance || (previousResidualNorm - residualNorm) < tolerance) {
+      break;
+    }
+    previousResidualNorm = residualNorm;
+
+    // Flatten residual matrix and derivative matrices using utility functions
+    const Eigen::Matrix<T, 9, 1> residualVector = residualMatrix.reshaped(9, 1);
+
+    Eigen::Matrix<T, 9, 2> jacobian;
+    jacobian.template block<9, 1>(0, 0) = dR0.reshaped(9, 1);
+    jacobian.template block<9, 1>(0, 1) = dR1.reshaped(9, 1);
+
+    // Gauss-Newton approximation: H ≈ J^T J
+    // Solve: (J^T J + λI) δθ = -J^T r
+    const Vector2<T> delta = jacobian.householderQr().solve(-residualVector);
+
+    // Check if solution is valid
+    if (!delta.allFinite()) {
+      break;
+    }
+
+    angles = angles + delta;
+  }
+
+  return angles;
+}
+
+} // anonymous namespace
+
+template <typename T>
+T rotationMatrixToOneAxisEuler(const Matrix3<T>& m, int axis0) {
+  MT_CHECK(axis0 >= 0 && axis0 <= 2, "Invalid axis0");
+
+  // Always extract the best single-axis approximation using atan2 as initial guess
+  T initialGuess = T(0);
+  if (axis0 == 0) { // X-axis rotation
+    // For X-axis rotation: R_x(θ) has cos(θ) at (1,1) and (2,2), sin(θ) at (2,1), -sin(θ) at (1,2)
+    initialGuess = std::atan2(m(2, 1), m(1, 1));
+  } else if (axis0 == 1) { // Y-axis rotation
+    // For Y-axis rotation: R_y(θ) has cos(θ) at (0,0) and (2,2), sin(θ) at (0,2), -sin(θ) at (2,0)
+    initialGuess = std::atan2(m(0, 2), m(0, 0));
+  } else { // Z-axis rotation
+    // For Z-axis rotation: R_z(θ) has cos(θ) at (0,0) and (1,1), sin(θ) at (1,0), -sin(θ) at (0,1)
+    initialGuess = std::atan2(m(1, 0), m(0, 0));
+  }
+
+  // Use Levenberg-Marquardt starting from the atan2 initial guess
+  // For exact single-axis rotations, this will converge immediately
+  // For non-exact cases, this provides a much better starting point
+  return levenbergMarquardtSolveScalar(m, axis0, initialGuess);
+}
+
+template <typename T>
+Vector2<T> rotationMatrixToTwoAxisEuler(const Matrix3<T>& m, int axis0, int axis1) {
+  MT_CHECK(axis0 != axis1, "Can't call two-axis rotation with the same axis");
+  MT_CHECK(axis0 >= 0 && axis0 <= 2, "Invalid axis0");
+  MT_CHECK(axis1 >= 0 && axis1 <= 2, "Invalid axis1");
+
+  // Use Levenberg-Marquardt to find optimal two-axis rotation
+  return levenbergMarquardtSolveTwoAxis(
+      m,
+      axis0,
+      axis1,
+      Eigen::Vector2<T>{
+          rotationMatrixToOneAxisEuler(m, axis0), rotationMatrixToOneAxisEuler(m, axis1)});
+}
+
+// Explicit template instantiations
+template float rotationMatrixToOneAxisEuler(const Matrix3<float>& m, int axis0);
+template double rotationMatrixToOneAxisEuler(const Matrix3<double>& m, int axis0);
+
+template Vector2<float> rotationMatrixToTwoAxisEuler(const Matrix3<float>& m, int axis0, int axis1);
+template Vector2<double>
+rotationMatrixToTwoAxisEuler(const Matrix3<double>& m, int axis0, int axis1);
+
 } // namespace momentum
