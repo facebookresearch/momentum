@@ -54,6 +54,7 @@ void saveFbx(
     bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
     bool /* permissive */,
+    const std::vector<std::vector<Marker>>& /* markerSequence */,
     std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
@@ -67,6 +68,7 @@ void saveFbxWithJointParams(
     bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
     bool /* permissive */,
+    const std::vector<std::vector<Marker>>& /* markerSequence */,
     std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
@@ -80,6 +82,10 @@ void saveFbxModel(
     std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
+}
+
+MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename) {
+  return loadOpenFbxMarkerSequence(filename);
 }
 
 } // namespace momentum

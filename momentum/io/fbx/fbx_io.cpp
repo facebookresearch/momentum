@@ -10,6 +10,7 @@
 #include "momentum/character/character.h"
 #include "momentum/character/character_state.h"
 #include "momentum/character/collision_geometry_state.h"
+#include "momentum/character/marker.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/filesystem.h"
@@ -305,6 +306,150 @@ void prependNamespaceToAllNodes(::fbxsdk::FbxNode* node, const std::string& name
     prependNamespaceToAllNodes(node->GetChild(i), namespacePrefix);
   }
 }
+
+// Create marker nodes under a "Markers" hierarchy and add animation for their translations
+std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
+    ::fbxsdk::FbxScene* scene,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    const double framerate) {
+  std::vector<::fbxsdk::FbxNode*> markerNodes;
+
+  if (markerSequence.empty()) {
+    return markerNodes;
+  }
+
+  // Create a root node for all markers
+  ::fbxsdk::FbxNode* markersRootNode = ::fbxsdk::FbxNode::Create(scene, "Markers");
+  ::fbxsdk::FbxNull* markersRootAttr = ::fbxsdk::FbxNull::Create(scene, "MarkersRootNull");
+  markersRootNode->SetNodeAttribute(markersRootAttr);
+
+  // Add custom property to identify this as a Momentum markers root
+  ::fbxsdk::FbxProperty::Create(markersRootNode, ::fbxsdk::FbxBoolDT, kMomentumMarkersRootProperty)
+      .Set(true);
+
+  // Collect unique marker names and organize data per marker
+  std::map<std::string, size_t> markerNameToIndex;
+  std::vector<std::string> markerNames;
+  std::vector<std::vector<float>> timestamps;
+  std::vector<std::vector<Vector3d>> markerPositions;
+
+  for (size_t frameIndex = 0; frameIndex < markerSequence.size(); ++frameIndex) {
+    const float timestamp = static_cast<float>(frameIndex) / static_cast<float>(framerate);
+    for (const auto& marker : markerSequence[frameIndex]) {
+      // Skip occluded markers
+      if (marker.occluded) {
+        continue;
+      }
+
+      // Create new arrays if marker is unknown
+      if (markerNameToIndex.count(marker.name) == 0) {
+        const auto index = timestamps.size();
+        timestamps.emplace_back();
+        markerPositions.emplace_back();
+        markerNameToIndex[marker.name] = index;
+        markerNames.emplace_back(marker.name);
+      }
+
+      // Add timestamp and position for this marker
+      const auto& index = markerNameToIndex.at(marker.name);
+      timestamps[index].push_back(timestamp);
+      markerPositions[index].push_back(marker.pos);
+    }
+  }
+
+  // Create a marker node for each unique marker name
+  for (const auto& markerName : markerNames) {
+    // Create FbxMarker attribute for visualization
+    ::fbxsdk::FbxMarker* markerAttribute = ::fbxsdk::FbxMarker::Create(scene, markerName.c_str());
+    markerAttribute->Look.Set(::fbxsdk::FbxMarker::ELook::eHardCross);
+
+    // Create the node
+    ::fbxsdk::FbxNode* markerNode = ::fbxsdk::FbxNode::Create(scene, markerName.c_str());
+    markerNode->SetNodeAttribute(markerAttribute);
+
+    // Add custom property to identify this as a Momentum marker
+    ::fbxsdk::FbxProperty::Create(markerNode, ::fbxsdk::FbxBoolDT, kMomentumMarkerProperty)
+        .Set(true);
+
+    // Initialize at origin
+    markerNode->LclTranslation.Set(FbxVector4(0.0, 0.0, 0.0));
+
+    // Add to markers root
+    markersRootNode->AddChild(markerNode);
+    markerNodes.push_back(markerNode);
+  }
+
+  // Add markers root to scene root
+  scene->GetRootNode()->AddChild(markersRootNode);
+
+  // Create animation stack if we have motion data
+  if (!timestamps.empty() && !timestamps[0].empty()) {
+    // Get or create animation stack
+    ::fbxsdk::FbxAnimStack* animStack = nullptr;
+    if (scene->GetSrcObjectCount<::fbxsdk::FbxAnimStack>() > 0) {
+      // Use existing animation stack (created for skeleton animation)
+      animStack = scene->GetSrcObject<::fbxsdk::FbxAnimStack>(0);
+    } else {
+      // Create new animation stack
+      animStack = ::fbxsdk::FbxAnimStack::Create(scene, "Marker Animation Stack");
+    }
+
+    // Get or create base layer
+    ::fbxsdk::FbxAnimLayer* animBaseLayer = nullptr;
+    if (animStack->GetMemberCount<::fbxsdk::FbxAnimLayer>() > 0) {
+      animBaseLayer = animStack->GetMember<::fbxsdk::FbxAnimLayer>(0);
+    } else {
+      animBaseLayer = ::fbxsdk::FbxAnimLayer::Create(scene, "Layer0");
+      animStack->AddMember(animBaseLayer);
+    }
+
+    // Create animation curves for each marker
+    for (size_t j = 0; j < markerNames.size(); ++j) {
+      if (timestamps[j].empty()) {
+        continue;
+      }
+
+      auto* markerNode = markerNodes.at(j);
+
+      // Create curves for X, Y, Z translation
+      markerNode->LclTranslation.GetCurveNode(animBaseLayer, true);
+      ::fbxsdk::FbxAnimCurve* curveX =
+          markerNode->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+      ::fbxsdk::FbxAnimCurve* curveY =
+          markerNode->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+      ::fbxsdk::FbxAnimCurve* curveZ =
+          markerNode->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+
+      // Add keyframes for each timestamp
+      curveX->KeyModifyBegin();
+      curveY->KeyModifyBegin();
+      curveZ->KeyModifyBegin();
+
+      for (size_t k = 0; k < timestamps[j].size(); ++k) {
+        ::fbxsdk::FbxTime time;
+        time.SetSecondDouble(timestamps[j][k]);
+
+        const auto& pos = markerPositions[j][k];
+
+        const auto keyIndexX = curveX->KeyAdd(time);
+        curveX->KeySet(keyIndexX, time, static_cast<float>(pos.x()));
+
+        const auto keyIndexY = curveY->KeyAdd(time);
+        curveY->KeySet(keyIndexY, time, static_cast<float>(pos.y()));
+
+        const auto keyIndexZ = curveZ->KeyAdd(time);
+        curveZ->KeySet(keyIndexZ, time, static_cast<float>(pos.z()));
+      }
+
+      curveX->KeyModifyEnd();
+      curveY->KeyModifyEnd();
+      curveZ->KeyModifyEnd();
+    }
+  }
+
+  return markerNodes;
+}
+
 void saveFbxCommon(
     const filesystem::path& filename,
     const Character& character,
@@ -314,6 +459,7 @@ void saveFbxCommon(
     const bool skipActiveJointParamCheck,
     const FBXCoordSystemInfo& coordSystemInfo,
     bool permissive,
+    const std::vector<std::vector<Marker>>& markerSequence,
     std::string_view fbxNamespace) {
   // ---------------------------------------------
   // initialize FBX SDK and prepare for export
@@ -560,6 +706,13 @@ void saveFbxCommon(
   }
 
   // ---------------------------------------------
+  // create marker nodes and animation
+  // ---------------------------------------------
+  if (!markerSequence.empty()) {
+    createMarkerNodes(scene, markerSequence, framerate);
+  }
+
+  // ---------------------------------------------
   // apply namespace prefix to all nodes
   // ---------------------------------------------
   if (!namespacePrefix.empty()) {
@@ -624,6 +777,7 @@ void saveFbx(
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
     bool permissive,
+    const std::vector<std::vector<Marker>>& markerSequence,
     std::string_view fbxNamespace) {
   CharacterParameters params;
   if (identity.size() == character.parameterTransform.numJointParameters()) {
@@ -665,6 +819,7 @@ void saveFbx(
       false,
       coordSystemInfo,
       permissive,
+      markerSequence,
       fbxNamespace);
 }
 
@@ -676,6 +831,7 @@ void saveFbxWithJointParams(
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
     bool permissive,
+    const std::vector<std::vector<Marker>>& markerSequence,
     std::string_view fbxNamespace) {
   // Call the helper function to save FBX file with joint values.
   // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
@@ -689,6 +845,7 @@ void saveFbxWithJointParams(
       true,
       coordSystemInfo,
       permissive,
+      markerSequence,
       fbxNamespace);
 }
 
@@ -707,7 +864,12 @@ void saveFbxModel(
       true,
       coordSystemInfo,
       permissive,
+      {},
       fbxNamespace);
+}
+
+MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename) {
+  return loadOpenFbxMarkerSequence(filename);
 }
 
 } // namespace momentum
