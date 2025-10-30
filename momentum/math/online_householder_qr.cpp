@@ -94,7 +94,7 @@ void OnlineHouseholderQR<T>::reset(const Eigen::Index n, T lambda) {
   y_.setZero();
 }
 
-void validateColumnIndices(gsl::span<const Eigen::Index> colIndices, Eigen::Index maxEntry) {
+void validateColumnIndices(std::span<const Eigen::Index> colIndices, Eigen::Index maxEntry) {
 #ifndef NDEBUG
   {
     for (const auto& idx : colIndices) {

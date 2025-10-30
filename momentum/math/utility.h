@@ -208,8 +208,8 @@ Vector3<T> quaternionToEuler(const Quaternion<T>& q);
 /// @param w Optional weights for each quaternion (defaults to equal weights)
 /// @return The average quaternion
 Quaternionf quaternionAverage(
-    gsl::span<const Quaternionf> q,
-    gsl::span<const float> w = std::vector<float>());
+    std::span<const Quaternionf> q,
+    std::span<const float> w = std::vector<float>());
 
 /// Returns the closest points on two line segments where the line segments are represented in
 /// origin and direction

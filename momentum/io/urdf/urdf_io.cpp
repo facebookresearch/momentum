@@ -321,7 +321,7 @@ template CharacterT<float> loadUrdfCharacter(const filesystem::path& filepath);
 template CharacterT<double> loadUrdfCharacter(const filesystem::path& filepath);
 
 template <typename T>
-CharacterT<T> loadUrdfCharacter(gsl::span<const std::byte> bytes) {
+CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes) {
   urdf::ModelInterfaceSharedPtr urdfModel;
 
   try {
@@ -344,7 +344,7 @@ CharacterT<T> loadUrdfCharacter(gsl::span<const std::byte> bytes) {
   }
 }
 
-template CharacterT<float> loadUrdfCharacter(gsl::span<const std::byte> bytes);
-template CharacterT<double> loadUrdfCharacter(gsl::span<const std::byte> bytes);
+template CharacterT<float> loadUrdfCharacter(std::span<const std::byte> bytes);
+template CharacterT<double> loadUrdfCharacter(std::span<const std::byte> bytes);
 
 } // namespace momentum

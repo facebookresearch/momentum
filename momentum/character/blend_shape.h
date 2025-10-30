@@ -22,9 +22,9 @@ struct BlendShape : public BlendShapeBase {
 
   /// @param baseShape Base shape vertices
   /// @param numShapes Number of blend shapes
-  BlendShape(gsl::span<const Vector3f> baseShape, size_t numShapes);
+  BlendShape(std::span<const Vector3f> baseShape, size_t numShapes);
 
-  void setBaseShape(gsl::span<const Vector3f> baseShape) {
+  void setBaseShape(std::span<const Vector3f> baseShape) {
     baseShape_.assign(baseShape.begin(), baseShape.end());
   }
 
@@ -67,7 +67,7 @@ struct BlendShape : public BlendShapeBase {
   /// @param weights Optional per-vertex importance weights
   /// @return Estimated blend shape coefficients
   [[nodiscard]] VectorXf estimateCoefficients(
-      gsl::span<const Vector3f> vertices,
+      std::span<const Vector3f> vertices,
       float regularization = 1.0f,
       const VectorXf& weights = VectorXf()) const;
 
@@ -75,7 +75,7 @@ struct BlendShape : public BlendShapeBase {
   ///
   /// @param index Index of the shape vector to set
   /// @param shapeVector Vector of vertex offsets
-  void setShapeVector(size_t index, gsl::span<const Vector3f> shapeVector);
+  void setShapeVector(size_t index, std::span<const Vector3f> shapeVector);
 
   /// Compares all components of two blend shapes
   ///

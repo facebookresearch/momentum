@@ -16,7 +16,7 @@ template <typename T>
 void MppcaT<T>::set(
     const VectorX<T>& inPi,
     const MatrixX<T>& mmu,
-    gsl::span<const MatrixX<T>> W,
+    std::span<const MatrixX<T>> W,
     const VectorX<T>& sigma2) {
   using CovarianceMatrix = LowRankCovarianceMatrixT<T>;
 
@@ -55,7 +55,7 @@ void MppcaT<T>::set(
 }
 
 template <typename T, typename T2>
-std::vector<Eigen::MatrixX<T2>> castMatrices(gsl::span<const Eigen::MatrixX<T>> m_in) {
+std::vector<Eigen::MatrixX<T2>> castMatrices(std::span<const Eigen::MatrixX<T>> m_in) {
   std::vector<Eigen::MatrixX<T2>> result;
   result.reserve(m_in.size());
   for (const auto& m : m_in) {

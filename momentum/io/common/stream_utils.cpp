@@ -11,7 +11,7 @@
 
 namespace momentum {
 
-spanstreambuf::spanstreambuf(gsl::span<const std::byte> buffer) {
+spanstreambuf::spanstreambuf(std::span<const std::byte> buffer) {
   if (buffer.empty()) {
     return;
   }
@@ -30,7 +30,7 @@ std::streamsize spanstreambuf::xsputn(
   MT_THROW("spanstreambuf is not writable.");
 }
 
-ispanstream::ispanstream(gsl::span<const std::byte> buffer) : std::istream(&sbuf_), sbuf_(buffer) {
+ispanstream::ispanstream(std::span<const std::byte> buffer) : std::istream(&sbuf_), sbuf_(buffer) {
   // Empty
 }
 

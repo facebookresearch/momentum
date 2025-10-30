@@ -16,7 +16,7 @@ namespace momentum {
 
 void saveMmo(
     const std::string& filename,
-    gsl::span<const VectorXf> poses,
+    std::span<const VectorXf> poses,
     const VectorXf& scale,
     const Character& character) {
   if (poses.empty() ||
@@ -46,7 +46,7 @@ void saveMmo(
     const VectorXf& scale,
     const Character& character,
     const MatrixXf& additionalParameters,
-    gsl::span<const std::string> additionalParameterNames) {
+    std::span<const std::string> additionalParameterNames) {
   if (poses.rows() !=
       gsl::narrow<Eigen::Index>(character.parameterTransform.numAllModelParameters())) {
     MT_LOGW(
@@ -114,8 +114,8 @@ void saveMmo(
     const std::string& filename,
     const MatrixXf& poses,
     const VectorXf& scale,
-    gsl::span<const std::string> parameterNames,
-    gsl::span<const std::string> jointNames) {
+    std::span<const std::string> parameterNames,
+    std::span<const std::string> jointNames) {
   if (poses.rows() != gsl::narrow<Eigen::Index>(parameterNames.size())) {
     MT_LOGW(
         "{}: Cannot save data: poses are of wrong dimension. Expected: {}, actual: {}",
@@ -169,8 +169,8 @@ void saveMmo(
 std::tuple<MatrixXf, VectorXf> mapMotionToCharacter(
     const MatrixXf& poses,
     const VectorXf& offsets,
-    gsl::span<const std::string> parameterNames,
-    gsl::span<const std::string> jointNames,
+    std::span<const std::string> parameterNames,
+    std::span<const std::string> jointNames,
     const Character& character) {
   std::tuple<MatrixXf, VectorXf> result;
   auto& outPoses = std::get<0>(result);
@@ -223,7 +223,7 @@ std::tuple<MatrixXf, VectorXf> loadMmo(const std::string& filename, const Charac
 // get auxiliary data from motion
 std::tuple<MatrixXf, std::vector<std::string>> getAuxiliaryDataFromMotion(
     const MatrixXf& poses,
-    gsl::span<const std::string> parameterNames) {
+    std::span<const std::string> parameterNames) {
   std::tuple<MatrixXf, std::vector<std::string>> result;
   auto& values = std::get<0>(result);
   auto& names = std::get<1>(result);

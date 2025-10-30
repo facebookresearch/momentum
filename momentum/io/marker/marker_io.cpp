@@ -63,7 +63,7 @@ std::optional<MarkerSequence> loadMarkersForMainSubject(
   }
 }
 
-int findMainSubjectIndex(gsl::span<const MarkerSequence> markerSequences) {
+int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences) {
   if (markerSequences.empty()) {
     return -1;
   }

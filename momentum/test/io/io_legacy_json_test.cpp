@@ -234,7 +234,7 @@ TEST_F(LegacyJsonIOTest, BufferOperations) {
   std::memcpy(buffer.data(), jsonString.data(), jsonString.size());
 
   // Load from buffer
-  Character loadedCharacter = loadCharacterFromLegacyJsonBuffer(gsl::span<const std::byte>(buffer));
+  Character loadedCharacter = loadCharacterFromLegacyJsonBuffer(std::span<const std::byte>(buffer));
 
   // Verify loaded character
   EXPECT_EQ(loadedCharacter.skeleton.joints.size(), testCharacter_.skeleton.joints.size());

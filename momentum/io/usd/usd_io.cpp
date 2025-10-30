@@ -431,7 +431,7 @@ Character loadUsdCharacter(const filesystem::path& inputPath) {
   return loadUsdCharacterFromStage(stage);
 }
 
-Character loadUsdCharacter(gsl::span<const std::byte> inputSpan) {
+Character loadUsdCharacter(std::span<const std::byte> inputSpan) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 

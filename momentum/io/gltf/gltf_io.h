@@ -14,7 +14,7 @@
 #include <momentum/math/types.h>
 
 #include <fx/gltf.h>
-#include <gsl/span>
+#include <span>
 
 #include <tuple>
 #include <vector>
@@ -33,7 +33,7 @@ Character loadGltfCharacter(const fx::gltf::Document& model);
 
 Character loadGltfCharacter(const filesystem::path& gltfFilename);
 
-Character loadGltfCharacter(gsl::span<const std::byte> byteSpan);
+Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 
 std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
     const filesystem::path& gltfFilename);
@@ -55,7 +55,7 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
 /// @return A tuple containing the loaded Character object, the motion represented in model
 /// parameters, the identity vector represented as joint parameters, and the fps.
 std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
-    gsl::span<const std::byte> byteSpan);
+    std::span<const std::byte> byteSpan);
 
 /// Load a GLTF Character with motion in the form of skeleton states (transform matrices)
 ///
@@ -63,7 +63,7 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
 /// file to be saved using momentum's functionality that saves model parameters in a
 /// custom GTLF extension, however the resulting skeleton states may be harder to work with.
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
-loadCharacterWithSkeletonStates(gsl::span<const std::byte> byteSpan);
+loadCharacterWithSkeletonStates(std::span<const std::byte> byteSpan);
 
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
 loadCharacterWithSkeletonStates(const filesystem::path& gltfFilename);
@@ -90,7 +90,7 @@ std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
 /// represented as joint parameters, and the fps. The model parameters and joint parameters are
 /// mapped to the input character by name matching.
 std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
-    gsl::span<const std::byte> byteSpan,
+    std::span<const std::byte> byteSpan,
     const Character& character);
 
 /// Loads a MarkerSequence from a file.
@@ -132,7 +132,7 @@ void saveCharacter(
     const filesystem::path& filename,
     const Character& Character,
     float fps,
-    gsl::span<const SkeletonState> skeletonStates,
+    std::span<const SkeletonState> skeletonStates,
     const std::vector<std::vector<Marker>>& markerSequence = {},
     GltfFileFormat fileFormat = GltfFileFormat::Extension,
     const GltfOptions& options = GltfOptions());

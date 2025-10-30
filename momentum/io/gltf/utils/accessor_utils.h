@@ -73,7 +73,7 @@ std::vector<T> copyAccessorBuffer(const fx::gltf::Document& model, int32_t id) {
   const auto stride = view.byteStride == 0 ? elsize : view.byteStride;
 
   const auto& buf = model.buffers[view.buffer];
-  auto bytes = gsl::as_bytes(gsl::make_span(buf.data));
+  auto bytes = std::as_bytes(std::span<const uint8_t>(buf.data));
   bytes = bytes.subspan(view.byteOffset, view.byteLength);
   bytes = bytes.subspan(accessor.byteOffset);
 
@@ -111,7 +111,7 @@ std::vector<T> copyAlignedAccessorBuffer(const fx::gltf::Document& model, int32_
   const auto stride = view.byteStride == 0 ? elsize : view.byteStride;
 
   const auto& buf = model.buffers[view.buffer];
-  auto bytes = gsl::as_bytes(gsl::make_span(buf.data));
+  auto bytes = std::as_bytes(std::span<const uint8_t>(buf.data));
   bytes = bytes.subspan(view.byteOffset, view.byteLength);
   bytes = bytes.subspan(accessor.byteOffset);
 
@@ -133,7 +133,7 @@ void setAccessorType(fx::gltf::Accessor& /* accessor */) {
 template <typename T>
 int32_t createAccessorBuffer(
     fx::gltf::Document& model,
-    gsl::span<T> data,
+    std::span<T> data,
     const bool align = false,
     const bool normalized = false) {
   // gltf 2.0 allows multiple buffers, but only the first buffer will be stored in
@@ -261,8 +261,8 @@ template <typename T>
 int32_t createSampler(
     fx::gltf::Document& model,
     fx::gltf::Animation& anim,
-    gsl::span<T> data,
-    const gsl::span<float>& timestamps) {
+    std::span<T> data,
+    const std::span<float>& timestamps) {
   MT_CHECK(
       data.size() == timestamps.size(), "data: {}, timestmaps: {}", data.size(), timestamps.size());
 
@@ -282,7 +282,7 @@ template <typename T>
 int32_t createSampler(
     fx::gltf::Document& model,
     fx::gltf::Animation& anim,
-    gsl::span<T> data,
+    std::span<T> data,
     const int32_t timestampAccessor) {
   // create new sampler
   const int32_t index = anim.samplers.size();

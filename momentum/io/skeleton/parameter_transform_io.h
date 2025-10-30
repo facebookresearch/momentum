@@ -11,7 +11,7 @@
 #include <momentum/character/parameter_transform.h>
 #include <momentum/common/filesystem.h>
 
-#include <gsl/span>
+#include <span>
 
 #include <string>
 #include <unordered_map>
@@ -21,7 +21,7 @@ namespace momentum {
 std::unordered_map<std::string, std::string> loadMomentumModel(const filesystem::path& filename);
 
 std::unordered_map<std::string, std::string> loadMomentumModelFromBuffer(
-    gsl::span<const std::byte> buffer);
+    std::span<const std::byte> buffer);
 
 ParameterTransform parseParameterTransform(const std::string& data, const Skeleton& skeleton);
 
@@ -35,7 +35,7 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
     const Skeleton& skeleton);
 
 std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
-    gsl::span<const std::byte> rawData,
+    std::span<const std::byte> rawData,
     const Skeleton& skeleton);
 
 } // namespace momentum

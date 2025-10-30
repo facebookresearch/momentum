@@ -9,7 +9,7 @@
 
 namespace momentum {
 
-FbxMemoryStream::FbxMemoryStream(gsl::span<const std::byte> buffer, int pReaderId)
+FbxMemoryStream::FbxMemoryStream(std::span<const std::byte> buffer, int pReaderId)
     : buffer_(buffer),
       length_(buffer.size()),
       position_(0),

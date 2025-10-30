@@ -49,9 +49,9 @@ void VertexSequenceErrorFunctionT<T>::addConstraint(
 
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::getError(
-    gsl::span<const ModelParametersT<T>> modelParameters,
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> meshStates) const {
+    std::span<const ModelParametersT<T>> modelParameters,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> meshStates) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
   MT_CHECK(skelStates.size() == 2);
@@ -80,8 +80,8 @@ double VertexSequenceErrorFunctionT<T>::getError(
 
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::calculateVelocityGradient(
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> meshStates,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> meshStates,
     const VertexVelocityConstraintT<T>& constraint,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   const Eigen::Vector3<T>& vertex0 = meshStates[0].posedMesh_->vertices[constraint.vertexIndex];
@@ -190,9 +190,9 @@ double VertexSequenceErrorFunctionT<T>::calculateVelocityGradient(
 
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::getGradient(
-    gsl::span<const ModelParametersT<T>> modelParameters,
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> meshStates,
+    std::span<const ModelParametersT<T>> modelParameters,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> meshStates,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
   MT_CHECK(modelParameters.size() == 2);
@@ -213,8 +213,8 @@ double VertexSequenceErrorFunctionT<T>::getGradient(
 
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::calculateVelocityJacobian(
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> meshStates,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> meshStates,
     const VertexVelocityConstraintT<T>& constraint,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
@@ -322,9 +322,9 @@ double VertexSequenceErrorFunctionT<T>::calculateVelocityJacobian(
 
 template <typename T>
 double VertexSequenceErrorFunctionT<T>::getJacobian(
-    gsl::span<const ModelParametersT<T>> modelParameters,
-    gsl::span<const SkeletonStateT<T>> skelStates,
-    gsl::span<const MeshStateT<T>> meshStates,
+    std::span<const ModelParametersT<T>> modelParameters,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> meshStates,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) const {

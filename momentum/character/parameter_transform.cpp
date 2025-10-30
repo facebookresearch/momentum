@@ -49,7 +49,7 @@ ParameterTransformT<T> ParameterTransformT<T>::empty(size_t nJointParameters) {
 }
 
 template <typename T>
-ParameterTransformT<T> ParameterTransformT<T>::identity(gsl::span<const std::string> jointNames) {
+ParameterTransformT<T> ParameterTransformT<T>::identity(std::span<const std::string> jointNames) {
   ParameterTransformT<T> result;
   const size_t nJoints = jointNames.size();
   const size_t nJointParameters = nJoints * kParametersPerJoint;

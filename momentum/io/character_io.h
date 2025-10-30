@@ -49,8 +49,8 @@ enum class CharacterFormat : uint8_t {
 /// @return The loaded Character object.
 [[nodiscard]] Character loadFullCharacterFromBuffer(
     CharacterFormat format,
-    gsl::span<const std::byte> characterBuffer,
-    gsl::span<const std::byte> paramBuffer = gsl::span<const std::byte>(),
-    gsl::span<const std::byte> locBuffer = gsl::span<const std::byte>());
+    std::span<const std::byte> characterBuffer,
+    std::span<const std::byte> paramBuffer = std::span<const std::byte>(),
+    std::span<const std::byte> locBuffer = std::span<const std::byte>());
 
 } // namespace momentum

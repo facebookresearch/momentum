@@ -507,7 +507,7 @@ Character loadCharacterFromLegacyJson(const std::string& jsonPath) {
   return loadCharacterFromLegacyJsonString(j.dump());
 }
 
-Character loadCharacterFromLegacyJsonBuffer(gsl::span<const std::byte> jsonBuffer) {
+Character loadCharacterFromLegacyJsonBuffer(std::span<const std::byte> jsonBuffer) {
   std::string jsonString(reinterpret_cast<const char*>(jsonBuffer.data()), jsonBuffer.size());
   return loadCharacterFromLegacyJsonString(jsonString);
 }

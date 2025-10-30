@@ -116,7 +116,7 @@ Affine3f getInverseSSDTransformation(
 std::vector<Vector3f> applyInverseSSD(
     const TransformationList& inverseBindPose,
     const SkinWeights& skin,
-    gsl::span<const Vector3f> points,
+    std::span<const Vector3f> points,
     const SkeletonState& state);
 
 /// Applies inverse SSD to points, storing results in a mesh
@@ -132,7 +132,7 @@ std::vector<Vector3f> applyInverseSSD(
 void applyInverseSSD(
     const TransformationList& inverseBindPose,
     const SkinWeights& skin,
-    gsl::span<const Vector3f> points,
+    std::span<const Vector3f> points,
     const SkeletonState& state,
     Mesh& mesh);
 

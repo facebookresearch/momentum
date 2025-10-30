@@ -216,8 +216,8 @@ using TransformListT =
 
 template <typename T>
 TransformT<T> blendTransforms(
-    gsl::span<const TransformT<T>> transforms,
-    gsl::span<const T> weights);
+    std::span<const TransformT<T>> transforms,
+    std::span<const T> weights);
 
 /// Spherical linear interpolation between two transforms
 template <typename T>

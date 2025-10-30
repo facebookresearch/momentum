@@ -46,9 +46,9 @@ class SequenceErrorFunctionT {
   }
 
   [[nodiscard]] virtual double getError(
-      gsl::span<const ModelParametersT<T>> /* modelParameters */,
-      gsl::span<const SkeletonStateT<T>> /* skelStates */,
-      gsl::span<const MeshStateT<T>> /* meshStates */) const {
+      std::span<const ModelParametersT<T>> /* modelParameters */,
+      std::span<const SkeletonStateT<T>> /* skelStates */,
+      std::span<const MeshStateT<T>> /* meshStates */) const {
     return 0.0f;
   }
 
@@ -58,9 +58,9 @@ class SequenceErrorFunctionT {
   // meshStates: [numFrames()] array of mesh states
   // gradient: [numFrames() * parameterTransform] gradient vector
   virtual double getGradient(
-      gsl::span<const ModelParametersT<T>> /* modelParameters */,
-      gsl::span<const SkeletonStateT<T>> /* skelStates */,
-      gsl::span<const MeshStateT<T>> /* meshStates */,
+      std::span<const ModelParametersT<T>> /* modelParameters */,
+      std::span<const SkeletonStateT<T>> /* skelStates */,
+      std::span<const MeshStateT<T>> /* meshStates */,
       Eigen::Ref<Eigen::VectorX<T>> /* gradient */) const {
     return 0.0f;
   }
@@ -71,9 +71,9 @@ class SequenceErrorFunctionT {
   // jacobian: [getJacobianSize()] x [numFrames() * parameterTransform] Jacobian matrix
   // residual: [getJacobianSize()] residual vector.
   virtual double getJacobian(
-      gsl::span<const ModelParametersT<T>> /* modelParameters */,
-      gsl::span<const SkeletonStateT<T>> /* skelStates */,
-      gsl::span<const MeshStateT<T>> /* meshStates */,
+      std::span<const ModelParametersT<T>> /* modelParameters */,
+      std::span<const SkeletonStateT<T>> /* skelStates */,
+      std::span<const MeshStateT<T>> /* meshStates */,
       Eigen::Ref<Eigen::MatrixX<T>> /* jacobian */,
       Eigen::Ref<Eigen::VectorX<T>> /* residual */,
       int& usedRows) const {

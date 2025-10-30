@@ -403,7 +403,7 @@ TYPED_TEST(TransformTest, Blend1) {
     const std::vector<TransformT<T>> transforms{js};
     const std::vector<T> weights{T(1.0)};
     const auto blended =
-        blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+        blendTransforms(std::span<const TransformT<T>>(transforms), std::span<const T>(weights));
 
     ASSERT_LT(
         (js.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
@@ -423,7 +423,7 @@ TYPED_TEST(TransformTest, Blend2) {
       const std::vector<TransformT<T>> transforms{js1, js2};
       const std::vector<T> weights{T(1.0), T(0.0)};
       const auto blended =
-          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+          blendTransforms(std::span<const TransformT<T>>(transforms), std::span<const T>(weights));
       ASSERT_LT(
           (js1.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
           Eps<T>(1e-5f, 1e-13));
@@ -433,7 +433,7 @@ TYPED_TEST(TransformTest, Blend2) {
       const std::vector<TransformT<T>> transforms{js1, js2};
       const std::vector<T> weights{T(0.0), T(1.0)};
       const auto blended =
-          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+          blendTransforms(std::span<const TransformT<T>>(transforms), std::span<const T>(weights));
       ASSERT_LT(
           (js2.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
           Eps<T>(1e-5f, 1e-13));
@@ -443,7 +443,7 @@ TYPED_TEST(TransformTest, Blend2) {
       const std::vector<TransformT<T>> transforms{js1, js2};
       const std::vector<T> weights{T(2.0), T(2.0)};
       const auto halfway =
-          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+          blendTransforms(std::span<const TransformT<T>>(transforms), std::span<const T>(weights));
       const auto lerped = slerp(js1, js2, T(0.5));
       ASSERT_LT(
           (halfway.toMatrix() - lerped.toMatrix()).template lpNorm<Eigen::Infinity>(),
@@ -466,7 +466,7 @@ TYPED_TEST(TransformTest, BlendOpposites) {
       const std::vector<TransformT<T>> transforms{js1, js2};
       const std::vector<T> weights{T(j), T(4 - j)};
       const auto blended =
-          blendTransforms(gsl::span<const TransformT<T>>(transforms), gsl::span<const T>(weights));
+          blendTransforms(std::span<const TransformT<T>>(transforms), std::span<const T>(weights));
       ASSERT_LT(
           (js1.toMatrix() - blended.toMatrix()).template lpNorm<Eigen::Infinity>(),
           Eps<T>(1e-5f, 1e-13));

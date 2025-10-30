@@ -177,14 +177,14 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// Appends a list of constraints
   ///
   /// @param[in] constrs: a list of constraints to be added
-  void addConstraints(gsl::span<const Data> constrs) {
+  void addConstraints(std::span<const Data> constrs) {
     constraints_.insert(constraints_.end(), constrs.begin(), constrs.end());
   }
 
   /// Replace the current list of constraints with the input
   ///
   /// @param[in] constrs: the new list of constraints
-  void setConstraints(gsl::span<const Data> constrs) {
+  void setConstraints(std::span<const Data> constrs) {
     constraints_.assign(constrs.begin(), constrs.end());
   }
 

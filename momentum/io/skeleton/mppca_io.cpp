@@ -15,7 +15,7 @@
 
 namespace momentum {
 
-std::shared_ptr<const Mppca> loadMppca(const gsl::span<const unsigned char> posePriorDataRaw) {
+std::shared_ptr<const Mppca> loadMppca(const std::span<const unsigned char> posePriorDataRaw) {
   // Load from passed file data
   std::stringstream instream;
   std::copy(

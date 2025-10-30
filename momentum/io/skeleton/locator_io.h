@@ -11,7 +11,7 @@
 #include <momentum/character/locator.h>
 
 #include <momentum/common/filesystem.h>
-#include <gsl/span>
+#include <span>
 
 namespace momentum {
 
@@ -28,7 +28,7 @@ LocatorList loadLocators(
     const ParameterTransform& parameterTransform);
 
 LocatorList loadLocatorsFromBuffer(
-    gsl::span<const std::byte> rawData,
+    std::span<const std::byte> rawData,
     const Skeleton& skeleton,
     const ParameterTransform& parameterTransform);
 

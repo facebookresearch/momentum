@@ -72,7 +72,7 @@ class GltfBuilder final {
   void addSkeletonStates(
       const Character& character,
       float fps,
-      gsl::span<const SkeletonState> skeletonStates,
+      std::span<const SkeletonState> skeletonStates,
       const std::string& customName = "default");
 
   /// Add marker data to the file
@@ -85,7 +85,7 @@ class GltfBuilder final {
   /// @param[in] animName Optional parameter specifying the animation name (default is "default").
   void addMarkerSequence(
       float fps,
-      gsl::span<const std::vector<momentum::Marker>> markerSequence,
+      std::span<const std::vector<momentum::Marker>> markerSequence,
       MarkerMesh markerMesh = MarkerMesh::None,
       const std::string& animName = "default");
 
