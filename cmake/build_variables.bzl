@@ -90,6 +90,7 @@ math_test_sources = [
     "test/math/mesh_test.cpp",
     "test/math/mppca_test.cpp",
     "test/math/random_test.cpp",
+    "test/math/rotation_fitting_test.cpp",
     "test/math/transform_test.cpp",
     "test/math/utility_test.cpp",
 ]
