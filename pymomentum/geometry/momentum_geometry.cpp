@@ -550,7 +550,11 @@ std::vector<bool> listToBitset(const std::vector<size_t>& list, const size_t sz)
 
 std::vector<size_t> getUpperBodyJoints(const momentum::Skeleton& skeleton) {
   auto upperBodyRoot_idx = skeleton.getJointIdByName("b_spine0");
-  MT_THROW_IF(upperBodyRoot_idx == momentum::kInvalidIndex, "Missing 'b_spine0' joint.");
+  if (upperBodyRoot_idx == momentum::kInvalidIndex) { // Check for different skeleton definition
+    upperBodyRoot_idx = skeleton.getJointIdByName("c_spine0");
+  }
+  MT_THROW_IF(
+      upperBodyRoot_idx == momentum::kInvalidIndex, "Missing 'b_spine0' & 'c_spine0' joint.");
 
   std::vector<size_t> result;
 
