@@ -125,6 +125,17 @@ void saveFbxWithJointParams(
     const std::vector<std::vector<Marker>>& markerSequence = {},
     std::string_view fbxNamespace = "");
 
+void saveFbxWithSkelState(
+    const filesystem::path& filename,
+    const Character& character,
+    std::span<const SkeletonState> skeletonStates,
+    double framerate = 120.0,
+    bool saveMesh = false,
+    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    bool permissive = false,
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::string_view fbxNamespace = "");
+
 /// Save a character model (skeleton and mesh) without animation.
 /// @param filename Path to the output FBX file
 /// @param character The character to save
