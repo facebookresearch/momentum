@@ -449,3 +449,211 @@ TEST(SoftwareRasterizer, AlphaMatte) {
     }
   }
 }
+/// Compute bounding box for a line in window space
+/// @param camera The camera to use for projection
+/// @param lineStart The line start point in eye space
+/// @param lineEnd The line end point in eye space
+/// @param thickness The line thickness in pixels
+/// @return Bounding box in pixel coordinates, clamped to image bounds
+Eigen::AlignedBox2i computeLineBoundingBox(
+    const Camera& camera,
+    const Eigen::Vector3f& lineStart,
+    const Eigen::Vector3f& lineEnd,
+    float thickness) {
+  const auto height = camera.imageHeight();
+  const auto width = camera.imageWidth();
+
+  // Project line endpoints to window space
+  auto [lineStartWindow, validStart] = camera.intrinsicsModel()->project(lineStart);
+  auto [lineEndWindow, validEnd] = camera.intrinsicsModel()->project(lineEnd);
+
+  if (!validStart || !validEnd) {
+    // Return empty box if projection failed
+    return {};
+  }
+
+  // Calculate bounding box with padding for thickness
+  const float padding = std::ceil(thickness / 2.0f) + 1.0f; // Add 1 for safety margin
+
+  const int minX = std::clamp(
+      static_cast<int>(std::floor(std::min(lineStartWindow.x(), lineEndWindow.x()) - padding)),
+      0,
+      width - 1);
+  const int maxX = std::clamp(
+      static_cast<int>(std::ceil(std::max(lineStartWindow.x(), lineEndWindow.x()) + padding)),
+      0,
+      width - 1);
+  const int minY = std::clamp(
+      static_cast<int>(std::floor(std::min(lineStartWindow.y(), lineEndWindow.y()) - padding)),
+      0,
+      height - 1);
+  const int maxY = std::clamp(
+      static_cast<int>(std::ceil(std::max(lineStartWindow.y(), lineEndWindow.y()) + padding)),
+      0,
+      height - 1);
+
+  return {Eigen::Vector2i(minX, minY), Eigen::Vector2i(maxX, maxY)};
+}
+
+/// Count modified pixels within and outside a bounding box
+/// @param zBuffer The z-buffer to check for modified pixels
+/// @param bbox The bounding box in pixel coordinates
+/// @return Pair of (pixels inside box, pixels outside box)
+std::pair<int, int> countModifiedPixelsInBox(Span2f zBuffer, const Eigen::AlignedBox2i& bbox) {
+  const auto height = zBuffer.extent(0);
+  const auto width = zBuffer.extent(1);
+
+  int64_t pixelsInBox = 0;
+  int64_t pixelsOutsideBox = 0;
+
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      if (zBuffer(y, x) < FLT_MAX) {
+        if (bbox.contains(Eigen::Vector2i(x, y))) {
+          pixelsInBox++;
+        } else {
+          pixelsOutsideBox++;
+        }
+      }
+    }
+  }
+
+  return {pixelsInBox, pixelsOutsideBox};
+}
+
+TEST(SoftwareRasterizer, LinesWithPaddedBuffer) {
+  // This test specifically checks that line rasterization works correctly with
+  // buffers that have padding (stride > imageWidth). This is important because
+  // SIMD alignment requirements often mean buffers are wider than the actual
+  // image dimensions.
+  const int width = 23; // Deliberately not a multiple of kSimdPacketSize (8)
+  const int height = 30;
+
+  OpenCVDistortionParametersT<float> distortionParams;
+  auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
+      width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
+
+  Camera camera(intrinsics);
+
+  // makeRasterizerZBuffer creates a buffer with proper SIMD padding
+  auto zBuffer = makeRasterizerZBuffer(camera);
+  auto rgbBuffer = makeRasterizerRGBBuffer(camera);
+
+  // Verify that the buffer is indeed padded
+  ASSERT_GE(zBuffer.extent(1), width);
+  ASSERT_EQ(zBuffer.extent(1), padImageWidthForRasterizer(width));
+
+  // Create a diagonal line across the image
+  std::vector<Eigen::Vector3f> linePositions = {
+      Eigen::Vector3f(-0.5f, -0.5f, 2.0f), // Start point
+      Eigen::Vector3f(0.5f, 0.5f, 2.0f) // End point
+  };
+
+  const Eigen::Vector3f lineColor(1.0f, 0.0f, 0.0f); // Red
+  const float thickness = 2.0f;
+
+  rasterizeLines(
+      linePositions,
+      camera,
+      Eigen::Matrix4f::Identity(),
+      0.1f,
+      lineColor,
+      thickness,
+      zBuffer.view(),
+      rgbBuffer.view());
+
+  // Calculate expected bounding box and verify all pixels are within it
+  Eigen::AlignedBox2i bbox =
+      computeLineBoundingBox(camera, linePositions[0], linePositions[1], thickness);
+  ASSERT_FALSE(bbox.isEmpty());
+
+  auto [pixelsDrawn, pixelsOutsideBox] = countModifiedPixelsInBox(zBuffer.view(), bbox);
+
+  ASSERT_EQ(pixelsOutsideBox, 0) << "Found " << pixelsOutsideBox
+                                 << " pixels drawn outside the expected line bounding box ["
+                                 << bbox.min().x() << ", " << bbox.max().x() << "] x ["
+                                 << bbox.min().y() << ", " << bbox.max().y() << "]";
+
+  // Verify colors for all drawn pixels
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      if (zBuffer(y, x) < FLT_MAX) {
+        // Verify the color is correct (red)
+        ASSERT_NEAR(rgbBuffer(y, x, 0), 1.0f, 1e-5f);
+        ASSERT_NEAR(rgbBuffer(y, x, 1), 0.0f, 1e-5f);
+        ASSERT_NEAR(rgbBuffer(y, x, 2), 0.0f, 1e-5f);
+      }
+    }
+  }
+
+  // We should have drawn a reasonable number of pixels for a diagonal line
+  ASSERT_GT(pixelsDrawn, 10);
+  ASSERT_LT(pixelsDrawn, width * height / 2);
+
+  // Test a horizontal line that spans the width
+  auto zBuffer2 = makeRasterizerZBuffer(camera);
+  auto rgbBuffer2 = makeRasterizerRGBBuffer(camera);
+
+  std::vector<Eigen::Vector3f> horizontalLine = {
+      Eigen::Vector3f(-1.2f, 0.0f, 2.0f), // Start point
+      Eigen::Vector3f(1.2f, 0.0f, 2.0f) // End point
+  };
+
+  rasterizeLines(
+      horizontalLine,
+      camera,
+      Eigen::Matrix4f::Identity(),
+      0.1f,
+      lineColor,
+      thickness,
+      zBuffer2.view(),
+      rgbBuffer2.view());
+
+  // Calculate bounding box and verify all pixels are within it
+  Eigen::AlignedBox2i horizBbox =
+      computeLineBoundingBox(camera, horizontalLine[0], horizontalLine[1], thickness);
+  ASSERT_FALSE(horizBbox.isEmpty());
+
+  auto [horizontalPixels, horizPixelsOutside] =
+      countModifiedPixelsInBox(zBuffer2.view(), horizBbox);
+
+  ASSERT_EQ(horizPixelsOutside, 0)
+      << "Found " << horizPixelsOutside
+      << " pixels drawn outside the expected horizontal line bounding box";
+
+  // Horizontal line should draw a substantial number of pixels
+  ASSERT_GT(horizontalPixels, width / 2);
+
+  // Test a vertical line that spans the height
+  auto zBuffer3 = makeRasterizerZBuffer(camera);
+  auto rgbBuffer3 = makeRasterizerRGBBuffer(camera);
+
+  std::vector<Eigen::Vector3f> verticalLine = {
+      Eigen::Vector3f(0.0f, -1.0f, 2.0f), // Start point
+      Eigen::Vector3f(0.0f, 1.0f, 2.0f) // End point
+  };
+
+  rasterizeLines(
+      verticalLine,
+      camera,
+      Eigen::Matrix4f::Identity(),
+      0.1f,
+      lineColor,
+      thickness,
+      zBuffer3.view(),
+      rgbBuffer3.view());
+
+  // Calculate bounding box and verify all pixels are within it
+  Eigen::AlignedBox2i vertBbox =
+      computeLineBoundingBox(camera, verticalLine[0], verticalLine[1], thickness);
+  ASSERT_FALSE(vertBbox.isEmpty());
+
+  auto [verticalPixels, vertPixelsOutside] = countModifiedPixelsInBox(zBuffer3.view(), vertBbox);
+
+  ASSERT_EQ(vertPixelsOutside, 0)
+      << "Found " << vertPixelsOutside
+      << " pixels drawn outside the expected vertical line bounding box";
+
+  // Vertical line should draw a substantial number of pixels
+  ASSERT_GT(verticalPixels, height / 2);
+}

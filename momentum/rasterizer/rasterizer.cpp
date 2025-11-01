@@ -960,6 +960,7 @@ void rasterizeOneLineP(
     float nearClip,
     const Vector3f& color,
     float thickness,
+    index_t zBufferWidth,
     float* zBufferPtr,
     float* rgbBufferPtr,
     float depthOffset) {
@@ -1017,7 +1018,7 @@ void rasterizeOneLineP(
         color,
         halfThickness,
         nearClip,
-        camera.imageWidth(), // Use the logical image width since this is a temporary workaround
+        zBufferWidth,
         depthOffset,
         zBufferPtr,
         rgbBufferPtr);
@@ -1097,6 +1098,7 @@ void rasterizeLinesImp(
         nearClip,
         color_drjit,
         thickness,
+        getRowStride(zBuffer),
         zBufferPtr,
         rgbBufferPtr,
         depthOffset);
@@ -1462,6 +1464,7 @@ void rasterizeWireframeImp(
           nearClip,
           color_drjit,
           thickness,
+          getRowStride(zBuffer),
           zBufferPtr,
           rgbBufferPtr,
           depthOffset);
