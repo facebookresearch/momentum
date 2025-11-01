@@ -17,6 +17,17 @@
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
 
+// Forward declaration for unified save function
+namespace momentum {
+void saveCharacter(
+    const filesystem::path& filename,
+    const Character& character,
+    const MatrixXf& motion,
+    const VectorXf& offsets,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    float fps);
+} // namespace momentum
+
 namespace pymomentum {
 
 momentum::Character loadGLTFCharacterFromFile(const std::string& path) {
@@ -117,7 +128,7 @@ void saveGLTFCharacterToFile(
         poses.rows(),
         poses.cols());
   }
-  momentum::saveCharacter(
+  momentum::saveGltfCharacter(
       path,
       character,
       fps,
@@ -147,7 +158,7 @@ void saveGLTFCharacterToFileFromSkelStates(
   std::vector<momentum::SkeletonState> skeletonStates =
       arrayToSkeletonStates(skel_states, character);
 
-  momentum::saveCharacter(
+  momentum::saveGltfCharacter(
       path,
       character,
       fps,
@@ -215,6 +226,22 @@ void saveFBXCharacterToFileWithJointParams(
         false, /*permissive*/
         fbxNamespace);
   }
+}
+
+void saveCharacter(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    const std::optional<const Eigen::MatrixXf>& motion,
+    const std::optional<const Eigen::VectorXf>& offsets,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+  momentum::saveCharacter(
+      path,
+      character,
+      motion.has_value() ? motion.value().transpose() : Eigen::MatrixXf{},
+      offsets.value_or(Eigen::VectorXf{}),
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      fps);
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(
