@@ -124,11 +124,40 @@ void saveCharacter(
     GltfFileFormat fileFormat = GltfFileFormat::Extension,
     const GltfOptions& options = GltfOptions());
 
+/// Saves character motion to a glb file.
+///
+/// @param[in] motion The model parameters representing the motion of the character (numModelParams,
+/// numFrames)
+/// @param[in] offsets Offset values per joint capturing the skeleton bone lengths using translation
+/// and scale offset (7*numJoints, 1)
+void saveGltfCharacter(
+    const filesystem::path& filename,
+    const Character& Character,
+    float fps = 120.0f,
+    const MotionParameters& motion = {},
+    const IdentityParameters& offsets = {},
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    GltfFileFormat fileFormat = GltfFileFormat::Extension,
+    const GltfOptions& options = GltfOptions());
+
 /// Saves character skeleton states to a glb file.
 ///
 /// @param[in] skeletonStates The skeleton states for each frame of the motion sequence (numFrames,
 /// numJoints, 8)
 void saveCharacter(
+    const filesystem::path& filename,
+    const Character& Character,
+    float fps,
+    std::span<const SkeletonState> skeletonStates,
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    GltfFileFormat fileFormat = GltfFileFormat::Extension,
+    const GltfOptions& options = GltfOptions());
+
+/// Saves character skeleton states to a glb file.
+///
+/// @param[in] skeletonStates The skeleton states for each frame of the motion sequence (numFrames,
+/// numJoints, 8)
+void saveGltfCharacter(
     const filesystem::path& filename,
     const Character& Character,
     float fps,
