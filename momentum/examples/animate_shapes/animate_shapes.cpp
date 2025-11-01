@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
     }
 
     // save the result
-    saveCharacter(
+    saveGltfCharacter(
         options->outFile,
         character,
         20.f,

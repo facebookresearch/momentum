@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
     } else if (oextension == ".glb" || oextension == ".gltf") {
       MT_LOGI("Saving gltf/glb file...");
       if (hasMotion) {
-        saveCharacter(
+        saveGltfCharacter(
             options->output_model_file,
             character,
             fps,
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
             {character.skeleton.getJointNames(), offsets},
             markerSequence.frames);
       } else {
-        saveCharacter(options->output_model_file, character);
+        saveGltfCharacter(options->output_model_file, character);
       }
     }
     if (!options->output_locator_local.empty()) {

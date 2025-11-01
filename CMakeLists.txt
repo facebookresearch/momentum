@@ -452,6 +452,7 @@ mt_library(
   PRIVATE_LINK_LIBRARIES
     io_common
     io_gltf
+    io_fbx
     ezc3d
 )
 

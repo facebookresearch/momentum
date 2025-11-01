@@ -8,6 +8,7 @@
 #include "momentum/io/character_io.h"
 
 #include "momentum/character/character.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/io/fbx/fbx_io.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/shape/pose_shape_io.h"
@@ -137,6 +138,78 @@ Character loadFullCharacterFromBuffer(
   }
 
   return character.value();
+}
+
+void saveCharacter(
+    const filesystem::path& filename,
+    const Character& character,
+    const MatrixXf& motion,
+    const VectorXf& offsets,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    float fps) {
+  // Parse format from file extension
+  const auto format = parseCharacterFormat(filename);
+  MT_THROW_IF(
+      format == CharacterFormat::Unknown,
+      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf",
+      filename.string());
+
+  if (format == CharacterFormat::Gltf) {
+    saveGltfCharacter(
+        filename,
+        character,
+        fps,
+        {character.parameterTransform.name, motion},
+        {character.skeleton.getJointNames(), offsets},
+        markerSequence);
+  } else if (format == CharacterFormat::Fbx) {
+    // Save as FBX
+    saveFbx(
+        filename,
+        character,
+        motion,
+        offsets,
+        static_cast<double>(fps),
+        true, // saveMesh
+        FBXCoordSystemInfo(),
+        false, // permissive
+        markerSequence);
+  } else {
+    MT_THROW(
+        "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
+  }
+}
+
+void saveCharacter(
+    const filesystem::path& filename,
+    const Character& character,
+    std::span<const SkeletonState> skeletonStates,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    float fps) {
+  // Parse format from file extension
+  const auto format = parseCharacterFormat(filename);
+  MT_THROW_IF(
+      format == CharacterFormat::Unknown,
+      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf",
+      filename.string());
+
+  if (format == CharacterFormat::Gltf) {
+    saveGltfCharacter(filename, character, fps, skeletonStates, markerSequence);
+  } else if (format == CharacterFormat::Fbx) {
+    // Save as FBX
+    saveFbxWithSkelState(
+        filename,
+        character,
+        skeletonStates,
+        static_cast<double>(fps),
+        true, // saveMesh
+        FBXCoordSystemInfo(),
+        false, // permissive
+        markerSequence);
+  } else {
+    MT_THROW(
+        "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
+  }
 }
 
 } // namespace momentum
