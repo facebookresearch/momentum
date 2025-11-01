@@ -14,13 +14,13 @@ if(NOT DEFINED ENV{CONDA_PREFIX})
   )
 endif()
 
-# For PyPI builds (pip wheel), look in site-packages
-# For conda builds, look in CONDA_PREFIX
-if(DEFINED ENV{CONDA_BUILD})
-  # Conda build - use CONDA_PREFIX
+# Determine torch base path based on build environment and platform
+# Use CONDA_PREFIX for Unix conda-build, use site-packages for PyPI or Windows
+if(DEFINED ENV{CONDA_BUILD} AND NOT WIN32)
+  # Unix conda-build - use CONDA_PREFIX
   set(libtorch_base_path $ENV{CONDA_PREFIX})
 else()
-  # PyPI build (pip wheel) - use site-packages/torch
+  # Windows or PyPI - use site-packages/torch
   set(libtorch_base_path ${Python3_SITELIB}/torch)
 endif()
 
