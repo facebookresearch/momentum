@@ -161,10 +161,10 @@ void saveFBXCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
-    std::optional<const Eigen::MatrixXf> motion,
-    std::optional<const Eigen::VectorXf> offsets,
+    const std::optional<const Eigen::MatrixXf>& motion,
+    const std::optional<const Eigen::VectorXf>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
   if (motion.has_value() && offsets.has_value()) {
     momentum::saveFbx(
@@ -192,9 +192,9 @@ void saveFBXCharacterToFileWithJointParams(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
-    std::optional<const Eigen::MatrixXf> jointParams,
+    const std::optional<const Eigen::MatrixXf>& jointParams,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    std::optional<const momentum::FBXCoordSystemInfo> coordSystemInfo,
+    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
   if (jointParams.has_value()) {
     momentum::saveFbxWithJointParams(
