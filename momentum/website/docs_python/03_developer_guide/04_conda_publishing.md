@@ -109,11 +109,7 @@ For internal changes to the upstream momentum repository that affect conda build
 
 ### Finding Package Details
 
-Inspect installed files and metadata for any package version:
-```bash
-# Use conda-metadata-app
-https://conda-metadata-app.streamlit.app/?q=conda-forge/linux-64/pymomentum-0.1.77-cuda129_py313_h861d01a_0.conda
-```
+Inspect installed files and metadata for any package version using [conda-metadata-app](https://conda-metadata-app.streamlit.app/?q=conda-forge/linux-64/pymomentum-0.1.77-cuda129_py313_h861d01a_0.conda).
 
 Or locally:
 ```bash
