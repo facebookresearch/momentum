@@ -201,41 +201,44 @@ PYBIND11_MODULE(renderer, m) {
             self.p4);
       });
 
+  // Factory function for PinholeIntrinsicsModel to avoid template ambiguity
+  auto pinholeFactory =
+      [](int32_t imageWidth,
+         int32_t imageHeight,
+         std::optional<float> fx,
+         std::optional<float> fy,
+         std::optional<float> cx,
+         std::optional<float> cy) -> std::shared_ptr<momentum::rasterizer::PinholeIntrinsicsModel> {
+    // Default focal length calculation: "normal" lens is a 50mm lens on
+    // a 35mm camera body
+    const float focal_length_cm = 5.0f;
+    const float film_width_cm = 3.6f;
+    const float default_focal_length_pixels = (focal_length_cm / film_width_cm) * (float)imageWidth;
+
+    if (fx.has_value() != fy.has_value()) {
+      throw std::runtime_error("fx and fy must be both specified or both omitted");
+    }
+
+    if (cx.has_value() != cy.has_value()) {
+      throw std::runtime_error("cx and cy must be both specified or both omitted");
+    }
+
+    return std::make_shared<momentum::rasterizer::PinholeIntrinsicsModel>(
+        imageWidth,
+        imageHeight,
+        fx.value_or(default_focal_length_pixels),
+        fy.value_or(default_focal_length_pixels),
+        cx.value_or(imageWidth / 2.0f),
+        cy.value_or(imageHeight / 2.0f));
+  };
+
   py::class_<
       momentum::rasterizer::PinholeIntrinsicsModel,
       momentum::rasterizer::IntrinsicsModel,
       std::shared_ptr<momentum::rasterizer::PinholeIntrinsicsModel>>(
       m, "PinholeIntrinsicsModel", "Pinhole camera intrinsics model without distortion")
       .def(
-          py::init([](int32_t imageWidth,
-                      int32_t imageHeight,
-                      std::optional<float> fx,
-                      std::optional<float> fy,
-                      std::optional<float> cx,
-                      std::optional<float> cy) {
-            // Default focal length calculation: "normal" lens is a 50mm lens on
-            // a 35mm camera body
-            const float focal_length_cm = 5.0f;
-            const float film_width_cm = 3.6f;
-            const float default_focal_length_pixels =
-                (focal_length_cm / film_width_cm) * (float)imageWidth;
-
-            if (fx.has_value() != fy.has_value()) {
-              throw std::runtime_error("fx and fy must be both specified or both omitted");
-            }
-
-            if (cx.has_value() != cy.has_value()) {
-              throw std::runtime_error("cx and cy must be both specified or both omitted");
-            }
-
-            return std::make_shared<momentum::rasterizer::PinholeIntrinsicsModel>(
-                imageWidth,
-                imageHeight,
-                fx.value_or(default_focal_length_pixels),
-                fy.value_or(default_focal_length_pixels),
-                cx.value_or(imageWidth / 2.0f),
-                cy.value_or(imageHeight / 2.0f));
-          }),
+          py::init(pinholeFactory),
           R"(Create a pinhole camera model with specified focal lengths and image dimensions.
 
 :param image_width: Width of the image in pixels.
@@ -270,35 +273,38 @@ PYBIND11_MODULE(renderer, m) {
             self.cy());
       });
 
+  // Factory function for OpenCVIntrinsicsModel to avoid template ambiguity
+  auto opencvFactory =
+      [](int32_t imageWidth,
+         int32_t imageHeight,
+         std::optional<float> fx,
+         std::optional<float> fy,
+         std::optional<float> cx,
+         std::optional<float> cy,
+         std::optional<momentum::rasterizer::OpenCVDistortionParameters> distortionParams)
+      -> std::shared_ptr<momentum::rasterizer::OpenCVIntrinsicsModel> {
+    // Default focal length calculation: "normal" lens is a 50mm
+    // lens on a 35mm camera body
+    const float focal_length_cm = 5.0f;
+    const float film_width_cm = 3.6f;
+    const float default_focal_length_pixels = (focal_length_cm / film_width_cm) * (float)imageWidth;
+    return std::make_shared<momentum::rasterizer::OpenCVIntrinsicsModel>(
+        imageWidth,
+        imageHeight,
+        fx.value_or(default_focal_length_pixels),
+        fy.value_or(default_focal_length_pixels),
+        cx.value_or(imageWidth / 2.0f),
+        cy.value_or(imageHeight / 2.0f),
+        distortionParams.value_or(momentum::rasterizer::OpenCVDistortionParameters{}));
+  };
+
   py::class_<
       momentum::rasterizer::OpenCVIntrinsicsModel,
       momentum::rasterizer::IntrinsicsModel,
       std::shared_ptr<momentum::rasterizer::OpenCVIntrinsicsModel>>(
       m, "OpenCVIntrinsicsModel", "OpenCV camera intrinsics model with distortion")
       .def(
-          py::init(
-              [](int32_t imageWidth,
-                 int32_t imageHeight,
-                 std::optional<float> fx,
-                 std::optional<float> fy,
-                 std::optional<float> cx,
-                 std::optional<float> cy,
-                 std::optional<momentum::rasterizer::OpenCVDistortionParameters> distortionParams) {
-                // Default focal length calculation: "normal" lens is a 50mm
-                // lens on a 35mm camera body
-                const float focal_length_cm = 5.0f;
-                const float film_width_cm = 3.6f;
-                const float default_focal_length_pixels =
-                    (focal_length_cm / film_width_cm) * (float)imageWidth;
-                return std::make_shared<momentum::rasterizer::OpenCVIntrinsicsModel>(
-                    imageWidth,
-                    imageHeight,
-                    fx.value_or(default_focal_length_pixels),
-                    fy.value_or(default_focal_length_pixels),
-                    cx.value_or(imageWidth / 2.0f),
-                    cy.value_or(imageHeight / 2.0f),
-                    distortionParams.value_or(momentum::rasterizer::OpenCVDistortionParameters{}));
-              }),
+          py::init(opencvFactory),
           R"(Create an OpenCV camera model with specified parameters and optional distortion.
 
 :param image_width: Width of the image in pixels.
@@ -335,14 +341,18 @@ PYBIND11_MODULE(renderer, m) {
             self.cy());
       });
 
+  // Factory function for Camera to avoid template ambiguity
+  auto cameraFactory =
+      [](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
+         const std::optional<Eigen::Matrix4f>& eye_from_world) -> momentum::rasterizer::Camera {
+    return momentum::rasterizer::Camera(
+        intrinsics, Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
+  };
+
   // Bind Camera class
   py::class_<momentum::rasterizer::Camera>(m, "Camera", "Camera for rendering")
       .def(
-          py::init([](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
-                      const std::optional<Eigen::Matrix4f>& eye_from_world) {
-            return momentum::rasterizer::Camera(
-                intrinsics, Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
-          }),
+          py::init(cameraFactory),
           R"(Create a camera with specified intrinsics and pose.
 
 :param intrinsics_model: Camera intrinsics model defining focal length, principal point, and image dimensions.
@@ -585,7 +595,22 @@ PYBIND11_MODULE(renderer, m) {
           })
       .def(py::init<>())
       .def(
-          py::init(&pymomentum::createPhongMaterial),
+          py::init(
+              [](const std::optional<Eigen::Vector3f>& diffuseColor,
+                 const std::optional<Eigen::Vector3f>& specularColor,
+                 const std::optional<float>& specularExponent,
+                 const std::optional<Eigen::Vector3f>& emissiveColor,
+                 const std::optional<py::array_t<const float>>& diffuseTexture,
+                 const std::optional<py::array_t<const float>>& emissiveTexture)
+                  -> momentum::rasterizer::PhongMaterial {
+                return pymomentum::createPhongMaterial(
+                    diffuseColor,
+                    specularColor,
+                    specularExponent,
+                    emissiveColor,
+                    diffuseTexture,
+                    emissiveTexture);
+              }),
           R"(Create a Phong material with customizable properties.
 
           :param diffuse_color: RGB diffuse color values (0-1 range)
@@ -599,8 +624,8 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("specular_color") = std::optional<Eigen::Vector3f>{},
           py::arg("specular_exponent") = std::optional<float>{},
           py::arg("emissive_color") = std::optional<Eigen::Vector3f>{},
-          py::arg("diffuse_texture") = std::optional<py::array_t<float>>{},
-          py::arg("emissive_texture") = std::optional<py::array_t<float>>{})
+          py::arg("diffuse_texture") = std::optional<py::array_t<const float>>{},
+          py::arg("emissive_texture") = std::optional<py::array_t<const float>>{})
       .def("__repr__", [](const momentum::rasterizer::PhongMaterial& self) {
         return fmt::format(
             "PhongMaterial(diffuse=({:.2f}, {:.2f}, {:.2f}), specular=({:.2f}, {:.2f}, {:.2f}), exponent={:.2f}, emissive=({:.2f}, {:.2f}, {:.2f}))",
