@@ -141,6 +141,37 @@ template <typename T>
     const Matrix3<T>& m,
     EulerConvention convention = EulerConvention::Intrinsic);
 
+/// Fits a two-axis Euler rotation to a rotation matrix
+///
+/// Finds the best-fit two-axis Euler angles (axis0 then axis1) that minimize the
+/// L2 distance to the target rotation matrix using Levenberg-Marquardt optimization.
+///
+/// @tparam T The scalar type.
+/// @param[in] m The target rotation matrix.
+/// @param[in] axis0 The index of the first rotation axis, one of {0, 1, 2}.
+/// @param[in] axis1 The index of the second rotation axis, one of {0, 1, 2}.
+/// @return A 2D vector containing the fitted Euler angles [angle0, angle1].
+template <typename T>
+[[nodiscard]] Vector2<T> rotationMatrixToTwoAxisEuler(const Matrix3<T>& m, int axis0, int axis1);
+
+/// Fits a single-axis Euler rotation to a rotation matrix
+///
+/// Finds the best-fit single-axis rotation angle that minimizes the L2 distance
+/// to the target rotation matrix using Levenberg-Marquardt optimization. This is
+/// NOT a direct conversion - if the input matrix cannot be exactly represented as
+/// a single-axis rotation, this function returns the closest approximation.
+///
+/// For exact single-axis rotations, the result will be precise. For general rotation
+/// matrices (e.g., those involving rotations around multiple axes), the result is the
+/// best single-axis approximation in the least-squares sense.
+///
+/// @tparam T The scalar type.
+/// @param[in] m The target rotation matrix.
+/// @param[in] axis0 The rotation axis index, one of {0, 1, 2} (X, Y, Z).
+/// @return The fitted rotation angle around the specified axis.
+template <typename T>
+[[nodiscard]] T rotationMatrixToOneAxisEuler(const Matrix3<T>& m, int axis0);
+
 /// Converts Euler angles to quaternion
 ///
 /// @tparam T The scalar type.
