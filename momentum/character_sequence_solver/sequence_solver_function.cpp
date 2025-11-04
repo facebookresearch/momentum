@@ -192,6 +192,9 @@ double SequenceSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters)
   // update the state according to the transformed parameters
   dispenso::parallel_for(0, nFrames, [&](size_t f) {
     states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
+    if (needsMesh_) {
+      meshStates_[f].update(frameParameters_[f], states_[f], character_);
+    }
   });
 
   // sum up error for all per-frame error functions
