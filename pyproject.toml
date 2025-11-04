@@ -21,6 +21,7 @@ Homepage = "https://github.com/facebookresearch/momentum"
 build-dir = "build/{wheel_tag}"
 cmake.args = [
     "-DBUILD_SHARED_LIBS=OFF",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
