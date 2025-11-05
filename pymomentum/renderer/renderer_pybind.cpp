@@ -226,7 +226,7 @@ PYBIND11_MODULE(renderer, m) {
               throw std::runtime_error("cx and cy must be both specified or both omitted");
             }
 
-            return momentum::rasterizer::PinholeIntrinsicsModel(
+            return std::make_shared<momentum::rasterizer::PinholeIntrinsicsModel>(
                 imageWidth,
                 imageHeight,
                 fx.value_or(default_focal_length_pixels),
@@ -281,13 +281,12 @@ PYBIND11_MODULE(renderer, m) {
                  std::optional<float> fy,
                  std::optional<float> cx,
                  std::optional<float> cy,
-                 std::optional<momentum::rasterizer::OpenCVDistortionParameters> distortionParams)
-                  -> momentum::rasterizer::OpenCVIntrinsicsModel {
+                 std::optional<momentum::rasterizer::OpenCVDistortionParameters> distortionParams) {
                 const float focal_length_cm = 5.0f;
                 const float film_width_cm = 3.6f;
                 const float default_focal_length_pixels =
                     (focal_length_cm / film_width_cm) * (float)imageWidth;
-                return momentum::rasterizer::OpenCVIntrinsicsModel(
+                return std::make_shared<momentum::rasterizer::OpenCVIntrinsicsModel>(
                     imageWidth,
                     imageHeight,
                     fx.value_or(default_focal_length_pixels),
@@ -337,8 +336,7 @@ PYBIND11_MODULE(renderer, m) {
       .def(
           py::init(
               [](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
-                 const std::optional<Eigen::Matrix4f>& eye_from_world)
-                  -> momentum::rasterizer::Camera {
+                 const std::optional<Eigen::Matrix4f>& eye_from_world) {
                 return momentum::rasterizer::Camera(
                     intrinsics,
                     Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
