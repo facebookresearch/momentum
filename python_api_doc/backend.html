@@ -186,61 +186,26 @@ output.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.forward">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_mul_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the forward of the custom autograd Function.</p>
-<p>This function is to be overridden by all subclasses.
-There are two ways to define forward:</p>
-<p>Usage 1 (Combined forward and ctx):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>It must accept a context ctx as the first argument, followed by any
-number of arguments (tensors or other types).</p></li>
-<li><p>See <span class="xref std std-ref">combining-forward-context</span> for more details</p></li>
-</ul>
-<p>Usage 2 (Separate forward and ctx):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="k">pass</span>
-
-<span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">setup_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>The forward no longer accepts a ctx argument.</p></li>
-<li><p>Instead, you must also override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.setup_context()</span></code>
-staticmethod to handle setting up the <code class="docutils literal notranslate"><span class="pre">ctx</span></code> object.
-<code class="docutils literal notranslate"><span class="pre">output</span></code> is the output of the forward, <code class="docutils literal notranslate"><span class="pre">inputs</span></code> are a Tuple of inputs
-to the forward.</p></li>
-<li><p>See <span class="xref std std-ref">extending-autograd</span> for more details</p></li>
-</ul>
-<p>The context can be used to store arbitrary data that can be then
-retrieved during the backward pass. Tensors should not be stored
-directly on <cite>ctx</cite> (though this is not currently enforced for
-backward compatibility). Instead, tensors should be saved either with
-<code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_backward()</span></code> if they are intended to be used in
-<code class="docutils literal notranslate"><span class="pre">backward</span></code> (equivalently, <code class="docutils literal notranslate"><span class="pre">vjp</span></code>) or <code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_forward()</span></code>
-if they are intended to be used for in <code class="docutils literal notranslate"><span class="pre">jvp</span></code>.</p>
+<dd><p>Compute forward pass for differentiable forward kinematics.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>local_skel_state: Local joint transformations, shape (batch_size, num_joints, 8)
+prefix_mul_indices: List of [child_index, parent_index] tensor pairs</p>
+</dd>
+<dt>Returns:</dt><dd><p>Tuple of (global_skel_state, intermediate_results)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.setup_context">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.setup_context" title="Link to this definition"></a></dt>
-<dd><p>There are two ways to define the forward pass of an autograd.Function.</p>
-<p>Either:</p>
-<ol class="arabic simple">
-<li><p>Override forward with the signature <code class="docutils literal notranslate"><span class="pre">forward(ctx,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.
-<code class="docutils literal notranslate"><span class="pre">setup_context</span></code> is not overridden. Setting up the ctx for backward
-happens inside the <code class="docutils literal notranslate"><span class="pre">forward</span></code>.</p></li>
-<li><p>Override forward with the signature <code class="docutils literal notranslate"><span class="pre">forward(*args,</span> <span class="pre">**kwargs)</span></code> and
-override <code class="docutils literal notranslate"><span class="pre">setup_context</span></code>. Setting up the ctx for backward happens
-inside <code class="docutils literal notranslate"><span class="pre">setup_context</span></code> (as opposed to inside the <code class="docutils literal notranslate"><span class="pre">forward</span></code>)</p></li>
-</ol>
-<p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.forward()</span></code> and <span class="xref std std-ref">extending-autograd</span> for more details.</p>
+<dd><p>Save context for backward pass.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>ctx: Context object for saving tensors and data
+inputs: Tuple of (local_skel_state, prefix_mul_indices)
+outputs: Tuple of (global_skel_state, intermediate_results)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -342,17 +307,14 @@ intermediate_results: List of intermediate joint states from forward pass</p>
 <span class="sig-prename descclassname"><span class="pre">pymomentum.backend.skel_state_backend.</span></span><span class="sig-name descname"><span class="pre">unpose_from_momentum_global_joint_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_joint_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binded_joint_state_inv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin_indices_flattened</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin_weights_flattened</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vert_indices_flattened</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_high_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.unpose_from_momentum_global_joint_state" title="Link to this definition"></a></dt>
 <dd><p>The inverse function of skinning().
 WARNING: the precision is low…</p>
-<dl>
+<dl class="simple">
 <dt>Args:</dt><dd><p>verts: [batch_size, num_verts, 3]
 global_joint_state (th.Tensor): (B, J, 8)
 binded_joint_state (th.Tensor): (J, 8)
 skin_indices_flattened: (N, ) LBS skinning nbr joint indices
 skin_weights_flattened: (N, ) LBS skinning nbr joint weights
 vert_indices_flattened: (N, ) LBS skinning nbr corresponding vertex indices
-with_high_precision: if True, use high precision solver (LDLT),</p>
-<blockquote>
-<div><p>but requires a cuda device sync</p>
-</div></blockquote>
+with_high_precision: if True, use high precision solver (LDLT), but requires a cuda device sync</p>
 </dd>
 </dl>
 </dd></dl>
@@ -408,61 +370,28 @@ output.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.forward">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_state_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_state_r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_state_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_mul_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the forward of the custom autograd Function.</p>
-<p>This function is to be overridden by all subclasses.
-There are two ways to define forward:</p>
-<p>Usage 1 (Combined forward and ctx):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>It must accept a context ctx as the first argument, followed by any
-number of arguments (tensors or other types).</p></li>
-<li><p>See <span class="xref std std-ref">combining-forward-context</span> for more details</p></li>
-</ul>
-<p>Usage 2 (Separate forward and ctx):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="k">pass</span>
-
-<span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">setup_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>The forward no longer accepts a ctx argument.</p></li>
-<li><p>Instead, you must also override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.setup_context()</span></code>
-staticmethod to handle setting up the <code class="docutils literal notranslate"><span class="pre">ctx</span></code> object.
-<code class="docutils literal notranslate"><span class="pre">output</span></code> is the output of the forward, <code class="docutils literal notranslate"><span class="pre">inputs</span></code> are a Tuple of inputs
-to the forward.</p></li>
-<li><p>See <span class="xref std std-ref">extending-autograd</span> for more details</p></li>
-</ul>
-<p>The context can be used to store arbitrary data that can be then
-retrieved during the backward pass. Tensors should not be stored
-directly on <cite>ctx</cite> (though this is not currently enforced for
-backward compatibility). Instead, tensors should be saved either with
-<code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_backward()</span></code> if they are intended to be used in
-<code class="docutils literal notranslate"><span class="pre">backward</span></code> (equivalently, <code class="docutils literal notranslate"><span class="pre">vjp</span></code>) or <code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_forward()</span></code>
-if they are intended to be used for in <code class="docutils literal notranslate"><span class="pre">jvp</span></code>.</p>
+<dd><p>Compute forward pass for differentiable forward kinematics using TRS representation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>local_state_t: Local joint translations, shape (batch_size, num_joints, 3)
+local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3)
+local_state_s: Local joint scales, shape (batch_size, num_joints, 1)
+prefix_mul_indices: List of [child_index, parent_index] tensor pairs</p>
+</dd>
+<dt>Returns:</dt><dd><p>Tuple of (global_state_t, global_state_r, global_state_s, intermediate_results)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.setup_context">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.setup_context" title="Link to this definition"></a></dt>
-<dd><p>There are two ways to define the forward pass of an autograd.Function.</p>
-<p>Either:</p>
-<ol class="arabic simple">
-<li><p>Override forward with the signature <code class="docutils literal notranslate"><span class="pre">forward(ctx,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.
-<code class="docutils literal notranslate"><span class="pre">setup_context</span></code> is not overridden. Setting up the ctx for backward
-happens inside the <code class="docutils literal notranslate"><span class="pre">forward</span></code>.</p></li>
-<li><p>Override forward with the signature <code class="docutils literal notranslate"><span class="pre">forward(*args,</span> <span class="pre">**kwargs)</span></code> and
-override <code class="docutils literal notranslate"><span class="pre">setup_context</span></code>. Setting up the ctx for backward happens
-inside <code class="docutils literal notranslate"><span class="pre">setup_context</span></code> (as opposed to inside the <code class="docutils literal notranslate"><span class="pre">forward</span></code>)</p></li>
-</ol>
-<p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.forward()</span></code> and <span class="xref std std-ref">extending-autograd</span> for more details.</p>
+<dd><p>Save context for backward pass.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>ctx: Context object for saving tensors and data
+inputs: Tuple of (local_state_t, local_state_r, local_state_s, prefix_mul_indices)
+outputs: Tuple of (joint_state_t, joint_state_r, joint_state_s, intermediate_results)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -473,14 +402,11 @@ inside <code class="docutils literal notranslate"><span class="pre">setup_contex
 <dd><p>Compute global TRS state from local joint transformations (user-facing wrapper).</p>
 <p>This is the main entry point for forward kinematics using TRS states. It automatically
 selects between JIT-compiled and autograd-enabled implementations based on the execution context.</p>
-<dl>
+<dl class="simple">
 <dt>Args:</dt><dd><p>local_state_t: Local joint translations, shape (batch_size, num_joints, 3).
 local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3).
 local_state_s: Local joint scales, shape (batch_size, num_joints, 1).
-prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining</p>
-<blockquote>
-<div><p>the kinematic hierarchy traversal order.</p>
-</div></blockquote>
+prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining the kinematic hierarchy traversal order.</p>
 </dd>
 <dt>Returns:</dt><dd><p>global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
 global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
@@ -522,7 +448,7 @@ global_state_s: Global joint scales, shape (batch_size, num_joints, 1).</p>
 <span class="sig-prename descclassname"><span class="pre">pymomentum.backend.trs_backend.</span></span><span class="sig-name descname"><span class="pre">unpose_from_global_joint_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin_indices_flattened</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin_weights_flattened</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vert_indices_flattened</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_high_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.backend.trs_backend.unpose_from_global_joint_state" title="Link to this definition"></a></dt>
 <dd><p>The inverse function of skinning().
 WARNING: the precision is low…</p>
-<dl>
+<dl class="simple">
 <dt>Args:</dt><dd><p>verts: [batch_size, num_verts, 3]
 t: (B, J, 3) Translation of the joints
 r: (B, J, 3, 3) Rotation of the joints
@@ -532,10 +458,7 @@ r0: (J, 3, 3) Rotation of inverse bind pose
 skin_indices_flattened: (N, ) LBS skinning nbr joint indices
 skin_weights_flattened: (N, ) LBS skinning nbr joint weights
 vert_indices_flattened: (N, ) LBS skinning nbr corresponding vertex indices
-with_high_precision: if True, use high precision solver (LDLT),</p>
-<blockquote>
-<div><p>but requires a cuda device sync</p>
-</div></blockquote>
+with_high_precision: if True, use high precision solver (LDLT), but requires a cuda device sync</p>
 </dd>
 </dl>
 </dd></dl>

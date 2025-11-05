@@ -327,14 +327,11 @@ registered hooks while the latter silently ignores them.</p>
 <p>This method provides backward compatibility for code that passes individual
 tensors instead of the TRS tuple format. Internally, it creates a tuple
 and delegates to skin_with_trs().</p>
-<dl>
+<dl class="simple">
 <dt>Args:</dt><dd><p>global_state_t: Global joint translations, shape (batch_size, num_joints, 3)
 global_state_r: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
 global_state_s: Global joint scales, shape (batch_size, num_joints, 1)
-rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3)</p>
-<blockquote>
-<div><p>or (num_vertices, 3) which will be expanded to batch size</p>
-</div></blockquote>
+rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3) or (num_vertices, 3) which will be expanded to batch size</p>
 </dd>
 <dt>Returns:</dt><dd><p>skinned_vertices: Skinned vertex positions, shape (batch_size, num_vertices, 3)</p>
 </dd>
