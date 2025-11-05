@@ -384,6 +384,18 @@ class ForwardKinematicsFromLocalTransformationJIT(th.autograd.Function):
     ) -> Tuple[
         th.Tensor, th.Tensor, th.Tensor, List[Tuple[th.Tensor, th.Tensor, th.Tensor]]
     ]:
+        """
+        Compute forward pass for differentiable forward kinematics using TRS representation.
+
+        Args:
+            local_state_t: Local joint translations, shape (batch_size, num_joints, 3)
+            local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3)
+            local_state_s: Local joint scales, shape (batch_size, num_joints, 1)
+            prefix_mul_indices: List of [child_index, parent_index] tensor pairs
+
+        Returns:
+            Tuple of (global_state_t, global_state_r, global_state_s, intermediate_results)
+        """
         return global_trs_state_from_local_trs_state_no_grad(
             local_state_t,
             local_state_r,
@@ -395,6 +407,14 @@ class ForwardKinematicsFromLocalTransformationJIT(th.autograd.Function):
     # pyre-ignore[14]
     # pyre-ignore[2]
     def setup_context(ctx, inputs, outputs) -> None:
+        """
+        Save context for backward pass.
+
+        Args:
+            ctx: Context object for saving tensors and data
+            inputs: Tuple of (local_state_t, local_state_r, local_state_s, prefix_mul_indices)
+            outputs: Tuple of (joint_state_t, joint_state_r, joint_state_s, intermediate_results)
+        """
         (
             _,
             _,
@@ -468,8 +488,7 @@ def global_trs_state_from_local_trs_state(
         local_state_t: Local joint translations, shape (batch_size, num_joints, 3).
         local_state_r: Local joint rotations, shape (batch_size, num_joints, 3, 3).
         local_state_s: Local joint scales, shape (batch_size, num_joints, 1).
-        prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining
-                           the kinematic hierarchy traversal order.
+        prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining the kinematic hierarchy traversal order.
 
     Returns:
         global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
@@ -731,8 +750,7 @@ def unpose_from_global_joint_state(
         skin_indices_flattened: (N, ) LBS skinning nbr joint indices
         skin_weights_flattened: (N, ) LBS skinning nbr joint weights
         vert_indices_flattened: (N, ) LBS skinning nbr corresponding vertex indices
-        with_high_precision: if True, use high precision solver (LDLT),
-            but requires a cuda device sync
+        with_high_precision: if True, use high precision solver (LDLT), but requires a cuda device sync
     """
     dtype = verts.dtype
     device = verts.device
