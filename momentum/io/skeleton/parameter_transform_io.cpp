@@ -8,6 +8,7 @@
 #include "momentum/io/skeleton/parameter_transform_io.h"
 
 #include "momentum/character/skeleton.h"
+#include "momentum/common/log.h"
 #include "momentum/common/string.h"
 #include "momentum/io/common/stream_utils.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
@@ -51,7 +52,10 @@ std::unordered_map<std::string, std::string> loadMomentumModelCommon(std::istrea
     if (re2::RE2::FullMatch(line, reg, &newSectionName)) {
       // new section, store old section
       if (!sectionName.empty()) {
-        result[sectionName] = sectionContent;
+        if (result.find(sectionName) != result.end()) {
+          MT_LOGW("Repeated section [{}] found; make sure it's intentional.", sectionName);
+        }
+        result[sectionName] += sectionContent;
       }
 
       // start new section
@@ -64,7 +68,10 @@ std::unordered_map<std::string, std::string> loadMomentumModelCommon(std::istrea
 
   // store last section
   if (!sectionName.empty()) {
-    result[sectionName] = sectionContent;
+    if (result.find(sectionName) != result.end()) {
+      MT_LOGW("Repeated section [{}] found; make sure it's intentional.", sectionName);
+    }
+    result[sectionName] += sectionContent;
   }
 
   return result;
@@ -251,6 +258,7 @@ ParameterTransform parseParameterTransform(const std::string& data, const Skelet
     // ------------------------------------------------
     const auto pTokens = tokenize(line, "=");
     if (pTokens.size() != 2) {
+      MT_LOGW("Invalid line under [ParameterTransform] section; ignoring\n{}", line);
       continue;
     }
 
@@ -311,6 +319,7 @@ ParameterSets parseParameterSets(const std::string& data, const ParameterTransfo
 
     // Skip if not parameterset definitions
     if (line.find("parameterset") != 0) {
+      MT_LOGW("Invalid line under [ParameterSets] section; ignoring\n{}", line);
       continue;
     }
 
@@ -358,6 +367,7 @@ PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTra
 
     // load parameterset definitions
     if (line.find("poseconstraints") != 0) {
+      MT_LOGW("Invalid line under [PoseConstraints] section; ignoring\n{}", line);
       continue;
     }
 
