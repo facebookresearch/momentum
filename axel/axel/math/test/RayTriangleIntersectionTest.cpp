@@ -18,7 +18,7 @@ using ::axel::detail::eps;
 
 TEST(RayTriangleIntersectionTest, Basic) {
   Eigen::Vector3d collisionPoint;
-  double t;
+  double t = 0.0;
   EXPECT_TRUE(rayTriangleIntersect(
       Eigen::Vector3d(1., 1., 1.),
       Eigen::Vector3d(0., 1., 0.),
@@ -103,9 +103,9 @@ TEST(RaytracingUtilsTest, rayTriangleIntersect_hit) {
   const Eigen::Vector3d p2(2.5, 5., 2.5);
 
   Eigen::Vector3d hitPoint;
-  double t;
-  double u;
-  double v;
+  double t = 0.0;
+  double u = 0.0;
+  double v = 0.0;
   EXPECT_TRUE(rayTriangleIntersect(
       Eigen::Vector3d(1., 1., 1.), Eigen::Vector3d(0., 1., 0.), p0, p1, p2, hitPoint, t, u, v));
   EXPECT_NEAR(t, 4., eps<double>());
@@ -120,7 +120,7 @@ TEST(RaytracingUtilsTest, rayTriangleIntersect_hit) {
 
 TEST(RaytracingUtilsTest, rayTriangleIntersect_noHit) {
   Eigen::Vector3d hitPoint;
-  double t;
+  double t = 0.0;
   EXPECT_FALSE(rayTriangleIntersect(
       Eigen::Vector3d(1., 1., 1.),
       Eigen::Vector3d(0., 1., 0.),
