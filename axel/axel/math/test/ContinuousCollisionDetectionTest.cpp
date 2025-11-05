@@ -26,7 +26,7 @@ struct LineData {
   std::array<double, 6> values;
   bool hit;
 
-  Eigen::Vector3d getVertexPosition() const {
+  [[nodiscard]] Eigen::Vector3d getVertexPosition() const {
     return Eigen::Vector3d(values[0] / values[1], values[2] / values[3], values[4] / values[5]);
   }
 };
