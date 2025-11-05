@@ -336,7 +336,7 @@ PYBIND11_MODULE(renderer, m) {
       .def(
           py::init([](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
                       const std::optional<Eigen::Matrix4f>& eye_from_world) {
-            return momentum::rasterizer::Camera(
+            return std::make_shared<momentum::rasterizer::Camera>(
                 intrinsics, Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
           }),
           R"(Create a camera with specified intrinsics and pose.
@@ -587,13 +587,14 @@ PYBIND11_MODULE(renderer, m) {
                       const std::optional<Eigen::Vector3f>& emissiveColor,
                       const std::optional<py::array_t<const float>>& diffuseTexture,
                       const std::optional<py::array_t<const float>>& emissiveTexture) {
-            return pymomentum::createPhongMaterial(
-                diffuseColor,
-                specularColor,
-                specularExponent,
-                emissiveColor,
-                diffuseTexture,
-                emissiveTexture);
+            return std::make_shared<momentum::rasterizer::PhongMaterial>(
+                pymomentum::createPhongMaterial(
+                    diffuseColor,
+                    specularColor,
+                    specularExponent,
+                    emissiveColor,
+                    diffuseTexture,
+                    emissiveTexture));
           }),
           R"(Create a Phong material with customizable properties.
 
