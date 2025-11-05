@@ -1180,7 +1180,8 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     KeepLocators keepLocators,
     bool loadAnim,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
   auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
   const size_t length = fbxCharDataRaw.size();
   MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
@@ -1201,11 +1202,13 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
 
-  // Strip all namespaces from all node names in the scene
-  for (int i = 0; i < scene->getAllObjectCount(); ++i) {
-    const ofbx::Object* obj = scene->getAllObjects()[i];
-    if (obj && obj->name[0] != '\0') {
-      stripNamespace(obj);
+  if (stripNamespaces) {
+    // Strip all namespaces from all node names in the scene
+    for (int i = 0; i < scene->getAllObjectCount(); ++i) {
+      const ofbx::Object* obj = scene->getAllObjects()[i];
+      if (obj && obj->name[0] != '\0') {
+        stripNamespace(obj);
+      }
     }
   }
 
@@ -1271,9 +1274,10 @@ Character loadOpenFbxCharacter(
     const std::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
   auto [character, motion, fps] =
-      loadOpenFbx(inputData, keepLocators, false, permissive, loadBlendShapes);
+      loadOpenFbx(inputData, keepLocators, false, permissive, loadBlendShapes, stripNamespaces);
   return character;
 }
 
@@ -1281,37 +1285,42 @@ Character loadOpenFbxCharacter(
     const filesystem::path& path,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
   auto [buffer, length] = readFileToBuffer(path);
   return loadOpenFbxCharacter(
       gsl::as_bytes(gsl::make_span(buffer.get(), length)),
       keepLocators,
       permissive,
-      loadBlendShapes);
+      loadBlendShapes,
+      stripNamespaces);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     std::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
-  return loadOpenFbx(inputData, keepLocators, true, permissive, loadBlendShapes);
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbx(inputData, keepLocators, true, permissive, loadBlendShapes, stripNamespaces);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
   auto [buffer, length] = readFileToBuffer(inputPath);
   return loadOpenFbxCharacterWithMotion(
       gsl::as_bytes(gsl::make_span(buffer.get(), length)),
       keepLocators,
       permissive,
-      loadBlendShapes);
+      loadBlendShapes,
+      stripNamespaces);
 }
 
-MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename) {
+MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
   auto [buffer, length] = readFileToBuffer(filename);
   MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
   auto fbxCharDataRaw = gsl::make_span(buffer.get(), length);
@@ -1328,11 +1337,13 @@ MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename) {
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
 
-  // Strip all namespaces from all node names in the scene
-  for (int i = 0; i < scene->getAllObjectCount(); ++i) {
-    const ofbx::Object* obj = scene->getAllObjects()[i];
-    if (obj && obj->name[0] != '\0') {
-      stripNamespace(obj);
+  if (stripNamespaces) {
+    // Strip all namespaces from all node names in the scene
+    for (int i = 0; i < scene->getAllObjectCount(); ++i) {
+      const ofbx::Object* obj = scene->getAllObjects()[i];
+      if (obj && obj->name[0] != '\0') {
+        stripNamespace(obj);
+      }
     }
   }
 

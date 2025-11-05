@@ -55,7 +55,8 @@ Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
@@ -64,21 +65,24 @@ Character loadFbxCharacter(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocatorss = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShape = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShape = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 /// Save a character with animation to an FBX file.
 /// @param filename Path to the output FBX file
@@ -148,9 +152,10 @@ void saveFbxModel(
 /// property "Momentum_Markers_Root" to be identified.
 ///
 /// @param[in] filename Path to the FBX file containing marker data.
+/// @param stripNamespaces Removes namespace from joints when true. True by default
 /// @return A MarkerSequence object containing the marker animation data, including
 ///         marker positions per frame and fps. Returns an empty sequence if no
 ///         markers or animations are found.
-MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename);
+MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces = true);
 
 } // namespace momentum

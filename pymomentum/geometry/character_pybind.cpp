@@ -76,8 +76,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - to_gltf(character, fps, motion, offsets)
   // - load_fbx(fbxFilename, modelFilename, locatorsFilename)
   // - load_fbx_from_bytes(fbx_bytes, permissive)
-  // - load_fbx_with_motion(fbxFilename, permissive)
-  // - load_fbx_with_motion_from_bytes(fbx_bytes, permissive)
+  // - load_fbx_with_motion(fbxFilename, permissive, strip_namespaces)
+  // - load_fbx_with_motion_from_bytes(fbx_bytes, permissive, strip_namespaces)
   // - load_gltf(path)
   // - load_gltf_with_motion(gltfFilename)
   // - load_urdf(urdf_filename)
@@ -530,12 +530,14 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 :param locators_filename: File containing the locators, e.g. character.locators.
 :param permissive: If true, ignore certain errors during loading.
 :param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes
 :return: A valid :class:`Character`.)",
           py::arg("fbx_filename"),
           py::arg("model_filename") = std::optional<std::string>{},
           py::arg("locators_filename") = std::optional<std::string>{},
           py::arg("permissive") = false,
-          py::arg("load_blendshapes") = false)
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
       // loadFBXCharacterFromFileWithMotion(fbxFilename, modelFilename,
       // locatorsFilename)
       .def_static(
@@ -547,10 +549,12 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 :param fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
 :param permissive: If true, ignore certain errors during loading.
 :param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes
 :return: A valid :class:`Character`, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
           py::arg("fbx_filename"),
           py::arg("permissive") = false,
-          py::arg("load_blendshapes") = false)
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
 
       .def_static(
           "load_fbx_with_motion_from_bytes",
@@ -561,10 +565,12 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 :param fbx_bytes: A Python bytes that is an .fbx file containing the skeleton and skinned mesh.
 :param permissive: If true, ignore certain errors during loading.
 :param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes
 :return: A valid :class:`Character`, a vector of motions in the format of nFrames X nNumJointParameters, and fps. The caller needs to decide how to handle the joint parameters.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false,
-          py::arg("load_blendshapes") = false)
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
 
       // loadFBXCharacterFromBytes(fbxBytes)
       .def_static(
@@ -576,10 +582,12 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
 :param fbx_bytes: An array of bytes in FBX format.
 :param permissive: If true, ignore certain errors during loading.
 :param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes
 :return: A valid :class:`Character`.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false,
-          py::arg("load_blendshapes") = false)
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
       // loadLocatorsFromFile(character, locatorFile)
       .def(
           "load_locators",

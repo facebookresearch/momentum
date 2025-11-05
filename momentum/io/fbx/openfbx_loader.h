@@ -28,29 +28,35 @@ Character loadOpenFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
     std::span<const std::byte> inputData,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     std::span<const std::byte> inputData,
     KeepLocators keepLocators = KeepLocators::No,
     bool permissive = false,
-    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
 
-MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename);
+MarkerSequence loadOpenFbxMarkerSequence(
+    const filesystem::path& filename,
+    bool stripNamespaces = true);
 
 } // namespace momentum

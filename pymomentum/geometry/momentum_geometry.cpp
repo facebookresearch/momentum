@@ -175,12 +175,14 @@ momentum::Character loadFBXCharacterFromFile(
     const std::optional<std::string>& configPath,
     const std::optional<std::string>& locatorsPath,
     bool permissive,
-    bool loadBlendShapes) {
+    bool loadBlendShapes,
+    bool stripNamespaces) {
   momentum::Character result = momentum::loadFbxCharacter(
       filesystem::path(fbxPath),
       keepLocators,
       permissive,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No);
+      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      stripNamespaces);
   if (configPath && !configPath->empty()) {
     result = loadConfigFromFile(result, *configPath);
   }
@@ -206,12 +208,14 @@ std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
 loadFBXCharacterWithMotionFromFile(
     const std::string& fbxPath,
     bool permissive,
-    bool loadBlendShapes) {
+    bool loadBlendShapes,
+    bool stripNamespaces) {
   auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
       filesystem::path(fbxPath),
       keepLocators,
       permissive,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No);
+      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      stripNamespaces);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
 }
@@ -220,12 +224,14 @@ std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
 loadFBXCharacterWithMotionFromBytes(
     const py::bytes& fbxBytes,
     bool permissive,
-    bool loadBlendShapes) {
+    bool loadBlendShapes,
+    bool stripNamespaces) {
   auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
       toSpan<std::byte>(fbxBytes),
       keepLocators,
       permissive,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No);
+      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      stripNamespaces);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
 }
@@ -265,13 +271,17 @@ momentum::Character loadConfigFromFile(
       character.skinnedLocators);
 }
 
-momentum::Character
-loadFBXCharacterFromBytes(const pybind11::bytes& bytes, bool permissive, bool loadBlendShapes) {
+momentum::Character loadFBXCharacterFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive,
+    bool loadBlendShapes,
+    bool stripNamespaces) {
   return momentum::loadFbxCharacter(
       toSpan<std::byte>(bytes),
       keepLocators,
       permissive,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No);
+      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      stripNamespaces);
 }
 
 momentum::Character loadConfigFromBytes(

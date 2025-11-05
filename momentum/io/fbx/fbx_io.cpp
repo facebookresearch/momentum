@@ -740,32 +740,40 @@ Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
-  return loadOpenFbxCharacter(inputPath, keepLocators, permissive, loadBlendShapes);
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbxCharacter(
+      inputPath, keepLocators, permissive, loadBlendShapes, stripNamespaces);
 }
 
 Character loadFbxCharacter(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
-  return loadOpenFbxCharacter(inputSpan, keepLocators, permissive, loadBlendShapes);
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbxCharacter(
+      inputSpan, keepLocators, permissive, loadBlendShapes, stripNamespaces);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
-  return loadOpenFbxCharacterWithMotion(inputPath, keepLocators, permissive, loadBlendShapes);
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbxCharacterWithMotion(
+      inputPath, keepLocators, permissive, loadBlendShapes, stripNamespaces);
 }
 
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
     bool permissive,
-    LoadBlendShapes loadBlendShapes) {
-  return loadOpenFbxCharacterWithMotion(inputSpan, keepLocators, permissive, loadBlendShapes);
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbxCharacterWithMotion(
+      inputSpan, keepLocators, permissive, loadBlendShapes, stripNamespaces);
 }
 
 void saveFbx(
@@ -868,8 +876,8 @@ void saveFbxModel(
       fbxNamespace);
 }
 
-MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename) {
-  return loadOpenFbxMarkerSequence(filename);
+MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
+  return loadOpenFbxMarkerSequence(filename, stripNamespaces);
 }
 
 } // namespace momentum

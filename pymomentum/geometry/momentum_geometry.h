@@ -45,18 +45,21 @@ momentum::Character loadFBXCharacterFromFile(
     const std::optional<std::string>& configPath = {},
     const std::optional<std::string>& locatorsPath = {},
     bool permissive = false,
-    bool loadBlendShapes = false);
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
 std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
 loadFBXCharacterWithMotionFromFile(
     const std::string& fbxPath,
     bool permissive = false,
-    bool loadBlendShapes = false);
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
 
 std::tuple<momentum::Character, std::vector<Eigen::MatrixXf>, float>
 loadFBXCharacterWithMotionFromBytes(
     const pybind11::bytes& fbxBytes,
     bool permissive = false,
-    bool loadBlendShapes = false);
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
 
 momentum::Character loadLocatorsFromFile(
     const momentum::Character& character,
@@ -68,7 +71,8 @@ momentum::Character loadConfigFromFile(
 momentum::Character loadFBXCharacterFromBytes(
     const pybind11::bytes& bytes,
     bool permissive = false,
-    bool loadBlendShapes = false);
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
 momentum::Character loadLocatorsFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes);
