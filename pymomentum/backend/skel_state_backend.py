@@ -310,6 +310,16 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
         local_skel_state: th.Tensor,
         prefix_mul_indices: List[th.Tensor],
     ) -> Tuple[th.Tensor, List[th.Tensor]]:
+        """
+        Compute forward pass for differentiable forward kinematics.
+
+        Args:
+            local_skel_state: Local joint transformations, shape (batch_size, num_joints, 8)
+            prefix_mul_indices: List of [child_index, parent_index] tensor pairs
+
+        Returns:
+            Tuple of (global_skel_state, intermediate_results)
+        """
         return global_skel_state_from_local_skel_state_no_grad(
             local_skel_state,
             prefix_mul_indices,
@@ -319,6 +329,14 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
     # pyre-ignore[14]
     # pyre-ignore[2]
     def setup_context(ctx, inputs, outputs) -> None:
+        """
+        Save context for backward pass.
+
+        Args:
+            ctx: Context object for saving tensors and data
+            inputs: Tuple of (local_skel_state, prefix_mul_indices)
+            outputs: Tuple of (global_skel_state, intermediate_results)
+        """
         (
             _,
             prefix_mul_indices,
@@ -594,8 +612,7 @@ def unpose_from_momentum_global_joint_state(
         skin_indices_flattened: (N, ) LBS skinning nbr joint indices
         skin_weights_flattened: (N, ) LBS skinning nbr joint weights
         vert_indices_flattened: (N, ) LBS skinning nbr corresponding vertex indices
-        with_high_precision: if True, use high precision solver (LDLT),
-            but requires a cuda device sync
+        with_high_precision: if True, use high precision solver (LDLT), but requires a cuda device sync
     """
     t, r, s = trs.from_skeleton_state(global_joint_state)
     t0, r0, _ = trs.from_skeleton_state(binded_joint_state_inv)

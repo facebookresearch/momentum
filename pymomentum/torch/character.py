@@ -426,8 +426,7 @@ class LinearBlendSkinning(torch.nn.Module):
             global_state_t: Global joint translations, shape (batch_size, num_joints, 3)
             global_state_r: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
             global_state_s: Global joint scales, shape (batch_size, num_joints, 1)
-            rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3)
-                or (num_vertices, 3) which will be expanded to batch size
+            rest_vertex_positions: Rest vertex positions, shape (batch_size, num_vertices, 3) or (num_vertices, 3) which will be expanded to batch size
 
         Returns:
             skinned_vertices: Skinned vertex positions, shape (batch_size, num_vertices, 3)

@@ -813,7 +813,7 @@ PYBIND11_MODULE(renderer, m) {
 :param normals: n x 3 numpy.ndarray of vertex normals.
 :param triangles: n x 3 numpy.ndarray of triangles.
 :param texture_coordinates: n x numpy.ndarray or texture coordinates.
-:param texture_triangles: n x numpy.ndarray or texture triangles (see :mesh:`rasterize_mesh` for more details).).
+:param texture_triangles: n x numpy.ndarray or texture triangles (see :func:`rasterize_mesh` for more details).).
 :param levels: Maximum levels to subdivide (default = 1)
 :param max_edge_length: Stop subdividing when the longest edge is shorter than this length.
 :return: A tuple [vertices, normals, triangles, texture_coordinates, texture_triangles].

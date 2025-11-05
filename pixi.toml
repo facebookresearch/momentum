@@ -163,9 +163,9 @@ test_py = { cmd = "pytest pymomentum/test/*.py", env = { MOMENTUM_MODELS_PATH = 
 test_py_verbose = { cmd = "pytest pymomentum/test/*.py -v", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
 ], description = "Run Python tests with verbose output" }
-doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
+doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
-], description = "Build Python API documentation" }
+], description = "Build Python API documentation with warnings as errors" }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
     "doc_py",
 ], description = "Open Python documentation in browser" }
@@ -308,7 +308,7 @@ build_py = { cmd = "pip install . -v --no-build-isolation", env = { FBXSDK_PATH 
 test_py = { cmd = "pytest pymomentum/test/*.py", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
 ] }
-doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
+doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
 ] }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
@@ -334,7 +334,7 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py", "install",
 ] }
-doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
+doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
 ] }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
@@ -360,7 +360,7 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
 test_py = { cmd = "pytest pymomentum/test/*.py -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py", "install",
 ] }
-doc_py = { cmd = "sphinx-build -a -E -b html pymomentum/doc build/python_api_doc", depends-on = [
+doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
 ] }
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
