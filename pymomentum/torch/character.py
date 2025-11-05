@@ -484,14 +484,33 @@ class Mesh(torch.nn.Module):
         )
 
 
-class BlendShape(torch.nn.Module):
+class BlendShapeBase(torch.nn.Module):
+    def __init__(
+        self,
+        shape_vectors: torch.Tensor,
+        *,
+        dtype: torch.dtype = torch.float32,
+    ) -> None:
+        super().__init__()
+
+        self.register_buffer(
+            "shape_vectors",
+            shape_vectors.to(dtype=dtype).clone().detach(),
+        )
+
+    def forward(self, coeffs: torch.Tensor) -> torch.Tensor:
+        return torch.einsum("nvd, ...n -> ...vd", self.shape_vectors, coeffs)
+
+
+class BlendShape(BlendShapeBase):
     def __init__(
         self,
         character: pym_geometry.Character,
         *,
         dtype: torch.dtype = torch.float32,
     ) -> None:
-        super().__init__()
+        assert character.blend_shape is not None
+        super().__init__(torch.tensor(character.blend_shape.shape_vectors), dtype=dtype)
 
         assert character.blend_shape is not None
         self.register_buffer(
@@ -501,21 +520,10 @@ class BlendShape(torch.nn.Module):
             .detach(),
         )
 
-        assert character.blend_shape is not None
-        self.register_buffer(
-            "shape_vectors",
-            torch.tensor(character.blend_shape.shape_vectors, dtype=dtype)
-            .clone()
-            .detach(),
-        )
-
     def forward(self, coeffs: torch.Tensor) -> torch.Tensor:
         if not hasattr(self, "base_shape"):
             raise RuntimeError("Character has no blendshapes")
-        return (
-            torch.einsum("nvd, ...n -> ...vd", self.shape_vectors, coeffs)
-            + self.base_shape
-        )
+        return super().forward(coeffs) + self.base_shape
 
 
 class ParameterTransform(torch.nn.Module):
