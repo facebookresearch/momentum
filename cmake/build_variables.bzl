@@ -395,6 +395,7 @@ io_skeleton_sources = [
 ]
 
 io_skeleton_test_sources = [
+    "test/io/io_model_parser_test.cpp",
     "test/io/io_parameter_limits_test.cpp",
 ]
 
