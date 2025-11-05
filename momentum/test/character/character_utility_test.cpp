@@ -810,3 +810,441 @@ TEST_F(CharacterUtilityTest, ParameterSetsAndRemainingCodePaths) {
   // Check that the result has a valid skeleton
   EXPECT_FALSE(resultCharacter.skeleton.joints.empty());
 }
+
+/// Helper function to create a test character with controlled active joint parameters
+Character createTestCharacterWithConstrainedJoints() {
+  // Create a skeleton with 4 joints
+  Skeleton skeleton;
+
+  // Root joint - all parameters active
+  Joint rootJoint;
+  rootJoint.name = "root";
+  rootJoint.parent = kInvalidIndex;
+  rootJoint.translationOffset = Vector3f(0, 0, 0);
+  rootJoint.preRotation = Quaternionf::Identity();
+  skeleton.joints.push_back(rootJoint);
+
+  // Joint1 - only Y rotation active (1D joint)
+  Joint joint1;
+  joint1.name = "joint1";
+  joint1.parent = 0;
+  joint1.translationOffset = Vector3f(1, 0, 0);
+  joint1.preRotation = Quaternionf::Identity();
+  skeleton.joints.push_back(joint1);
+
+  // Joint2 - X and Z rotations active (2D joint)
+  Joint joint2;
+  joint2.name = "joint2";
+  joint2.parent = 1;
+  joint2.translationOffset = Vector3f(0, 1, 0);
+  joint2.preRotation = Quaternionf::Identity();
+  skeleton.joints.push_back(joint2);
+
+  // Joint3 - all rotations active (3D joint)
+  Joint joint3;
+  joint3.name = "joint3";
+  joint3.parent = 2;
+  joint3.translationOffset = Vector3f(0, 0, 1);
+  joint3.preRotation = Quaternionf::Identity();
+  skeleton.joints.push_back(joint3);
+
+  // Create parameter transform with constrained active parameters
+  ParameterTransform parameterTransform;
+  const size_t numJoints = skeleton.joints.size();
+  const size_t numJointParams = numJoints * kParametersPerJoint;
+
+  parameterTransform.activeJointParams = VectorX<bool>::Constant(numJointParams, false);
+  parameterTransform.offsets = VectorXf::Zero(numJointParams);
+  parameterTransform.transform.resize(
+      numJointParams, numJoints * 3); // 3 params per joint for testing
+
+  // Set up parameter names
+  parameterTransform.name.resize(numJoints * 3);
+  for (size_t i = 0; i < numJoints; ++i) {
+    parameterTransform.name[i * 3 + 0] = skeleton.joints[i].name + "_param0";
+    parameterTransform.name[i * 3 + 1] = skeleton.joints[i].name + "_param1";
+    parameterTransform.name[i * 3 + 2] = skeleton.joints[i].name + "_param2";
+  }
+
+  // Set active joint parameters
+  // Root joint (index 0): all translation and rotation parameters active
+  for (int i = 0; i < 6; ++i) {
+    parameterTransform.activeJointParams[0 * kParametersPerJoint + i] = true;
+  }
+  parameterTransform.activeJointParams[0 * kParametersPerJoint + 6] = true; // scale
+
+  // Joint1 (index 1): only Y rotation active (1D joint)
+  parameterTransform.activeJointParams[1 * kParametersPerJoint + 4] = true; // RY
+  parameterTransform.activeJointParams[1 * kParametersPerJoint + 6] = true; // scale
+
+  // Joint2 (index 2): X and Z rotations active (2D joint)
+  parameterTransform.activeJointParams[2 * kParametersPerJoint + 3] = true; // RX
+  parameterTransform.activeJointParams[2 * kParametersPerJoint + 5] = true; // RZ
+  parameterTransform.activeJointParams[2 * kParametersPerJoint + 6] = true; // scale
+
+  // Joint3 (index 3): all rotations active (3D joint)
+  parameterTransform.activeJointParams[3 * kParametersPerJoint + 3] = true; // RX
+  parameterTransform.activeJointParams[3 * kParametersPerJoint + 4] = true; // RY
+  parameterTransform.activeJointParams[3 * kParametersPerJoint + 5] = true; // RZ
+  parameterTransform.activeJointParams[3 * kParametersPerJoint + 6] = true; // scale
+
+  // Set up identity transform matrix (for simplicity, each joint param maps to itself)
+  std::vector<Eigen::Triplet<float>> triplets;
+  for (size_t i = 0; i < numJoints; ++i) {
+    triplets.emplace_back(i * kParametersPerJoint + 4, i * 3 + 0, 1.0f); // Y rotation
+    triplets.emplace_back(i * kParametersPerJoint + 3, i * 3 + 1, 1.0f); // X rotation
+    triplets.emplace_back(i * kParametersPerJoint + 5, i * 3 + 2, 1.0f); // Z rotation
+  }
+  parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
+
+  return Character(skeleton, parameterTransform);
+}
+
+// Test fixture for SkeletonStateToJointParametersRespectingTransform tests
+template <typename T>
+class SkeletonStateToJointParametersRespectingTransformTest : public testing::Test {
+ protected:
+  using SkeletonStateType = SkeletonStateT<T>;
+  using JointParametersType = JointParametersT<T>;
+  // Character class only supports float parameter transforms, so we always use Character (float)
+  using CharacterType = Character;
+
+  void SetUp() override {
+    // Character class only supports float parameter transforms
+    character = createTestCharacterWithConstrainedJoints();
+  }
+
+  CharacterType character;
+};
+
+using Types = testing::Types<float, double>;
+TYPED_TEST_SUITE(SkeletonStateToJointParametersRespectingTransformTest, Types);
+
+// Test basic functionality with constraints
+TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, BasicFunctionality) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+
+  // Create joint parameters with specific rotations
+  JointParametersType jointParameters =
+      JointParametersType::Zero(this->character.skeleton.joints.size() * kParametersPerJoint);
+
+  // Set root joint rotation (3D - all axes active)
+  jointParameters.v(0 * kParametersPerJoint + 3) = T(0.1); // RX
+  jointParameters.v(0 * kParametersPerJoint + 4) = T(0.2); // RY
+  jointParameters.v(0 * kParametersPerJoint + 5) = T(0.3); // RZ
+
+  // Set joint1 rotation (1D - only Y axis active)
+  jointParameters.v(1 * kParametersPerJoint + 4) = T(0.5); // RY
+
+  // Set joint2 rotation (2D - X and Z axes active)
+  jointParameters.v(2 * kParametersPerJoint + 3) = T(0.4); // RX
+  jointParameters.v(2 * kParametersPerJoint + 5) = T(0.6); // RZ
+
+  // Set joint3 rotation (3D - all axes active)
+  jointParameters.v(3 * kParametersPerJoint + 3) = T(0.7); // RX
+  jointParameters.v(3 * kParametersPerJoint + 4) = T(0.8); // RY
+  jointParameters.v(3 * kParametersPerJoint + 5) = T(0.9); // RZ
+
+  // Create skeleton state from joint parameters
+  SkeletonStateType state(jointParameters, this->character.skeleton, false);
+
+  // Convert back using our new function
+  // Note: Character only supports float, so we need to cast the skeleton state to float
+  auto floatState = state.template cast<float>();
+  auto convertedParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatState, this->character.skeleton, this->character.parameterTransform.activeJointParams);
+  JointParametersType convertedParams = convertedParamsFloat.template cast<T>();
+
+  // For 1D joint (joint1), only Y rotation should be non-zero
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 3), T(0), T(1e-5)); // RX should be 0
+  EXPECT_NEAR(
+      convertedParams.v(1 * kParametersPerJoint + 4),
+      T(0.5),
+      T(1e-3)); // RY should match closely for 1D
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 5), T(0), T(1e-5)); // RZ should be 0
+
+  // For 2D joint (joint2), only X and Z rotations should be non-zero
+  // Note: 2D Euler conversion has inherent limitations, so we use moderate tolerance
+  EXPECT_NEAR(
+      convertedParams.v(2 * kParametersPerJoint + 3),
+      T(0.4),
+      T(0.08)); // RX should be reasonably close
+  EXPECT_NEAR(convertedParams.v(2 * kParametersPerJoint + 4), T(0), T(1e-5)); // RY should be 0
+  EXPECT_NEAR(
+      convertedParams.v(2 * kParametersPerJoint + 5),
+      T(0.6),
+      T(0.08)); // RZ should be reasonably close
+
+  // For 3D joint (joint3), all rotations should be preserved reasonably well
+  EXPECT_NEAR(
+      convertedParams.v(3 * kParametersPerJoint + 3),
+      T(0.7),
+      T(0.02)); // RX should match well for 3D
+  EXPECT_NEAR(
+      convertedParams.v(3 * kParametersPerJoint + 4),
+      T(0.8),
+      T(0.02)); // RY should match well for 3D
+  EXPECT_NEAR(
+      convertedParams.v(3 * kParametersPerJoint + 5),
+      T(0.9),
+      T(0.02)); // RZ should match well for 3D
+}
+
+// Test with TransformList overload
+TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, TransformListOverload) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+
+  // Create joint parameters
+  Random<> rng(12345);
+  JointParametersType jointParameters =
+      JointParametersType::Zero(this->character.skeleton.joints.size() * kParametersPerJoint);
+  // Fill with random values
+  for (Eigen::Index i = 0; i < jointParameters.size(); ++i) {
+    jointParameters.v(i) = rng.uniform(T(-0.5), T(0.5));
+  }
+
+  // Create skeleton state
+  SkeletonStateType state(jointParameters, this->character.skeleton, false);
+
+  // Extract transforms
+  TransformListT<T> transforms = state.toTransforms();
+
+  // Convert using TransformList overload
+  // Note: Character only supports float, so we need to cast transforms to float
+  auto floatTransforms = [&transforms]() {
+    TransformListT<float> result;
+    result.reserve(transforms.size());
+    for (const auto& transform : transforms) {
+      result.push_back(transform.template cast<float>());
+    }
+    return result;
+  }();
+  auto convertedParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatTransforms,
+      this->character.skeleton,
+      this->character.parameterTransform.activeJointParams);
+  JointParametersType convertedParams = convertedParamsFloat.template cast<T>();
+
+  // Convert using SkeletonState overload for comparison
+  auto floatState = state.template cast<float>();
+  auto stateConvertedParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatState, this->character.skeleton, this->character.parameterTransform.activeJointParams);
+  JointParametersType stateConvertedParams = stateConvertedParamsFloat.template cast<T>();
+
+  // Both methods should give similar results
+  EXPECT_LT((convertedParams.v - stateConvertedParams.v).norm(), T(1e-4));
+}
+
+// Test edge case with no active rotations
+TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, NoActiveRotations) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+  using CharacterType = typename TestFixture::CharacterType;
+
+  // Create a character where one joint has no active rotation parameters
+  CharacterType testCharacter = this->character;
+
+  // Disable all rotation parameters for joint1
+  testCharacter.parameterTransform.activeJointParams[1 * kParametersPerJoint + 3] = false; // RX
+  testCharacter.parameterTransform.activeJointParams[1 * kParametersPerJoint + 4] = false; // RY
+  testCharacter.parameterTransform.activeJointParams[1 * kParametersPerJoint + 5] = false; // RZ
+
+  // Create joint parameters with some rotation
+  JointParametersType jointParameters =
+      JointParametersType::Zero(testCharacter.skeleton.joints.size() * kParametersPerJoint);
+  jointParameters.v(1 * kParametersPerJoint + 4) = T(0.5); // Set RY even though it's not active
+
+  // Create skeleton state
+  SkeletonStateType state(jointParameters, testCharacter.skeleton, false);
+
+  // Convert back using our new function
+  // Note: Character only supports float, so we need to cast the skeleton state to float
+  auto floatState = state.template cast<float>();
+  auto convertedParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatState, testCharacter.skeleton, testCharacter.parameterTransform.activeJointParams);
+  JointParametersType convertedParams = convertedParamsFloat.template cast<T>();
+
+  // All rotation parameters for joint1 should be zero
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 3), T(0), T(1e-5)); // RX
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 4), T(0), T(1e-5)); // RY
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 5), T(0), T(1e-5)); // RZ
+}
+
+// Test comparison with original function for 3D joints
+TYPED_TEST(
+    SkeletonStateToJointParametersRespectingTransformTest,
+    ComparisonWithOriginalFor3DJoints) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+
+  // Create a test character where all joints have all rotations active (3D joints)
+  auto testCharacter = createTestCharacter<T>();
+
+  // Create joint parameters
+  Random<> rng(98765);
+  JointParametersType jointParameters =
+      JointParametersType::Zero(testCharacter.skeleton.joints.size() * kParametersPerJoint);
+  // Fill with random values
+  for (Eigen::Index i = 0; i < jointParameters.size(); ++i) {
+    jointParameters.v(i) = rng.uniform(T(-0.3), T(0.3));
+  }
+
+  // Create skeleton state
+  SkeletonStateType state(jointParameters, testCharacter.skeleton, false);
+
+  // Convert using new function
+  VectorX<bool> allParams =
+      VectorX<bool>::Constant(testCharacter.parameterTransform.numJointParameters(), true);
+  auto newResultFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      state, testCharacter.skeleton, allParams);
+  JointParametersType newResult = newResultFloat.template cast<T>();
+
+  // Results should be similar for 3D joints (all rotations active)
+  EXPECT_LT((jointParameters.v - newResult.v).norm(), 1e-4);
+}
+
+// Test round-trip consistency
+TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, RoundTripConsistency) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+
+  // Create joint parameters respecting the constraints
+  JointParametersType originalParams =
+      JointParametersType::Zero(this->character.skeleton.joints.size() * kParametersPerJoint);
+
+  // Set only active parameters
+  // Root joint - all rotations
+  originalParams.v(0 * kParametersPerJoint + 3) = T(0.1); // RX
+  originalParams.v(0 * kParametersPerJoint + 4) = T(0.2); // RY
+  originalParams.v(0 * kParametersPerJoint + 5) = T(0.3); // RZ
+
+  // Joint1 - only Y rotation
+  originalParams.v(1 * kParametersPerJoint + 4) = T(0.4); // RY
+
+  // Joint2 - X and Z rotations
+  originalParams.v(2 * kParametersPerJoint + 3) = T(0.5); // RX
+  originalParams.v(2 * kParametersPerJoint + 5) = T(0.6); // RZ
+
+  // Joint3 - all rotations
+  originalParams.v(3 * kParametersPerJoint + 3) = T(0.7); // RX
+  originalParams.v(3 * kParametersPerJoint + 4) = T(0.8); // RY
+  originalParams.v(3 * kParametersPerJoint + 5) = T(0.9); // RZ
+
+  // Forward: JointParams -> SkeletonState
+  SkeletonStateType state1(originalParams, this->character.skeleton, false);
+
+  VectorX<bool> activeJointParams = VectorX<bool>::Constant(
+      momentum::kParametersPerJoint * this->character.skeleton.joints.size(), false);
+  for (Eigen::Index i = 0; i < originalParams.size(); ++i) {
+    if (originalParams(i) != 0) {
+      activeJointParams(i) = true;
+    }
+  }
+
+  // Backward: SkeletonState -> JointParams
+  // Note: Character only supports float, so we need to cast the skeleton state to float
+  auto convertedParams = skeletonStateToJointParametersRespectingActiveParameters(
+      state1, this->character.skeleton, activeJointParams);
+
+  // Forward again: JointParams -> SkeletonState
+  SkeletonStateType state2(convertedParams, this->character.skeleton, false);
+
+  // The two skeleton states should be similar
+  for (size_t i = 0; i < state1.jointState.size(); ++i) {
+    EXPECT_LT(
+        (state1.jointState[i].transform.toAffine3().matrix() -
+         state2.jointState[i].transform.toAffine3().matrix())
+            .norm(),
+        T(1e-3));
+  }
+}
+
+// Test specific rotation axes constraints
+TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, SpecificRotationAxesConstraints) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+
+  // Test with a pure single-axis rotation for joint1 (Y-axis only)
+  JointParametersType jointParameters =
+      JointParametersType::Zero(this->character.skeleton.joints.size() * kParametersPerJoint);
+
+  // Set a Y-axis rotation for joint1
+  T rotationAngle = T(pi<T>() / 6); // 30 degrees
+  jointParameters.v(1 * kParametersPerJoint + 4) = rotationAngle;
+
+  // Create skeleton state
+  SkeletonStateType state(jointParameters, this->character.skeleton, false);
+
+  // Convert back
+  // Note: Character only supports float, so we need to cast the skeleton state to float
+  auto floatState = state.template cast<float>();
+  auto convertedParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatState, this->character.skeleton, this->character.parameterTransform.activeJointParams);
+  JointParametersType convertedParams = convertedParamsFloat.template cast<T>();
+
+  // Should recover the Y rotation accurately
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 4), rotationAngle, T(1e-5));
+
+  // X and Z rotations should be zero
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 3), T(0), T(1e-5));
+  EXPECT_NEAR(convertedParams.v(1 * kParametersPerJoint + 5), T(0), T(1e-5));
+}
+
+TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, EdgeCases) {
+  using T = TypeParam;
+  using SkeletonStateType = typename TestFixture::SkeletonStateType;
+  using JointParametersType = typename TestFixture::JointParametersType;
+
+  // Test with zero rotations
+  JointParametersType zeroParams =
+      JointParametersType::Zero(this->character.skeleton.joints.size() * kParametersPerJoint);
+
+  SkeletonStateType zeroState(zeroParams, this->character.skeleton, false);
+  // Note: Character only supports float, so we need to cast the skeleton state to float
+  auto floatZeroState = zeroState.template cast<float>();
+  auto convertedZeroParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatZeroState,
+      this->character.skeleton,
+      this->character.parameterTransform.activeJointParams);
+  JointParametersType convertedZeroParams = convertedZeroParamsFloat.template cast<T>();
+
+  // All rotation parameters should remain zero
+  for (size_t i = 0; i < this->character.skeleton.joints.size(); ++i) {
+    EXPECT_NEAR(convertedZeroParams.v(i * kParametersPerJoint + 3), T(0), T(1e-5)); // RX
+    EXPECT_NEAR(convertedZeroParams.v(i * kParametersPerJoint + 4), T(0), T(1e-5)); // RY
+    EXPECT_NEAR(convertedZeroParams.v(i * kParametersPerJoint + 5), T(0), T(1e-5)); // RZ
+  }
+
+  // Test with large rotations
+  JointParametersType largeParams =
+      JointParametersType::Zero(this->character.skeleton.joints.size() * kParametersPerJoint);
+
+  // Set large rotation for 3D joint (joint3)
+  largeParams.v(3 * kParametersPerJoint + 3) = T(pi<T>() * 0.8); // Large X rotation
+  largeParams.v(3 * kParametersPerJoint + 4) = T(pi<T>() * 0.6); // Large Y rotation
+  largeParams.v(3 * kParametersPerJoint + 5) = T(pi<T>() * 0.4); // Large Z rotation
+
+  SkeletonStateType largeState(largeParams, this->character.skeleton, false);
+  // Note: Character only supports float, so we need to cast the skeleton state to float
+  auto floatLargeState = largeState.template cast<float>();
+  auto convertedLargeParamsFloat = skeletonStateToJointParametersRespectingActiveParameters(
+      floatLargeState,
+      this->character.skeleton,
+      this->character.parameterTransform.activeJointParams);
+  JointParametersType convertedLargeParams = convertedLargeParamsFloat.template cast<T>();
+
+  // Should handle large rotations reasonably well
+  // Note: Due to Euler angle singularities, we can't expect perfect recovery for large rotations
+  // but the function should not crash and should give reasonable results
+  EXPECT_FALSE(std::isnan(convertedLargeParams.v(3 * kParametersPerJoint + 3)));
+  EXPECT_FALSE(std::isnan(convertedLargeParams.v(3 * kParametersPerJoint + 4)));
+  EXPECT_FALSE(std::isnan(convertedLargeParams.v(3 * kParametersPerJoint + 5)));
+}

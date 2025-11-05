@@ -7,10 +7,14 @@
 
 #include "momentum/character/skeleton_state.h"
 
+#include "momentum/character/joint.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
-#include "momentum/math/types.h"
+#include "momentum/math/utility.h"
+
+#include <algorithm>
+#include <numeric>
 
 namespace momentum {
 
@@ -229,12 +233,12 @@ template <typename T>
 [[nodiscard]] Eigen::Vector<T, kParametersPerJoint> localTransformToJointParameters(
     const Joint& joint,
     const TransformT<T>& localTransform) {
-  Eigen::Vector<T, kParametersPerJoint> result = Eigen::Vector<T, 7>::Zero();
+  Eigen::Vector<T, kParametersPerJoint> result = Eigen::Vector<T, kParametersPerJoint>::Zero();
   result.template segment<3>(0) =
       localTransform.translation - joint.translationOffset.template cast<T>();
 
   const Eigen::Quaternion<T> localRotation =
-      joint.preRotation.template cast<T>().inverse().template cast<T>() * localTransform.rotation;
+      joint.preRotation.template cast<T>().inverse() * localTransform.rotation;
   result.template segment<3>(3) = quaternionToEuler(localRotation);
   result(6) = std::log2(localTransform.scale);
   return result;
@@ -285,6 +289,150 @@ JointParametersT<T> skeletonStateToJointParameters(
   return result;
 }
 
+namespace {
+
+/// Helper function to convert a local transform to joint parameters respecting active joint params.
+///
+/// This function replaces the original `localTransformToJointParameters` to respect parameter
+/// constraints. It uses different rotation conversion methods based on how many rotation
+/// axes are active for the joint.
+///
+/// @tparam T The scalar type (float or double)
+/// @param[in] joint The joint definition
+/// @param[in] localTransform The local transform to convert
+/// @param[in] activeJointParams Boolean array indicating which joint parameters are active
+/// @param[in] jointIndex The index of this joint
+/// @return Joint parameter vector for this joint
+template <typename T>
+[[nodiscard]] Eigen::Vector<T, kParametersPerJoint>
+localTransformToJointParametersRespectingConstraints(
+    const Joint& joint,
+    const TransformT<T>& localTransform,
+    const VectorX<bool>& activeJointParams,
+    size_t jointIndex) {
+  const size_t paramOffset = jointIndex * kParametersPerJoint;
+
+  Eigen::Vector<T, kParametersPerJoint> result = Eigen::Vector<T, kParametersPerJoint>::Zero();
+
+  // Handle translation (same as original)
+  for (int k = 0; k < 3; ++k) {
+    if (activeJointParams[paramOffset + k]) {
+      result(k) = localTransform.translation(k) - static_cast<T>(joint.translationOffset(k));
+    }
+  }
+
+  // Handle rotation based on active parameters
+  const Eigen::Quaternion<T> localRotation =
+      joint.preRotation.template cast<T>().inverse() * localTransform.rotation;
+
+  // Convert to rotation matrix for the new rotation functions
+  const Matrix3<T> rotationMatrix = localRotation.toRotationMatrix();
+
+  // Determine which rotation axes are active
+
+  std::array<size_t, 3> activeAxes{};
+  size_t numActiveAxes = 0;
+  for (int k = 0; k < 3; ++k) {
+    if (activeJointParams[paramOffset + 3 + k]) {
+      activeAxes[numActiveAxes++] = k;
+    }
+  }
+
+  if (numActiveAxes == 1) {
+    // Single axis rotation - use rotationMatrixToOneAxisEuler
+    const auto axis = activeAxes[0];
+    const T angle = rotationMatrixToOneAxisEuler(rotationMatrix, axis);
+    result(3 + axis) = angle;
+  } else if (numActiveAxes == 2) {
+    // Two axis rotation - use rotationMatrixToTwoAxisEuler
+    const Vector2<T> angles =
+        rotationMatrixToTwoAxisEuler(rotationMatrix, activeAxes[0], activeAxes[1]);
+    result(3 + activeAxes[0]) = angles[0];
+    result(3 + activeAxes[1]) = angles[1];
+  } else if (numActiveAxes == 3) {
+    // Three axis rotation - use the existing quaternion to Euler conversion (equivalent to
+    // original)
+    result.template segment<3>(3) = rotationMatrixToEulerZYX(rotationMatrix).reverse();
+  } else {
+    // No active rotation axes, don't convert rotation.
+  }
+
+  // Handle scale (same as original)
+  if (activeJointParams[paramOffset + 6]) {
+    result(6) = std::log2(localTransform.scale);
+  }
+
+  return result;
+}
+
+} // namespace
+
+template <typename T>
+JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
+    const SkeletonStateT<T>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams) {
+  MT_CHECK(
+      activeJointParams.size() ==
+          gsl::narrow<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
+      "activeJointParams size {} does not match expected size {} (skeleton joints: {})",
+      activeJointParams.size(),
+      skeleton.joints.size() * kParametersPerJoint,
+      skeleton.joints.size());
+
+  JointParametersT<T> result =
+      JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
+
+  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+    const auto parentJoint = skeleton.joints[i].parent;
+    TransformT<T> parentXF;
+    if (parentJoint != kInvalidIndex) {
+      parentXF = state.jointState[parentJoint].transform;
+    }
+
+    // parentXF * localXF = jointXF
+    const TransformT<T> localXF = state.jointState[i].localTransform;
+    result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
+        localTransformToJointParametersRespectingConstraints(
+            skeleton.joints[i], localXF, activeJointParams, i);
+  }
+
+  return result;
+}
+
+template <typename T>
+JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
+    const TransformListT<T>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams) {
+  MT_CHECK(
+      activeJointParams.size() ==
+          gsl::narrow<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
+      "activeJointParams size {} does not match expected size {} (skeleton joints: {})",
+      activeJointParams.size(),
+      skeleton.joints.size() * kParametersPerJoint,
+      skeleton.joints.size());
+
+  JointParametersT<T> result =
+      JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
+
+  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+    const auto parentJoint = skeleton.joints[i].parent;
+    TransformT<T> parentXF;
+    if (parentJoint != kInvalidIndex) {
+      parentXF = state[parentJoint];
+    }
+
+    // parentXF * localXF = jointXF
+    const TransformT<T> localXF = parentXF.inverse() * state[i];
+    result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
+        localTransformToJointParametersRespectingConstraints(
+            skeleton.joints[i], localXF, activeJointParams, i);
+  }
+
+  return result;
+}
+
 template struct SkeletonStateT<float>;
 template struct SkeletonStateT<double>;
 
@@ -320,5 +468,23 @@ template JointParametersT<float> skeletonStateToJointParameters(
 template JointParametersT<double> skeletonStateToJointParameters(
     const TransformListT<double>& state,
     const Skeleton& skeleton);
+
+template JointParametersT<float> skeletonStateToJointParametersRespectingActiveParameters(
+    const SkeletonStateT<float>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams);
+template JointParametersT<double> skeletonStateToJointParametersRespectingActiveParameters(
+    const SkeletonStateT<double>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams);
+
+template JointParametersT<float> skeletonStateToJointParametersRespectingActiveParameters(
+    const TransformListT<float>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams);
+template JointParametersT<double> skeletonStateToJointParametersRespectingActiveParameters(
+    const TransformListT<double>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams);
 
 } // namespace momentum

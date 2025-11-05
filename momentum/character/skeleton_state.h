@@ -178,4 +178,50 @@ template <typename T>
     const TransformListT<T>& state,
     const Skeleton& skeleton);
 
+/// Converts skeleton state back to joint parameters, respecting active joint parameter constraints.
+///
+/// This function addresses the limitation of the original `skeletonStateToJointParameters` which
+/// always uses 3-axis Euler rotations. Many joints only support 1-axis or 2-axis rotations, so
+/// this function uses the provided `activeJointParams` to determine how many rotation axes are
+/// active for each joint and applies the appropriate conversion method:
+/// - 0 active rotation axes: Sets all rotation parameters to zero
+/// - 1 active rotation axis: Uses `rotationMatrixToOneAxisEuler`
+/// - 2 active rotation axes: Uses `rotationMatrixToTwoAxisEuler`
+/// - 3 active rotation axes: Uses the standard 3-axis Euler conversion
+///
+/// @tparam T The scalar type (float or double)
+/// @param[in] state The skeleton state to convert
+/// @param[in] skeleton The skeleton defining joint hierarchy and properties
+/// @param[in] activeJointParams Boolean array indicating which joint parameters are active.
+///            Size should be skeleton.joints.size() * kParametersPerJoint
+/// @return Joint parameters with rotations respecting the active parameter constraints
+template <typename T>
+[[nodiscard]] JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
+    const SkeletonStateT<T>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams);
+
+/// Converts transform list back to joint parameters, respecting active joint parameter constraints.
+///
+/// This function addresses the limitation of the original `skeletonStateToJointParameters` which
+/// always uses 3-axis Euler rotations. Many joints only support 1-axis or 2-axis rotations, so
+/// this function uses the provided `activeJointParams` to determine how many rotation axes are
+/// active for each joint and applies the appropriate conversion method:
+/// - 0 active rotation axes: Sets all rotation parameters to zero
+/// - 1 active rotation axis: Uses `rotationMatrixToOneAxisEuler`
+/// - 2 active rotation axes: Uses `rotationMatrixToTwoAxisEuler`
+/// - 3 active rotation axes: Uses the standard 3-axis Euler conversion
+///
+/// @tparam T The scalar type (float or double)
+/// @param[in] state The transform list to convert
+/// @param[in] skeleton The skeleton defining joint hierarchy and properties
+/// @param[in] activeJointParams Boolean array indicating which joint parameters are active.
+///            Size should be skeleton.joints.size() * kParametersPerJoint
+/// @return Joint parameters with rotations respecting the active parameter constraints
+template <typename T>
+[[nodiscard]] JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
+    const TransformListT<T>& state,
+    const Skeleton& skeleton,
+    const VectorX<bool>& activeJointParams);
+
 } // namespace momentum
