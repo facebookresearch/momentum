@@ -334,11 +334,14 @@ PYBIND11_MODULE(renderer, m) {
   // Bind Camera class
   py::class_<momentum::rasterizer::Camera>(m, "Camera", "Camera for rendering")
       .def(
-          py::init([](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
-                      const std::optional<Eigen::Matrix4f>& eye_from_world) {
-            return std::make_shared<momentum::rasterizer::Camera>(
-                intrinsics, Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
-          }),
+          py::init(
+              [](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
+                 const std::optional<Eigen::Matrix4f>& eye_from_world)
+                  -> momentum::rasterizer::Camera {
+                return momentum::rasterizer::Camera(
+                    intrinsics,
+                    Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
+              }),
           R"(Create a camera with specified intrinsics and pose.
 
 :param intrinsics_model: Camera intrinsics model defining focal length, principal point, and image dimensions.
@@ -581,21 +584,22 @@ PYBIND11_MODULE(renderer, m) {
           })
       .def(py::init<>())
       .def(
-          py::init([](const std::optional<Eigen::Vector3f>& diffuseColor,
-                      const std::optional<Eigen::Vector3f>& specularColor,
-                      const std::optional<float>& specularExponent,
-                      const std::optional<Eigen::Vector3f>& emissiveColor,
-                      const std::optional<py::array_t<const float>>& diffuseTexture,
-                      const std::optional<py::array_t<const float>>& emissiveTexture) {
-            return std::make_shared<momentum::rasterizer::PhongMaterial>(
-                pymomentum::createPhongMaterial(
+          py::init(
+              [](const std::optional<Eigen::Vector3f>& diffuseColor,
+                 const std::optional<Eigen::Vector3f>& specularColor,
+                 const std::optional<float>& specularExponent,
+                 const std::optional<Eigen::Vector3f>& emissiveColor,
+                 const std::optional<py::array_t<const float>>& diffuseTexture,
+                 const std::optional<py::array_t<const float>>& emissiveTexture)
+                  -> momentum::rasterizer::PhongMaterial {
+                return pymomentum::createPhongMaterial(
                     diffuseColor,
                     specularColor,
                     specularExponent,
                     emissiveColor,
                     diffuseTexture,
-                    emissiveTexture));
-          }),
+                    emissiveTexture);
+              }),
           R"(Create a Phong material with customizable properties.
 
           :param diffuse_color: RGB diffuse color values (0-1 range)
