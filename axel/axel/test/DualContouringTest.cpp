@@ -22,7 +22,7 @@ class DualContouringTest : public ::testing::Test {
  protected:
   void SetUp() override {}
 
-  SignedDistanceFieldf createSphereSdf(
+  static SignedDistanceFieldf createSphereSdf(
       float radius,
       const Eigen::Vector3f& center,
       const BoundingBoxf& bounds,
