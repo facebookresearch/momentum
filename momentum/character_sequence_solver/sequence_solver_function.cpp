@@ -31,9 +31,8 @@ SequenceSolverFunctionT<T>::SequenceSolverFunctionT(
     const size_t nFrames)
     : character_(character),
       parameterTransform_(parameterTransform),
+      nFrames_(nFrames),
       universalParameters_(universal) {
-  states_.resize(nFrames);
-  meshStates_.resize(nFrames);
   perFrameErrorFunctions_.resize(nFrames);
   sequenceErrorFunctions_.resize(nFrames);
   frameParameters_.resize(
@@ -98,7 +97,7 @@ template <typename T>
 void SequenceSolverFunctionT<T>::setFrameParameters(
     const size_t frame,
     const ModelParametersT<T>& parameters) {
-  MT_CHECK(frame < states_.size());
+  MT_CHECK(frame < getNumFrames());
   MT_CHECK(
       parameters.size() == gsl::narrow<Eigen::Index>(parameterTransform_.numAllModelParameters()));
   frameParameters_[frame] = parameters;
@@ -189,40 +188,63 @@ double SequenceSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters)
   MT_CHECK(parameters.size() == gsl::narrow_cast<Eigen::Index>(this->numParameters_));
   setFrameParametersFromJoinedParameterVector(parameters);
 
-  // update the state according to the transformed parameters
-  dispenso::parallel_for(0, nFrames, [&](size_t f) {
-    states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
-    if (needsMesh_) {
-      meshStates_[f].update(frameParameters_[f], states_[f], character_);
-    }
-  });
-
-  // sum up error for all per-frame error functions
+  // sum up error for all per-frame error functions using thread-local states
   std::vector<double> perFrameErrors(nFrames);
-  dispenso::parallel_for(0, nFrames, [&](size_t f) {
-    for (const auto& errf : perFrameErrorFunctions_[f]) {
-      if (errf->getWeight() <= 0.0f) {
-        continue;
-      }
+  std::vector<PerFrameStateT<T>> states;
+  dispenso::parallel_for(
+      states,
+      []() -> PerFrameStateT<T> { return PerFrameStateT<T>(); },
+      dispenso::makeChunkedRange(0, nFrames, 1),
+      [&](PerFrameStateT<T>& state, size_t rangeStart, size_t rangeEnd) {
+        for (size_t f = rangeStart; f < rangeEnd; ++f) {
+          state.skeletonState.set(
+              parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
+          if (needsMeshPerFrame_) {
+            state.meshState.update(frameParameters_[f], state.skeletonState, character_);
+          }
 
-      perFrameErrors[f] += errf->getError(frameParameters_[f], states_[f], meshStates_[f]);
-    }
-  });
+          for (const auto& errf : perFrameErrorFunctions_[f]) {
+            if (errf->getWeight() <= 0.0f) {
+              continue;
+            }
 
-  // Now sum up the sequence error functions:
-  dispenso::parallel_for(0, nFrames, [&](size_t f) {
+            perFrameErrors[f] +=
+                errf->getError(frameParameters_[f], state.skeletonState, state.meshState);
+          }
+        }
+      });
+
+  // Now sum up the sequence error functions (single-threaded)
+  std::vector<SkeletonStateT<T>> skelStates;
+  std::vector<MeshStateT<T>> meshStates;
+  for (size_t f = 0; f < nFrames; ++f) {
     for (const auto& errf : sequenceErrorFunctions_[f]) {
       const auto nFramesSubset = errf->numFrames();
       if (errf->getWeight() <= 0.0f) {
         continue;
       }
 
+      // Compute skeleton/mesh states for this sequence
+      skelStates.resize(nFramesSubset);
+      if (needsMeshSequence_) {
+        meshStates.resize(nFramesSubset);
+      }
+
+      for (size_t kSubFrame = 0; kSubFrame < nFramesSubset; ++kSubFrame) {
+        skelStates[kSubFrame].set(
+            parameterTransform_.apply(frameParameters_[f + kSubFrame]), character_.skeleton);
+        if (needsMeshSequence_) {
+          meshStates[kSubFrame].update(
+              frameParameters_[f + kSubFrame], skelStates[kSubFrame], character_);
+        }
+      }
+
       perFrameErrors[f] += errf->getError(
-          gsl::make_span(frameParameters_).subspan(f, nFramesSubset),
-          gsl::make_span(states_).subspan(f, nFramesSubset),
-          gsl::make_span(meshStates_).subspan(f, nFramesSubset));
+          std::span(frameParameters_).subspan(f, nFramesSubset),
+          std::span(skelStates),
+          std::span(meshStates));
     }
-  });
+  }
 
   return std::accumulate(perFrameErrors.begin(), perFrameErrors.end(), 0.0);
 }
@@ -238,28 +260,31 @@ double SequenceSolverFunctionT<T>::getGradient(
   MT_CHECK(parameters.size() == gsl::narrow_cast<Eigen::Index>(this->numParameters_));
   setFrameParametersFromJoinedParameterVector(parameters);
 
-  // update the state according to the transformed parameters
-  dispenso::parallel_for(0, nFrames, [&](size_t f) {
-    states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
-    if (needsMesh_) {
-      meshStates_[f].update(frameParameters_[f], states_[f], character_);
-    }
-  });
-
   double error = 0.0;
 
-  // Now accumulate all sequenceErrorFunctions_ which operate on multiple frames.
+  // Accumulate per-frame error functions (single-threaded)
   Eigen::VectorX<T> fullGradient = Eigen::VectorX<T>::Zero(nFrames * np);
+  SkeletonStateT<T> skelState;
+  MeshStateT<T> meshState;
+
   for (size_t f = 0; f < nFrames; ++f) {
+    skelState.set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
+    if (needsMeshPerFrame_) {
+      meshState.update(frameParameters_[f], skelState, character_);
+    }
+
     for (const auto& errf : perFrameErrorFunctions_[f]) {
       if (errf->getWeight() <= 0) {
         continue;
       }
       error += errf->getGradient(
-          frameParameters_[f], states_[f], meshStates_[f], fullGradient.segment(f * np, np));
+          frameParameters_[f], skelState, meshState, fullGradient.segment(f * np, np));
     }
   }
 
+  // Now accumulate sequence error functions (single-threaded)
+  std::vector<SkeletonStateT<T>> skelStates;
+  std::vector<MeshStateT<T>> meshStates;
   for (size_t f = 0; f < nFrames; ++f) {
     for (const auto& errf : sequenceErrorFunctions_[f]) {
       if (errf->getWeight() <= 0.0f) {
@@ -267,10 +292,26 @@ double SequenceSolverFunctionT<T>::getGradient(
       }
 
       const auto nFramesSubset = errf->numFrames();
+
+      // Compute skeleton/mesh states for this sequence
+      skelStates.resize(nFramesSubset);
+      if (needsMeshSequence_) {
+        meshStates.resize(nFramesSubset);
+      }
+
+      for (size_t kSubFrame = 0; kSubFrame < nFramesSubset; ++kSubFrame) {
+        skelStates[kSubFrame].set(
+            parameterTransform_.apply(frameParameters_[f + kSubFrame]), character_.skeleton);
+        if (needsMeshSequence_) {
+          meshStates[kSubFrame].update(
+              frameParameters_[f + kSubFrame], skelStates[kSubFrame], character_);
+        }
+      }
+
       error += errf->getGradient(
-          gsl::make_span(frameParameters_).subspan(f, nFramesSubset),
-          gsl::make_span(states_).subspan(f, nFramesSubset),
-          gsl::make_span(meshStates_).subspan(f, nFramesSubset),
+          std::span(frameParameters_).subspan(f, nFramesSubset),
+          std::span(skelStates),
+          std::span(meshStates),
           fullGradient.segment(f * np, nFramesSubset * np));
     }
   }
@@ -295,29 +336,138 @@ double SequenceSolverFunctionT<T>::getGradient(
 }
 
 template <typename T>
+double SequenceSolverFunctionT<T>::getPerFrameJacobian(
+    Eigen::MatrixX<T>& jacobian,
+    Eigen::VectorX<T>& residual,
+    size_t& position) {
+  const auto np = this->parameterTransform_.numAllModelParameters();
+  const auto nFrames = this->getNumFrames();
+
+  double error = 0.0;
+
+  ResizeableMatrix<T> tempJac;
+  SkeletonStateT<T> skelState;
+  MeshStateT<T> meshState;
+
+  for (size_t f = 0; f < nFrames; ++f) {
+    skelState.set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
+    if (needsMeshPerFrame_) {
+      meshState.update(frameParameters_[f], skelState, character_);
+    }
+
+    for (const auto& errf : perFrameErrorFunctions_[f]) {
+      if (errf->getWeight() <= 0.0f) {
+        continue;
+      }
+
+      const auto n = errf->getJacobianSize();
+      tempJac.resizeAndSetZero(n, np);
+
+      int rows = 0;
+      error += errf->getJacobian(
+          frameParameters_[f],
+          skelState,
+          meshState,
+          tempJac.mat(),
+          residual.middleRows(position, n),
+          rows);
+
+      // move values to correct columns in actual jacobian according to the structure
+      for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
+        jacobian.block(position, perFrameParameterIndices_.size() * f + k, rows, 1) =
+            tempJac.mat().block(0, perFrameParameterIndices_[k], rows, 1);
+      }
+
+      for (size_t k = 0; k < universalParameterIndices_.size(); ++k) {
+        jacobian.block(position, perFrameParameterIndices_.size() * nFrames + k, rows, 1) =
+            tempJac.mat().block(0, universalParameterIndices_[k], rows, 1);
+      }
+
+      position += rows;
+    }
+  }
+
+  return error;
+}
+
+template <typename T>
+double SequenceSolverFunctionT<T>::getSequenceErrorFunctionsJacobian(
+    Eigen::MatrixX<T>& jacobian,
+    Eigen::VectorX<T>& residual,
+    size_t& position) {
+  const auto np = this->parameterTransform_.numAllModelParameters();
+  const auto nFrames = this->getNumFrames();
+
+  double error = 0.0;
+
+  ResizeableMatrix<T> tempJac;
+  std::vector<SkeletonStateT<T>> skelStates;
+  std::vector<MeshStateT<T>> meshStates;
+
+  for (size_t f = 0; f < getNumFrames(); ++f) {
+    for (const auto& errf : sequenceErrorFunctions_[f]) {
+      if (errf->getWeight() <= 0.0f) {
+        continue;
+      }
+
+      const auto nFramesSubset = errf->numFrames();
+      const auto js = errf->getJacobianSize();
+
+      // Compute skeleton/mesh states for this sequence
+      skelStates.resize(nFramesSubset);
+      if (needsMeshSequence_) {
+        meshStates.resize(nFramesSubset);
+      }
+
+      for (size_t kSubFrame = 0; kSubFrame < nFramesSubset; ++kSubFrame) {
+        skelStates[kSubFrame].set(
+            parameterTransform_.apply(frameParameters_[f + kSubFrame]), character_.skeleton);
+        if (needsMeshSequence_) {
+          meshStates[kSubFrame].update(
+              frameParameters_[f + kSubFrame], skelStates[kSubFrame], character_);
+        }
+      }
+
+      tempJac.resizeAndSetZero(js, nFramesSubset * np);
+      int rows = 0;
+      error += errf->getJacobian(
+          std::span(frameParameters_).subspan(f, nFramesSubset),
+          std::span(skelStates),
+          std::span(meshStates),
+          tempJac.mat(),
+          residual.middleRows(position, js),
+          rows);
+
+      for (size_t iSubframe = 0; iSubframe < nFramesSubset; ++iSubframe) {
+        for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
+          jacobian.block(
+              position, perFrameParameterIndices_.size() * (f + iSubframe) + k, rows, 1) =
+              tempJac.mat().block(0, iSubframe * np + perFrameParameterIndices_[k], rows, 1);
+        }
+
+        for (size_t k = 0; k < universalParameterIndices_.size(); ++k) {
+          jacobian.block(position, perFrameParameterIndices_.size() * nFrames + k, rows, 1) +=
+              tempJac.mat().block(0, iSubframe * np + universalParameterIndices_[k], rows, 1);
+        }
+      }
+
+      position += rows;
+    }
+  }
+
+  return error;
+}
+
+template <typename T>
 double SequenceSolverFunctionT<T>::getJacobian(
     const Eigen::VectorX<T>& parameters,
     Eigen::MatrixX<T>& jacobian,
     Eigen::VectorX<T>& residual,
     size_t& actualRows) {
-  const auto np = this->parameterTransform_.numAllModelParameters();
-  const auto nFrames = this->getNumFrames();
-
   MT_PROFILE_EVENT("GetMultiposeJacobian");
   // update states
   MT_CHECK(parameters.size() == gsl::narrow_cast<Eigen::Index>(this->numParameters_));
   setFrameParametersFromJoinedParameterVector(parameters);
-
-  // update the state according to the transformed parameters
-  {
-    MT_PROFILE_EVENT("UpdateState");
-    dispenso::parallel_for(0, nFrames, [&](size_t f) {
-      states_[f].set(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
-      if (needsMesh_) {
-        meshStates_[f].update(frameParameters_[f], states_[f], character_);
-      }
-    });
-  }
 
   double error = 0.0;
 
@@ -354,84 +504,10 @@ double SequenceSolverFunctionT<T>::getJacobian(
   }
   actualRows = jacobianSize;
 
-  ResizeableMatrix<T> tempJac;
-
-  // add values to the jacobian
   size_t position = 0;
-  for (size_t f = 0; f < getNumFrames(); f++) {
-    // fill in temporary jacobian
-    MT_PROFILE_EVENT("GetFrameJacobian");
-    for (const auto& errf : perFrameErrorFunctions_[f]) {
-      if (errf->getWeight() <= 0.0f) {
-        continue;
-      }
 
-      // TODO pad jacobian
-      const auto n = errf->getJacobianSize();
-      tempJac.resizeAndSetZero(n, np);
-
-      int rows = 0;
-      error += errf->getJacobian(
-          frameParameters_[f],
-          states_[f],
-          meshStates_[f],
-          tempJac.mat(),
-          residual.middleRows(position, n),
-          rows);
-
-      // move values to correct columns in actual jacobian according to the structure
-      {
-        MT_PROFILE_EVENT("MoveJacobianBlocks");
-        for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
-          jacobian.block(position, perFrameParameterIndices_.size() * f + k, rows, 1) =
-              tempJac.mat().block(0, perFrameParameterIndices_[k], rows, 1);
-        }
-
-        for (size_t k = 0; k < universalParameterIndices_.size(); ++k) {
-          jacobian.block(position, perFrameParameterIndices_.size() * nFrames + k, rows, 1) =
-              tempJac.mat().block(0, universalParameterIndices_[k], rows, 1);
-        }
-      }
-
-      position += rows;
-    }
-  }
-
-  for (size_t f = 0; f < getNumFrames(); ++f) {
-    for (const auto& errf : sequenceErrorFunctions_[f]) {
-      if (errf->getWeight() <= 0.0f) {
-        continue;
-      }
-
-      const auto nFramesSubset = errf->numFrames();
-      const auto js = errf->getJacobianSize();
-
-      tempJac.resizeAndSetZero(js, nFramesSubset * np);
-      int rows = 0;
-      error += errf->getJacobian(
-          gsl::make_span(frameParameters_).subspan(f, nFramesSubset),
-          gsl::make_span(states_).subspan(f, nFramesSubset),
-          gsl::make_span(meshStates_).subspan(f, nFramesSubset),
-          tempJac.mat(),
-          residual.middleRows(position, js),
-          rows);
-
-      for (size_t iSubframe = 0; iSubframe < nFramesSubset; ++iSubframe) {
-        for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
-          jacobian.block(
-              position, perFrameParameterIndices_.size() * (f + iSubframe) + k, rows, 1) =
-              tempJac.mat().block(0, iSubframe * np + perFrameParameterIndices_[k], rows, 1);
-        }
-
-        for (size_t k = 0; k < universalParameterIndices_.size(); ++k) {
-          jacobian.block(position, perFrameParameterIndices_.size() * nFrames + k, rows, 1) +=
-              tempJac.mat().block(0, iSubframe * np + universalParameterIndices_[k], rows, 1);
-        }
-      }
-
-      position += rows;
-    }
-  }
+  error += getPerFrameJacobian(jacobian, residual, position);
+  error += getSequenceErrorFunctionsJacobian(jacobian, residual, position);
 
   return error;
 }
@@ -455,14 +531,14 @@ void SequenceSolverFunctionT<T>::addErrorFunction(
     const size_t frame,
     std::shared_ptr<SkeletonErrorFunctionT<T>> errorFunction) {
   if (errorFunction->needsMesh()) {
-    needsMesh_.store(true, std::memory_order_relaxed);
+    needsMeshPerFrame_.store(true, std::memory_order_relaxed);
   }
   if (frame == kAllFrames) {
     dispenso::parallel_for(0, getNumFrames(), [this, errorFunction](size_t iFrame) {
       addErrorFunction(iFrame, errorFunction);
     });
   } else {
-    MT_CHECK(frame < states_.size());
+    MT_CHECK(frame < getNumFrames());
     perFrameErrorFunctions_[frame].push_back(errorFunction);
     ++numTotalPerFrameErrorFunctions_;
   }
@@ -473,7 +549,7 @@ void SequenceSolverFunctionT<T>::addSequenceErrorFunction(
     const size_t frame,
     std::shared_ptr<SequenceErrorFunctionT<T>> errorFunction) {
   if (errorFunction->needsMesh()) {
-    needsMesh_.store(true, std::memory_order_relaxed);
+    needsMeshSequence_.store(true, std::memory_order_relaxed);
   }
   if (frame == kAllFrames) {
     if (getNumFrames() >= errorFunction->numFrames()) {
@@ -483,8 +559,8 @@ void SequenceSolverFunctionT<T>::addSequenceErrorFunction(
           });
     }
   } else {
-    MT_CHECK(frame < states_.size());
-    MT_CHECK(frame + errorFunction->numFrames() <= states_.size());
+    MT_CHECK(frame < getNumFrames());
+    MT_CHECK(frame + errorFunction->numFrames() <= getNumFrames());
     sequenceErrorFunctions_[frame].push_back(errorFunction);
     ++numTotalSequenceErrorFunctions_;
   }

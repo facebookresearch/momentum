@@ -96,16 +96,18 @@ size_t computeJacobianSize(std::vector<std::shared_ptr<ErrorFunctionType>>& func
 // Compute the full per-frame Jacobian and update the skeleton state:
 template <typename T>
 std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t>
-SequenceSolverT<T>::computePerFrameJacobian(SequenceSolverFunctionT<T>* fn, size_t iFrame) {
+SequenceSolverT<T>::computePerFrameJacobian(
+    SequenceSolverFunctionT<T>* fn,
+    size_t iFrame,
+    SkeletonStateT<T>& skelState,
+    MeshStateT<T>& meshState) {
   const auto& frameParameters = fn->frameParameters_[iFrame];
-  auto& skelState = fn->states_[iFrame];
-  auto& meshState = fn->meshStates_[iFrame];
 
   const auto& character = fn->getCharacter();
 
   skelState.set(fn->parameterTransform_.apply(frameParameters), character.skeleton);
 
-  if (fn->needsMesh()) {
+  if (fn->needsMeshPerFrame()) {
     meshState.update(frameParameters, skelState, character);
   }
 
@@ -143,9 +145,16 @@ SequenceSolverT<T>::computePerFrameJacobian(SequenceSolverFunctionT<T>* fn, size
 }
 
 template <typename T>
-std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> SequenceSolverT<
-    T>::computeSequenceJacobian(SequenceSolverFunctionT<T>* fn, size_t iFrame, size_t bandwidth) {
+std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t>
+SequenceSolverT<T>::computeSequenceJacobian(
+    SequenceSolverFunctionT<T>* fn,
+    size_t iFrame,
+    size_t bandwidth,
+    std::span<const SkeletonStateT<T>> skelStates,
+    std::span<const MeshStateT<T>> meshStates) {
   const size_t bandwidth_cur = std::min(fn->getNumFrames() - iFrame, bandwidth);
+  MT_CHECK(skelStates.size() >= bandwidth_cur);
+  MT_CHECK(meshStates.size() >= bandwidth_cur);
 
   const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
   const size_t jacobianSize = padForSSE(computeJacobianSize(fn->sequenceErrorFunctions_[iFrame]));
@@ -165,9 +174,9 @@ std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> SequenceSolverT
     const size_t n = errf->getJacobianSize();
     int rows = 0;
     errorCur += errf->getJacobian(
-        gsl::make_span(fn->frameParameters_).subspan(iFrame, nFrames),
-        gsl::make_span(fn->states_).subspan(iFrame, nFrames),
-        gsl::make_span(fn->meshStates_).subspan(iFrame, nFrames),
+        std::span(fn->frameParameters_).subspan(iFrame, nFrames),
+        skelStates,
+        meshStates,
         jacobian.block(offset, 0, n, nFrames * nFullParameters),
         residual.middleRows(offset, n),
         rows);
@@ -215,9 +224,12 @@ double SequenceSolverT<T>::processPerFrameErrors_serial(
     SequenceSolverFunctionT<T>* fn,
     OnlineBandedHouseholderQR<T>& qrSolver,
     ProgressBar* progress) {
+  SkeletonStateT<T> skelState;
+  MeshStateT<T> meshState;
   double errorSum = 0;
   for (size_t iFrame = 0; iFrame < fn->getNumFrames(); ++iFrame) {
-    auto [jacobian, residual, errorCur, nFunctions] = computePerFrameJacobian(fn, iFrame);
+    auto [jacobian, residual, errorCur, nFunctions] =
+        computePerFrameJacobian(fn, iFrame, skelState, meshState);
     errorSum += errorCur;
 
     if (jacobian.rows() != 0) {
@@ -269,7 +281,9 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
     const std::function<UniversalJacobianResid(
         size_t,
         SequenceSolverFunctionT<T>*,
-        OnlineBandedHouseholderQR<T>& qrSolver)>& processJac,
+        OnlineBandedHouseholderQR<T>&,
+        SkeletonStateT<T>,
+        MeshStateT<T>&)>& processJac,
     SequenceSolverFunctionT<T>* fn,
     OnlineBandedHouseholderQR<T>& qrSolver,
     ProgressBar* progress) {
@@ -292,15 +306,20 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
   //   1. We compute the full Jacobian/residual for each from each frame.
   //   2. We zero out the non-shared parts of the Jacobian in parallel
   //   3. We zero out the shared parts of the Jacobian serially in order in the last stage.
+  std::vector<PerFrameStateT<T>> states;
   dispenso::parallel_for(
-      dispenso::makeChunkedRange(0, end, 1), [&](size_t rangeStart, size_t rangeEnd) {
+      states,
+      []() -> PerFrameStateT<T> { return PerFrameStateT<T>(); },
+      dispenso::makeChunkedRange(0, end, 1),
+      [&](PerFrameStateT<T>& state, size_t rangeStart, size_t rangeEnd) {
         for (size_t iFrame = rangeStart; iFrame < rangeEnd; ++iFrame) {
           if (iFrame >= end) {
             // nothing to do:
             return;
           }
 
-          UniversalJacobianResid universalJacRes = processJac(iFrame, fn, qrSolver);
+          UniversalJacobianResid universalJacRes =
+              processJac(iFrame, fn, qrSolver, state.skeletonState, state.meshState);
 
           // Need to push into the queue:
           std::unique_lock<std::mutex> reorderBufferLock(reorderBufferMutex);
@@ -385,11 +404,14 @@ double SequenceSolverT<T>::processPerFrameErrors_parallel(
   return processErrorFunctions_parallel(
       [](size_t iFrame,
          SequenceSolverFunctionT<T>* fn,
-         OnlineBandedHouseholderQR<T>& qrSolver) -> UniversalJacobianResid {
+         OnlineBandedHouseholderQR<T>& qrSolver,
+         SkeletonStateT<T> skelState,
+         MeshStateT<T>& meshState) -> UniversalJacobianResid {
         // Construct the Jacobian/residual for a single frame and zero out the parts
         // of the Jacobian that only affect that frame; this is safe to do because
         // the non-shared parameters for each frame don't overlap.
-        auto [jacobian, residual, errorCur, numFunctions] = computePerFrameJacobian(fn, iFrame);
+        auto [jacobian, residual, errorCur, numFunctions] =
+            computePerFrameJacobian(fn, iFrame, skelState, meshState);
 
         qrSolver.zeroBandedPart(
             iFrame * fn->perFrameParameterIndices_.size(),
@@ -434,12 +456,39 @@ double SequenceSolverT<T>::processSequenceErrors_serial(
   // copies of the perFrameParameterIndices_:
   const auto sequenceColumnIndices = buildSequenceColumnIndices(fn, bandwidth);
 
+  std::vector<SkeletonStateT<T>> skelStates(bandwidth);
+  std::vector<MeshStateT<T>> meshStates(bandwidth);
+
   double errorSum = 0;
   for (size_t iFrame = 0; iFrame < fn->getNumFrames(); ++iFrame) {
     const size_t bandwidth_cur = std::min<size_t>(fn->getNumFrames() - iFrame, bandwidth);
 
+    // Determine how many frames are already valid from the previous iteration
+    // First frame: 0 (compute all), subsequent frames: bandwidth_cur - 1 (reuse all but last)
+    const size_t numValidFrames = (iFrame == 0) ? 0 : (bandwidth_cur - 1);
+
+    // Shift valid frames left by 1 to reuse already-computed states
+    for (size_t kSubFrame = 0; kSubFrame < numValidFrames; ++kSubFrame) {
+      skelStates[kSubFrame] = std::move(skelStates[kSubFrame + 1]);
+      if (fn->needsMeshSequence()) {
+        meshStates[kSubFrame] = std::move(meshStates[kSubFrame + 1]);
+      }
+    }
+
+    // Compute new frames (all frames if iFrame == 0, or just the last frame if iFrame > 0)
+    for (size_t kSubFrame = numValidFrames; kSubFrame < bandwidth_cur; ++kSubFrame) {
+      skelStates[kSubFrame].set(
+          fn->parameterTransform_.apply(fn->frameParameters_[iFrame + kSubFrame]),
+          fn->getCharacter().skeleton);
+
+      if (fn->needsMeshSequence()) {
+        meshStates[kSubFrame].update(
+            fn->frameParameters_[iFrame + kSubFrame], skelStates[kSubFrame], fn->getCharacter());
+      }
+    }
+
     auto [jacobian, residual, errorCur, nFunctions] =
-        computeSequenceJacobian(fn, iFrame, bandwidth);
+        computeSequenceJacobian(fn, iFrame, bandwidth, skelStates, meshStates);
     errorSum += errorCur;
 
     if (jacobian.rows() != 0) {
@@ -447,7 +496,7 @@ double SequenceSolverT<T>::processSequenceErrors_serial(
           iFrame * fn->perFrameParameterIndices_.size(),
           ColumnIndexedMatrix<Eigen::MatrixX<T>>(
               jacobian,
-              gsl::make_span(sequenceColumnIndices)
+              std::span(sequenceColumnIndices)
                   .subspan(0, bandwidth_cur * fn->perFrameParameterIndices_.size())),
           ColumnIndexedMatrix<Eigen::MatrixX<T>>(jacobian, fn->universalParameterIndices_),
           residual);

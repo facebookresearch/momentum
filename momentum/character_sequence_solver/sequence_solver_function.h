@@ -18,6 +18,12 @@
 
 namespace momentum {
 
+template <typename T>
+struct PerFrameStateT {
+  SkeletonStateT<T> skeletonState;
+  MeshStateT<T> meshState;
+};
+
 inline constexpr size_t kAllFrames = SIZE_MAX;
 
 template <typename T>
@@ -47,8 +53,14 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
     return universalParameters_;
   }
 
-  [[nodiscard]] bool needsMesh() const {
-    return needsMesh_;
+  /// Returns whether the per-frame error functions need the mesh.
+  [[nodiscard]] bool needsMeshPerFrame() const {
+    return needsMeshPerFrame_;
+  }
+
+  /// Returns whether the sequence error functions need the mesh.
+  [[nodiscard]] bool needsMeshSequence() const {
+    return needsMeshSequence_;
   }
 
   // Passing in the special frame index kAllFrames will add the error function to every frame; this
@@ -61,7 +73,7 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
       std::shared_ptr<SequenceErrorFunctionT<T>> errorFunction);
 
   [[nodiscard]] size_t getNumFrames() const {
-    return states_.size();
+    return frameParameters_.size();
   }
 
   [[nodiscard]] const ModelParametersT<T>& getFrameParameters(size_t frame) const {
@@ -101,14 +113,23 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
  private:
   void setFrameParametersFromJoinedParameterVector(const Eigen::VectorX<T>& parameters);
 
+  /// Helper method to compute per-frame jacobians
+  double
+  getPerFrameJacobian(Eigen::MatrixX<T>& jacobian, Eigen::VectorX<T>& residual, size_t& position);
+
+  /// Helper method to compute sequence error functions jacobians
+  double getSequenceErrorFunctionsJacobian(
+      Eigen::MatrixX<T>& jacobian,
+      Eigen::VectorX<T>& residual,
+      size_t& position);
+
  private:
   const Character& character_;
   const ParameterTransformT<T>& parameterTransform_;
-  std::vector<SkeletonStateT<T>> states_;
-  std::vector<MeshStateT<T>> meshStates_;
   VectorX<bool> activeJointParams_;
 
   std::vector<ModelParametersT<T>> frameParameters_;
+  size_t nFrames_;
 
   void updateParameterSets(const ParameterSet& activeParams);
 
@@ -126,7 +147,10 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
   std::atomic<size_t> numTotalPerFrameErrorFunctions_ = 0;
   std::atomic<size_t> numTotalSequenceErrorFunctions_ = 0;
 
-  std::atomic<bool> needsMesh_{false};
+  // Whether per-frame error functions need the mesh
+  std::atomic<bool> needsMeshPerFrame_{false};
+  // Whether sequence error functions need the mesh
+  std::atomic<bool> needsMeshSequence_{false};
 
   friend class SequenceSolverT<T>;
 };

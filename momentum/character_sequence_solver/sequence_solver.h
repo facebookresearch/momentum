@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character/fwd.h>
 #include <momentum/character_sequence_solver/fwd.h>
 #include <momentum/common/fwd.h>
 #include <momentum/math/fwd.h>
@@ -14,6 +15,7 @@
 #include <momentum/solver/solver.h>
 
 #include <functional>
+#include <span>
 
 namespace momentum {
 
@@ -113,7 +115,9 @@ class SequenceSolverT : public SolverT<T> {
       const std::function<UniversalJacobianResid(
           size_t,
           SequenceSolverFunctionT<T>*,
-          OnlineBandedHouseholderQR<T>&)>& processJac,
+          OnlineBandedHouseholderQR<T>&,
+          SkeletonStateT<T> skelState,
+          MeshStateT<T>& meshState)>& processJac,
       SequenceSolverFunctionT<T>* fn,
       OnlineBandedHouseholderQR<T>& qrSolver,
       ProgressBar* progress);
@@ -121,12 +125,18 @@ class SequenceSolverT : public SolverT<T> {
   // Returns the [Jacobian, residual, error] for all the error functions applying to a single frame:
   static std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> computePerFrameJacobian(
       SequenceSolverFunctionT<T>* fn,
-      size_t iFrame);
+      size_t iFrame,
+      SkeletonStateT<T>& skelState,
+      MeshStateT<T>& meshState);
 
   // Returns the [Jacobian, residual, error] for all the sequence error functions starting from a
   // single frame:
-  static std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t>
-  computeSequenceJacobian(SequenceSolverFunctionT<T>* fn, size_t iFrame, size_t bandwidth);
+  static std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> computeSequenceJacobian(
+      SequenceSolverFunctionT<T>* fn,
+      size_t iFrame,
+      size_t bandwidth,
+      std::span<const SkeletonStateT<T>> skelStates,
+      std::span<const MeshStateT<T>> meshStates);
 
   static std::vector<Eigen::Index> buildSequenceColumnIndices(
       const SequenceSolverFunctionT<T>* fn,
