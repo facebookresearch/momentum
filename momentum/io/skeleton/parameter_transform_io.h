@@ -38,4 +38,23 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
     std::span<const std::byte> rawData,
     const Skeleton& skeleton);
 
+// Write functions to serialize model definition components
+std::string writeParameterTransform(
+    const ParameterTransform& parameterTransform,
+    const Skeleton& skeleton);
+
+std::string writeParameterSets(const ParameterSets& parameterSets);
+
+std::string writePoseConstraints(const PoseConstraints& poseConstraints);
+
+/// Write complete model definition file
+/// @param skeleton The character's skeletal structure
+/// @param parameterTransform Maps model parameters to joint parameters
+/// @param parameterLimits Constraints on model parameters (can be empty)
+/// @return String containing the complete model definition
+std::string writeModelDefinition(
+    const Skeleton& skeleton,
+    const ParameterTransform& parameterTransform,
+    const ParameterLimits& parameterLimits);
+
 } // namespace momentum
