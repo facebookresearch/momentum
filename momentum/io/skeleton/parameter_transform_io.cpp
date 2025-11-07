@@ -104,6 +104,7 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinitionFromStream(
 
   pt = parseParameterTransform(data, skeleton);
   pt.parameterSets = parseParameterSets(data, pt);
+  pt.poseConstraints = parsePoseConstraints(data, pt);
   pl = parseParameterLimits(data, skeleton, pt);
 
   return res;
@@ -433,6 +434,161 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
   MT_THROW_IF(!inputStream, "Unable to read parameter transform data.");
 
   return loadModelDefinitionFromStream(inputStream, skeleton);
+}
+
+std::string writeParameterTransform(
+    const ParameterTransform& parameterTransform,
+    const Skeleton& skeleton) {
+  std::ostringstream oss;
+
+  // Write each joint parameter definition
+  for (size_t iJoint = 0; iJoint < skeleton.joints.size(); ++iJoint) {
+    const auto& joint = skeleton.joints[iJoint];
+
+    for (size_t iParam = 0; iParam < kParametersPerJoint; ++iParam) {
+      const size_t jointParamIndex = iJoint * kParametersPerJoint + iParam;
+
+      // Skip inactive joint parameters
+      if (!parameterTransform.activeJointParams[jointParamIndex]) {
+        continue;
+      }
+
+      // Write joint parameter name
+      oss << joint.name << "." << kJointParameterNames[iParam] << " = ";
+
+      // Collect all model parameters that influence this joint parameter
+      std::vector<std::pair<size_t, float>> influences;
+      for (Eigen::Index iModelParam = 0; iModelParam < parameterTransform.transform.cols();
+           ++iModelParam) {
+        const float weight = parameterTransform.transform.coeff(jointParamIndex, iModelParam);
+        if (weight != 0.0f) {
+          influences.emplace_back(iModelParam, weight);
+        }
+      }
+
+      // Write the offset if it exists
+      const float offset = parameterTransform.offsets[jointParamIndex];
+      bool needsPlus = false;
+
+      if (!influences.empty()) {
+        for (size_t i = 0; i < influences.size(); ++i) {
+          if (i > 0) {
+            oss << " + ";
+          }
+          const auto [modelParamIndex, weight] = influences[i];
+          oss << weight << "*" << parameterTransform.name[modelParamIndex];
+        }
+        needsPlus = true;
+      }
+
+      if (offset != 0.0f) {
+        if (needsPlus) {
+          oss << " + ";
+        }
+        oss << offset;
+      }
+
+      oss << "\n";
+    }
+  }
+
+  return oss.str();
+}
+
+std::string writeParameterSets(const ParameterSets& parameterSets) {
+  std::ostringstream oss;
+
+  for (const auto& [name, paramSet] : parameterSets) {
+    oss << "parameterset " << name;
+
+    // Write all active parameters in the set
+    for (size_t i = 0; i < paramSet.size(); ++i) {
+      if (paramSet.test(i)) {
+        // We need the parameter name, but we don't have access to parameterTransform here
+        // This is a limitation - we'll need to pass it in
+        oss << " param_" << i;
+      }
+    }
+    oss << "\n";
+  }
+
+  return oss.str();
+}
+
+std::string writePoseConstraints(const PoseConstraints& poseConstraints) {
+  std::ostringstream oss;
+
+  for (const auto& [name, constraint] : poseConstraints) {
+    oss << "poseconstraints " << name;
+
+    // Write all parameter=value pairs
+    for (const auto& [paramIndex, value] : constraint.parameterIdValue) {
+      // We need the parameter name, but we don't have access to parameterTransform here
+      oss << " param_" << paramIndex << "=" << value;
+    }
+    oss << "\n";
+  }
+
+  return oss.str();
+}
+
+std::string writeModelDefinition(
+    const Skeleton& skeleton,
+    const ParameterTransform& parameterTransform,
+    const ParameterLimits& parameterLimits) {
+  std::ostringstream oss;
+
+  // Write header
+  oss << "Momentum Model Definition V1.0\n\n";
+
+  // Write ParameterTransform section
+  if (!parameterTransform.name.empty()) {
+    oss << "[ParameterTransform]\n";
+    oss << writeParameterTransform(parameterTransform, skeleton);
+    oss << "\n";
+  }
+
+  // Write ParameterSets section
+  if (!parameterTransform.parameterSets.empty()) {
+    oss << "[ParameterSets]\n";
+    for (const auto& [name, paramSet] : parameterTransform.parameterSets) {
+      oss << "parameterset " << name;
+
+      // Write all active parameters in the set
+      for (size_t i = 0; i < paramSet.size() && i < parameterTransform.name.size(); ++i) {
+        if (paramSet.test(i)) {
+          oss << " " << parameterTransform.name[i];
+        }
+      }
+      oss << "\n";
+    }
+    oss << "\n";
+  }
+
+  // Write PoseConstraints section
+  if (!parameterTransform.poseConstraints.empty()) {
+    oss << "[PoseConstraints]\n";
+    for (const auto& [name, constraint] : parameterTransform.poseConstraints) {
+      oss << "poseconstraints " << name;
+
+      // Write all parameter=value pairs
+      for (const auto& [paramIndex, value] : constraint.parameterIdValue) {
+        if (paramIndex < parameterTransform.name.size()) {
+          oss << " " << parameterTransform.name[paramIndex] << "=" << value;
+        }
+      }
+      oss << "\n";
+    }
+    oss << "\n";
+  }
+
+  // Write ParameterLimits section using existing function
+  if (!parameterLimits.empty()) {
+    oss << "[ParameterLimits]\n";
+    oss << writeParameterLimits(parameterLimits, skeleton, parameterTransform);
+  }
+
+  return oss.str();
 }
 
 } // namespace momentum

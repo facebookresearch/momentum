@@ -749,6 +749,7 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       io_skeleton
       io_test_helper
+      character_test_helpers_gtest
   )
 
   mt_test(
