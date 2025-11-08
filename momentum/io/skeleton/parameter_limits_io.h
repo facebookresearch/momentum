@@ -12,10 +12,23 @@
 
 namespace momentum {
 
+namespace io_detail {
+// Forward declaration
+class SectionContent;
+} // namespace io_detail
+
+// Internal overload for use within momentum parsing
+ParameterLimits parseParameterLimits(
+    const io_detail::SectionContent& content,
+    const Skeleton& skeleton,
+    const ParameterTransform& parameterTransform);
+
+// Public API for external use
 ParameterLimits parseParameterLimits(
     const std::string& data,
     const Skeleton& skeleton,
-    const ParameterTransform& parameterTransform);
+    const ParameterTransform& parameterTransform,
+    size_t lineOffset = 0);
 
 std::string writeParameterLimits(
     const ParameterLimits& parameterLimits,

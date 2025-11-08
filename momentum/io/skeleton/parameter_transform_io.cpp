@@ -12,6 +12,7 @@
 #include "momentum/common/string.h"
 #include "momentum/io/common/stream_utils.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
+#include "momentum/io/skeleton/utility.h"
 #include "momentum/math/utility.h"
 
 #include <re2/re2.h>
@@ -22,22 +23,44 @@ namespace momentum {
 
 namespace {
 
-std::unordered_map<std::string, std::string> loadMomentumModelCommon(std::istream& input) {
+using io_detail::SectionContent;
+
+// Section name constants to avoid typos
+constexpr const char* kParameterTransformSection = "ParameterTransform";
+constexpr const char* kParameterSetsSection = "ParameterSets";
+constexpr const char* kPoseConstraintsSection = "PoseConstraints";
+constexpr const char* kParameterLimitsSection = "Limits";
+
+bool isKnownSection(const std::string& sectionName) {
+  return sectionName == kParameterTransformSection || sectionName == kParameterSetsSection ||
+      sectionName == kPoseConstraintsSection || sectionName == kParameterLimitsSection;
+}
+
+std::unordered_map<std::string, SectionContent> loadMomentumModelCommon(std::istream& input) {
   if (!input) {
+    MT_LOGW("Unable to read parameter transform data.");
     return {};
   }
 
-  std::unordered_map<std::string, std::string> result;
+  std::unordered_map<std::string, SectionContent> result;
   std::string sectionName;
   std::string sectionContent;
+  size_t sectionStartLine = 0;
+  size_t linesNotInSectionCount = 0;
+  constexpr size_t kMaxLinesNotInSectionWarnings = 5;
 
   std::string line;
+  size_t lineNumber = 0;
   GetLineCrossPlatform(input, line);
+  ++lineNumber;
   if (trim(line) != "Momentum Model Definition V1.0") {
+    MT_LOGW(
+        "Invalid model definition file; expected 'Momentum Model Definition V1.0', got {}", line);
     return result;
   }
 
   while (GetLineCrossPlatform(input, line)) {
+    ++lineNumber;
     // erase all comments
     line = trim(line.substr(0, line.find_first_of('#')));
 
@@ -51,27 +74,43 @@ std::unordered_map<std::string, std::string> loadMomentumModelCommon(std::istrea
     std::string newSectionName;
     if (re2::RE2::FullMatch(line, reg, &newSectionName)) {
       // new section, store old section
-      if (!sectionName.empty()) {
-        if (result.find(sectionName) != result.end()) {
-          MT_LOGW("Repeated section [{}] found; make sure it's intentional.", sectionName);
+      if (!sectionName.empty() && !sectionContent.empty()) {
+        if (isKnownSection(sectionName)) {
+          result[sectionName].addSegment(sectionContent, sectionStartLine);
         }
-        result[sectionName] += sectionContent;
+      }
+
+      // Check if this is a known section type
+      if (!isKnownSection(newSectionName)) {
+        MT_LOGW("Unexpected section found at line {}: [{}]", lineNumber, newSectionName);
       }
 
       // start new section
       sectionName = newSectionName;
       sectionContent.clear();
+      sectionStartLine = lineNumber + 1; // Content starts on the next line after section header
     } else if (!sectionName.empty()) {
-      sectionContent += line + "\n";
+      // Only accumulate content for known sections
+      if (isKnownSection(sectionName)) {
+        sectionContent += line + "\n";
+      }
+    } else {
+      // Line is not in a section and is not a comment
+      if (linesNotInSectionCount < kMaxLinesNotInSectionWarnings) {
+        MT_LOGW("Line {} is not in a section and is not a comment: {}", lineNumber, line);
+        ++linesNotInSectionCount;
+        if (linesNotInSectionCount == kMaxLinesNotInSectionWarnings) {
+          MT_LOGW("Suppressing further warnings about lines not in sections");
+        }
+      }
     }
   }
 
   // store last section
-  if (!sectionName.empty()) {
-    if (result.find(sectionName) != result.end()) {
-      MT_LOGW("Repeated section [{}] found; make sure it's intentional.", sectionName);
+  if (!sectionName.empty() && !sectionContent.empty()) {
+    if (isKnownSection(sectionName)) {
+      result[sectionName].addSegment(sectionContent, sectionStartLine);
     }
-    result[sectionName] += sectionContent;
   }
 
   return result;
@@ -82,30 +121,33 @@ std::tuple<ParameterTransform, ParameterLimits> loadModelDefinitionFromStream(
     const Skeleton& skeleton) {
   MT_THROW_IF(!instream, "Unable to read parameter transform data.");
 
-  std::string data;
-  std::string line;
-  GetLineCrossPlatform(instream, line);
-
-  while (GetLineCrossPlatform(instream, line)) {
-    // erase all comments
-    line = trim(line.substr(0, line.find_first_of('#')));
-
-    // skip empty lines or comment lines
-    if (line.empty()) {
-      continue;
-    }
-
-    data += line + "\n";
-  }
+  const auto sections = loadMomentumModelCommon(instream);
 
   std::tuple<ParameterTransform, ParameterLimits> res;
   ParameterTransform& pt = std::get<0>(res);
   ParameterLimits& pl = std::get<1>(res);
 
-  pt = parseParameterTransform(data, skeleton);
-  pt.parameterSets = parseParameterSets(data, pt);
-  pt.poseConstraints = parsePoseConstraints(data, pt);
-  pl = parseParameterLimits(data, skeleton, pt);
+  const auto ptIt = sections.find(kParameterTransformSection);
+  if (ptIt == sections.end()) {
+    pt = parseParameterTransform(momentum::io_detail::SectionContent{}, skeleton);
+  } else {
+    pt = parseParameterTransform(ptIt->second, skeleton);
+  }
+
+  const auto psIt = sections.find(kParameterSetsSection);
+  if (psIt != sections.end()) {
+    pt.parameterSets = parseParameterSets(psIt->second, pt);
+  }
+
+  const auto pcIt = sections.find(kPoseConstraintsSection);
+  if (pcIt != sections.end()) {
+    pt.poseConstraints = parsePoseConstraints(pcIt->second, pt);
+  }
+
+  const auto plIt = sections.find(kParameterLimitsSection);
+  if (plIt != sections.end()) {
+    pl = parseParameterLimits(plIt->second, skeleton, pt);
+  }
 
   return res;
 }
@@ -212,7 +254,13 @@ std::unordered_map<std::string, std::string> loadMomentumModel(const filesystem:
 
   std::ifstream infile(filename);
   MT_THROW_IF(!infile.is_open(), "Cannot find file {}", filename.string());
-  return loadMomentumModelCommon(infile);
+  const auto sections = loadMomentumModelCommon(infile);
+
+  std::unordered_map<std::string, std::string> result;
+  for (const auto& [sectionName, content] : sections) {
+    result[sectionName] = content.toString();
+  }
+  return result;
 }
 
 std::unordered_map<std::string, std::string> loadMomentumModelFromBuffer(
@@ -222,10 +270,19 @@ std::unordered_map<std::string, std::string> loadMomentumModelFromBuffer(
   }
 
   ispanstream inputStream(buffer);
-  return loadMomentumModelCommon(inputStream);
+  const auto sections = loadMomentumModelCommon(inputStream);
+
+  std::unordered_map<std::string, std::string> result;
+  for (const auto& [sectionName, content] : sections) {
+    result[sectionName] = content.toString();
+  }
+  return result;
 }
 
-ParameterTransform parseParameterTransform(const std::string& data, const Skeleton& skeleton) {
+// Internal overload that accepts SectionContent
+ParameterTransform parseParameterTransform(
+    const SectionContent& content,
+    const Skeleton& skeleton) {
   ParameterTransform pt;
   pt.activeJointParams.setConstant(skeleton.joints.size() * kParametersPerJoint, false);
   pt.offsets.setZero(skeleton.joints.size() * kParametersPerJoint);
@@ -233,24 +290,16 @@ ParameterTransform parseParameterTransform(const std::string& data, const Skelet
   // triplet list
   std::vector<Eigen::Triplet<float>> triplets;
 
-  std::istringstream f(data);
+  auto iterator = content.begin();
   std::string line;
-  while (std::getline(f, line)) {
+  while (iterator.getline(line)) {
+    const size_t lineIndex = iterator.currentLine();
+
     // erase all comments
     line = line.substr(0, line.find_first_of('#'));
 
-    // ignore limit lines
-    if (line.find("limit") == 0) {
-      continue;
-    }
-
-    // load parameterset definitions
-    if (line.find("parameterset") == 0) {
-      continue;
-    }
-
-    // load poseconstraints
-    if (line.find("poseconstraints") == 0) {
+    // Skip empty lines
+    if (trim(line).empty()) {
       continue;
     }
 
@@ -259,17 +308,25 @@ ParameterTransform parseParameterTransform(const std::string& data, const Skelet
     // ------------------------------------------------
     const auto pTokens = tokenize(line, "=");
     if (pTokens.size() != 2) {
-      MT_LOGW("Invalid line under [ParameterTransform] section; ignoring\n{}", line);
+      MT_LOGW(
+          "Ignoring invalid line under [ParameterTransform] section at line {}: {}",
+          lineIndex,
+          line);
       continue;
     }
 
     // split pToken[0] into joint name and attribute name
     const auto aTokens = tokenize(pTokens[0], ".");
-    MT_THROW_IF(aTokens.size() != 2, "Unknown joint name in expression : {}", line);
+    MT_THROW_IF(
+        aTokens.size() != 2, "Unknown joint name in expression at line {}: {}", lineIndex, line);
 
     // get the right joint to modify
     const size_t jointIndex = skeleton.getJointIdByName(trim(aTokens[0]));
-    MT_THROW_IF(jointIndex == kInvalidIndex, "Unknown joint name in expression : {}", line);
+    MT_THROW_IF(
+        jointIndex == kInvalidIndex,
+        "Unknown joint name in expression at line {}: {}",
+        lineIndex,
+        line);
 
     // the first pToken is the name of the joint and it's attribute type
     size_t attributeIndex = kInvalidIndex;
@@ -282,7 +339,11 @@ ParameterTransform parseParameterTransform(const std::string& data, const Skelet
     }
 
     // if we didn't find a right name exit with an error
-    MT_THROW_IF(attributeIndex == kInvalidIndex, "Unknown channel name in expression : {}", line);
+    MT_THROW_IF(
+        attributeIndex == kInvalidIndex,
+        "Unknown channel name in expression at line {}: {}",
+        lineIndex,
+        line);
 
     // enable the attribute in the skeleton if we have a parameter controlling it
     pt.activeJointParams[jointIndex * kParametersPerJoint + attributeIndex] = 1;
@@ -309,18 +370,37 @@ ParameterTransform parseParameterTransform(const std::string& data, const Skelet
   return pt;
 }
 
-ParameterSets parseParameterSets(const std::string& data, const ParameterTransform& pt) {
+// Public API wrapper for backward compatibility
+ParameterTransform
+parseParameterTransform(const std::string& data, const Skeleton& skeleton, size_t lineOffset) {
+  SectionContent content;
+  if (!data.empty()) {
+    content.addSegment(data, lineOffset);
+  }
+  return parseParameterTransform(content, skeleton);
+}
+
+// Internal overload that accepts SectionContent
+ParameterSets parseParameterSets(const SectionContent& content, const ParameterTransform& pt) {
   ParameterSets result;
 
-  std::istringstream f(data);
+  auto iterator = content.begin();
   std::string line;
-  while (std::getline(f, line)) {
+  while (iterator.getline(line)) {
+    const size_t lineIndex = iterator.currentLine();
+
     // erase all comments
     line = line.substr(0, line.find_first_of('#'));
 
+    // Skip empty lines
+    if (trim(line).empty()) {
+      continue;
+    }
+
     // Skip if not parameterset definitions
     if (line.find("parameterset") != 0) {
-      MT_LOGW("Invalid line under [ParameterSets] section; ignoring\n{}", line);
+      MT_LOGW(
+          "Ignoring invalid line under [ParameterSets] section at line {}: {}", lineIndex, line);
       continue;
     }
 
@@ -328,7 +408,8 @@ ParameterSets parseParameterSets(const std::string& data, const ParameterTransfo
     const auto pTokens = tokenize(line, " \t\r\n");
     MT_THROW_IF(
         pTokens.size() < 2,
-        "Could not parse parameterset line in parameter configuration : {}",
+        "Could not parse parameterset line in parameter configuration at line {}: {}",
+        lineIndex,
         line);
 
     ParameterSet ps;
@@ -344,7 +425,8 @@ ParameterSets parseParameterSets(const std::string& data, const ParameterTransfo
 
       MT_THROW_IF(
           parameterIndex == kInvalidIndex,
-          "Could not parse parameterset line in parameter configuration : {}. Found unknown parameter name {}.",
+          "Could not parse parameterset line in parameter configuration at line {}: {}. Found unknown parameter name {}.",
+          lineIndex,
           line,
           parameterName);
 
@@ -357,18 +439,37 @@ ParameterSets parseParameterSets(const std::string& data, const ParameterTransfo
   return result;
 }
 
-PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTransform& pt) {
+// Public API wrapper for backward compatibility
+ParameterSets
+parseParameterSets(const std::string& data, const ParameterTransform& pt, size_t lineOffset) {
+  SectionContent content;
+  if (!data.empty()) {
+    content.addSegment(data, lineOffset);
+  }
+  return parseParameterSets(content, pt);
+}
+
+// Internal overload that accepts SectionContent
+PoseConstraints parsePoseConstraints(const SectionContent& content, const ParameterTransform& pt) {
   PoseConstraints result;
 
-  std::istringstream f(data);
+  auto iterator = content.begin();
   std::string line;
-  while (std::getline(f, line)) {
+  while (iterator.getline(line)) {
+    const size_t lineIndex = iterator.currentLine();
+
     // erase all comments
     line = line.substr(0, line.find_first_of('#'));
 
-    // load parameterset definitions
+    // Skip empty lines
+    if (trim(line).empty()) {
+      continue;
+    }
+
+    // Skip if not poseconstraints definitions
     if (line.find("poseconstraints") != 0) {
-      MT_LOGW("Invalid line under [PoseConstraints] section; ignoring\n{}", line);
+      MT_LOGW(
+          "Ignoring invalid line under [PoseConstraints] section at line {}: {}", lineIndex, line);
       continue;
     }
 
@@ -376,7 +477,8 @@ PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTra
     const auto pTokens = tokenize(line, " \t\r\n");
     MT_THROW_IF(
         pTokens.size() < 2,
-        "Could not parse 'poseconstraints' line in parameter configuration : {}",
+        "Could not parse 'poseconstraints' line in parameter configuration at line {}: {}",
+        lineIndex,
         line);
 
     PoseConstraint ps;
@@ -398,7 +500,8 @@ PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTra
 
       MT_THROW_IF(
           parameterIndex == kInvalidIndex,
-          "Could not parse 'poseconstraints' line in parameter configuration : {}",
+          "Could not parse 'poseconstraints' line in parameter configuration at line {}: {}",
+          lineIndex,
           line);
 
       ps.parameterIdValue.emplace_back(parameterIndex, std::stof(cTokens[1]));
@@ -408,6 +511,16 @@ PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTra
   }
 
   return result;
+}
+
+// Public API wrapper for backward compatibility
+PoseConstraints
+parsePoseConstraints(const std::string& data, const ParameterTransform& pt, size_t lineOffset) {
+  SectionContent content;
+  if (!data.empty()) {
+    content.addSegment(data, lineOffset);
+  }
+  return parsePoseConstraints(content, pt);
 }
 
 std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(
@@ -584,7 +697,7 @@ std::string writeModelDefinition(
 
   // Write ParameterLimits section using existing function
   if (!parameterLimits.empty()) {
-    oss << "[ParameterLimits]\n";
+    oss << "[" << kParameterLimitsSection << "]\n";
     oss << writeParameterLimits(parameterLimits, skeleton, parameterTransform);
   }
 

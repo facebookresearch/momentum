@@ -384,6 +384,7 @@ io_skeleton_public_headers = [
     "io/skeleton/parameter_limits_io.h",
     "io/skeleton/parameter_transform_io.h",
     "io/skeleton/parameters_io.h",
+    "io/skeleton/utility.h",
 ]
 
 io_skeleton_sources = [
@@ -392,6 +393,7 @@ io_skeleton_sources = [
     "io/skeleton/parameter_limits_io.cpp",
     "io/skeleton/parameter_transform_io.cpp",
     "io/skeleton/parameters_io.cpp",
+    "io/skeleton/utility.cpp",
 ]
 
 io_skeleton_test_sources = [

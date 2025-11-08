@@ -18,16 +18,36 @@
 
 namespace momentum {
 
+namespace io_detail {
+// Forward declaration
+class SectionContent;
+} // namespace io_detail
+
 std::unordered_map<std::string, std::string> loadMomentumModel(const filesystem::path& filename);
 
 std::unordered_map<std::string, std::string> loadMomentumModelFromBuffer(
     std::span<const std::byte> buffer);
 
-ParameterTransform parseParameterTransform(const std::string& data, const Skeleton& skeleton);
+// Internal overloads for use within momentum parsing
+ParameterTransform parseParameterTransform(
+    const io_detail::SectionContent& content,
+    const Skeleton& skeleton);
+ParameterSets parseParameterSets(
+    const io_detail::SectionContent& content,
+    const ParameterTransform& pt);
+PoseConstraints parsePoseConstraints(
+    const io_detail::SectionContent& content,
+    const ParameterTransform& pt);
 
-ParameterSets parseParameterSets(const std::string& data, const ParameterTransform& pt);
+// Public APIs for external use
+ParameterTransform
+parseParameterTransform(const std::string& data, const Skeleton& skeleton, size_t lineOffset = 0);
 
-PoseConstraints parsePoseConstraints(const std::string& data, const ParameterTransform& pt);
+ParameterSets
+parseParameterSets(const std::string& data, const ParameterTransform& pt, size_t lineOffset = 0);
+
+PoseConstraints
+parsePoseConstraints(const std::string& data, const ParameterTransform& pt, size_t lineOffset = 0);
 
 // load transform definition from file
 std::tuple<ParameterTransform, ParameterLimits> loadModelDefinition(

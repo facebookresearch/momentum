@@ -182,7 +182,7 @@ TEST(IoModelParserTest, WriteModelDefinition_RoundTrip) {
   EXPECT_TRUE(written.find("[ParameterTransform]") != std::string::npos);
   EXPECT_TRUE(written.find("[ParameterSets]") != std::string::npos);
   EXPECT_TRUE(written.find("[PoseConstraints]") != std::string::npos);
-  EXPECT_TRUE(written.find("[ParameterLimits]") != std::string::npos);
+  EXPECT_TRUE(written.find("[Limits]") != std::string::npos);
 
   // Verify parameter transform content
   EXPECT_TRUE(written.find("root.tx = 1*tx") != std::string::npos);
