@@ -12,6 +12,8 @@
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/common/log.h"
+#include "momentum/common/string.h"
+#include "momentum/io/skeleton/utility.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/utility.h"
 
@@ -609,23 +611,30 @@ void parseEllipsoid(const std::string& jointName, ParameterLimits& pl, Tokenizer
 
 } // namespace
 
+// Internal overload that accepts SectionContent
 ParameterLimits parseParameterLimits(
-    const std::string& data,
+    const io_detail::SectionContent& content,
     const Skeleton& skeleton,
     const ParameterTransform& parameterTransform) {
   ParameterLimits pl;
 
-  std::istringstream f(data);
+  auto iterator = content.begin();
   std::string line;
-  size_t lineIndex = 0;
-  while (std::getline(f, line)) {
-    ++lineIndex;
+  while (iterator.getline(line)) {
+    const size_t lineIndex = iterator.currentLine();
 
     // erase all comments
     line = line.substr(0, line.find_first_of('#'));
 
+    // Skip empty lines
+    if (trim(line).empty()) {
+      continue;
+    }
+
     // ignore everything but limits
     if (line.find("limit") != 0) {
+      MT_LOGW(
+          "Ignoring invalid line under [ParameterLimits] section at line {}: {}", lineIndex, line);
       continue;
     }
 
@@ -670,6 +679,19 @@ ParameterLimits parseParameterLimits(
         line);
   }
   return pl;
+}
+
+// Public API wrapper for backward compatibility
+ParameterLimits parseParameterLimits(
+    const std::string& data,
+    const Skeleton& skeleton,
+    const ParameterTransform& parameterTransform,
+    size_t lineOffset) {
+  io_detail::SectionContent content;
+  if (!data.empty()) {
+    content.addSegment(data, lineOffset);
+  }
+  return parseParameterLimits(content, skeleton, parameterTransform);
 }
 
 namespace {
