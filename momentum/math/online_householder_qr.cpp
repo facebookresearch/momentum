@@ -44,6 +44,35 @@ void applyHouseholderTransformation(
   y_2m.noalias() -= scalar * v_2m;
 }
 
+// Apply the Householder transformation to a block of columns in a ColumnIndexedMatrix.
+// Falls back to column-by-column processing.
+// Y_1 should be the full row; colStart and colEnd specify which columns to process.
+template <typename T, typename MatrixType, typename RowType>
+void applyHouseholderTransformationBlock(
+    T beta,
+    const Eigen::Ref<const Eigen::Matrix<T, Eigen::Dynamic, 1>>& v_2m,
+    RowType Y_1,
+    ColumnIndexedMatrix<MatrixType> Y_2m,
+    Eigen::Index colStart,
+    Eigen::Index colEnd) {
+  const auto nCols = Y_2m.cols();
+  MT_CHECK(v_2m.rows() == Y_2m.rows());
+  MT_CHECK(colStart <= colEnd);
+  MT_CHECK(colEnd <= nCols);
+  MT_CHECK(colEnd <= nCols);
+  MT_CHECK(Y_1.cols() == nCols);
+
+  const auto colIndices = Y_2m.columnIndices();
+  MT_CHECK(colIndices.empty() || colIndices.size() >= colEnd);
+  auto jCol = colStart;
+
+  while (jCol < colEnd) {
+    // Process column-by-column
+    applyHouseholderTransformation<T>(beta, v_2m, Y_1(jCol), Y_2m.col(jCol));
+    ++jCol;
+  }
+}
+
 // Computes the Householder reflection vector for the column [x1 x2...xm]^T
 // (x1 is passed in separately because it comes from the R matrix rather than A).
 // Uses the stable algorithm from Golub and van Loan.
@@ -259,13 +288,12 @@ void OnlineBlockHouseholderQR<T>::addMutating(
 
     // Apply the Householder vector to the remaining columns.
     const auto& v2m = A_diag.col(iCol);
-    for (Eigen::Index jCol_diag = iCol + 1; jCol_diag < n_diag; ++jCol_diag) {
-      applyHouseholderTransformation<T>(beta, v2m, R_ii(iCol, jCol_diag), A_diag.col(jCol_diag));
+    if (iCol + 1 < n_diag) {
+      applyHouseholderTransformationBlock<T>(beta, v2m, R_ii.row(iCol), A_diag, iCol + 1, n_diag);
     }
 
-    for (Eigen::Index jCol_common = 0; jCol_common < n_common; ++jCol_common) {
-      applyHouseholderTransformation<T>(
-          beta, v2m, R_in(iCol, jCol_common), A_common.col(jCol_common));
+    if (n_common > 0) {
+      applyHouseholderTransformationBlock<T>(beta, v2m, R_in.row(iCol), A_common, 0, n_common);
     }
 
     // Apply the Householder vector to the rhs.
@@ -531,16 +559,19 @@ void OnlineBandedHouseholderQR<T>::zeroBandedPart(
 
     // Apply the Householder vector to the remaining columns.
     const auto& v2m = A_band.col(iCol_local);
+
+    // For the banded part, we can't use block operations because R_band_ uses
+    // special banded storage format, so fall back to column-by-column
     for (Eigen::Index jCol_local = iCol_local + 1; jCol_local < A_band.cols(); ++jCol_local) {
       const auto jCol_global = jCol_local + iCol_offset;
-
       applyHouseholderTransformation<T>(
           beta, v2m, R_band_entry(iCol_global, jCol_global), A_band.col(jCol_local));
     }
 
-    for (Eigen::Index jCol_common = 0; jCol_common < n_common; ++jCol_common) {
-      applyHouseholderTransformation<T>(
-          beta, v2m, R_common_(iCol_global, jCol_common), A_common.col(jCol_common));
+    // For the common part, we can use block operations since R_common_ is a regular matrix
+    if (n_common > 0) {
+      applyHouseholderTransformationBlock<T>(
+          beta, v2m, R_common_.row(iCol_global), A_common, 0, n_common);
     }
 
     applyHouseholderTransformation<T>(beta, v2m, y_(iCol_global), b);
