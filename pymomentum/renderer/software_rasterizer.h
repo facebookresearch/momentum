@@ -12,6 +12,7 @@
 #include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/fwd.h>
 #include <momentum/rasterizer/rasterizer.h>
+#include <momentum/rasterizer/text_rasterizer.h>
 
 #include <ATen/ATen.h>
 #include <pybind11/numpy.h>
@@ -241,6 +242,32 @@ void rasterizeLines2D(
     at::Tensor rgbBuffer,
     float thickness,
     const std::optional<Eigen::Vector3f>& color,
+    std::optional<at::Tensor> zBuffer,
+    const std::optional<Eigen::Vector2f>& imageOffset);
+
+void rasterizeText(
+    at::Tensor positions,
+    const std::vector<std::string>& texts,
+    const momentum::rasterizer::Camera& camera,
+    at::Tensor zBuffer,
+    std::optional<at::Tensor> rgbBuffer,
+    const std::optional<Eigen::Vector3f>& color,
+    int textScale,
+    momentum::rasterizer::HorizontalAlignment horizontalAlignment,
+    momentum::rasterizer::VerticalAlignment verticalAlignment,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    float nearClip,
+    float depthOffset,
+    const std::optional<Eigen::Vector2f>& imageOffset);
+
+void rasterizeText2D(
+    at::Tensor positions,
+    const std::vector<std::string>& texts,
+    at::Tensor rgbBuffer,
+    const std::optional<Eigen::Vector3f>& color,
+    int textScale,
+    momentum::rasterizer::HorizontalAlignment horizontalAlignment,
+    momentum::rasterizer::VerticalAlignment verticalAlignment,
     std::optional<at::Tensor> zBuffer,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
