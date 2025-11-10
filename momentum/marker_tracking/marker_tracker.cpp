@@ -441,6 +441,23 @@ Eigen::MatrixXf trackSequence(
   return outMotion;
 }
 
+/// Check if the global transform is zero by checking if any rigid parameters are non-zero.
+///
+/// This is used to determine whether initialization is needed for pose tracking.
+/// If all rigid parameters are zero, we need to solve for an initial rigid transform.
+///
+/// @param dof The parameter vector to check
+/// @param rigidParams Parameter set defining which parameters are rigid/global
+/// @return True if global transform is zero (needs initialization), false otherwise
+bool isGlobalTransformZero(const Eigen::VectorXf& dof, const ParameterSet& rigidParams) {
+  for (Eigen::Index i = 0; i < dof.size(); ++i) {
+    if (rigidParams.test(i) && dof[i] != 0.0f) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// Track poses independently per frame with fixed character identity.
 ///
 /// This is the main production tracking function used after character calibration.
@@ -462,167 +479,24 @@ Eigen::MatrixXf trackPosesPerframe(
     const size_t frameStride) {
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
-  MT_CHECK(
-      globalParams.v.size() == character.parameterTransform.numAllModelParameters(),
-      "Input model parameters {} do not match character model parameters {}",
-      globalParams.v.size(),
-      character.parameterTransform.numAllModelParameters());
 
-  const ParameterTransform& pt = character.parameterTransform;
-  const size_t numMarkers = markerData[0].size();
-
-  // pose parameters need to exclude "locators"
-  ParameterSet poseParams = pt.getPoseParameters();
-  const auto& locatorSet = pt.parameterSets.find("locators");
-  if (locatorSet != pt.parameterSets.end()) {
-    poseParams &= ~locatorSet->second;
+  // Generate frame indices from stride
+  std::vector<size_t> frameIndices;
+  for (size_t iFrame = 0; iFrame < numFrames; iFrame += frameStride) {
+    frameIndices.push_back(iFrame);
   }
 
-  // set up the solver
-  auto solverFunc = SkeletonSolverFunction(character, pt);
-  GaussNewtonSolverOptions solverOptions;
-  solverOptions.maxIterations = config.maxIter;
-  solverOptions.minIterations = 2;
-  solverOptions.doLineSearch = false;
-  solverOptions.verbose = config.debug;
-  solverOptions.threshold = 1.f;
-  solverOptions.regularization = config.regularization;
-  auto solver = GaussNewtonSolver(solverOptions, &solverFunc);
-  solver.setEnabledParameters(poseParams);
-
-  // parameter limits constraint
-  auto limitConstrFunc = std::make_shared<LimitErrorFunction>(character);
-  limitConstrFunc->setWeight(0.1);
-  solverFunc.addErrorFunction(limitConstrFunc);
-
-  // positional constraint function for markers
-  auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
-  posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
-  solverFunc.addErrorFunction(posConstrFunc);
-
-  std::shared_ptr<SkinnedLocatorErrorFunction> skinnedLocatorPosConstrFunc =
-      std::make_shared<SkinnedLocatorErrorFunction>(character);
-  skinnedLocatorPosConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
-  solverFunc.addErrorFunction(skinnedLocatorPosConstrFunc);
-
-  // floor penetration constraint data; we assume the world is y-up and floor is y=0 for mocap data.
-  const auto& floorConstraints = createFloorConstraints<float>(
-      "Floor_",
-      character.locators,
-      Vector3f::UnitY(),
-      /* y offset */ 0.0f,
-      /* weight */ 5.0f);
-  auto halfPlaneConstrFunc = std::make_shared<PlaneErrorFunction>(character, /*half plane*/ true);
-  halfPlaneConstrFunc->setConstraints(floorConstraints);
-  halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight);
-  solverFunc.addErrorFunction(halfPlaneConstrFunc);
-
-  // marker constraint data
-  auto constrData = createConstraintData(markerData, character.locators);
-  auto skinnedConstrData = createSkinnedConstraintData(markerData, character.skinnedLocators);
-
-  // smoothness constraint only for the joints and exclude global dofs because the global transform
-  // needs to be accurate (may not matter in practice?)
-  auto smoothConstrFunc = std::make_shared<ModelParametersErrorFunction>(
-      character, poseParams & ~pt.getRigidParameters());
-  smoothConstrFunc->setWeight(config.smoothing);
-  solverFunc.addErrorFunction(smoothConstrFunc);
-
-  // add collision error
-  std::shared_ptr<CollisionErrorFunction> collisionErrorFunction;
-  if (config.collisionErrorWeight != 0 && character.collision != nullptr) {
-    collisionErrorFunction = std::make_shared<CollisionErrorFunction>(character);
-    collisionErrorFunction->setWeight(config.collisionErrorWeight);
-    solverFunc.addErrorFunction(collisionErrorFunction);
+  // Convert globalParams to initial motion matrix
+  MatrixXf initialMotion(globalParams.v.size(), numFrames);
+  for (size_t i = 0; i < numFrames; ++i) {
+    initialMotion.col(i) = globalParams.v;
   }
 
-  MatrixXf motion(pt.numAllModelParameters(), numFrames);
-  // initialize parameters to contain identity information
-  // the identity fields will be used but untouched during optimization
-  // globalParams could also be repurposed to pass in initial pose value
-  Eigen::VectorXf dof = globalParams.v;
-  size_t solverFrame = 0;
-  double error = 0.0;
-  // Use the initial global transform is it's not zero
-  bool needsInit = dof.head(6).isZero(0); // TODO: assume first six dofs are global dofs
+  // Determine if tracking should be continuous (temporal coherence)
+  bool isContinuous = (frameStride < 5);
 
-  // When the frames are not continuous, we sometimes run into an issue when the desired joint
-  // rotation between two consecutive frames is large (eg. larger than 180). If we initialize from
-  // the previous result, the smaller rotation will be wrongly chosen, and we cannot recover from
-  // this mistake. To prevent this, we will solve each frame completely independently when they are
-  // not continuous.
-  bool continuous = (frameStride < 5);
-  if (!continuous) {
-    needsInit = true;
-  }
-
-  { // scope the ProgressBar so it returns
-    ProgressBar progress("", numFrames);
-    for (size_t iFrame = 0; iFrame < numFrames; iFrame += frameStride) {
-      // reinitialize if not continuous
-      if (!continuous) {
-        dof = globalParams.v;
-      }
-
-      if ((constrData.at(iFrame).size() + skinnedConstrData.at(iFrame).size()) >
-          config.minVisPercent * numMarkers) {
-        // add positional constraints
-        posConstrFunc->clearConstraints(); // clear constraint data from the previous frame
-        posConstrFunc->setConstraints(constrData.at(iFrame));
-
-        skinnedLocatorPosConstrFunc->clearConstraints();
-        skinnedLocatorPosConstrFunc->setConstraints(skinnedConstrData.at(iFrame));
-
-        // initialization
-        // TODO: run on first frame or tracking failure
-        if (needsInit) { // solve only for the rigid parameters as preprocessing
-          MT_LOGI_IF(
-              config.debug && continuous, "Solving for an initial rigid pose at frame {}", iFrame);
-
-          // Set up different config for initialization
-          solverOptions.maxIterations = 50; // make sure it converges
-          solver.setOptions(solverOptions);
-          solver.setEnabledParameters(pt.getRigidParameters());
-          smoothConstrFunc->setWeight(0.0); // turn off smoothing - it doesn't affect rigid dofs
-
-          solver.solve(dof);
-
-          // Recover solver config
-          solverOptions.maxIterations = config.maxIter;
-          solver.setOptions(solverOptions);
-          solver.setEnabledParameters(poseParams);
-          smoothConstrFunc->setWeight(config.smoothing);
-
-          if (continuous) {
-            needsInit = false;
-          }
-        }
-
-        // set smoothness target as the last pose -- dof holds parameter values from last (good)
-        // frame it will serve as a small regularization to rest pose for the first frame
-        // TODO: API needs improvement
-        smoothConstrFunc->setTargetParameters(dof, smoothConstrFunc->getTargetWeights());
-
-        error += solver.solve(dof);
-        ++solverFrame;
-      }
-
-      // set result to output; fill in frames within a stride
-      // note that dof contains complete parameter info with identity
-      for (size_t jDelta = 0; jDelta < frameStride && iFrame + jDelta < numFrames; ++jDelta) {
-        motion.col(iFrame + jDelta) = dof;
-      }
-      progress.increment(frameStride);
-    }
-  }
-  if (config.debug) {
-    if (solverFrame > 0) {
-      MT_LOGI("Average per-frame residual: {}", error / solverFrame);
-    } else {
-      MT_LOGW("no valid frames to solve");
-    }
-  }
-  return motion;
+  return trackPosesForFrames(
+      markerData, character, initialMotion, config, frameIndices, isContinuous);
 }
 
 /// Track poses independently for specific frame indices with fixed character identity.
@@ -637,13 +511,15 @@ Eigen::MatrixXf trackPosesPerframe(
 /// @param initialMotion Initial parameter values (parameters x frames)
 /// @param config Tracking configuration settings
 /// @param frameIndices Vector of specific frame indices to solve
+/// @param isContinuous Whether to use temporal coherence between frames
 /// @return Solved motion parameters matrix (parameters x frames) with poses for selected frames
 Eigen::MatrixXf trackPosesForFrames(
     const std::span<const std::vector<Marker>> markerData,
     const Character& character,
     const MatrixXf& initialMotion,
     const TrackingConfig& config,
-    const std::vector<size_t>& frameIndices) {
+    const std::vector<size_t>& frameIndices,
+    bool isContinuous) {
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
   MT_CHECK(
@@ -707,6 +583,17 @@ Eigen::MatrixXf trackPosesForFrames(
   auto constrData = createConstraintData(markerData, character.locators);
   auto skinnedConstrData = createSkinnedConstraintData(markerData, character.skinnedLocators);
 
+  // smoothness constraint only for the joints and exclude global dofs because the global transform
+  // needs to be accurate (may not matter in practice?)
+  // Only use temporal smoothness if isContinuous is true
+  std::shared_ptr<ModelParametersErrorFunction> smoothConstrFunc;
+  if (isContinuous) {
+    smoothConstrFunc = std::make_shared<ModelParametersErrorFunction>(
+        character, poseParams & ~pt.getRigidParameters());
+    smoothConstrFunc->setWeight(config.smoothing);
+    solverFunc.addErrorFunction(smoothConstrFunc);
+  }
+
   // add collision error
   std::shared_ptr<CollisionErrorFunction> collisionErrorFunction;
   if (config.collisionErrorWeight != 0 && character.collision != nullptr) {
@@ -718,18 +605,26 @@ Eigen::MatrixXf trackPosesForFrames(
   // initialize parameters to contain identity information
   // the identity fields will be used but untouched during optimization
   // globalParams could also be repurposed to pass in initial pose value
-  std::vector<Eigen::VectorXf> poses(frameIndices.size());
   Eigen::VectorXf dof = initialMotion.col(sortedFrames.empty() ? 0 : sortedFrames[0]);
   size_t solverFrame = 0;
   double priorError = 0.0;
   double error = 0.0;
 
-  MatrixXf outMotion(pt.numAllModelParameters(), numFrames);
+  // Use the initial global transform if it's not zero
+  bool needsInit = isGlobalTransformZero(dof, pt.getRigidParameters());
+
+  MatrixXf outMotion = initialMotion;
+  Eigen::Index outputIndex = 0;
   { // scope the ProgressBar so it returns
-    ProgressBar progress("", sortedFrames.size());
-    for (size_t fi = 0; fi < sortedFrames.size(); fi++) {
-      const size_t& iFrame = sortedFrames[fi];
-      dof = initialMotion.col(iFrame);
+    ProgressBar progress("Tracking per-frame", sortedFrames.size());
+    for (const auto iFrame : sortedFrames) {
+      // For continuous tracking, keep the solved dof from previous frame (temporal coherence)
+      // For non-continuous tracking, always start from initial motion (independent solving)
+      if (!isContinuous) {
+        dof = initialMotion.col(iFrame);
+        needsInit = true;
+      }
+      // For continuous tracking, dof is preserved from previous iteration (or initial value)
 
       if ((constrData.at(iFrame).size() + skinnedConstrData.at(iFrame).size()) >
           numMarkers * config.minVisPercent) {
@@ -741,16 +636,37 @@ Eigen::MatrixXf trackPosesForFrames(
         skinnedLocatorPosConstrFunc->setConstraints(skinnedConstrData.at(iFrame));
 
         // initialization
-        solverOptions.maxIterations = 50; // make sure it converges
-        solver.setOptions(solverOptions);
-        solver.setEnabledParameters(pt.getRigidParameters());
+        if (needsInit) { // solve only for the rigid parameters as preprocessing
+          MT_LOGI_IF(
+              config.debug && isContinuous,
+              "Solving for an initial rigid pose at frame {}",
+              iFrame);
 
-        solver.solve(dof);
+          // Set up different config for initialization
+          solverOptions.maxIterations = 50; // make sure it converges
+          solver.setOptions(solverOptions);
+          solver.setEnabledParameters(pt.getRigidParameters());
+          if (smoothConstrFunc) {
+            smoothConstrFunc->setWeight(0.0); // turn off smoothing - it doesn't affect rigid dofs
+          }
 
-        // Recover solver config
-        solverOptions.maxIterations = config.maxIter;
-        solver.setOptions(solverOptions);
-        solver.setEnabledParameters(poseParams);
+          solver.solve(dof);
+
+          // Recover solver config
+          solverOptions.maxIterations = config.maxIter;
+          solver.setOptions(solverOptions);
+          solver.setEnabledParameters(poseParams);
+          if (smoothConstrFunc) {
+            smoothConstrFunc->setWeight(config.smoothing);
+          }
+
+          needsInit = false;
+        }
+
+        // set smoothness target as the last pose for continuous tracking
+        if (smoothConstrFunc) {
+          smoothConstrFunc->setTargetParameters(dof, smoothConstrFunc->getTargetWeights());
+        }
 
         priorError += solverFunc.getError(dof);
         error += solver.solve(dof);
@@ -758,17 +674,14 @@ Eigen::MatrixXf trackPosesForFrames(
       }
 
       // store result
-      poses[fi] = dof;
+      while (outputIndex <= iFrame) {
+        outMotion.col(outputIndex++) = dof;
+      }
       progress.increment();
     }
 
-    // set results to output
-    size_t sortedIndex = 0;
-    for (size_t fi = 0; fi < numFrames; fi++) {
-      if (sortedIndex < sortedFrames.size() - 1 && fi == sortedFrames[sortedIndex + 1]) {
-        sortedIndex++;
-      }
-      outMotion.col(fi) = poses[sortedIndex];
+    while (outputIndex < numFrames) {
+      outMotion.col(outputIndex++) = dof;
     }
   }
   if (config.debug) {
@@ -881,7 +794,8 @@ void calibrateModel(
           character,
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
-          firstFrame);
+          firstFrame,
+          false); // Not continuous for calibration keyframes
       motion.topRows(transform.numAllModelParameters()) = trackSequence(
           markerData,
           character,
@@ -990,7 +904,8 @@ void calibrateModel(
           character,
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
-          frameIndices);
+          frameIndices,
+          false); // Not continuous for calibration keyframes
     } else {
       const VectorXf initPose = motion.col(0).head(transform.numAllModelParameters());
       motion.topRows(transform.numAllModelParameters()) =
@@ -1119,7 +1034,8 @@ void calibrateLocators(
         character,
         motion.topRows(transform.numAllModelParameters()),
         trackingConfig,
-        frameIndices);
+        frameIndices,
+        false); // Not continuous for calibration keyframes
 
     // Solve for both markers and poses.
     // TODO: add a small regularization to prevent too large a change
