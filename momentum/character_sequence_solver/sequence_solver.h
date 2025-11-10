@@ -99,7 +99,7 @@ class SequenceSolverT : public SolverT<T> {
     Eigen::VectorX<T> residual;
     double error;
     size_t nFunctions;
-    size_t usedRows = 0;
+    Eigen::Index usedRows = 0;
 
     bool operator<(const JacobianResidual& rhs) const {
       return frameIndex < rhs.frameIndex;
