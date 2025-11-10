@@ -38,9 +38,9 @@ bool ccdEdgeEdge(
 
     // Compute the collider edge at the time when all points are coplanar
     // and check if the distance between the two edges is close enough.
-    double s;
-    double v;
-    double distance;
+    double s = 0.0;
+    double v = 0.0;
+    double distance = 0.0;
     const bool success = distanceEdgeEdge(
         x1 + time * v1, x2 + time * v2, x3 + time * v3, x4 + time * v4, s, v, distance);
     if (success && distance < distanceThreshold) {
