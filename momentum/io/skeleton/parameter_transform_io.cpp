@@ -51,12 +51,20 @@ std::unordered_map<std::string, SectionContent> loadMomentumModelCommon(std::ist
 
   std::string line;
   size_t lineNumber = 0;
-  GetLineCrossPlatform(input, line);
-  ++lineNumber;
-  if (trim(line) != "Momentum Model Definition V1.0") {
-    MT_LOGW(
+  while (GetLineCrossPlatform(input, line)) {
+    ++lineNumber;
+    line = trim(line.substr(0, line.find_first_of('#')));
+    if (line.empty()) {
+      // Skip leading comments
+      continue;
+    }
+
+    if (line == "Momentum Model Definition V1.0") {
+      break;
+    }
+
+    MT_THROW(
         "Invalid model definition file; expected 'Momentum Model Definition V1.0', got {}", line);
-    return result;
   }
 
   while (GetLineCrossPlatform(input, line)) {
