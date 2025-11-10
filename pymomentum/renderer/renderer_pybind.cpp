@@ -15,6 +15,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/rasterizer.h>
+#include <momentum/rasterizer/text_rasterizer.h>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -645,6 +646,18 @@ PYBIND11_MODULE(renderer, m) {
       .value("Ambient", momentum::rasterizer::LightType::Ambient)
       .value("Directional", momentum::rasterizer::LightType::Directional)
       .value("Point", momentum::rasterizer::LightType::Point);
+
+  py::enum_<momentum::rasterizer::HorizontalAlignment>(
+      m, "HorizontalAlignment", "Horizontal text alignment options.")
+      .value("Left", momentum::rasterizer::HorizontalAlignment::Left)
+      .value("Center", momentum::rasterizer::HorizontalAlignment::Center)
+      .value("Right", momentum::rasterizer::HorizontalAlignment::Right);
+
+  py::enum_<momentum::rasterizer::VerticalAlignment>(
+      m, "VerticalAlignment", "Vertical text alignment options.")
+      .value("Top", momentum::rasterizer::VerticalAlignment::Top)
+      .value("Center", momentum::rasterizer::VerticalAlignment::Center)
+      .value("Bottom", momentum::rasterizer::VerticalAlignment::Bottom);
   py::class_<momentum::rasterizer::Light>(
       m,
       "Light",
@@ -1459,4 +1472,65 @@ This is useful for rendering shadows using the classic projection shadows techni
       py::arg("light"),
       py::arg("plane_normal") = std::optional<Eigen::Vector3f>{},
       py::arg("plane_origin") = std::optional<Eigen::Vector3f>{});
+
+  m.def(
+      "rasterize_text",
+      &rasterizeText,
+      R"(Rasterize text at 3D world positions.
+
+Projects 3D positions to image space using the camera and renders text strings at those locations using an embedded bitmap font.
+
+:param positions: (nTexts x 3) torch.Tensor of 3D positions in world coordinates.
+:param texts: List of strings to render at each position.
+:param camera: Camera to render from.
+:param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
+:param rgb_buffer: Optional RGB-buffer to render geometry onto.
+:param color: RGB color for the text. Defaults to white (1, 1, 1).
+:param text_scale: Integer scaling factor for text size (1 = 1 pixel per font pixel). Defaults to 1.
+:param horizontal_alignment: Horizontal text alignment (Left, Center, or Right). Defaults to Left.
+:param vertical_alignment: Vertical text alignment (Top, Center, or Bottom). Defaults to Top.
+:param model_matrix: Additional matrix to apply to the model. Defaults to identity matrix.
+:param near_clip: Clip any text closer than this depth. Defaults to 0.1.
+:param depth_offset: Offset the depth values. Defaults to 0.
+:param image_offset: Offset by (x, y) pixels in image space.
+)",
+      py::arg("positions"),
+      py::arg("texts"),
+      py::arg("camera"),
+      py::arg("z_buffer"),
+      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::kw_only(),
+      py::arg("color") = Eigen::Vector3f(1.0f, 1.0f, 1.0f),
+      py::arg("text_scale") = 1,
+      py::arg("horizontal_alignment") = momentum::rasterizer::HorizontalAlignment::Left,
+      py::arg("vertical_alignment") = momentum::rasterizer::VerticalAlignment::Top,
+      py::arg("model_matrix") = std::optional<Eigen::Matrix4f>{},
+      py::arg("near_clip") = 0.1f,
+      py::arg("depth_offset") = 0.0f,
+      py::arg("image_offset") = std::optional<Eigen::Vector2f>{});
+
+  m.def(
+      "rasterize_text_2d",
+      &rasterizeText2D,
+      R"(Rasterize text directly in 2D image space without camera projection or depth testing.
+
+:param positions: (nTexts x 2) torch.Tensor of 2D positions in image coordinates.
+:param texts: List of strings to render at each position.
+:param rgb_buffer: RGB-buffer to render geometry onto.
+:param color: RGB color for the text. Defaults to white (1, 1, 1).
+:param text_scale: Integer scaling factor for text size (1 = 1 pixel per font pixel). Defaults to 1.
+:param horizontal_alignment: Horizontal text alignment (Left, Center, or Right). Defaults to Left.
+:param vertical_alignment: Vertical text alignment (Top, Center, or Bottom). Defaults to Top.
+:param z_buffer: Optional Z-buffer to write zeros to for alpha matting.
+:param image_offset: Offset by (x, y) pixels in image space.
+)",
+      py::arg("positions"),
+      py::arg("texts"),
+      py::arg("rgb_buffer"),
+      py::arg("color") = Eigen::Vector3f(1.0f, 1.0f, 1.0f),
+      py::arg("text_scale") = 1,
+      py::arg("horizontal_alignment") = momentum::rasterizer::HorizontalAlignment::Left,
+      py::arg("vertical_alignment") = momentum::rasterizer::VerticalAlignment::Top,
+      py::arg("z_buffer") = std::optional<at::Tensor>{},
+      py::arg("image_offset") = std::optional<Eigen::Vector2f>{});
 }

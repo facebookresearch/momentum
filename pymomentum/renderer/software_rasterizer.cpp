@@ -1495,6 +1495,162 @@ void rasterizeLines2D(
   }
 }
 
+void rasterizeText(
+    at::Tensor positions,
+    const std::vector<std::string>& texts,
+    const momentum::rasterizer::Camera& camera,
+    at::Tensor zBuffer,
+    std::optional<at::Tensor> rgbBuffer,
+    const std::optional<Eigen::Vector3f>& color,
+    int textScale,
+    momentum::rasterizer::HorizontalAlignment horizontalAlignment,
+    momentum::rasterizer::VerticalAlignment verticalAlignment,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    float nearClip,
+    float depthOffset,
+    const std::optional<Eigen::Vector2f>& imageOffset) {
+  drjit::scoped_flush_denormals flushDenorm(true);
+  pybind11::gil_scoped_release release;
+
+  const int nTextBindingId = -1;
+  const int heightBindingId = -2003;
+  const int widthBindingId = -2004;
+
+  TensorChecker checker("rasterize_text");
+  positions = checker.validateAndFixTensor(
+      positions, "positions", {nTextBindingId, 3}, {"nTexts", "xyz"}, at::kFloat, true, false);
+
+  zBuffer = checker.validateAndFixTensor(
+      zBuffer,
+      "z_buffer",
+      {heightBindingId, widthBindingId},
+      {"height", "width"},
+      at::kFloat,
+      true,
+      false);
+
+  if (rgbBuffer.has_value()) {
+    rgbBuffer = checker.validateAndFixTensor(
+        *rgbBuffer,
+        "rgb_buffer",
+        {heightBindingId, widthBindingId, 3},
+        {"height", "width", "rgb"},
+        at::kFloat,
+        true,
+        false);
+  }
+
+  const int64_t numTexts = checker.getBoundValue(nTextBindingId);
+  if (numTexts != static_cast<int64_t>(texts.size())) {
+    throw std::runtime_error(
+        fmt::format(
+            "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
+  }
+
+  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
+    auto zBufferCur = zBuffer.select(0, iBatch);
+    auto positionsCur = positions.select(0, iBatch);
+    auto rgbBufferCur =
+        rgbBuffer.has_value() ? maybeSelect(rgbBuffer, iBatch) : std::optional<at::Tensor>{};
+
+    const Eigen::Ref<const Eigen::VectorXf> positionsFlat = toEigenMap<float>(positionsCur);
+    std::vector<Eigen::Vector3f> positionsVec;
+    positionsVec.reserve(numTexts);
+    for (int i = 0; i < numTexts; ++i) {
+      positionsVec.emplace_back(positionsFlat.segment<3>(3 * i));
+    }
+
+    momentum::rasterizer::rasterizeText(
+        positionsVec,
+        texts,
+        camera,
+        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+        nearClip,
+        color.value_or(Eigen::Vector3f::Ones()),
+        textScale,
+        make_mdspan<float, 2>(zBufferCur),
+        make_mdspan<float, 3>(rgbBufferCur),
+        depthOffset,
+        imageOffset.value_or(Eigen::Vector2f::Zero()),
+        horizontalAlignment,
+        verticalAlignment);
+  }
+}
+
+void rasterizeText2D(
+    at::Tensor positions,
+    const std::vector<std::string>& texts,
+    at::Tensor rgbBuffer,
+    const std::optional<Eigen::Vector3f>& color,
+    int textScale,
+    momentum::rasterizer::HorizontalAlignment horizontalAlignment,
+    momentum::rasterizer::VerticalAlignment verticalAlignment,
+    std::optional<at::Tensor> zBuffer,
+    const std::optional<Eigen::Vector2f>& imageOffset) {
+  drjit::scoped_flush_denormals flushDenorm(true);
+  pybind11::gil_scoped_release release;
+
+  const int nTextBindingId = -1;
+  const int heightBindingId = -2003;
+  const int widthBindingId = -2004;
+
+  TensorChecker checker("rasterize_text_2d");
+  positions = checker.validateAndFixTensor(
+      positions, "positions", {nTextBindingId, 2}, {"nTexts", "xy"}, at::kFloat, true, false);
+
+  rgbBuffer = checker.validateAndFixTensor(
+      rgbBuffer,
+      "rgb_buffer",
+      {heightBindingId, widthBindingId, 3},
+      {"height", "width", "rgb"},
+      at::kFloat,
+      true,
+      false);
+
+  if (zBuffer.has_value()) {
+    zBuffer = checker.validateAndFixTensor(
+        *zBuffer,
+        "z_buffer",
+        {heightBindingId, widthBindingId},
+        {"height", "width"},
+        at::kFloat,
+        true,
+        false);
+  }
+
+  const int64_t numTexts = checker.getBoundValue(nTextBindingId);
+  if (numTexts != static_cast<int64_t>(texts.size())) {
+    throw std::runtime_error(
+        fmt::format(
+            "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
+  }
+
+  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
+    auto rgbBufferCur = rgbBuffer.select(0, iBatch);
+    auto positionsCur = positions.select(0, iBatch);
+    auto zBufferCur =
+        zBuffer.has_value() ? maybeSelect(zBuffer, iBatch) : std::optional<at::Tensor>{};
+
+    const Eigen::Ref<const Eigen::MatrixXf> positionsMat = toEigenMap<float>(positionsCur);
+    std::vector<Eigen::Vector2f> positionsVec;
+    positionsVec.reserve(positionsMat.rows());
+    for (int i = 0; i < positionsMat.rows(); ++i) {
+      positionsVec.emplace_back(positionsMat.row(i));
+    }
+
+    momentum::rasterizer::rasterizeText2D(
+        positionsVec,
+        texts,
+        color.value_or(Eigen::Vector3f::Ones()),
+        textScale,
+        make_mdspan<float, 3>(rgbBufferCur),
+        make_mdspan<float, 2>(zBufferCur),
+        imageOffset.value_or(Eigen::Vector2f::Zero()),
+        horizontalAlignment,
+        verticalAlignment);
+  }
+}
+
 void rasterizeCircles2D(
     at::Tensor positions,
     at::Tensor rgbBuffer,
