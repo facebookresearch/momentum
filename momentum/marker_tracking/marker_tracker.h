@@ -155,6 +155,7 @@ Eigen::MatrixXf trackPosesPerframe(
 /// too.
 /// @param[in] config Solving options.
 /// @param[in] frameIndices Frame indices of the frames to be solved.
+/// @param[in] isContinuous Whether to use temporal coherence between frames.
 ///
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
 /// within a frame stride.
@@ -163,7 +164,8 @@ Eigen::MatrixXf trackPosesForFrames(
     const momentum::Character& character,
     const Eigen::MatrixXf& initialMotion,
     const TrackingConfig& config,
-    const std::vector<size_t>& frameIndices);
+    const std::vector<size_t>& frameIndices,
+    bool isContinuous = false);
 
 /// Calibrate body proportions and locator offsets of a character from input marker data.
 ///
