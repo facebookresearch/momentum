@@ -16,6 +16,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/character_utility.h>
 #include <momentum/character/skeleton.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/legacy_json/legacy_json_io.h>
@@ -783,6 +784,45 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
           py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{},
           py::arg("fbx_namespace") = "")
+      .def_static(
+          "save",
+          &saveCharacterToFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character to a file. The format is determined by the file extension (.fbx, .glb, .gltf).
+
+    This is a unified interface that automatically selects between FBX and GLTF based on the file extension.
+
+    :param path: Export filename with extension (.fbx, .glb, or .gltf).
+    :param character: A Character to be saved to the output file.
+    :param fps: [Optional] Frequency in frames per second
+    :param motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
+    :param offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
+    :param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
+          )",
+          py::arg("path"),
+          py::arg("character"),
+          py::arg("fps") = 120.f,
+          py::arg("motion") = std::optional<const Eigen::MatrixXf>{},
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
+      .def_static(
+          "save_with_skel_states",
+          &saveCharacterToFileWithSkelStates,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character to a file using skeleton states. The format is determined by the file extension (.fbx, .glb, .gltf).
+
+    This function allows saving a character and its animation using skeleton state matrices instead of model parameters.
+
+    :param path: Export filename with extension (.fbx, .glb, or .gltf).
+    :param character: A Character to be saved to the output file.
+    :param fps: Frequency in frames per second
+    :param skel_states: Skeleton states [n_frames x n_joints x n_parameters_per_joint]
+    :param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
+    )",
+          py::arg("path"),
+          py::arg("character"),
+          py::arg("fps"),
+          py::arg("skel_states"),
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
       // Legacy JSON I/O methods
       .def_static(
           "load_legacy_json",

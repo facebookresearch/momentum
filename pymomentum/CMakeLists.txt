@@ -158,6 +158,7 @@ mt_python_binding(
   LINK_LIBRARIES
     character
     character_test_helpers
+    io
     io_fbx
     io_gltf
     io_legacy_json
