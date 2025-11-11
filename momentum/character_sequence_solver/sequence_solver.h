@@ -93,18 +93,19 @@ class SequenceSolverT : public SolverT<T> {
       OnlineBandedHouseholderQR<T>& qrSolver,
       ProgressBar* progress);
 
-  struct UniversalJacobianResid {
+  struct JacobianResidual {
     size_t frameIndex = SIZE_MAX;
     Eigen::MatrixX<T> jacobian;
     Eigen::VectorX<T> residual;
     double error;
     size_t nFunctions;
+    size_t usedRows = 0;
 
-    bool operator<(const UniversalJacobianResid& rhs) const {
+    bool operator<(const JacobianResidual& rhs) const {
       return frameIndex < rhs.frameIndex;
     }
 
-    bool operator>(const UniversalJacobianResid& rhs) const {
+    bool operator>(const JacobianResidual& rhs) const {
       return frameIndex > rhs.frameIndex;
     }
   };
@@ -112,7 +113,7 @@ class SequenceSolverT : public SolverT<T> {
   // Here, the processJac function computes the Jacobian/residual, applies it to the banded
   // part of the matrix, and then returns the universal part.
   static double processErrorFunctions_parallel(
-      const std::function<UniversalJacobianResid(
+      const std::function<JacobianResidual(
           size_t,
           SequenceSolverFunctionT<T>*,
           OnlineBandedHouseholderQR<T>&,
@@ -123,7 +124,7 @@ class SequenceSolverT : public SolverT<T> {
       ProgressBar* progress);
 
   // Returns the [Jacobian, residual, error] for all the error functions applying to a single frame:
-  static std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> computePerFrameJacobian(
+  static JacobianResidual computePerFrameJacobian(
       SequenceSolverFunctionT<T>* fn,
       size_t iFrame,
       SkeletonStateT<T>& skelState,
@@ -131,7 +132,7 @@ class SequenceSolverT : public SolverT<T> {
 
   // Returns the [Jacobian, residual, error] for all the sequence error functions starting from a
   // single frame:
-  static std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>, double, size_t> computeSequenceJacobian(
+  static JacobianResidual computeSequenceJacobian(
       SequenceSolverFunctionT<T>* fn,
       size_t iFrame,
       size_t bandwidth,
