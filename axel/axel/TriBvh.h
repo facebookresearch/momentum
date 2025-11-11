@@ -43,7 +43,7 @@ class TriBvh {
    * All primitives whose bounding box intersects with the query get returned as a list of their
    * IDs, e.g. the triangle indices.
    */
-  std::vector<uint32_t> boxQuery(const BoundingBox<S>& box) const;
+  [[nodiscard]] std::vector<uint32_t> boxQuery(const BoundingBox<S>& box) const;
 
   /**
    * @brief Performs a query with a given bounding box.
@@ -57,36 +57,36 @@ class TriBvh {
   /**
    * @brief Returns all primitives hit by the line formed from the ray's direction.
    */
-  std::vector<uint32_t> lineHits(const Ray3<S>& ray) const;
+  [[nodiscard]] std::vector<uint32_t> lineHits(const Ray3<S>& ray) const;
 
   /**
    * @brief Returns the closest hit with the given query ray.
    * If the ray hits nothing, returns a std::nullopt.
    */
-  std::optional<IntersectionResult<S>> closestHit(const Ray3<S>& ray) const;
+  [[nodiscard]] std::optional<IntersectionResult<S>> closestHit(const Ray3<S>& ray) const;
 
   /**
    * @brief Returns all hits with the given query ray.
    */
-  std::vector<IntersectionResult<S>> allHits(const Ray3<S>& ray) const;
+  [[nodiscard]] std::vector<IntersectionResult<S>> allHits(const Ray3<S>& ray) const;
 
   /**
    * @brief Checks whether the given ray intersects any of the primitives in the Bvh.
    */
-  bool anyHit(const Ray3<S>& ray) const;
+  [[nodiscard]] bool anyHit(const Ray3<S>& ray) const;
 
-  ClosestSurfacePointResult closestSurfacePoint(const Eigen::Vector3<S>& query) const;
+  [[nodiscard]] ClosestSurfacePointResult closestSurfacePoint(const Eigen::Vector3<S>& query) const;
 
   /**
    * @brief Returns the total number of internal nodes in the tree.
    */
-  size_t getNodeCount() const;
+  [[nodiscard]] size_t getNodeCount() const;
 
   /**
    * @brief Returns the total number of primitives in the tree. It should be equal to the number of
    * triangles that Bvh was constructed with.
    */
-  size_t getPrimitiveCount() const;
+  [[nodiscard]] size_t getPrimitiveCount() const;
 
  private:
   // This memory layout is required for gather operations in vectorized code.
