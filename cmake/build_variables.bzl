@@ -700,6 +700,7 @@ rasterizer_public_headers = [
     "rasterizer/image.h",
     "rasterizer/rasterizer.h",
     "rasterizer/tensor.h",
+    "rasterizer/text_rasterizer.h",
     "rasterizer/utility.h",
 ]
 
@@ -708,12 +709,14 @@ rasterizer_sources = [
     "rasterizer/geometry.cpp",
     "rasterizer/rasterizer.cpp",
     "rasterizer/image.cpp",
+    "rasterizer/text_rasterizer.cpp",
 ]
 
 rasterizer_test_sources = [
     "test/rasterizer/test_camera.cpp",
     "test/rasterizer/test_geometry.cpp",
     "test/rasterizer/test_software_rasterizer.cpp",
+    "test/rasterizer/test_text_rasterizer.cpp",
 ]
 
 #===========
