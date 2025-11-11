@@ -111,7 +111,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computePerFram
   }
 
   const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
-  const size_t jacobianSize = padForSSE(computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
+  const auto jacobianSize = padForSSE(computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(jacobianSize, nFullParameters);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
 
@@ -122,7 +122,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computePerFram
       continue;
     }
 
-    const size_t n = errf->getJacobianSize();
+    const auto n = errf->getJacobianSize();
 
     int rows = 0;
     errorCur += errf->getJacobian(
@@ -133,6 +133,8 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computePerFram
         residual.middleRows(offset, n),
         rows);
 
+    MT_CHECK(rows >= 0 && rows <= static_cast<Eigen::Index>(n));
+
     offset += rows;
   }
 
@@ -142,7 +144,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computePerFram
       .residual = std::move(residual),
       .error = errorCur,
       .nFunctions = fn->perFrameErrorFunctions_[iFrame].size(),
-      .usedRows = static_cast<size_t>(offset)};
+      .usedRows = offset};
 }
 
 template <typename T>
@@ -181,6 +183,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computeSequenc
         residual.middleRows(offset, n),
         rows);
 
+    MT_CHECK(rows >= 0 && rows <= static_cast<Eigen::Index>(n));
     offset += rows;
   }
 
@@ -199,7 +202,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computeSequenc
       .residual = std::move(residual),
       .error = errorCur,
       .nFunctions = fn->sequenceErrorFunctions_[iFrame].size(),
-      .usedRows = static_cast<size_t>(offset)};
+      .usedRows = offset};
 }
 
 // Indices into the multi-frame, all-parameters Jacobian that correspond to the submatrix which is
@@ -233,12 +236,14 @@ double SequenceSolverT<T>::processPerFrameErrors_serial(
     auto jacRes = computePerFrameJacobian(fn, iFrame, skelState, meshState);
     errorSum += jacRes.error;
 
-    if (jacRes.jacobian.rows() != 0) {
+    if (jacRes.usedRows > 0) {
       qrSolver.addMutating(
           iFrame * fn->perFrameParameterIndices_.size(),
-          ColumnIndexedMatrix<Eigen::MatrixX<T>>(jacRes.jacobian, fn->perFrameParameterIndices_),
-          ColumnIndexedMatrix<Eigen::MatrixX<T>>(jacRes.jacobian, fn->universalParameterIndices_),
-          jacRes.residual);
+          ColumnIndexedMatrix<Eigen::MatrixX<T>>(
+              jacRes.jacobian.topRows(jacRes.usedRows), fn->perFrameParameterIndices_),
+          ColumnIndexedMatrix<Eigen::MatrixX<T>>(
+              jacRes.jacobian.topRows(jacRes.usedRows), fn->universalParameterIndices_),
+          jacRes.residual.topRows(jacRes.usedRows));
     }
 
     if (progress) {
@@ -351,10 +356,16 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
               }
             }
 
+            MT_CHECK(toProcess.usedRows <= toProcess.residual.rows());
+
             if (toProcess.frameIndex == SIZE_MAX) {
               break;
             } else {
-              qrSolver.addMutating(toProcess.jacobian, toProcess.residual);
+              if (toProcess.residual.rows() > 0) {
+                qrSolver.addMutating(
+                    toProcess.jacobian.topRows(toProcess.usedRows),
+                    toProcess.residual.topRows(toProcess.usedRows));
+              }
               errorSum += toProcess.error;
               if (progress) {
                 progress->increment(toProcess.nFunctions);
@@ -371,7 +382,11 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
     {
       std::unique_lock<std::mutex> reorderLock(readyJacobiansMutex);
       while (!readyJacobians.empty()) {
-        qrSolver.addMutating(readyJacobians.front().jacobian, readyJacobians.front().residual);
+        if (readyJacobians.front().usedRows > 0) {
+          qrSolver.addMutating(
+              readyJacobians.front().jacobian.topRows(readyJacobians.front().usedRows),
+              readyJacobians.front().residual.topRows(readyJacobians.front().usedRows));
+        }
         errorSum += readyJacobians.front().error;
         if (progress) {
           progress->increment(readyJacobians.front().nFunctions);
@@ -383,7 +398,11 @@ double SequenceSolverT<T>::processErrorFunctions_parallel(
     {
       std::unique_lock<std::mutex> reorderLock(reorderBufferMutex);
       while (!reorderBuffer.empty()) {
-        qrSolver.addMutating(reorderBuffer.top().jacobian, reorderBuffer.top().residual);
+        if (reorderBuffer.top().usedRows > 0) {
+          qrSolver.addMutating(
+              reorderBuffer.top().jacobian.topRows(reorderBuffer.top().usedRows),
+              reorderBuffer.top().residual.topRows(reorderBuffer.top().usedRows));
+        }
         errorSum += reorderBuffer.top().error;
         if (progress) {
           progress->increment(reorderBuffer.top().nFunctions);
@@ -413,11 +432,15 @@ double SequenceSolverT<T>::processPerFrameErrors_parallel(
         // the non-shared parameters for each frame don't overlap.
         auto jacRes = computePerFrameJacobian(fn, iFrame, skelState, meshState);
 
-        qrSolver.zeroBandedPart(
-            iFrame * fn->perFrameParameterIndices_.size(),
-            ColumnIndexedMatrix<Eigen::MatrixX<T>>(jacRes.jacobian, fn->perFrameParameterIndices_),
-            ColumnIndexedMatrix<Eigen::MatrixX<T>>(jacRes.jacobian, fn->universalParameterIndices_),
-            jacRes.residual);
+        if (jacRes.usedRows > 0) {
+          qrSolver.zeroBandedPart(
+              iFrame * fn->perFrameParameterIndices_.size(),
+              ColumnIndexedMatrix<Eigen::MatrixX<T>>(
+                  jacRes.jacobian.topRows(jacRes.usedRows), fn->perFrameParameterIndices_),
+              ColumnIndexedMatrix<Eigen::MatrixX<T>>(
+                  jacRes.jacobian.topRows(jacRes.usedRows), fn->universalParameterIndices_),
+              jacRes.residual.topRows(jacRes.usedRows));
+        }
 
         if (fn->universalParameterIndices_.empty()) {
           // Optimization: don't hang onto the residual if we aren't going to need it later.
@@ -427,15 +450,16 @@ double SequenceSolverT<T>::processPerFrameErrors_parallel(
               .residual = Eigen::VectorX<T>(),
               .error = jacRes.error,
               .nFunctions = jacRes.nFunctions,
-              .usedRows = jacRes.usedRows};
+              .usedRows = 0};
         } else {
           // Now, pass the Jacobian/residual pair for the universal parameters to be handled by the
           // last stage.  These Jacobians must be handled one at a time because the universal
           // parameters are shared between all frames.
           return {
               .frameIndex = iFrame,
-              .jacobian = jacRes.jacobian(Eigen::all, fn->universalParameterIndices_),
-              .residual = std::move(jacRes.residual),
+              .jacobian = jacRes.jacobian.topRows(jacRes.usedRows)(
+                  Eigen::all, fn->universalParameterIndices_),
+              .residual = jacRes.residual.topRows(jacRes.usedRows),
               .error = jacRes.error,
               .nFunctions = jacRes.nFunctions,
               .usedRows = jacRes.usedRows};
@@ -497,15 +521,16 @@ double SequenceSolverT<T>::processSequenceErrors_serial(
     auto jacRes = computeSequenceJacobian(fn, iFrame, bandwidth, skelStates, meshStates);
     errorSum += jacRes.error;
 
-    if (jacRes.jacobian.rows() != 0) {
+    if (jacRes.usedRows > 0) {
       qrSolver.addMutating(
           iFrame * fn->perFrameParameterIndices_.size(),
           ColumnIndexedMatrix<Eigen::MatrixX<T>>(
-              jacRes.jacobian,
+              jacRes.jacobian.topRows(jacRes.usedRows),
               std::span(sequenceColumnIndices)
                   .subspan(0, bandwidth_cur * fn->perFrameParameterIndices_.size())),
-          ColumnIndexedMatrix<Eigen::MatrixX<T>>(jacRes.jacobian, fn->universalParameterIndices_),
-          jacRes.residual);
+          ColumnIndexedMatrix<Eigen::MatrixX<T>>(
+              jacRes.jacobian.topRows(jacRes.usedRows), fn->universalParameterIndices_),
+          jacRes.residual.topRows(jacRes.usedRows));
     }
 
     if (progress) {
