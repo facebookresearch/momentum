@@ -2032,8 +2032,14 @@ avoid divide-by-zero. )");
           })
       .def_readonly("parent", &mm::OrientationData::parent, "The parent joint index")
       .def_readonly("weight", &mm::OrientationData::weight, "The weight of the constraint")
-      .def_readonly("offset", &mm::OrientationData::offset, "The offset in parent space")
-      .def_readonly("target", &mm::OrientationData::target, "The target orientation");
+      .def_property_readonly(
+          "offset",
+          [](const mm::OrientationData& self) { return self.offset.coeffs(); },
+          "The offset in parent space (as [x, y, z, w] coefficients)")
+      .def_property_readonly(
+          "target",
+          [](const mm::OrientationData& self) { return self.target.coeffs(); },
+          "The target orientation (as [x, y, z, w] coefficients)");
 
   py::class_<
       mm::OrientationErrorFunctionT<float>,
