@@ -452,6 +452,7 @@ mt_library(
   PRIVATE_LINK_LIBRARIES
     io_common
     io_gltf
+    io_fbx
     ezc3d
 )
 
@@ -920,7 +921,7 @@ install(
 
 # Install CMake modules
 install(
-  FILES cmake/Findre2.cmake
+  FILES cmake/Findre2.cmake cmake/FindFbxSdk.cmake
   DESTINATION ${MOMENTUM_CONFIG_INSTALL_DIR}
 )
 

@@ -82,6 +82,20 @@ void saveFbxWithJointParams(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
 
+void saveFbxWithSkeletonStates(
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    std::span<const SkeletonState> /* skeletonStates */,
+    double /* framerate */,
+    bool /* saveMesh */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    bool /* permissive */,
+    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::string_view /* fbxNamespace */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
+}
+
 void saveFbxModel(
     const filesystem::path& /* filename */,
     const Character& /* character */,

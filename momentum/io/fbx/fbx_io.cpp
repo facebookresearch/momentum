@@ -857,6 +857,39 @@ void saveFbxWithJointParams(
       fbxNamespace);
 }
 
+void saveFbxWithSkeletonStates(
+    const filesystem::path& filename,
+    const Character& character,
+    std::span<const SkeletonState> skeletonStates,
+    const double framerate,
+    const bool saveMesh,
+    const FBXCoordSystemInfo& coordSystemInfo,
+    bool permissive,
+    const std::vector<std::vector<Marker>>& markerSequence,
+    std::string_view fbxNamespace) {
+  const size_t nFrames = skeletonStates.size();
+  MatrixXf jointParams(character.parameterTransform.zero().v.size(), nFrames);
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    jointParams.col(iFrame) =
+        skeletonStateToJointParameters(skeletonStates[iFrame], character.skeleton).v;
+  }
+
+  // Call the helper function to save FBX file with joint values.
+  // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
+  // passed in directly from user.
+  saveFbxCommon(
+      filename,
+      character,
+      jointParams,
+      framerate,
+      saveMesh,
+      true,
+      coordSystemInfo,
+      permissive,
+      markerSequence,
+      fbxNamespace);
+}
+
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,

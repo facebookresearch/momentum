@@ -8,10 +8,13 @@
 #pragma once
 
 #include <momentum/character/fwd.h>
+#include <momentum/character/marker.h>
+#include <momentum/common/filesystem.h>
 #include <momentum/math/fwd.h>
 #include <momentum/math/types.h>
 
 #include <string>
+#include <vector>
 
 namespace momentum {
 
@@ -53,4 +56,36 @@ enum class CharacterFormat : uint8_t {
     std::span<const std::byte> paramBuffer = std::span<const std::byte>(),
     std::span<const std::byte> locBuffer = std::span<const std::byte>());
 
+/// High level function to save a character with motion and markers to any supported format.
+///
+/// The format is determined by the file extension (.fbx, .glb, .gltf).
+/// This is a unified interface that automatically selects between FBX and GLTF based on extension.
+/// @param[in] filename The path where the character file will be saved.
+/// @param[in] character The Character object to save.
+/// @param[in] fps Frame rate for the animation (default: 120.0f).
+/// @param[in] motion The motion represented in model parameters (numModelParams, numFrames).
+/// @param[in] markerSequence Optional marker sequence data to save with the character.
+void saveCharacter(
+    const filesystem::path& filename,
+    const Character& character,
+    float fps /* = 120.f*/,
+    const MatrixXf& motion /* = MatrixXf()*/,
+    const std::vector<std::vector<Marker>>& markerSequence /* = {}*/);
+
+/// High level function to save a character with motion in skeleton states and markers to any
+/// supported format.
+///
+/// The format is determined by the file extension (.fbx, .glb, .gltf).
+/// This is a unified interface that automatically selects between FBX and GLTF based on extension.
+/// @param[in] filename The path where the character file will be saved.
+/// @param[in] character The Character object to save.
+/// @param[in] fps Frame rate for the animation.
+/// @param[in] skeletonStates The motion represented in skeleton states (ie. JointStates).
+/// @param[in] markerSequence Optional marker sequence data to save with the character.
+void saveCharacter(
+    const filesystem::path& filename,
+    const Character& character,
+    std::span<const SkeletonState> skeletonStates,
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    float fps = 120.f);
 } // namespace momentum
