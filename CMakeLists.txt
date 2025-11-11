@@ -59,7 +59,20 @@ include(GNUInstallDirs)
 #===============================================================================
 
 mt_option(BUILD_SHARED_LIBS "Build as shared libraries" ON)
-mt_option(MOMENTUM_ENABLE_FBX_SAVING "Enable FBX saving via Autodesk FBX SDK (FBX loading always available via OpenFBX)" OFF)
+
+# MOMENTUM_BUILD_WITH_FBXSDK environment variable controls whether FBX SDK is available
+# If not set or OFF, MOMENTUM_ENABLE_FBX_SAVING is forced to OFF
+# This ensures the open source build only uses FBX SDK when explicitly available
+if(DEFINED ENV{MOMENTUM_BUILD_WITH_FBXSDK} AND "$ENV{MOMENTUM_BUILD_WITH_FBXSDK}")
+  # FBX SDK is available, allow enabling FBX saving
+  mt_option(MOMENTUM_ENABLE_FBX_SAVING "Enable FBX saving via Autodesk FBX SDK (FBX loading always available via OpenFBX)" $ENV{MOMENTUM_BUILD_WITH_FBXSDK})
+else()
+  # FBX SDK is not available, force FBX saving to OFF
+  set(MOMENTUM_ENABLE_FBX_SAVING OFF CACHE BOOL "Enable FBX saving via Autodesk FBX SDK (FBX loading always available via OpenFBX)" FORCE)
+  if(DEFINED MOMENTUM_ENABLE_FBX_SAVING_OVERRIDE AND MOMENTUM_ENABLE_FBX_SAVING_OVERRIDE)
+    message(WARNING "MOMENTUM_ENABLE_FBX_SAVING was requested but MOMENTUM_BUILD_WITH_FBXSDK environment variable is not set. FBX SDK support requires MOMENTUM_BUILD_WITH_FBXSDK=ON. Forcing MOMENTUM_ENABLE_FBX_SAVING to OFF.")
+  endif()
+endif()
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
@@ -359,7 +372,6 @@ mt_library(
 )
 
 if(MOMENTUM_ENABLE_FBX_SAVING)
-  set(io_fbx_sources_var io_fbx_sources)
   find_package(FbxSdk MODULE REQUIRED)
 
   # Fix FBX SDK header typos for Clang 19 compatibility
@@ -377,7 +389,6 @@ if(MOMENTUM_ENABLE_FBX_SAVING)
   set(io_fbx_private_link_libraries fbxsdk::fbxsdk)
 else()
   # When FBX SDK is not available, use OpenFBX-only mode (OpenFBX is always available)
-  set(io_fbx_sources_var io_fbx_sources_openfbx_only)
   set(io_fbx_private_link_libraries )
 endif()
 
@@ -388,13 +399,17 @@ mt_library(
   PRIVATE_HEADERS_VARS
     io_fbx_private_headers
   SOURCES_VARS
-    ${io_fbx_sources_var}
+    io_fbx_sources
   PRIVATE_LINK_LIBRARIES
     io_common
     io_skeleton
     ${io_fbx_private_link_libraries}
     OpenFBX
 )
+
+if(MOMENTUM_ENABLE_FBX_SAVING)
+  target_compile_definitions(io_fbx PRIVATE MOMENTUM_WITH_FBX_SDK)
+endif()
 
 mt_library(
   NAME io_gltf
