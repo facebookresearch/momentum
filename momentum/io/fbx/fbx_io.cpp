@@ -8,15 +8,17 @@
 #include "momentum/io/fbx/fbx_io.h"
 
 #include "momentum/character/character.h"
+#include "momentum/common/exception.h"
+#include "momentum/io/fbx/openfbx_loader.h"
+
+#ifdef MOMENTUM_WITH_FBX_SDK
 #include "momentum/character/character_state.h"
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/marker.h"
 #include "momentum/character/skin_weights.h"
-#include "momentum/common/exception.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/fbx/fbx_memory_stream.h"
-#include "momentum/io/fbx/openfbx_loader.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
 #include "momentum/io/skeleton/parameter_transform_io.h"
@@ -37,8 +39,11 @@
 #endif
 
 #include <variant>
+#endif // MOMENTUM_WITH_FBX_SDK
 
 namespace momentum {
+
+#ifdef MOMENTUM_WITH_FBX_SDK
 
 namespace {
 
@@ -736,6 +741,8 @@ void saveFbxCommon(
 
 } // namespace
 
+#endif // MOMENTUM_WITH_FBX_SDK
+
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
@@ -775,6 +782,12 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
   return loadOpenFbxCharacterWithMotion(
       inputSpan, keepLocators, permissive, loadBlendShapes, stripNamespaces);
 }
+
+MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
+  return loadOpenFbxMarkerSequence(filename, stripNamespaces);
+}
+
+#ifdef MOMENTUM_WITH_FBX_SDK
 
 void saveFbx(
     const filesystem::path& filename,
@@ -784,7 +797,7 @@ void saveFbx(
     const double framerate,
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive,
+    const bool permissive,
     const std::vector<std::vector<Marker>>& markerSequence,
     std::string_view fbxNamespace) {
   CharacterParameters params;
@@ -838,7 +851,7 @@ void saveFbxWithJointParams(
     const double framerate,
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive,
+    const bool permissive,
     const std::vector<std::vector<Marker>>& markerSequence,
     std::string_view fbxNamespace) {
   // Call the helper function to save FBX file with joint values.
@@ -864,7 +877,7 @@ void saveFbxWithSkeletonStates(
     const double framerate,
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
-    bool permissive,
+    const bool permissive,
     const std::vector<std::vector<Marker>>& markerSequence,
     std::string_view fbxNamespace) {
   const size_t nFrames = skeletonStates.size();
@@ -909,8 +922,61 @@ void saveFbxModel(
       fbxNamespace);
 }
 
-MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
-  return loadOpenFbxMarkerSequence(filename, stripNamespaces);
+#else // !MOMENTUM_WITH_FBX_SDK
+
+void saveFbx(
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    const MatrixXf& /* poses */,
+    const VectorXf& /* identity */,
+    const double /* framerate */,
+    const bool /* saveMesh */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const bool /* permissive */,
+    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::string_view /* fbxNamespace */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
+
+void saveFbxWithJointParams(
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    const MatrixXf& /* jointParams */,
+    const double /* framerate */,
+    const bool /* saveMesh */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const bool /* permissive */,
+    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::string_view /* fbxNamespace */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
+}
+
+void saveFbxWithSkeletonStates(
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    std::span<const SkeletonState> /* skeletonStates */,
+    const double /* framerate */,
+    const bool /* saveMesh */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const bool /* permissive */,
+    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::string_view /* fbxNamespace */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
+}
+
+void saveFbxModel(
+    const filesystem::path& /* filename */,
+    const Character& /* character */,
+    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    bool /* permissive */,
+    std::string_view /* fbxNamespace */) {
+  MT_THROW(
+      "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
+}
+
+#endif // MOMENTUM_WITH_FBX_SDK
 
 } // namespace momentum

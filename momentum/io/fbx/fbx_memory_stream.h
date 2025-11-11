@@ -7,6 +7,8 @@
 
 #pragma once
 
+#ifdef MOMENTUM_WITH_FBX_SDK
+
 #include <fbxsdk.h>
 #include <fbxsdk/core/fbxstream.h>
 #include <span>
@@ -64,3 +66,5 @@ class FbxMemoryStream : public FbxStream {
 };
 
 } // namespace momentum
+
+#endif // MOMENTUM_WITH_FBX_SDK
