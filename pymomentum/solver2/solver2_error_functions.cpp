@@ -12,6 +12,7 @@
 #include <momentum/character_solver/collision_error_function.h>
 #include <momentum/character_solver/distance_error_function.h>
 #include <momentum/character_solver/fixed_axis_error_function.h>
+#include <momentum/character_solver/joint_to_joint_distance_error_function.h>
 #include <momentum/character_solver/limit_error_function.h>
 #include <momentum/character_solver/model_parameters_error_function.h>
 #include <momentum/character_solver/normal_error_function.h>
@@ -1267,6 +1268,180 @@ or maintaining the width of body parts.)")
           "Returns the number of constraints.");
 }
 
+void defJointToJointDistanceErrorFunction(py::module_& m) {
+  py::class_<mm::JointToJointDistanceConstraintT<float>>(m, "JointToJointDistanceConstraint")
+      .def(
+          "__repr__",
+          [](const mm::JointToJointDistanceConstraintT<float>& self) {
+            return fmt::format(
+                "JointToJointDistanceConstraint(joint1={}, joint2={}, offset1=[{:.3f}, {:.3f}, {:.3f}], offset2=[{:.3f}, {:.3f}, {:.3f}], weight={}, target_distance={})",
+                self.joint1,
+                self.joint2,
+                self.offset1.x(),
+                self.offset1.y(),
+                self.offset1.z(),
+                self.offset2.x(),
+                self.offset2.y(),
+                self.offset2.z(),
+                self.weight,
+                self.targetDistance);
+          })
+      .def_readonly(
+          "joint1",
+          &mm::JointToJointDistanceConstraintT<float>::joint1,
+          "The index of the first joint")
+      .def_readonly(
+          "joint2",
+          &mm::JointToJointDistanceConstraintT<float>::joint2,
+          "The index of the second joint")
+      .def_readonly(
+          "offset1",
+          &mm::JointToJointDistanceConstraintT<float>::offset1,
+          "The offset from joint1 in the local coordinate system of joint1")
+      .def_readonly(
+          "offset2",
+          &mm::JointToJointDistanceConstraintT<float>::offset2,
+          "The offset from joint2 in the local coordinate system of joint2")
+      .def_readonly(
+          "weight",
+          &mm::JointToJointDistanceConstraintT<float>::weight,
+          "The weight of the constraint")
+      .def_readonly(
+          "target_distance",
+          &mm::JointToJointDistanceConstraintT<float>::targetDistance,
+          "The target distance between the two points");
+
+  py::class_<
+      mm::JointToJointDistanceErrorFunctionT<float>,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::JointToJointDistanceErrorFunctionT<float>>>(
+      m,
+      "JointToJointDistanceErrorFunction",
+      R"(Error function that penalizes deviation from a target distance between two points attached to different joints.
+
+This is useful for enforcing distance constraints between different parts of a character,
+such as maintaining a fixed distance between hands or ensuring two joints stay a certain distance apart.)")
+      .def(
+          "__repr__",
+          [](const mm::JointToJointDistanceErrorFunctionT<float>& self) {
+            return fmt::format(
+                "JointToJointDistanceErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.getConstraints().size());
+          })
+      .def(
+          py::init<>(
+              [](const mm::Character& character,
+                 float weight) -> std::shared_ptr<mm::JointToJointDistanceErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
+                auto result =
+                    std::make_shared<mm::JointToJointDistanceErrorFunctionT<float>>(character);
+                result->setWeight(weight);
+                return result;
+              }),
+          R"(Initialize a JointToJointDistanceErrorFunction.
+
+            :param character: The character to use.
+            :param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::JointToJointDistanceErrorFunctionT<float>& self,
+             size_t joint1,
+             const Eigen::Vector3f& offset1,
+             size_t joint2,
+             const Eigen::Vector3f& offset2,
+             float targetDistance,
+             float weight) {
+            validateJointIndex(joint1, "joint1", self.getSkeleton());
+            validateJointIndex(joint2, "joint2", self.getSkeleton());
+            validateWeight(weight, "weight");
+            self.addConstraint(joint1, offset1, joint2, offset2, targetDistance, weight);
+          },
+          R"(Adds a joint-to-joint distance constraint to the error function.
+
+        :param joint1: The index of the first joint.
+        :param offset1: The offset from joint1 in the local coordinate system of joint1.
+        :param joint2: The index of the second joint.
+        :param offset2: The offset from joint2 in the local coordinate system of joint2.
+        :param target_distance: The desired distance between the two points in world space.
+        :param weight: The weight of the constraint.)",
+          py::arg("joint1"),
+          py::arg("offset1"),
+          py::arg("joint2"),
+          py::arg("offset2"),
+          py::arg("target_distance"),
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraints",
+          [](mm::JointToJointDistanceErrorFunctionT<float>& self,
+             const py::array_t<int>& joint1,
+             const py::array_t<float>& offset1,
+             const py::array_t<int>& joint2,
+             const py::array_t<float>& offset2,
+             const py::array_t<float>& targetDistance,
+             const std::optional<py::array_t<float>>& weight) {
+            ArrayShapeValidator validator;
+            const int nConsIdx = -1;
+            validator.validate(joint1, "joint1", {nConsIdx}, {"n_cons"});
+            validateJointIndex(joint1, "joint1", self.getSkeleton());
+            validator.validate(offset1, "offset1", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(joint2, "joint2", {nConsIdx}, {"n_cons"});
+            validateJointIndex(joint2, "joint2", self.getSkeleton());
+            validator.validate(offset2, "offset2", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(targetDistance, "target_distance", {nConsIdx}, {"n_cons"});
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+            validateWeights(weight, "weight");
+
+            auto joint1Acc = joint1.unchecked<1>();
+            auto offset1Acc = offset1.unchecked<2>();
+            auto joint2Acc = joint2.unchecked<1>();
+            auto offset2Acc = offset2.unchecked<2>();
+            auto targetDistanceAcc = targetDistance.unchecked<1>();
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
+
+            py::gil_scoped_release release;
+
+            for (py::ssize_t i = 0; i < joint1.shape(0); ++i) {
+              self.addConstraint(
+                  joint1Acc(i),
+                  Eigen::Vector3f(offset1Acc(i, 0), offset1Acc(i, 1), offset1Acc(i, 2)),
+                  joint2Acc(i),
+                  Eigen::Vector3f(offset2Acc(i, 0), offset2Acc(i, 1), offset2Acc(i, 2)),
+                  targetDistanceAcc(i),
+                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f);
+            }
+          },
+          R"(Adds multiple joint-to-joint distance constraints to the error function.
+
+        :param joint1: A numpy array of indices for the first joints.
+        :param offset1: A numpy array of shape (n, 3) for offsets from joint1 in local coordinates.
+        :param joint2: A numpy array of indices for the second joints.
+        :param offset2: A numpy array of shape (n, 3) for offsets from joint2 in local coordinates.
+        :param target_distance: A numpy array of desired distances between point pairs.
+        :param weight: A numpy array of weights for the constraints.)",
+          py::arg("joint1"),
+          py::arg("offset1"),
+          py::arg("joint2"),
+          py::arg("offset2"),
+          py::arg("target_distance"),
+          py::arg("weight") = std::nullopt)
+      .def(
+          "clear_constraints",
+          &mm::JointToJointDistanceErrorFunctionT<float>::clearConstraints,
+          "Clears all joint-to-joint distance constraints from the error function.")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::JointToJointDistanceErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of joint-to-joint distance constraints.");
+}
+
 } // namespace
 
 void addErrorFunctions(py::module_& m) {
@@ -2241,6 +2416,9 @@ rotation matrix to a target rotation.)")
 
   // Vertex-to-vertex distance error function
   defVertexVertexDistanceErrorFunction(m);
+
+  // Joint-to-joint distance error function
+  defJointToJointDistanceErrorFunction(m);
 }
 
 } // namespace pymomentum
