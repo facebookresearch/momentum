@@ -110,7 +110,7 @@ $(document).ready(function(){initNavTree('json__utils_8cpp_source.html',''); ini
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="character_8h.html">momentum/character/character.h</a>&quot;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="log_8h.html">momentum/common/log.h</a>&quot;</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="constants_8h.html">momentum/math/constants.h</a>&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="utility_8h.html">momentum/math/utility.h</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="math_2utility_8h.html">momentum/math/utility.h</a>&quot;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
@@ -514,6 +514,7 @@ $(document).ready(function(){initNavTree('json__utils_8cpp_source.html',''); ini
 <div class="ttc" id="alog_8h_html"><div class="ttname"><a href="log_8h.html">log.h</a></div></div>
 <div class="ttc" id="alog_8h_html_a4ac7d20df2baf72b9510eb9fa4f1a542"><div class="ttname"><a href="log_8h.html#a4ac7d20df2baf72b9510eb9fa4f1a542">MT_LOGW_ONCE</a></div><div class="ttdeci">#define MT_LOGW_ONCE(...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00137">log.h:137</a></div></div>
 <div class="ttc" id="alog_8h_html_a55b409fde2247475adccfcf743cc946f"><div class="ttname"><a href="log_8h.html#a55b409fde2247475adccfcf743cc946f">MT_LOGE</a></div><div class="ttdeci">#define MT_LOGE(...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00126">log.h:126</a></div></div>
+<div class="ttc" id="amath_2utility_8h_html"><div class="ttname"><a href="math_2utility_8h.html">utility.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a05a1cc0958a1517cd60bbb0be5fdee7b"><div class="ttname"><a href="namespacemomentum.html#a05a1cc0958a1517cd60bbb0be5fdee7b">momentum::parameterLimitsFromJson</a></div><div class="ttdeci">ParameterLimits parameterLimitsFromJson(const Character &amp;character, const nlohmann::json &amp;j)</div><div class="ttdef"><b>Definition</b> <a href="json__utils_8cpp_source.html#l00290">json_utils.cpp:290</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a063db1902d2932bc04e4be4df1509a87"><div class="ttname"><a href="namespacemomentum.html#a063db1902d2932bc04e4be4df1509a87">momentum::toM</a></div><div class="ttdeci">constexpr T toM(T x=T(1)) noexcept</div><div class="ttdoc">Converts the given length x (in centimeters) to meters.</div><div class="ttdef"><b>Definition</b> <a href="constants_8h_source.html#l00068">constants.h:68</a></div></div>
@@ -560,14 +561,13 @@ $(document).ready(function(){initNavTree('json__utils_8cpp_source.html',''); ini
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html_a88a0732a2701920900c3bf2b25650f56"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html#a88a0732a2701920900c3bf2b25650f56">momentum::SkeletonT::joints</a></div><div class="ttdeci">JointList joints</div><div class="ttdoc">The list of joints in this skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton_8h_source.html#l00024">skeleton.h:24</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html_ac9aaec7e80183040d9916ea4d9e91910"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html#ac9aaec7e80183040d9916ea4d9e91910">momentum::SkeletonT::getJointNames</a></div><div class="ttdeci">std::vector&lt; std::string &gt; getJointNames() const</div><div class="ttdoc">Returns a vector containing all joint names in the skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton_8cpp_source.html#l00034">skeleton.cpp:34</a></div></div>
 <div class="ttc" id="aurdf__io_8cpp_html_a6827879151157521bb9062fc01b74f2e"><div class="ttname"><a href="urdf__io_8cpp.html#a6827879151157521bb9062fc01b74f2e">triplets</a></div><div class="ttdeci">std::vector&lt; Eigen::Triplet&lt; float &gt; &gt; triplets</div><div class="ttdef"><b>Definition</b> <a href="urdf__io_8cpp_source.html#l00023">urdf_io.cpp:23</a></div></div>
-<div class="ttc" id="autility_8h_html"><div class="ttname"><a href="utility_8h.html">utility.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c2f13be7e03d9233fc5bd49f0a0b157c.html">gltf</a></li><li class="navelem"><a class="el" href="dir_432cb5a14feb3e5b0e96466e6b7440bb.html">utils</a></li><li class="navelem"><a class="el" href="json__utils_8cpp.html">json_utils.cpp</a></li>
-    <li class="footer">Generated on Wed Nov 5 2025 20:05:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

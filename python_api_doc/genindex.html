@@ -200,6 +200,8 @@
 </li>
         <li><a href="renderer.html#pymomentum.renderer.Camera.__init__">(pymomentum.renderer.Camera method)</a>
 </li>
+        <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.__init__">(pymomentum.renderer.HorizontalAlignment method)</a>
+</li>
         <li><a href="renderer.html#pymomentum.renderer.IntrinsicsModel.__init__">(pymomentum.renderer.IntrinsicsModel method)</a>
 </li>
         <li><a href="renderer.html#pymomentum.renderer.Light.__init__">(pymomentum.renderer.Light method)</a>
@@ -215,6 +217,8 @@
         <li><a href="renderer.html#pymomentum.renderer.PinholeIntrinsicsModel.__init__">(pymomentum.renderer.PinholeIntrinsicsModel method)</a>
 </li>
         <li><a href="renderer.html#pymomentum.renderer.SkeletonStyle.__init__">(pymomentum.renderer.SkeletonStyle method)</a>
+</li>
+        <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.__init__">(pymomentum.renderer.VerticalAlignment method)</a>
 </li>
         <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.__init__">(pymomentum.solver.ErrorFunctionType method)</a>
 </li>
@@ -515,6 +519,8 @@
       </ul></li>
       <li><a href="torch.html#pymomentum.torch.character.BlendShapeBase">BlendShapeBase (class in pymomentum.torch.character)</a>
 </li>
+      <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.Bottom">Bottom (pymomentum.renderer.VerticalAlignment attribute)</a>
+</li>
       <li><a href="axel.html#pymomentum.axel.BoundingBox">BoundingBox (class in pymomentum.axel)</a>
 </li>
       <li><a href="axel.html#pymomentum.axel.SignedDistanceField.bounds">bounds (pymomentum.axel.SignedDistanceField property)</a>
@@ -549,6 +555,12 @@
 </li>
       <li><a href="axel.html#pymomentum.axel.BoundingBox.center">center (pymomentum.axel.BoundingBox property)</a>
 </li>
+      <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.Center">Center (pymomentum.renderer.HorizontalAlignment attribute)</a>
+
+      <ul>
+        <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.Center">(pymomentum.renderer.VerticalAlignment attribute)</a>
+</li>
+      </ul></li>
       <li><a href="renderer.html#pymomentum.renderer.Camera.center_of_projection">center_of_projection (pymomentum.renderer.Camera property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character">Character (class in pymomentum.geometry)</a>
@@ -625,10 +637,10 @@
 </li>
       <li><a href="renderer.html#pymomentum.renderer.Light.color">color (pymomentum.renderer.Light property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.Mesh.colors">colors (pymomentum.geometry.Mesh property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.Mesh.colors">colors (pymomentum.geometry.Mesh property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.compute_shape">compute_shape() (pymomentum.geometry.BlendShape method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.compute_vertex_normals">compute_vertex_normals() (in module pymomentum.geometry)</a>
@@ -1053,11 +1065,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.LimitData.halfplane">halfplane (pymomentum.geometry.LimitData property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.LimitType.HalfPlane">HalfPlane (pymomentum.geometry.LimitType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.has_mesh">has_mesh (pymomentum.geometry.Character property)</a>
+</li>
+      <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment">HorizontalAlignment (class in pymomentum.renderer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1198,6 +1212,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="backend.html#pymomentum.backend.utils.LBSAdapter">LBSAdapter (class in pymomentum.backend.utils)</a>
+</li>
+      <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.Left">Left (pymomentum.renderer.HorizontalAlignment attribute)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FBXCoordSystem.LeftHanded">LeftHanded (pymomentum.geometry.FBXCoordSystem attribute)</a>
 </li>
@@ -1573,9 +1589,13 @@
 </li>
         <li><a href="geometry.html#pymomentum.geometry.UpVector.name">(pymomentum.geometry.UpVector property)</a>
 </li>
+        <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.name">(pymomentum.renderer.HorizontalAlignment property)</a>
+</li>
         <li><a href="renderer.html#pymomentum.renderer.LightType.name">(pymomentum.renderer.LightType property)</a>
 </li>
         <li><a href="renderer.html#pymomentum.renderer.SkeletonStyle.name">(pymomentum.renderer.SkeletonStyle property)</a>
+</li>
+        <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.name">(pymomentum.renderer.VerticalAlignment property)</a>
 </li>
         <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.name">(pymomentum.solver.ErrorFunctionType property)</a>
 </li>
@@ -2009,6 +2029,10 @@
 </li>
       <li><a href="renderer.html#pymomentum.renderer.rasterize_spheres">rasterize_spheres() (in module pymomentum.renderer)</a>
 </li>
+      <li><a href="renderer.html#pymomentum.renderer.rasterize_text">rasterize_text() (in module pymomentum.renderer)</a>
+</li>
+      <li><a href="renderer.html#pymomentum.renderer.rasterize_text_2d">rasterize_text_2d() (in module pymomentum.renderer)</a>
+</li>
       <li><a href="renderer.html#pymomentum.renderer.rasterize_transforms">rasterize_transforms() (in module pymomentum.renderer)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.rasterize_wireframe">rasterize_wireframe() (in module pymomentum.renderer)</a>
@@ -2023,10 +2047,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.LimitLinearJoint.reference_joint_index">reference_joint_index (pymomentum.geometry.LimitLinearJoint property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.LimitLinearJoint.reference_joint_parameter">reference_joint_parameter (pymomentum.geometry.LimitLinearJoint property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.LimitLinearJoint.reference_joint_parameter">reference_joint_parameter (pymomentum.geometry.LimitLinearJoint property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.LimitLinear.reference_model_parameter_index">reference_model_parameter_index (pymomentum.geometry.LimitLinear property)</a>
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.refine_motion">refine_motion() (in module pymomentum.marker_tracking)</a>
@@ -2058,6 +2082,8 @@
       <li><a href="renderer.html#pymomentum.renderer.IntrinsicsModel.resize">resize() (pymomentum.renderer.IntrinsicsModel method)</a>
 </li>
       <li><a href="axel.html#pymomentum.axel.SignedDistanceField.resolution">resolution (pymomentum.axel.SignedDistanceField property)</a>
+</li>
+      <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.Right">Right (pymomentum.renderer.HorizontalAlignment attribute)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FBXCoordSystem.RightHanded">RightHanded (pymomentum.geometry.FBXCoordSystem attribute)</a>
 </li>
@@ -2365,6 +2391,8 @@
 </li>
       <li><a href="axel.html#pymomentum.axel.MeshToSdfConfig.tolerance">tolerance (pymomentum.axel.MeshToSdfConfig property)</a>
 </li>
+      <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.Top">Top (pymomentum.renderer.VerticalAlignment attribute)</a>
+</li>
       <li><a href="axel.html#pymomentum.axel.SignedDistanceField.total_voxels">total_voxels (pymomentum.axel.SignedDistanceField property)</a>
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig">TrackingConfig (class in pymomentum.marker_tracking)</a>
@@ -2462,9 +2490,13 @@
 </li>
         <li><a href="geometry.html#pymomentum.geometry.UpVector.value">(pymomentum.geometry.UpVector property)</a>
 </li>
+        <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.value">(pymomentum.renderer.HorizontalAlignment property)</a>
+</li>
         <li><a href="renderer.html#pymomentum.renderer.LightType.value">(pymomentum.renderer.LightType property)</a>
 </li>
         <li><a href="renderer.html#pymomentum.renderer.SkeletonStyle.value">(pymomentum.renderer.SkeletonStyle property)</a>
+</li>
+        <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.value">(pymomentum.renderer.VerticalAlignment property)</a>
 </li>
         <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.value">(pymomentum.solver.ErrorFunctionType property)</a>
 </li>
@@ -2481,6 +2513,8 @@
       </ul></li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Vertex">Vertex (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.VertexConstraint.vertex_index">vertex_index (pymomentum.solver2.VertexConstraint property)</a>
 
       <ul>
@@ -2489,8 +2523,6 @@
         <li><a href="solver2.html#pymomentum.solver2.VertexVelocityConstraint.vertex_index">(pymomentum.solver2.VertexVelocityConstraint property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index1">vertex_index1 (pymomentum.solver2.VertexVertexDistanceConstraint property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceConstraint.vertex_index2">vertex_index2 (pymomentum.solver2.VertexVertexDistanceConstraint property)</a>
@@ -2514,6 +2546,8 @@
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceConstraint">VertexVertexDistanceConstraint (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexVertexDistanceErrorFunction">VertexVertexDistanceErrorFunction (class in pymomentum.solver2)</a>
+</li>
+      <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment">VerticalAlignment (class in pymomentum.renderer)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.vertices">vertices (pymomentum.geometry.Mesh property)</a>
 </li>
