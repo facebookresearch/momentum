@@ -13,6 +13,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
 #include <momentum/common/checks.h>
+#include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
@@ -117,7 +118,7 @@ void saveGLTFCharacterToFile(
         poses.rows(),
         poses.cols());
   }
-  momentum::saveCharacter(
+  momentum::saveGltfCharacter(
       path,
       character,
       fps,
@@ -147,7 +148,7 @@ void saveGLTFCharacterToFileFromSkelStates(
   std::vector<momentum::SkeletonState> skeletonStates =
       arrayToSkeletonStates(skel_states, character);
 
-  momentum::saveCharacter(
+  momentum::saveGltfCharacter(
       path,
       character,
       fps,
@@ -215,6 +216,34 @@ void saveFBXCharacterToFileWithJointParams(
         false, /*permissive*/
         fbxNamespace);
   }
+}
+
+void saveCharacterToFile(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    const std::optional<const Eigen::MatrixXf>& motion,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+  momentum::saveCharacter(
+      path,
+      character,
+      fps,
+      motion.has_value() ? motion.value().transpose() : Eigen::MatrixXf{},
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
+}
+
+void saveCharacterToFileWithSkelStates(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    std::span<const momentum::SkeletonState> skel_states,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+  momentum::saveCharacter(
+      path,
+      character,
+      skel_states,
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      fps);
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(

@@ -10,6 +10,7 @@
 #include "momentum/character/marker.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
+#include "momentum/io/fbx/fbx_io.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/marker/c3d_io.h"
 #include "momentum/io/marker/trc_io.h"
@@ -40,6 +41,8 @@ std::vector<MarkerSequence> loadMarkers(
       return {loadTrc(filename, up)};
     } else if (ext == ".glb") {
       return {loadMarkerSequence(filename)};
+    } else if (ext == ".fbx") {
+      return {loadFbxMarkerSequence(filename)};
     } else {
       MT_LOGE("{} Unknown marker file type {}", __func__, filename);
       return {};
