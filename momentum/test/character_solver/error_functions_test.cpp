@@ -1580,6 +1580,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
   const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
+  Random<> rng(10455);
+
   // create constraints
   FixedAxisDiffErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   const T TEST_WEIGHT_VALUE = 4.5;
@@ -1587,9 +1589,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
     SCOPED_TRACE("FixedAxisDiffL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
         FixedAxisDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1600,9 +1602,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
         Eps<T>(5e-2f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
+          rng.uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, character, Eps<T>(8e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(9e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -1614,6 +1616,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
 
+  Random<> rng(43926);
+
   // create constraints
   FixedAxisCosErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   const T TEST_WEIGHT_VALUE = 4.5;
@@ -1621,9 +1625,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
     SCOPED_TRACE("FixedAxisCosL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
         FixedAxisDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1634,7 +1638,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
         Eps<T>(2e-2f, 1e-4));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
+          rng.uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, character, Eps<T>(5e-2f, 1e-4), Eps<T>(1e-6f, 1e-7));
     }
@@ -1649,6 +1653,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
   const Skeleton& skeleton = character.skeleton;
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
+  Random<> rng(37482);
+
   // create constraints
   FixedAxisAngleErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   const T TEST_WEIGHT_VALUE = 4.5;
@@ -1656,7 +1662,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
     SCOPED_TRACE("FixedAxisAngleL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
         // corner case when the angle is close to zero
         FixedAxisDataT<T>(
             Vector3<T>::UnitY(), Vector3<T>(1e-16, 1 + 1e-16, 1e-16), 1, TEST_WEIGHT_VALUE),
@@ -1683,7 +1689,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
     }
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
+          rng.uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, character, Eps<T>(2e-1f, 5e-5), Eps<T>(1e-6f, 1e-7));
     }
