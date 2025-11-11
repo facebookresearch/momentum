@@ -1626,6 +1626,165 @@ class TestSolver(unittest.TestCase):
         self.assertIn("vertex_index1=0", constraint_repr)
         self.assertIn("vertex_index2=2", constraint_repr)
 
+    def test_joint_to_joint_distance_constraint(self) -> None:
+        """Test JointToJointDistanceErrorFunction to ensure joints are pulled to target distance."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+
+        # Choose two joints to constrain - use joints that are initially far apart
+        joint_index1 = 0
+        joint_index2 = character.skeleton.size - 1  # Last joint
+        offset1 = np.array([0.5, 0.0, 0.0], dtype=np.float32)
+        offset2 = np.array([0.0, 0.5, 0.0], dtype=np.float32)
+        target_distance = 1.5  # Target distance between the two points
+        weight = 1.0
+
+        # Get initial positions of the points
+        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_init
+        )
+        initial_point1 = pym_skel_state.transform_points(
+            skel_state_init[joint_index1],
+            torch.from_numpy(offset1),
+        )
+        initial_point2 = pym_skel_state.transform_points(
+            skel_state_init[joint_index2],
+            torch.from_numpy(offset2),
+        )
+        initial_distance = torch.norm(initial_point2 - initial_point1).item()
+
+        # Create JointToJointDistanceErrorFunction
+        joint_distance_error = pym_solver2.JointToJointDistanceErrorFunction(character)
+
+        # Test basic properties
+        self.assertEqual(len(joint_distance_error.constraints), 0)
+
+        # Add a single constraint
+        joint_distance_error.add_constraint(
+            joint1=joint_index1,
+            offset1=offset1,
+            joint2=joint_index2,
+            offset2=offset2,
+            target_distance=target_distance,
+            weight=weight,
+        )
+
+        # Verify constraint was added
+        self.assertEqual(len(joint_distance_error.constraints), 1)
+
+        constraint = joint_distance_error.constraints[0]
+        self.assertEqual(constraint.joint1, joint_index1)
+        self.assertEqual(constraint.joint2, joint_index2)
+        self.assertTrue(np.allclose(constraint.offset1, offset1))
+        self.assertTrue(np.allclose(constraint.offset2, offset2))
+        self.assertAlmostEqual(constraint.weight, weight)
+        self.assertAlmostEqual(constraint.target_distance, target_distance)
+
+        # Create solver function with the joint distance error
+        solver_function = pym_solver2.SkeletonSolverFunction(
+            character, [joint_distance_error]
+        )
+
+        # Set solver options
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 100
+        solver_options.regularization = 1e-5
+
+        # Create and run the solver
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+        model_params_final = solver.solve(model_params_init.numpy())
+
+        # Convert final model parameters to skeleton state
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final)
+        )
+
+        # Compute final positions of the points
+        final_point1 = pym_skel_state.transform_points(
+            skel_state_final[joint_index1],
+            torch.from_numpy(offset1),
+        )
+        final_point2 = pym_skel_state.transform_points(
+            skel_state_final[joint_index2],
+            torch.from_numpy(offset2),
+        )
+        final_distance = torch.norm(final_point2 - final_point1).item()
+
+        # Assert that the final distance is close to the target distance
+        self.assertAlmostEqual(
+            final_distance,
+            target_distance,
+            delta=1e-3,
+            msg=f"Final distance {final_distance} does not match target {target_distance}",
+        )
+
+        # Verify that the distance actually changed from the initial distance
+        self.assertNotAlmostEqual(
+            initial_distance,
+            final_distance,
+            delta=1e-1,
+            msg=f"Distance did not change significantly from initial {initial_distance} to final {final_distance}",
+        )
+
+        # Test multiple constraints using add_constraints
+        joint_distance_error.clear_constraints()
+        self.assertEqual(len(joint_distance_error.constraints), 0)
+
+        # Add multiple constraints
+        joint_indices1 = np.array([0, 1], dtype=np.int32)
+        offsets1 = np.array([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0]], dtype=np.float32)
+        joint_indices2 = np.array([2, 3], dtype=np.int32)
+        offsets2 = np.array([[0.0, 0.0, 0.5], [0.5, 0.5, 0.0]], dtype=np.float32)
+        target_distances = np.array([0.8, 1.2], dtype=np.float32)
+        weights = np.array([1.0, 2.0], dtype=np.float32)
+
+        joint_distance_error.add_constraints(
+            joint1=joint_indices1,
+            offset1=offsets1,
+            joint2=joint_indices2,
+            offset2=offsets2,
+            target_distance=target_distances,
+            weight=weights,
+        )
+
+        # Verify multiple constraints were added
+        self.assertEqual(len(joint_distance_error.constraints), 2)
+        constraints = joint_distance_error.constraints
+
+        # Check first constraint
+        self.assertEqual(constraints[0].joint1, 0)
+        self.assertEqual(constraints[0].joint2, 2)
+        self.assertTrue(np.allclose(constraints[0].offset1, [0.5, 0.0, 0.0]))
+        self.assertTrue(np.allclose(constraints[0].offset2, [0.0, 0.0, 0.5]))
+        self.assertAlmostEqual(constraints[0].weight, 1.0)
+        self.assertAlmostEqual(constraints[0].target_distance, 0.8)
+
+        # Check second constraint
+        self.assertEqual(constraints[1].joint1, 1)
+        self.assertEqual(constraints[1].joint2, 3)
+        self.assertTrue(np.allclose(constraints[1].offset1, [0.0, 0.5, 0.0]))
+        self.assertTrue(np.allclose(constraints[1].offset2, [0.5, 0.5, 0.0]))
+        self.assertAlmostEqual(constraints[1].weight, 2.0)
+        self.assertAlmostEqual(constraints[1].target_distance, 1.2)
+
+        # Test string representation
+        repr_str = repr(joint_distance_error)
+        self.assertIn("JointToJointDistanceErrorFunction", repr_str)
+        self.assertIn("num_constraints=2", repr_str)
+
+        # Test constraint string representation
+        constraint_repr = repr(constraints[0])
+        self.assertIn("JointToJointDistanceConstraint", constraint_repr)
+        self.assertIn("joint1=0", constraint_repr)
+        self.assertIn("joint2=2", constraint_repr)
+
     def test_weight_validation(self) -> None:
         """Test that error functions throw ValueError when negative weights are passed."""
 
