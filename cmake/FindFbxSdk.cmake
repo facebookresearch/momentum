@@ -86,9 +86,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   list(APPEND required_vars LibXml2_FOUND Iconv_FOUND ZLIB_LIBRARIES)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   find_package(LibXml2 MODULE QUIET)
-  list(APPEND FBXSDK_LIBRARIES LibXml2::LibXml2)
-  list(APPEND FBXSDK_LIBRARIES_DEBUG LibXml2::LibXml2)
-  list(APPEND required_vars LibXml2_FOUND)
+  find_package(ZLIB MODULE QUIET)
+  list(APPEND FBXSDK_LIBRARIES LibXml2::LibXml2 ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
+  list(APPEND FBXSDK_LIBRARIES_DEBUG LibXml2::LibXml2 ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
+  list(APPEND required_vars LibXml2_FOUND ZLIB_LIBRARIES)
 endif()
 
 # Set (NAME)_FOUND if all the variables and the version are satisfied.

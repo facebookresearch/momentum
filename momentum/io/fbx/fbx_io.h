@@ -129,6 +129,28 @@ void saveFbxWithJointParams(
     const std::vector<std::vector<Marker>>& markerSequence = {},
     std::string_view fbxNamespace = "");
 
+/// Save a character with animation using skeleton states directly.
+/// @param filename Path to the output FBX file
+/// @param character The character to save
+/// @param skeletonStates SkeletonState for each frame (empty for bind pose only)
+/// @param framerate Animation framerate in frames per second
+/// @param saveMesh Whether to include mesh geometry in the output
+/// @param coordSystemInfo Coordinate system configuration for the FBX file
+/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
+/// @param markerSequence Optional marker sequence data to save with the character
+/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
+/// "ns:")
+void saveFbxWithSkeletonStates(
+    const filesystem::path& filename,
+    const Character& character,
+    std::span<const SkeletonState> skeletonStates,
+    double framerate = 120.0,
+    bool saveMesh = false,
+    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    bool permissive = false,
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::string_view fbxNamespace = "");
+
 /// Save a character model (skeleton and mesh) without animation.
 /// @param filename Path to the output FBX file
 /// @param character The character to save
