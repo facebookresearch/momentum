@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#ifdef MOMENTUM_WITH_FBX_SDK
+
 #include "momentum/io/fbx/fbx_memory_stream.h"
 
 namespace momentum {
@@ -113,3 +115,5 @@ void FbxMemoryStream::ClearError() {
 }
 
 } // namespace momentum
+
+#endif // MOMENTUM_WITH_FBX_SDK
