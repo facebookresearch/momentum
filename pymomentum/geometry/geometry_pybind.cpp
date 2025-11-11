@@ -1029,6 +1029,12 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.
 
 :return: A simple pose prior.)");
 
+  // isFbxsdkAvailable()
+  m.def(
+      "is_fbxsdk_available",
+      &isFbxsdkAvailable,
+      R"(When FBXSDK is available, you can save fbx files as output.)");
+
   registerMeshBindings(meshClass);
   registerJointBindings(jointClass);
   registerSkeletonBindings(skeletonClass);

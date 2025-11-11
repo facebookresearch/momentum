@@ -115,4 +115,6 @@ std::vector<momentum::SkeletonState> arrayToSkeletonStates(
     const pybind11::array_t<float>& skel_states,
     const momentum::Character& character);
 
+bool isFbxsdkAvailable();
+
 } // namespace pymomentum

@@ -360,4 +360,11 @@ std::vector<momentum::MarkerSequence> loadMarkersFromFile(
   }
 }
 
+bool isFbxsdkAvailable() {
+#ifdef MOMENTUM_WITH_FBX_SDK
+  return true;
+#else
+  return false;
+#endif
+}
 } // namespace pymomentum
