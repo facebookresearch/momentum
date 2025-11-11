@@ -269,12 +269,12 @@ $(document).ready(function(){initNavTree('pose__prior__error__function_8cpp_sour
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; <span class="comment">/* meshState */</span>,</div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <span class="comment">// loop over all joints and check for smoothness</span></div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>  <span class="keywordtype">double</span> error = 0.0;</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = 0;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  usedRows = 0;</div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <span class="keywordflow">if</span> (!posePrior_ || invMap_.size() != gsl::narrow_cast&lt;size_t&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>.size())) {</div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keywordflow">return</span> error;</div>
@@ -313,7 +313,7 @@ $(document).ready(function(){initNavTree('pose__prior__error__function_8cpp_sour
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    }</div>
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  }</div>
 <div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posePrior</a>.d);</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  usedRows = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posePrior</a>.d);</div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
 <div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  <span class="comment">// return error</span></div>
 <div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="keywordflow">return</span> error;</div>
@@ -409,7 +409,7 @@ $(document).ready(function(){initNavTree('pose__prior__error__function_8cpp_sour
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="pose__prior__error__function_8cpp.html">pose_prior_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

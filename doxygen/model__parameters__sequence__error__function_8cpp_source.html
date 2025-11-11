@@ -215,14 +215,14 @@ $(document).ready(function(){initNavTree('model__parameters__sequence__error__fu
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    std::span&lt;<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&gt; <span class="comment">/* meshStates */</span>,</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">int</span>&amp; usedRows)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      jacobian.cols() ==</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>      gsl::narrow_cast&lt;Eigen::Index&gt;(</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>          numFrames() * this-&gt;parameterTransform_.numAllModelParameters()));</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = 0;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  usedRows = 0;</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">np</a> = gsl::narrow_cast&lt;Eigen::Index&gt;(this-&gt;parameterTransform_.numAllModelParameters());</div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
@@ -257,7 +257,7 @@ $(document).ready(function(){initNavTree('model__parameters__sequence__error__fu
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">out</a> &lt;= residual.rows() &amp;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">out</a> &lt;= jacobian.rows());</div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">out</a>);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  usedRows = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">out</a>);</div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  <span class="comment">// return error</span></div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <span class="keywordflow">return</span> error * this-&gt;weight_ * kMotionWeight;</div>
@@ -295,7 +295,7 @@ $(document).ready(function(){initNavTree('model__parameters__sequence__error__fu
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="model__parameters__sequence__error__function_8cpp.html">model_parameters_sequence_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:38 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

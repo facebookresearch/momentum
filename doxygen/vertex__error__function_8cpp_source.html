@@ -772,7 +772,7 @@ $(document).ready(function(){initNavTree('vertex__error__function_8cpp_source.ht
 <div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; meshState,</div>
 <div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
-<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>      jacobian.cols() == <span class="keyword">static_cast&lt;</span>Eigen::Index<span class="keyword">&gt;</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_.transform.cols()));</div>
 <div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(jacobian.rows() &gt;= (Eigen::Index)(1 * constraints_.size()));</div>
@@ -805,7 +805,7 @@ $(document).ready(function(){initNavTree('vertex__error__function_8cpp_source.ht
 <div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>              residual.middleRows(3 * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCons</a>, 3));</div>
 <div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>        },</div>
 <div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dispensoOptions</a>);</div>
-<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = 3 * constraints_.size();</div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>    usedRows = 3 * constraints_.size();</div>
 <div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>  } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>    <a class="code hl_define" href="profile_8h.html#a6edc78f1defd74999db6eb22373d24df">MT_PROFILE_EVENT</a>(<span class="stringliteral">&quot;VertexErrorFunction - normal jacobians&quot;</span>);</div>
 <div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sourceNormalWeight</a>;</div>
@@ -830,7 +830,7 @@ $(document).ready(function(){initNavTree('vertex__error__function_8cpp_source.ht
 <div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>        },</div>
 <div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dispensoOptions</a>);</div>
 <div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span> </div>
-<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = constraints_.size();</div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>    usedRows = constraints_.size();</div>
 <div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>  }</div>
 <div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span> </div>
 <div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>  <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.empty()) {</div>
@@ -914,7 +914,7 @@ $(document).ready(function(){initNavTree('vertex__error__function_8cpp_source.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="vertex__error__function_8cpp.html">vertex_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -453,7 +453,7 @@ $(document).ready(function(){initNavTree('collision__error__function__stateless_
 <div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; <span class="comment">/* meshState */</span>,</div>
 <div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    <a class="code hl_typedef" href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">Ref</a>&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MatrixX&lt;T&gt;</a>&gt; jacobian,</div>
 <div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    <a class="code hl_typedef" href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">Ref</a>&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">VectorX&lt;T&gt;</a>&gt; residual,</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>      jacobian.rows() &gt;= gsl::narrow&lt;Eigen::Index&gt;(collisionPairs.size()),</div>
@@ -637,7 +637,7 @@ $(document).ready(function(){initNavTree('collision__error__function__stateless_
 <div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>    residual(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">row</a>) = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">overlap</a> * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">wgt</a>;</div>
 <div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>  }</div>
 <div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span> </div>
-<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = pos;</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>  usedRows = pos;</div>
 <div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span> </div>
 <div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>  <span class="comment">// return error</span></div>
 <div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>  <span class="keywordflow">return</span> error;</div>
@@ -695,7 +695,7 @@ $(document).ready(function(){initNavTree('collision__error__function__stateless_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="collision__error__function__stateless_8cpp.html">collision_error_function_stateless.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

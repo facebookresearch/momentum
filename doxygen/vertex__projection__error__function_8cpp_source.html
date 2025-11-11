@@ -535,7 +535,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; meshState,</div>
 <div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
-<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>      jacobian.cols() == <span class="keyword">static_cast&lt;</span>Eigen::Index<span class="keyword">&gt;</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_.transform.cols()));</div>
 <div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(jacobian.rows() &gt;= (Eigen::Index)(1 * constraints_.size()));</div>
@@ -565,7 +565,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>            residual.middleRows(2 * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCons</a>, 2));</div>
 <div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>      },</div>
 <div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dispensoOptions</a>);</div>
-<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = 2 * constraints_.size();</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>  usedRows = 2 * constraints_.size();</div>
 <div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span> </div>
 <div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>  <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.empty()) {</div>
 <div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>    error = std::accumulate(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.begin() + 1, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.end(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>[0]);</div>
@@ -631,7 +631,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="vertex__projection__error__function_8cpp.html">vertex_projection_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

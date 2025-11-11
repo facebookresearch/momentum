@@ -436,7 +436,7 @@ $(document).ready(function(){initNavTree('skinned__locator__error__function_8cpp
 <div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; <span class="comment">/* meshState */</span>,</div>
 <div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>      jacobian.cols() == <span class="keyword">static_cast&lt;</span>Eigen::Index<span class="keyword">&gt;</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_.transform.cols()));</div>
 <div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(jacobian.rows() &gt;= (Eigen::Index)(3 * constraints_.size()));</div>
@@ -452,7 +452,7 @@ $(document).ready(function(){initNavTree('skinned__locator__error__function_8cpp
 <div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>,</div>
 <div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>        jacobian.block(3 * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCons</a>, 0, 3, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>.size()),</div>
 <div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        residual.middleRows(3 * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCons</a>, 3));</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> += 3;</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    usedRows += 3;</div>
 <div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>  }</div>
 <div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
 <div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>  <span class="keywordflow">return</span> error;</div>
@@ -509,7 +509,7 @@ $(document).ready(function(){initNavTree('skinned__locator__error__function_8cpp
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skinned__locator__error__function_8cpp.html">skinned_locator_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

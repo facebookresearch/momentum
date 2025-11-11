@@ -361,7 +361,7 @@ $(document).ready(function(){initNavTree('state__sequence__error__function_8cpp_
 <div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    std::span&lt;<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&gt; <span class="comment">/* meshStates */</span>,</div>
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jacobian_full</a>,</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">residual_full</a>,</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="keywordtype">int</span>&amp; usedRows)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>.size() == 2);</div>
@@ -489,7 +489,7 @@ $(document).ready(function(){initNavTree('state__sequence__error__function_8cpp_
 <div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>    offset += 12;</div>
 <div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>  }</div>
 <div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span> </div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(offset);</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>  usedRows = gsl::narrow_cast&lt;int&gt;(offset);</div>
 <div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
 <div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>  <span class="comment">// return error</span></div>
 <div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>  <span class="keywordflow">return</span> error;</div>
@@ -539,7 +539,7 @@ $(document).ready(function(){initNavTree('state__sequence__error__function_8cpp_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="state__sequence__error__function_8cpp.html">state_sequence_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:38 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

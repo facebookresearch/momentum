@@ -418,7 +418,7 @@ $(document).ready(function(){initNavTree('simd__position__error__function_8cpp_s
 <div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmomentum_1_1MeshStateT.html">MeshState</a>&amp; <span class="comment">/* unused */</span>,</div>
 <div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;MatrixXf&gt;</a> jacobian,</div>
 <div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;VectorXf&gt;</a> residual,</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span> </div>
 <div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>  <span class="keywordflow">if</span> (constraints_ == <span class="keyword">nullptr</span>) {</div>
@@ -580,7 +580,7 @@ $(document).ready(function(){initNavTree('simd__position__error__function_8cpp_s
 <div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>      },</div>
 <div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dispensoOptions</a>);</div>
 <div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span> </div>
-<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(jacobian.rows());</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>  usedRows = gsl::narrow_cast&lt;int&gt;(jacobian.rows());</div>
 <div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span> </div>
 <div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>  <span class="comment">// Sum the SIMD error register for final result</span></div>
 <div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> error =</div>
@@ -917,7 +917,7 @@ $(document).ready(function(){initNavTree('simd__position__error__function_8cpp_s
 <div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a586cd208bf6a635fe3b3fd693884107f">MeshState</a>&amp; <span class="comment">/* meshState */</span>,</div>
 <div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;MatrixXf&gt;</a> jacobian,</div>
 <div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;VectorXf&gt;</a> residual,</div>
-<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>  <span class="keywordflow">if</span> (constraints_ == <span class="keyword">nullptr</span>) {</div>
 <div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>    <span class="keywordflow">return</span> 0.0f;</div>
 <div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>  }</div>
@@ -1151,7 +1151,7 @@ $(document).ready(function(){initNavTree('simd__position__error__function_8cpp_s
 <div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span> </div>
 <div class="line"><a id="l01030" name="l01030"></a><span class="lineno"> 1030</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> error = std::accumulate(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ets_error</a>.begin(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ets_error</a>.end(), 0.0);</div>
 <div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span> </div>
-<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(jacobian.rows());</div>
+<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>  usedRows = gsl::narrow_cast&lt;int&gt;(jacobian.rows());</div>
 <div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span> </div>
 <div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>  <span class="comment">// sum the AVX error register for final result</span></div>
 <div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span>  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(error);</div>
@@ -1249,7 +1249,7 @@ $(document).ready(function(){initNavTree('simd__position__error__function_8cpp_s
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="simd__position__error__function_8cpp.html">simd_position_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

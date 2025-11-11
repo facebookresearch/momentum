@@ -611,7 +611,7 @@ $(document).ready(function(){initNavTree('skinned__locator__triangle__error__fun
 <div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; meshState,</div>
 <div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
-<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>      jacobian.cols() == <span class="keyword">static_cast&lt;</span>Eigen::Index<span class="keyword">&gt;</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_.transform.cols()));</div>
 <div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(jacobian.rows() &gt;= (Eigen::Index)(1 * constraints_.size()));</div>
@@ -631,7 +631,7 @@ $(document).ready(function(){initNavTree('skinned__locator__triangle__error__fun
 <div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span>          jacobian.block(3 * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>, 0, 3, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>.size()),</div>
 <div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>          residual.middleRows(3 * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>, 3));</div>
 <div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>    }</div>
-<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = 3 * constraints_.size();</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>    usedRows = 3 * constraints_.size();</div>
 <div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>  } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>    <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(constraintType_ == <a class="code hl_enumvalue" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a0d3adee051531c15b3509b4d4d75ce7b">VertexConstraintType::Plane</a>);</div>
 <div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> = 0; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> &lt; constraints_.size(); ++<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>) {</div>
@@ -644,7 +644,7 @@ $(document).ready(function(){initNavTree('skinned__locator__triangle__error__fun
 <div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>          <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">residualValue</a>);</div>
 <div class="line"><a id="l00522" name="l00522"></a><span class="lineno">  522</span>      residual(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>) = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">residualValue</a>;</div>
 <div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>    }</div>
-<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = constraints_.size();</div>
+<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>    usedRows = constraints_.size();</div>
 <div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>  }</div>
 <div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span> </div>
 <div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>  <span class="keywordflow">return</span> error;</div>
@@ -718,7 +718,7 @@ $(document).ready(function(){initNavTree('skinned__locator__triangle__error__fun
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skinned__locator__triangle__error__function_8cpp.html">skinned_locator_triangle_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

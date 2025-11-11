@@ -421,7 +421,7 @@ $(document).ready(function(){initNavTree('simd__plane__error__function_8cpp_sour
 <div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmomentum_1_1MeshStateT.html">MeshState</a>&amp; <span class="comment">/* unused */</span>,</div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;MatrixXf&gt;</a> jacobian,</div>
 <div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;VectorXf&gt;</a> residual,</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(jacobian.cols() == <span class="keyword">static_cast&lt;</span>Eigen::Index<span class="keyword">&gt;</span>(parameterTransform_.transform.cols()));</div>
 <div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span> </div>
@@ -537,7 +537,7 @@ $(document).ready(function(){initNavTree('simd__plane__error__function_8cpp_sour
 <div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>      },</div>
 <div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dispensoOptions</a>);</div>
 <div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span> </div>
-<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(jacobian.rows());</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>  usedRows = gsl::narrow_cast&lt;int&gt;(jacobian.rows());</div>
 <div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span> </div>
 <div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>  <span class="comment">// Sum the joint errors for final result</span></div>
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> error =</div>
@@ -877,7 +877,7 @@ $(document).ready(function(){initNavTree('simd__plane__error__function_8cpp_sour
 <div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a586cd208bf6a635fe3b3fd693884107f">MeshState</a>&amp; <span class="comment">/* meshState */</span>,</div>
 <div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;MatrixXf&gt;</a> jacobian,</div>
 <div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Ref&lt;VectorXf&gt;</a> residual,</div>
-<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(jacobian.cols() == <span class="keyword">static_cast&lt;</span>Eigen::Index<span class="keyword">&gt;</span>(parameterTransform_.transform.cols()));</div>
 <div class="line"><a id="l00761" name="l00761"></a><span class="lineno">  761</span> </div>
@@ -1092,9 +1092,9 @@ $(document).ready(function(){initNavTree('simd__plane__error__function_8cpp_sour
 <div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span>  <span class="keywordtype">double</span> error = std::accumulate(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ets_error</a>.begin(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ets_error</a>.end(), 0.0);</div>
 <div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span> </div>
 <div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">num</a> &gt;= <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxRows</a>) {</div>
-<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxRows</a> - 1);</div>
+<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>    usedRows = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxRows</a> - 1);</div>
 <div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">num</a>);</div>
+<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>    usedRows = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">num</a>);</div>
 <div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>  }</div>
 <div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span> </div>
 <div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span>  <span class="comment">// sum the AVX error register for final result</span></div>
@@ -1191,7 +1191,7 @@ $(document).ready(function(){initNavTree('simd__plane__error__function_8cpp_sour
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="simd__plane__error__function_8cpp.html">simd_plane_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

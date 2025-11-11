@@ -205,22 +205,22 @@ $(document).ready(function(){initNavTree('gauss__newton__solver__qr_8cpp_source.
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    jacobian_.resizeAndSetZero(rows, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nFullParams</a>);</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    residual_.resizeAndSetZero(rows);</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordtype">int</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = 0;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordtype">int</span> usedRows = 0;</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">error_orig</a> += errorFunction-&gt;getJacobian(</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        this-&gt;parameters_,</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        *skeletonState_,</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        *meshState_,</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        jacobian_.mat(),</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        residual_.mat(),</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> == 0) {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        usedRows);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">if</span> (usedRows == 0) {</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    }</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    qrSolver_.addMutating(</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <a class="code hl_class" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt;Eigen::MatrixX&lt;T&gt;&gt;(</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>            jacobian_.mat().topRows(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">enabledParameters</a>),</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        residual_.mat().topRows(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>));</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>            jacobian_.mat().topRows(usedRows), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">enabledParameters</a>),</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        residual_.mat().topRows(usedRows));</div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  }</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  this-&gt;error_ = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">error_orig</a>;</div>
@@ -298,7 +298,7 @@ $(document).ready(function(){initNavTree('gauss__newton__solver__qr_8cpp_source.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="gauss__newton__solver__qr_8cpp.html">gauss_newton_solver_qr.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

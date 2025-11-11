@@ -537,7 +537,7 @@ $(document).ready(function(){initNavTree('collision__error__function_8cpp_source
 <div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; <span class="comment">/* meshState */</span>,</div>
 <div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>    <a class="code hl_typedef" href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">Ref</a>&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MatrixX&lt;T&gt;</a>&gt; jacobian,</div>
 <div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>    <a class="code hl_typedef" href="namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d">Ref</a>&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">VectorX&lt;T&gt;</a>&gt; residual,</div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    <span class="keywordtype">int</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a>) {</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>  <a class="code hl_define" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">MT_PROFILE_FUNCTION</a>();</div>
 <div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>      jacobian.rows() &gt;= gsl::narrow&lt;Eigen::Index&gt;(getJacobianSize()),</div>
@@ -726,7 +726,7 @@ $(document).ready(function(){initNavTree('collision__error__function_8cpp_source
 <div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span>  });</div>
 <div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span> </div>
-<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">usedRows</a> = pos;</div>
+<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>  usedRows = pos;</div>
 <div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span> </div>
 <div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>  <span class="keywordflow">return</span> error;</div>
 <div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>}</div>
@@ -784,7 +784,7 @@ $(document).ready(function(){initNavTree('collision__error__function_8cpp_source
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="collision__error__function_8cpp.html">collision_error_function.cpp</a></li>
-    <li class="footer">Generated on Tue Nov 11 2025 05:05:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Nov 11 2025 18:24:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
