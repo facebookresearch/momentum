@@ -392,6 +392,13 @@ else()
   set(io_fbx_private_link_libraries )
 endif()
 
+# Header-only library for file save options
+mt_library(
+  NAME io_file_save_options
+  HEADERS_VARS
+    io_file_save_options_public_headers
+)
+
 mt_library(
   NAME io_fbx
   HEADERS_VARS
@@ -402,6 +409,7 @@ mt_library(
     io_fbx_sources
   PRIVATE_LINK_LIBRARIES
     io_common
+    io_file_save_options
     io_skeleton
     ${io_fbx_private_link_libraries}
     OpenFBX
@@ -421,6 +429,7 @@ mt_library(
   PUBLIC_LINK_LIBRARIES
     character
     io_common
+    io_file_save_options
     io_skeleton
     fx-gltf::fx-gltf
   PRIVATE_LINK_LIBRARIES

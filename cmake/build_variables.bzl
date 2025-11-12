@@ -380,6 +380,10 @@ io_common_test_sources = [
     "test/io/common/stream_utils_test.cpp",
 ]
 
+io_file_save_options_public_headers = [
+    "io/file_save_options.h",
+]
+
 io_skeleton_public_headers = [
     "io/skeleton/locator_io.h",
     "io/skeleton/mppca_io.h",
@@ -441,7 +445,6 @@ io_fbx_test_sources = [
 
 io_gltf_public_headers = [
     "io/gltf/gltf_builder.h",
-    "io/gltf/gltf_file_format.h",
     "io/gltf/gltf_io.h",
 ]
 
