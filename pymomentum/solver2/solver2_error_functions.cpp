@@ -1767,6 +1767,25 @@ avoid divide-by-zero. )");
       R"(Error function that minimizes the difference between a local axis (in
       joint-local space) and a global axis using the angle between the vectors.)");
 
+  py::enum_<mm::RotationErrorType>(m, "RotationErrorType")
+      .value(
+          "RotationMatrixDifference",
+          mm::RotationErrorType::RotationMatrixDifference,
+          R"(Frobenius norm of rotation matrix difference: ||R1 - R2||_F^2.
+
+This is the default method. It computes the squared Frobenius norm of the
+difference between two rotation matrices. While not a geodesic distance,
+it has smooth derivatives everywhere and is computationally efficient.)")
+      .value(
+          "QuaternionLogMap",
+          mm::RotationErrorType::QuaternionLogMap,
+          R"(Logarithmic map of relative rotation: ||log(R1^{-1} * R2)||^2.
+
+This method computes the squared norm of the logarithmic map of the relative
+rotation quaternion. This gives the squared geodesic distance on SO(3), which
+has a clear geometric interpretation. It uses numerically robust logmap
+computation with Taylor series for small angles.)");
+
   py::class_<
       mm::StateErrorFunction,
       mm::SkeletonErrorFunction,
@@ -1782,14 +1801,15 @@ avoid divide-by-zero. )");
                         float positionWeight,
                         float rotationWeight,
                         const std::optional<py::array_t<float>>& jointPositionWeights,
-                        const std::optional<py::array_t<float>>& jointRotationWeights) {
+                        const std::optional<py::array_t<float>>& jointRotationWeights,
+                        mm::RotationErrorType rotationErrorType) {
             validateWeight(weight, "weight");
             validateWeight(positionWeight, "position_weight");
             validateWeight(rotationWeight, "rotation_weight");
             validateWeights(jointPositionWeights, "joint_position_weights");
             validateWeights(jointRotationWeights, "joint_rotation_weights");
 
-            auto result = std::make_shared<mm::StateErrorFunction>(character);
+            auto result = std::make_shared<mm::StateErrorFunction>(character, rotationErrorType);
             result->setWeight(weight);
             result->setWeights(positionWeight, rotationWeight);
 
@@ -1812,14 +1832,17 @@ avoid divide-by-zero. )");
 :param joint_position_weights: Optional numpy array of per-joint position weights.
                                Must match the number of joints in the skeleton.
 :param joint_rotation_weights: Optional numpy array of per-joint rotation weights.
-                               Must match the number of joints in the skeleton.)",
+                               Must match the number of joints in the skeleton.
+:param rotation_error_type: The type of rotation error to use. Defaults to RotationMatrixDifference.
+                            See :class:`RotationErrorType` for options.)",
           py::arg("character"),
           py::kw_only(),
           py::arg("weight") = 1.0f,
           py::arg("position_weight") = 1.0f,
           py::arg("rotation_weight") = 1.0f,
           py::arg("joint_position_weights") = std::optional<py::array_t<float>>{},
-          py::arg("joint_rotation_weights") = std::optional<py::array_t<float>>{})
+          py::arg("joint_rotation_weights") = std::optional<py::array_t<float>>{},
+          py::arg("rotation_error_type") = mm::RotationErrorType::RotationMatrixDifference)
       .def(
           "set_target_state",
           [](mm::StateErrorFunction& self, const py::array_t<float>& targetStateArray) {
