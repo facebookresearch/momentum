@@ -34,6 +34,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/io/fbx/fbx_io.h>
+#include <momentum/io/file_save_options.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/legacy_json/legacy_json_io.h>
 #include <momentum/io/marker/coordinate_system.h>
@@ -179,6 +180,13 @@ PYBIND11_MODULE(geometry, m) {
       "ellipsoid constraints, and half-plane constraints.");
   auto gltfOptionsClass =
       py::class_<mm::GltfOptions>(m, "GltfOptions", "Storage options for Gltf export.");
+  auto fileSaveOptionsClass = py::class_<mm::FileSaveOptions>(
+      m,
+      "FileSaveOptions",
+      "Unified options for saving files in both FBX and GLTF formats. "
+      "This struct consolidates save options that were previously scattered across "
+      "multiple function parameters. Format-specific options (e.g., FBX coordinate "
+      "system, GLTF extensions) are included but only used by their respective formats.");
 
   gltfOptionsClass.def(py::init<>())
       .def(
@@ -539,6 +547,128 @@ The resulting tensors are as follows:
             upVectorStr,
             frontVectorStr,
             coordSystemStr);
+      });
+
+  // =====================================================
+  // momentum::FileSaveOptions
+  // - Common options: mesh, locators, collisions, blendShapes, permissive
+  // - FBX-specific: coordSystemInfo, fbxNamespace
+  // - GLTF-specific: extensions, gltfFileFormat
+  // =====================================================
+
+  fileSaveOptionsClass.def(py::init<>())
+      .def_readwrite(
+          "mesh", &mm::FileSaveOptions::mesh, "Include mesh geometry in the output (default: true)")
+      .def_readwrite(
+          "locators",
+          &mm::FileSaveOptions::locators,
+          "Include locators in the output (default: true)")
+      .def_readwrite(
+          "collisions",
+          &mm::FileSaveOptions::collisions,
+          "Include collision geometry in the output (default: true)")
+      .def_readwrite(
+          "blend_shapes",
+          &mm::FileSaveOptions::blendShapes,
+          "Include blend shapes in the output (default: true)")
+      .def_readwrite(
+          "permissive",
+          &mm::FileSaveOptions::permissive,
+          "Permissive mode: allow saving mesh-only characters without skin weights (default: false)")
+      .def_readwrite(
+          "coord_system_info",
+          &mm::FileSaveOptions::coordSystemInfo,
+          "FBX coordinate system configuration (default: Maya Y-up)")
+      .def_readwrite(
+          "fbx_namespace",
+          &mm::FileSaveOptions::fbxNamespace,
+          "Optional namespace prefix for FBX node names (e.g., 'ns' becomes 'ns:'), only used for FBX output (default: empty = no namespace)")
+      .def_readwrite(
+          "extensions",
+          &mm::FileSaveOptions::extensions,
+          "Enable GLTF extensions (default: true), only used for GLTF output")
+      .def_readwrite(
+          "gltf_file_format",
+          &mm::FileSaveOptions::gltfFileFormat,
+          "GLTF file format selection (default: Extension), only used for GLTF output")
+      .def("__repr__", [](const mm::FileSaveOptions& opts) {
+        std::string gltfFormatStr;
+        switch (opts.gltfFileFormat) {
+          case mm::GltfFileFormat::Extension:
+            gltfFormatStr = "Extension";
+            break;
+          case mm::GltfFileFormat::GltfBinary:
+            gltfFormatStr = "GltfBinary";
+            break;
+          case mm::GltfFileFormat::GltfAscii:
+            gltfFormatStr = "GltfAscii";
+            break;
+          default:
+            gltfFormatStr = "Unknown";
+            break;
+        }
+
+        // Format coord_system_info
+        std::string upVectorStr;
+        switch (opts.coordSystemInfo.upVector) {
+          case mm::FBXUpVector::XAxis:
+            upVectorStr = "XAxis";
+            break;
+          case mm::FBXUpVector::YAxis:
+            upVectorStr = "YAxis";
+            break;
+          case mm::FBXUpVector::ZAxis:
+            upVectorStr = "ZAxis";
+            break;
+          default:
+            upVectorStr = "Unknown";
+            break;
+        }
+
+        std::string frontVectorStr;
+        switch (opts.coordSystemInfo.frontVector) {
+          case mm::FBXFrontVector::ParityEven:
+            frontVectorStr = "ParityEven";
+            break;
+          case mm::FBXFrontVector::ParityOdd:
+            frontVectorStr = "ParityOdd";
+            break;
+          default:
+            frontVectorStr = "Unknown";
+            break;
+        }
+
+        std::string coordSystemStr;
+        switch (opts.coordSystemInfo.coordSystem) {
+          case mm::FBXCoordSystem::RightHanded:
+            coordSystemStr = "RightHanded";
+            break;
+          case mm::FBXCoordSystem::LeftHanded:
+            coordSystemStr = "LeftHanded";
+            break;
+          default:
+            coordSystemStr = "Unknown";
+            break;
+        }
+
+        std::string coordSystemInfoStr = fmt::format(
+            "FBXCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
+            upVectorStr,
+            frontVectorStr,
+            coordSystemStr);
+
+        return fmt::format(
+            "FileSaveOptions(mesh={}, locators={}, collisions={}, blendShapes={}, permissive={}, "
+            "coord_system_info={}, fbx_namespace='{}', extensions={}, gltfFileFormat={})",
+            opts.mesh,
+            opts.locators,
+            opts.collisions,
+            opts.blendShapes,
+            opts.permissive,
+            coordSystemInfoStr,
+            opts.fbxNamespace,
+            opts.extensions,
+            gltfFormatStr);
       });
 
   // loadMotion(gltfFilename)
