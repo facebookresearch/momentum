@@ -10,6 +10,7 @@
 #include <momentum/character/fwd.h>
 #include <momentum/character/marker.h>
 #include <momentum/common/filesystem.h>
+#include <momentum/io/file_save_options.h>
 #include <momentum/math/types.h>
 
 #include <span>
@@ -18,35 +19,11 @@
 
 namespace momentum {
 
-// UpVector Specifies which canonical axis represents up in the system
-// (typically Y or Z). Maps to fbxsdk::FbxAxisSystem::EUpVector
-enum class FBXUpVector { XAxis = 1, YAxis = 2, ZAxis = 3 };
-
-// FrontVector  Vector with origin at the screen pointing toward the camera.
-// This is a subset of enum EUpVector because axis cannot be repeated.
-// We use the system of "parity" to define this vector because its value (X,Y or
-// Z axis) really depends on the up-vector. The EPreDefinedAxisSystem list the
-// up-vector, parity and coordinate system values for the predefined systems.
-// Maps to fbxsdk::FbxAxisSystem::EFrontVector
-enum class FBXFrontVector { ParityEven = 1, ParityOdd = 2 };
-
-// CoordSystem Specifies the third vector of the system.
-// Maps to fbxsdk::FbxAxisSystem::ECoordSystem
-enum class FBXCoordSystem { RightHanded, LeftHanded };
-
 // KeepLocators Specifies whether Nulls in the transform hierarchy should be turned into Locators.
 enum class KeepLocators { No, Yes };
 
 // LoadBlendShapes Specifies whether blendshapes should be loaded or not
 enum class LoadBlendShapes { No, Yes };
-
-// A struct containing the up, front vectors and coordinate system
-struct FBXCoordSystemInfo {
-  // Default to the same orientations as FbxAxisSystem::eMayaYUp
-  FBXUpVector upVector = FBXUpVector::YAxis;
-  FBXFrontVector frontVector = FBXFrontVector::ParityOdd;
-  FBXCoordSystem coordSystem = FBXCoordSystem::RightHanded;
-};
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.

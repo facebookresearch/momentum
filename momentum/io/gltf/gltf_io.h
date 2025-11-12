@@ -10,7 +10,7 @@
 #include <momentum/character/marker.h>
 #include <momentum/character/types.h>
 #include <momentum/common/filesystem.h>
-#include <momentum/io/gltf/gltf_file_format.h>
+#include <momentum/io/file_save_options.h>
 #include <momentum/math/types.h>
 
 #include <fx/gltf.h>
@@ -20,14 +20,6 @@
 #include <vector>
 
 namespace momentum {
-
-struct GltfOptions {
-  bool extensions = true;
-  bool collisions = true;
-  bool locators = true;
-  bool mesh = true;
-  bool blendShapes = true;
-};
 
 Character loadGltfCharacter(const fx::gltf::Document& model);
 
