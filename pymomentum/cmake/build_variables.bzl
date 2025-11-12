@@ -11,6 +11,7 @@ backend_sources = [
 ]
 
 python_utility_public_headers = [
+    "python_utility/eigen_quaternion.h",
     "python_utility/python_utility.h",
 ]
 
