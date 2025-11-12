@@ -37,14 +37,16 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
                         float positionWeight,
                         float rotationWeight,
                         const std::optional<py::array_t<float>>& jointPositionWeights,
-                        const std::optional<py::array_t<float>>& jointRotationWeights) {
+                        const std::optional<py::array_t<float>>& jointRotationWeights,
+                        mm::RotationErrorType rotationErrorType) {
             validateWeight(weight, "weight");
             validateWeight(positionWeight, "position_weight");
             validateWeight(rotationWeight, "rotation_weight");
             validateWeights(jointPositionWeights, "joint_position_weights");
             validateWeights(jointRotationWeights, "joint_rotation_weights");
 
-            auto result = std::make_shared<mm::StateSequenceErrorFunction>(character);
+            auto result =
+                std::make_shared<mm::StateSequenceErrorFunction>(character, rotationErrorType);
             result->setWeight(weight);
             result->setWeights(positionWeight, rotationWeight);
 
@@ -68,14 +70,16 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
 :param position_weight: The weight of the position error.  Defaults to 1.0.
 :param rotation_weight: The weight of the rotation error.  Defaults to 1.0.
 :param joint_position_weights: The weights of the position error for each joint.  Defaults to all 1s.
-:param joint_rotation_weights: The weights of the rotation error for each joint.  Defaults to all 1s.)",
+:param joint_rotation_weights: The weights of the rotation error for each joint.  Defaults to all 1s.
+:param rotation_error_type: The type of rotation error to use. Defaults to RotationMatrixDifference.)",
           py::arg("character"),
           py::kw_only(),
           py::arg("weight") = 1.0f,
           py::arg("position_weight") = 1.0f,
           py::arg("rotation_weight") = 1.0f,
           py::arg("joint_position_weights") = std::optional<Eigen::VectorXf>{},
-          py::arg("joint_rotation_weights") = std::optional<Eigen::VectorXf>{})
+          py::arg("joint_rotation_weights") = std::optional<Eigen::VectorXf>{},
+          py::arg("rotation_error_type") = mm::RotationErrorType::RotationMatrixDifference)
       .def(
           "set_target_state",
           [](mm::StateSequenceErrorFunction& self, const py::array_t<float>& targetStateArray) {
