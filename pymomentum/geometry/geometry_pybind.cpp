@@ -590,18 +590,18 @@ The resulting tensors are as follows:
       .def_readwrite(
           "gltf_file_format",
           &mm::FileSaveOptions::gltfFileFormat,
-          "GLTF file format selection (default: Extension), only used for GLTF output")
+          "GLTF file format selection (default: Auto), only used for GLTF output")
       .def("__repr__", [](const mm::FileSaveOptions& opts) {
         std::string gltfFormatStr;
         switch (opts.gltfFileFormat) {
-          case mm::GltfFileFormat::Extension:
-            gltfFormatStr = "Extension";
+          case mm::GltfFileFormat::Auto:
+            gltfFormatStr = "Auto";
             break;
-          case mm::GltfFileFormat::GltfBinary:
-            gltfFormatStr = "GltfBinary";
+          case mm::GltfFileFormat::Binary:
+            gltfFormatStr = "Binary";
             break;
-          case mm::GltfFileFormat::GltfAscii:
-            gltfFormatStr = "GltfAscii";
+          case mm::GltfFileFormat::Ascii:
+            gltfFormatStr = "Ascii";
             break;
           default:
             gltfFormatStr = "Unknown";
