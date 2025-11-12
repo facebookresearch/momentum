@@ -59,6 +59,168 @@ Quaternion<T> rotVecToQuaternion(const Vector3<T>& v) {
 }
 
 template <typename T>
+Quaternion<T> quaternionExpMap(const Vector3<T>& v) {
+  // Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+  // by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+  // https://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
+
+  // Compute the rotation angle (norm of the rotation vector)
+  const T theta = v.norm();
+
+  // For numerical stability, use Taylor series for small angles
+  // Threshold is sqrt(epsilon): ~3.5e-4 for float, ~1.5e-8 for double
+  constexpr T kSmallAngleThreshold = Eps<T>(3.5e-4f, 1.5e-8);
+
+  if (theta < kSmallAngleThreshold) {
+    // Taylor series expansion of exp map near zero:
+    // exp(v) ≈ [1, v/2] for small ||v||
+    // We can refine this with higher order terms for better accuracy
+    const T theta2 = theta * theta;
+
+    // Second-order approximation: scalar = 1 - theta^2/8
+    const T w = T(1) - theta2 / T(8);
+
+    // Second-order approximation: vector = v/2 * (1 - theta^2/24)
+    const T scale = T(0.5) * (T(1) - theta2 / T(24));
+
+    Quaternion<T> q(w, scale * v.x(), scale * v.y(), scale * v.z());
+    q.normalize();
+    return q;
+  } else {
+    // Standard computation: exp([0, v]) = [cos(theta), sin(theta)/theta * v]
+    const T halfTheta = theta / T(2);
+    const T sinHalfTheta = std::sin(halfTheta);
+    const T cosHalfTheta = std::cos(halfTheta);
+    const T scale = sinHalfTheta / theta;
+
+    return Quaternion<T>(cosHalfTheta, scale * v.x(), scale * v.y(), scale * v.z());
+  }
+}
+
+template <typename T>
+Vector3<T> quaternionLogMap(const Quaternion<T>& q) {
+  // Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+  // by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+  // https://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
+
+  // Ensure the quaternion is normalized
+  Quaternion<T> qNorm = q.normalized();
+
+  // Extract components
+  const T w = qNorm.w();
+  const Vector3<T> vec(qNorm.x(), qNorm.y(), qNorm.z());
+  const T vecNorm = vec.norm();
+
+  // For numerical stability, use Taylor series for small angles
+  // Threshold is sqrt(epsilon): ~3.5e-4 for float, ~1.5e-8 for double
+  constexpr T kSmallAngleThreshold = Eps<T>(3.5e-4f, 1.5e-8);
+
+  if (vecNorm < kSmallAngleThreshold) {
+    // Quaternion is close to identity or -identity
+    if (w > T(0)) {
+      // Close to identity: log(q) ≈ 2 * vec * (1 + vec.squaredNorm()/6)
+      // Using first-order approximation is sufficient for stability
+      const T vecNorm2 = vec.squaredNorm();
+      const T scale = T(2) * (T(1) + vecNorm2 / T(6));
+      return scale * vec;
+    } else {
+      // Close to -identity (180-degree rotation)
+      // The log is not unique here; we need to choose a branch
+      // Return a rotation of pi radians around an arbitrary axis
+      // We pick the x-axis for consistency
+      return Vector3<T>(pi<T>(), T(0), T(0));
+    }
+  }
+
+  // Standard computation: log([w, v]) = atan2(||v||, w) / ||v|| * v
+  const T theta = T(2) * std::atan2(vecNorm, w);
+  const T scale = theta / vecNorm;
+
+  return scale * vec;
+}
+
+/// Computes the derivative of the logmap with respect to quaternion components.
+///
+/// Given a quaternion q with coeffs [x, y, z, w], computes the Jacobian matrix J where:
+/// J(i,j) = d(log(q)[i]) / dq.coeffs()[j]
+/// where log(q) is the 3D rotation vector and q.coeffs() = [x, y, z, w].
+///
+/// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+/// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+/// https://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
+///
+/// @tparam T The scalar type
+/// @param q The input quaternion (should be normalized)
+/// @return 3x4 Jacobian matrix where column j is the gradient w.r.t. q.coeffs()[j]
+///         i.e., columns are ordered as [d/dx, d/dy, d/dz, d/dw]
+template <typename T>
+Eigen::Matrix<T, 3, 4> quaternionLogMapDerivative(const Quaternion<T>& q) {
+  // Ensure the quaternion is normalized
+  const Quaternion<T> qNorm = q.normalized();
+
+  // Extract components: q.coeffs() = [x, y, z, w]
+  const T w = qNorm.w();
+  const Vector3<T> vec(qNorm.x(), qNorm.y(), qNorm.z());
+  const T vecNorm = vec.norm();
+
+  // For numerical stability, use Taylor series for small angles
+  constexpr T kSmallAngleThreshold = Eps<T>(3.5e-4f, 1.5e-8);
+
+  Eigen::Matrix<T, 3, 4> jacobian;
+
+  if (vecNorm < kSmallAngleThreshold) {
+    // Near identity: log(q) ≈ 2 * vec * (1 + vec.squaredNorm()/6)
+    // For small ||vec||, we can compute the derivatives analytically
+    const T vecNorm2 = vec.squaredNorm();
+    const T scale = T(2) * (T(1) + vecNorm2 / T(6));
+
+    // d(log)/d(vec) ≈ 2 * I * (1 + vecNorm2/6) + 2 * vec * vec^T / 3
+    // Columns 0, 1, 2 are for x, y, z
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        jacobian(i, j) = (i == j ? scale : T(0)) + T(2) * vec(i) * vec(j) / T(3);
+      }
+    }
+
+    // d(log)/dw ≈ 0 for small angles (higher order terms)
+    // Column 3 is for w
+    jacobian.col(3).setZero();
+  } else {
+    // Standard computation: log([w, v]) = theta / ||v|| * v
+    // where theta = 2 * atan2(||v||, w)
+    const T theta = T(2) * std::atan2(vecNorm, w);
+    const T scale = theta / vecNorm;
+
+    // Compute d(theta)/dw and d(theta)/d(vec)
+    // theta = 2 * atan2(||v||, w)
+    // d(theta)/dw = -2 * ||v|| / (w^2 + ||v||^2)
+    // d(theta)/d(vec_i) = 2 * w * vec_i / (||v|| * (w^2 + ||v||^2))
+    const T denom = w * w + vecNorm * vecNorm;
+    const T dthetaDw = -T(2) * vecNorm / denom;
+    const Vector3<T> dthetaDvec = T(2) * w * vec / (vecNorm * denom);
+
+    // d(log)/d(vec_j) = d(theta/||v||)/d(vec_j) * v + (theta/||v||) * d(v)/d(vec_j)
+    // where d(theta/||v||)/d(vec_j) = d(theta)/d(vec_j) / ||v|| - theta * vec_j / ||v||^3
+    // Columns 0, 1, 2 are for x, y, z
+    for (int j = 0; j < 3; ++j) {
+      const T dScaleDvecj =
+          dthetaDvec(j) / vecNorm - theta * vec(j) / (vecNorm * vecNorm * vecNorm);
+      for (int i = 0; i < 3; ++i) {
+        jacobian(i, j) = dScaleDvecj * vec(i) + (i == j ? scale : T(0));
+      }
+    }
+
+    // Now compute d(log)/dw using product rule:
+    // log = (theta / ||v||) * v
+    // d(log)/dw = d(theta/||v||)/dw * v = (d(theta)/dw) / ||v|| * v
+    // Column 3 is for w
+    jacobian.col(3) = dthetaDw / vecNorm * vec;
+  }
+
+  return jacobian;
+}
+
+template <typename T>
 Vector3<T> rotationMatrixToEuler(
     const Matrix3<T>& m,
     int axis0,
@@ -408,6 +570,14 @@ template Vector3<float> quaternionToRotVec(const Quaternion<float>& q);
 template Vector3<double> quaternionToRotVec(const Quaternion<double>& q);
 template Quaternion<float> rotVecToQuaternion(const Vector3<float>& v);
 template Quaternion<double> rotVecToQuaternion(const Vector3<double>& v);
+
+template Quaternion<float> quaternionExpMap(const Vector3<float>& v);
+template Quaternion<double> quaternionExpMap(const Vector3<double>& v);
+template Vector3<float> quaternionLogMap(const Quaternion<float>& q);
+template Vector3<double> quaternionLogMap(const Quaternion<double>& q);
+
+template Eigen::Matrix<float, 3, 4> quaternionLogMapDerivative(const Quaternion<float>& q);
+template Eigen::Matrix<double, 3, 4> quaternionLogMapDerivative(const Quaternion<double>& q);
 
 template Vector3<float> rotationMatrixToEuler(
     const Matrix3<float>& m,

@@ -806,3 +806,261 @@ TYPED_TEST(UtilityTest, QuaternionToRotVecEdgeCases) {
   // a value in the range [0, π], making angle always non-negative.
   // The branch exists as defensive programming.
 }
+
+TYPED_TEST(UtilityTest, QuaternionLogMap) {
+  using T = typename TestFixture::Type;
+
+  // Test identity quaternion -> zero rotation vector
+  {
+    const Quaternion<T> q = Quaternion<T>::Identity();
+    const Vector3<T> logmap = quaternionLogMap<T>(q);
+    EXPECT_TRUE(logmap.isApprox(Vector3<T>::Zero(), T(1e-5)));
+  }
+
+  // Test rotation around X axis
+  {
+    const T angle = pi<T>() / 4; // 45 degrees
+    const Quaternion<T> q = Quaternion<T>(AngleAxis<T>(angle, Vector3<T>::UnitX()));
+    const Vector3<T> logmap = quaternionLogMap<T>(q);
+    const Vector3<T> expected(angle, T(0), T(0));
+    EXPECT_TRUE(logmap.isApprox(expected, T(1e-5)));
+  }
+
+  // Test rotation around Y axis
+  {
+    const T angle = pi<T>() / 3;
+    const Quaternion<T> q = Quaternion<T>(AngleAxis<T>(angle, Vector3<T>::UnitY()));
+    const Vector3<T> logmap = quaternionLogMap<T>(q);
+    const Vector3<T> expected(T(0), angle, T(0));
+    EXPECT_TRUE(logmap.isApprox(expected, T(1e-5)));
+  }
+
+  // Test rotation around Z axis
+  {
+    const T angle = pi<T>() / 6;
+    const Quaternion<T> q = Quaternion<T>(AngleAxis<T>(angle, Vector3<T>::UnitZ()));
+    const Vector3<T> logmap = quaternionLogMap<T>(q);
+    const Vector3<T> expected(T(0), T(0), angle);
+    EXPECT_TRUE(logmap.isApprox(expected, T(1e-5)));
+  }
+
+  // Test rotation around arbitrary axis
+  {
+    const Vector3<T> axis = Vector3<T>(1, 2, 3).normalized();
+    const T angle = T(0.7);
+    const Quaternion<T> q = Quaternion<T>(AngleAxis<T>(angle, axis));
+    const Vector3<T> logmap = quaternionLogMap<T>(q);
+    const Vector3<T> expected = axis * angle;
+    EXPECT_TRUE(logmap.isApprox(expected, T(1e-5)));
+  }
+
+  // Test 180-degree rotation (near singularity)
+  {
+    const Quaternion<T> q180x(0, 1, 0, 0); // 180 degrees around X
+    const Vector3<T> logmap = quaternionLogMap<T>(q180x);
+    EXPECT_NEAR(logmap.norm(), pi<T>(), T(1e-5));
+  }
+
+  // Test near-identity quaternion (small angle)
+  {
+    const T smallAngle = T(1e-6);
+    const Quaternion<T> q = Quaternion<T>(AngleAxis<T>(smallAngle, Vector3<T>::UnitX()));
+    const Vector3<T> logmap = quaternionLogMap<T>(q);
+    const Vector3<T> expected(smallAngle, T(0), T(0));
+    EXPECT_TRUE(logmap.isApprox(expected, T(1e-5)));
+  }
+
+  // Test that logmap is inverse of expmap
+  {
+    Random<> rng(42);
+    for (int i = 0; i < 10; ++i) {
+      const auto v = rng.uniform<Vector3<T>>(T(-pi<T>()), T(pi<T>()));
+      const Quaternion<T> q = quaternionExpMap<T>(v);
+      const Vector3<T> logmap = quaternionLogMap<T>(q);
+      EXPECT_TRUE(logmap.isApprox(v, T(1e-4))) << "Input: " << v.transpose() << "\n"
+                                               << "LogMap: " << logmap.transpose() << "\n";
+    }
+  }
+}
+
+TYPED_TEST(UtilityTest, QuaternionExpMap) {
+  using T = typename TestFixture::Type;
+
+  // Test zero rotation vector -> identity quaternion
+  {
+    const Vector3<T> v = Vector3<T>::Zero();
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    EXPECT_TRUE(q.isApprox(Quaternion<T>::Identity(), T(1e-5)));
+  }
+
+  // Test rotation around X axis
+  {
+    const T angle = pi<T>() / 4;
+    const Vector3<T> v(angle, T(0), T(0));
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    const Quaternion<T> expected(AngleAxis<T>(angle, Vector3<T>::UnitX()));
+    EXPECT_TRUE(q.isApprox(expected, T(1e-5)));
+  }
+
+  // Test rotation around Y axis
+  {
+    const T angle = pi<T>() / 3;
+    const Vector3<T> v(T(0), angle, T(0));
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    const Quaternion<T> expected(AngleAxis<T>(angle, Vector3<T>::UnitY()));
+    EXPECT_TRUE(q.isApprox(expected, T(1e-5)));
+  }
+
+  // Test rotation around Z axis
+  {
+    const T angle = pi<T>() / 6;
+    const Vector3<T> v(T(0), T(0), angle);
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    const Quaternion<T> expected(AngleAxis<T>(angle, Vector3<T>::UnitZ()));
+    EXPECT_TRUE(q.isApprox(expected, T(1e-5)));
+  }
+
+  // Test rotation around arbitrary axis
+  {
+    const Vector3<T> axis = Vector3<T>(1, 2, 3).normalized();
+    const T angle = T(0.7);
+    const Vector3<T> v = axis * angle;
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    const Quaternion<T> expected(AngleAxis<T>(angle, axis));
+    EXPECT_TRUE(q.isApprox(expected, T(1e-5)));
+  }
+
+  // Test very small rotation (Taylor series expansion)
+  {
+    const T smallAngle = T(1e-6);
+    const Vector3<T> v(smallAngle, T(0), T(0));
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    const Quaternion<T> expected(AngleAxis<T>(smallAngle, Vector3<T>::UnitX()));
+    EXPECT_TRUE(q.isApprox(expected, T(1e-5)));
+  }
+
+  // Test that expmap is inverse of logmap
+  {
+    Random<> rng(42);
+    for (int i = 0; i < 10; ++i) {
+      const Quaternion<T> q = Quaternion<T>(rng.uniform<Vector4<T>>(T(-1), T(1))).normalized();
+      const Vector3<T> v = quaternionLogMap<T>(q);
+      const Quaternion<T> q_reconstructed = quaternionExpMap<T>(v);
+      EXPECT_TRUE(q.isApprox(q_reconstructed, T(1e-4)))
+          << "Original q: " << q.coeffs().transpose() << "\n"
+          << "Reconstructed q: " << q_reconstructed.coeffs().transpose() << "\n";
+    }
+  }
+}
+
+TYPED_TEST(UtilityTest, QuaternionLogMapExpMapRoundtrip) {
+  using T = typename TestFixture::Type;
+
+  Random<> rng(123);
+
+  // Test forward: v → exp → log → v
+  for (int i = 0; i < 20; ++i) {
+    // Generate random rotation vector with angle in [-pi, pi]
+    const T angle = rng.uniform(T(-pi<T>()), T(pi<T>()));
+    const Vector3<T> axis = rng.uniform<Vector3<T>>(T(-1), T(1)).normalized();
+    const Vector3<T> v = axis * angle;
+
+    const Quaternion<T> q = quaternionExpMap<T>(v);
+    const Vector3<T> v_reconstructed = quaternionLogMap<T>(q);
+
+    EXPECT_TRUE(v.isApprox(v_reconstructed, T(1e-4)))
+        << "v: " << v.transpose() << "\n"
+        << "v_reconstructed: " << v_reconstructed.transpose() << "\n";
+  }
+
+  // Test backward: q → log → exp → q
+  for (int i = 0; i < 20; ++i) {
+    const Quaternion<T> q = Quaternion<T>(rng.uniform<Vector4<T>>(T(-1), T(1))).normalized();
+
+    const Vector3<T> v = quaternionLogMap<T>(q);
+    const Quaternion<T> q_reconstructed = quaternionExpMap<T>(v);
+
+    EXPECT_TRUE(q.isApprox(q_reconstructed, T(1e-4)))
+        << "q: " << q.coeffs().transpose() << "\n"
+        << "q_reconstructed: " << q_reconstructed.coeffs().transpose() << "\n";
+  }
+}
+
+TYPED_TEST(UtilityTest, QuaternionLogMapDerivative) {
+  using T = typename TestFixture::Type;
+
+  Random<> rng(789);
+
+  // Test the derivative of logmap with respect to quaternion components
+  // We test this by computing finite differences along tangent directions
+  for (int i = 0; i < 10; ++i) {
+    // Generate a random quaternion
+    const Quaternion<T> q = Quaternion<T>(rng.uniform<Vector4<T>>(T(-1), T(1))).normalized();
+
+    // Compute the Jacobian: 3x4 matrix
+    const Eigen::Matrix<T, 3, 4> jacobian = quaternionLogMapDerivative(q);
+
+    // Test by perturbing along tangent directions
+    // For a quaternion q = [w, x, y, z], we can perturb it by adding a small
+    // quaternion delta_q = [dw, dx, dy, dz] and then renormalizing
+    const T h = Eps<T>(1e-4f, 1e-8);
+
+    Eigen::Vector4<T> testVec = rng.uniform<Vector4<T>>(T(-1), T(1)).normalized();
+
+    // Perturb the quaternion: q_perturbed = (q + delta).normalized()
+    Eigen::Vector4<T> q_coeffs_plus = q.coeffs() + h * testVec;
+    Eigen::Vector4<T> q_coeffs_minus = q.coeffs() - h * testVec;
+
+    // Normalize the perturbed quaternions
+    const Quaternion<T> q_plus = Quaternion<T>(q_coeffs_plus);
+    const Quaternion<T> q_minus = Quaternion<T>(q_coeffs_minus);
+
+    // Compute logmap for both
+    const Vector3<T> logmap_plus = quaternionLogMap<T>(q_plus);
+    const Vector3<T> logmap_minus = quaternionLogMap<T>(q_minus);
+
+    // Numerical derivative using finite differences
+    const Vector3<T> numerical_derivative = (logmap_plus - logmap_minus) / (T(2) * h);
+
+    // For the analytical derivative, we need to account for normalization
+    // When we perturb q -> q + delta and normalize, the actual change in q is:
+    // delta_q_normalized ≈ delta - (q^T delta) * q  (for unit quaternions)
+    // This is the projection of delta onto the tangent space at q
+
+    // Analytical derivative
+    const Vector3<T> analytical_derivative = jacobian * testVec;
+
+    // Compare with higher tolerance since normalization introduces error
+    EXPECT_TRUE(numerical_derivative.isApprox(analytical_derivative, Eps<T>(1e-2f, 1e-4)))
+        << "Derivative w.r.t. quaternion test vec " << testVec.transpose() << "\n"
+        << "q: " << q.coeffs().transpose() << "\n"
+        << "Numerical:  " << numerical_derivative.transpose() << "\n"
+        << "Analytical: " << analytical_derivative.transpose() << "\n"
+        << "Difference: " << (numerical_derivative - analytical_derivative).norm() << "\n";
+  }
+
+  // Test identity quaternion case
+  {
+    const Quaternion<T> q = Quaternion<T>::Identity();
+    const Eigen::Matrix<T, 3, 4> jacobian = quaternionLogMapDerivative(q);
+
+    // For identity quaternion, the logmap is zero
+    // The derivative w.r.t. w should be approximately zero
+    // Note: q.coeffs() = [x, y, z, w], so w is at index 3
+    EXPECT_TRUE(jacobian.col(3).norm() < Eps<T>(1e-3f, 1e-6))
+        << "Derivative w.r.t. w for identity should be near zero\n"
+        << "Jacobian col 3: " << jacobian.col(3).transpose() << "\n";
+
+    // The derivative w.r.t. the vector components should be approximately 2*I
+    // Columns 0, 1, 2 correspond to x, y, z respectively
+    const T expectedScale = T(2);
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        const T expected = (i == j) ? expectedScale : T(0);
+        EXPECT_NEAR(jacobian(i, j), expected, Eps<T>(1e-3f, 1e-6))
+            << "For identity quaternion, d(log_" << i << ")/d(q_" << j << ") should be " << expected
+            << "\n";
+      }
+    }
+  }
+}
