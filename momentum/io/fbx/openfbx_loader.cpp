@@ -1058,6 +1058,7 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
 
   markersRoot = findMarkersRoot(root);
   if (!markersRoot) {
+    // Return empty sequence with no frames
     return result;
   }
 
@@ -1076,12 +1077,14 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
   }
 
   if (markerNodes.empty()) {
+    // Return empty sequence with no frames
     return result;
   }
 
   // Get animation data for all marker nodes
   const ofbx::AnimationStack* animStack = scene->getAnimationStack(0);
   if (!animStack) {
+    // Return empty sequence with no frames
     return result;
   }
 
@@ -1105,6 +1108,7 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
   }
 
   if (markerAnimCurves.empty()) {
+    // Return empty sequence with no frames
     return result;
   }
 
@@ -1131,35 +1135,46 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
     }
 
     if (translationCurve) {
-      // Collect all unique keyframe times across X, Y, Z channels
+      // Get the individual animation curves for X, Y, Z components
+      const ofbx::AnimationCurve* curveX = translationCurve->getCurve(0);
+      const ofbx::AnimationCurve* curveY = translationCurve->getCurve(1);
+      const ofbx::AnimationCurve* curveZ = translationCurve->getCurve(2);
+
+      // Collect all unique keyframe times from all three curves
       std::set<ofbx::i64> keyframeTimes;
-      for (int iChannel = 0; iChannel < 3; ++iChannel) {
-        const ofbx::AnimationCurve* channel = translationCurve->getCurve(iChannel);
-        if (channel == nullptr) {
-          continue;
+      if (curveX) {
+        const int keyCount = curveX->getKeyCount();
+        const ofbx::i64* times = curveX->getKeyTime();
+        for (int i = 0; i < keyCount; ++i) {
+          keyframeTimes.insert(times[i]);
         }
-        const int keyCount = channel->getKeyCount();
-        if (keyCount <= 0) {
-          continue;
+      }
+      if (curveY) {
+        const int keyCount = curveY->getKeyCount();
+        const ofbx::i64* times = curveY->getKeyTime();
+        for (int i = 0; i < keyCount; ++i) {
+          keyframeTimes.insert(times[i]);
         }
-        const ofbx::i64* times = channel->getKeyTime();
+      }
+      if (curveZ) {
+        const int keyCount = curveZ->getKeyCount();
+        const ofbx::i64* times = curveZ->getKeyTime();
         for (int i = 0; i < keyCount; ++i) {
           keyframeTimes.insert(times[i]);
         }
       }
 
-      // For each unique keyframe time, add a marker at that frame
-      // This matches GLTF behavior: only add markers at explicitly keyed frames
-      for (ofbx::i64 fbxTime : keyframeTimes) {
+      // Add markers only at frames where keyframes exist
+      for (const ofbx::i64 fbxTime : keyframeTimes) {
         const double timeInSeconds = ofbx::fbxTimeToSeconds(fbxTime);
-        const auto frameIndex = static_cast<size_t>(std::lround(timeInSeconds * fps));
+        const size_t frameIndex = std::round(timeInSeconds * fps);
 
         // Skip if frame index is out of bounds
         if (frameIndex >= numFrames) {
           continue;
         }
 
-        // Evaluate position at this specific keyframe time
+        // Evaluate position at this keyframe time
         const ofbx::DVec3 position = translationCurve->getNodeLocalTransform(timeInSeconds);
 
         Marker marker;

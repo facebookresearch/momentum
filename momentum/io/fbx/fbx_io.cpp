@@ -323,6 +323,9 @@ std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
     return markerNodes;
   }
 
+  // Set the framerate for the scene
+  setFrameRate(scene, framerate);
+
   // Create a root node for all markers
   ::fbxsdk::FbxNode* markersRootNode = ::fbxsdk::FbxNode::Create(scene, "Markers");
   ::fbxsdk::FbxNull* markersRootAttr = ::fbxsdk::FbxNull::Create(scene, "MarkersRootNull");
