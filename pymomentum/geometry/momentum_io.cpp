@@ -167,26 +167,18 @@ void saveFBXCharacterToFile(
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
-  if (motion.has_value() && offsets.has_value()) {
-    momentum::saveFbx(
-        path,
-        character,
-        motion.value().transpose(),
-        offsets.value(),
-        fps,
-        true, /*saveMesh*/
-        coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
-        false, /*permissive*/
-        markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-        fbxNamespace);
-  } else {
-    momentum::saveFbxModel(
-        path,
-        character,
-        coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
-        false, /*permissive*/
-        fbxNamespace);
-  }
+  // Always use saveFbx to support markers even without motion
+  momentum::saveFbx(
+      path,
+      character,
+      motion.has_value() ? motion.value().transpose() : Eigen::MatrixXf(),
+      offsets.has_value() ? offsets.value() : Eigen::VectorXf(),
+      fps,
+      true, /*saveMesh*/
+      coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
+      false, /*permissive*/
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      fbxNamespace);
 }
 
 void saveFBXCharacterToFileWithJointParams(
@@ -197,25 +189,17 @@ void saveFBXCharacterToFileWithJointParams(
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
-  if (jointParams.has_value()) {
-    momentum::saveFbxWithJointParams(
-        path,
-        character,
-        jointParams.value().transpose(),
-        fps,
-        true, /*saveMesh*/
-        coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
-        false, /*permissive*/
-        markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-        fbxNamespace);
-  } else {
-    momentum::saveFbxModel(
-        path,
-        character,
-        coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
-        false, /*permissive*/
-        fbxNamespace);
-  }
+  // Always use saveFbxWithJointParams to support markers even without motion
+  momentum::saveFbxWithJointParams(
+      path,
+      character,
+      jointParams.has_value() ? jointParams.value().transpose() : Eigen::MatrixXf(),
+      fps,
+      true, /*saveMesh*/
+      coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
+      false, /*permissive*/
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      fbxNamespace);
 }
 
 void saveCharacterToFile(
