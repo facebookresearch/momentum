@@ -66,12 +66,15 @@ enum class CharacterFormat : uint8_t {
 /// @param[in] fps Frame rate for the animation (default: 120.0f).
 /// @param[in] motion The motion represented in model parameters (numModelParams, numFrames).
 /// @param[in] markerSequence Optional marker sequence data to save with the character.
+/// @param[in] options Optional file save options for controlling output (default:
+/// FileSaveOptions{}).
 void saveCharacter(
     const filesystem::path& filename,
     const Character& character,
     float fps = 120.f,
     const MatrixXf& motion = MatrixXf(),
-    const std::vector<std::vector<Marker>>& markerSequence = {});
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// High level function to save a character with motion in skeleton states and markers to any
 /// supported format.
@@ -83,10 +86,13 @@ void saveCharacter(
 /// @param[in] fps Frame rate for the animation.
 /// @param[in] skeletonStates The motion represented in skeleton states (ie. JointStates).
 /// @param[in] markerSequence Optional marker sequence data to save with the character.
+/// @param[in] options Optional file save options for controlling output (default:
+/// FileSaveOptions{}).
 void saveCharacter(
     const filesystem::path& filename,
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence = {});
+    const std::vector<std::vector<Marker>>& markerSequence = {},
+    const FileSaveOptions& options = FileSaveOptions());
 } // namespace momentum

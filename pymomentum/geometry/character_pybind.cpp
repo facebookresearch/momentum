@@ -792,18 +792,20 @@ support the proprietary momentum motion format for storing model parameters in G
 
     This is a unified interface that automatically selects between FBX and GLTF based on the file extension.
 
-    :param path: Export filename with extension (.fbx, .glb, or .gltf).
-    :param character: A Character to be saved to the output file.
-    :param fps: [Optional] Frequency in frames per second
-    :param motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
-    :param offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
-    :param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
-          )",
+:param path: Export filename with extension (.fbx, .glb, or .gltf).
+:param character: A Character to be saved to the output file.
+:param fps: [Optional] Frequency in frames per second
+:param motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
+:param offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
+:param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
+:param options: [Optional] FileSaveOptions for controlling output (mesh, locators, collisions, etc.)
+      )",
           py::arg("path"),
           py::arg("character"),
           py::arg("fps") = 120.f,
           py::arg("motion") = std::optional<const Eigen::MatrixXf>{},
-          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{})
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
+          py::arg("options") = momentum::FileSaveOptions())
       .def_static(
           "save_with_skel_states",
           &saveCharacterToFileWithSkelStates,

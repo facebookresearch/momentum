@@ -77,7 +77,8 @@ void saveCharacterToFile(
     const momentum::Character& character,
     float fps,
     const std::optional<const Eigen::MatrixXf>& motion,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers);
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
+    const momentum::FileSaveOptions& options = momentum::FileSaveOptions());
 
 void saveCharacterToFileWithSkelStates(
     const std::string& path,

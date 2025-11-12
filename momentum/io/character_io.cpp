@@ -145,7 +145,8 @@ void saveCharacter(
     const Character& character,
     const float fps,
     const MatrixXf& motion,
-    const std::vector<std::vector<Marker>>& markerSequence) {
+    const std::vector<std::vector<Marker>>& markerSequence,
+    const FileSaveOptions& options) {
   // Parse format from file extension
   const auto format = parseCharacterFormat(filename);
   MT_THROW_IF(
@@ -154,8 +155,23 @@ void saveCharacter(
       filename.string());
 
   if (format == CharacterFormat::Gltf) {
+    // Convert FileSaveOptions to GltfOptions
+    GltfOptions gltfOptions;
+    gltfOptions.extensions = options.extensions;
+    gltfOptions.collisions = options.collisions;
+    gltfOptions.locators = options.locators;
+    gltfOptions.mesh = options.mesh;
+    gltfOptions.blendShapes = options.blendShapes;
+
     saveGltfCharacter(
-        filename, character, fps, {character.parameterTransform.name, motion}, {}, markerSequence);
+        filename,
+        character,
+        fps,
+        {character.parameterTransform.name, motion},
+        {},
+        markerSequence,
+        options.gltfFileFormat,
+        gltfOptions);
   } else if (format == CharacterFormat::Fbx) {
     // Save as FBX
     saveFbx(
@@ -164,10 +180,11 @@ void saveCharacter(
         motion,
         VectorXf(),
         static_cast<double>(fps),
-        true, // saveMesh
-        FBXCoordSystemInfo(),
-        false, // permissive
-        markerSequence);
+        options.mesh,
+        options.coordSystemInfo,
+        options.permissive,
+        markerSequence,
+        options.fbxNamespace);
   } else {
     MT_THROW(
         "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
@@ -179,7 +196,8 @@ void saveCharacter(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence) {
+    const std::vector<std::vector<Marker>>& markerSequence,
+    const FileSaveOptions& options) {
   // Parse format from file extension
   const auto format = parseCharacterFormat(filename);
   MT_THROW_IF(
@@ -188,7 +206,22 @@ void saveCharacter(
       filename.string());
 
   if (format == CharacterFormat::Gltf) {
-    saveGltfCharacter(filename, character, fps, skeletonStates, markerSequence);
+    // Convert FileSaveOptions to GltfOptions
+    GltfOptions gltfOptions;
+    gltfOptions.extensions = options.extensions;
+    gltfOptions.collisions = options.collisions;
+    gltfOptions.locators = options.locators;
+    gltfOptions.mesh = options.mesh;
+    gltfOptions.blendShapes = options.blendShapes;
+
+    saveGltfCharacter(
+        filename,
+        character,
+        fps,
+        skeletonStates,
+        markerSequence,
+        options.gltfFileFormat,
+        gltfOptions);
   } else if (format == CharacterFormat::Fbx) {
     // Save as FBX
     saveFbxWithSkeletonStates(
@@ -196,10 +229,11 @@ void saveCharacter(
         character,
         skeletonStates,
         static_cast<double>(fps),
-        true, // saveMesh
-        FBXCoordSystemInfo(),
-        false, // permissive
-        markerSequence);
+        options.mesh,
+        options.coordSystemInfo,
+        options.permissive,
+        markerSequence,
+        options.fbxNamespace);
   } else {
     MT_THROW(
         "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
