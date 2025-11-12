@@ -90,6 +90,56 @@ Vector3<T> quaternionToRotVec(const Quaternion<T>& q);
 template <typename T>
 Quaternion<T> rotVecToQuaternion(const Vector3<T>& v);
 
+/// Computes the exponential map from a rotation vector (axis-angle in R^3) to a quaternion.
+///
+/// The exponential map takes a 3D rotation vector (where the direction is the rotation axis
+/// and the magnitude is the rotation angle in radians) and returns the corresponding unit
+/// quaternion. This is numerically robust for small angles using Taylor series expansion.
+///
+/// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+/// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+///
+/// @tparam T The scalar type
+/// @param v The rotation vector (axis-angle representation)
+/// @return The corresponding unit quaternion
+template <typename T>
+Quaternion<T> quaternionExpMap(const Vector3<T>& v);
+
+/// Computes the logarithmic map from a quaternion to a rotation vector (axis-angle in R^3).
+///
+/// The logarithmic map takes a unit quaternion and returns the corresponding 3D rotation
+/// vector (where the direction is the rotation axis and the magnitude is the rotation angle
+/// in radians). This is numerically robust for small angles using Taylor series expansion.
+/// For quaternions close to -I (180 degree rotation), a consistent branch is chosen.
+///
+/// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+/// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+///
+/// @tparam T The scalar type
+/// @param q The input quaternion (should be normalized)
+/// @return The corresponding rotation vector (axis-angle representation)
+template <typename T>
+Vector3<T> quaternionLogMap(const Quaternion<T>& q);
+
+/// Computes the derivative of the logarithmic map with respect to quaternion components.
+///
+/// Given a quaternion q with coeffs [x, y, z, w], computes the Jacobian matrix J where:
+/// J(i,j) = d(log(q)[i]) / dq.coeffs()[j]
+/// where log(q) is the 3D rotation vector and q.coeffs() = [x, y, z, w] (Eigen's convention).
+///
+/// This is the fundamental building block for computing derivatives of functions
+/// involving logmap through the chain rule.
+///
+/// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+/// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+///
+/// @tparam T The scalar type
+/// @param q The input quaternion (should be normalized)
+/// @return 3x4 Jacobian matrix where column j is the gradient w.r.t. q.coeffs()[j],
+///         i.e., columns are ordered as [d/dx, d/dy, d/dz, d/dw]
+template <typename T>
+Eigen::Matrix<T, 3, 4> quaternionLogMapDerivative(const Quaternion<T>& q);
+
 /// The Euler angles convention.
 enum class EulerConvention {
   /// The intrinsic convention. Intrinsic rotations (also called local, relative, or body-fixed
