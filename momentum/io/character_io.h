@@ -10,6 +10,7 @@
 #include <momentum/character/fwd.h>
 #include <momentum/character/marker.h>
 #include <momentum/common/filesystem.h>
+#include <momentum/io/file_save_options.h>
 #include <momentum/math/fwd.h>
 #include <momentum/math/types.h>
 
