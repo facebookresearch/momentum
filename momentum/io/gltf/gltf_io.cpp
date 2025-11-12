@@ -1325,19 +1325,6 @@ void saveGltfCharacter(
   GltfBuilder::save(model, filename, fileFormat, kEmbedResources);
 }
 
-void saveCharacter(
-    const filesystem::path& filename,
-    const Character& character,
-    const float fps,
-    const MotionParameters& motion,
-    const IdentityParameters& offsets,
-    const std::vector<std::vector<Marker>>& markerSequence,
-    const GltfFileFormat fileFormat,
-    const GltfOptions& options) {
-  return saveGltfCharacter(
-      filename, character, fps, motion, offsets, markerSequence, fileFormat, options);
-}
-
 void saveGltfCharacter(
     const filesystem::path& filename,
     const Character& character,
@@ -1352,18 +1339,6 @@ void saveGltfCharacter(
       character, fps, skeletonStates, markerSequence, kEmbedResources, options);
 
   GltfBuilder::save(model, filename, fileFormat, kEmbedResources);
-}
-
-void saveCharacter(
-    const filesystem::path& filename,
-    const Character& character,
-    const float fps,
-    std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence,
-    const GltfFileFormat fileFormat,
-    const GltfOptions& options) {
-  return saveGltfCharacter(
-      filename, character, fps, skeletonStates, markerSequence, fileFormat, options);
 }
 
 std::vector<std::byte> saveCharacterToBytes(

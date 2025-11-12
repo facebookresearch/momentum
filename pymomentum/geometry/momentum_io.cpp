@@ -225,9 +225,9 @@ void saveCharacterToFileWithSkelStates(
   momentum::saveCharacter(
       path,
       character,
+      fps,
       skel_states,
-      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      fps);
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(

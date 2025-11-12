@@ -68,9 +68,9 @@ enum class CharacterFormat : uint8_t {
 void saveCharacter(
     const filesystem::path& filename,
     const Character& character,
-    float fps /* = 120.f*/,
-    const MatrixXf& motion /* = MatrixXf()*/,
-    const std::vector<std::vector<Marker>>& markerSequence /* = {}*/);
+    float fps = 120.f,
+    const MatrixXf& motion = MatrixXf(),
+    const std::vector<std::vector<Marker>>& markerSequence = {});
 
 /// High level function to save a character with motion in skeleton states and markers to any
 /// supported format.
@@ -85,7 +85,7 @@ void saveCharacter(
 void saveCharacter(
     const filesystem::path& filename,
     const Character& character,
+    float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence = {},
-    float fps = 120.f);
+    const std::vector<std::vector<Marker>>& markerSequence = {});
 } // namespace momentum
