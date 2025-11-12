@@ -50,7 +50,7 @@ LineData parseLineData(const std::string_view line) {
         data.values[currDataIdx++] = val;
         start = curr + 2;
       } else {
-        int val;
+        int val = 0;
         std::from_chars(line.data() + start, line.data() + curr + 1, val);
         data.hit = val > 0;
       }
