@@ -9,6 +9,7 @@
 
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
+#include "momentum/character_solver/error_function_utils.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/utility.h"
@@ -169,14 +170,8 @@ double StateSequenceErrorFunctionT<T>::getGradient(
                 diff.dot(
                     transform.rotate(state.jointState[jointIndex].getTranslationDerivative(d))) *
                 pwgt;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-                 index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-                 ++index) {
-              grad[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                  val * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            gradient_jointParams_to_modelParams(
+                val, paramIndex + d, this->parameterTransform_, grad);
           }
           if (this->activeJointParams_[paramIndex + 3 + d]) {
             // calculate joint gradient consisting of position gradient and orientation gradient
@@ -187,16 +182,8 @@ double StateSequenceErrorFunctionT<T>::getGradient(
                      state.jointState[jointIndex].getRotationDerivative(d, posd))) *
                      pwgt +
                  rwgt * rotD.cwiseProduct(rotDiff).sum());
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index =
-                     this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-                 index <
-                 this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d + 1];
-                 ++index) {
-              grad[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                  val * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            gradient_jointParams_to_modelParams(
+                val, paramIndex + 3 + d, this->parameterTransform_, grad);
           }
         }
         if (this->activeJointParams_[paramIndex + 6]) {
@@ -204,13 +191,7 @@ double StateSequenceErrorFunctionT<T>::getGradient(
           const T val = sign * T(2) *
               diff.dot(transform.rotate(state.jointState[jointIndex].getScaleDerivative(posd))) *
               pwgt;
-          // explicitly multiply with the parameter transform to generate parameter space gradients
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-               ++index) {
-            grad[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
+          gradient_jointParams_to_modelParams(val, paramIndex + 6, this->parameterTransform_, grad);
         }
 
         // go to the next joint
@@ -313,13 +294,8 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
           if (this->activeJointParams_[paramIndex + d]) {
             const Eigen::Vector3<T> jc =
                 sign * (transform.rotate(jointState.getTranslationDerivative(d))) * wgt;
-            for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-                 index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-                 ++index) {
-              jac.col(this->parameterTransform_.transform.innerIndexPtr()[index])
-                  .template topRows<3>()
-                  .noalias() += jc * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            jacobian_jointParams_to_modelParams<T>(
+                jc, paramIndex + d, this->parameterTransform_, jac.template topRows<3>());
           }
 
           if (this->activeJointParams_[paramIndex + 3 + d]) {
@@ -331,31 +307,18 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
                 crossProductMatrix(axis) * rot * awgt;
             const auto ja = Map<const Eigen::VectorX<T>>(rotD.data(), rotD.size());
 
-            for (auto index =
-                     this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3];
-                 index <
-                 this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                 ++index) {
-              jac.col(this->parameterTransform_.transform.innerIndexPtr()[index])
-                  .template topRows<3>()
-                  .noalias() += jc * this->parameterTransform_.transform.valuePtr()[index];
-              jac.col(this->parameterTransform_.transform.innerIndexPtr()[index])
-                  .template bottomRows<9>()
-                  .noalias() += ja * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            jacobian_jointParams_to_modelParams<T>(
+                jc, paramIndex + d + 3, this->parameterTransform_, jac.template topRows<3>());
+            jacobian_jointParams_to_modelParams<T>(
+                ja, paramIndex + d + 3, this->parameterTransform_, jac.template bottomRows<9>());
           }
         }
 
         if (this->activeJointParams_[paramIndex + 6]) {
           const Eigen::Vector3<T> jc =
               sign * (transform.rotate(jointState.getScaleDerivative(posd))) * wgt;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-               ++index) {
-            jac.col(this->parameterTransform_.transform.innerIndexPtr()[index])
-                .template topRows<3>()
-                .noalias() += jc * this->parameterTransform_.transform.valuePtr()[index];
-          }
+          jacobian_jointParams_to_modelParams<T>(
+              jc, paramIndex + 6, this->parameterTransform_, jac.template topRows<3>());
         }
 
         // go to the next joint
