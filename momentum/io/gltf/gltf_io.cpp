@@ -983,7 +983,7 @@ fx::gltf::Document makeCharacterDocument(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     bool embedResource,
     const GltfOptions& options) {
   GltfBuilder fileBuilder;
@@ -1218,7 +1218,7 @@ fx::gltf::Document makeCharacterDocument(
     const float fps,
     const MotionParameters& motion,
     const IdentityParameters& offsets,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     bool embedResource,
     const GltfOptions& options) {
   GltfBuilder fileBuilder;
@@ -1314,7 +1314,7 @@ void saveGltfCharacter(
     const float fps,
     const MotionParameters& motion,
     const IdentityParameters& offsets,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     const GltfFileFormat fileFormat,
     const GltfOptions& options) {
   constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
@@ -1330,7 +1330,7 @@ void saveGltfCharacter(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     const GltfFileFormat fileFormat,
     const GltfOptions& options) {
   constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
@@ -1346,7 +1346,7 @@ std::vector<std::byte> saveCharacterToBytes(
     float fps,
     const MotionParameters& motion,
     const IdentityParameters& offsets,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     const GltfOptions& options) {
   constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
   fx::gltf::Document model = makeCharacterDocument(

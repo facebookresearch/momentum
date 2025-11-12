@@ -73,7 +73,7 @@ void saveCharacter(
     const Character& character,
     float fps = 120.f,
     const MatrixXf& motion = MatrixXf(),
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     const FileSaveOptions& options = FileSaveOptions());
 
 /// High level function to save a character with motion in skeleton states and markers to any
@@ -93,6 +93,6 @@ void saveCharacter(
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     const FileSaveOptions& options = FileSaveOptions());
 } // namespace momentum

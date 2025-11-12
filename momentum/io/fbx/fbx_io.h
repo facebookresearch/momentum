@@ -81,7 +81,7 @@ void saveFbx(
     bool saveMesh = false,
     const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
     bool permissive = false,
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     std::string_view fbxNamespace = "");
 
 /// Save a character with animation using joint parameters directly.
@@ -103,7 +103,7 @@ void saveFbxWithJointParams(
     bool saveMesh = false,
     const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
     bool permissive = false,
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     std::string_view fbxNamespace = "");
 
 /// Save a character with animation using skeleton states directly.
@@ -125,7 +125,7 @@ void saveFbxWithSkeletonStates(
     bool saveMesh = false,
     const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
     bool permissive = false,
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     std::string_view fbxNamespace = "");
 
 /// Save a character model (skeleton and mesh) without animation.
