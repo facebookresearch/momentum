@@ -207,13 +207,15 @@ void saveCharacterToFile(
     const momentum::Character& character,
     const float fps,
     const std::optional<const Eigen::MatrixXf>& motion,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
+    const momentum::FileSaveOptions& options) {
   momentum::saveCharacter(
       path,
       character,
       fps,
       motion.has_value() ? motion.value().transpose() : Eigen::MatrixXf{},
-      markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      options);
 }
 
 void saveCharacterToFileWithSkelStates(
