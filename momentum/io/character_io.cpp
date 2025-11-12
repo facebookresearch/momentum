@@ -177,9 +177,9 @@ void saveCharacter(
 void saveCharacter(
     const filesystem::path& filename,
     const Character& character,
+    const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence,
-    const float fps) {
+    const std::vector<std::vector<Marker>>& markerSequence) {
   // Parse format from file extension
   const auto format = parseCharacterFormat(filename);
   MT_THROW_IF(
