@@ -160,6 +160,7 @@ mt_python_binding(
     character_test_helpers
     io
     io_fbx
+    io_file_save_options
     io_gltf
     io_legacy_json
     io_marker
