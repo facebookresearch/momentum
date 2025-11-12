@@ -40,20 +40,20 @@ momentum::MotionParameters transpose(const momentum::MotionParameters& motionPar
 }
 
 std::vector<momentum::SkeletonState> arrayToSkeletonStates(
-    const pybind11::array_t<float>& skel_states,
+    const pybind11::array_t<float>& skelStates,
     const momentum::Character& character) {
   MT_THROW_IF(
-      skel_states.ndim() != 3,
-      "Expected skel_states to have size n_frames x n_joints x 8, but got {}",
-      formatDimensions(skel_states));
+      skelStates.ndim() != 3,
+      "Expected skelStates to have size n_frames x n_joints x 8, but got {}",
+      formatDimensions(skelStates));
 
-  const int numFrames = skel_states.shape(0);
-  const int numJoints = skel_states.shape(1);
-  const int numElements = skel_states.shape(2);
+  const int numFrames = skelStates.shape(0);
+  const int numJoints = skelStates.shape(1);
+  const int numElements = skelStates.shape(2);
 
   MT_THROW_IF(
       numElements != 8,
-      "Expecting size 8 (3 translation + 4 rotation + scale) for last dimension of the skel_states, but got {}",
+      "Expecting size 8 (3 translation + 4 rotation + scale) for last dimension of the skelStates, but got {}",
       numElements);
   MT_THROW_IF(
       numJoints != character.skeleton.joints.size(),
@@ -63,7 +63,7 @@ std::vector<momentum::SkeletonState> arrayToSkeletonStates(
 
   std::vector<momentum::SkeletonState> skeletonStates(numFrames);
 
-  auto skelStatesAccess = skel_states.unchecked<3>();
+  auto skelStatesAccess = skelStates.unchecked<3>();
 
   for (int iFrame = 0; iFrame < numFrames; ++iFrame) {
     auto& skelStateCur = skeletonStates[iFrame];
@@ -133,20 +133,20 @@ void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
-    const pybind11::array_t<float>& skel_states,
+    const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const momentum::GltfOptions& options) {
-  const auto numFrames = skel_states.shape(0);
+  const auto numFrames = skelStates.shape(0);
 
   MT_THROW_IF(
       markers.has_value() && markers->size() != numFrames,
       "The number of frames of the skeleton states array {} does not coincide with the number of frames of the markers {}",
-      skel_states.size(),
+      skelStates.size(),
       markers->size());
 
   // Use the shared utility function for conversion
   std::vector<momentum::SkeletonState> skeletonStates =
-      arrayToSkeletonStates(skel_states, character);
+      arrayToSkeletonStates(skelStates, character);
 
   momentum::saveGltfCharacter(
       path,
@@ -202,6 +202,26 @@ void saveFBXCharacterToFileWithJointParams(
       fbxNamespace);
 }
 
+void saveFBXCharacterToFileWithSkelStates(
+    const std::string& path,
+    const momentum::Character& character,
+    float fps,
+    const pybind11::array_t<float>& skelStates,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
+    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    std::string_view fbxNamespace) {
+  momentum::saveFbxWithSkeletonStates(
+      path,
+      character,
+      arrayToSkeletonStates(skelStates, character),
+      fps,
+      true, /*saveMesh*/
+      coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
+      false, /*permissive*/
+      markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
+      fbxNamespace);
+}
+
 void saveCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
@@ -222,13 +242,13 @@ void saveCharacterToFileWithSkelStates(
     const std::string& path,
     const momentum::Character& character,
     const float fps,
-    std::span<const momentum::SkeletonState> skel_states,
+    const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
   momentum::saveCharacter(
       path,
       character,
       fps,
-      skel_states,
+      arrayToSkeletonStates(skelStates, character),
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}));
 }
 

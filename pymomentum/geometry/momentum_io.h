@@ -49,7 +49,7 @@ void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
     const momentum::Character& character,
     float fps,
-    const pybind11::array_t<float>& skel_states,
+    const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const momentum::GltfOptions& options);
 
@@ -72,6 +72,15 @@ void saveFBXCharacterToFileWithJointParams(
     const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace = "");
 
+void saveFBXCharacterToFileWithSkelStates(
+    const std::string& path,
+    const momentum::Character& character,
+    float fps,
+    const pybind11::array_t<float>& skelStates,
+    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
+    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    std::string_view fbxNamespace = "");
+
 void saveCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
@@ -84,7 +93,7 @@ void saveCharacterToFileWithSkelStates(
     const std::string& path,
     const momentum::Character& character,
     float fps,
-    std::span<const momentum::SkeletonState> skel_states,
+    const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers);
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(
@@ -113,7 +122,7 @@ std::vector<momentum::MarkerSequence> loadMarkersFromFile(
 /// This is shared between saveGLTFCharacterToFileFromSkelStates and
 /// GltfBuilder::addSkeletonStates
 std::vector<momentum::SkeletonState> arrayToSkeletonStates(
-    const pybind11::array_t<float>& skel_states,
+    const pybind11::array_t<float>& skelStates,
     const momentum::Character& character);
 
 bool isFbxsdkAvailable();
