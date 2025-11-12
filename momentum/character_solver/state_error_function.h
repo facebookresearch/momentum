@@ -13,11 +13,34 @@
 
 namespace momentum {
 
+/// Defines different methods for computing rotation error between two quaternions.
+enum class RotationErrorType {
+  /// Frobenius norm of rotation matrix difference: ||R1 - R2||_F^2
+  ///
+  /// This is the default method. It computes the squared Frobenius norm of the
+  /// difference between two rotation matrices. While not a geodesic distance,
+  /// it has smooth derivatives everywhere and is computationally efficient.
+  RotationMatrixDifference,
+
+  /// Logarithmic map of relative rotation: ||log(R1^{-1} * R2)||^2
+  ///
+  /// This method computes the squared norm of the logarithmic map of the relative
+  /// rotation quaternion. This gives the squared geodesic distance on SO(3), which
+  /// has a clear geometric interpretation. It uses numerically robust logmap
+  /// computation with Taylor series for small angles.
+  QuaternionLogMap,
+};
+
 template <typename T>
 class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
-  StateErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  explicit StateErrorFunctionT(const Character& character);
+  StateErrorFunctionT(
+      const Skeleton& skel,
+      const ParameterTransform& pt,
+      RotationErrorType rotationErrorType = RotationErrorType::RotationMatrixDifference);
+  explicit StateErrorFunctionT(
+      const Character& character,
+      RotationErrorType rotationErrorType = RotationErrorType::RotationMatrixDifference);
 
   [[nodiscard]] double getError(
       const ModelParametersT<T>& params,
@@ -84,6 +107,8 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   T posWgt_;
   T rotWgt_;
+
+  const RotationErrorType rotationErrorType_;
 
  public:
   // weights for the error functions

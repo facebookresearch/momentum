@@ -385,6 +385,36 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, StateError_GradientsAndJacobians) {
   }
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, StateErrorLogMap_GradientsAndJacobians) {
+  using T = typename TestFixture::Type;
+
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // create constraints
+  StateErrorFunctionT<T> errorFunction(
+      skeleton, character.parameterTransform, RotationErrorType::QuaternionLogMap);
+  {
+    SCOPED_TRACE("State Test");
+    SkeletonStateT<T> reference(transform.bindPose(), skeleton);
+    errorFunction.setTargetState(reference);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        ModelParametersT<T>::Zero(transform.numAllModelParameters()),
+        character,
+        Eps<T>(2e-5f, 1e-3));
+    EXPECT_EQ(errorFunction.getJacobianSize(), 6 * character.skeleton.joints.size());
+    for (size_t i = 0; i < 10; i++) {
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 5e-6));
+    }
+  }
+}
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, VertexVertexDistanceError_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
   SCOPED_TRACE(fmt::format("ScalarType: {}", typeid(T).name()));
