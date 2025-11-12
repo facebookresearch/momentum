@@ -637,10 +637,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorError_GradientsAndJacobian
   SkinnedLocatorErrorFunctionT<T> errorFunction(character);
 
   // Add constraints for some of the skinned locators
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   for (int i = 0; i < std::min(3, static_cast<int>(character.skinnedLocators.size())); ++i) {
     errorFunction.addConstraint(
-        i, TEST_WEIGHT_VALUE, uniform<Vector3<T>>(-1, 1)); // Random target position
+        i, kTestWeightValue, uniform<Vector3<T>>(-1, 1)); // Random target position
   }
 
   // Test with random parameters
@@ -666,7 +666,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_Gradien
     SkinnedLocatorTriangleErrorFunctionT<T> errorFunction(character, vertexConstraintType);
 
     // Add constraints for some of the skinned locators
-    const T TEST_WEIGHT_VALUE = 5.0;
+    const T kTestWeightValue = 5.0;
     for (int i = 0; i < character.skinnedLocators.size(); ++i) {
       // Create a simple triangle constraint
       Eigen::Vector3i triangleIndices =
@@ -675,7 +675,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_Gradien
       triangleBaryCoords /= triangleBaryCoords.sum();
       T depth = 0.5;
 
-      errorFunction.addConstraint(i, triangleIndices, triangleBaryCoords, depth, TEST_WEIGHT_VALUE);
+      errorFunction.addConstraint(i, triangleIndices, triangleBaryCoords, depth, kTestWeightValue);
     }
 
     // Test with random parameters
@@ -1264,14 +1264,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL2_GradientsAndJacobians) {
   // create constraints
   PositionErrorFunctionT<T> errorFunction(
       skeleton, character.parameterTransform, GeneralizedLossT<T>::kL2, uniform<T>(0.2, 10));
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PositionL2 Constraint Test");
     std::vector<PositionDataT<T>> cl{
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1300,14 +1300,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL1_GradientsAndJacobians) {
   // create constraints
   PositionErrorFunctionT<T> errorFunction(
       skeleton, character.parameterTransform, GeneralizedLossT<T>::kL1, uniform<T>(0.5, 2));
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PositionL1 Constraint Test");
     std::vector<PositionDataT<T>> cl{
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1346,14 +1346,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorCauchy_GradientsAndJacobian
   // create constraints
   PositionErrorFunctionT<T> errorFunction(
       skeleton, character.parameterTransform, GeneralizedLossT<T>::kCauchy, uniform<T>(0.5, 2));
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PositionCauchy Constraint Test");
     std::vector<PositionDataT<T>> cl{
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1392,14 +1392,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorWelsch_GradientsAndJacobian
   // create constraints
   PositionErrorFunctionT<T> errorFunction(
       skeleton, character.parameterTransform, GeneralizedLossT<T>::kWelsch);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PositionWelsch Constraint Test");
     std::vector<PositionDataT<T>> cl{
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1438,14 +1438,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorGeneral_GradientsAndJacobia
   // create constraints
   PositionErrorFunctionT<T> errorFunction(
       skeleton, character.parameterTransform, uniform<T>(0.1, 10));
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PositionGeneral Constraint Test");
     std::vector<PositionDataT<T>> cl{
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         PositionDataT<T>(
-            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            uniform<Vector3<T>>(-1, 1), uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1483,7 +1483,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneErrorL2_GradientsAndJacobians) {
 
   // create constraints
   PlaneErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PlaneL2 Constraint Test");
     std::vector<PlaneDataT<T>> cl{
@@ -1492,13 +1492,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneErrorL2_GradientsAndJacobians) {
             uniform<Vector3<T>>(0.1, 1).normalized(),
             uniform<T>(0, 1),
             2,
-            TEST_WEIGHT_VALUE),
+            kTestWeightValue),
         PlaneDataT<T>(
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized(),
             uniform<T>(0, 1),
             1,
-            TEST_WEIGHT_VALUE)};
+            kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1527,7 +1527,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, HalfPlaneErrorL2_GradientsAndJacobians) 
 
   // create constraints
   PlaneErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform, true);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("PlaneL2 Constraint Test");
     std::vector<PlaneDataT<T>> cl{
@@ -1536,13 +1536,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, HalfPlaneErrorL2_GradientsAndJacobians) 
             uniform<Vector3<T>>(0.1, 1).normalized(),
             uniform<T>(0, 1),
             2,
-            TEST_WEIGHT_VALUE),
+            kTestWeightValue),
         PlaneDataT<T>(
             uniform<Vector3<T>>(0, 1),
             uniform<Vector3<T>>(0.1, 1).normalized(),
             uniform<T>(0, 1),
             1,
-            TEST_WEIGHT_VALUE)};
+            kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1571,7 +1571,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
 
   // create constraints
   OrientationErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
 
   {
     SCOPED_TRACE("Orientation Constraint Test");
@@ -1580,12 +1580,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
             rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
             rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
             2,
-            TEST_WEIGHT_VALUE),
+            kTestWeightValue),
         OrientationDataT<T>(
             rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
             rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
             1,
-            TEST_WEIGHT_VALUE)};
+            kTestWeightValue)};
     errorFunction.setConstraints(std::move(cl));
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1615,14 +1615,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisDiffErrorL2_GradientsAndJacobia
 
   // create constraints
   FixedAxisDiffErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("FixedAxisDiffL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         FixedAxisDataT<T>(
-            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1651,14 +1651,14 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
 
   // create constraints
   FixedAxisCosErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("FixedAxisCosL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         FixedAxisDataT<T>(
-            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 1, TEST_WEIGHT_VALUE)};
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 1, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -1688,16 +1688,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisAngleErrorL2_GradientsAndJacobi
 
   // create constraints
   FixedAxisAngleErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("FixedAxisAngleL2 Constraint Test");
     std::vector<FixedAxisDataT<T>> cl{
         FixedAxisDataT<T>(
-            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, TEST_WEIGHT_VALUE),
+            rng.uniform<Vector3<T>>(-1, 1), rng.uniform<Vector3<T>>(-1, 1), 2, kTestWeightValue),
         // corner case when the angle is close to zero
         FixedAxisDataT<T>(
-            Vector3<T>::UnitY(), Vector3<T>(1e-16, 1 + 1e-16, 1e-16), 1, TEST_WEIGHT_VALUE),
-        FixedAxisDataT<T>(Vector3<T>::UnitX(), Vector3<T>::UnitX(), 2, TEST_WEIGHT_VALUE)};
+            Vector3<T>::UnitY(), Vector3<T>(1e-16, 1 + 1e-16, 1e-16), 1, kTestWeightValue),
+        FixedAxisDataT<T>(Vector3<T>::UnitX(), Vector3<T>::UnitX(), 2, kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     if constexpr (std::is_same_v<T, float>) {
@@ -1735,7 +1735,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
 
   // create constraints
   NormalErrorFunctionT<T> errorFunction(character.skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("Normal Constraint Test");
     std::vector<NormalDataT<T>> cl{
@@ -1744,13 +1744,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, NormalError_GradientsAndJacobians) {
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             1,
-            TEST_WEIGHT_VALUE),
+            kTestWeightValue),
         NormalDataT<T>(
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             2,
-            TEST_WEIGHT_VALUE)};
+            kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     if constexpr (std::is_same_v<T, float>) {
@@ -1790,7 +1790,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
 
   // create constraints
   AimDistErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("AimDist Constraint Test");
     std::vector<AimDataT<T>> cl{
@@ -1799,13 +1799,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDistError_GradientsAndJacobians) {
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             1,
-            TEST_WEIGHT_VALUE),
+            kTestWeightValue),
         AimDataT<T>(
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             2,
-            TEST_WEIGHT_VALUE)};
+            kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     if constexpr (std::is_same_v<T, float>) {
@@ -1845,7 +1845,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDirError_GradientsAndJacobians) {
 
   // create constraints
   AimDirErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("AimDir Constraint Test");
     std::vector<AimDataT<T>> cl{
@@ -1854,13 +1854,13 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, AimDirError_GradientsAndJacobians) {
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             1,
-            TEST_WEIGHT_VALUE),
+            kTestWeightValue),
         AimDataT<T>(
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             uniform<Vector3<T>>(-1, 1),
             2,
-            TEST_WEIGHT_VALUE)};
+            kTestWeightValue)};
     errorFunction.setConstraints(cl);
 
     if constexpr (std::is_same_v<T, float>) {
@@ -1956,7 +1956,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
 
   // create constraints
   DistanceErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 4.5;
+  const T kTestWeightValue = 4.5;
   {
     SCOPED_TRACE("Distance Constraint Test");
     DistanceConstraintDataT<T> constraintData;
@@ -1964,7 +1964,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
     constraintData.offset = normal<Vector3<T>>(0, 1);
     constraintData.origin = normal<Vector3<T>>(0, 1);
     constraintData.target = 2.3f;
-    constraintData.weight = TEST_WEIGHT_VALUE;
+    constraintData.weight = kTestWeightValue;
     errorFunction.setConstraints({constraintData});
 
     if constexpr (std::is_same_v<T, float>) {
@@ -2002,7 +2002,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointDistanceError_GradientsAndJa
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
 
   JointToJointDistanceErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
-  const T TEST_WEIGHT_VALUE = 2.5;
+  const T kTestWeightValue = 2.5;
 
   {
     SCOPED_TRACE("JointToJoint Distance Constraint Test");
@@ -2015,10 +2015,10 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointDistanceError_GradientsAndJa
         2,
         uniform<Vector3<T>>(-1, 1),
         uniform<T>(0.5, 2.0),
-        TEST_WEIGHT_VALUE);
+        kTestWeightValue);
 
     errorFunction.addConstraint(
-        0, Vector3<T>::Zero(), 2, Vector3<T>::UnitX(), uniform<T>(1.0, 3.0), TEST_WEIGHT_VALUE);
+        0, Vector3<T>::Zero(), 2, Vector3<T>::UnitX(), uniform<T>(1.0, 3.0), kTestWeightValue);
 
     if constexpr (std::is_same_v<T, float>) {
       TEST_GRADIENT_AND_JACOBIAN(
