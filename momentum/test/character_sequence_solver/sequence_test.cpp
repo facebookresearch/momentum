@@ -316,6 +316,135 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
   }
 }
 
+TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_GradientsAndJacobians) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  // create constraints with QuaternionLogMap error type
+  StateSequenceErrorFunctiond errorFunction(character, RotationErrorType::QuaternionLogMap);
+  {
+    SCOPED_TRACE("LogMap Motion Test");
+    SkeletonState reference(transform.bindPose(), skeleton);
+
+    VectorXd posWeights = VectorXd::Ones(skeleton.joints.size());
+    VectorXd rotWeights = VectorXd::Ones(skeleton.joints.size());
+    posWeights(0) = 4.0f;
+    posWeights(1) = 5.0f;
+    posWeights(2) = 0;
+
+    rotWeights(0) = 2.0f;
+    rotWeights(1) = 0.0f;
+    rotWeights(2) = 3;
+    errorFunction.setTargetWeights(posWeights, rotWeights);
+
+    // Test that Jacobian size is correct for logmap (6 per active joint instead of 12)
+    EXPECT_EQ(errorFunction.getJacobianSize(), 6 * skeleton.joints.size());
+
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_WithOffsets) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  // create constraints with QuaternionLogMap error type
+  StateSequenceErrorFunctiond errorFunction(character, RotationErrorType::QuaternionLogMap);
+  {
+    Random<> gen(1234);
+    SCOPED_TRACE("LogMap Motion Test with Offsets");
+    SkeletonState reference(transform.bindPose(), skeleton);
+
+    VectorXd posWeights = VectorXd::Ones(skeleton.joints.size());
+    VectorXd rotWeights = VectorXd::Ones(skeleton.joints.size());
+
+    std::vector<Transformd> offsets(skeleton.joints.size());
+    for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+      offsets[i].translation = gen.normal<Eigen::Vector3d>(0, 2.0);
+      offsets[i].rotation = gen.uniformQuaternion<double>();
+      offsets[i].scale = 1.0 + gen.normal<double>(0, 0.02);
+    }
+    errorFunction.setTargetState(offsets);
+
+    posWeights(0) = 2.0f;
+    posWeights(1) = 1.0f;
+    posWeights(2) = 3;
+
+    rotWeights(0) = 2.0f;
+    rotWeights(1) = 2.0f;
+    rotWeights(2) = 0;
+    errorFunction.setTargetWeights(posWeights, rotWeights);
+
+    // Test that Jacobian size is correct for logmap (6 per active joint instead of 12)
+    const auto nActiveJoints = (posWeights.array() != 0 || rotWeights.array() != 0).count();
+    EXPECT_EQ(errorFunction.getJacobianSize(), 6 * nActiveJoints);
+
+    testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_CompareWithMatrixDiff) {
+  // Test that both error types produce valid results and handle the same data correctly
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  // Create two error functions: one with LogMap, one with RotationMatrixDifference
+  StateSequenceErrorFunctiond logmapErrorFunction(character, RotationErrorType::QuaternionLogMap);
+  StateSequenceErrorFunctiond matrixDiffErrorFunction(
+      character, RotationErrorType::RotationMatrixDifference);
+
+  {
+    SCOPED_TRACE("Comparison Test");
+
+    VectorXd posWeights = VectorXd::Ones(skeleton.joints.size());
+    VectorXd rotWeights = VectorXd::Ones(skeleton.joints.size());
+
+    logmapErrorFunction.setTargetWeights(posWeights, rotWeights);
+    matrixDiffErrorFunction.setTargetWeights(posWeights, rotWeights);
+
+    // Test with zero parameters - both should give zero error
+    auto zeroParams = zeroModelParameters(character, 2);
+    const ParameterTransformd transformD = transform.cast<double>();
+
+    std::vector<SkeletonStated> skelStates(2);
+    for (size_t iFrame = 0; iFrame < 2; ++iFrame) {
+      skelStates[iFrame] = SkeletonStated(transformD.apply(zeroParams[iFrame]), skeleton);
+    }
+    std::vector<MeshStated> meshStates(2);
+
+    const double logmapError = logmapErrorFunction.getError(zeroParams, skelStates, meshStates);
+    const double matrixDiffError =
+        matrixDiffErrorFunction.getError(zeroParams, skelStates, meshStates);
+
+    // Both should be zero for identical frames
+    EXPECT_NEAR(logmapError, 0.0, 1e-10);
+    EXPECT_NEAR(matrixDiffError, 0.0, 1e-10);
+
+    // Test with random parameters - both should produce valid gradients and Jacobians
+    for (size_t i = 0; i < 5; i++) {
+      auto parameters = randomModelParameters(character, 2);
+
+      testGradientAndJacobian<double>(
+          logmapErrorFunction, parameters, character, 2e-3f, 1e-6f, true);
+      testGradientAndJacobian<double>(
+          matrixDiffErrorFunction, parameters, character, 2e-3f, 1e-6f, true);
+    }
+  }
+}
+
 TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians) {
   // create skeleton and reference values
   const Character character = createTestCharacter();
