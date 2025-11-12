@@ -144,61 +144,65 @@ auto performBatchedClosestHitQuery(
   auto hitPointsData = hitPoints.mutable_unchecked<2>();
   auto baryCoordsData = baryCoords.mutable_unchecked<2>();
 
-  if (hasMaxDistances) {
-    const auto maxDistancesData = maxDistances.unchecked<1>();
-    for (py::ssize_t i = 0; i < numRays; ++i) {
-      Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
-      Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
+  {
+    pybind11::gil_scoped_release release;
 
-      axel::Ray3f ray(origin, direction, maxDistancesData(i));
-      auto result = bvh.closestHit(ray);
+    if (hasMaxDistances) {
+      const auto maxDistancesData = maxDistances.unchecked<1>();
+      for (py::ssize_t i = 0; i < numRays; ++i) {
+        Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
+        Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
 
-      if (result.has_value()) {
-        triangleIdsData(i) = result->triangleId;
-        hitDistancesData(i) = result->hitDistance;
-        hitPointsData(i, 0) = result->hitPoint.x();
-        hitPointsData(i, 1) = result->hitPoint.y();
-        hitPointsData(i, 2) = result->hitPoint.z();
-        baryCoordsData(i, 0) = result->baryCoords.x();
-        baryCoordsData(i, 1) = result->baryCoords.y();
-        baryCoordsData(i, 2) = result->baryCoords.z();
-      } else {
-        triangleIdsData(i) = -1;
-        hitDistancesData(i) = std::numeric_limits<float>::max();
-        hitPointsData(i, 0) = 0.0f;
-        hitPointsData(i, 1) = 0.0f;
-        hitPointsData(i, 2) = 0.0f;
-        baryCoordsData(i, 0) = 0.0f;
-        baryCoordsData(i, 1) = 0.0f;
-        baryCoordsData(i, 2) = 0.0f;
+        axel::Ray3f ray(origin, direction, maxDistancesData(i));
+        auto result = bvh.closestHit(ray);
+
+        if (result.has_value()) {
+          triangleIdsData(i) = result->triangleId;
+          hitDistancesData(i) = result->hitDistance;
+          hitPointsData(i, 0) = result->hitPoint.x();
+          hitPointsData(i, 1) = result->hitPoint.y();
+          hitPointsData(i, 2) = result->hitPoint.z();
+          baryCoordsData(i, 0) = result->baryCoords.x();
+          baryCoordsData(i, 1) = result->baryCoords.y();
+          baryCoordsData(i, 2) = result->baryCoords.z();
+        } else {
+          triangleIdsData(i) = -1;
+          hitDistancesData(i) = std::numeric_limits<float>::max();
+          hitPointsData(i, 0) = 0.0f;
+          hitPointsData(i, 1) = 0.0f;
+          hitPointsData(i, 2) = 0.0f;
+          baryCoordsData(i, 0) = 0.0f;
+          baryCoordsData(i, 1) = 0.0f;
+          baryCoordsData(i, 2) = 0.0f;
+        }
       }
-    }
-  } else {
-    for (py::ssize_t i = 0; i < numRays; ++i) {
-      Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
-      Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
+    } else {
+      for (py::ssize_t i = 0; i < numRays; ++i) {
+        Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
+        Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
 
-      axel::Ray3f ray(origin, direction);
-      auto result = bvh.closestHit(ray);
+        axel::Ray3f ray(origin, direction);
+        auto result = bvh.closestHit(ray);
 
-      if (result.has_value()) {
-        triangleIdsData(i) = result->triangleId;
-        hitDistancesData(i) = result->hitDistance;
-        hitPointsData(i, 0) = result->hitPoint.x();
-        hitPointsData(i, 1) = result->hitPoint.y();
-        hitPointsData(i, 2) = result->hitPoint.z();
-        baryCoordsData(i, 0) = result->baryCoords.x();
-        baryCoordsData(i, 1) = result->baryCoords.y();
-        baryCoordsData(i, 2) = result->baryCoords.z();
-      } else {
-        triangleIdsData(i) = -1;
-        hitDistancesData(i) = std::numeric_limits<float>::max();
-        hitPointsData(i, 0) = 0.0f;
-        hitPointsData(i, 1) = 0.0f;
-        hitPointsData(i, 2) = 0.0f;
-        baryCoordsData(i, 0) = 0.0f;
-        baryCoordsData(i, 1) = 0.0f;
-        baryCoordsData(i, 2) = 0.0f;
+        if (result.has_value()) {
+          triangleIdsData(i) = result->triangleId;
+          hitDistancesData(i) = result->hitDistance;
+          hitPointsData(i, 0) = result->hitPoint.x();
+          hitPointsData(i, 1) = result->hitPoint.y();
+          hitPointsData(i, 2) = result->hitPoint.z();
+          baryCoordsData(i, 0) = result->baryCoords.x();
+          baryCoordsData(i, 1) = result->baryCoords.y();
+          baryCoordsData(i, 2) = result->baryCoords.z();
+        } else {
+          triangleIdsData(i) = -1;
+          hitDistancesData(i) = std::numeric_limits<float>::max();
+          hitPointsData(i, 0) = 0.0f;
+          hitPointsData(i, 1) = 0.0f;
+          hitPointsData(i, 2) = 0.0f;
+          baryCoordsData(i, 0) = 0.0f;
+          baryCoordsData(i, 1) = 0.0f;
+          baryCoordsData(i, 2) = 0.0f;
+        }
       }
     }
   }
@@ -251,22 +255,26 @@ auto performBatchedAnyHitQuery(
   auto hits = py::array_t<bool>(numRays);
   auto hitsData = hits.mutable_unchecked<1>();
 
-  if (hasMaxDistances) {
-    const auto maxDistancesData = maxDistances.unchecked<1>();
-    for (py::ssize_t i = 0; i < numRays; ++i) {
-      Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
-      Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
+  {
+    pybind11::gil_scoped_release release;
 
-      axel::Ray3f ray(origin, direction, maxDistancesData(i));
-      hitsData(i) = bvh.anyHit(ray);
-    }
-  } else {
-    for (py::ssize_t i = 0; i < numRays; ++i) {
-      Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
-      Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
+    if (hasMaxDistances) {
+      const auto maxDistancesData = maxDistances.unchecked<1>();
+      for (py::ssize_t i = 0; i < numRays; ++i) {
+        Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
+        Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
 
-      axel::Ray3f ray(origin, direction);
-      hitsData(i) = bvh.anyHit(ray);
+        axel::Ray3f ray(origin, direction, maxDistancesData(i));
+        hitsData(i) = bvh.anyHit(ray);
+      }
+    } else {
+      for (py::ssize_t i = 0; i < numRays; ++i) {
+        Eigen::Vector3f origin(originsData(i, 0), originsData(i, 1), originsData(i, 2));
+        Eigen::Vector3f direction(directionsData(i, 0), directionsData(i, 1), directionsData(i, 2));
+
+        axel::Ray3f ray(origin, direction);
+        hitsData(i) = bvh.anyHit(ray);
+      }
     }
   }
 
@@ -318,17 +326,20 @@ auto performAllHitsQuery(
   auto hitPointsData = hitPoints.mutable_unchecked<2>();
   auto baryCoordsData = baryCoords.mutable_unchecked<2>();
 
-  for (size_t i = 0; i < numHits; ++i) {
-    triangleIdsData(i) = results[i].triangleId;
-    hitDistancesData(i) = results[i].hitDistance;
-    hitPointsData(i, 0) = results[i].hitPoint.x();
-    hitPointsData(i, 1) = results[i].hitPoint.y();
-    hitPointsData(i, 2) = results[i].hitPoint.z();
-    baryCoordsData(i, 0) = results[i].baryCoords.x();
-    baryCoordsData(i, 1) = results[i].baryCoords.y();
-    baryCoordsData(i, 2) = results[i].baryCoords.z();
-  }
+  {
+    pybind11::gil_scoped_release release;
 
+    for (size_t i = 0; i < numHits; ++i) {
+      triangleIdsData(i) = results[i].triangleId;
+      hitDistancesData(i) = results[i].hitDistance;
+      hitPointsData(i, 0) = results[i].hitPoint.x();
+      hitPointsData(i, 1) = results[i].hitPoint.y();
+      hitPointsData(i, 2) = results[i].hitPoint.z();
+      baryCoordsData(i, 0) = results[i].baryCoords.x();
+      baryCoordsData(i, 1) = results[i].baryCoords.y();
+      baryCoordsData(i, 2) = results[i].baryCoords.z();
+    }
+  }
   return py::make_tuple(triangleIds, hitDistances, hitPoints, baryCoords);
 }
 
@@ -397,25 +408,29 @@ auto performBatchedClosestSurfacePointQuery(const BvhType& bvh, const py::array_
   auto triangleIndicesData = triangle_indices.template mutable_unchecked<1>();
   auto baryCoordsData = bary_coords.template mutable_unchecked<2>();
 
-  for (py::ssize_t i = 0; i < numQueries; ++i) {
-    Eigen::Vector3f pos(queriesData(i, 0), queriesData(i, 1), queriesData(i, 2));
-    auto result = bvh.closestSurfacePoint(pos);
+  {
+    pybind11::gil_scoped_release release;
 
-    // Check if result is valid
-    validData(i) = (result.triangleIdx != axel::kInvalidTriangleIdx);
-    pointsData(i, 0) = result.point.x();
-    pointsData(i, 1) = result.point.y();
-    pointsData(i, 2) = result.point.z();
-    triangleIndicesData(i) = result.triangleIdx;
+    for (py::ssize_t i = 0; i < numQueries; ++i) {
+      Eigen::Vector3f pos(queriesData(i, 0), queriesData(i, 1), queriesData(i, 2));
+      auto result = bvh.closestSurfacePoint(pos);
 
-    if (result.baryCoords.has_value()) {
-      baryCoordsData(i, 0) = result.baryCoords->x();
-      baryCoordsData(i, 1) = result.baryCoords->y();
-      baryCoordsData(i, 2) = result.baryCoords->z();
-    } else {
-      baryCoordsData(i, 0) = 0.0f;
-      baryCoordsData(i, 1) = 0.0f;
-      baryCoordsData(i, 2) = 0.0f;
+      // Check if result is valid
+      validData(i) = (result.triangleIdx != axel::kInvalidTriangleIdx);
+      pointsData(i, 0) = result.point.x();
+      pointsData(i, 1) = result.point.y();
+      pointsData(i, 2) = result.point.z();
+      triangleIndicesData(i) = result.triangleIdx;
+
+      if (result.baryCoords.has_value()) {
+        baryCoordsData(i, 0) = result.baryCoords->x();
+        baryCoordsData(i, 1) = result.baryCoords->y();
+        baryCoordsData(i, 2) = result.baryCoords->z();
+      } else {
+        baryCoordsData(i, 0) = 0.0f;
+        baryCoordsData(i, 1) = 0.0f;
+        baryCoordsData(i, 2) = 0.0f;
+      }
     }
   }
 
