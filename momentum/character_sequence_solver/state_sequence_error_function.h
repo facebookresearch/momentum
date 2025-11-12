@@ -10,6 +10,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_sequence_solver/fwd.h>
 #include <momentum/character_sequence_solver/sequence_error_function.h>
+#include <momentum/character_solver/state_error_function.h>
 
 namespace momentum {
 
@@ -20,8 +21,13 @@ namespace momentum {
 template <typename T>
 class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
  public:
-  StateSequenceErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
-  explicit StateSequenceErrorFunctionT(const Character& character);
+  StateSequenceErrorFunctionT(
+      const Skeleton& skel,
+      const ParameterTransform& pt,
+      RotationErrorType rotationErrorType = RotationErrorType::RotationMatrixDifference);
+  explicit StateSequenceErrorFunctionT(
+      const Character& character,
+      RotationErrorType rotationErrorType = RotationErrorType::RotationMatrixDifference);
 
   [[nodiscard]] size_t numFrames() const final {
     return 2;
@@ -99,6 +105,8 @@ class StateSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
 
   T posWgt_;
   T rotWgt_;
+
+  const RotationErrorType rotationErrorType_;
 
  public:
   // weights for the error functions
