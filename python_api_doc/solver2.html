@@ -294,6 +294,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.ProjectionErrorFunction.num_constraints"><code class="docutils literal notranslate"><span class="pre">ProjectionErrorFunction.num_constraints()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType"><code class="docutils literal notranslate"><span class="pre">RotationErrorType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType.QuaternionLogMap"><code class="docutils literal notranslate"><span class="pre">RotationErrorType.QuaternionLogMap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType.RotationMatrixDifference"><code class="docutils literal notranslate"><span class="pre">RotationErrorType.RotationMatrixDifference</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType.__init__"><code class="docutils literal notranslate"><span class="pre">RotationErrorType.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType.name"><code class="docutils literal notranslate"><span class="pre">RotationErrorType.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType.value"><code class="docutils literal notranslate"><span class="pre">RotationErrorType.value</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.SequenceErrorFunction"><code class="docutils literal notranslate"><span class="pre">SequenceErrorFunction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SequenceErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">SequenceErrorFunction.__init__()</span></code></a></li>
 </ul>
@@ -2315,6 +2323,51 @@ This is useful for camera-based constraints where you want to match a 3D point t
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.RotationErrorType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">RotationErrorType</span></span><a class="headerlink" href="#pymomentum.solver2.RotationErrorType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Members:</p>
+<blockquote>
+<div><p>RotationMatrixDifference : Frobenius norm of rotation matrix difference: ||R1 - R2||_F^2.</p>
+</div></blockquote>
+<p>This is the default method. It computes the squared Frobenius norm of the
+difference between two rotation matrices. While not a geodesic distance,
+it has smooth derivatives everywhere and is computationally efficient.</p>
+<blockquote>
+<div><p>QuaternionLogMap : Logarithmic map of relative rotation: ||log(R1^{-1} * R2)||^2.</p>
+</div></blockquote>
+<p>This method computes the squared norm of the logarithmic map of the relative
+rotation quaternion. This gives the squared geodesic distance on SO(3), which
+has a clear geometric interpretation. It uses numerically robust logmap
+computation with Taylor series for small angles.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver2.RotationErrorType.QuaternionLogMap">
+<span class="sig-name descname"><span class="pre">QuaternionLogMap</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;RotationErrorType.QuaternionLogMap:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.solver2.RotationErrorType.QuaternionLogMap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver2.RotationErrorType.RotationMatrixDifference">
+<span class="sig-name descname"><span class="pre">RotationMatrixDifference</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;RotationErrorType.RotationMatrixDifference:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.solver2.RotationErrorType.RotationMatrixDifference" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.RotationErrorType.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.RotationErrorType" title="pymomentum.solver2.RotationErrorType"><span class="pre">pymomentum.solver2.RotationErrorType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.RotationErrorType.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.RotationErrorType.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.solver2.RotationErrorType.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.RotationErrorType.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.solver2.RotationErrorType.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.solver2.SequenceErrorFunction">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">SequenceErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.SequenceErrorFunction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
@@ -2687,7 +2740,7 @@ use <a class="reference internal" href="#pymomentum.solver2.SequenceSolverFuncti
 <dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.StateErrorFunction.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.StateErrorFunction" title="pymomentum.solver2.StateErrorFunction"><span class="pre">pymomentum.solver2.StateErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_position_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_rotation_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.StateErrorFunction.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">pymomentum.solver2.StateErrorFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character:</span> <span class="pre">pymomentum.geometry.Character</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_weight:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_weight:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_position_weights:</span> <span class="pre">Optional[numpy.ndarray[numpy.float32]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_rotation_weights:</span> <span class="pre">Optional[numpy.ndarray[numpy.float32]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_error_type:</span> <span class="pre">pymomentum.solver2.RotationErrorType</span> <span class="pre">=</span> <span class="pre">&lt;RotationErrorType.RotationMatrixDifference:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.StateErrorFunction.__init__" title="Link to this definition"></a></dt>
 <dd><p>Constructs a StateErrorFunction for a given character.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2700,6 +2753,8 @@ use <a class="reference internal" href="#pymomentum.solver2.SequenceSolverFuncti
 Must match the number of joints in the skeleton.</p></li>
 <li><p><strong>joint_rotation_weights</strong> – Optional numpy array of per-joint rotation weights.
 Must match the number of joints in the skeleton.</p></li>
+<li><p><strong>rotation_error_type</strong> – The type of rotation error to use. Defaults to RotationMatrixDifference.
+See <a class="reference internal" href="#pymomentum.solver2.RotationErrorType" title="pymomentum.solver2.RotationErrorType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RotationErrorType</span></code></a> for options.</p></li>
 </ul>
 </dd>
 </dl>
