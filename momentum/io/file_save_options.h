@@ -17,9 +17,9 @@ namespace momentum {
 
 /// File format in which the character is saved
 enum class GltfFileFormat {
-  Extension = 0, // The file extension is used for deduction (e.g. ".gltf" --> ASCII)
-  GltfBinary = 1, // Binary format (generally .glb)
-  GltfAscii = 2, // ASCII format (generally .gltf)
+  Auto = 0, // The file extension is used for deduction (e.g. ".gltf" --> ASCII)
+  Binary = 1, // Binary format (generally .glb)
+  Ascii = 2, // ASCII format (generally .gltf)
 };
 
 /// Options for GLTF file export
@@ -105,9 +105,9 @@ struct FileSaveOptions {
   /// Only used for GLTF output
   bool extensions = true;
 
-  /// GLTF file format selection (default: Extension)
+  /// GLTF file format selection (default: Auto)
   /// Only used for GLTF output
-  GltfFileFormat gltfFileFormat = GltfFileFormat::Extension;
+  GltfFileFormat gltfFileFormat = GltfFileFormat::Auto;
 };
 
 } // namespace momentum

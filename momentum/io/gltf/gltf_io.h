@@ -113,7 +113,7 @@ void saveGltfCharacter(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
-    GltfFileFormat fileFormat = GltfFileFormat::Extension,
+    GltfFileFormat fileFormat = GltfFileFormat::Auto,
     const GltfOptions& options = GltfOptions());
 
 /// Saves character skeleton states to a glb file.
@@ -126,7 +126,7 @@ void saveGltfCharacter(
     float fps,
     std::span<const SkeletonState> skeletonStates,
     std::span<const std::vector<Marker>> markerSequence = {},
-    GltfFileFormat fileFormat = GltfFileFormat::Extension,
+    GltfFileFormat fileFormat = GltfFileFormat::Auto,
     const GltfOptions& options = GltfOptions());
 
 std::vector<std::byte> saveCharacterToBytes(

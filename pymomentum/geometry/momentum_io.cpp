@@ -125,7 +125,7 @@ void saveGLTFCharacterToFile(
       transpose(motion.value_or(momentum::MotionParameters{})),
       offsets.value_or(momentum::IdentityParameters{}),
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      momentum::GltfFileFormat::Extension,
+      momentum::GltfFileFormat::Auto,
       options);
 }
 
@@ -154,7 +154,7 @@ void saveGLTFCharacterToFileFromSkelStates(
       fps,
       skeletonStates,
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      momentum::GltfFileFormat::Extension,
+      momentum::GltfFileFormat::Auto,
       options);
 }
 

@@ -89,18 +89,18 @@ class GltfBuilder final {
       MarkerMesh markerMesh = MarkerMesh::None,
       const std::string& animName = "default");
 
-  // Save the file with the provided filename. If the fileFormat is 'GltfFileFormat::Extension',
+  // Save the file with the provided filename. If the fileFormat is 'GltfFileFormat::Auto',
   // will deduct the file format by filename.
   // When embedResources is true, it will set all the existing buffers to embed the data.
   void save(
       const filesystem::path& filename,
-      GltfFileFormat fileFormat = GltfFileFormat::Extension,
+      GltfFileFormat fileFormat = GltfFileFormat::Auto,
       bool embedResources = false);
 
   static void save(
       fx::gltf::Document& document,
       const filesystem::path& filename,
-      GltfFileFormat fileFormat = GltfFileFormat::Extension,
+      GltfFileFormat fileFormat = GltfFileFormat::Auto,
       bool embedResources = false);
 
   /// Set all existing buffers to embed resources.

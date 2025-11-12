@@ -771,9 +771,8 @@ void saveDocument(
     const GltfFileFormat fileFormat) {
   // save model
   auto deducedFileFormat = fileFormat;
-  if (fileFormat == GltfFileFormat::Extension &&
-      filename.extension() == filesystem::path(".gltf")) {
-    deducedFileFormat = GltfFileFormat::GltfAscii;
+  if (fileFormat == GltfFileFormat::Auto && filename.extension() == filesystem::path(".gltf")) {
+    deducedFileFormat = GltfFileFormat::Ascii;
   }
 
   try {
@@ -787,7 +786,7 @@ void saveDocument(
     }
 
     switch (deducedFileFormat) {
-      case GltfFileFormat::GltfAscii: {
+      case GltfFileFormat::Ascii: {
         // we can't embed binary if we writing to ascii format.
         // so we need to provide exported with a uri name relative to json root.
         filesystem::path new_filename = filename;
@@ -801,9 +800,9 @@ void saveDocument(
         fx::gltf::Save(model, filename.string(), false);
         break;
       }
-      case GltfFileFormat::Extension:
+      case GltfFileFormat::Auto:
         [[fallthrough]];
-      case GltfFileFormat::GltfBinary:
+      case GltfFileFormat::Binary:
         fx::gltf::Save(model, filename.string(), true);
         break;
     }

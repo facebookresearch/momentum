@@ -39,9 +39,9 @@ void registerGltfBuilderBindings(pybind11::module& m) {
   // momentum::GltfFileFormat enum
   // =====================================================
   py::enum_<mm::GltfFileFormat>(m, "GltfFileFormat")
-      .value("Extension", mm::GltfFileFormat::Extension)
-      .value("GltfBinary", mm::GltfFileFormat::GltfBinary)
-      .value("GltfAscii", mm::GltfFileFormat::GltfAscii);
+      .value("Auto", mm::GltfFileFormat::Auto)
+      .value("Binary", mm::GltfFileFormat::Binary)
+      .value("Ascii", mm::GltfFileFormat::Ascii);
 
   // =====================================================
   // momentum::GltfBuilder
@@ -250,8 +250,7 @@ analysis or visualization. Optional marker mesh visualization can be added as un
           [](mm::GltfBuilder& builder,
              const std::string& filename,
              const std::optional<mm::GltfFileFormat>& fileFormat) {
-            mm::GltfFileFormat actualFileFormat =
-                fileFormat.value_or(mm::GltfFileFormat::Extension);
+            mm::GltfFileFormat actualFileFormat = fileFormat.value_or(mm::GltfFileFormat::Auto);
             builder.save(filename, actualFileFormat);
           },
           R"(Save the GLTF scene to a file.
@@ -277,8 +276,7 @@ can be explicitly specified or automatically deduced from the file extension.
                 doc,
                 output,
                 {},
-                fileFormat.value_or(mm::GltfFileFormat::GltfBinary) !=
-                    mm::GltfFileFormat::GltfAscii);
+                fileFormat.value_or(mm::GltfFileFormat::Binary) != mm::GltfFileFormat::Ascii);
 
             // Convert to Python bytes
             const std::string& str = output.str();
@@ -290,9 +288,9 @@ This method serializes the constructed GLTF scene to a byte array without
 writing to disk. This is useful for programmatic processing, network transmission,
 or when you need the GLTF data as bytes for other purposes.
 
-:return: The GLTF scene as bytes. For GltfBinary format, this will be GLB binary data.
-         For GltfAscii format, this will be JSON text encoded as UTF-8 bytes.)",
-          py::arg("file_format") = mm::GltfFileFormat::GltfBinary);
+:return: The GLTF scene as bytes. For Binary format, this will be GLB binary data.
+         For Ascii format, this will be JSON text encoded as UTF-8 bytes.)",
+          py::arg("file_format") = mm::GltfFileFormat::Binary);
 }
 
 } // namespace pymomentum
