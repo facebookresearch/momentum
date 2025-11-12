@@ -87,12 +87,9 @@ int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences) {
   }
 
   // Special case when there's only one actor.
+  // Return the actor even if it has no markers (empty sequence is valid).
   if (numActors == 1) {
-    if (maxMarkers.at(0) > 0) {
-      return 0;
-    } else {
-      return -1;
-    }
+    return 0;
   }
 
   // find the max marker count with a name
