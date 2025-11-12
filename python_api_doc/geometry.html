@@ -160,6 +160,19 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FBXUpVector.value"><code class="docutils literal notranslate"><span class="pre">FBXUpVector.value</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.__init__"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.blend_shapes"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.blend_shapes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.collisions"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.collisions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.coord_system_info"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.coord_system_info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.extensions"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.extensions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.fbx_namespace"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.fbx_namespace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.gltf_file_format"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.gltf_file_format</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.locators"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.locators</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.mesh"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.mesh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions.permissive"><code class="docutils literal notranslate"><span class="pre">FileSaveOptions.permissive</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder"><code class="docutils literal notranslate"><span class="pre">GltfBuilder</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder.__init__"><code class="docutils literal notranslate"><span class="pre">GltfBuilder.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder.add_character"><code class="docutils literal notranslate"><span class="pre">GltfBuilder.add_character()</span></code></a></li>
@@ -1099,31 +1112,24 @@ this is a legacy format that has historically been used in previous Python libra
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.save">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.save" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blendShapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FBXCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltfFileFormat=Extension)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.save" title="Link to this definition"></a></dt>
 <dd><p>Save a character to a file. The format is determined by the file extension (.fbx, .glb, .gltf).</p>
 <blockquote>
 <div><p>This is a unified interface that automatically selects between FBX and GLTF based on the file extension.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">param path<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Export filename with extension (.fbx, .glb, or .gltf).</p>
-</dd>
-<dt class="field-even">param character<span class="colon">:</span></dt>
-<dd class="field-even"><p>A Character to be saved to the output file.</p>
-</dd>
-<dt class="field-odd">param fps<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[Optional] Frequency in frames per second</p>
-</dd>
-<dt class="field-even">param motion<span class="colon">:</span></dt>
-<dd class="field-even"><p>[Optional] 2D pose matrix in [n_frames x n_parameters]</p>
-</dd>
-<dt class="field-odd">param offsets<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[Optional] Offset array in [(n_joints x n_parameters_per_joint)]</p>
-</dd>
-<dt class="field-even">param markers<span class="colon">:</span></dt>
-<dd class="field-even"><p>[Optional] Additional marker (3d positions) data in [n_frames][n_markers]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Export filename with extension (.fbx, .glb, or .gltf).</p></li>
+<li><p><strong>character</strong> – A Character to be saved to the output file.</p></li>
+<li><p><strong>fps</strong> – [Optional] Frequency in frames per second</p></li>
+<li><p><strong>motion</strong> – [Optional] 2D pose matrix in [n_frames x n_parameters]</p></li>
+<li><p><strong>offsets</strong> – [Optional] Offset array in [(n_joints x n_parameters_per_joint)]</p></li>
+<li><p><strong>markers</strong> – [Optional] Additional marker (3d positions) data in [n_frames][n_markers]</p></li>
+<li><p><strong>options</strong> – [Optional] FileSaveOptions for controlling output (mesh, locators, collisions, etc.)</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -1598,6 +1604,72 @@ It can be used to solve for shapes and pose simultaneously.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.FBXUpVector.value">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.geometry.FBXUpVector.value" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">FileSaveOptions</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Unified options for saving files in both FBX and GLTF formats. This struct consolidates save options that were previously scattered across multiple function parameters. Format-specific options (e.g., FBX coordinate system, GLTF extensions) are included but only used by their respective formats.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.blend_shapes">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">blend_shapes</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.blend_shapes" title="Link to this definition"></a></dt>
+<dd><p>Include blend shapes in the output (default: true)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.collisions">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collisions</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.collisions" title="Link to this definition"></a></dt>
+<dd><p>Include collision geometry in the output (default: true)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.coord_system_info">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coord_system_info</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.coord_system_info" title="Link to this definition"></a></dt>
+<dd><p>FBX coordinate system configuration (default: Maya Y-up)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.extensions">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extensions</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.extensions" title="Link to this definition"></a></dt>
+<dd><p>Enable GLTF extensions (default: true), only used for GLTF output</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.fbx_namespace">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fbx_namespace</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.fbx_namespace" title="Link to this definition"></a></dt>
+<dd><p>Optional namespace prefix for FBX node names (e.g., ‘ns’ becomes ‘ns:’), only used for FBX output (default: empty = no namespace)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.gltf_file_format">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gltf_file_format</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.gltf_file_format" title="Link to this definition"></a></dt>
+<dd><p>GLTF file format selection (default: Extension), only used for GLTF output</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.locators">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">locators</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.locators" title="Link to this definition"></a></dt>
+<dd><p>Include locators in the output (default: true)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.mesh">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mesh</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.mesh" title="Link to this definition"></a></dt>
+<dd><p>Include mesh geometry in the output (default: true)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.FileSaveOptions.permissive">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">permissive</span></span><a class="headerlink" href="#pymomentum.geometry.FileSaveOptions.permissive" title="Link to this definition"></a></dt>
+<dd><p>Permissive mode: allow saving mesh-only characters without skin weights (default: false)</p>
+</dd></dl>
 
 </dd></dl>
 
