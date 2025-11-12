@@ -145,7 +145,7 @@ void saveCharacter(
     const Character& character,
     const float fps,
     const MatrixXf& motion,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     const FileSaveOptions& options) {
   // Parse format from file extension
   const auto format = parseCharacterFormat(filename);
@@ -196,7 +196,7 @@ void saveCharacter(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     const FileSaveOptions& options) {
   // Parse format from file extension
   const auto format = parseCharacterFormat(filename);

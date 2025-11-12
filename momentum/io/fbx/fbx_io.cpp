@@ -315,7 +315,7 @@ void prependNamespaceToAllNodes(::fbxsdk::FbxNode* node, const std::string& name
 // Create marker nodes under a "Markers" hierarchy and add animation for their translations
 std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
     ::fbxsdk::FbxScene* scene,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     const double framerate) {
   std::vector<::fbxsdk::FbxNode*> markerNodes;
 
@@ -467,7 +467,7 @@ void saveFbxCommon(
     const bool skipActiveJointParamCheck,
     const FBXCoordSystemInfo& coordSystemInfo,
     bool permissive,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
   // ---------------------------------------------
   // initialize FBX SDK and prepare for export
@@ -801,7 +801,7 @@ void saveFbx(
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
     const bool permissive,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
   CharacterParameters params;
   if (identity.size() == character.parameterTransform.numJointParameters()) {
@@ -855,7 +855,7 @@ void saveFbxWithJointParams(
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
     const bool permissive,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
   // Call the helper function to save FBX file with joint values.
   // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
@@ -881,7 +881,7 @@ void saveFbxWithSkeletonStates(
     const bool saveMesh,
     const FBXCoordSystemInfo& coordSystemInfo,
     const bool permissive,
-    const std::vector<std::vector<Marker>>& markerSequence,
+    std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
   const size_t nFrames = skeletonStates.size();
   MatrixXf jointParams(character.parameterTransform.zero().v.size(), nFrames);
@@ -936,7 +936,7 @@ void saveFbx(
     const bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
     const bool /* permissive */,
-    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::span<const std::vector<Marker>> /* markerSequence */,
     std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
@@ -950,7 +950,7 @@ void saveFbxWithJointParams(
     const bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
     const bool /* permissive */,
-    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::span<const std::vector<Marker>> /* markerSequence */,
     std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
@@ -964,7 +964,7 @@ void saveFbxWithSkeletonStates(
     const bool /* saveMesh */,
     const FBXCoordSystemInfo& /* coordSystemInfo */,
     const bool /* permissive */,
-    const std::vector<std::vector<Marker>>& /* markerSequence */,
+    std::span<const std::vector<Marker>> /* markerSequence */,
     std::string_view /* fbxNamespace */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");

@@ -96,7 +96,7 @@ fx::gltf::Document makeCharacterDocument(
     float fps = 120.0f,
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     bool embedResource = true,
     const GltfOptions& options = GltfOptions());
 
@@ -112,7 +112,7 @@ void saveGltfCharacter(
     float fps = 120.0f,
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     GltfFileFormat fileFormat = GltfFileFormat::Extension,
     const GltfOptions& options = GltfOptions());
 
@@ -125,7 +125,7 @@ void saveGltfCharacter(
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     GltfFileFormat fileFormat = GltfFileFormat::Extension,
     const GltfOptions& options = GltfOptions());
 
@@ -134,7 +134,7 @@ std::vector<std::byte> saveCharacterToBytes(
     float fps = 120.0f,
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
-    const std::vector<std::vector<Marker>>& markerSequence = {},
+    std::span<const std::vector<Marker>> markerSequence = {},
     const GltfOptions& options = GltfOptions());
 
 } // namespace momentum
