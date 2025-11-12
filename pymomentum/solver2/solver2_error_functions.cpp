@@ -26,6 +26,7 @@
 #include <momentum/character_solver/state_error_function.h>
 #include <momentum/character_solver/vertex_projection_error_function.h>
 #include <momentum/character_solver/vertex_vertex_distance_error_function.h>
+#include <pymomentum/python_utility/eigen_quaternion.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
 #include <fmt/format.h>
@@ -2207,14 +2208,8 @@ avoid divide-by-zero. )");
           })
       .def_readonly("parent", &mm::OrientationData::parent, "The parent joint index")
       .def_readonly("weight", &mm::OrientationData::weight, "The weight of the constraint")
-      .def_property_readonly(
-          "offset",
-          [](const mm::OrientationData& self) { return self.offset.coeffs(); },
-          "The offset in parent space (as [x, y, z, w] coefficients)")
-      .def_property_readonly(
-          "target",
-          [](const mm::OrientationData& self) { return self.target.coeffs(); },
-          "The target orientation (as [x, y, z, w] coefficients)");
+      .def_readonly("offset", &mm::OrientationData::offset, "The offset in parent space")
+      .def_readonly("target", &mm::OrientationData::target, "The target orientation");
 
   py::class_<
       mm::OrientationErrorFunctionT<float>,
