@@ -1,1 +1,0 @@
-var structmomentum_1_1FBXCoordSystemInfo=[["coordSystem","structmomentum_1_1FBXCoordSystemInfo.html#afc31695eb133ab0ecb6d17822b975004",null],["frontVector","structmomentum_1_1FBXCoordSystemInfo.html#ab3713110b2f619faa8eeebccaf152e9b",null],["upVector","structmomentum_1_1FBXCoordSystemInfo.html#a92a1ff1d2fb7f71faac336cd17c1be2c",null]];
