@@ -82,14 +82,6 @@ MatrixX<T> pseudoInverse(const SparseMatrix<T>& mat);
 /// @name Geometry Utilities
 /// @{
 
-/// Converts a quaternion to a rotation vector.
-template <typename T>
-Vector3<T> quaternionToRotVec(const Quaternion<T>& q);
-
-/// Converts a rotation vector to a quaternion.
-template <typename T>
-Quaternion<T> rotVecToQuaternion(const Vector3<T>& v);
-
 /// Computes the exponential map from a rotation vector (axis-angle in R^3) to a quaternion.
 ///
 /// The exponential map takes a 3D rotation vector (where the direction is the rotation axis
