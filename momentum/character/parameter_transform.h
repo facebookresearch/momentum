@@ -26,30 +26,7 @@ struct PoseConstraint {
   /// map would be more semantically correct) since it stores an index to the model parameters
   std::vector<std::pair<size_t, float>> parameterIdValue;
 
-  inline bool operator==(const PoseConstraint& poseConstraint) const {
-    // Compare the parameterIdValue as sets
-    std::map<size_t, float> paramIdToValue1;
-    std::copy(
-        parameterIdValue.begin(),
-        parameterIdValue.end(),
-        std::inserter(paramIdToValue1, paramIdToValue1.begin()));
-
-    std::map<size_t, float> paramIdToValue2;
-    std::copy(
-        poseConstraint.parameterIdValue.begin(),
-        poseConstraint.parameterIdValue.end(),
-        std::inserter(paramIdToValue2, paramIdToValue2.begin()));
-
-    if (paramIdToValue1.size() != paramIdToValue2.size()) {
-      return false;
-    }
-
-    auto pred = [](const auto& l, const auto& r) {
-      return ((l.first == r.first) && isApprox(l.second, r.second));
-    };
-    return std::equal(
-        paramIdToValue1.begin(), paramIdToValue1.end(), paramIdToValue2.begin(), pred);
-  }
+  bool operator==(const PoseConstraint& poseConstraint) const;
 };
 
 using ParameterSets = std::unordered_map<std::string, ParameterSet>;
@@ -181,27 +158,7 @@ struct ParameterTransformT {
         numSkinnedLocatorParameters();
   }
 
-  [[nodiscard]] inline bool isApprox(const ParameterTransformT<T>& parameterTransform) const {
-    // special handling of zero sparse matrix
-    bool isTransformEqual = false;
-    if (transform.cols() > 0 && transform.rows() > 0 && parameterTransform.transform.cols() > 0 &&
-        parameterTransform.transform.rows() > 0) {
-      isTransformEqual = transform.isApprox(parameterTransform.transform);
-    } else {
-      isTransformEqual = (transform.cols() == parameterTransform.transform.cols()) &&
-          (transform.rows() == parameterTransform.transform.rows());
-    }
-    if (!isTransformEqual) {
-      return false;
-    }
-
-    return (
-        (name == parameterTransform.name) &&
-        activeJointParams.isApprox(parameterTransform.activeJointParams) &&
-        (parameterSets == parameterTransform.parameterSets) &&
-        (poseConstraints == parameterTransform.poseConstraints) &&
-        (blendShapeParameters == parameterTransform.blendShapeParameters));
-  }
+  [[nodiscard]] bool isApprox(const ParameterTransformT<T>& parameterTransform) const;
 };
 
 using ParameterTransform = ParameterTransformT<float>;
