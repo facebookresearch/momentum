@@ -283,6 +283,9 @@ ParameterTransformT<T> mapParameterTransformJoints(
   // copy over the parameterSets
   mappedTransform.parameterSets = parameterTransform.parameterSets;
   mappedTransform.poseConstraints = parameterTransform.poseConstraints;
+  mappedTransform.blendShapeParameters = parameterTransform.blendShapeParameters;
+  mappedTransform.faceExpressionParameters = parameterTransform.faceExpressionParameters;
+  mappedTransform.skinnedLocatorParameters = parameterTransform.skinnedLocatorParameters;
 
   return mappedTransform;
 }
@@ -489,6 +492,9 @@ ParameterTransformT<T2> ParameterTransformT<T>::cast() const {
   result.activeJointParams = activeJointParams;
   result.parameterSets = parameterSets;
   result.poseConstraints = poseConstraints;
+  result.blendShapeParameters = blendShapeParameters;
+  result.faceExpressionParameters = faceExpressionParameters;
+  result.skinnedLocatorParameters = skinnedLocatorParameters;
   return result;
 }
 
@@ -545,11 +551,13 @@ bool ParameterTransformT<T>::isApprox(const ParameterTransformT<T>& parameterTra
   }
 
   return (
-      (name == parameterTransform.name) &&
+      (name == parameterTransform.name) && offsets.isApprox(parameterTransform.offsets) &&
       activeJointParams.isApprox(parameterTransform.activeJointParams) &&
       (parameterSets == parameterTransform.parameterSets) &&
       (poseConstraints == parameterTransform.poseConstraints) &&
-      (blendShapeParameters == parameterTransform.blendShapeParameters));
+      (blendShapeParameters == parameterTransform.blendShapeParameters) &&
+      (faceExpressionParameters == parameterTransform.faceExpressionParameters) &&
+      (skinnedLocatorParameters == parameterTransform.skinnedLocatorParameters));
 }
 
 std::tuple<ParameterTransform, ParameterLimits> addBlendShapeParameters(
