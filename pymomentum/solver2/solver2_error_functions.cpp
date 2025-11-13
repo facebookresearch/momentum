@@ -12,6 +12,7 @@
 #include <momentum/character_solver/collision_error_function.h>
 #include <momentum/character_solver/distance_error_function.h>
 #include <momentum/character_solver/fixed_axis_error_function.h>
+#include <momentum/character_solver/height_error_function.h>
 #include <momentum/character_solver/joint_to_joint_distance_error_function.h>
 #include <momentum/character_solver/limit_error_function.h>
 #include <momentum/character_solver/model_parameters_error_function.h>
@@ -1469,6 +1470,66 @@ void addErrorFunctions(py::module_& m) {
           py::arg("character"),
           py::kw_only(),
           py::arg("weight") = 1.0f);
+
+  py::class_<
+      mm::HeightErrorFunction,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::HeightErrorFunction>>(
+      m,
+      "HeightErrorFunction",
+      R"(Error function for character height constraints.
+
+This error function measures the height of a character mesh by projecting
+all vertices onto a specified "up" direction and computing the difference
+between the maximum and minimum projections.
+
+Unlike most error functions, this one only depends on specific active parameters
+that are automatically determined: blend shape, face expression, and scale parameters
+only (not pose parameters). This allows constraining height independent of pose.)")
+      .def(
+          "__repr__",
+          [](const mm::HeightErrorFunction& self) {
+            return fmt::format(
+                "HeightErrorFunction(weight={}, target_height={:.3f})",
+                self.getWeight(),
+                self.getTargetHeight());
+          })
+      .def(
+          py::init<>([](const mm::Character& character,
+                        float targetHeight,
+                        const std::optional<Eigen::Vector3f>& upDirection,
+                        size_t k,
+                        float weight) {
+            validateWeight(weight, "weight");
+            auto result = std::make_shared<mm::HeightErrorFunction>(
+                character, targetHeight, upDirection.value_or(Eigen::Vector3f::UnitY()), k);
+            result->setWeight(weight);
+            return result;
+          }),
+          R"(Initialize a HeightErrorFunction.
+
+:param character: The character to measure height for.
+:param target_height: The target height for the character (required).
+:param up_direction: The direction to measure height along (defaults to Y-axis [0, 1, 0]).
+:param k: Number of vertices to average for min/max height calculation (defaults to 1).
+:param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::arg("target_height"),
+          py::kw_only(),
+          py::arg("up_direction") = std::nullopt,
+          py::arg("k") = 1,
+          py::arg("weight") = 1.0f)
+      .def_property(
+          "target_height",
+          &mm::HeightErrorFunction::getTargetHeight,
+          &mm::HeightErrorFunction::setTargetHeight,
+          "The target height for the character.")
+      .def_property(
+          "up_direction",
+          &mm::HeightErrorFunction::getUpDirection,
+          &mm::HeightErrorFunction::setUpDirection,
+          "The up direction for height measurement.");
 
   py::class_<
       mm::ModelParametersErrorFunction,
