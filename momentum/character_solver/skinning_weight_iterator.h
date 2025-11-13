@@ -55,7 +55,7 @@ class SkinningWeightIteratorT {
       const Character& character,
       const MeshT<T>& restMesh,
       const SkeletonStateT<T>& skelState,
-      int vertexIndex);
+      Eigen::Index vertexIndex);
 
   SkinningWeightIteratorT(
       const Character& character,

@@ -512,6 +512,25 @@ using GaussNewtonSolverQRd_const_u = ::std::unique_ptr<const GaussNewtonSolverQR
 using GaussNewtonSolverQRd_const_w = ::std::weak_ptr<const GaussNewtonSolverQRd>;
 
 template <typename T>
+class HeightErrorFunctionT;
+using HeightErrorFunction = HeightErrorFunctionT<float>;
+using HeightErrorFunctiond = HeightErrorFunctionT<double>;
+
+using HeightErrorFunction_p = ::std::shared_ptr<HeightErrorFunction>;
+using HeightErrorFunction_u = ::std::unique_ptr<HeightErrorFunction>;
+using HeightErrorFunction_w = ::std::weak_ptr<HeightErrorFunction>;
+using HeightErrorFunction_const_p = ::std::shared_ptr<const HeightErrorFunction>;
+using HeightErrorFunction_const_u = ::std::unique_ptr<const HeightErrorFunction>;
+using HeightErrorFunction_const_w = ::std::weak_ptr<const HeightErrorFunction>;
+
+using HeightErrorFunctiond_p = ::std::shared_ptr<HeightErrorFunctiond>;
+using HeightErrorFunctiond_u = ::std::unique_ptr<HeightErrorFunctiond>;
+using HeightErrorFunctiond_w = ::std::weak_ptr<HeightErrorFunctiond>;
+using HeightErrorFunctiond_const_p = ::std::shared_ptr<const HeightErrorFunctiond>;
+using HeightErrorFunctiond_const_u = ::std::unique_ptr<const HeightErrorFunctiond>;
+using HeightErrorFunctiond_const_w = ::std::weak_ptr<const HeightErrorFunctiond>;
+
+template <typename T>
 class LimitErrorFunctionT;
 using LimitErrorFunction = LimitErrorFunctionT<float>;
 using LimitErrorFunctiond = LimitErrorFunctionT<double>;
