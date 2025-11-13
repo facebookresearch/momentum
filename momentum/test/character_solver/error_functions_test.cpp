@@ -1576,16 +1576,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
   {
     SCOPED_TRACE("Orientation Constraint Test");
     std::vector<OrientationDataT<T>> cl{
-        OrientationDataT<T>(
-            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
-            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
-            2,
-            kTestWeightValue),
-        OrientationDataT<T>(
-            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
-            rotVecToQuaternion<T>(uniform<Vector3<T>>(-1, 1)),
-            1,
-            kTestWeightValue)};
+        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 2, kTestWeightValue),
+        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 1, kTestWeightValue)};
     errorFunction.setConstraints(std::move(cl));
 
     TEST_GRADIENT_AND_JACOBIAN(

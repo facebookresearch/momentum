@@ -29,36 +29,6 @@ constexpr T eulerTol() {
 } // namespace
 
 template <typename T>
-Vector3<T> quaternionToRotVec(const Quaternion<T>& q) {
-  T angle = T(2) * std::acos(q.w());
-  // Note: This branch is theoretically unreachable since std::acos() always returns
-  // a value in the range [0, pi], making angle always non-negative.
-  // It's kept as defensive programming.
-  if (angle < -pi<T>()) {
-    angle = T(2) * pi<T>() - angle;
-  } else if (angle > pi<T>()) {
-    angle = -(2) * pi<T>() + angle;
-  }
-  const T ww = q.w() * q.w();
-  if (ww > 1.0f - 1e-7f) {
-    return Vector3<T>::Zero();
-  } else {
-    const T mul = T(1) / std::sqrt(T(1) - ww);
-    return Vector3<T>(q.x(), q.y(), q.z()) * mul * angle;
-  }
-}
-
-template <typename T>
-Quaternion<T> rotVecToQuaternion(const Vector3<T>& v) {
-  const T angle = v.norm();
-  if (angle < 1e-5f) {
-    return Quaternion<T>::Identity();
-  }
-  const Vector3<T> axis = v.normalized();
-  return Quaternion<T>(Eigen::AngleAxis<T>(angle, axis));
-}
-
-template <typename T>
 Quaternion<T> quaternionExpMap(const Vector3<T>& v) {
   // Reference: "Practical Parameterization of Rotations Using the Exponential Map"
   // by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
@@ -565,11 +535,6 @@ template MatrixX<double> pseudoInverse(const MatrixX<double>& mat);
 
 template MatrixX<float> pseudoInverse(const SparseMatrix<float>& mat);
 template MatrixX<double> pseudoInverse(const SparseMatrix<double>& mat);
-
-template Vector3<float> quaternionToRotVec(const Quaternion<float>& q);
-template Vector3<double> quaternionToRotVec(const Quaternion<double>& q);
-template Quaternion<float> rotVecToQuaternion(const Vector3<float>& v);
-template Quaternion<double> rotVecToQuaternion(const Vector3<double>& v);
 
 template Quaternion<float> quaternionExpMap(const Vector3<float>& v);
 template Quaternion<double> quaternionExpMap(const Vector3<double>& v);

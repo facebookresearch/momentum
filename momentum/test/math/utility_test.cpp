@@ -723,7 +723,7 @@ TYPED_TEST(UtilityTest, TestEulerToQuaternionIntrinsicExtrinsic) {
   testEulerToQuaternionConversion<T>(2, 1, 0);
 }
 
-TYPED_TEST(UtilityTest, TestQuaternionToRotVec) {
+TYPED_TEST(UtilityTest, TestQuaternionLogMapExpMap) {
   using T = typename TestFixture::Type;
 
   const auto numTests = 10;
@@ -733,8 +733,8 @@ TYPED_TEST(UtilityTest, TestQuaternionToRotVec) {
         AngleAxis<T>(rand_angles(1), Vector3<T>::UnitY()) *
         AngleAxis<T>(rand_angles(2), Vector3<T>::UnitZ());
 
-    const Vector3<T> rot_vec = quaternionToRotVec<T>(quaternion);
-    const Quaternion<T> quaternion_from_rot_vec = rotVecToQuaternion<T>(rot_vec);
+    const Vector3<T> rot_vec = quaternionLogMap<T>(quaternion);
+    const Quaternion<T> quaternion_from_rot_vec = quaternionExpMap<T>(rot_vec);
 
     EXPECT_TRUE(quaternion.isApprox(quaternion_from_rot_vec))
         << "quaternion: " << quaternion.coeffs().transpose() << "\n"
@@ -743,15 +743,15 @@ TYPED_TEST(UtilityTest, TestQuaternionToRotVec) {
   }
 }
 
-TYPED_TEST(UtilityTest, TestRotVecToQuaternion) {
+TYPED_TEST(UtilityTest, TestExpMapLogMap) {
   using T = typename TestFixture::Type;
 
   const auto numTests = 10;
   for (auto i = 0u; i < numTests; ++i) {
     const Vector3<T> rand_rot_vec = Vector3<T>::Random();
 
-    const Quaternion<T> quaternion = rotVecToQuaternion<T>(rand_rot_vec);
-    const Vector3<T> rot_vec_from_quaternion = quaternionToRotVec<T>(quaternion);
+    const Quaternion<T> quaternion = quaternionExpMap<T>(rand_rot_vec);
+    const Vector3<T> rot_vec_from_quaternion = quaternionLogMap<T>(quaternion);
 
     EXPECT_TRUE(rand_rot_vec.isApprox(rot_vec_from_quaternion))
         << "rotation vector: " << rand_rot_vec.transpose() << "\n"
@@ -760,36 +760,36 @@ TYPED_TEST(UtilityTest, TestRotVecToQuaternion) {
 
   // Test with zero rotation vector
   const Vector3<T> zero_rot_vec = Vector3<T>::Zero();
-  const Quaternion<T> quaternion = rotVecToQuaternion<T>(zero_rot_vec);
+  const Quaternion<T> quaternion = quaternionExpMap<T>(zero_rot_vec);
   EXPECT_TRUE(quaternion.isApprox(Quaternion<T>::Identity()));
 }
 
-// Test edge cases for quaternionToRotVec
-TYPED_TEST(UtilityTest, QuaternionToRotVecEdgeCases) {
+// Test edge cases for quaternionLogMap
+TYPED_TEST(UtilityTest, QuaternionLogMapEdgeCases) {
   using T = typename TestFixture::Type;
 
   // Test with identity quaternion
   const Quaternion<T> identity = Quaternion<T>::Identity();
-  const Vector3<T> rot_vec = quaternionToRotVec<T>(identity);
+  const Vector3<T> rot_vec = quaternionLogMap<T>(identity);
   EXPECT_TRUE(rot_vec.isApprox(Vector3<T>::Zero()));
 
   // Test with quaternion representing 180-degree rotation around X axis
   const Quaternion<T> q180x(0, 1, 0, 0);
-  const Vector3<T> rot_vec_180x = quaternionToRotVec<T>(q180x);
+  const Vector3<T> rot_vec_180x = quaternionLogMap<T>(q180x);
   EXPECT_TRUE(rot_vec_180x.isApprox(Vector3<T>(pi<T>(), 0, 0)));
 
   // Test with quaternion representing 180-degree rotation around Y axis
   const Quaternion<T> q180y(0, 0, 1, 0);
-  const Vector3<T> rot_vec_180y = quaternionToRotVec<T>(q180y);
+  const Vector3<T> rot_vec_180y = quaternionLogMap<T>(q180y);
   EXPECT_TRUE(rot_vec_180y.isApprox(Vector3<T>(0, pi<T>(), 0)));
 
   // Test with quaternion representing 180-degree rotation around Z axis
   const Quaternion<T> q180z(0, 0, 0, 1);
-  const Vector3<T> rot_vec_180z = quaternionToRotVec<T>(q180z);
+  const Vector3<T> rot_vec_180z = quaternionLogMap<T>(q180z);
   EXPECT_TRUE(rot_vec_180z.isApprox(Vector3<T>(0, 0, pi<T>())));
 
   // Test with quaternion having w < 0 (angle > pi)
-  // This creates a quaternion with w < 0, which should trigger the angle > pi branch
+  // This creates a quaternion with w < 0, which should be handled by the logmap implementation
   Quaternion<T> qLargeAngle;
   qLargeAngle.w() = T(-0.1);
   qLargeAngle.x() = T(0.1);
@@ -798,13 +798,8 @@ TYPED_TEST(UtilityTest, QuaternionToRotVecEdgeCases) {
   qLargeAngle.normalize();
 
   // Just verify that the function doesn't crash and returns a valid result
-  const Vector3<T> rot_vec_large = quaternionToRotVec<T>(qLargeAngle);
+  const Vector3<T> rot_vec_large = quaternionLogMap<T>(qLargeAngle);
   EXPECT_FALSE(rot_vec_large.hasNaN());
-
-  // Note: There's a branch in quaternionToRotVec where angle < -pi<T>(),
-  // but this is theoretically unreachable since std::acos() always returns
-  // a value in the range [0, π], making angle always non-negative.
-  // The branch exists as defensive programming.
 }
 
 TYPED_TEST(UtilityTest, QuaternionLogMap) {
