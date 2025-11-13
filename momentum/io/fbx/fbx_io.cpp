@@ -47,42 +47,42 @@ namespace momentum {
 
 namespace {
 
-[[nodiscard]] ::fbxsdk::FbxAxisSystem::EUpVector toFbx(const FBXUpVector upVector) {
+[[nodiscard]] ::fbxsdk::FbxAxisSystem::EUpVector toFbx(const FbxUpVector upVector) {
   switch (upVector) {
-    case FBXUpVector::XAxis:
+    case FbxUpVector::XAxis:
       return ::fbxsdk::FbxAxisSystem::EUpVector::eXAxis;
-    case FBXUpVector::YAxis:
+    case FbxUpVector::YAxis:
       return ::fbxsdk::FbxAxisSystem::EUpVector::eYAxis;
-    case FBXUpVector::ZAxis:
+    case FbxUpVector::ZAxis:
       return ::fbxsdk::FbxAxisSystem::EUpVector::eZAxis;
     default:
       MT_THROW("Unsupported up vector");
   }
 }
 
-[[nodiscard]] ::fbxsdk::FbxAxisSystem::EFrontVector toFbx(const FBXFrontVector frontVector) {
+[[nodiscard]] ::fbxsdk::FbxAxisSystem::EFrontVector toFbx(const FbxFrontVector frontVector) {
   switch (frontVector) {
-    case FBXFrontVector::ParityEven:
+    case FbxFrontVector::ParityEven:
       return ::fbxsdk::FbxAxisSystem::EFrontVector::eParityEven;
-    case FBXFrontVector::ParityOdd:
+    case FbxFrontVector::ParityOdd:
       return ::fbxsdk::FbxAxisSystem::EFrontVector::eParityOdd;
     default:
       MT_THROW("Unsupported front vector");
   }
 }
 
-[[nodiscard]] ::fbxsdk::FbxAxisSystem::ECoordSystem toFbx(const FBXCoordSystem coordSystem) {
+[[nodiscard]] ::fbxsdk::FbxAxisSystem::ECoordSystem toFbx(const FbxCoordSystem coordSystem) {
   switch (coordSystem) {
-    case FBXCoordSystem::RightHanded:
+    case FbxCoordSystem::RightHanded:
       return ::fbxsdk::FbxAxisSystem::ECoordSystem::eRightHanded;
-    case FBXCoordSystem::LeftHanded:
+    case FbxCoordSystem::LeftHanded:
       return ::fbxsdk::FbxAxisSystem::ECoordSystem::eLeftHanded;
     default:
       MT_THROW("Unsupported coordinate system");
   }
 }
 
-[[nodiscard]] ::fbxsdk::FbxAxisSystem toFbx(const FBXCoordSystemInfo& coordSystemInfo) {
+[[nodiscard]] ::fbxsdk::FbxAxisSystem toFbx(const FbxCoordSystemInfo& coordSystemInfo) {
   return {
       toFbx(coordSystemInfo.upVector),
       toFbx(coordSystemInfo.frontVector),
@@ -465,7 +465,7 @@ void saveFbxCommon(
     const double framerate,
     const bool saveMesh,
     const bool skipActiveJointParamCheck,
-    const FBXCoordSystemInfo& coordSystemInfo,
+    const FbxCoordSystemInfo& coordSystemInfo,
     bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
@@ -799,7 +799,7 @@ void saveFbx(
     const VectorXf& identity,
     const double framerate,
     const bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo,
+    const FbxCoordSystemInfo& coordSystemInfo,
     const bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
@@ -853,7 +853,7 @@ void saveFbxWithJointParams(
     const MatrixXf& jointParams,
     const double framerate,
     const bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo,
+    const FbxCoordSystemInfo& coordSystemInfo,
     const bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
@@ -879,7 +879,7 @@ void saveFbxWithSkeletonStates(
     std::span<const SkeletonState> skeletonStates,
     const double framerate,
     const bool saveMesh,
-    const FBXCoordSystemInfo& coordSystemInfo,
+    const FbxCoordSystemInfo& coordSystemInfo,
     const bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
@@ -909,7 +909,7 @@ void saveFbxWithSkeletonStates(
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
-    const FBXCoordSystemInfo& coordSystemInfo,
+    const FbxCoordSystemInfo& coordSystemInfo,
     bool permissive,
     std::string_view fbxNamespace) {
   saveFbx(
@@ -934,7 +934,7 @@ void saveFbx(
     const VectorXf& /* identity */,
     const double /* framerate */,
     const bool /* saveMesh */,
-    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const FbxCoordSystemInfo& /* coordSystemInfo */,
     const bool /* permissive */,
     std::span<const std::vector<Marker>> /* markerSequence */,
     std::string_view /* fbxNamespace */) {
@@ -948,7 +948,7 @@ void saveFbxWithJointParams(
     const MatrixXf& /* jointParams */,
     const double /* framerate */,
     const bool /* saveMesh */,
-    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const FbxCoordSystemInfo& /* coordSystemInfo */,
     const bool /* permissive */,
     std::span<const std::vector<Marker>> /* markerSequence */,
     std::string_view /* fbxNamespace */) {
@@ -962,7 +962,7 @@ void saveFbxWithSkeletonStates(
     std::span<const SkeletonState> /* skeletonStates */,
     const double /* framerate */,
     const bool /* saveMesh */,
-    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const FbxCoordSystemInfo& /* coordSystemInfo */,
     const bool /* permissive */,
     std::span<const std::vector<Marker>> /* markerSequence */,
     std::string_view /* fbxNamespace */) {
@@ -973,7 +973,7 @@ void saveFbxWithSkeletonStates(
 void saveFbxModel(
     const filesystem::path& /* filename */,
     const Character& /* character */,
-    const FBXCoordSystemInfo& /* coordSystemInfo */,
+    const FbxCoordSystemInfo& /* coordSystemInfo */,
     bool /* permissive */,
     std::string_view /* fbxNamespace */) {
   MT_THROW(

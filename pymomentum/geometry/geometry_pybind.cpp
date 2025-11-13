@@ -80,23 +80,23 @@ PYBIND11_MODULE(geometry, m) {
 
   m.attr("PARAMETERS_PER_JOINT") = mm::kParametersPerJoint;
 
-  py::enum_<mm::FBXUpVector>(m, "FBXUpVector")
-      .value("XAxis", mm::FBXUpVector::XAxis)
-      .value("YAxis", mm::FBXUpVector::YAxis)
-      .value("ZAxis", mm::FBXUpVector::ZAxis);
+  py::enum_<mm::FbxUpVector>(m, "FBXUpVector")
+      .value("XAxis", mm::FbxUpVector::XAxis)
+      .value("YAxis", mm::FbxUpVector::YAxis)
+      .value("ZAxis", mm::FbxUpVector::ZAxis);
 
   py::enum_<mm::UpVector>(m, "UpVector")
       .value("X", mm::UpVector::X)
       .value("Y", mm::UpVector::Y)
       .value("Z", mm::UpVector::Z);
 
-  py::enum_<mm::FBXFrontVector>(m, "FBXFrontVector")
-      .value("ParityEven", mm::FBXFrontVector::ParityEven)
-      .value("ParityOdd", mm::FBXFrontVector::ParityOdd);
+  py::enum_<mm::FbxFrontVector>(m, "FBXFrontVector")
+      .value("ParityEven", mm::FbxFrontVector::ParityEven)
+      .value("ParityOdd", mm::FbxFrontVector::ParityOdd);
 
-  py::enum_<mm::FBXCoordSystem>(m, "FBXCoordSystem")
-      .value("RightHanded", mm::FBXCoordSystem::RightHanded)
-      .value("LeftHanded", mm::FBXCoordSystem::LeftHanded);
+  py::enum_<mm::FbxCoordSystem>(m, "FBXCoordSystem")
+      .value("RightHanded", mm::FbxCoordSystem::RightHanded)
+      .value("LeftHanded", mm::FbxCoordSystem::LeftHanded);
 
   // We need to forward-declare classes so that if we refer to them they get
   // typed correctly; otherwise we end up with "momentum::Locator" in the
@@ -167,7 +167,7 @@ PYBIND11_MODULE(geometry, m) {
       "MarkerSequence",
       "A sequence of motion capture marker data over time. Contains marker positions "
       "and occlusion status for each frame, along with frame rate information.");
-  auto fbxCoordSystemInfoClass = py::class_<mm::FBXCoordSystemInfo>(
+  auto fbxCoordSystemInfoClass = py::class_<mm::FbxCoordSystemInfo>(
       m,
       "FBXCoordSystemInfo",
       "FBX coordinate system information containing up vector, front vector, and handedness. "
@@ -470,7 +470,7 @@ The resulting tensors are as follows:
       });
 
   // =====================================================
-  // momentum::FBXCoordSystemInfo
+  // momentum::FbxCoordSystemInfo
   // - upVector
   // - frontVector
   // - coordSystem
@@ -479,36 +479,36 @@ The resulting tensors are as follows:
 
   fbxCoordSystemInfoClass
       .def(
-          py::init([](const momentum::FBXUpVector upVector,
-                      const momentum::FBXFrontVector frontVector,
-                      const momentum::FBXCoordSystem coordSystem) {
-            return momentum::FBXCoordSystemInfo{upVector, frontVector, coordSystem};
+          py::init([](const momentum::FbxUpVector upVector,
+                      const momentum::FbxFrontVector frontVector,
+                      const momentum::FbxCoordSystem coordSystem) {
+            return momentum::FbxCoordSystemInfo{upVector, frontVector, coordSystem};
           }),
           py::arg("upVector"),
           py::arg("frontVector"),
           py::arg("coordSystem"))
       .def_property_readonly(
           "upVector",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.upVector; },
+          [](const mm::FbxCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.upVector; },
           "Returns the up vector.")
       .def_property_readonly(
           "frontVector",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.frontVector; },
+          [](const mm::FbxCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.frontVector; },
           "Returns the front vector.")
       .def_property_readonly(
           "coordSystem",
-          [](const mm::FBXCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.coordSystem; },
+          [](const mm::FbxCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.coordSystem; },
           "Returns the coordinate system.")
-      .def("__repr__", [](const mm::FBXCoordSystemInfo& info) {
+      .def("__repr__", [](const mm::FbxCoordSystemInfo& info) {
         std::string upVectorStr;
         switch (info.upVector) {
-          case mm::FBXUpVector::XAxis:
+          case mm::FbxUpVector::XAxis:
             upVectorStr = "XAxis";
             break;
-          case mm::FBXUpVector::YAxis:
+          case mm::FbxUpVector::YAxis:
             upVectorStr = "YAxis";
             break;
-          case mm::FBXUpVector::ZAxis:
+          case mm::FbxUpVector::ZAxis:
             upVectorStr = "ZAxis";
             break;
           default:
@@ -518,10 +518,10 @@ The resulting tensors are as follows:
 
         std::string frontVectorStr;
         switch (info.frontVector) {
-          case mm::FBXFrontVector::ParityEven:
+          case mm::FbxFrontVector::ParityEven:
             frontVectorStr = "ParityEven";
             break;
-          case mm::FBXFrontVector::ParityOdd:
+          case mm::FbxFrontVector::ParityOdd:
             frontVectorStr = "ParityOdd";
             break;
           default:
@@ -531,10 +531,10 @@ The resulting tensors are as follows:
 
         std::string coordSystemStr;
         switch (info.coordSystem) {
-          case mm::FBXCoordSystem::RightHanded:
+          case mm::FbxCoordSystem::RightHanded:
             coordSystemStr = "RightHanded";
             break;
-          case mm::FBXCoordSystem::LeftHanded:
+          case mm::FbxCoordSystem::LeftHanded:
             coordSystemStr = "LeftHanded";
             break;
           default:
@@ -611,13 +611,13 @@ The resulting tensors are as follows:
         // Format coord_system_info
         std::string upVectorStr;
         switch (opts.coordSystemInfo.upVector) {
-          case mm::FBXUpVector::XAxis:
+          case mm::FbxUpVector::XAxis:
             upVectorStr = "XAxis";
             break;
-          case mm::FBXUpVector::YAxis:
+          case mm::FbxUpVector::YAxis:
             upVectorStr = "YAxis";
             break;
-          case mm::FBXUpVector::ZAxis:
+          case mm::FbxUpVector::ZAxis:
             upVectorStr = "ZAxis";
             break;
           default:
@@ -627,10 +627,10 @@ The resulting tensors are as follows:
 
         std::string frontVectorStr;
         switch (opts.coordSystemInfo.frontVector) {
-          case mm::FBXFrontVector::ParityEven:
+          case mm::FbxFrontVector::ParityEven:
             frontVectorStr = "ParityEven";
             break;
-          case mm::FBXFrontVector::ParityOdd:
+          case mm::FbxFrontVector::ParityOdd:
             frontVectorStr = "ParityOdd";
             break;
           default:
@@ -640,10 +640,10 @@ The resulting tensors are as follows:
 
         std::string coordSystemStr;
         switch (opts.coordSystemInfo.coordSystem) {
-          case mm::FBXCoordSystem::RightHanded:
+          case mm::FbxCoordSystem::RightHanded:
             coordSystemStr = "RightHanded";
             break;
-          case mm::FBXCoordSystem::LeftHanded:
+          case mm::FbxCoordSystem::LeftHanded:
             coordSystemStr = "LeftHanded";
             break;
           default:

@@ -79,7 +79,7 @@ void saveFbx(
     const VectorXf& identity = VectorXf(),
     double framerate = 120.0,
     bool saveMesh = false,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
     bool permissive = false,
     std::span<const std::vector<Marker>> markerSequence = {},
     std::string_view fbxNamespace = "");
@@ -101,7 +101,7 @@ void saveFbxWithJointParams(
     const MatrixXf& jointParams = MatrixXf(),
     double framerate = 120.0,
     bool saveMesh = false,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
     bool permissive = false,
     std::span<const std::vector<Marker>> markerSequence = {},
     std::string_view fbxNamespace = "");
@@ -123,7 +123,7 @@ void saveFbxWithSkeletonStates(
     std::span<const SkeletonState> skeletonStates,
     double framerate = 120.0,
     bool saveMesh = false,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
     bool permissive = false,
     std::span<const std::vector<Marker>> markerSequence = {},
     std::string_view fbxNamespace = "");
@@ -138,7 +138,7 @@ void saveFbxWithSkeletonStates(
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
-    const FBXCoordSystemInfo& coordSystemInfo = FBXCoordSystemInfo(),
+    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
     bool permissive = false,
     std::string_view fbxNamespace = "");
 
