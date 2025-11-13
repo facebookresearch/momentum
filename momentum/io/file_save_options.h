@@ -42,25 +42,25 @@ struct GltfOptions {
 
 /// Specifies which canonical axis represents up in the system (typically Y or Z).
 /// Maps to fbxsdk::FbxAxisSystem::EUpVector
-enum class FBXUpVector { XAxis = 1, YAxis = 2, ZAxis = 3 };
+enum class FbxUpVector { XAxis = 1, YAxis = 2, ZAxis = 3 };
 
 /// Vector with origin at the screen pointing toward the camera.
 /// This is a subset of enum EUpVector because axis cannot be repeated.
 /// We use the system of "parity" to define this vector because its value (X,Y or
 /// Z axis) really depends on the up-vector.
 /// Maps to fbxsdk::FbxAxisSystem::EFrontVector
-enum class FBXFrontVector { ParityEven = 1, ParityOdd = 2 };
+enum class FbxFrontVector { ParityEven = 1, ParityOdd = 2 };
 
 /// Specifies the third vector of the system.
 /// Maps to fbxsdk::FbxAxisSystem::ECoordSystem
-enum class FBXCoordSystem { RightHanded, LeftHanded };
+enum class FbxCoordSystem { RightHanded, LeftHanded };
 
 /// A struct containing the up, front vectors and coordinate system for FBX export.
-struct FBXCoordSystemInfo {
+struct FbxCoordSystemInfo {
   /// Default to the same orientations as FbxAxisSystem::eMayaYUp
-  FBXUpVector upVector = FBXUpVector::YAxis;
-  FBXFrontVector frontVector = FBXFrontVector::ParityOdd;
-  FBXCoordSystem coordSystem = FBXCoordSystem::RightHanded;
+  FbxUpVector upVector = FbxUpVector::YAxis;
+  FbxFrontVector frontVector = FbxFrontVector::ParityOdd;
+  FbxCoordSystem coordSystem = FbxCoordSystem::RightHanded;
 };
 
 // ============================================================================
@@ -93,7 +93,7 @@ struct FileSaveOptions {
   // ---- FBX-Specific Options ----
 
   /// FBX coordinate system configuration (default: Maya Y-up)
-  FBXCoordSystemInfo coordSystemInfo = {};
+  FbxCoordSystemInfo coordSystemInfo = {};
 
   /// Optional namespace prefix for FBX node names (e.g., "ns" becomes "ns:")
   /// Only used for FBX output (default: empty = no namespace)

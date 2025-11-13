@@ -761,7 +761,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("motion") = std::optional<const Eigen::MatrixXf>{},
           py::arg("offsets") = std::optional<const Eigen::VectorXf>{},
           py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
-          py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{},
+          py::arg("coord_system_info") = std::optional<mm::FbxCoordSystemInfo>{},
           py::arg("fbx_namespace") = "")
       .def_static(
           "save_fbx_with_joint_params",
@@ -782,7 +782,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("fps") = 120.f,
           py::arg("joint_params") = std::optional<const Eigen::MatrixXf>{},
           py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
-          py::arg("coord_system_info") = std::optional<mm::FBXCoordSystemInfo>{},
+          py::arg("coord_system_info") = std::optional<mm::FbxCoordSystemInfo>{},
           py::arg("fbx_namespace") = "")
       .def_static(
           "save",

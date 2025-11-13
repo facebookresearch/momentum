@@ -18,7 +18,7 @@
 
 // Forward declarations
 namespace momentum {
-struct FBXCoordSystemInfo;
+struct FbxCoordSystemInfo;
 } // namespace momentum
 
 namespace pymomentum {
@@ -60,7 +60,7 @@ void saveFBXCharacterToFile(
     const std::optional<const Eigen::MatrixXf>& motion,
     const std::optional<const Eigen::VectorXf>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace = "");
 
 void saveFBXCharacterToFileWithJointParams(
@@ -69,7 +69,7 @@ void saveFBXCharacterToFileWithJointParams(
     float fps,
     const std::optional<const Eigen::MatrixXf>& jointParams,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace = "");
 
 void saveFBXCharacterToFileWithSkelStates(
@@ -78,7 +78,7 @@ void saveFBXCharacterToFileWithSkelStates(
     float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace = "");
 
 void saveCharacterToFile(

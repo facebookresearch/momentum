@@ -165,7 +165,7 @@ void saveFBXCharacterToFile(
     const std::optional<const Eigen::MatrixXf>& motion,
     const std::optional<const Eigen::VectorXf>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
   // Always use saveFbx to support markers even without motion
   momentum::saveFbx(
@@ -175,7 +175,7 @@ void saveFBXCharacterToFile(
       offsets.has_value() ? offsets.value() : Eigen::VectorXf(),
       fps,
       true, /*saveMesh*/
-      coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
+      coordSystemInfo.value_or(momentum::FbxCoordSystemInfo()),
       false, /*permissive*/
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
       fbxNamespace);
@@ -187,7 +187,7 @@ void saveFBXCharacterToFileWithJointParams(
     const float fps,
     const std::optional<const Eigen::MatrixXf>& jointParams,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
   // Always use saveFbxWithJointParams to support markers even without motion
   momentum::saveFbxWithJointParams(
@@ -196,7 +196,7 @@ void saveFBXCharacterToFileWithJointParams(
       jointParams.has_value() ? jointParams.value().transpose() : Eigen::MatrixXf(),
       fps,
       true, /*saveMesh*/
-      coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
+      coordSystemInfo.value_or(momentum::FbxCoordSystemInfo()),
       false, /*permissive*/
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
       fbxNamespace);
@@ -208,7 +208,7 @@ void saveFBXCharacterToFileWithSkelStates(
     float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FBXCoordSystemInfo>& coordSystemInfo,
+    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
     std::string_view fbxNamespace) {
   momentum::saveFbxWithSkeletonStates(
       path,
@@ -216,7 +216,7 @@ void saveFBXCharacterToFileWithSkelStates(
       arrayToSkeletonStates(skelStates, character),
       fps,
       true, /*saveMesh*/
-      coordSystemInfo.value_or(momentum::FBXCoordSystemInfo()),
+      coordSystemInfo.value_or(momentum::FbxCoordSystemInfo()),
       false, /*permissive*/
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
       fbxNamespace);
