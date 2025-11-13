@@ -175,7 +175,10 @@ void testGradientAndJacobian(
         for (int iParam = 0; iParam < numGradient.size(); ++iParam) {
           const auto diff = std::abs(numGradient(iParam) - anaGradient(iParam));
           if (diff > 1e-3) {
-            MT_LOGI("Mismatched gradient component: {}", iParam);
+            MT_LOGI(
+                "Mismatched gradient component: {} ({})",
+                iParam,
+                character.parameterTransform.name.at(iParam));
             MT_LOGI("  numGradient: {}", numGradient(iParam));
             MT_LOGI("  anaGradient: {}", anaGradient(iParam));
             MT_LOGI("  diff: {}", diff);
