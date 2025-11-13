@@ -149,10 +149,10 @@ class TestFBX(unittest.TestCase):
                 motion=self.model_params.numpy(),
                 offsets=offsets,
                 fps=60,
-                coord_system_info=pym_geometry.FBXCoordSystemInfo(
-                    pym_geometry.FBXUpVector.YAxis,
-                    pym_geometry.FBXFrontVector.ParityEven,
-                    pym_geometry.FBXCoordSystem.LeftHanded,
+                coord_system_info=pym_geometry.FbxCoordSystemInfo(
+                    pym_geometry.FbxUpVector.YAxis,
+                    pym_geometry.FbxFrontVector.ParityEven,
+                    pym_geometry.FbxCoordSystem.LeftHanded,
                 ),
             )
             self._verify_fbx(temp_file.name)
@@ -178,10 +178,10 @@ class TestFBX(unittest.TestCase):
                 character=self.character,
                 joint_params=self.joint_params.numpy(),
                 fps=60,
-                coord_system_info=pym_geometry.FBXCoordSystemInfo(
-                    pym_geometry.FBXUpVector.YAxis,
-                    pym_geometry.FBXFrontVector.ParityEven,
-                    pym_geometry.FBXCoordSystem.RightHanded,
+                coord_system_info=pym_geometry.FbxCoordSystemInfo(
+                    pym_geometry.FbxUpVector.YAxis,
+                    pym_geometry.FbxFrontVector.ParityEven,
+                    pym_geometry.FbxCoordSystem.RightHanded,
                 ),
             )
             self._verify_fbx(temp_file.name)
