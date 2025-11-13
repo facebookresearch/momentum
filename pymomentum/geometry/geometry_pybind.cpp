@@ -80,7 +80,7 @@ PYBIND11_MODULE(geometry, m) {
 
   m.attr("PARAMETERS_PER_JOINT") = mm::kParametersPerJoint;
 
-  py::enum_<mm::FbxUpVector>(m, "FBXUpVector")
+  py::enum_<mm::FbxUpVector>(m, "FbxUpVector")
       .value("XAxis", mm::FbxUpVector::XAxis)
       .value("YAxis", mm::FbxUpVector::YAxis)
       .value("ZAxis", mm::FbxUpVector::ZAxis);
@@ -90,11 +90,11 @@ PYBIND11_MODULE(geometry, m) {
       .value("Y", mm::UpVector::Y)
       .value("Z", mm::UpVector::Z);
 
-  py::enum_<mm::FbxFrontVector>(m, "FBXFrontVector")
+  py::enum_<mm::FbxFrontVector>(m, "FbxFrontVector")
       .value("ParityEven", mm::FbxFrontVector::ParityEven)
       .value("ParityOdd", mm::FbxFrontVector::ParityOdd);
 
-  py::enum_<mm::FbxCoordSystem>(m, "FBXCoordSystem")
+  py::enum_<mm::FbxCoordSystem>(m, "FbxCoordSystem")
       .value("RightHanded", mm::FbxCoordSystem::RightHanded)
       .value("LeftHanded", mm::FbxCoordSystem::LeftHanded);
 
@@ -169,7 +169,7 @@ PYBIND11_MODULE(geometry, m) {
       "and occlusion status for each frame, along with frame rate information.");
   auto fbxCoordSystemInfoClass = py::class_<mm::FbxCoordSystemInfo>(
       m,
-      "FBXCoordSystemInfo",
+      "FbxCoordSystemInfo",
       "FBX coordinate system information containing up vector, front vector, and handedness. "
       "Used when importing/exporting FBX files to ensure proper coordinate system conversion.");
   auto parameterLimitClass = py::class_<mm::ParameterLimit>(
@@ -543,7 +543,7 @@ The resulting tensors are as follows:
         }
 
         return fmt::format(
-            "FBXCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
+            "FbxCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
             upVectorStr,
             frontVectorStr,
             coordSystemStr);
@@ -652,7 +652,7 @@ The resulting tensors are as follows:
         }
 
         std::string coordSystemInfoStr = fmt::format(
-            "FBXCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
+            "FbxCoordSystemInfo(upVector={}, frontVector={}, coordSystem={})",
             upVectorStr,
             frontVectorStr,
             coordSystemStr);
