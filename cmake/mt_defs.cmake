@@ -597,6 +597,16 @@ function(mt_python_library)
     mt_append_pymomentum_filelist("${var}" libs)
   endforeach()
 
+  # Filter out non-file items (e.g., library names that get incorrectly included)
+  # Only keep items that are actual files
+  set(filtered_libs "")
+  foreach(lib ${libs})
+    if(EXISTS "${lib}")
+      list(APPEND filtered_libs "${lib}")
+    endif()
+  endforeach()
+  set(libs "${filtered_libs}")
+
   if(NOT ${_ARG_NO_INSTALL})
     if(${_ARG_PRESERVE_DIRECTORY_STRUCTURE})
       # Store files with their directory structure preserved
