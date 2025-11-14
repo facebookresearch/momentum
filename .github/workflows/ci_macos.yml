@@ -27,9 +27,18 @@ jobs:
       matrix:
         os: [macos-latest]
         mode: [""]
+    env:
+      # Enable ccache for C++ compilation caching
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.workflow }}-${{ matrix.os }}-${{ matrix.mode }}
 
       - name: Install FBX SDK
         run: |
@@ -41,6 +50,7 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.9.3
         with:
           cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Build and test Momentum
         run: |
@@ -55,6 +65,9 @@ jobs:
             -B momentum/examples/hello_world/build \
             -DCMAKE_BUILD_TYPE=Release
           pixi run cmake --build momentum/examples/hello_world/build
+
+      - name: Print ccache stats
+        run: ccache -s
 
   pymomentum:
     if: false # Disabled: Redundant with Windows, macOS is most expensive
