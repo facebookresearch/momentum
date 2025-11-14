@@ -215,7 +215,7 @@ Public Attributes</h2></td></tr>
 struct momentum::ParameterTransformT&lt; T &gt;</div><p>A parameter transform is an abstraction of the joint parameters that maps a model_parameter vector to a joint_parameter vector. </p>
 <p>It allows mapping a single model_parameter to multiple joints, and a single joint being influenced by multiple model_parameters joint parameters are calculated from parameters in the following way : &lt;joint_parameters&gt; = &lt;transform&gt; * &lt;model_parameters&gt; + &lt;offsets&gt; </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00064">64</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00041">41</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a998b2a1e0175151261671704b060c66a" name="a998b2a1e0175151261671704b060c66a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a998b2a1e0175151261671704b060c66a">&#9670;&#160;</a></span>apply() <span class="overload">[1/2]</span></h2>
@@ -237,9 +237,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Map model parameters to joint parameters using a linear transformation. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00102">102</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00126">126</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
+<p class="reference">References <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
 
 </div>
 </div>
@@ -263,9 +263,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Map model parameters to joint parameters using a linear transformation. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00085">85</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>, <a class="el" href="character_2types_8h_source.html#l00091">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>, and <a class="el" href="character_2types_8h_source.html#l00038">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00109">109</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00752">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="fully__differentiable__body__ik_8cpp_source.html#l00112">momentum::d_modelParams_d_inputs()</a>, <a class="el" href="gauss__newton__solver__qr_8cpp_source.html#l00056">momentum::GaussNewtonSolverQRT&lt; T &gt;::doIteration()</a>, <a class="el" href="trust__region__qr_8cpp_source.html#l00051">momentum::TrustRegionQRT&lt; T &gt;::doIteration()</a>, <a class="el" href="app__utils_8cpp_source.html#l00189">momentum::saveMotion()</a>, and <a class="el" href="character_8cpp_source.html#l00643">momentum::CharacterT&lt; T &gt;::splitParameters()</a>.</p>
 
@@ -290,7 +288,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Return bind pose joint parameters (same as the rest pose here). </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00130">130</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00154">154</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00096">momentum::EigenStrongType&lt; JointParametersT, ::Eigen::VectorX&lt; T &gt; &gt;::Zero()</a>.</p>
 
@@ -317,9 +315,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00460">460</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00487">487</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00075">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00072">momentum::ParameterTransformT&lt; T &gt;::offsets</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="parameter__transform_8h_source.html#l00081">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, and <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="parameter__transform_8h_source.html#l00062">momentum::ParameterTransformT&lt; T &gt;::blendShapeParameters</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::faceExpressionParameters</a>, <a class="el" href="parameter__transform_8h_source.html#l00043">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00049">momentum::ParameterTransformT&lt; T &gt;::offsets</a>, <a class="el" href="parameter__transform_8h_source.html#l00055">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="parameter__transform_8h_source.html#l00058">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, <a class="el" href="parameter__transform_8h_source.html#l00074">momentum::ParameterTransformT&lt; T &gt;::skinnedLocatorParameters</a>, and <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -343,7 +341,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Compute activeJointParams based on the transform and the input ParameterSet. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00071">71</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00095">95</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -376,9 +374,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Return a ParameterTransform object with no model parameters. </p>
 <p>The model can still perform FK with JointParameters, but it does not have any degrees of freedom for IK. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00042">42</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00066">66</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00075">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00072">momentum::ParameterTransformT&lt; T &gt;::offsets</a>, and <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="parameter__transform_8h_source.html#l00043">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00049">momentum::ParameterTransformT&lt; T &gt;::offsets</a>, and <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -401,9 +399,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get a list of blend shape parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00472">472</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00502">502</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00752">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00730">momentum::CharacterT&lt; T &gt;::bakeBlendShape()</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00725">momentum::calibrateModel()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00752">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="character_8cpp_source.html#l00730">momentum::CharacterT&lt; T &gt;::bakeBlendShape()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00725">momentum::calibrateModel()</a>, and <a class="el" href="height__error__function_8cpp_source.html#l00070">momentum::HeightErrorFunctionT&lt; T &gt;::HeightErrorFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -426,7 +424,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get a list of face expression parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00498">498</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00528">528</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="height__error__function_8cpp_source.html#l00070">momentum::HeightErrorFunctionT&lt; T &gt;::HeightErrorFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -450,7 +450,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Return the index of a model parameter from its name. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00019">19</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00043">43</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>.</p>
 
@@ -488,7 +488,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get a parameter set, if allowMissing is set then it will return an empty parameter set if no such parameterset is found in the file. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00030">30</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00054">54</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>.</p>
 
@@ -515,7 +515,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Return all parameters used for posing the body (excludes scaling parameters, blend shape parameters, or any parameters used for physics). </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00194">194</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00218">218</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00233">momentum::trackSequence()</a>.</p>
 
@@ -540,7 +540,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get a list of root parameters (with prefix "root_") </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00150">150</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00174">174</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -563,9 +563,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get a list of scaling parameters (with prefix "scale_"). </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00136">136</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00160">160</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00752">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00725">momentum::calibrateModel()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01069">momentum::refineMotion()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00189">momentum::saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00752">momentum::CharacterT&lt; T &gt;::bake()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00725">momentum::calibrateModel()</a>, <a class="el" href="height__error__function_8cpp_source.html#l00070">momentum::HeightErrorFunctionT&lt; T &gt;::HeightErrorFunctionT()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01069">momentum::refineMotion()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00189">momentum::saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -588,7 +588,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get a list of skinned locator parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00484">484</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00514">514</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -620,9 +620,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Return a ParameterTransform object where the model parameters are identical to the joint parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00052">52</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00075">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="character_2types_8h_source.html#l00028">momentum::kJointParameterNames</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00072">momentum::ParameterTransformT&lt; T &gt;::offsets</a>, and <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00076">76</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -633,9 +631,6 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div class="memproto">
 <div class="memtemplate">
 template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::isApprox </td>
@@ -645,16 +640,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00184">184</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00540">540</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00075">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="parameter__transform_8h_source.html#l00085">momentum::ParameterTransformT&lt; T &gt;::blendShapeParameters</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00078">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00218">parameterTransform</a>, <a class="el" href="parameter__transform_8h_source.html#l00081">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, and <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="parameter__transform_8h_source.html#l00062">momentum::ParameterTransformT&lt; T &gt;::blendShapeParameters</a>, <a class="el" href="parameter__transform_8h_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::faceExpressionParameters</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="parameter__transform_8h_source.html#l00043">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00049">momentum::ParameterTransformT&lt; T &gt;::offsets</a>, <a class="el" href="parameter__transform_8h_source.html#l00055">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00218">parameterTransform</a>, <a class="el" href="parameter__transform_8h_source.html#l00058">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>, <a class="el" href="parameter__transform_8h_source.html#l00074">momentum::ParameterTransformT&lt; T &gt;::skinnedLocatorParameters</a>, and <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>.</p>
 
 </div>
 </div>
@@ -685,11 +677,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of all model parameters, including pose, scaling, marker joints, and blendshape parameters for id and expressions. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00158">158</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00135">135</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00609">momentum::CharacterT&lt; T &gt;::bindPose()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00961">momentum::calibrateLocators()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00725">momentum::calibrateModel()</a>, <a class="el" href="fully__differentiable__body__ik_8cpp_source.html#l00021">momentum::computeSubsetParameterIndices()</a>, <a class="el" href="fully__differentiable__body__ik_8cpp_source.html#l00112">momentum::d_modelParams_d_inputs()</a>, <a class="el" href="fully__differentiable__orientation__error__function_8cpp_source.html#l00077">momentum::FullyDifferentiableOrientationErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="fully__differentiable__position__error__function_8cpp_source.html#l00105">momentum::FullyDifferentiablePositionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01129">momentum::getLocatorError()</a>, <a class="el" href="app__utils_8cpp_source.html#l00160">momentum::loadCharacterWithIdentity()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00169">momentum::mapMotionToCharacter()</a>, <a class="el" href="model__parameters__error__function_8cpp_source.html#l00028">momentum::ModelParametersErrorFunctionT&lt; T &gt;::ModelParametersErrorFunctionT()</a>, <a class="el" href="parameter__transform_8h_source.html#l00179">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>, <a class="el" href="transform__pose_8cpp_source.html#l00086">momentum::PoseTransformSolverT&lt; T &gt;::PoseTransformSolverT()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01069">momentum::refineMotion()</a>, <a class="el" href="character_8cpp_source.html#l00574">momentum::CharacterT&lt; T &gt;::remapLocators()</a>, <a class="el" href="character_8cpp_source.html#l00459">momentum::CharacterT&lt; T &gt;::remapParameterLimits()</a>, <a class="el" href="character_8cpp_source.html#l00518">momentum::CharacterT&lt; T &gt;::remapSkinnedLocators()</a>, <a class="el" href="character_8cpp_source.html#l00408">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00017">momentum::saveMmo()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00516">momentum::trackPosesForFrames()</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00233">momentum::trackSequence()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00609">momentum::CharacterT&lt; T &gt;::bindPose()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00961">momentum::calibrateLocators()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00725">momentum::calibrateModel()</a>, <a class="el" href="fully__differentiable__body__ik_8cpp_source.html#l00021">momentum::computeSubsetParameterIndices()</a>, <a class="el" href="fully__differentiable__body__ik_8cpp_source.html#l00112">momentum::d_modelParams_d_inputs()</a>, <a class="el" href="fully__differentiable__orientation__error__function_8cpp_source.html#l00077">momentum::FullyDifferentiableOrientationErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="fully__differentiable__position__error__function_8cpp_source.html#l00105">momentum::FullyDifferentiablePositionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01129">momentum::getLocatorError()</a>, <a class="el" href="app__utils_8cpp_source.html#l00160">momentum::loadCharacterWithIdentity()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00169">momentum::mapMotionToCharacter()</a>, <a class="el" href="model__parameters__error__function_8cpp_source.html#l00028">momentum::ModelParametersErrorFunctionT&lt; T &gt;::ModelParametersErrorFunctionT()</a>, <a class="el" href="parameter__transform_8h_source.html#l00156">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>, <a class="el" href="transform__pose_8cpp_source.html#l00086">momentum::PoseTransformSolverT&lt; T &gt;::PoseTransformSolverT()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01069">momentum::refineMotion()</a>, <a class="el" href="character_8cpp_source.html#l00574">momentum::CharacterT&lt; T &gt;::remapLocators()</a>, <a class="el" href="character_8cpp_source.html#l00459">momentum::CharacterT&lt; T &gt;::remapParameterLimits()</a>, <a class="el" href="character_8cpp_source.html#l00518">momentum::CharacterT&lt; T &gt;::remapSkinnedLocators()</a>, <a class="el" href="character_8cpp_source.html#l00408">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00017">momentum::saveMmo()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00516">momentum::trackPosesForFrames()</a>, and <a class="el" href="marker__tracker_8cpp_source.html#l00233">momentum::trackSequence()</a>.</p>
 
 </div>
 </div>
@@ -712,9 +704,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of identity blendshape parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00178">178</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00202">202</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00179">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00156">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>.</p>
 
 </div>
 </div>
@@ -737,9 +729,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of facial expression parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00183">183</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00207">207</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00179">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00156">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>.</p>
 
 </div>
 </div>
@@ -770,9 +762,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of the output jointParameters vector. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00163">163</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00140">140</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00069">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -804,9 +796,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Dimension of skeletal model parameters, including pose parameters, scaling parameters, locator joint parameters etc. </p>
 <p>basically everything but blendshapes (ids and expressions). </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00179">179</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00156">156</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00158">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00178">momentum::ParameterTransformT&lt; T &gt;::numBlendShapeParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00183">momentum::ParameterTransformT&lt; T &gt;::numFaceExpressionParameters()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00188">momentum::ParameterTransformT&lt; T &gt;::numSkinnedLocatorParameters()</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00135">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00202">momentum::ParameterTransformT&lt; T &gt;::numBlendShapeParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00207">momentum::ParameterTransformT&lt; T &gt;::numFaceExpressionParameters()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00212">momentum::ParameterTransformT&lt; T &gt;::numSkinnedLocatorParameters()</a>.</p>
 
 </div>
 </div>
@@ -829,9 +821,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of facial expression parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00188">188</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00212">212</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00179">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00156">momentum::ParameterTransformT&lt; T &gt;::numSkeletonParameters()</a>.</p>
 
 </div>
 </div>
@@ -855,9 +847,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Create a simplified transform given the enabled parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00200">200</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00224">224</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00267">momentum::subsetParameterTransform()</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8cpp_source.html#l00294">momentum::subsetParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -880,7 +872,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Return rest pose joint parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00123">123</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8cpp_source.html#l00147">147</a> of file <a class="el" href="parameter__transform_8cpp_source.html">parameter_transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -901,9 +893,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>The list of joint <em>parameters</em> that are actually active and influenced from the transform. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00075">75</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00052">52</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00460">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00042">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::identity()</a>, <a class="el" href="parameter__transform_8h_source.html#l00184">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="json__utils_8cpp_source.html#l00102">momentum::parameterTransformFromJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00291">momentum::parseParameterTransform()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="json__utils_8cpp_source.html#l00102">momentum::parameterTransformFromJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00291">momentum::parseParameterTransform()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -923,9 +915,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>The indices of the parameters that influence blend shapes; <a class="el" href="structmomentum_1_1ParameterTransformT.html#abcfd51bd3f35465c71d5d816056e973c" title="The indices of the parameters that influence blend shapes; blendShapeParameters(0) is the parameter t...">blendShapeParameters(0)</a> is the parameter that controls the 0th blend shape, etc. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00085">85</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00062">62</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8h_source.html#l00184">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>.</p>
 
 </div>
 </div>
@@ -945,7 +937,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>The indices of the parameters that influence face expressions; <a class="el" href="structmomentum_1_1ParameterTransformT.html#a69e4e3e4d62d5867709ef93becdd2136" title="The indices of the parameters that influence face expressions; faceExpressionParameters(0) is the par...">faceExpressionParameters(0)</a> is the parameter that controls the 0th face expression parameter, etc. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00089">89</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00066">66</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>.</p>
 
 </div>
 </div>
@@ -965,9 +959,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>The list of model parameter names. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00066">66</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00043">43</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00460">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00042">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::identity()</a>, <a class="el" href="parameter__transform_8h_source.html#l00184">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00169">momentum::mapMotionToCharacter()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00206">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00188">momentum::parameterLimitsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00019">momentum::parameterSetsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00080">momentum::parameterTransformToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00049">momentum::poseConstraintsToJson()</a>, <a class="el" href="character__io_8cpp_source.html#l00143">momentum::saveCharacter()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="app__utils_8cpp_source.html#l00189">momentum::saveMotion()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00656">momentum::writeModelDefinition()</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00715">momentum::writeParameterLimits()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00095">momentum::ParameterTransformT&lt; float &gt;::computeActiveJointParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00169">momentum::mapMotionToCharacter()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00188">momentum::parameterLimitsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00019">momentum::parameterSetsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00080">momentum::parameterTransformToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00049">momentum::poseConstraintsToJson()</a>, <a class="el" href="character__io_8cpp_source.html#l00143">momentum::saveCharacter()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00043">momentum::saveMmo()</a>, <a class="el" href="app__utils_8cpp_source.html#l00189">momentum::saveMotion()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00656">momentum::writeModelDefinition()</a>, <a class="el" href="parameter__limits__io_8cpp_source.html#l00715">momentum::writeParameterLimits()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -986,9 +980,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated:</a></b></dt><dd>Constant offset factor for each joint. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00072">72</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00049">49</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00460">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00042">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::identity()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00206">momentum::mapParameterTransformJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00440">momentum::replaceSkeletonHierarchy()</a>, <a class="el" href="character_8cpp_source.html#l00697">momentum::CharacterT&lt; float &gt;::withFaceExpressionBlendShape()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00440">momentum::replaceSkeletonHierarchy()</a>, <a class="el" href="character_8cpp_source.html#l00697">momentum::CharacterT&lt; float &gt;::withFaceExpressionBlendShape()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -1008,9 +1002,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Convenience grouping of model parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00078">78</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00055">55</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00961">momentum::calibrateLocators()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00460">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8h_source.html#l00184">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00206">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00019">momentum::parameterSetsToJson()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01069">momentum::refineMotion()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00656">momentum::writeModelDefinition()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l00961">momentum::calibrateLocators()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00019">momentum::parameterSetsToJson()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01069">momentum::refineMotion()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00656">momentum::writeModelDefinition()</a>.</p>
 
 </div>
 </div>
@@ -1030,9 +1024,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>A set of predefined poses. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00081">81</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00058">58</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00460">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8h_source.html#l00184">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00206">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00049">momentum::poseConstraintsToJson()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00233">momentum::trackSequence()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00656">momentum::writeModelDefinition()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="parameters__io_8cpp_source.html#l00016">momentum::loadParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00049">momentum::poseConstraintsToJson()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00233">momentum::trackSequence()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00656">momentum::writeModelDefinition()</a>.</p>
 
 </div>
 </div>
@@ -1053,7 +1047,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Parameters that control the rest-space positions of the skinned locators. </p>
 <p>This array will be either empty or have the same size as the number of skinned locators. Each entry maps from a skinned locator index to the first of the three (x,y,z) parameters that control its position. Skinned locators that aren't controlled by the paramete transform will have skinnedLocatorParameters[i] = -1. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00097">97</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00074">74</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>.</p>
 
 </div>
 </div>
@@ -1073,9 +1069,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>The sparse mapping matrix that maps model parameters to joint parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00069">69</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00046">46</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00173">momentum::CharacterT&lt; float &gt;::activeJointsToParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00460">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00042">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00166">momentum::SimdNormalErrorFunction::getGradient()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00181">momentum::LimitErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">momentum::SimdNormalErrorFunction::getJacobian()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00425">momentum::LimitErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="error__function__utils_8h_source.html#l00016">momentum::gradient_jointParams_to_modelParams()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00147">momentum::gradient_jointParams_to_modelParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00052">momentum::ParameterTransformT&lt; T &gt;::identity()</a>, <a class="el" href="parameter__transform_8h_source.html#l00184">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="error__function__utils_8h_source.html#l00031">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00162">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00270">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="error__function__utils_8h_source.html#l00046">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00177">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00206">momentum::mapParameterTransformJoints()</a>, <a class="el" href="parameter__transform_8h_source.html#l00158">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00163">momentum::ParameterTransformT&lt; T &gt;::numJointParameters()</a>, <a class="el" href="character_8cpp_source.html#l00147">momentum::CharacterT&lt; T &gt;::parametersToActiveJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00080">momentum::parameterTransformToJson()</a>, <a class="el" href="ceres__utility_8h_source.html#l00057">momentum::times_parameterTransform_times_v()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character_8cpp_source.html#l00173">momentum::CharacterT&lt; float &gt;::activeJointsToParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00487">momentum::ParameterTransformT&lt; T &gt;::cast()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00066">momentum::ParameterTransformT&lt; T &gt;::empty()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00166">momentum::SimdNormalErrorFunction::getGradient()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00181">momentum::LimitErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">momentum::SimdNormalErrorFunction::getJacobian()</a>, <a class="el" href="limit__error__function_8cpp_source.html#l00425">momentum::LimitErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="error__function__utils_8h_source.html#l00016">momentum::gradient_jointParams_to_modelParams()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00147">momentum::gradient_jointParams_to_modelParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00540">momentum::ParameterTransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="error__function__utils_8h_source.html#l00031">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00162">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00270">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="error__function__utils_8h_source.html#l00046">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00177">momentum::jacobian_jointParams_to_modelParams()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00230">momentum::mapParameterTransformJoints()</a>, <a class="el" href="parameter__transform_8h_source.html#l00135">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00140">momentum::ParameterTransformT&lt; T &gt;::numJointParameters()</a>, <a class="el" href="character_8cpp_source.html#l00147">momentum::CharacterT&lt; T &gt;::parametersToActiveJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00080">momentum::parameterTransformToJson()</a>, <a class="el" href="ceres__utility_8h_source.html#l00057">momentum::times_parameterTransform_times_v()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00560">momentum::writeParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -1090,7 +1086,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1ParameterTransformT.html">ParameterTransformT</a></li>
-    <li class="footer">Generated on Thu Nov 13 2025 17:48:49 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Nov 14 2025 07:47:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

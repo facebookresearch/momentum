@@ -156,6 +156,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverQROptions.regularization"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQROptions.regularization</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.HeightErrorFunction"><code class="docutils literal notranslate"><span class="pre">HeightErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.HeightErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">HeightErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.HeightErrorFunction.target_height"><code class="docutils literal notranslate"><span class="pre">HeightErrorFunction.target_height</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.HeightErrorFunction.up_direction"><code class="docutils literal notranslate"><span class="pre">HeightErrorFunction.up_direction</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceConstraint"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceConstraint</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceConstraint.__init__"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceConstraint.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceConstraint.joint1"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceConstraint.joint1</span></code></a></li>
@@ -1301,6 +1307,48 @@ joint-local space) and a global axis using element-wise differences.</p>
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverQROptions.regularization">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regularization</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverQROptions.regularization" title="Link to this definition"></a></dt>
 <dd><p>Regularization parameter for QR decomposition.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.HeightErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">HeightErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.HeightErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
+<p>Error function for character height constraints.</p>
+<p>This error function measures the height of a character mesh by projecting
+all vertices onto a specified “up” direction and computing the difference
+between the maximum and minimum projections.</p>
+<p>Unlike most error functions, this one only depends on specific active parameters
+that are automatically determined: blend shape, face expression, and scale parameters
+only (not pose parameters). This allows constraining height independent of pose.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.HeightErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.HeightErrorFunction" title="pymomentum.solver2.HeightErrorFunction"><span class="pre">pymomentum.solver2.HeightErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.HeightErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a HeightErrorFunction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to measure height for.</p></li>
+<li><p><strong>target_height</strong> – The target height for the character (required).</p></li>
+<li><p><strong>up_direction</strong> – The direction to measure height along (defaults to Y-axis [0, 1, 0]).</p></li>
+<li><p><strong>k</strong> – Number of vertices to average for min/max height calculation (defaults to 1).</p></li>
+<li><p><strong>weight</strong> – The weight applied to the error function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.HeightErrorFunction.target_height">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_height</span></span><a class="headerlink" href="#pymomentum.solver2.HeightErrorFunction.target_height" title="Link to this definition"></a></dt>
+<dd><p>The target height for the character.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.HeightErrorFunction.up_direction">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">up_direction</span></span><a class="headerlink" href="#pymomentum.solver2.HeightErrorFunction.up_direction" title="Link to this definition"></a></dt>
+<dd><p>The up direction for height measurement.</p>
 </dd></dl>
 
 </dd></dl>
