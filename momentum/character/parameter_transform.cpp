@@ -15,6 +15,30 @@
 
 namespace momentum {
 
+bool PoseConstraint::operator==(const PoseConstraint& poseConstraint) const {
+  // Compare the parameterIdValue as sets
+  std::map<size_t, float> paramIdToValue1;
+  std::copy(
+      parameterIdValue.begin(),
+      parameterIdValue.end(),
+      std::inserter(paramIdToValue1, paramIdToValue1.begin()));
+
+  std::map<size_t, float> paramIdToValue2;
+  std::copy(
+      poseConstraint.parameterIdValue.begin(),
+      poseConstraint.parameterIdValue.end(),
+      std::inserter(paramIdToValue2, paramIdToValue2.begin()));
+
+  if (paramIdToValue1.size() != paramIdToValue2.size()) {
+    return false;
+  }
+
+  auto pred = [](const auto& l, const auto& r) {
+    return ((l.first == r.first) && isApprox(l.second, r.second));
+  };
+  return std::equal(paramIdToValue1.begin(), paramIdToValue1.end(), paramIdToValue2.begin(), pred);
+}
+
 template <typename T>
 size_t ParameterTransformT<T>::getParameterIdByName(const std::string& nm) const {
   for (size_t d = 0; d < name.size(); d++) {
@@ -504,6 +528,28 @@ ParameterSet ParameterTransformT<T>::getFaceExpressionParameters() const {
   }
 
   return result;
+}
+
+template <typename T>
+bool ParameterTransformT<T>::isApprox(const ParameterTransformT<T>& parameterTransform) const {
+  bool isTransformEqual = false;
+  if (transform.cols() > 0 && transform.rows() > 0 && parameterTransform.transform.cols() > 0 &&
+      parameterTransform.transform.rows() > 0) {
+    isTransformEqual = transform.isApprox(parameterTransform.transform);
+  } else {
+    isTransformEqual = (transform.cols() == parameterTransform.transform.cols()) &&
+        (transform.rows() == parameterTransform.transform.rows());
+  }
+  if (!isTransformEqual) {
+    return false;
+  }
+
+  return (
+      (name == parameterTransform.name) &&
+      activeJointParams.isApprox(parameterTransform.activeJointParams) &&
+      (parameterSets == parameterTransform.parameterSets) &&
+      (poseConstraints == parameterTransform.poseConstraints) &&
+      (blendShapeParameters == parameterTransform.blendShapeParameters));
 }
 
 std::tuple<ParameterTransform, ParameterLimits> addBlendShapeParameters(
