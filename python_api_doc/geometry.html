@@ -371,6 +371,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform"><code class="docutils literal notranslate"><span class="pre">ParameterTransform</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.__init__"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.add_parameter_set"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.add_parameter_set()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.all_parameters"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.all_parameters</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.apply"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.apply()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.blend_shape_parameters"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.blend_shape_parameters</span></code></a></li>
@@ -2912,6 +2913,20 @@ where q is the dimensionality of the PCA subspace.</p>
 <li><p><strong>names</strong> – List of model parameter names.</p></li>
 <li><p><strong>skeleton</strong> – The skeleton that this parameter transform operates on.</p></li>
 <li><p><strong>transform</strong> – A dense numpy array of size (7*n_joints x n_params) that maps from model parameters to joint parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.add_parameter_set">
+<span class="sig-name descname"><span class="pre">add_parameter_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_set_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.add_parameter_set" title="Link to this definition"></a></dt>
+<dd><p>Adds a parameter set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameter_set_name</strong> – The name of the parameter set.</p></li>
+<li><p><strong>parameter_set</strong> – The tensor of parameter set values.</p></li>
 </ul>
 </dd>
 </dl>
