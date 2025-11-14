@@ -19,7 +19,8 @@ concurrency:
 
 jobs:
   momentum:
-    if: false # Temporarily disabled to reduce CI cost
+    # Disabled: Too slow for CI (use sccache on local development)
+    if: false
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-win
     runs-on: windows-latest
     strategy:
