@@ -403,9 +403,9 @@ TYPED_TEST(Momentum_ParameterTransformTest, Cast) {
   EXPECT_EQ(transform.offsets.size(), transformOther.offsets.size());
   EXPECT_EQ(transform.activeJointParams.size(), transformOther.activeJointParams.size());
 
-  // Cast back to original type
+  // Cast back to original type and verify no data is lost using isApprox
   ParameterTransformT<T> transformBack = transformOther.template cast<T>();
-  EXPECT_EQ(transform.name, transformBack.name);
+  EXPECT_TRUE(transform.isApprox(transformBack));
 }
 
 // Test isApprox method
