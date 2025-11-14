@@ -108,7 +108,7 @@ TYPED_TEST(TriBvhEmbreeTest, ClosestSurfacePoint_SameResultsAsIgl) {
     const Eigen::Vector3<S> query = queryPoints.row(i);
 
     int32_t tri0 = 0;
-    Eigen::RowVector3<S> p0;
+    Eigen::RowVector3<S> p0{};
     aabb.squared_distance(positions, faces, query, tri0, p0);
 
     const auto result = bvh.closestSurfacePoint(query);
