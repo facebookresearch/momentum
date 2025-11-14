@@ -674,10 +674,13 @@ void parseSkinnedModel(
         const auto shape = channel->getShape(s);
         int numVertices = shape->getVertexCount();
         const auto shapeV = shape->getVertices();
+        int numIndices = shape->getIndexCount();
+        const auto indexV = shape->getIndices();
+        MT_CHECK(numIndices == numVertices);
         for (int v = 0; v < numVertices; ++v) {
-          shapes(vertexOffset * 3 + v * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
-          shapes(vertexOffset * 3 + v * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
-          shapes(vertexOffset * 3 + v * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
+          shapes(vertexOffset * 3 + indexV[v] * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
+          shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
+          shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
         }
         shapeIndex++;
       }

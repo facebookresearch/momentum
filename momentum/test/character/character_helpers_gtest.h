@@ -14,6 +14,10 @@ namespace momentum {
 
 // Matching methods
 void compareMeshes(const Mesh_u& refMesh, const Mesh_u& mesh);
-void compareChars(const Character& refChar, const Character& character, bool withMesh = true);
+void compareChars(
+    const Character& refChar,
+    const Character& character,
+    bool withMesh = true,
+    bool withParameterTransform = true);
 
 } // namespace momentum

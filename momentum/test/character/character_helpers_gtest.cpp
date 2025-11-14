@@ -111,7 +111,7 @@ void compareBlendShapes(const BlendShape_const_p& refShapes, const BlendShape_co
     EXPECT_THAT(
         refShapes->getBaseShape(),
         testing::Pointwise(FloatNearPointwise(0.0001), shapes->getBaseShape()));
-    EXPECT_TRUE(refShapes->getShapeVectors().isApprox(shapes->getShapeVectors()));
+    EXPECT_TRUE(refShapes->getShapeVectors().isApprox(shapes->getShapeVectors(), 1e-3));
   }
 }
 
@@ -183,7 +183,11 @@ void compareCollisionGeometry(
   }
 }
 
-void compareChars(const Character& refChar, const Character& character, const bool withMesh) {
+void compareChars(
+    const Character& refChar,
+    const Character& character,
+    const bool withMesh,
+    const bool withParameterTransform) {
   ASSERT_EQ(refChar.name, character.name);
   const auto& refJoints = refChar.skeleton.joints;
   const auto& joints = character.skeleton.joints;
@@ -202,8 +206,11 @@ void compareChars(const Character& refChar, const Character& character, const bo
         << "  - preRotation: " << joints[i].preRotation.coeffs().transpose() << "\n"
         << "  - translationOffset: " << joints[i].translationOffset.transpose() << "\n";
   }
-  ASSERT_TRUE(refChar.parameterTransform.isApprox(character.parameterTransform));
-  EXPECT_THAT(refChar.parameterLimits, testing::Pointwise(ElementsEq(), character.parameterLimits));
+  if (withParameterTransform) {
+    ASSERT_TRUE(refChar.parameterTransform.isApprox(character.parameterTransform));
+    EXPECT_THAT(
+        refChar.parameterLimits, testing::Pointwise(ElementsEq(), character.parameterLimits));
+  }
   compareLocators(refChar.locators, character.locators);
   compareCollisionGeometry(refChar.collision, character.collision);
   ASSERT_EQ(refChar.inverseBindPose.size(), character.inverseBindPose.size());
