@@ -297,6 +297,14 @@ std::unordered_map<std::string, at::Tensor> getParameterSets(
   return result;
 }
 
+void addParameterSet(
+    momentum::ParameterTransform& parameterTransform,
+    const std::string& paramSetName,
+    const at::Tensor& paramSet) {
+  const auto set = tensorToParameterSet(parameterTransform, paramSet);
+  parameterTransform.parameterSets.insert({paramSetName, set});
+}
+
 at::Tensor getParametersForJoints(
     const momentum::ParameterTransform& parameterTransform,
     const std::vector<size_t>& jointIndices) {

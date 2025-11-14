@@ -192,6 +192,15 @@ Rotations are in Euler angles.)",
 This is convenient for turning off certain body features; for example the 'fingers' parameters
 can be used to enable/disable finger motion in the character model.  )")
       .def(
+          "add_parameter_set",
+          &addParameterSet,
+          R"(Adds a parameter set.
+
+:param parameter_set_name: The name of the parameter set.
+:param parameter_set: The tensor of parameter set values.)",
+          py::arg("parameter_set_name"),
+          py::arg("parameter_set"))
+      .def(
           "parameters_for_joints",
           &getParametersForJoints,
           R"(Gets a boolean torch.Tensor indicating which parameters affect the passed-in joints.

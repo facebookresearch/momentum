@@ -37,6 +37,11 @@ at::Tensor getBlendShapeParameters(const momentum::ParameterTransform& parameter
 
 at::Tensor getPoseParameters(const momentum::ParameterTransform& parameterTransform);
 
+void addParameterSet(
+    momentum::ParameterTransform& parameterTransform,
+    const std::string& paramSetName,
+    const at::Tensor& paramSet);
+
 at::Tensor getParametersForJoints(
     const momentum::ParameterTransform& parameterTransform,
     const std::vector<size_t>& jointIndices);
