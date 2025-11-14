@@ -26,14 +26,23 @@ jobs:
       fail-fast: false
       matrix:
         mode: [""]  # TODO: Add -dev model
+    env:
+      # Enable sccache for C++ compilation caching
+      CMAKE_C_COMPILER_LAUNCHER: sccache
+      CMAKE_CXX_COMPILER_LAUNCHER: sccache
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@v0.0.8
 
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.9.3
         with:
           cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Build and test Momentum
         run: |
@@ -49,6 +58,9 @@ jobs:
             --build momentum/examples/hello_world/build `
             --config Release `
             --parallel
+
+      - name: Print sccache stats
+        run: sccache --show-stats
 
   pymomentum:
     # Enabled: CPU-only for cost optimization (GPU disabled)
