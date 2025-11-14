@@ -756,6 +756,12 @@ void addLocatorsToModel(
       extension["limitWeight"] = loc.limitWeight;
       extension["limitOrigin"] = loc.limitOrigin;
       extension["locked"] = loc.locked;
+      if (loc.attachedToSkin) {
+        extension["attachedToSkin"] = loc.attachedToSkin;
+      }
+      if (loc.skinOffset != 0.0f) {
+        extension["skinOffset"] = loc.skinOffset;
+      }
     }
 
     auto newMeshIdx = addMeshToModel(model, kUnitCubeGreen, true);

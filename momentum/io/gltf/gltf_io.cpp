@@ -91,6 +91,12 @@ Locator createLocator(const fx::gltf::Node& node, const nlohmann::json& extensio
     }
     loc.limitWeight = fromJson<Vector3f>(extension["limitWeight"]);
     loc.locked = fromJson<Vector3i>(extension["locked"]);
+    if (extension.contains("attachedToSkin")) {
+      loc.attachedToSkin = extension["attachedToSkin"];
+    }
+    if (extension.contains("skinOffset")) {
+      loc.skinOffset = extension["skinOffset"];
+    }
   } catch (const std::exception&) {
     MT_THROW(
         "Fail to parse json {} for locator {} when loading character.",
