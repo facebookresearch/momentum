@@ -80,6 +80,7 @@ template_classes = [
     "FixedAxisCosErrorFunction",
     "FixedAxisDiffErrorFunction",
     "GaussNewtonSolverQR",
+    "HeightErrorFunction",
     "LimitErrorFunction",
     "ModelParametersErrorFunction",
     "NormalErrorFunction",

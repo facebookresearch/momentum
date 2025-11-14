@@ -22,7 +22,7 @@ SkinningWeightIteratorT<T>::SkinningWeightIteratorT(
     const Character& character,
     const MeshT<T>& restMesh,
     const SkeletonStateT<T>& skelState,
-    int vertexIndex)
+    Eigen::Index vertexIndex)
     : character(character) {
   const auto& skinWeights = *character.skinWeights;
   nBoneWeights = 0;
