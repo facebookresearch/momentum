@@ -117,8 +117,10 @@ find_package(fx-gltf CONFIG REQUIRED)
 find_package(indicators 2.3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(openfbx CONFIG REQUIRED)
+find_package(pxr CONFIG REQUIRED HINTS ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_PREFIX}/cmake)
 find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(TBB CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
 
 if(MOMENTUM_BUILD_RENDERER)
@@ -449,6 +451,22 @@ mt_library(
 )
 
 mt_library(
+  NAME io_usd
+  HEADERS_VARS io_usd_public_headers
+  SOURCES_VARS io_usd_sources
+  PUBLIC_LINK_LIBRARIES
+    character
+    io_common
+    io_skeleton
+  PRIVATE_LINK_LIBRARIES
+    usd
+    usdGeom
+    usdSkel
+    TBB::tbb
+    Python3::Python  # Conda USD has Python symbols on both Linux and macOS
+)
+
+mt_library(
   NAME io_legacy_json
   HEADERS_VARS io_legacy_json_public_headers
   SOURCES_VARS io_legacy_json_sources
@@ -493,6 +511,7 @@ mt_library(
     io_marker
     io_shape
     io_skeleton
+    io_usd
 )
 
 mt_library(
@@ -794,6 +813,18 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       io_legacy_json
       io_test_helper
+    ENV
+      "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
+  )
+
+  mt_test(
+    NAME io_usd_test
+    SOURCES_VARS io_usd_test_sources
+    LINK_LIBRARIES
+      character_test_helpers
+      io_usd
+      io_test_helper
+      Python3::Python
     ENV
       "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
   )
