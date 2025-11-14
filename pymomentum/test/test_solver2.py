@@ -1849,3 +1849,88 @@ class TestSolver(unittest.TestCase):
             weight=np.array([0.5, 2.5], dtype=np.float32),
         )
         self.assertEqual(len(pos_error_valid.constraints), 3)
+
+    def test_height_error_solver_convergence(self) -> None:
+        """Test HeightErrorFunction can solve for the correct height using pose+scale parameters."""
+
+        # Create test character with mesh
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        # Set target height different from rest pose
+        target_height = 4.5
+
+        # Create height error function with required target_height parameter
+        height_error = pym_solver2.HeightErrorFunction(
+            character,
+            target_height=target_height,
+            up_direction=np.array([0.0, 1.0, 0.0]),
+            k=1,
+            weight=1.0,
+        )
+
+        # Create solver function
+        solver_function = pym_solver2.SkeletonSolverFunction(character, [height_error])
+
+        # Initialize parameters to zero (rest pose)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
+
+        # Create solver
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 50
+        solver_options.min_iterations = 10
+        solver_options.regularization = 1e-7
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+
+        # Solve for target height
+        model_params_final = solver.solve(model_params_init)
+
+        # Compute actual height from optimized parameters
+        skel_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final)
+        )
+        mesh_vertices = character.skin_points(skel_state)
+
+        # Compute height by projecting all vertices onto the up direction
+        up_direction = np.array([0.0, 1.0, 0.0])
+        projections = mesh_vertices.numpy() @ up_direction
+        actual_height = projections.max() - projections.min()
+
+        # Check that the actual height is close to the target height
+        self.assertTrue(
+            np.isclose(actual_height, target_height, rtol=1e-2, atol=1e-2),
+            f"Solved height {actual_height} does not match target height {target_height}",
+        )
+
+        # Verify that the solver converged to low error
+        self.assertGreater(len(solver.per_iteration_errors), 1)
+        self.assertLess(
+            solver.per_iteration_errors[-1],
+            1e-4,
+            f"Solver did not converge to low error. Final error: {solver.per_iteration_errors[-1]}",
+        )
+
+        # Test with a different target height to ensure solver works consistently
+        target_height_2 = 5.5
+        height_error.target_height = target_height_2
+
+        # Reset parameters
+        model_params_init = np.zeros(n_params, dtype=np.float32)
+        model_params_final_2 = solver.solve(model_params_init)
+
+        # Compute actual height from optimized parameters
+        skel_state_2 = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final_2)
+        )
+        mesh_vertices_2 = character.skin_points(skel_state_2)
+
+        # Compute height
+        projections_2 = mesh_vertices_2.numpy() @ up_direction
+        actual_height_2 = projections_2.max() - projections_2.min()
+
+        # Check that the actual height is close to the second target height
+        self.assertTrue(
+            np.isclose(actual_height_2, target_height_2, rtol=1e-2, atol=1e-2),
+            f"Solved height {actual_height_2} does not match second target height {target_height_2}",
+        )
