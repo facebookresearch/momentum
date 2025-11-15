@@ -7,6 +7,7 @@
 
 #include <momentum/character/character_utility.h>
 #include <momentum/character/inverse_parameter_transform.h>
+#include <momentum/io/character_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
@@ -81,13 +82,7 @@ int main(int argc, char* argv[]) {
 
     MatrixXf finalMotion = refineMotion(markerData, motion, *config, character);
     // save results
-    saveMotion(
-        ioOpt->outputFile,
-        character,
-        finalMotion.col(0) /*contains newly solved id*/,
-        finalMotion,
-        markerData,
-        fps);
+    saveCharacter(ioOpt->outputFile, character, fps, finalMotion, markerData);
     MT_LOGI("{} saved", ioOpt->outputFile);
   } catch (std::exception& e) {
     MT_LOGE("{}", e.what());

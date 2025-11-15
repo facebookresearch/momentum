@@ -438,7 +438,7 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
     auto fidxDense = copyAccessorBuffer<uint32_t>(model, extension.at("texfaces"));
     MT_CHECK(fidxDense.size() % 3 == 0, "{} % 3 = {}", fidxDense.size(), fidxDense.size() % 3);
     texfaces.resize(fidxDense.size() / 3);
-    if (fidxDense.size() > 0) {
+    if (!fidxDense.empty()) {
       std::copy_n(fidxDense.data(), fidxDense.size(), &texfaces[0][0]);
     }
   } else {
@@ -991,7 +991,7 @@ fx::gltf::Document makeCharacterDocument(
     std::span<const SkeletonState> skeletonStates,
     std::span<const std::vector<Marker>> markerSequence,
     bool embedResource,
-    const GltfOptions& options) {
+    const FileSaveOptions& options) {
   GltfBuilder fileBuilder;
 
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
@@ -1226,7 +1226,7 @@ fx::gltf::Document makeCharacterDocument(
     const IdentityParameters& offsets,
     std::span<const std::vector<Marker>> markerSequence,
     bool embedResource,
-    const GltfOptions& options) {
+    const FileSaveOptions& options) {
   GltfBuilder fileBuilder;
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
   if (!kCharacterIsEmpty) {
@@ -1293,14 +1293,14 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
           positions.size());
 
       // resize the output array if necessary
-      const size_t length = static_cast<size_t>(timestamps.back() * fps + 0.5f) + 1;
+      const size_t length = static_cast<size_t>(std::lround(timestamps.back() * fps)) + 1;
       if (length > result.frames.size()) {
         result.frames.resize(length);
       }
 
       // go over all data and enter into the output array
       for (size_t i = 0; i < timestamps.size(); i++) {
-        const size_t index = static_cast<size_t>(timestamps[i] * fps + 0.5f);
+        const size_t index = static_cast<size_t>(std::lround(timestamps[i] * fps));
         result.frames[index].emplace_back();
         auto& marker = result.frames[index].back();
 
@@ -1321,14 +1321,12 @@ void saveGltfCharacter(
     const MotionParameters& motion,
     const IdentityParameters& offsets,
     std::span<const std::vector<Marker>> markerSequence,
-    const GltfFileFormat fileFormat,
-    const GltfOptions& options) {
-  constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
-  // create new model
+    const FileSaveOptions& options) {
+  constexpr auto kEmbedResources = false;
   fx::gltf::Document model = makeCharacterDocument(
       character, fps, motion, offsets, markerSequence, kEmbedResources, options);
 
-  GltfBuilder::save(model, filename, fileFormat, kEmbedResources);
+  GltfBuilder::save(model, filename, options.gltfFileFormat, kEmbedResources);
 }
 
 void saveGltfCharacter(
@@ -1337,14 +1335,12 @@ void saveGltfCharacter(
     const float fps,
     std::span<const SkeletonState> skeletonStates,
     std::span<const std::vector<Marker>> markerSequence,
-    const GltfFileFormat fileFormat,
-    const GltfOptions& options) {
-  constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
-  // create new model
+    const FileSaveOptions& options) {
+  constexpr auto kEmbedResources = false;
   fx::gltf::Document model = ::makeCharacterDocument(
       character, fps, skeletonStates, markerSequence, kEmbedResources, options);
 
-  GltfBuilder::save(model, filename, fileFormat, kEmbedResources);
+  GltfBuilder::save(model, filename, options.gltfFileFormat, kEmbedResources);
 }
 
 std::vector<std::byte> saveCharacterToBytes(
@@ -1353,8 +1349,8 @@ std::vector<std::byte> saveCharacterToBytes(
     const MotionParameters& motion,
     const IdentityParameters& offsets,
     std::span<const std::vector<Marker>> markerSequence,
-    const GltfOptions& options) {
-  constexpr auto kEmbedResources = false; // Don't embed resource for saving glb
+    const FileSaveOptions& options) {
+  constexpr auto kEmbedResources = false;
   fx::gltf::Document model = makeCharacterDocument(
       character, fps, motion, offsets, markerSequence, kEmbedResources, options);
 

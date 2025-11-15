@@ -151,9 +151,12 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCalibratedModel(
   auto [c, m, id, fps] = loadCharacterWithMotion(modelFile);
 
   // make sure we actually only convert joint id back to scale id parameters
-  const ModelParameters identity =
+  ModelParameters identity =
       jointIdentityToModelIdentity(c, c.parameterTransform.getScalingParameters(), id);
-
+  // add identity from the first frame
+  if (m.cols() > 0) {
+    identity.v += extractParameters(m.col(0), c.parameterTransform.getScalingParameters()).v;
+  }
   return {c, identity};
 }
 
@@ -173,6 +176,10 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIden
     } else {
       identity = ModelParameters::Zero(character.parameterTransform.numAllModelParameters());
     }
+    // add identity from the first frame
+    if (m.cols() > 0) {
+      identity.v = extractParameters(m.col(0), c.parameterTransform.getScalingParameters()).v;
+    }
 
     if (!modelFiles.locators.empty()) {
       character.locators =
@@ -184,41 +191,6 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIden
   }
 
   return {character, identity};
-}
-
-void saveMotion(
-    const std::string& outFile,
-    const momentum::Character& character,
-    const momentum::ModelParameters& identity,
-    Eigen::MatrixXf& finalMotion,
-    std::span<const std::vector<momentum::Marker>> markerData,
-    const double fps,
-    const bool saveMarkerMesh) {
-  const filesystem::path output(outFile);
-  const auto ext = output.extension();
-
-  ModelParameters id =
-      extractParameters(identity, character.parameterTransform.getScalingParameters());
-
-  // gltf io assumes the identity info is removed from the motion matrix
-  removeIdentity(character.parameterTransform.getScalingParameters(), id, finalMotion);
-  const VectorXf idVec = character.parameterTransform.apply(id).v;
-
-  if (ext == ".fbx") {
-    saveFbx(output, character, finalMotion, idVec, fps, saveMarkerMesh);
-  } else if (ext == ".glb" || ext == ".gltf") {
-    GltfBuilder fileBuilder;
-    fileBuilder.addMotion(
-        character,
-        fps,
-        std::make_tuple(character.parameterTransform.name, finalMotion),
-        std::make_tuple(character.skeleton.getJointNames(), idVec));
-    fileBuilder.addMarkerSequence(
-        fps,
-        markerData,
-        saveMarkerMesh ? GltfBuilder::MarkerMesh::UnitCube : GltfBuilder::MarkerMesh::None);
-    fileBuilder.save(outFile);
-  }
 }
 
 } // namespace momentum
