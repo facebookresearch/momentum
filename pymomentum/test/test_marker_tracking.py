@@ -41,6 +41,7 @@ class TestMarkerTracking(unittest.TestCase):
                 pym_skel_state.inverse(rest_skeleton_state[parent_joint_idx]),
                 torch.from_numpy(mesh_vertex_position),
             ).numpy(),  # Position it at the mesh vertex
+            attached_to_skin=True,
         )
 
         # Add the locator to the character

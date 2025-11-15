@@ -45,14 +45,18 @@ void registerLocatorBindings(
               const Eigen::Vector3i&,
               float,
               const Eigen::Vector3f&,
-              const Eigen::Vector3f&>(),
+              const Eigen::Vector3f&,
+              bool,
+              float>(),
           py::arg("name") = "uninitialized",
           py::arg("parent") = mm::kInvalidIndex,
           py::arg("offset") = Eigen::Vector3f::Zero(),
           py::arg("locked") = Eigen::Vector3i::Zero(),
           py::arg("weight") = 1.0f,
           py::arg("limit_origin") = Eigen::Vector3f::Zero(),
-          py::arg("limit_weight") = Eigen::Vector3f::Zero())
+          py::arg("limit_weight") = Eigen::Vector3f::Zero(),
+          py::arg("attached_to_skin") = false,
+          py::arg("skin_offset") = 0.0f)
       .def_readonly("name", &mm::Locator::name, "The locator's name.")
       .def_readonly("parent", &mm::Locator::parent, "The locator's parent joint index.")
       .def_readonly(
@@ -72,6 +76,15 @@ void registerLocatorBindings(
           &mm::Locator::limitWeight,
           "Controls how strongly the locator should maintain its original position.  "
           "Higher values create stronger constraints, zero means completely free.")
+      .def_readonly(
+          "attached_to_skin",
+          &mm::Locator::attachedToSkin,
+          "Indicates whether the locator is attached to the skin of a person (e.g. as in mocap tracking), "
+          "used to determine whether the locator can safely be converted to a skinned locator.")
+      .def_readonly(
+          "skin_offset",
+          &mm::Locator::skinOffset,
+          "Offset from the skin surface, used when trying to solve for body shape using locators.")
       .def("__repr__", [](const mm::Locator& l) {
         return fmt::format(
             "Locator(name={}, parent={}, offset=[{}, {}, {}])",
