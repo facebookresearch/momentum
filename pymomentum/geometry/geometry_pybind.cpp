@@ -98,6 +98,15 @@ PYBIND11_MODULE(geometry, m) {
       .value("RightHanded", mm::FbxCoordSystem::RightHanded)
       .value("LeftHanded", mm::FbxCoordSystem::LeftHanded);
 
+  // =====================================================
+  // momentum::GltfFileFormat enum
+  // Must be defined before FileSaveOptions since FileSaveOptions uses it
+  // =====================================================
+  py::enum_<mm::GltfFileFormat>(m, "GltfFileFormat")
+      .value("Auto", mm::GltfFileFormat::Auto)
+      .value("Binary", mm::GltfFileFormat::Binary)
+      .value("Ascii", mm::GltfFileFormat::Ascii);
+
   // We need to forward-declare classes so that if we refer to them they get
   // typed correctly; otherwise we end up with "momentum::Locator" in the
   // docstrings/type descriptors.

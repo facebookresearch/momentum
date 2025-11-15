@@ -36,14 +36,6 @@ void registerGltfBuilderBindings(pybind11::module& m) {
       .value("UnitCube", mm::GltfBuilder::MarkerMesh::UnitCube);
 
   // =====================================================
-  // momentum::GltfFileFormat enum
-  // =====================================================
-  py::enum_<mm::GltfFileFormat>(m, "GltfFileFormat")
-      .value("Auto", mm::GltfFileFormat::Auto)
-      .value("Binary", mm::GltfFileFormat::Binary)
-      .value("Ascii", mm::GltfFileFormat::Ascii);
-
-  // =====================================================
   // momentum::GltfBuilder
   // - constructor with fps
   // - getFps() / setFps()
