@@ -98,7 +98,7 @@ fx::gltf::Document makeCharacterDocument(
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
     bool embedResource = true,
-    const GltfOptions& options = GltfOptions());
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Saves character motion to a glb file.
 ///
@@ -106,6 +106,8 @@ fx::gltf::Document makeCharacterDocument(
 /// numFrames)
 /// @param[in] offsets Offset values per joint capturing the skeleton bone lengths using translation
 /// and scale offset (7*numJoints, 1)
+/// @param[in] options Optional file save options for controlling output (default:
+/// FileSaveOptions{}).
 void saveGltfCharacter(
     const filesystem::path& filename,
     const Character& character,
@@ -113,21 +115,21 @@ void saveGltfCharacter(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
-    GltfFileFormat fileFormat = GltfFileFormat::Auto,
-    const GltfOptions& options = GltfOptions());
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Saves character skeleton states to a glb file.
 ///
 /// @param[in] skeletonStates The skeleton states for each frame of the motion sequence (numFrames,
 /// numJoints, 8)
+/// @param[in] options Optional file save options for controlling output (default:
+/// FileSaveOptions{}).
 void saveGltfCharacter(
     const filesystem::path& filename,
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates,
     std::span<const std::vector<Marker>> markerSequence = {},
-    GltfFileFormat fileFormat = GltfFileFormat::Auto,
-    const GltfOptions& options = GltfOptions());
+    const FileSaveOptions& options = FileSaveOptions());
 
 std::vector<std::byte> saveCharacterToBytes(
     const Character& character,
@@ -135,6 +137,6 @@ std::vector<std::byte> saveCharacterToBytes(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
-    const GltfOptions& options = GltfOptions());
+    const FileSaveOptions& options = FileSaveOptions());
 
 } // namespace momentum
