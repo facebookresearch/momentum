@@ -15,7 +15,7 @@
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
-#include <momentum/io/motion/mmo_io.h>
+#include <momentum/io/marker/marker_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/skeleton/parameters_io.h>
@@ -34,6 +34,7 @@ struct Options {
   std::string output_model_file;
   std::string output_locator_local;
   std::string output_locator_global;
+  std::string fbx_namespace;
   bool save_markers = false;
   bool character_mesh_save = false;
 };
@@ -52,7 +53,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option("-l,--locator", opt->input_locator_file, "Input locator file (.locators)")
       ->check(CLI::ExistingFile);
 
-  app.add_option("-d,--motion", opt->input_motion_file, "Input motion data file (.mmo/.glb/.fbx)")
+  app.add_option("-d,--motion", opt->input_motion_file, "Input motion data file (.glb/.fbx)")
       ->check(CLI::ExistingFile);
 
   app.add_option("-o,--out", opt->output_model_file, "Output file (.fbx/.glb)")->required();
@@ -65,11 +66,10 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
       "--out-locator-global",
       opt->output_locator_global,
       "Output a locator file (.locators) in global space for authoring a template");
+  app.add_option("--fbx-namespace", opt->fbx_namespace, "Namespace in output fbx file");
 
   app.add_flag(
-      "--save-markers",
-      opt->save_markers,
-      "Save marker data from motion file in output (glb only)");
+      "--save-markers", opt->save_markers, "Save marker data from input motion file in the output");
   app.add_flag(
       "-c,--character-mesh",
       opt->character_mesh_save,
@@ -111,23 +111,11 @@ int main(int argc, char** argv) {
 
     MarkerSequence markerSequence;
     bool saveMarkers = options->save_markers;
-    if (saveMarkers && oextension == ".fbx") {
-      MT_LOGW("We cannot save marker data in .fbx yet, sorry!");
-      saveMarkers = false;
-    }
 
     if (hasMotion) {
       const auto motionPath = filesystem::path(options->input_motion_file);
       const auto motionExt = motionPath.extension();
-      if (motionExt == ".mmo") {
-        MT_LOGI("Loading motion from mmo...");
-        MT_THROW_IF(!hasModel, "mmo file requires an input character.");
-        std::tie(poses, offsets) = loadMmo(motionPath.string(), character);
-
-        if (saveMarkers) {
-          MT_LOGW("No marker data in .mmo file {}", motionPath.string());
-        }
-      } else if (motionExt == ".glb") {
+      if (motionExt == ".glb") {
         MT_LOGI("Loading motion from glb...");
         if (hasModel) {
           std::tie(poses, offsets, fps) = loadMotionOnCharacter(motionPath, character);
@@ -139,10 +127,6 @@ int main(int argc, char** argv) {
           if (!options->input_locator_file.empty()) {
             MT_LOGW("Ignoring input locators {}.", options->input_locator_file);
           }
-        }
-
-        if (saveMarkers) {
-          markerSequence = loadMarkerSequence(motionPath);
         }
       } else if (motionExt == ".fbx") {
         MT_LOGI("Loading motion from fbx...");
@@ -232,39 +216,28 @@ int main(int argc, char** argv) {
             offsets = character.parameterTransform.zero().v;
           }
         }
-
-        if (saveMarkers) {
-          MT_LOGW("No marker data in .fbx file {}", motionPath.string());
-        }
       } else {
         MT_LOGW(
             "Unknown motion file format: {}. Exporting without motion.",
             options->input_motion_file);
       }
-    } else if (saveMarkers) {
-      MT_LOGW("No motion file to read marker data from");
+    }
+    if (saveMarkers) {
+      markerSequence = loadMarkers(options->input_motion_file)[0];
     }
 
     // save output
-    if (oextension == ".fbx") {
-      MT_LOGI("Saving fbx file...");
-      FileSaveOptions fbxOptions;
-      fbxOptions.mesh = options->character_mesh_save;
-      saveFbx(options->output_model_file, character, poses, offsets, fps, {}, fbxOptions);
-    } else if (oextension == ".glb" || oextension == ".gltf") {
-      MT_LOGI("Saving gltf/glb file...");
-      if (hasMotion) {
-        saveGltfCharacter(
-            options->output_model_file,
-            character,
-            fps,
-            {character.parameterTransform.name, poses},
-            {character.skeleton.getJointNames(), offsets},
-            markerSequence.frames);
-      } else {
-        saveGltfCharacter(options->output_model_file, character);
-      }
-    }
+    MT_LOGI("Saving {}...", options->output_model_file);
+    FileSaveOptions saveOptions;
+    saveOptions.mesh = options->character_mesh_save;
+    saveOptions.fbxNamespace = options->fbx_namespace;
+    saveCharacter(
+        options->output_model_file,
+        character,
+        fps,
+        poses,
+        saveMarkers ? markerSequence.frames : std::vector<std::vector<Marker>>{},
+        saveOptions);
     if (!options->output_locator_local.empty()) {
       saveLocators(
           options->output_locator_local,
