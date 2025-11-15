@@ -155,14 +155,6 @@ void saveCharacter(
       filename.string());
 
   if (format == CharacterFormat::Gltf) {
-    // Convert FileSaveOptions to GltfOptions
-    GltfOptions gltfOptions;
-    gltfOptions.extensions = options.extensions;
-    gltfOptions.collisions = options.collisions;
-    gltfOptions.locators = options.locators;
-    gltfOptions.mesh = options.mesh;
-    gltfOptions.blendShapes = options.blendShapes;
-
     saveGltfCharacter(
         filename,
         character,
@@ -170,21 +162,11 @@ void saveCharacter(
         {character.parameterTransform.name, motion},
         {},
         markerSequence,
-        options.gltfFileFormat,
-        gltfOptions);
+        options);
   } else if (format == CharacterFormat::Fbx) {
     // Save as FBX
     saveFbx(
-        filename,
-        character,
-        motion,
-        VectorXf(),
-        static_cast<double>(fps),
-        options.mesh,
-        options.coordSystemInfo,
-        options.permissive,
-        markerSequence,
-        options.fbxNamespace);
+        filename, character, motion, VectorXf(), static_cast<double>(fps), markerSequence, options);
   } else {
     MT_THROW(
         "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
@@ -206,34 +188,11 @@ void saveCharacter(
       filename.string());
 
   if (format == CharacterFormat::Gltf) {
-    // Convert FileSaveOptions to GltfOptions
-    GltfOptions gltfOptions;
-    gltfOptions.extensions = options.extensions;
-    gltfOptions.collisions = options.collisions;
-    gltfOptions.locators = options.locators;
-    gltfOptions.mesh = options.mesh;
-    gltfOptions.blendShapes = options.blendShapes;
-
-    saveGltfCharacter(
-        filename,
-        character,
-        fps,
-        skeletonStates,
-        markerSequence,
-        options.gltfFileFormat,
-        gltfOptions);
+    saveGltfCharacter(filename, character, fps, skeletonStates, markerSequence, options);
   } else if (format == CharacterFormat::Fbx) {
     // Save as FBX
     saveFbxWithSkeletonStates(
-        filename,
-        character,
-        skeletonStates,
-        static_cast<double>(fps),
-        options.mesh,
-        options.coordSystemInfo,
-        options.permissive,
-        markerSequence,
-        options.fbxNamespace);
+        filename, character, skeletonStates, static_cast<double>(fps), markerSequence, options);
   } else {
     MT_THROW(
         "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());

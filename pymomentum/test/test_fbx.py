@@ -143,17 +143,20 @@ class TestFBX(unittest.TestCase):
         # Test saving with model parameters
         with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
             offsets = np.zeros(self.joint_params.shape[1])
+            options = pym_geometry.FileSaveOptions(
+                coord_system_info=pym_geometry.FbxCoordSystemInfo(
+                    pym_geometry.FbxUpVector.YAxis,
+                    pym_geometry.FbxFrontVector.ParityEven,
+                    pym_geometry.FbxCoordSystem.LeftHanded,
+                )
+            )
             pym_geometry.Character.save_fbx(
                 path=temp_file.name,
                 character=self.character,
                 motion=self.model_params.numpy(),
                 offsets=offsets,
                 fps=60,
-                coord_system_info=pym_geometry.FbxCoordSystemInfo(
-                    pym_geometry.FbxUpVector.YAxis,
-                    pym_geometry.FbxFrontVector.ParityEven,
-                    pym_geometry.FbxCoordSystem.LeftHanded,
-                ),
+                options=options,
             )
             self._verify_fbx(temp_file.name)
 
@@ -173,16 +176,19 @@ class TestFBX(unittest.TestCase):
 
         # Test saving with joint parameters using non-default coord-system
         with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            options = pym_geometry.FileSaveOptions(
+                coord_system_info=pym_geometry.FbxCoordSystemInfo(
+                    pym_geometry.FbxUpVector.YAxis,
+                    pym_geometry.FbxFrontVector.ParityEven,
+                    pym_geometry.FbxCoordSystem.RightHanded,
+                )
+            )
             pym_geometry.Character.save_fbx_with_joint_params(
                 path=temp_file.name,
                 character=self.character,
                 joint_params=self.joint_params.numpy(),
                 fps=60,
-                coord_system_info=pym_geometry.FbxCoordSystemInfo(
-                    pym_geometry.FbxUpVector.YAxis,
-                    pym_geometry.FbxFrontVector.ParityEven,
-                    pym_geometry.FbxCoordSystem.RightHanded,
-                ),
+                options=options,
             )
             self._verify_fbx(temp_file.name)
 
@@ -215,13 +221,14 @@ class TestFBX(unittest.TestCase):
         with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
             offsets = np.zeros(self.joint_params.shape[1])
             # Save with namespace
+            options = pym_geometry.FileSaveOptions(fbx_namespace="test_ns")
             pym_geometry.Character.save_fbx(
                 path=temp_file.name,
                 character=self.character,
                 motion=self.model_params.numpy(),
                 offsets=offsets,
                 fps=60,
-                fbx_namespace="test_ns",
+                options=options,
             )
             # Verify file can be loaded
             self._verify_fbx(temp_file.name)
@@ -232,12 +239,13 @@ class TestFBX(unittest.TestCase):
 
         """Test FBX save with joint params and namespace parameter."""
         with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            options = pym_geometry.FileSaveOptions(fbx_namespace="test_ns")
             pym_geometry.Character.save_fbx_with_joint_params(
                 path=temp_file.name,
                 character=self.character,
                 joint_params=self.joint_params.numpy(),
                 fps=60,
-                fbx_namespace="test_ns",
+                options=options,
             )
             # Verify file can be loaded
             self._verify_fbx(temp_file.name)

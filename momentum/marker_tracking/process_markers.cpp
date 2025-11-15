@@ -12,6 +12,7 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
+#include "momentum/io/character_io.h"
 #include "momentum/io/marker/marker_io.h"
 #include "momentum/marker_tracking/app_utils.h"
 #include "momentum/marker_tracking/tracker_utils.h"
@@ -132,14 +133,13 @@ void processMarkerFile(
     // save results
     const size_t lastFrame = maxFrames > 0 ? std::min(firstFrame + maxFrames, actor->frames.size())
                                            : actor->frames.size();
-    saveMotion(
+    saveCharacter(
         outputFile,
         character,
-        identity,
+        actor->fps,
         finalMotion,
         std::span<const std::vector<momentum::Marker>>(
-            actor->frames.data() + firstFrame, actor->frames.data() + lastFrame),
-        actor->fps);
+            actor->frames.data() + firstFrame, actor->frames.data() + lastFrame));
     MT_LOGI("{} saved", outputFile);
   } catch (std::exception& e) {
     MT_LOGE("Failed to track the markers from file {}, exception: {}", inputMarkerFile, e.what());
