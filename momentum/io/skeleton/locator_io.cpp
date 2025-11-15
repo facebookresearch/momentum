@@ -190,6 +190,10 @@ LocatorList loadLocatorsFromBuffer(
         l.limitWeight[1] = svtof(tokens[1]);
       } else if (tokens[0] == "\"limitWeightZ\"") {
         l.limitWeight[2] = svtof(tokens[1]);
+      } else if (tokens[0] == "\"attachedToSkin\"") {
+        l.attachedToSkin = (svtoi(tokens[1]) != 0);
+      } else if (tokens[0] == "\"skinOffset\"") {
+        l.skinOffset = svtof(tokens[1]);
       }
     } while (line < lines.size() - 1 && (current != "}," || current != "}"));
 
@@ -245,6 +249,12 @@ void saveLocators(
     }
     if (locators[i].limitWeight[2] != 0.0f) {
       o << "\t\t\t\"limitWeightZ\":" << locators[i].limitWeight.z() << ",\n";
+    }
+    if (locators[i].attachedToSkin) {
+      o << "\t\t\t\"attachedToSkin\":1,\n";
+    }
+    if (locators[i].skinOffset != 0.0f) {
+      o << "\t\t\t\"skinOffset\":" << locators[i].skinOffset << ",\n";
     }
     MT_CHECK(
         0 <= locators[i].parent && locators[i].parent < skeleton.joints.size(),
