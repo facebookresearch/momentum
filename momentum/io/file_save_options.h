@@ -22,23 +22,9 @@ enum class GltfFileFormat {
   Ascii = 2, // ASCII format (generally .gltf)
 };
 
-/// Options for GLTF file export
-struct GltfOptions {
-  /// Include GLTF extensions in the output.
-  bool extensions = true;
-  /// Include collision geometry in the output.
-  bool collisions = true;
-  /// Include locators in the output.
-  bool locators = true;
-  /// Include mesh geometry in the output.
-  bool mesh = true;
-  /// Include blend shapes in the output.
-  bool blendShapes = true;
-};
-
 // ============================================================================
 // FBX Coordinate System Options
-// =====================================================================
+// ============================================================================
 
 /// Specifies which canonical axis represents up in the system (typically Y or Z).
 /// Maps to fbxsdk::FbxAxisSystem::EUpVector

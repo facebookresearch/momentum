@@ -43,7 +43,7 @@ void saveGLTFCharacterToFile(
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const momentum::IdentityParameters>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const momentum::GltfOptions& options);
+    const std::optional<const momentum::FileSaveOptions>& options);
 
 void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
@@ -51,7 +51,7 @@ void saveGLTFCharacterToFileFromSkelStates(
     float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const momentum::GltfOptions& options);
+    const std::optional<const momentum::FileSaveOptions>& options);
 
 void saveFBXCharacterToFile(
     const std::string& path,
@@ -100,13 +100,13 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
     const std::string& gltfFilename);
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& bytes);
+loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes);
 
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
 loadGLTFCharacterWithSkelStates(const std::string& gltfFilename);
 
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
-loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfFilename);
+loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes);
 
 std::string toGLTF(const momentum::Character& character);
 
