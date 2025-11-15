@@ -552,6 +552,7 @@ mt_library(
     skeleton
   PRIVATE_LINK_LIBRARIES
     io_marker
+    io
 )
 
 if(MOMENTUM_BUILD_RENDERER)
