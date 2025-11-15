@@ -39,6 +39,13 @@ struct Locator {
   /// Higher values create stronger constraints, zero means completely free
   Vector3f limitWeight;
 
+  /// Indicates whether the locator is attached to the skin of a person (e.g. as in mocap tracking),
+  /// used to determine whether the locator can safely be converted to a skinned locator.
+  bool attachedToSkin = false;
+
+  /// Offset from the skin surface, used when trying to solve for body shape using locators.
+  float skinOffset = 0.0f;
+
   /// Creates a locator with the specified properties
   ///
   /// @param name Identifier for the locator
@@ -55,14 +62,18 @@ struct Locator {
       const Vector3i& locked = Vector3i::Zero(),
       const float weight = 1.0f,
       const Vector3f& limitOrigin = Vector3f::Zero(),
-      const Vector3f& limitWeight = Vector3f::Zero())
+      const Vector3f& limitWeight = Vector3f::Zero(),
+      bool attachedToSkin = false,
+      float skinOffset = 0.0f)
       : name(name),
         parent(parent),
         offset(offset),
         locked(locked),
         weight(weight),
         limitOrigin(limitOrigin),
-        limitWeight(limitWeight) {}
+        limitWeight(limitWeight),
+        attachedToSkin(attachedToSkin),
+        skinOffset(skinOffset) {}
 
   /// Compares two locators for equality, using approximate comparison for floating-point values
   ///
@@ -72,7 +83,8 @@ struct Locator {
     return (
         (name == locator.name) && (parent == locator.parent) && offset.isApprox(locator.offset) &&
         locked.isApprox(locator.locked) && isApprox(weight, locator.weight) &&
-        limitOrigin.isApprox(locator.limitOrigin) && limitWeight.isApprox(locator.limitWeight));
+        limitOrigin.isApprox(locator.limitOrigin) && limitWeight.isApprox(locator.limitWeight) &&
+        attachedToSkin == locator.attachedToSkin && isApprox(skinOffset, locator.skinOffset));
   }
 };
 
