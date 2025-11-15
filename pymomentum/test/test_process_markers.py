@@ -19,7 +19,6 @@ from pymomentum.marker_tracking import (
     process_markers,
     refine_motion,
     RefineConfig,
-    save_motion,
     TrackingConfig,
 )
 
@@ -150,17 +149,15 @@ class TestMarkerTracker(unittest.TestCase):
         self.assertEqual(ref_motion.shape[0], num_frames)
         self.assertEqual(ref_motion.shape[1], character.parameter_transform.size)
 
-        with tempfile.NamedTemporaryFile() as temp_file:
-            save_motion(
+        with tempfile.NamedTemporaryFile(suffix=".glb") as temp_file:
+            pym_geometry.Character.save(
                 temp_file.name,
                 character,
-                identity,
-                ref_motion,
-                marker_data,
-                30,
-                True,
+                fps=30.0,
+                motion=ref_motion,
+                markers=marker_data,
             )
-            # check that save_motion returns correct motion matrix
+            # check that Character.save() successfully saves the motion file
             self.assertEqual(ref_motion.shape[0], num_frames)
             self.assertEqual(ref_motion.shape[1], character.parameter_transform.size)
 
