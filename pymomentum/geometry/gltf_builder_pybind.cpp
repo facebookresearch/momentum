@@ -82,11 +82,12 @@ Setting this value will affect subsequently added motions and animations.
              const mm::Character& character,
              const std::optional<Eigen::Vector3f>& positionOffset,
              const std::optional<Eigen::Vector4f>& rotationOffset,
-             const mm::GltfOptions& options) {
+             const std::optional<mm::FileSaveOptions>& options) {
             // Use defaults if not provided
             Eigen::Vector3f actualPositionOffset = positionOffset.value_or(Eigen::Vector3f::Zero());
             Eigen::Vector4f actualRotationOffset =
                 rotationOffset.value_or(Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f));
+            mm::FileSaveOptions actualOptions = options.value_or(mm::FileSaveOptions{});
 
             // Convert Vector4f (x,y,z,w) to Quaternionf (w,x,y,z)
             mm::Quaternionf quaternionOffset(
@@ -95,7 +96,7 @@ Setting this value will affect subsequently added motions and animations.
                 actualRotationOffset[1], // y
                 actualRotationOffset[2]); // z
 
-            builder.addCharacter(character, actualPositionOffset, quaternionOffset, options);
+            builder.addCharacter(character, actualPositionOffset, quaternionOffset, actualOptions);
           },
           R"(Add a character to the GLTF scene.
 
@@ -113,7 +114,7 @@ can be provided as an initial transform for the character.
           py::arg("character"),
           py::arg("position_offset") = std::nullopt,
           py::arg("rotation_offset") = std::nullopt,
-          py::arg("options") = mm::GltfOptions{})
+          py::arg("options") = std::nullopt)
       .def(
           "add_mesh",
           &mm::GltfBuilder::addMesh,
@@ -272,7 +273,7 @@ can be explicitly specified or automatically deduced from the file extension.
 
             // Convert to Python bytes
             const std::string& str = output.str();
-            return py::bytes(str);
+            return {str};
           },
           R"(Convert the GLTF scene to bytes in memory.
 

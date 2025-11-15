@@ -421,49 +421,6 @@ PYBIND11_MODULE(marker_tracking, m) {
       py::arg("max_frames") = 0);
 
   m.def(
-      "save_motion",
-      [](const std::string& outFile,
-         const momentum::Character& character,
-         const Eigen::VectorXf& identity,
-         Eigen::MatrixXf& motion,
-         const std::vector<std::vector<momentum::Marker>>& markerData,
-         const float fps,
-         const bool saveMarkerMesh = true) {
-        momentum::ModelParameters params(identity);
-
-        if (params.size() == 0) { // If no identity is passed in, use default
-          params = momentum::ModelParameters::Zero(character.parameterTransform.name.size());
-        }
-
-        // python and cpp have the motion matrix transposed from each other:
-        // python (#frames, #params) vs. cpp (#params, #frames)
-        if (motion.cols() == character.parameterTransform.numAllModelParameters()) {
-          // we need to transpose the matrix before passing it to the cpp
-          Eigen::MatrixXf finalMotion(motion.transpose());
-          // note: saveMotion removes identity from the motion matrix
-          momentum::saveMotion(
-              outFile, character, params, finalMotion, markerData, fps, saveMarkerMesh);
-          // and transpose it back since motion is passed by reference
-          motion = finalMotion.transpose();
-        } else if (motion.rows() == character.parameterTransform.numAllModelParameters()) {
-          // motion matrix is already in cpp format
-          // keeping this branch for backward compatibility
-          // note: saveMotion removes identity from the motion matrix
-          momentum::saveMotion(outFile, character, params, motion, markerData, fps, saveMarkerMesh);
-        } else {
-          throw std::runtime_error(
-              "Inconsistent number of parameters in motion matrix with the character parameter transform");
-        }
-      },
-      py::arg("out_file"),
-      py::arg("character"),
-      py::arg("identity"),
-      py::arg("motion"),
-      py::arg("marker_data"),
-      py::arg("fps"),
-      py::arg("save_marker_mesh") = true);
-
-  m.def(
       "refine_motion",
       [](momentum::Character& character,
          const Eigen::VectorXf& identity,

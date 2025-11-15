@@ -8,12 +8,14 @@
 #define DEFAULT_LOG_CHANNEL "convert_model"
 
 #include <momentum/character/character.h>
+#include <momentum/character/character_utility.h>
 #include <momentum/character/inverse_parameter_transform.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/common/log.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
-#include <momentum/io/motion/mmo_io.h>
+#include <momentum/io/marker/marker_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/skeleton/parameters_io.h>
@@ -32,6 +34,7 @@ struct Options {
   std::string output_model_file;
   std::string output_locator_local;
   std::string output_locator_global;
+  std::string fbx_namespace;
   bool save_markers = false;
   bool character_mesh_save = false;
 };
@@ -50,7 +53,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option("-l,--locator", opt->input_locator_file, "Input locator file (.locators)")
       ->check(CLI::ExistingFile);
 
-  app.add_option("-d,--motion", opt->input_motion_file, "Input motion data file (.mmo/.glb/.fbx)")
+  app.add_option("-d,--motion", opt->input_motion_file, "Input motion data file (.glb/.fbx)")
       ->check(CLI::ExistingFile);
 
   app.add_option("-o,--out", opt->output_model_file, "Output file (.fbx/.glb)")->required();
@@ -63,11 +66,10 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
       "--out-locator-global",
       opt->output_locator_global,
       "Output a locator file (.locators) in global space for authoring a template");
+  app.add_option("--fbx-namespace", opt->fbx_namespace, "Namespace in output fbx file");
 
   app.add_flag(
-      "--save-markers",
-      opt->save_markers,
-      "Save marker data from motion file in output (glb only)");
+      "--save-markers", opt->save_markers, "Save marker data from input motion file in the output");
   app.add_flag(
       "-c,--character-mesh",
       opt->character_mesh_save,
@@ -109,23 +111,11 @@ int main(int argc, char** argv) {
 
     MarkerSequence markerSequence;
     bool saveMarkers = options->save_markers;
-    if (saveMarkers && oextension == ".fbx") {
-      MT_LOGW("We cannot save marker data in .fbx yet, sorry!");
-      saveMarkers = false;
-    }
 
     if (hasMotion) {
       const auto motionPath = filesystem::path(options->input_motion_file);
       const auto motionExt = motionPath.extension();
-      if (motionExt == ".mmo") {
-        MT_LOGI("Loading motion from mmo...");
-        MT_THROW_IF(!hasModel, "mmo file requires an input character.");
-        std::tie(poses, offsets) = loadMmo(motionPath.string(), character);
-
-        if (saveMarkers) {
-          MT_LOGW("No marker data in .mmo file {}", motionPath.string());
-        }
-      } else if (motionExt == ".glb") {
+      if (motionExt == ".glb") {
         MT_LOGI("Loading motion from glb...");
         if (hasModel) {
           std::tie(poses, offsets, fps) = loadMotionOnCharacter(motionPath, character);
@@ -137,10 +127,6 @@ int main(int argc, char** argv) {
           if (!options->input_locator_file.empty()) {
             MT_LOGW("Ignoring input locators {}.", options->input_locator_file);
           }
-        }
-
-        if (saveMarkers) {
-          markerSequence = loadMarkerSequence(motionPath);
         }
       } else if (motionExt == ".fbx") {
         MT_LOGI("Loading motion from fbx...");
@@ -180,58 +166,78 @@ int main(int argc, char** argv) {
                 options->input_locator_file, character.skeleton, character.parameterTransform);
           }
         }
+
         // Validate model compatibility
         if (c.skeleton.joints.size() != character.skeleton.joints.size()) {
           MT_LOGE("The motion is not on a compatible character");
         } else if (motionIndex >= 0) {
-          if (character.parameterTransform.numAllModelParameters() == motions.at(0).rows()) {
-            poses = std::move(motions.at(motionIndex));
-          } else {
-            // Use inverse parameter transform to convet from joint params to model params; may lose
-            // info.
-            const auto motion = motions.at(motionIndex);
-            const size_t nFrames = motion.cols();
-            poses.setZero(character.parameterTransform.numAllModelParameters(), nFrames);
-            InverseParameterTransform inversePt(character.parameterTransform);
-            for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-              poses.col(iFrame) = inversePt.apply(motion.col(iFrame)).pose.v;
+          // To account for differences in the rest pose, we will go from joint state to joint
+          // parameters then to model parameters
+          const auto motion = motions.at(motionIndex);
+          const size_t nFrames = motion.cols();
+          const size_t nJoints = c.skeleton.joints.size();
+          poses.setZero(character.parameterTransform.numAllModelParameters(), nFrames);
+          InverseParameterTransform inversePt(character.parameterTransform);
+          SkeletonState sourceState;
+          TransformList transforms(nJoints);
+
+          // name mapping: index_map[target_index] = source_index
+          const auto jointNames = character.skeleton.getJointNames();
+          std::vector<size_t> indexMap(nJoints, kInvalidIndex);
+          for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+            indexMap[iJoint] = c.skeleton.getJointIdByName(jointNames[iJoint]);
+          }
+
+          for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+            sourceState.set(motion.col(iFrame), c.skeleton);
+
+            for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
+              if (indexMap[jJoint] == kInvalidIndex) {
+                // no correspondence in source
+                const Joint& joint = character.skeleton.joints[jJoint];
+                const Transform local(joint.translationOffset, joint.preRotation);
+                const size_t parentIndex = character.skeleton.joints[jJoint].parent;
+                if (parentIndex == kInvalidIndex) {
+                  transforms[jJoint] = local;
+                } else {
+                  transforms[jJoint] = transforms[parentIndex] * local;
+                }
+              } else {
+                transforms[jJoint] = sourceState.jointState[indexMap[jJoint]].transform;
+              }
             }
+            const auto jointParams = skeletonStateToJointParameters(transforms, character.skeleton);
+            poses.col(iFrame) = inversePt.apply(jointParams).pose.v;
           }
           fps = framerate;
-          offsets = character.parameterTransform.zero().v;
-        }
-
-        if (saveMarkers) {
-          MT_LOGW("No marker data in .fbx file {}", motionPath.string());
+          if (offsets.size() > 0) {
+            offsets = mapIdentityToCharacter({c.skeleton.getJointNames(), offsets}, character);
+          } else {
+            offsets = character.parameterTransform.zero().v;
+          }
         }
       } else {
         MT_LOGW(
             "Unknown motion file format: {}. Exporting without motion.",
             options->input_motion_file);
       }
-    } else if (saveMarkers) {
-      MT_LOGW("No motion file to read marker data from");
+    }
+    if (saveMarkers) {
+      markerSequence = loadMarkers(options->input_motion_file)[0];
     }
 
     // save output
-    if (oextension == ".fbx") {
-      MT_LOGI("Saving fbx file...");
-      saveFbx(
-          options->output_model_file, character, poses, offsets, fps, options->character_mesh_save);
-    } else if (oextension == ".glb" || oextension == ".gltf") {
-      MT_LOGI("Saving gltf/glb file...");
-      if (hasMotion) {
-        saveGltfCharacter(
-            options->output_model_file,
-            character,
-            fps,
-            {character.parameterTransform.name, poses},
-            {character.skeleton.getJointNames(), offsets},
-            markerSequence.frames);
-      } else {
-        saveGltfCharacter(options->output_model_file, character);
-      }
-    }
+    MT_LOGI("Saving {}...", options->output_model_file);
+    FileSaveOptions saveOptions;
+    saveOptions.mesh = options->character_mesh_save;
+    saveOptions.fbxNamespace = options->fbx_namespace;
+    saveCharacter(
+        options->output_model_file,
+        character,
+        fps,
+        poses,
+        saveMarkers ? markerSequence.frames : std::vector<std::vector<Marker>>{},
+        saveOptions);
     if (!options->output_locator_local.empty()) {
       saveLocators(
           options->output_locator_local,

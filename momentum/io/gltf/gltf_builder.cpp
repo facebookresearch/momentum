@@ -855,7 +855,7 @@ void GltfBuilder::addCharacter(
     const Character& character,
     const Vector3f& positionOffset /*= Vector3f::Zero()*/,
     const Quaternionf& rotationOffset /*= Quaternionf::Identity()*/,
-    const GltfOptions& options) {
+    const FileSaveOptions& options) {
   if (impl_->characterData.find(character.name) != impl_->characterData.end()) {
     // Character already exist. Doesn't allow character with the same name to be saved.
     // #TODO: proper warning

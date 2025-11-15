@@ -26,8 +26,8 @@ momentum::Character loadGLTFCharacterFromFile(const std::string& path) {
 
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
   pybind11::buffer_info info(pybind11::buffer(bytes).request());
-  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const size_t length = static_cast<size_t>(info.size);
+  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
+  const auto length = static_cast<size_t>(info.size);
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
@@ -108,7 +108,7 @@ void saveGLTFCharacterToFile(
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const momentum::IdentityParameters>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const momentum::GltfOptions& options) {
+    const std::optional<const momentum::FileSaveOptions>& options) {
   if (motion.has_value()) {
     const auto& [parameters, poses] = motion.value();
     MT_THROW_IF(
@@ -125,8 +125,7 @@ void saveGLTFCharacterToFile(
       transpose(motion.value_or(momentum::MotionParameters{})),
       offsets.value_or(momentum::IdentityParameters{}),
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      momentum::GltfFileFormat::Auto,
-      options);
+      options.value_or(momentum::FileSaveOptions{}));
 }
 
 void saveGLTFCharacterToFileFromSkelStates(
@@ -135,7 +134,7 @@ void saveGLTFCharacterToFileFromSkelStates(
     const float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const momentum::GltfOptions& options) {
+    const std::optional<const momentum::FileSaveOptions>& options) {
   const auto numFrames = skelStates.shape(0);
 
   MT_THROW_IF(
@@ -154,8 +153,7 @@ void saveGLTFCharacterToFileFromSkelStates(
       fps,
       skeletonStates,
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      momentum::GltfFileFormat::Auto,
-      options);
+      options.value_or(momentum::FileSaveOptions{}));
 }
 
 void saveFBXCharacterToFile(
@@ -165,20 +163,15 @@ void saveFBXCharacterToFile(
     const std::optional<const Eigen::MatrixXf>& motion,
     const std::optional<const Eigen::VectorXf>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
-    std::string_view fbxNamespace) {
-  // Always use saveFbx to support markers even without motion
+    const momentum::FileSaveOptions& options) {
   momentum::saveFbx(
       path,
       character,
       motion.has_value() ? motion.value().transpose() : Eigen::MatrixXf(),
       offsets.has_value() ? offsets.value() : Eigen::VectorXf(),
       fps,
-      true, /*saveMesh*/
-      coordSystemInfo.value_or(momentum::FbxCoordSystemInfo()),
-      false, /*permissive*/
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      fbxNamespace);
+      options);
 }
 
 void saveFBXCharacterToFileWithJointParams(
@@ -187,19 +180,14 @@ void saveFBXCharacterToFileWithJointParams(
     const float fps,
     const std::optional<const Eigen::MatrixXf>& jointParams,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
-    std::string_view fbxNamespace) {
-  // Always use saveFbxWithJointParams to support markers even without motion
+    const momentum::FileSaveOptions& options) {
   momentum::saveFbxWithJointParams(
       path,
       character,
       jointParams.has_value() ? jointParams.value().transpose() : Eigen::MatrixXf(),
       fps,
-      true, /*saveMesh*/
-      coordSystemInfo.value_or(momentum::FbxCoordSystemInfo()),
-      false, /*permissive*/
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      fbxNamespace);
+      options);
 }
 
 void saveFBXCharacterToFileWithSkelStates(
@@ -208,18 +196,14 @@ void saveFBXCharacterToFileWithSkelStates(
     float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FbxCoordSystemInfo>& coordSystemInfo,
-    std::string_view fbxNamespace) {
+    const momentum::FileSaveOptions& options) {
   momentum::saveFbxWithSkeletonStates(
       path,
       character,
       arrayToSkeletonStates(skelStates, character),
       fps,
-      true, /*saveMesh*/
-      coordSystemInfo.value_or(momentum::FbxCoordSystemInfo()),
-      false, /*permissive*/
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      fbxNamespace);
+      options);
 }
 
 void saveCharacterToFile(
@@ -261,8 +245,8 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes) {
   pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
-  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const size_t length = static_cast<size_t>(info.size);
+  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
+  const auto length = static_cast<size_t>(info.size);
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
@@ -302,8 +286,8 @@ pybind11::array_t<float> skelStatesToTensor(
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
 loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes) {
   pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
-  const std::byte* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const size_t length = static_cast<size_t>(info.size);
+  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
+  const auto length = static_cast<size_t>(info.size);
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 

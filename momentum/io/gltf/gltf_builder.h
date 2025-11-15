@@ -50,7 +50,7 @@ class GltfBuilder final {
       const Character& character,
       const Vector3f& positionOffset = Vector3f::Zero(),
       const Quaternionf& rotationOffset = Quaternionf::Identity(),
-      const GltfOptions& options = GltfOptions());
+      const FileSaveOptions& options = FileSaveOptions());
 
   /// Add a static mesh, such as an environment or a target scan
   void addMesh(const Mesh& mesh, const std::string& name, bool addColor = false);
@@ -86,7 +86,7 @@ class GltfBuilder final {
   void addMarkerSequence(
       float fps,
       std::span<const std::vector<momentum::Marker>> markerSequence,
-      MarkerMesh markerMesh = MarkerMesh::None,
+      MarkerMesh markerMesh = MarkerMesh::UnitCube,
       const std::string& animName = "default");
 
   // Save the file with the provided filename. If the fileFormat is 'GltfFileFormat::Auto',
