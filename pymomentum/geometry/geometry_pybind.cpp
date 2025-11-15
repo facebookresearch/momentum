@@ -204,7 +204,7 @@ PYBIND11_MODULE(geometry, m) {
           py::arg("collisions") = true,
           py::arg("locators") = true,
           py::arg("mesh") = true,
-          py::arg("blendShapes") = true)
+          py::arg("blend_shapes") = true)
       .def(
           "__repr__",
           [](const mm::GltfOptions& self) {
@@ -493,19 +493,19 @@ The resulting tensors are as follows:
                       const momentum::FbxCoordSystem coordSystem) {
             return momentum::FbxCoordSystemInfo{upVector, frontVector, coordSystem};
           }),
-          py::arg("upVector"),
-          py::arg("frontVector"),
-          py::arg("coordSystem"))
+          py::arg("up_vector"),
+          py::arg("front_vector"),
+          py::arg("coord_system"))
       .def_property_readonly(
-          "upVector",
+          "up_vector",
           [](const mm::FbxCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.upVector; },
           "Returns the up vector.")
       .def_property_readonly(
-          "frontVector",
+          "front_vector",
           [](const mm::FbxCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.frontVector; },
           "Returns the front vector.")
       .def_property_readonly(
-          "coordSystem",
+          "coord_system",
           [](const mm::FbxCoordSystemInfo& coordSystemInfo) { return coordSystemInfo.coordSystem; },
           "Returns the coordinate system.")
       .def("__repr__", [](const mm::FbxCoordSystemInfo& info) {
@@ -565,7 +565,48 @@ The resulting tensors are as follows:
   // - GLTF-specific: extensions, gltfFileFormat
   // =====================================================
 
-  fileSaveOptionsClass.def(py::init<>())
+  fileSaveOptionsClass
+      .def(
+          py::init([](bool mesh,
+                      bool locators,
+                      bool collisions,
+                      bool blendShapes,
+                      bool permissive,
+                      mm::FbxCoordSystemInfo coordSystemInfo,
+                      std::string_view fbxNamespace,
+                      bool extensions,
+                      mm::GltfFileFormat gltfFileFormat) {
+            mm::FileSaveOptions options;
+            options.mesh = mesh;
+            options.locators = locators;
+            options.collisions = collisions;
+            options.blendShapes = blendShapes;
+            options.permissive = permissive;
+            options.coordSystemInfo = coordSystemInfo;
+            options.fbxNamespace = fbxNamespace;
+            options.extensions = extensions;
+            options.gltfFileFormat = gltfFileFormat;
+            return options;
+          }),
+          py::arg("mesh") = true,
+          py::arg("locators") = true,
+          py::arg("collisions") = true,
+          py::arg("blend_shapes") = true,
+          py::arg("permissive") = false,
+          py::arg("coord_system_info") = mm::FbxCoordSystemInfo{},
+          py::arg("fbx_namespace") = "",
+          py::arg("extensions") = true,
+          py::arg("gltf_file_format") = mm::GltfFileFormat::Auto,
+          "Create FileSaveOptions with custom settings.\n\n"
+          ":param mesh: Include mesh geometry in the output (default: True)\n"
+          ":param locators: Include locators in the output (default: True)\n"
+          ":param collisions: Include collision geometry in the output (default: True)\n"
+          ":param blend_shapes: Include blend shapes in the output (default: True)\n"
+          ":param permissive: Permissive mode - allow saving mesh-only characters without skin weights (default: False)\n"
+          ":param coord_system_info: FBX coordinate system configuration (default: Maya Y-up)\n"
+          ":param fbx_namespace: Optional namespace prefix for FBX node names (default: empty)\n"
+          ":param extensions: Enable GLTF extensions (default: True)\n"
+          ":param gltf_file_format: GLTF file format selection (default: Auto)\n")
       .def_readwrite(
           "mesh", &mm::FileSaveOptions::mesh, "Include mesh geometry in the output (default: true)")
       .def_readwrite(
@@ -667,8 +708,8 @@ The resulting tensors are as follows:
             coordSystemStr);
 
         return fmt::format(
-            "FileSaveOptions(mesh={}, locators={}, collisions={}, blendShapes={}, permissive={}, "
-            "coord_system_info={}, fbx_namespace='{}', extensions={}, gltfFileFormat={})",
+            "FileSaveOptions(mesh={}, locators={}, collisions={}, blend_shapes={}, permissive={}, "
+            "coord_system_info={}, fbx_namespace='{}', extensions={}, gltf_file_format={})",
             opts.mesh,
             opts.locators,
             opts.collisions,
