@@ -714,6 +714,7 @@ support the proprietary momentum motion format for storing model parameters in G
 :param motion: Pose array in [n_frames x n_parameters]
 :param offsets: Offset array in [n_joints x n_parameters_per_joint]
 :param markers: Additional marker (3d positions) data in [n_frames][n_markers]
+:param options: FileSaveOptions for controlling output (mesh, locators, collisions, etc.)
       )",
           py::arg("path"),
           py::arg("character"),
@@ -721,7 +722,7 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("motion") = std::optional<momentum::MotionParameters>{},
           py::arg("offsets") = std::optional<const momentum::IdentityParameters>{},
           py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
-          py::arg("options") = momentum::GltfOptions{})
+          py::arg("options") = std::optional<momentum::FileSaveOptions>{})
       .def_static(
           "save_gltf_from_skel_states",
           &saveGLTFCharacterToFileFromSkelStates,
@@ -733,13 +734,14 @@ support the proprietary momentum motion format for storing model parameters in G
 :param fps: Frequency in frames per second
 :param skel_states: Skeleton states [n_frames x n_joints x n_parameters_per_joint]
 :param markers: Additional marker (3d positions) data in [n_frames][n_markers]
+:param options: FileSaveOptions for controlling output (mesh, locators, collisions, etc.)
       )",
           py::arg("path"),
           py::arg("character"),
           py::arg("fps"),
           py::arg("skel_states"),
           py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
-          py::arg("options") = momentum::GltfOptions{})
+          py::arg("options") = std::optional<momentum::FileSaveOptions>{})
       .def_static(
           "save_fbx",
           &saveFBXCharacterToFile,
