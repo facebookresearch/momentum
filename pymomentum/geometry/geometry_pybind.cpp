@@ -187,8 +187,6 @@ PYBIND11_MODULE(geometry, m) {
       "A constraint on model or joint parameters used to enforce realistic poses. "
       "Supports various limit types including min/max bounds, linear relationships, "
       "ellipsoid constraints, and half-plane constraints.");
-  auto gltfOptionsClass =
-      py::class_<mm::GltfOptions>(m, "GltfOptions", "Storage options for Gltf export.");
   auto fileSaveOptionsClass = py::class_<mm::FileSaveOptions>(
       m,
       "FileSaveOptions",
@@ -196,31 +194,6 @@ PYBIND11_MODULE(geometry, m) {
       "This struct consolidates save options that were previously scattered across "
       "multiple function parameters. Format-specific options (e.g., FBX coordinate "
       "system, GLTF extensions) are included but only used by their respective formats.");
-
-  gltfOptionsClass.def(py::init<>())
-      .def(
-          py::init<bool, bool, bool, bool, bool>(),
-          py::arg("extensions") = true,
-          py::arg("collisions") = true,
-          py::arg("locators") = true,
-          py::arg("mesh") = true,
-          py::arg("blend_shapes") = true)
-      .def(
-          "__repr__",
-          [](const mm::GltfOptions& self) {
-            return fmt::format(
-                "GltfData(extensions={}, collisions={}, locators={}, mesh={}, blendShapes={})",
-                self.extensions,
-                self.collisions,
-                self.locators,
-                self.mesh,
-                self.blendShapes);
-          })
-      .def_readwrite("extensions", &mm::GltfOptions::extensions, "Save momentum extensions")
-      .def_readwrite("collisions", &mm::GltfOptions::collisions, "Save collision geometry")
-      .def_readwrite("locators", &mm::GltfOptions::locators, "Save locator data")
-      .def_readwrite("mesh", &mm::GltfOptions::mesh, "Save mesh data")
-      .def_readwrite("blend_shapes", &mm::GltfOptions::blendShapes, "Save blend shape data");
 
   blendShapeClass
       .def_property_readonly(
