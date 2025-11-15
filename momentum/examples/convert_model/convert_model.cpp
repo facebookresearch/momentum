@@ -8,7 +8,9 @@
 #define DEFAULT_LOG_CHANNEL "convert_model"
 
 #include <momentum/character/character.h>
+#include <momentum/character/character_utility.h>
 #include <momentum/character/inverse_parameter_transform.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/common/log.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
@@ -180,25 +182,55 @@ int main(int argc, char** argv) {
                 options->input_locator_file, character.skeleton, character.parameterTransform);
           }
         }
+
         // Validate model compatibility
         if (c.skeleton.joints.size() != character.skeleton.joints.size()) {
           MT_LOGE("The motion is not on a compatible character");
         } else if (motionIndex >= 0) {
-          if (character.parameterTransform.numAllModelParameters() == motions.at(0).rows()) {
-            poses = std::move(motions.at(motionIndex));
-          } else {
-            // Use inverse parameter transform to convet from joint params to model params; may lose
-            // info.
-            const auto motion = motions.at(motionIndex);
-            const size_t nFrames = motion.cols();
-            poses.setZero(character.parameterTransform.numAllModelParameters(), nFrames);
-            InverseParameterTransform inversePt(character.parameterTransform);
-            for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-              poses.col(iFrame) = inversePt.apply(motion.col(iFrame)).pose.v;
+          // To account for differences in the rest pose, we will go from joint state to joint
+          // parameters then to model parameters
+          const auto motion = motions.at(motionIndex);
+          const size_t nFrames = motion.cols();
+          const size_t nJoints = c.skeleton.joints.size();
+          poses.setZero(character.parameterTransform.numAllModelParameters(), nFrames);
+          InverseParameterTransform inversePt(character.parameterTransform);
+          SkeletonState sourceState;
+          TransformList transforms(nJoints);
+
+          // name mapping: index_map[target_index] = source_index
+          const auto jointNames = character.skeleton.getJointNames();
+          std::vector<size_t> indexMap(nJoints, kInvalidIndex);
+          for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+            indexMap[iJoint] = c.skeleton.getJointIdByName(jointNames[iJoint]);
+          }
+
+          for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+            sourceState.set(motion.col(iFrame), c.skeleton);
+
+            for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
+              if (indexMap[jJoint] == kInvalidIndex) {
+                // no correspondence in source
+                const Joint& joint = character.skeleton.joints[jJoint];
+                const Transform local(joint.translationOffset, joint.preRotation);
+                const size_t parentIndex = character.skeleton.joints[jJoint].parent;
+                if (parentIndex == kInvalidIndex) {
+                  transforms[jJoint] = local;
+                } else {
+                  transforms[jJoint] = transforms[parentIndex] * local;
+                }
+              } else {
+                transforms[jJoint] = sourceState.jointState[indexMap[jJoint]].transform;
+              }
             }
+            const auto jointParams = skeletonStateToJointParameters(transforms, character.skeleton);
+            poses.col(iFrame) = inversePt.apply(jointParams).pose.v;
           }
           fps = framerate;
-          offsets = character.parameterTransform.zero().v;
+          if (offsets.size() > 0) {
+            offsets = mapIdentityToCharacter({c.skeleton.getJointNames(), offsets}, character);
+          } else {
+            offsets = character.parameterTransform.zero().v;
+          }
         }
 
         if (saveMarkers) {
