@@ -755,8 +755,14 @@ void calibrateModel(
   ParameterSet calibBodySetExtended;
   ParameterSet calibBodySet;
   if (config.globalScaleOnly) {
-    calibBodySetExtended.set(transformExtended.getParameterIdByName("scale_global"));
-    calibBodySet.set(transform.getParameterIdByName("scale_global"));
+    const size_t paramIndex = transform.getParameterIdByName("scale_global");
+    const size_t paramIndexExt = transformExtended.getParameterIdByName("scale_global");
+    MT_THROW_IF(
+        paramIndex == kInvalidIndex || paramIndexExt == kInvalidIndex,
+        "Can't calibrate global scale since it is not defined in the parameter list!");
+
+    calibBodySetExtended.set(paramIndexExt);
+    calibBodySet.set(paramIndex);
   } else {
     calibBodySetExtended = transformExtended.getScalingParameters();
     calibBodySet = transform.getScalingParameters();
