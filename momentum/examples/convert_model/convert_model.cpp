@@ -216,8 +216,9 @@ int main(int argc, char** argv) {
     // save output
     if (oextension == ".fbx") {
       MT_LOGI("Saving fbx file...");
-      saveFbx(
-          options->output_model_file, character, poses, offsets, fps, options->character_mesh_save);
+      FileSaveOptions fbxOptions;
+      fbxOptions.mesh = options->character_mesh_save;
+      saveFbx(options->output_model_file, character, poses, offsets, fps, {}, fbxOptions);
     } else if (oextension == ".glb" || oextension == ".gltf") {
       MT_LOGI("Saving gltf/glb file...");
       if (hasMotion) {
