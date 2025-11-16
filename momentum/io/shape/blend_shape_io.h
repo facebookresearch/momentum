@@ -55,11 +55,23 @@ BlendShape loadBlendShape(
 /// @return BlendShape object with loaded data
 BlendShape loadBlendShape(std::istream& data, int expectedShapes = -1, int expectedVertices = -1);
 
+/// Saves a blend shape base (shape vectors) to a file.
+///
+/// @param filename Output file path for the blend shape data
+/// @param blendShapeBase BlendShapeBase object to save
+void saveBlendShapeBase(const filesystem::path& filename, const BlendShapeBase& blendShapeBase);
+
 /// Saves a blend shape to a file.
 ///
 /// @param filename Output file path for the blend shape data
 /// @param blendShape BlendShape object to save
 void saveBlendShape(const filesystem::path& filename, const BlendShape& blendShape);
+
+/// Saves a blend shape base (shape vectors) to a stream.
+///
+/// @param os Output stream to write blend shape data
+/// @param blendShapeBase BlendShapeBase object to save
+void saveBlendShapeBase(std::ostream& os, const BlendShapeBase& blendShapeBase);
 
 /// Saves a blend shape to a stream.
 ///

@@ -707,7 +707,14 @@ void CharacterT<T>::addFaceExpressionBlendShape(
     const BlendShapeBase_const_p& blendShape_in,
     Eigen::Index maxBlendShapes) {
   MT_CHECK(mesh);
-  MT_CHECK(blendShape_in);
+
+  if (!blendShape_in) {
+    std::tie(parameterTransform, parameterLimits) =
+        addFaceExpressionParameters(parameterTransform, parameterLimits, 0);
+    this->faceExpressionBlendShape.reset();
+    return;
+  }
+
   MT_CHECK(
       blendShape_in->modelSize() == mesh->vertices.size(),
       "{} is not {}",
