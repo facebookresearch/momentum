@@ -86,7 +86,7 @@ class GltfBuilder final {
   void addMarkerSequence(
       float fps,
       std::span<const std::vector<momentum::Marker>> markerSequence,
-      MarkerMesh markerMesh = MarkerMesh::None,
+      MarkerMesh markerMesh = MarkerMesh::UnitCube,
       const std::string& animName = "default");
 
   // Save the file with the provided filename. If the fileFormat is 'GltfFileFormat::Auto',
