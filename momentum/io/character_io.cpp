@@ -166,16 +166,7 @@ void saveCharacter(
   } else if (format == CharacterFormat::Fbx) {
     // Save as FBX
     saveFbx(
-        filename,
-        character,
-        motion,
-        VectorXf(),
-        static_cast<double>(fps),
-        options.mesh,
-        options.coordSystemInfo,
-        options.permissive,
-        markerSequence,
-        options.fbxNamespace);
+        filename, character, motion, VectorXf(), static_cast<double>(fps), markerSequence, options);
   } else {
     MT_THROW(
         "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
@@ -201,15 +192,7 @@ void saveCharacter(
   } else if (format == CharacterFormat::Fbx) {
     // Save as FBX
     saveFbxWithSkeletonStates(
-        filename,
-        character,
-        skeletonStates,
-        static_cast<double>(fps),
-        options.mesh,
-        options.coordSystemInfo,
-        options.permissive,
-        markerSequence,
-        options.fbxNamespace);
+        filename, character, skeletonStates, static_cast<double>(fps), markerSequence, options);
   } else {
     MT_THROW(
         "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());

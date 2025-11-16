@@ -795,14 +795,11 @@ MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stri
 void saveFbx(
     const filesystem::path& filename,
     const Character& character,
-    const MatrixXf& poses, // model parameters
+    const MatrixXf& poses,
     const VectorXf& identity,
     const double framerate,
-    const bool saveMesh,
-    const FbxCoordSystemInfo& coordSystemInfo,
-    const bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
-    std::string_view fbxNamespace) {
+    const FileSaveOptions& options) {
   CharacterParameters params;
   if (identity.size() == character.parameterTransform.numJointParameters()) {
     params.offsets = identity;
@@ -810,41 +807,34 @@ void saveFbx(
     params.offsets = character.parameterTransform.bindPose();
   }
 
-  // first convert model parameters to joint values
   CharacterState state;
   MatrixXf jointValues;
   if (poses.cols() > 0) {
-    // Set the initial pose to initialize the state
     params.pose = poses.col(0);
     state.set(params, character, false, false, false);
 
-    // Resize the jointValues matrix based on the size of joint parameters and number of poses
     jointValues.resize(state.skeletonState.jointParameters.v.size(), poses.cols());
 
-    // Store the joint parameters for the initial pose
     jointValues.col(0) = state.skeletonState.jointParameters.v;
 
-    // Iterate through each subsequent pose
     for (Eigen::Index f = 1; f < poses.cols(); f++) {
-      // set the current pose
       params.pose = poses.col(f);
       state.set(params, character, false, false, false);
       jointValues.col(f) = state.skeletonState.jointParameters.v;
     }
   }
 
-  // Call the helper function to save FBX file with joint values
   saveFbxCommon(
       filename,
       character,
       jointValues,
       framerate,
-      saveMesh,
+      options.mesh,
       false,
-      coordSystemInfo,
-      permissive,
+      options.coordSystemInfo,
+      options.permissive,
       markerSequence,
-      fbxNamespace);
+      options.fbxNamespace);
 }
 
 void saveFbxWithJointParams(
@@ -852,25 +842,19 @@ void saveFbxWithJointParams(
     const Character& character,
     const MatrixXf& jointParams,
     const double framerate,
-    const bool saveMesh,
-    const FbxCoordSystemInfo& coordSystemInfo,
-    const bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
-    std::string_view fbxNamespace) {
-  // Call the helper function to save FBX file with joint values.
-  // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
-  // passed in directly from user.
+    const FileSaveOptions& options) {
   saveFbxCommon(
       filename,
       character,
       jointParams,
       framerate,
-      saveMesh,
+      options.mesh,
       true,
-      coordSystemInfo,
-      permissive,
+      options.coordSystemInfo,
+      options.permissive,
       markerSequence,
-      fbxNamespace);
+      options.fbxNamespace);
 }
 
 void saveFbxWithSkeletonStates(
@@ -878,11 +862,8 @@ void saveFbxWithSkeletonStates(
     const Character& character,
     std::span<const SkeletonState> skeletonStates,
     const double framerate,
-    const bool saveMesh,
-    const FbxCoordSystemInfo& coordSystemInfo,
-    const bool permissive,
     std::span<const std::vector<Marker>> markerSequence,
-    std::string_view fbxNamespace) {
+    const FileSaveOptions& options) {
   const size_t nFrames = skeletonStates.size();
   MatrixXf jointParams(character.parameterTransform.zero().v.size(), nFrames);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
@@ -890,39 +871,24 @@ void saveFbxWithSkeletonStates(
         skeletonStateToJointParameters(skeletonStates[iFrame], character.skeleton).v;
   }
 
-  // Call the helper function to save FBX file with joint values.
-  // Set skipActiveJointParamCheck=true to skip the active joint param check as the joint params are
-  // passed in directly from user.
   saveFbxCommon(
       filename,
       character,
       jointParams,
       framerate,
-      saveMesh,
+      options.mesh,
       true,
-      coordSystemInfo,
-      permissive,
+      options.coordSystemInfo,
+      options.permissive,
       markerSequence,
-      fbxNamespace);
+      options.fbxNamespace);
 }
 
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
-    const FbxCoordSystemInfo& coordSystemInfo,
-    bool permissive,
-    std::string_view fbxNamespace) {
-  saveFbx(
-      filename,
-      character,
-      MatrixXf(),
-      VectorXf(),
-      120.0,
-      true,
-      coordSystemInfo,
-      permissive,
-      {},
-      fbxNamespace);
+    const FileSaveOptions& options) {
+  saveFbx(filename, character, MatrixXf(), VectorXf(), 120.0, {}, options);
 }
 
 #else // !MOMENTUM_WITH_FBX_SDK
@@ -933,11 +899,8 @@ void saveFbx(
     const MatrixXf& /* poses */,
     const VectorXf& /* identity */,
     const double /* framerate */,
-    const bool /* saveMesh */,
-    const FbxCoordSystemInfo& /* coordSystemInfo */,
-    const bool /* permissive */,
     std::span<const std::vector<Marker>> /* markerSequence */,
-    std::string_view /* fbxNamespace */) {
+    const FileSaveOptions& /* options */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
@@ -947,11 +910,8 @@ void saveFbxWithJointParams(
     const Character& /* character */,
     const MatrixXf& /* jointParams */,
     const double /* framerate */,
-    const bool /* saveMesh */,
-    const FbxCoordSystemInfo& /* coordSystemInfo */,
-    const bool /* permissive */,
     std::span<const std::vector<Marker>> /* markerSequence */,
-    std::string_view /* fbxNamespace */) {
+    const FileSaveOptions& /* options */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
@@ -961,11 +921,8 @@ void saveFbxWithSkeletonStates(
     const Character& /* character */,
     std::span<const SkeletonState> /* skeletonStates */,
     const double /* framerate */,
-    const bool /* saveMesh */,
-    const FbxCoordSystemInfo& /* coordSystemInfo */,
-    const bool /* permissive */,
     std::span<const std::vector<Marker>> /* markerSequence */,
-    std::string_view /* fbxNamespace */) {
+    const FileSaveOptions& /* options */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }
@@ -973,9 +930,7 @@ void saveFbxWithSkeletonStates(
 void saveFbxModel(
     const filesystem::path& /* filename */,
     const Character& /* character */,
-    const FbxCoordSystemInfo& /* coordSystemInfo */,
-    bool /* permissive */,
-    std::string_view /* fbxNamespace */) {
+    const FileSaveOptions& /* options */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
 }

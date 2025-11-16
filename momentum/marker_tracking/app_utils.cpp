@@ -205,7 +205,7 @@ void saveMotion(
   const VectorXf idVec = character.parameterTransform.apply(id).v;
 
   if (ext == ".fbx") {
-    saveFbx(output, character, finalMotion, idVec, fps, saveMarkerMesh);
+    saveFbx(output, character, finalMotion, idVec, fps);
   } else if (ext == ".glb" || ext == ".gltf") {
     GltfBuilder fileBuilder;
     fileBuilder.addMotion(

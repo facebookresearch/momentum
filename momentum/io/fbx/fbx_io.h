@@ -67,80 +67,55 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
 /// @param poses Model parameters for each frame (empty for bind pose only)
 /// @param identity Identity pose parameters (empty to use bind pose)
 /// @param framerate Animation framerate in frames per second
-/// @param saveMesh Whether to include mesh geometry in the output
-/// @param coordSystemInfo Coordinate system configuration for the FBX file
-/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
-/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
-/// "ns:")
+/// @param markerSequence Optional marker sequence data to save with the character
+/// @param options Optional file save options for controlling output (default: FileSaveOptions{})
 void saveFbx(
     const filesystem::path& filename,
     const Character& character,
     const MatrixXf& poses = MatrixXf(),
     const VectorXf& identity = VectorXf(),
     double framerate = 120.0,
-    bool saveMesh = false,
-    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
-    bool permissive = false,
     std::span<const std::vector<Marker>> markerSequence = {},
-    std::string_view fbxNamespace = "");
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Save a character with animation using joint parameters directly.
 /// @param filename Path to the output FBX file
 /// @param character The character to save
 /// @param jointParams Joint parameters for each frame (empty for bind pose only)
 /// @param framerate Animation framerate in frames per second
-/// @param saveMesh Whether to include mesh geometry in the output
-/// @param coordSystemInfo Coordinate system configuration for the FBX file
-/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
 /// @param markerSequence Optional marker sequence data to save with the character
-/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
-/// "ns:")
+/// @param options Optional file save options for controlling output (default: FileSaveOptions{})
 void saveFbxWithJointParams(
     const filesystem::path& filename,
     const Character& character,
     const MatrixXf& jointParams = MatrixXf(),
     double framerate = 120.0,
-    bool saveMesh = false,
-    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
-    bool permissive = false,
     std::span<const std::vector<Marker>> markerSequence = {},
-    std::string_view fbxNamespace = "");
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Save a character with animation using skeleton states directly.
 /// @param filename Path to the output FBX file
 /// @param character The character to save
 /// @param skeletonStates SkeletonState for each frame (empty for bind pose only)
 /// @param framerate Animation framerate in frames per second
-/// @param saveMesh Whether to include mesh geometry in the output
-/// @param coordSystemInfo Coordinate system configuration for the FBX file
-/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
 /// @param markerSequence Optional marker sequence data to save with the character
-/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
-/// "ns:")
+/// @param options Optional file save options for controlling output (default: FileSaveOptions{})
 void saveFbxWithSkeletonStates(
     const filesystem::path& filename,
     const Character& character,
     std::span<const SkeletonState> skeletonStates,
     double framerate = 120.0,
-    bool saveMesh = false,
-    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
-    bool permissive = false,
     std::span<const std::vector<Marker>> markerSequence = {},
-    std::string_view fbxNamespace = "");
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Save a character model (skeleton and mesh) without animation.
 /// @param filename Path to the output FBX file
 /// @param character The character to save
-/// @param coordSystemInfo Coordinate system configuration for the FBX file
-/// @param permissive Permissive mode allows saving mesh-only characters (without skin weights)
-/// @param fbxNamespace Optional namespace to prepend to all node names (e.g., "ns" will become
-/// "ns:")
+/// @param options Optional file save options for controlling output (default: FileSaveOptions{})
 void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
-    const FbxCoordSystemInfo& coordSystemInfo = FbxCoordSystemInfo(),
-    bool permissive = false,
-    std::string_view fbxNamespace = "");
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Loads a MarkerSequence from an FBX file.
 ///
