@@ -16,7 +16,8 @@
     "ci": "yarn lint && yarn prettier:diff",
     "lint": "eslint --cache \"**/*.js\" && stylelint \"**/*.css\"",
     "prettier": "prettier --config .prettierrc --write \"**/*.{js,jsx,ts,tsx,md,mdx}\"",
-    "prettier:diff": "prettier --config .prettierrc --list-different \"**/*.{js,jsx,ts,tsx,md,mdx}\""
+    "prettier:diff": "prettier --config .prettierrc --list-different \"**/*.{js,jsx,ts,tsx,md,mdx}\"",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@algolia/client-search": "^4.23.3",
@@ -38,7 +39,9 @@
     "dompurify": ">=3.2.5",
     "**/nth-check": ">=2.0.1",
     "**/webpack-dev-server": ">=5.2.1",
-    "**/on-headers": ">=1.1.0"
+    "**/on-headers": ">=1.1.0",
+    "**/js-yaml": ">=4.1.1",
+    "**/gray-matter": ">=4.0.3"
   },
   "browserslist": {
     "production": [
@@ -57,5 +60,7 @@
     "npm": "use yarn instead",
     "yarn": "^1.5"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "patch-package": "^8.0.0"
+  }
 }
