@@ -120,6 +120,17 @@ TEST_F(BlendShapeIOTest, LoadBlendShapeFileNotFound) {
   EXPECT_THROW(loadBlendShape("nonexistent.bin"), std::runtime_error);
 }
 
+TEST_F(BlendShapeIOTest, BlendShapeBaseSaveAndLoadRoundTrip) {
+  BlendShapeBase original(shapeVectors_.rows(), 2);
+  original.setShapeVectors(shapeVectors_);
+
+  auto tempFile = temporaryFile("test", ".bin");
+  saveBlendShapeBase(tempFile.path(), original);
+  BlendShapeBase loaded = loadBlendShapeBase(tempFile.path());
+
+  EXPECT_TRUE(loaded.getShapeVectors().isApprox(original.getShapeVectors()));
+}
+
 TEST_F(BlendShapeIOTest, SaveAndLoadRoundTrip) {
   BlendShape original(baseShape_, 2);
   original.setShapeVectors(shapeVectors_);

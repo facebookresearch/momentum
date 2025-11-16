@@ -117,12 +117,34 @@ BlendShape loadBlendShape(std::istream& data, int expectedShapes, int expectedVe
   return res;
 }
 
+void saveBlendShapeBase(const filesystem::path& filename, const BlendShapeBase& blendShapeBase) {
+  std::ofstream data(filename, std::ios::out | std::ios::binary);
+  if (!data.is_open()) {
+    MT_LOGW("Failed to open file for writing: {}", filename.string());
+    return;
+  }
+  saveBlendShapeBase(data, blendShapeBase);
+}
+
 void saveBlendShape(const filesystem::path& filename, const BlendShape& blendShape) {
   std::ofstream data(filename, std::ios::out | std::ios::binary);
   if (!data.is_open()) {
+    MT_LOGW("Failed to open file for writing: {}", filename.string());
     return;
   }
   saveBlendShape(data, blendShape);
+}
+
+void saveBlendShapeBase(std::ostream& os, const BlendShapeBase& blendShapeBase) {
+  // write dimensions
+  const uint64_t numRows = blendShapeBase.getShapeVectors().rows();
+  const uint64_t numCols = blendShapeBase.getShapeVectors().cols();
+
+  os.write((char const*)&numRows, sizeof(numRows));
+  os.write((char const*)&numCols, sizeof(numCols));
+
+  // write coefficient matrix
+  os.write((char const*)blendShapeBase.getShapeVectors().data(), sizeof(float) * numRows * numCols);
 }
 
 void saveBlendShape(std::ostream& os, const BlendShape& blendShape) {
