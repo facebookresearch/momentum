@@ -273,7 +273,7 @@ can be explicitly specified or automatically deduced from the file extension.
 
             // Convert to Python bytes
             const std::string& str = output.str();
-            return {str};
+            return py::bytes{str};
           },
           R"(Convert the GLTF scene to bytes in memory.
 

@@ -570,16 +570,18 @@ The resulting tensors are as follows:
           py::arg("fbx_namespace") = "",
           py::arg("extensions") = true,
           py::arg("gltf_file_format") = mm::GltfFileFormat::Auto,
-          "Create FileSaveOptions with custom settings.\n\n"
-          ":param mesh: Include mesh geometry in the output (default: True)\n"
-          ":param locators: Include locators in the output (default: True)\n"
-          ":param collisions: Include collision geometry in the output (default: True)\n"
-          ":param blend_shapes: Include blend shapes in the output (default: True)\n"
-          ":param permissive: Permissive mode - allow saving mesh-only characters without skin weights (default: False)\n"
-          ":param coord_system_info: FBX coordinate system configuration (default: Maya Y-up)\n"
-          ":param fbx_namespace: Optional namespace prefix for FBX node names (default: empty)\n"
-          ":param extensions: Enable GLTF extensions (default: True)\n"
-          ":param gltf_file_format: GLTF file format selection (default: Auto)\n")
+          R"(Create FileSaveOptions with custom settings.
+
+:param mesh: Include mesh geometry in the output (default: True)
+:param locators: Include locators in the output (default: True)
+:param collisions: Include collision geometry in the output (default: True)
+:param blend_shapes: Include blend shapes in the output (default: True)
+:param permissive: Permissive mode - allow saving mesh-only characters without skin weights (default: False)
+:param coord_system_info: FBX coordinate system configuration (default: Maya Y-up)
+:param fbx_namespace: Optional namespace prefix for FBX node names (default: empty)
+:param extensions: Enable GLTF extensions (default: True)
+:param gltf_file_format: GLTF file format selection (default: Auto))
+          )")
       .def_readwrite(
           "mesh", &mm::FileSaveOptions::mesh, "Include mesh geometry in the output (default: true)")
       .def_readwrite(
