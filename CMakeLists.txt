@@ -362,6 +362,7 @@ mt_library(
     character
   PRIVATE_LINK_LIBRARIES
     io_common
+    nlohmann_json::nlohmann_json
     re2::re2
 )
 
