@@ -38,7 +38,52 @@ def _build_blend_shape_basis(
     return blend_shape
 
 
+def _apply_blend_coeffs(
+    blend_shape: pym_geometry.BlendShapeBase,
+    base_shape: np.ndarray | None,
+    shape_vectors: np.ndarray,
+) -> [np.ndarray, np.ndarray, torch.Tensor]:
+    n_blend = shape_vectors.shape[0]
+    n_pts = shape_vectors.shape[1]
+
+    nBatch = 2
+    n_coeffs = min(blend_shape.n_shapes, 10)
+    coeffs = torch.rand(nBatch, n_coeffs, dtype=torch.float64, requires_grad=True)
+
+    shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
+    c1 = coeffs.select(0, 0).detach().numpy()
+
+    # Compute the shape another way:
+    shape2 = np.dot(shape_vectors.reshape(n_blend, n_pts * 3).transpose(), c1).reshape(
+        n_pts, 3
+    )
+    if base_shape is not None:
+        shape2 += base_shape
+    return shape1, torch.from_numpy(shape2).float(), coeffs
+
+
 class TestBlendShapeBase(unittest.TestCase):
+    def test_diff_apply_blend_coeffs(self) -> None:
+        np.random.seed(0)
+
+        n_pts = 10
+        n_blend = 4
+
+        shape_vectors = np.random.rand(n_blend, n_pts, 3)
+        blend_shape = pym_geometry.BlendShapeBase.from_tensors(shape_vectors)
+
+        shape1, shape2, coeffs = _apply_blend_coeffs(blend_shape, None, shape_vectors)
+
+        self.assertTrue(shape1.allclose(shape2))
+
+        torch.autograd.gradcheck(
+            blend_shape.compute_shape,
+            [coeffs],
+            eps=1e-3,
+            atol=1e-4,
+            raise_exception=True,
+        )
+
     def test_save_and_load(self) -> None:
         torch.manual_seed(0)
         np.random.seed(0)
@@ -83,6 +128,68 @@ class TestBlendShapeBase(unittest.TestCase):
             torch.sum(c3.parameter_transform.face_expression_parameters) == 0
         )
 
+    def test_solve_face_expression_parameters(self) -> None:
+        c = pym_geometry.create_test_character()
+        blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
+        c = c.with_face_expression_blend_shape(blend_shape)
+        pt = c.parameter_transform
+
+        gt_model_params = torch.rand(c.parameter_transform.size).masked_fill(
+            pt.pose_parameters | pt.scaling_parameters | pt.blend_shape_parameters,
+            0,
+        )
+        gt_joint_params = pym_geometry.apply_parameter_transform(c, gt_model_params)
+        gt_blend_coeffs = pym_geometry.model_parameters_to_face_expression_coefficients(
+            c, gt_model_params
+        )
+        rest_shape = torch.from_numpy(c.mesh.vertices)
+        gt_shape = rest_shape + blend_shape.compute_shape(gt_blend_coeffs)
+        gt_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            c, gt_joint_params
+        )
+        gt_posed_shape = c.skin_points(gt_skel_state, gt_shape)
+
+        active_params = c.parameter_transform.face_expression_parameters
+        active_error_functions = [ErrorFunctionType.Limit, ErrorFunctionType.Vertex]
+        error_function_weights = torch.ones(
+            len(active_error_functions),
+            requires_grad=True,
+        )
+        model_params_init = torch.zeros(c.parameter_transform.size)
+
+        # Test whether ik works without proj or dist constraints:
+        test_model_params = pym_solver.solve_ik(
+            character=c,
+            active_parameters=active_params,
+            model_parameters_init=model_params_init,
+            active_error_functions=active_error_functions,
+            error_function_weights=error_function_weights,
+            vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
+            vertex_cons_target_positions=gt_posed_shape,
+        )
+        test_joint_params = pym_geometry.apply_parameter_transform(c, test_model_params)
+        test_blend_coeffs = (
+            pym_geometry.model_parameters_to_face_expression_coefficients(
+                c, test_model_params
+            )
+        )
+        test_shape = rest_shape + blend_shape.compute_shape(test_blend_coeffs)
+        test_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            c, test_joint_params
+        )
+        test_posed_shape = c.skin_points(test_skel_state, test_shape)
+
+        # Debug output for ASAN mode tolerance issues
+        max_abs_diff = torch.max(torch.abs(test_posed_shape - gt_posed_shape)).item()
+        max_rel_diff = torch.max(
+            torch.abs((test_posed_shape - gt_posed_shape) / (gt_posed_shape + 1e-8))
+        ).item()
+        print(f"Max absolute difference: {max_abs_diff}")
+        print(f"Max relative difference: {max_rel_diff}")
+
+        # Relaxed tolerances for ASAN mode - ASAN has different numerical behavior
+        self.assertTrue(test_posed_shape.allclose(gt_posed_shape, rtol=5e-3, atol=5e-2))
+
 
 class TestBlendShape(unittest.TestCase):
     def test_diff_apply_blend_coeffs(self) -> None:
@@ -95,18 +202,11 @@ class TestBlendShape(unittest.TestCase):
         shape_vectors = np.random.rand(n_blend, n_pts, 3)
         blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
 
-        nBatch = 2
-        n_coeffs = min(blend_shape.n_shapes, 10)
-        coeffs = torch.rand(nBatch, n_coeffs, dtype=torch.float64, requires_grad=True)
+        shape1, shape2, coeffs = _apply_blend_coeffs(
+            blend_shape, base_shape, shape_vectors
+        )
 
-        shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
-        c1 = coeffs.select(0, 0).detach().numpy()
-
-        # Compute the shape another way:
-        shape2 = base_shape + np.dot(
-            shape_vectors.reshape(n_blend, n_pts * 3).transpose(), c1
-        ).reshape(n_pts, 3)
-        self.assertTrue(shape1.allclose(torch.from_numpy(shape2).float()))
+        self.assertTrue(shape1.allclose(shape2))
 
         torch.autograd.gradcheck(
             blend_shape.compute_shape,

@@ -64,28 +64,31 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
   const int64_t nCoeffs = checker.getBoundValue(nCoeffs_idx);
   const int64_t nBatch = checker.getBatchSize();
 
-  const momentum::BlendShape* blendShape = py::cast<const momentum::BlendShape*>(blendShape_in);
+  const momentum::BlendShapeBase* blendShapePtr =
+      py::cast<const momentum::BlendShapeBase*>(blendShape_in);
+  const momentum::BlendShape* blendShape = dynamic_cast<const momentum::BlendShape*>(blendShapePtr);
 
   MT_THROW_IF(
-      nCoeffs > blendShape->shapeSize(),
+      nCoeffs > blendShapePtr->shapeSize(),
       "In applyBlendShapeCoeffs, invalid blend shape count; expected at most {} coefficients but got {}.",
-      blendShape->shapeSize(),
+      blendShapePtr->shapeSize(),
       nCoeffs);
 
-  const int64_t nPoints = blendShape->modelSize();
+  const int64_t nPoints = blendShapePtr->modelSize();
 
   at::Tensor result = at::zeros({nBatch, nPoints, 3}, at::CPU(at::kFloat));
 
-  const Eigen::MatrixXf& shapeVectors = blendShape->getShapeVectors();
-  const std::vector<Eigen::Vector3f>& baseShape = blendShape->getBaseShape();
+  const Eigen::MatrixXf& shapeVectors = blendShapePtr->getShapeVectors();
 
   dispenso::parallel_for(0, nBatch, [&](int64_t iBatch) {
     at::Tensor coeffs_cur = blendShapeCoefficients.select(0, iBatch);
     at::Tensor result_cur = result.select(0, iBatch);
 
     Eigen::Map<Eigen::VectorXf> result_cur_map = toEigenMap<float>(result_cur);
-    for (size_t i = 0; i < baseShape.size(); ++i) {
-      result_cur_map.segment<3>(3 * i) = baseShape[i];
+    if (blendShape) {
+      for (size_t i = 0; i < blendShape->getBaseShape().size(); ++i) {
+        result_cur_map.segment<3>(3 * i) = blendShape->getBaseShape()[i];
+      }
     }
 
     result_cur_map += shapeVectors.leftCols(nCoeffs) * toEigenMap<float>(coeffs_cur);
@@ -105,14 +108,14 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
 
-  const momentum::BlendShape* blendShape =
-      py::cast<const momentum::BlendShape*>(ctx->saved_data["blendShape"].toPyObject());
+  const momentum::BlendShapeBase* blendShapePtr =
+      py::cast<const momentum::BlendShapeBase*>(ctx->saved_data["blendShape"].toPyObject());
 
   auto dLoss_dPositions = grad_outputs[0].contiguous().to(at::DeviceType::CPU, at::kFloat);
 
   bool squeeze = false;
 
-  const int nPoints = blendShape->modelSize();
+  const int nPoints = blendShapePtr->modelSize();
 
   const auto saved = ctx->get_saved_variables();
   MT_THROW_IF(saved.empty(), "Missing saved variable");
@@ -142,7 +145,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
     at::Tensor dLoss_dPos_cur = dLoss_dPositions.select(0, k);
 
     toEigenMap<float>(dLoss_dCoeffsCur) =
-        blendShape->getShapeVectors().leftCols(nBlendShapes).transpose() *
+        blendShapePtr->getShapeVectors().leftCols(nBlendShapes).transpose() *
         toEigenMap<float>(dLoss_dPos_cur);
   }
 
