@@ -24,6 +24,8 @@ struct BlendShapeBase {
   /// @param numShapes Number of blend shapes
   BlendShapeBase(size_t modelSize, size_t numShapes);
 
+  virtual ~BlendShapeBase() = default;
+
   /// @param shapeVectors Matrix where each column is a shape vector
   void setShapeVectors(const MatrixXf& shapeVectors) {
     shapeVectors_ = shapeVectors;
