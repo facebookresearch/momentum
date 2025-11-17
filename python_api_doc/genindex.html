@@ -126,6 +126,8 @@
 </li>
         <li><a href="geometry.html#pymomentum.geometry.BlendShape.__init__">(pymomentum.geometry.BlendShape method)</a>
 </li>
+        <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.__init__">(pymomentum.geometry.BlendShapeBase method)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.Character.__init__">(pymomentum.geometry.Character method)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.FbxCoordSystem.__init__">(pymomentum.geometry.FbxCoordSystem method)</a>
@@ -539,8 +541,12 @@
         <li><a href="torch.html#pymomentum.torch.character.BlendShape">(class in pymomentum.torch.character)</a>
 </li>
       </ul></li>
-      <li><a href="torch.html#pymomentum.torch.character.BlendShapeBase">BlendShapeBase (class in pymomentum.torch.character)</a>
+      <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase">BlendShapeBase (class in pymomentum.geometry)</a>
+
+      <ul>
+        <li><a href="torch.html#pymomentum.torch.character.BlendShapeBase">(class in pymomentum.torch.character)</a>
 </li>
+      </ul></li>
       <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.Bottom">Bottom (pymomentum.renderer.VerticalAlignment attribute)</a>
 </li>
       <li><a href="axel.html#pymomentum.axel.BoundingBox">BoundingBox (class in pymomentum.axel)</a>
@@ -871,6 +877,10 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.Character.face_expression_blend_shape">face_expression_blend_shape (pymomentum.geometry.Character property)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.face_expression_parameters">face_expression_parameters (pymomentum.geometry.ParameterTransform property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.faces">faces (pymomentum.geometry.Mesh property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FileSaveOptions.fbx_namespace">fbx_namespace (pymomentum.geometry.FileSaveOptions property)</a>
@@ -946,6 +956,8 @@
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.from_bytes">from_bytes() (pymomentum.geometry.BlendShape static method)</a>
 
       <ul>
+        <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.from_bytes">(pymomentum.geometry.BlendShapeBase static method)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.Mppca.from_bytes">(pymomentum.geometry.Mppca static method)</a>
 </li>
       </ul></li>
@@ -974,7 +986,11 @@
       <li><a href="trs.html#pymomentum.trs.from_skeleton_state">from_skeleton_state() (in module pymomentum.trs)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.from_tensors">from_tensors() (pymomentum.geometry.BlendShape static method)</a>
+
+      <ul>
+        <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.from_tensors">(pymomentum.geometry.BlendShapeBase static method)</a>
 </li>
+      </ul></li>
       <li><a href="skel_state.html#pymomentum.skel_state.from_translation">from_translation() (in module pymomentum.skel_state)</a>
 
       <ul>
@@ -1493,6 +1509,8 @@
 </li>
       <li><a href="torch.html#pymomentum.torch.character.Character.model_parameters_to_blendshape_coefficients">model_parameters_to_blendshape_coefficients() (pymomentum.torch.character.Character method)</a>
 </li>
+      <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_face_expression_coefficients">model_parameters_to_face_expression_coefficients() (in module pymomentum.geometry)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="torch.html#pymomentum.torch.character.Character.model_parameters_to_joint_parameters">model_parameters_to_joint_parameters() (pymomentum.torch.character.Character method)</a>
@@ -1592,9 +1610,9 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mppca.n_mixtures">n_mixtures (pymomentum.geometry.Mppca property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.BlendShape.n_shapes">n_shapes (pymomentum.geometry.BlendShape property)</a>
+      <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.n_shapes">n_shapes (pymomentum.geometry.BlendShapeBase property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.BlendShape.n_vertices">n_vertices (pymomentum.geometry.BlendShape property)</a>
+      <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.n_vertices">n_vertices (pymomentum.geometry.BlendShapeBase property)</a>
 
       <ul>
         <li><a href="geometry.html#pymomentum.geometry.Mesh.n_vertices">(pymomentum.geometry.Mesh property)</a>
@@ -2170,6 +2188,8 @@
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.save">save() (pymomentum.geometry.BlendShape method)</a>
 
       <ul>
+        <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.save">(pymomentum.geometry.BlendShapeBase method)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.Character.save">(pymomentum.geometry.Character static method)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.save">(pymomentum.geometry.GltfBuilder method)</a>
@@ -2233,7 +2253,7 @@
         <li><a href="backend.html#pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT.setup_context">(pymomentum.backend.trs_backend.ForwardKinematicsFromLocalTransformationJIT static method)</a>
 </li>
       </ul></li>
-      <li><a href="geometry.html#pymomentum.geometry.BlendShape.shape_vectors">shape_vectors (pymomentum.geometry.BlendShape property)</a>
+      <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.shape_vectors">shape_vectors (pymomentum.geometry.BlendShapeBase property)</a>
 </li>
       <li><a href="axel.html#pymomentum.axel.SignedDistanceField">SignedDistanceField (class in pymomentum.axel)</a>
 </li>
@@ -2428,6 +2448,8 @@
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.to_bytes">to_bytes() (pymomentum.geometry.BlendShape method)</a>
 
       <ul>
+        <li><a href="geometry.html#pymomentum.geometry.BlendShapeBase.to_bytes">(pymomentum.geometry.BlendShapeBase method)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.to_bytes">(pymomentum.geometry.GltfBuilder method)</a>
 </li>
       </ul></li>
@@ -2674,6 +2696,8 @@
       <li><a href="geometry.html#pymomentum.geometry.Character.with_blend_shape">with_blend_shape() (pymomentum.geometry.Character method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.with_collision_geometry">with_collision_geometry() (pymomentum.geometry.Character method)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.Character.with_face_expression_blend_shape">with_face_expression_blend_shape() (pymomentum.geometry.Character method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.with_locators">with_locators() (pymomentum.geometry.Character method)</a>
 </li>
