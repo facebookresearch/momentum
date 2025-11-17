@@ -44,7 +44,7 @@ class TriBvhEmbree {
    * @brief Returns the total number of primitives in the tree. It should be equal to the number of
    * triangles that Bvh was constructed with.
    */
-  size_t getPrimitiveCount() const;
+  [[nodiscard]] size_t getPrimitiveCount() const;
 
  private:
   // TODO(nemanjab): Wrap this in a singleton to allow usage across multiple BVHs.
