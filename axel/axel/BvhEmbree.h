@@ -62,11 +62,12 @@ class BVHEmbree final : public BvhBased {
   void setPrimitives(std::vector<RTCBuildPrimitive>& prims);
 
   uint32_t query(const BoundingBoxd& box, QueryBuffer& hits) const override;
-  std::vector<unsigned int> query(const BoundingBoxd& box) const override;
-  std::vector<unsigned int> query(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction)
-      const override;
+  [[nodiscard]] std::vector<unsigned int> query(const BoundingBoxd& box) const override;
+  [[nodiscard]] std::vector<unsigned int> query(
+      const Eigen::Vector3d& origin,
+      const Eigen::Vector3d& direction) const override;
 
-  Size getPrimitiveCount() const override;
+  [[nodiscard]] Size getPrimitiveCount() const override;
 
  private:
   // Manually ref-counted handle to the device used as Embree's context.
