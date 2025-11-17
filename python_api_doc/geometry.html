@@ -49,7 +49,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.BlendShape"><code class="docutils literal notranslate"><span class="pre">BlendShape</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.__init__"><code class="docutils literal notranslate"><span class="pre">BlendShape.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.base_shape"><code class="docutils literal notranslate"><span class="pre">BlendShape.base_shape</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.compute_shape"><code class="docutils literal notranslate"><span class="pre">BlendShape.compute_shape()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.from_bytes"><code class="docutils literal notranslate"><span class="pre">BlendShape.from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.from_tensors"><code class="docutils literal notranslate"><span class="pre">BlendShape.from_tensors()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShape.load"><code class="docutils literal notranslate"><span class="pre">BlendShape.load()</span></code></a></li>
@@ -59,6 +58,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase.__init__"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase.compute_shape"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase.compute_shape()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase.from_bytes"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase.from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase.from_tensors"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase.from_tensors()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase.n_shapes"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase.n_shapes</span></code></a></li>
@@ -534,21 +534,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.compute_shape">
-<span class="sig-name descname"><span class="pre">compute_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.compute_shape" title="Link to this definition"></a></dt>
-<dd><p>Apply the blend shape coefficients to compute the rest shape.</p>
-<p>The resulting shape is equal to the base shape plus a linear combination of the shape vectors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>coeffs</strong> – A torch.Tensor of size [n_batch x n_shapes] containing blend shape coefficients.</p>
-</dd>
-<dt class="field-even">Result<span class="colon">:</span></dt>
-<dd class="field-even"><p>A [n_batch x n_vertices x 3] tensor containing the vertex positions.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShape.from_bytes">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blend_shape_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_expected_shapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_expected_vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.BlendShape" title="pymomentum.geometry.BlendShape"><span class="pre">pymomentum.geometry.BlendShape</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.BlendShape.from_bytes" title="Link to this definition"></a></dt>
 <dd><p>Load a blend shape basis from bytes in memory.</p>
@@ -624,6 +609,21 @@
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShapeBase.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.BlendShapeBase.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.BlendShapeBase.compute_shape">
+<span class="sig-name descname"><span class="pre">compute_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.BlendShapeBase.compute_shape" title="Link to this definition"></a></dt>
+<dd><p>Apply the blend shape coefficients to compute the rest shape.</p>
+<p>The resulting shape is equal to a linear combination of the shape vectors (plus the base shape, if it is a BlendShape object).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coeffs</strong> – A torch.Tensor of size [n_batch x n_shapes] containing blend shape coefficients.</p>
+</dd>
+<dt class="field-even">Result<span class="colon">:</span></dt>
+<dd class="field-even"><p>A [n_batch x n_vertices x 3] tensor containing the vertex positions.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.BlendShapeBase.from_bytes">
