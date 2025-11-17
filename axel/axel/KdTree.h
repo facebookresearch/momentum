@@ -76,11 +76,11 @@ class KdTree {
   }
 
   // Returns the number of points in the tree.
-  size_t getSize() const {
+  [[nodiscard]] size_t getSize() const {
     return static_cast<size_t>(tree_.index->size());
   }
 
-  bool isEmpty() const {
+  [[nodiscard]] bool isEmpty() const {
     return tree_.index->size() == 0;
   }
 
