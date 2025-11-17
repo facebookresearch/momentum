@@ -12,6 +12,7 @@
 #include "momentum/io/fbx/openfbx_loader.h"
 
 #ifdef MOMENTUM_WITH_FBX_SDK
+#include "momentum/character/blend_shape.h"
 #include "momentum/character/character_state.h"
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/marker.h"
@@ -458,6 +459,89 @@ std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
   return markerNodes;
 }
 
+void saveSkinWeightsToFbx(
+    const Character& character,
+    ::fbxsdk::FbxScene* scene,
+    ::fbxsdk::FbxMesh* mesh,
+    const std::unordered_map<size_t, fbxsdk::FbxNode*>& jointToNodeMap) {
+  ::fbxsdk::FbxSkin* fbxskin = ::fbxsdk::FbxSkin::Create(scene, "meshskinning");
+  fbxskin->SetSkinningType(::fbxsdk::FbxSkin::eLinear);
+  fbxskin->SetGeometry(mesh);
+  FbxAMatrix meshTransform;
+  meshTransform.SetIdentity();
+  for (const auto& jointNode : jointToNodeMap) {
+    size_t jointIdx = jointNode.first;
+    auto* fbxJointNode = jointNode.second;
+
+    std::ostringstream s;
+    s << "skinningcluster_" << jointIdx;
+    FbxCluster* pCluster = ::fbxsdk::FbxCluster::Create(scene, s.str().c_str());
+    pCluster->SetLinkMode(::fbxsdk::FbxCluster::ELinkMode::eNormalize);
+    pCluster->SetLink(fbxJointNode);
+
+    ::fbxsdk::FbxAMatrix globalMatrix = fbxJointNode->EvaluateLocalTransform();
+    ::fbxsdk::FbxNode* pParent = fbxJointNode->GetParent();
+    // TODO: should use inverse bind transform from character instead.
+    while (pParent != nullptr) {
+      globalMatrix = pParent->EvaluateLocalTransform() * globalMatrix;
+      pParent = pParent->GetParent();
+    }
+    pCluster->SetTransformLinkMatrix(globalMatrix);
+    pCluster->SetTransformMatrix(meshTransform);
+
+    for (int i = 0; i < character.skinWeights->index.rows(); i++) {
+      for (int j = 0; j < character.skinWeights->index.cols(); j++) {
+        auto boneIndex = character.skinWeights->index(i, j);
+        if (boneIndex == jointNode.first && character.skinWeights->weight(i, j) > 0) {
+          pCluster->AddControlPointIndex(i, character.skinWeights->weight(i, j));
+        }
+      }
+    }
+    fbxskin->AddCluster(pCluster);
+  }
+  mesh->AddDeformer(fbxskin);
+}
+
+void saveBlendShapesToFbx(
+    const Character& character,
+    ::fbxsdk::FbxScene* scene,
+    ::fbxsdk::FbxMesh* mesh) {
+  // create blendshape deformer
+  ::fbxsdk::FbxBlendShape* blendShape = ::fbxsdk::FbxBlendShape::Create(scene, "blendshape");
+  blendShape->SetGeometry(mesh);
+
+  // add blendshape channels
+  const auto& shapes = character.blendShape->getShapeVectors();
+  const auto& base = character.blendShape->getBaseShape();
+  const int numVertices = character.mesh.get()->vertices.size();
+
+  for (int j = 0; j < numVertices; j++) {
+    FbxVector4 point(base[j].x(), base[j].y(), base[j].z());
+    mesh->SetControlPointAt(point, j);
+  }
+
+  for (size_t i = 0; i < character.blendShape->shapeSize(); i++) {
+    ::fbxsdk::FbxBlendShapeChannel* blendShapeChannelPtr =
+        ::fbxsdk::FbxBlendShapeChannel::Create(scene, ("shape_c_" + std::to_string(i)).c_str());
+    blendShape->AddBlendShapeChannel(blendShapeChannelPtr);
+
+    // add blendshape targets
+    ::fbxsdk::FbxShape* shape =
+        ::fbxsdk::FbxShape::Create(scene, ("shape_" + std::to_string(i)).c_str());
+    shape->SetControlPointCount(numVertices);
+    for (int j = 0; j < numVertices; j++) {
+      const Eigen::Vector3f delta = shapes.block<3, 1>(j * 3, i);
+      const Eigen::Vector3f p = delta + base[j];
+      shape->SetControlPointAt(FbxVector4(p.x(), p.y(), p.z()), j);
+      shape->AddControlPointIndex(j);
+    }
+    blendShapeChannelPtr->AddTargetShape(shape, 100.0);
+  }
+
+  // add blendshape to mesh
+  mesh->AddDeformer(blendShape);
+}
+
 void saveFbxCommon(
     const filesystem::path& filename,
     const Character& character,
@@ -650,42 +734,12 @@ void saveFbxCommon(
         filename.string());
 
     if (character.skinWeights != nullptr) {
-      ::fbxsdk::FbxSkin* fbxskin = ::fbxsdk::FbxSkin::Create(scene, "meshskinning");
-      fbxskin->SetSkinningType(::fbxsdk::FbxSkin::eLinear);
-      fbxskin->SetGeometry(lMesh);
-      FbxAMatrix meshTransform;
-      meshTransform.SetIdentity();
-      for (const auto& jointNode : jointToNodeMap) {
-        size_t jointIdx = jointNode.first;
-        auto* fbxJointNode = jointNode.second;
+      saveSkinWeightsToFbx(character, scene, lMesh, jointToNodeMap);
+    }
 
-        std::ostringstream s;
-        s << "skinningcluster_" << jointIdx;
-        FbxCluster* pCluster = ::fbxsdk::FbxCluster::Create(scene, s.str().c_str());
-        pCluster->SetLinkMode(::fbxsdk::FbxCluster::ELinkMode::eNormalize);
-        pCluster->SetLink(fbxJointNode);
-
-        ::fbxsdk::FbxAMatrix globalMatrix = fbxJointNode->EvaluateLocalTransform();
-        ::fbxsdk::FbxNode* pParent = fbxJointNode->GetParent();
-        // TODO: should use inverse bind transform from character instead.
-        while (pParent != nullptr) {
-          globalMatrix = pParent->EvaluateLocalTransform() * globalMatrix;
-          pParent = pParent->GetParent();
-        }
-        pCluster->SetTransformLinkMatrix(globalMatrix);
-        pCluster->SetTransformMatrix(meshTransform);
-
-        for (int i = 0; i < character.skinWeights->index.rows(); i++) {
-          for (int j = 0; j < character.skinWeights->index.cols(); j++) {
-            auto boneIndex = character.skinWeights->index(i, j);
-            if (boneIndex == jointNode.first && character.skinWeights->weight(i, j) > 0) {
-              pCluster->AddControlPointIndex(i, character.skinWeights->weight(i, j));
-            }
-          }
-        }
-        fbxskin->AddCluster(pCluster);
-      }
-      lMesh->AddDeformer(fbxskin);
+    // if we have blendshapes, add them to the mesh
+    if (character.blendShape && character.blendShape->shapeSize() > 0) {
+      saveBlendShapesToFbx(character, scene, lMesh);
     }
     // Add the mesh under the root
     root->AddChild(meshNode);
