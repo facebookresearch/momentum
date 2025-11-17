@@ -336,11 +336,35 @@ std::shared_ptr<const momentum::Mppca> loadPosePriorFromBytes(const py::bytes& b
   return momentum::loadMppca(toSpan<unsigned char>(bytes));
 }
 
+std::shared_ptr<momentum::BlendShapeBase>
+loadBlendShapeBaseFromFile(const std::string& path, int nExpectedShapes, int nExpectedVertices) {
+  auto result = momentum::loadBlendShapeBase(path, nExpectedShapes, nExpectedVertices);
+  MT_THROW_IF(
+      result.getShapeVectors().cols() < nExpectedShapes,
+      "Error loading blend shape base from '{}'.",
+      path);
+  return std::make_shared<momentum::BlendShapeBase>(std::move(result));
+}
+
 std::shared_ptr<momentum::BlendShape>
 loadBlendShapeFromFile(const std::string& path, int nExpectedShapes, int nExpectedVertices) {
   auto result = momentum::loadBlendShape(path, nExpectedShapes, nExpectedVertices);
   MT_THROW_IF(result.getBaseShape().empty(), "Error loading blend shape from '{}'.", path);
   return std::make_shared<momentum::BlendShape>(std::move(result));
+}
+
+std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromBytes(
+    const pybind11::bytes& bytes,
+    int nExpectedShapes,
+    int nExpectedVertices) {
+  PyBytesStreamBuffer streambuf(bytes);
+  std::istream is(&streambuf);
+  momentum::BlendShapeBase result =
+      momentum::loadBlendShapeBase(is, nExpectedShapes, nExpectedVertices);
+  MT_THROW_IF(
+      result.getShapeVectors().cols() < nExpectedShapes,
+      "Error loading blend shape base from bytes.");
+  return std::make_shared<momentum::BlendShapeBase>(std::move(result));
 }
 
 std::shared_ptr<momentum::BlendShape>
@@ -352,10 +376,20 @@ loadBlendShapeFromBytes(const pybind11::bytes& bytes, int nExpectedShapes, int n
   return std::make_shared<momentum::BlendShape>(std::move(result));
 }
 
+py::bytes saveBlendShapeBaseToBytes(const momentum::BlendShapeBase& blendShape) {
+  std::ostringstream oss;
+  momentum::saveBlendShapeBase(oss, blendShape);
+  return py::bytes{oss.str()};
+}
+
 py::bytes saveBlendShapeToBytes(const momentum::BlendShape& blendShape) {
   std::ostringstream oss;
   momentum::saveBlendShape(oss, blendShape);
-  return py::bytes(oss.str());
+  return py::bytes{oss.str()};
+}
+
+void saveBlendShapeBaseToFile(const momentum::BlendShapeBase& blendShape, const std::string& path) {
+  momentum::saveBlendShapeBase(filesystem::path(path), blendShape);
 }
 
 void saveBlendShapeToFile(const momentum::BlendShape& blendShape, const std::string& path) {
@@ -375,35 +409,15 @@ std::string formatDimensions(const py::array& array) {
   return oss.str();
 }
 
-std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
-    pybind11::array_t<float> baseShape,
-    pybind11::array_t<float> shapeVectors) {
-  MT_THROW_IF(
-      baseShape.ndim() != 2 || baseShape.shape(1) != 3,
-      "In BlendShape.from_tensors(), expected base_shape to be [n_pts x 3] but got {}",
-      formatDimensions(baseShape));
+std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromTensors(
+    const pybind11::array_t<float>& shapeVectors) {
   MT_THROW_IF(
       shapeVectors.ndim() != 3 || shapeVectors.shape(2) != 3,
-      "In BlendShape.from_tensors(), expected shape_vectors shape to be [n_shapes x n_pts x 3] but got {}",
+      "In BlendShapeBase.from_tensors(), expected shape_vectors shape to be [n_shapes x n_pts x 3] but got {}",
       formatDimensions(shapeVectors));
 
-  const auto nPts = baseShape.shape(0);
   const auto nShapes = shapeVectors.shape(0);
-  MT_THROW_IF(
-      shapeVectors.shape(1) != nPts,
-      "In BlendShape.from_tensors(), expected match in n_pts dimensions. "
-      "Expected base_shape to be [n_pts x 3] but got {}. "
-      "Expected shape_vectors to be [n_shapes x n_pts x 3] but got {}.",
-      formatDimensions(baseShape),
-      formatDimensions(shapeVectors));
-
-  std::vector<Eigen::Vector3f> baseShapeRes(nPts, Eigen::Vector3f::Zero());
-  auto baseShapeAccess = baseShape.unchecked<2>();
-  for (py::ssize_t i = 0; i < baseShapeAccess.shape(0); i++) {
-    for (py::ssize_t j = 0; j < 3; j++) {
-      baseShapeRes[i](j) = baseShapeAccess(i, j);
-    }
-  }
+  const auto nPts = shapeVectors.shape(1);
 
   Eigen::MatrixXf shapeVectorsRes(3 * nPts, nShapes);
   auto shapeVectorsAccess = shapeVectors.unchecked<3>();
@@ -415,8 +429,41 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
     }
   }
 
-  auto result = std::make_shared<momentum::BlendShape>(baseShapeRes, nShapes);
+  auto result = std::make_shared<momentum::BlendShapeBase>(nPts, nShapes);
   result->setShapeVectors(shapeVectorsRes);
+  return result;
+}
+
+std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
+    const pybind11::array_t<float>& baseShape,
+    const pybind11::array_t<float>& shapeVectors) {
+  MT_THROW_IF(
+      baseShape.ndim() != 2 || baseShape.shape(1) != 3,
+      "In BlendShape.from_tensors(), expected base_shape to be [n_pts x 3] but got {}",
+      formatDimensions(baseShape));
+
+  const auto nPts = baseShape.shape(0);
+  MT_THROW_IF(
+      shapeVectors.shape(1) != nPts,
+      "In BlendShape.from_tensors(), expected match in n_pts dimensions. "
+      "Expected base_shape to be [n_pts x 3] but got {}. "
+      "Expected shape_vectors to be [n_shapes x n_pts x 3] but got {}.",
+      formatDimensions(baseShape),
+      formatDimensions(shapeVectors));
+
+  // Create a BlendShape and get the shape vectors from the base
+  auto result = std::make_shared<momentum::BlendShape>();
+  result->setShapeVectors(loadBlendShapeBaseFromTensors(shapeVectors)->getShapeVectors());
+
+  // Set the base shape specific to BlendShape
+  std::vector<Eigen::Vector3f> baseShapeRes(nPts, Eigen::Vector3f::Zero());
+  auto baseShapeAccess = baseShape.unchecked<2>();
+  for (py::ssize_t i = 0; i < baseShapeAccess.shape(0); i++) {
+    for (py::ssize_t j = 0; j < 3; j++) {
+      baseShapeRes[i](j) = baseShapeAccess(i, j);
+    }
+  }
+  result->setBaseShape(baseShapeRes);
   return result;
 }
 

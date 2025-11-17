@@ -17,16 +17,71 @@ import torch
 from pymomentum.solver import ErrorFunctionType
 
 
+def _build_shape_vectors(
+    c: pym_geometry.Character,
+) -> np.ndarray:
+    np.random.seed(0)
+    n_pts = c.mesh.n_vertices
+    n_blend = 4
+    shape_vectors = np.random.rand(n_blend, n_pts, 3)
+    return shape_vectors
+
+
 def _build_blend_shape_basis(
     c: pym_geometry.Character,
 ) -> pym_geometry.BlendShape:
     np.random.seed(0)
-    n_pts = c.mesh.n_vertices
+    shape_vectors = _build_shape_vectors(c)
+    n_pts = shape_vectors.shape[1]
     base_shape = np.random.rand(n_pts, 3)
-    n_blend = 4
-    shape_vectors = np.random.rand(n_blend, n_pts, 3)
     blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
     return blend_shape
+
+
+class TestBlendShapeBase(unittest.TestCase):
+    def test_save_and_load(self) -> None:
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        c = pym_geometry.create_test_character()
+        blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
+
+        bs_bytes = blend_shape.to_bytes()
+        blend_shape2 = pym_geometry.BlendShapeBase.from_bytes(bs_bytes)
+
+        self.assertTrue(
+            np.allclose(blend_shape.shape_vectors, blend_shape2.shape_vectors)
+        )
+
+    def test_blend_shape_character(self) -> None:
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        c = pym_geometry.create_test_character()
+
+        # Build a set of shape vectors and instantiate as blend shape base
+        blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
+
+        c2 = c.with_face_expression_blend_shape(blend_shape)
+        # Check the right parameters are retrieved
+        params = torch.rand(c2.parameter_transform.size)
+        bp1 = params[c2.parameter_transform.face_expression_parameters]
+        bp2 = pym_geometry.model_parameters_to_face_expression_coefficients(c2, params)
+        self.assertTrue(bp1.allclose(bp2))
+
+        # Check the shape vectors have been passed on correctly
+        blend_shape_2 = c2.face_expression_blend_shape
+        self.assertTrue(blend_shape_2 is not None)
+        self.assertTrue(
+            np.allclose(blend_shape_2.shape_vectors, blend_shape.shape_vectors)
+        )
+
+        # Check shape vectors are not initialized when not passed
+        c3 = c.with_face_expression_blend_shape(None)
+        self.assertTrue(c3.face_expression_blend_shape is None)
+        self.assertTrue(
+            torch.sum(c3.parameter_transform.face_expression_parameters) == 0
+        )
 
 
 class TestBlendShape(unittest.TestCase):

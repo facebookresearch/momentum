@@ -57,8 +57,9 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - [constructor](name, skeleton, parameter_transform, locators)
   // - with_mesh_and_skin_weights(mesh, skin_weights)
   // - with_blend_shape(blend_shape, n_shapes)
+  // - with_face_expression_blend_shape(blend_shape, n_shapes)
   //
-  // [memeber methods]
+  // [member methods]
   // - pose_mesh(jointParams)
   // - skin_points(skel_state, rest_vertices)
   // - scaled(scale)
@@ -315,6 +316,16 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           },
           ":return: The character's :class:`BlendShape` basis, if present, or None.")
       .def_property_readonly(
+          "face_expression_blend_shape",
+          [](const mm::Character& c) -> std::optional<std::shared_ptr<const mm::BlendShapeBase>> {
+            if (c.faceExpressionBlendShape) {
+              return c.faceExpressionBlendShape;
+            } else {
+              return {};
+            }
+          },
+          ":return: The character's :class:`BlendShapeBase` basis, if present, or None.")
+      .def_property_readonly(
           "collision_geometry",
           [](const mm::Character& c) -> mm::CollisionGeometry {
             if (c.collision) {
@@ -337,6 +348,22 @@ It can be used to solve for shapes and pose simultaneously.
 
 :param blend_shape: Blend shape basis.
 :param n_shapes: Max blend shapes to retain.  Pass -1 to keep all of them (but warning: the default allgender basis is quite large with hundreds of shapes).
+)",
+          py::arg("blend_shape"),
+          py::arg("n_shapes") = -1)
+      .def(
+          "with_face_expression_blend_shape",
+          [](const mm::Character& c,
+             const std::optional<mm::BlendShapeBase_const_p>& blendShape,
+             int nShapes) {
+            return c.withFaceExpressionBlendShape(
+                blendShape.value_or(mm::BlendShapeBase_const_p{}), nShapes < 0 ? INT_MAX : nShapes);
+          },
+          R"(Returns a character that uses the parameter transform to control the passed-in blend shapes.
+It can be used to solve for facial expressions.
+
+:param blend_shape: Blend shape basis (shape vectors only).
+:param n_shapes: Max blend shapes to retain.  Pass -1 to keep all of them.
 )",
           py::arg("blend_shape"),
           py::arg("n_shapes") = -1)

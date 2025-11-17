@@ -284,6 +284,10 @@ at::Tensor getBlendShapeParameters(const momentum::ParameterTransform& parameter
   return parameterSetToTensor(parameterTransform, parameterTransform.getBlendShapeParameters());
 }
 
+at::Tensor getFaceExpressionParameters(const momentum::ParameterTransform& parameterTransform) {
+  return parameterSetToTensor(parameterTransform, parameterTransform.getFaceExpressionParameters());
+}
+
 at::Tensor getPoseParameters(const momentum::ParameterTransform& parameterTransform) {
   return parameterSetToTensor(parameterTransform, parameterTransform.getPoseParameters());
 }
@@ -556,9 +560,16 @@ at::Tensor flattenJointParameters(
 
 at::Tensor modelParametersToBlendShapeCoefficients(
     const momentum::Character& character,
-    at::Tensor modelParameters) {
+    const at::Tensor& modelParameters) {
   return modelParameters.index_select(
       -1, to1DTensor(character.parameterTransform.blendShapeParameters));
+}
+
+at::Tensor modelParametersToFaceExpressionCoefficients(
+    const momentum::Character& character,
+    const at::Tensor& modelParameters) {
+  return modelParameters.index_select(
+      -1, to1DTensor(character.parameterTransform.faceExpressionParameters));
 }
 
 at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& parameterTransform) {

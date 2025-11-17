@@ -98,20 +98,33 @@ std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& 
 void savePosePriorToFile(const momentum::Mppca& mppca, const std::string& path);
 std::shared_ptr<const momentum::Mppca> loadPosePriorFromBytes(const pybind11::bytes& bytes);
 
+std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromFile(
+    const std::string& path,
+    int nExpectedShapes = -1,
+    int nExpectedVertices = -1);
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromFile(
     const std::string& path,
+    int nExpectedShapes = -1,
+    int nExpectedVertices = -1);
+std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromBytes(
+    const pybind11::bytes& bytes,
     int nExpectedShapes = -1,
     int nExpectedVertices = -1);
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromBytes(
     const pybind11::bytes& bytes,
     int nExpectedShapes = -1,
     int nExpectedVertices = -1);
+pybind11::bytes saveBlendShapeBaseToBytes(const momentum::BlendShapeBase& blendShape);
 pybind11::bytes saveBlendShapeToBytes(const momentum::BlendShape& blendShape);
+void saveBlendShapeBaseToFile(const momentum::BlendShapeBase& blendShape, const std::string& path);
 void saveBlendShapeToFile(const momentum::BlendShape& blendShape, const std::string& path);
 
+std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromTensors(
+    const pybind11::array_t<float>& shapeVectors);
+
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
-    pybind11::array_t<float> baseShape,
-    pybind11::array_t<float> shapeVectors);
+    const pybind11::array_t<float>& baseShape,
+    const pybind11::array_t<float>& shapeVectors);
 
 // Strips out vertices attached to the lower body.
 // Does not actually change the skeleton, this is so you can

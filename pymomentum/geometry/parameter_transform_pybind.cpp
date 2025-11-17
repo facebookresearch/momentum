@@ -176,6 +176,10 @@ Rotations are in Euler angles.)",
           &getBlendShapeParameters,
           "Boolean torch.Tensor with just the blend shape parameters enabled.")
       .def_property_readonly(
+          "face_expression_parameters",
+          &getFaceExpressionParameters,
+          "Boolean torch.Tensor with just the face expression parameters enabled.")
+      .def_property_readonly(
           "pose_parameters",
           &getPoseParameters,
           "Boolean torch.Tensor with all the parameters used to pose the body, excluding and scaling, blend shape, or physics parameters.")

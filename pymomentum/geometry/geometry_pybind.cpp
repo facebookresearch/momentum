@@ -155,12 +155,19 @@ PYBIND11_MODULE(geometry, m) {
       "Locators define target positions that the character should reach during pose optimization, "
       "with configurable weights and axis locks for fine-grained control.");
   auto skinnedLocatorClass = py::class_<mm::SkinnedLocator>(m, "SkinnedLocator");
-  auto blendShapeClass = py::class_<mm::BlendShape, std::shared_ptr<mm::BlendShape>>(
+  auto blendShapeBaseClass = py::class_<mm::BlendShapeBase, std::shared_ptr<mm::BlendShapeBase>>(
       m,
-      "BlendShape",
-      "A blend shape basis for facial expressions and corrective shapes. "
-      "Contains a base mesh and a set of shape vectors that can be linearly "
-      "combined to create different facial expressions or body shape variations.");
+      "BlendShapeBase",
+      "A blend shape basis for facial expressions. "
+      "Contains a set of shape vectors that can be linearly "
+      "combined to create different facial expressions.");
+  auto blendShapeClass =
+      py::class_<mm::BlendShape, mm::BlendShapeBase, std::shared_ptr<mm::BlendShape>>(
+          m,
+          "BlendShape",
+          "A blend shape basis for identity corrective shapes. "
+          "Contains a base mesh and a set of shape vectors that can be linearly "
+          "combined to create different body shape variations.");
   auto capsuleClass = py::class_<mm::TaperedCapsule>(
       m,
       "TaperedCapsule",
@@ -195,16 +202,10 @@ PYBIND11_MODULE(geometry, m) {
       "multiple function parameters. Format-specific options (e.g., FBX coordinate "
       "system, GLTF extensions) are included but only used by their respective formats.");
 
-  blendShapeClass
-      .def_property_readonly(
-          "base_shape",
-          [](const mm::BlendShape& blendShape) {
-            return pymomentum::asArray(blendShape.getBaseShape());
-          },
-          ":return: The base shape of the blend shape solver.")
+  blendShapeBaseClass
       .def_property_readonly(
           "shape_vectors",
-          [](const mm::BlendShape& blendShape) -> py::array_t<float> {
+          [](const mm::BlendShapeBase& blendShape) -> py::array_t<float> {
             const Eigen::MatrixXf& shapeVectors = blendShape.getShapeVectors();
             const Eigen::Index nVerts = shapeVectors.rows() / 3;
             MT_THROW_IF(shapeVectors.rows() % 3 != 0, "Invalid blend shape basis.");
@@ -212,6 +213,51 @@ PYBIND11_MODULE(geometry, m) {
             py::buffer_info buf = result.request();
             memcpy(buf.ptr, shapeVectors.data(), result.nbytes());
             return result;
+          },
+          ":return: The shape vectors of the blend shape solver.")
+      .def_property_readonly(
+          "n_shapes",
+          [](const mm::BlendShapeBase& blendShape) { return blendShape.shapeSize(); },
+          "Number of shapes in the blend shape basis.")
+      .def_property_readonly(
+          "n_vertices",
+          [](const mm::BlendShapeBase& blendShape) { return blendShape.modelSize(); },
+          "Number of vertices in the mesh.")
+      .def_static(
+          "from_bytes",
+          &loadBlendShapeBaseFromBytes,
+          R"(Load blend shape basis (shape vectors) from bytes in memory.
+
+:param blend_shape_bytes: A chunk of bytes containing the blend shape vectors.
+:param num_expected_shapes: Trim the shape basis if it contains more shapes than this.  Pass -1 (the default) to leave the shapes untouched.
+:param num_expected_vertices: Trim the shape basis if it contains more vertices than this.  Pass -1 (the default) to leave the shapes untouched.
+:return: a :class:`BlendShapeBase`.)",
+          py::arg("blend_shape_bytes"),
+          py::arg("num_expected_shapes") = -1,
+          py::arg("num_expected_vertices") = -1)
+      .def(
+          "to_bytes",
+          &saveBlendShapeBaseToBytes,
+          R"(Save a blend shape basis (shape vectors) to bytes in memory.)")
+      .def(
+          "save",
+          &saveBlendShapeBaseToFile,
+          R"(Save a blend shape basis (shape vectors) to a file.)",
+          py::arg("path"))
+      .def_static(
+          "from_tensors",
+          &loadBlendShapeBaseFromTensors,
+          R"(Create a blend shape basis (shape vectors) from numpy.ndarray.
+
+:param shape_vectors: A [nShapes x nPts x 3] ndarray containing the blend shape basis.
+:return: a :class:`BlendShapeBase`.)",
+          py::arg("shape_vectors"));
+
+  blendShapeClass
+      .def_property_readonly(
+          "base_shape",
+          [](const mm::BlendShape& blendShape) {
+            return pymomentum::asArray(blendShape.getBaseShape());
           },
           ":return: The base shape of the blend shape solver.")
       .def_static(
@@ -250,14 +296,6 @@ PYBIND11_MODULE(geometry, m) {
 :return: a :class:`BlendShape`.)",
           py::arg("base_shape"),
           py::arg("shape_vectors"))
-      .def_property_readonly(
-          "n_shapes",
-          [](const mm::BlendShape& blendShape) { return blendShape.shapeSize(); },
-          "Number of shapes in the blend shape basis.")
-      .def_property_readonly(
-          "n_vertices",
-          [](const mm::BlendShape& blendShape) { return blendShape.modelSize(); },
-          "Number of vertices in the mesh.")
       .def(
           "compute_shape",
           [](py::object blendShape, at::Tensor coeffs) {
@@ -814,6 +852,18 @@ batching on the character.
       &modelParametersToBlendShapeCoefficients,
       R"(Extract the model parameters that correspond to the blend shape coefficients, in the order
 required to call `meth:BlendShape.compute_shape`.
+
+:param character: A character.
+:parameter model_parameters: A [nBatch x nParams] tensor of model parameters.
+
+:return: A [nBatch x nBlendShape] torch.Tensor of blend shape coefficients.)",
+      py::arg("character"),
+      py::arg("model_parameters"));
+
+  m.def(
+      "model_parameters_to_face_expression_coefficients",
+      &modelParametersToFaceExpressionCoefficients,
+      R"(Extract the model parameters that correspond to the face expression coefficients.
 
 :param character: A character.
 :parameter model_parameters: A [nBatch x nParams] tensor of model parameters.
