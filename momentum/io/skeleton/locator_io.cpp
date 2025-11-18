@@ -215,52 +215,58 @@ void saveLocators(
   const SkeletonState state(VectorXf::Zero(skeleton.joints.size() * kParametersPerJoint), skeleton);
   const LocatorState lstate(state, locators);
 
-  std::ofstream o(filename);
-  o << "{\n\t\"locators\":[\n";
+  nlohmann::json j;
+  j["locators"] = nlohmann::json::array();
+
   for (size_t i = 0; i < locators.size(); i++) {
-    o << "\t\t{\n";
-    o << "\t\t\t\"name\":\"" << locators[i].name << "\",\n";
+    nlohmann::json locatorJson;
+
+    locatorJson["name"] = locators[i].name;
+
     if (space == LocatorSpace::Global) {
-      o << "\t\t\t\"globalX\":" << lstate.position[i].x() << ",\n";
-      o << "\t\t\t\"globalY\":" << lstate.position[i].y() << ",\n";
-      o << "\t\t\t\"globalZ\":" << lstate.position[i].z() << ",\n";
+      locatorJson["globalX"] = lstate.position[i].x();
+      locatorJson["globalY"] = lstate.position[i].y();
+      locatorJson["globalZ"] = lstate.position[i].z();
     } else if (space == LocatorSpace::Local) {
-      o << "\t\t\t\"offsetX\":" << locators[i].offset.x() << ",\n";
-      o << "\t\t\t\"offsetY\":" << locators[i].offset.y() << ",\n";
-      o << "\t\t\t\"offsetZ\":" << locators[i].offset.z() << ",\n";
+      locatorJson["offsetX"] = locators[i].offset.x();
+      locatorJson["offsetY"] = locators[i].offset.y();
+      locatorJson["offsetZ"] = locators[i].offset.z();
     }
-    o << "\t\t\t\"lockX\":" << locators[i].locked.x() << ",\n";
-    o << "\t\t\t\"lockY\":" << locators[i].locked.y() << ",\n";
-    o << "\t\t\t\"lockZ\":" << locators[i].locked.z() << ",\n";
-    o << "\t\t\t\"weight\":" << locators[i].weight << ",\n";
+
+    locatorJson["lockX"] = locators[i].locked.x();
+    locatorJson["lockY"] = locators[i].locked.y();
+    locatorJson["lockZ"] = locators[i].locked.z();
+    locatorJson["weight"] = locators[i].weight;
+
     if (locators[i].limitWeight[0] != 0.0f) {
-      o << "\t\t\t\"limitWeightX\":" << locators[i].limitWeight.x() << ",\n";
+      locatorJson["limitWeightX"] = locators[i].limitWeight.x();
     }
     if (locators[i].limitWeight[1] != 0.0f) {
-      o << "\t\t\t\"limitWeightY\":" << locators[i].limitWeight.y() << ",\n";
+      locatorJson["limitWeightY"] = locators[i].limitWeight.y();
     }
     if (locators[i].limitWeight[2] != 0.0f) {
-      o << "\t\t\t\"limitWeightZ\":" << locators[i].limitWeight.z() << ",\n";
+      locatorJson["limitWeightZ"] = locators[i].limitWeight.z();
     }
+
     if (locators[i].attachedToSkin) {
-      o << "\t\t\t\"attachedToSkin\":1,\n";
+      locatorJson["attachedToSkin"] = 1;
     }
     if (locators[i].skinOffset != 0.0f) {
-      o << "\t\t\t\"skinOffset\":" << locators[i].skinOffset << ",\n";
+      locatorJson["skinOffset"] = locators[i].skinOffset;
     }
+
     MT_CHECK(
         0 <= locators[i].parent && locators[i].parent < skeleton.joints.size(),
         "Invalid joint index");
     if (!skeleton.joints.empty() && locators[i].parent < skeleton.joints.size()) {
-      o << "\t\t\t\"parentName\":\"" << skeleton.joints[locators[i].parent].name << "\"\n";
+      locatorJson["parentName"] = skeleton.joints[locators[i].parent].name;
     }
-    if (i < locators.size() - 1) {
-      o << "\t\t},\n";
-    } else {
-      o << "\t\t}\n";
-    }
+
+    j["locators"].push_back(locatorJson);
   }
-  o << "\t]\n}\n";
+
+  std::ofstream o(filename);
+  o << j.dump(1, '\t') << '\n';
 }
 
 } // namespace momentum
