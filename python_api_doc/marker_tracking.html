@@ -95,6 +95,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators"><code class="docutils literal notranslate"><span class="pre">convert_locators_to_skinned_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_skinned_locators_to_locators"><code class="docutils literal notranslate"><span class="pre">convert_skinned_locators_to_locators()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.process_marker_file"><code class="docutils literal notranslate"><span class="pre">process_marker_file()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.process_markers"><code class="docutils literal notranslate"><span class="pre">process_markers()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.refine_motion"><code class="docutils literal notranslate"><span class="pre">refine_motion()</span></code></a></li>
@@ -500,6 +501,30 @@ influenced by multiple joints through skin weights.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>New character with converted skinned locators and remaining regular locators</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.convert_skinned_locators_to_locators">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">convert_skinned_locators_to_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.marker_tracking.convert_skinned_locators_to_locators" title="Link to this definition"></a></dt>
+<dd><p>Convert skinned locators to regular locators by selecting the bone with highest weight.</p>
+<p>This function is useful when exporting to file formats that don’t support skinned locators
+(e.g., Maya). Each skinned locator is converted to a regular locator by:</p>
+<ol class="arabic simple">
+<li><p>Finding the bone with the highest skin weight from the skinned locator’s bone influences</p></li>
+<li><p>Transforming the locator’s position from rest pose space to the local coordinate space
+of the selected bone</p></li>
+<li><p>Creating a regular locator attached to that bone with the computed offset</p></li>
+</ol>
+<p>The resulting locators can be exported to formats like Maya that only support single-parent
+attachments. Any existing regular locators in the character are preserved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>character</strong> – Character with skinned locators to convert</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New character with skinned locators converted to regular locators</p>
 </dd>
 </dl>
 </dd></dl>
