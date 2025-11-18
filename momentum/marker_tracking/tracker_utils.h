@@ -42,6 +42,15 @@ momentum::Character locatorsToSkinnedLocators(
     const momentum::Character& sourceCharacter,
     float maxDistance = 3.0f);
 
+/// Convert skinned locators to regular locators by selecting the bone with the highest skin weight.
+/// This is useful when exporting to file formats that don't support skinned locators (e.g., Maya).
+/// Each skinned locator will be converted to a regular locator attached to the bone with the
+/// highest weight. The position will be transformed from the rest pose space to the local space
+/// of the selected bone.
+/// @param sourceCharacter Character with skinned locators to convert
+/// @return Character with skinned locators converted to regular locators
+momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceCharacter);
+
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
     float targetDepth = 1.0f);
