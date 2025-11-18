@@ -778,6 +778,11 @@ class Character(torch.nn.Module):
 
         if has_rest_mesh and character.blend_shape is not None:
             self.blend_shape: BlendShape = BlendShape(character, dtype=dtype)
+        if has_rest_mesh and character.face_expression_blend_shape is not None:
+            self.face_expression_blend_shape: BlendShapeBase = BlendShapeBase(
+                torch.tensor(character.face_expression_blend_shape.shape_vectors),
+                dtype=dtype,
+            )
 
     def joint_parameters_to_local_skeleton_state(
         self, joint_parameters: torch.Tensor
