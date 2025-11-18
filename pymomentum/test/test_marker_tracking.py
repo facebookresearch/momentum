@@ -116,6 +116,104 @@ class TestMarkerTracking(unittest.TestCase):
         # The test_locator should no longer be in the regular locators
         self.assertEqual(character_with_skinned.locators, [])
 
+    def test_convert_skinned_locators_to_locators(self) -> None:
+        """Test that skinned locators get converted back to regular locators correctly."""
+        # Create a test character with mesh and skin weights
+        character = pym_geometry.create_test_character(4)
+
+        # Hand-create a skinned locator with multiple bone influences
+        # We'll create one at the origin in rest pose with known skin weights
+        test_skinned_locator = pym_geometry.SkinnedLocator(
+            name="test_skinned_locator",
+            parents=np.array([0, 1, 2, 0, 0, 0, 0, 0], dtype=np.uint32),
+            skin_weights=np.array(
+                [0.5, 0.3, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32
+            ),
+            position=np.array([1.0, 2.0, 3.0], dtype=np.float32),
+            weight=1.0,
+        )
+
+        # Add the skinned locator to the character
+        character_with_skinned = character.with_skinned_locators(
+            [test_skinned_locator], replace=True
+        )
+
+        # Verify the skinned locator was added
+        self.assertEqual(len(character_with_skinned.skinned_locators), 1)
+        self.assertEqual(
+            character_with_skinned.skinned_locators[0].name, "test_skinned_locator"
+        )
+
+        # Convert skinned locators back to regular locators
+        character_with_locators = (
+            pym_marker_tracking.convert_skinned_locators_to_locators(
+                character_with_skinned
+            )
+        )
+
+        # Verify that we now have regular locators
+        self.assertGreater(len(character_with_locators.locators), 0)
+
+        # Find our converted locator
+        converted_locator = None
+        for loc in character_with_locators.locators:
+            if loc.name == "test_skinned_locator":
+                converted_locator = loc
+                break
+
+        self.assertIsNotNone(
+            converted_locator,
+            "Test skinned locator should have been converted to regular locator",
+        )
+
+        # Verify the regular locator is attached to the bone with highest weight
+        # In our test case, bone 0 has weight 0.5 (highest)
+        self.assertEqual(
+            converted_locator.parent,
+            0,
+            "Locator should be attached to bone with highest skin weight (bone 0)",
+        )
+
+        # Verify the weight is preserved
+        self.assertAlmostEqual(
+            converted_locator.weight,
+            1.0,
+            places=5,
+            msg="Locator weight should be preserved",
+        )
+
+        # Verify that the world position is preserved
+        # Compute the world position of the converted locator in rest pose
+        rest_model_params = torch.zeros(character.parameter_transform.size)
+        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, rest_model_params.unsqueeze(0)
+        )[0]
+
+        # Transform the offset to world space using the parent bone's transform
+        converted_world_pos = pym_skel_state.transform_points(
+            rest_skeleton_state[converted_locator.parent],
+            torch.from_numpy(converted_locator.offset),
+        )
+
+        # Compare with original skinned locator position
+        original_world_pos = torch.from_numpy(test_skinned_locator.position)
+        position_diff = torch.norm(converted_world_pos - original_world_pos).item()
+
+        self.assertLess(
+            position_diff,
+            0.01,
+            msg=f"Converted locator world position should match original skinned locator position. "
+            f"Original: {original_world_pos.numpy()}, Converted: {converted_world_pos.numpy()}, "
+            f"Diff: {position_diff}",
+        )
+
+        # The skinned locators should be empty after conversion
+        self.assertEqual(
+            len(character_with_locators.skinned_locators),
+            0,
+            "Skinned locators should be empty after conversion",
+        )
+
     def test_marker_tracking_with_skinned_locators(self) -> None:
         """Test marker tracking with skinned locators created from mesh vertices."""
         torch.manual_seed(42)  # Ensure repeatability

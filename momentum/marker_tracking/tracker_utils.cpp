@@ -248,6 +248,73 @@ momentum::Character locatorsToSkinnedLocators(
       skinnedLocators};
 }
 
+momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceCharacter) {
+  if (sourceCharacter.skinnedLocators.empty()) {
+    MT_LOGI("No skinned locators to convert");
+    return sourceCharacter;
+  }
+
+  const JointParameters restJointParams =
+      JointParameters::Zero(sourceCharacter.parameterTransform.numJointParameters());
+  const SkeletonState restState(restJointParams, sourceCharacter.skeleton);
+
+  LocatorList locators = sourceCharacter.locators;
+
+  for (const auto& skinnedLocator : sourceCharacter.skinnedLocators) {
+    // Find the bone with the highest skin weight
+    int maxWeightIdx = 0;
+    float maxWeight = skinnedLocator.skinWeights[0];
+
+    for (int i = 1; i < kMaxSkinJoints; ++i) {
+      if (skinnedLocator.skinWeights[i] > maxWeight) {
+        maxWeight = skinnedLocator.skinWeights[i];
+        maxWeightIdx = i;
+      }
+    }
+
+    // Get the parent bone index
+    const uint32_t parentBoneIdx = skinnedLocator.parents[maxWeightIdx];
+
+    // Transform the position from rest pose space to local bone space
+    const Eigen::Vector3f offset =
+        restState.jointState[parentBoneIdx].transform.inverse() * skinnedLocator.position;
+
+    // Create a regular locator
+    Locator locator;
+    locator.name = skinnedLocator.name;
+    locator.parent = parentBoneIdx;
+    locator.offset = offset;
+    locator.weight = skinnedLocator.weight;
+    locator.locked = Vector3i::Zero();
+    locator.limitOrigin = offset;
+    locator.limitWeight = Vector3f::Zero();
+
+    MT_LOGT(
+        "Converting skinned locator {} to regular locator attached to bone {} ({})",
+        skinnedLocator.name,
+        sourceCharacter.skeleton.joints.at(parentBoneIdx).name,
+        parentBoneIdx);
+
+    locators.push_back(locator);
+  }
+
+  // Return character with skinned locators converted to regular locators
+  return {
+      sourceCharacter.skeleton,
+      sourceCharacter.parameterTransform,
+      sourceCharacter.parameterLimits,
+      locators,
+      sourceCharacter.mesh.get(),
+      sourceCharacter.skinWeights.get(),
+      sourceCharacter.collision.get(),
+      sourceCharacter.poseShapes.get(),
+      sourceCharacter.blendShape,
+      sourceCharacter.faceExpressionBlendShape,
+      sourceCharacter.name,
+      sourceCharacter.inverseBindPose,
+      {}};
+}
+
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
     float targetDepth) {

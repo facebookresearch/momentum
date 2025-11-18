@@ -518,4 +518,24 @@ influenced by multiple joints through skin weights.
 :return: New character with converted skinned locators and remaining regular locators)",
       py::arg("character"),
       py::arg("max_distance") = 3.0f);
+
+  m.def(
+      "convert_skinned_locators_to_locators",
+      &momentum::skinnedLocatorsToLocators,
+      R"(Convert skinned locators to regular locators by selecting the bone with highest weight.
+
+This function is useful when exporting to file formats that don't support skinned locators
+(e.g., Maya). Each skinned locator is converted to a regular locator by:
+
+1. Finding the bone with the highest skin weight from the skinned locator's bone influences
+2. Transforming the locator's position from rest pose space to the local coordinate space
+   of the selected bone
+3. Creating a regular locator attached to that bone with the computed offset
+
+The resulting locators can be exported to formats like Maya that only support single-parent
+attachments. Any existing regular locators in the character are preserved.
+
+:param character: Character with skinned locators to convert
+:return: New character with skinned locators converted to regular locators)",
+      py::arg("character"));
 }
