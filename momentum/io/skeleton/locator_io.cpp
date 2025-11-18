@@ -13,63 +13,17 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
-#include "momentum/common/string.h"
 #include "momentum/math/utility.h"
 
+#include <nlohmann/json.hpp>
 #include <gsl/gsl>
 
-#include <charconv>
 #include <fstream>
-#include <optional>
-#include <string_view>
-#include <type_traits>
 #include <unordered_set>
 
 namespace momentum {
 
 namespace {
-
-// Function to convert a string_view to a numeric value.
-//
-// It removes leading whitespaces, and then uses std::from_chars to perform the conversion.
-// The base parameter is optional, and is used when converting to an integral type.
-template <typename T>
-[[nodiscard]] T from_chars_wrapping(std::string_view s, std::optional<int> base = std::nullopt) {
-  s.remove_prefix(std::min(s.find_first_not_of(" \t\n\r\f\v"), s.size()));
-  T value;
-
-  if constexpr (std::is_integral_v<T>) {
-    if (base.has_value()) {
-      std::from_chars(s.data(), s.data() + s.size(), value, base.value());
-    } else {
-      std::from_chars(s.data(), s.data() + s.size(), value);
-    }
-  } else {
-    value = std::stof(std::string(s));
-  }
-
-  return value;
-}
-
-// Function to convert a string_view to a numeric value of type T.
-template <typename T>
-[[nodiscard]] T svto(const std::string_view input, std::optional<int> base = std::nullopt) {
-  try {
-    return from_chars_wrapping<T>(input, base);
-  } catch (...) {
-    MT_THROW("Error parsing string to number");
-  }
-}
-
-// Convert a string_view to an int. Throws a runtime error if the conversion fails.
-[[nodiscard]] int svtoi(const std::string_view input) {
-  return svto<int>(input);
-}
-
-// Convert a string_view to a float. Throws a runtime error if the conversion fails.
-[[nodiscard]] float svtof(const std::string_view input) {
-  return svto<float>(input);
-}
 
 std::string firstDuplicate(const LocatorList& locators) {
   std::unordered_set<std::string> locatorNames;
@@ -81,6 +35,23 @@ std::string firstDuplicate(const LocatorList& locators) {
     locatorNames.insert(itr, l.name);
   }
   return "";
+}
+
+// Convert byte index to line and column numbers
+std::pair<size_t, size_t> byteIndexToLineColumn(std::string_view input, size_t byteIndex) {
+  size_t line = 1;
+  size_t column = 1;
+
+  for (size_t i = 0; i < byteIndex && i < input.size(); ++i) {
+    if (input[i] == '\n') {
+      ++line;
+      column = 1;
+    } else {
+      ++column;
+    }
+  }
+
+  return {line, column};
 }
 
 } // namespace
@@ -112,101 +83,122 @@ LocatorList loadLocatorsFromBuffer(
 
   LocatorList res;
 
-  const SkeletonState state(parameterTransform.bindPose(), skeleton);
+  try {
+    const nlohmann::json j = nlohmann::json::parse(input);
 
-  const auto lines = tokenize(input, "\r\n");
-  if (lines.size() < 4 || lines[0] != "{" ||
-      trim(lines[1]).find("\"locators\":") == std::string::npos) {
-    return res;
-  }
-  for (size_t line = 2; line < lines.size(); line++) {
-    std::string_view current = trim(lines[line]);
-    if (current != "{") {
-      continue;
+    if (!j.contains("locators") || !j["locators"].is_array()) {
+      return res;
     }
 
-    // start of locator
-    Locator l;
-    Vector3f global;
-    bool haveGlobal = false;
-    do {
-      current = trim(lines.at(++line));
-      if (current[0] == '}') {
-        break;
-      }
-      if (current[0] == '/') {
-        continue;
-      }
-      const auto tokens = tokenize(current, ":");
-      if (tokens.size() != 2) {
-        continue;
-      }
-      if (tokens[0] == "\"lockX\"") {
-        l.locked.x() = svtoi(tokens[1]);
-      } else if (tokens[0] == "\"lockY\"") {
-        l.locked.y() = svtoi(tokens[1]);
-      } else if (tokens[0] == "\"lockZ\"") {
-        l.locked.z() = svtoi(tokens[1]);
-      } else if (tokens[0] == "\"name\"") {
-        const auto first = tokens[1].find_first_of('"') + 1;
-        const auto last = tokens[1].find_last_of('"') - 1;
-        l.name = tokens[1].substr(first, last - first + 1);
-      } else if (tokens[0] == "\"parent\"") {
-        l.parent = svtoi(tokens[1]);
-      } else if (tokens[0] == "\"parentName\"") {
-        const auto first = tokens[1].find_first_of('"') + 1;
-        const auto last = tokens[1].find_last_of('"') - 1;
-        const std::string_view parent = tokens[1].substr(first, last - first + 1);
+    const SkeletonState state(parameterTransform.bindPose(), skeleton);
+
+    for (const auto& locatorJson : j["locators"]) {
+      Locator l;
+
+      // Read lock fields
+      l.locked.x() = locatorJson.value("lockX", 0);
+      l.locked.y() = locatorJson.value("lockY", 0);
+      l.locked.z() = locatorJson.value("lockZ", 0);
+
+      // Read name
+      l.name = locatorJson.value("name", std::string());
+
+      // Read parent index or parent name
+      l.parent = locatorJson.value("parent", kInvalidIndex);
+      if (locatorJson.contains("parentName")) {
+        const std::string parentName = locatorJson["parentName"].get<std::string>();
         for (size_t k = 0; k < skeleton.joints.size(); k++) {
-          if (skeleton.joints[k].name == parent) {
+          if (skeleton.joints[k].name == parentName) {
             l.parent = static_cast<int>(k);
             break;
           }
         }
-        // invalid joint name
         if (l.parent == kInvalidIndex) {
-          MT_LOGW("Invalid parent name: {}", parent);
+          MT_LOGW("Invalid parent name: {}", parentName);
         }
-      } else if (tokens[0] == "\"weight\"") {
-        l.weight = svtof(tokens[1]);
-      } else if (tokens[0] == "\"offsetX\"") {
-        l.offset.x() = svtof(tokens[1]);
-      } else if (tokens[0] == "\"offsetY\"") {
-        l.offset.y() = svtof(tokens[1]);
-      } else if (tokens[0] == "\"offsetZ\"") {
-        l.offset.z() = svtof(tokens[1]);
-      } else if (tokens[0] == "\"globalX\"") {
-        global.x() = svtof(tokens[1]);
-        haveGlobal = true;
-      } else if (tokens[0] == "\"globalY\"") {
-        global.y() = svtof(tokens[1]);
-        haveGlobal = true;
-      } else if (tokens[0] == "\"globalZ\"") {
-        global.z() = svtof(tokens[1]);
-        haveGlobal = true;
-      } else if (tokens[0] == "\"limitWeightX\"") {
-        l.limitWeight[0] = svtof(tokens[1]);
-      } else if (tokens[0] == "\"limitWeightY\"") {
-        l.limitWeight[1] = svtof(tokens[1]);
-      } else if (tokens[0] == "\"limitWeightZ\"") {
-        l.limitWeight[2] = svtof(tokens[1]);
-      } else if (tokens[0] == "\"attachedToSkin\"") {
-        l.attachedToSkin = (svtoi(tokens[1]) != 0);
-      } else if (tokens[0] == "\"skinOffset\"") {
-        l.skinOffset = svtof(tokens[1]);
       }
-    } while (line < lines.size() - 1 && (current != "}," || current != "}"));
 
-    // skip locator if it has no parent
-    if (l.parent == kInvalidIndex) {
-      continue;
-    }
+      // Skip locator if it has no parent
+      if (l.parent == kInvalidIndex) {
+        MT_LOGW(
+            "Skipping locator '{}' because it has no valid parent",
+            l.name.empty() ? "(unnamed)" : l.name);
+        continue;
+      }
 
-    if (haveGlobal) {
-      l.offset = state.jointState[l.parent].transform.inverse() * (global);
+      // Read weight
+      l.weight = locatorJson.value("weight", 1.0f);
+
+      // Read offset
+      const bool hasOffsetX = locatorJson.contains("offsetX");
+      const bool hasOffsetY = locatorJson.contains("offsetY");
+      const bool hasOffsetZ = locatorJson.contains("offsetZ");
+      l.offset.x() = locatorJson.value("offsetX", 0.0f);
+      l.offset.y() = locatorJson.value("offsetY", 0.0f);
+      l.offset.z() = locatorJson.value("offsetZ", 0.0f);
+
+      // Check for partial offset specification
+      const bool hasAnyOffset = hasOffsetX || hasOffsetY || hasOffsetZ;
+      const bool hasAllOffset = hasOffsetX && hasOffsetY && hasOffsetZ;
+      if (hasAnyOffset && !hasAllOffset) {
+        MT_LOGW(
+            "Locator '{}' has partial offset specification (offsetX: {}, offsetY: {}, offsetZ: {}). "
+            "If any offset component is specified, all three should be provided.",
+            l.name.empty() ? "(unnamed)" : l.name,
+            hasOffsetX,
+            hasOffsetY,
+            hasOffsetZ);
+      }
+
+      // Read global coordinates and convert to local offset if present
+      const bool hasGlobalX = locatorJson.contains("globalX");
+      const bool hasGlobalY = locatorJson.contains("globalY");
+      const bool hasGlobalZ = locatorJson.contains("globalZ");
+      const bool hasAnyGlobal = hasGlobalX || hasGlobalY || hasGlobalZ;
+      const bool hasAllGlobal = hasGlobalX && hasGlobalY && hasGlobalZ;
+
+      // Check for partial global specification
+      if (hasAnyGlobal && !hasAllGlobal) {
+        MT_LOGW(
+            "Locator '{}' has partial global specification (globalX: {}, globalY: {}, globalZ: {}). "
+            "If any global component is specified, all three should be provided.",
+            l.name.empty() ? "(unnamed)" : l.name,
+            hasGlobalX,
+            hasGlobalY,
+            hasGlobalZ);
+      }
+
+      // Check for both global and local offset specification
+      if (hasAnyGlobal && hasAnyOffset) {
+        MT_LOGW(
+            "Locator '{}' has both global (globalX/Y/Z) and local (offsetX/Y/Z) offset specification. "
+            "Only one type of offset should be specified. Global offset will take precedence.",
+            l.name.empty() ? "(unnamed)" : l.name);
+      }
+
+      if (hasAnyGlobal) {
+        Vector3f global;
+        global.x() = locatorJson.value("globalX", 0.0f);
+        global.y() = locatorJson.value("globalY", 0.0f);
+        global.z() = locatorJson.value("globalZ", 0.0f);
+        l.offset = state.jointState[l.parent].transform.inverse() * global;
+      }
+
+      // Read limit weights
+      l.limitWeight[0] = locatorJson.value("limitWeightX", 0.0f);
+      l.limitWeight[1] = locatorJson.value("limitWeightY", 0.0f);
+      l.limitWeight[2] = locatorJson.value("limitWeightZ", 0.0f);
+
+      // Read skin attachment fields
+      l.attachedToSkin = (locatorJson.value("attachedToSkin", 0) != 0);
+      l.skinOffset = locatorJson.value("skinOffset", 0.0f);
+
+      l.limitOrigin = l.offset;
+      res.push_back(l);
     }
-    l.limitOrigin = l.offset;
-    res.push_back(l);
+  } catch (const nlohmann::json::parse_error& e) {
+    const auto [line, column] = byteIndexToLineColumn(input, e.byte);
+    MT_THROW("Failed to parse locators JSON at line {}, column {}: {}", line, column, e.what());
   }
 
   std::string dup = firstDuplicate(res);
