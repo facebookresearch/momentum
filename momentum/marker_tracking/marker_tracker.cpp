@@ -16,6 +16,7 @@
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
 #include "momentum/character_solver/collision_error_function.h"
 #include "momentum/character_solver/collision_error_function_stateless.h"
+#include "momentum/character_solver/gauss_newton_solver_qr.h"
 #include "momentum/character_solver/limit_error_function.h"
 #include "momentum/character_solver/model_parameters_error_function.h"
 #include "momentum/character_solver/plane_error_function.h"
@@ -27,7 +28,6 @@
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/tracker_utils.h"
 #include "momentum/math/mesh.h"
-#include "momentum/solver/gauss_newton_solver.h"
 #include "momentum/solver/solver.h"
 
 using namespace momentum;
@@ -543,14 +543,14 @@ Eigen::MatrixXf trackPosesForFrames(
 
   // set up the solver
   auto solverFunc = SkeletonSolverFunction(character, pt);
-  GaussNewtonSolverOptions solverOptions;
+  GaussNewtonSolverQROptions solverOptions;
   solverOptions.maxIterations = config.maxIter;
   solverOptions.minIterations = 2;
   solverOptions.doLineSearch = false;
   solverOptions.verbose = config.debug;
   solverOptions.threshold = 1.f;
   solverOptions.regularization = config.regularization;
-  auto solver = GaussNewtonSolver(solverOptions, &solverFunc);
+  auto solver = GaussNewtonSolverQR(solverOptions, &solverFunc);
   solver.setEnabledParameters(poseParams);
 
   // parameter limits constraint
