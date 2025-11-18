@@ -73,6 +73,7 @@ else()
     message(WARNING "MOMENTUM_ENABLE_FBX_SAVING was requested but MOMENTUM_BUILD_WITH_FBXSDK environment variable is not set. FBX SDK support requires MOMENTUM_BUILD_WITH_FBXSDK=ON. Forcing MOMENTUM_ENABLE_FBX_SAVING to OFF.")
   endif()
 endif()
+mt_option(MOMENTUM_BUILD_IO_USD "Build USD I/O support" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
@@ -117,7 +118,9 @@ find_package(fx-gltf CONFIG REQUIRED)
 find_package(indicators 2.3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(openfbx CONFIG REQUIRED)
-find_package(pxr CONFIG REQUIRED HINTS ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_PREFIX}/cmake)
+if(MOMENTUM_BUILD_IO_USD)
+  find_package(pxr CONFIG REQUIRED HINTS ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_PREFIX}/cmake)
+endif()
 find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(TBB CONFIG REQUIRED)
@@ -451,21 +454,26 @@ mt_library(
     urdfdom::urdf_parser
 )
 
-mt_library(
-  NAME io_usd
-  HEADERS_VARS io_usd_public_headers
-  SOURCES_VARS io_usd_sources
-  PUBLIC_LINK_LIBRARIES
-    character
-    io_common
-    io_skeleton
-  PRIVATE_LINK_LIBRARIES
-    usd
-    usdGeom
-    usdSkel
-    TBB::tbb
-    Python3::Python  # Conda USD has Python symbols on both Linux and macOS
-)
+if(MOMENTUM_BUILD_IO_USD)
+  mt_library(
+    NAME io_usd
+    HEADERS_VARS io_usd_public_headers
+    SOURCES_VARS io_usd_sources
+    PUBLIC_LINK_LIBRARIES
+      character
+      io_common
+      io_skeleton
+    PRIVATE_LINK_LIBRARIES
+      usd
+      usdGeom
+      usdSkel
+      TBB::tbb
+      Python3::Python  # Conda USD has Python symbols on both Linux and macOS
+  )
+  set(io_usd_library io_usd)
+else()
+  set(io_usd_library )
+endif()
 
 mt_library(
   NAME io_legacy_json
@@ -512,7 +520,7 @@ mt_library(
     io_marker
     io_shape
     io_skeleton
-    io_usd
+    ${io_usd_library}
 )
 
 mt_library(
@@ -818,17 +826,19 @@ if(MOMENTUM_BUILD_TESTING)
       "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
   )
 
-  mt_test(
-    NAME io_usd_test
-    SOURCES_VARS io_usd_test_sources
-    LINK_LIBRARIES
-      character_test_helpers
-      io_usd
-      io_test_helper
-      Python3::Python
-    ENV
-      "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
-  )
+  if(MOMENTUM_BUILD_IO_USD)
+    mt_test(
+      NAME io_usd_test
+      SOURCES_VARS io_usd_test_sources
+      LINK_LIBRARIES
+        character_test_helpers
+        io_usd
+        io_test_helper
+        Python3::Python
+      ENV
+        "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
+    )
+  endif()
 
   mt_test(
     NAME rasterizer_test
