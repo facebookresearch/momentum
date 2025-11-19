@@ -550,7 +550,7 @@ void saveFbxCommon(
     const bool saveMesh,
     const bool skipActiveJointParamCheck,
     const FbxCoordSystemInfo& coordSystemInfo,
-    bool permissive,
+    Permissive permissive,
     std::span<const std::vector<Marker>> markerSequence,
     std::string_view fbxNamespace) {
   // ---------------------------------------------
@@ -728,7 +728,7 @@ void saveFbxCommon(
     // weight the vertex for that joint.
 
     MT_THROW_IF(
-        !permissive && !character.skinWeights,
+        permissive == Permissive::No && !character.skinWeights,
         " Failed to save the character '{}' to {}. The character has no skinning weights and permissive mode is not enabled. Only mesh-only characters are allowed in permissive mode.",
         character.name,
         filename.string());
@@ -803,7 +803,7 @@ void saveFbxCommon(
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   return loadOpenFbxCharacter(
@@ -813,7 +813,7 @@ Character loadFbxCharacter(
 Character loadFbxCharacter(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   return loadOpenFbxCharacter(
@@ -823,7 +823,7 @@ Character loadFbxCharacter(
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   return loadOpenFbxCharacterWithMotion(
@@ -833,7 +833,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   return loadOpenFbxCharacterWithMotion(

@@ -27,7 +27,7 @@ constexpr const char* kMomentumMarkerProperty = "Momentum_Marker";
 Character loadOpenFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
@@ -35,7 +35,7 @@ Character loadOpenFbxCharacter(
 Character loadOpenFbxCharacter(
     std::span<const std::byte> inputData,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
@@ -43,7 +43,7 @@ Character loadOpenFbxCharacter(
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
@@ -51,7 +51,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     std::span<const std::byte> inputData,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
