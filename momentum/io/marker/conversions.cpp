@@ -11,14 +11,9 @@
 
 namespace momentum {
 
-namespace internal {
+namespace {
 
-// function prototypes are needed to compile on some platforms
-Unit toUnit(const std::string& unitStr);
-
-[[nodiscard]] std::string_view toString(const Unit& unit);
-
-Unit toUnit(const std::string& unitStr) {
+[[maybe_unused]] [[nodiscard]] Unit toUnit(const std::string& unitStr) {
   if (unitStr == "m" || unitStr == "M") {
     return Unit::M;
   } else if (unitStr == "dm" || unitStr == "DM") {
@@ -32,7 +27,7 @@ Unit toUnit(const std::string& unitStr) {
   }
 }
 
-[[nodiscard]] std::string_view toString(const Unit& unit) {
+[[maybe_unused]] [[nodiscard]] std::string_view toString(const Unit& unit) {
   switch (unit) {
     case Unit::M:
       return "m";
@@ -48,7 +43,7 @@ Unit toUnit(const std::string& unitStr) {
   }
 }
 
-} // namespace internal
+} // namespace
 
 template <typename T>
 Vector3<T> toMomentumVector3(const Vector3<T>& vec, UpVector up, Unit unit) {
@@ -71,7 +66,7 @@ Vector3<T> toMomentumVector3(const Vector3<T>& vec, UpVector up, Unit unit) {
       MT_LOGE(
           "{}: Unknown unit '{}' found in the file. Use centimeters instead.",
           __func__,
-          internal::toString(unit));
+          toString(unit));
       vec_in_cm = vec;
       break;
     default:
@@ -104,7 +99,7 @@ Vector3<T> toMomentumVector3(const Vector3<T>& vec, UpVector up, Unit unit) {
 
 template <typename T>
 Vector3<T> toMomentumVector3(const Vector3<T>& vec, UpVector up, const std::string& unitStr) {
-  return toMomentumVector3(vec, up, internal::toUnit(unitStr));
+  return toMomentumVector3(vec, up, toUnit(unitStr));
 }
 
 template Vector3<float> toMomentumVector3(const Vector3<float>& vec, UpVector up, Unit unit);
