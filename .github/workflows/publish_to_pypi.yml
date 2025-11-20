@@ -115,6 +115,7 @@ jobs:
               --exclude 'libmkl*.so'
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: >
+            pip install torch &&
             cp pyproject-pypi-cpu-py${{ matrix.python-version == '3.12' && '312' || '313' }}.toml pyproject.toml
           CIBW_TEST_COMMAND: >
             python -c "import pymomentum; import torch; print('Import successful')"
@@ -231,6 +232,7 @@ jobs:
               --exclude 'libmkl*.so'
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: >
+            pip install torch &&
             cp pyproject-pypi-gpu.toml pyproject.toml
           CIBW_TEST_COMMAND: >
             python -c "import pymomentum; import torch; print('CUDA available:', torch.cuda.is_available()); print('Import successful')"
