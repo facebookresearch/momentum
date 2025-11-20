@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
         MT_LOGI("Loading motion from fbx...");
         int motionIndex = -1;
         auto [c, motions, framerate] =
-            loadFbxCharacterWithMotion(motionPath, KeepLocators::Yes, false);
+            loadFbxCharacterWithMotion(motionPath, KeepLocators::Yes, Permissive::No);
         // Validate the motion
         if (motions.empty() || (motions.size() == 1 && motions.at(0).cols() == 0)) {
           MT_LOGW("No motion loaded from file");

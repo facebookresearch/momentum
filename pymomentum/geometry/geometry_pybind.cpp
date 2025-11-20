@@ -592,7 +592,7 @@ The resulting tensors are as follows:
             options.locators = locators;
             options.collisions = collisions;
             options.blendShapes = blendShapes;
-            options.permissive = permissive;
+            options.permissive = permissive ? mm::Permissive::Yes : mm::Permissive::No;
             options.coordSystemInfo = coordSystemInfo;
             options.fbxNamespace = fbxNamespace;
             options.extensions = extensions;
@@ -634,9 +634,12 @@ The resulting tensors are as follows:
           "blend_shapes",
           &mm::FileSaveOptions::blendShapes,
           "Include blend shapes in the output (default: true)")
-      .def_readwrite(
+      .def_property(
           "permissive",
-          &mm::FileSaveOptions::permissive,
+          [](const mm::FileSaveOptions& opts) { return opts.permissive == mm::Permissive::Yes; },
+          [](mm::FileSaveOptions& opts, bool permissive) {
+            opts.permissive = permissive ? mm::Permissive::Yes : mm::Permissive::No;
+          },
           "Permissive mode: allow saving mesh-only characters without skin weights (default: false)")
       .def_readwrite(
           "coord_system_info",
@@ -727,7 +730,7 @@ The resulting tensors are as follows:
             opts.locators,
             opts.collisions,
             opts.blendShapes,
-            opts.permissive,
+            (opts.permissive == mm::Permissive::Yes),
             coordSystemInfoStr,
             opts.fbxNamespace,
             opts.extensions,

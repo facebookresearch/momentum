@@ -12,6 +12,14 @@
 namespace momentum {
 
 // ============================================================================
+// Permissive Mode
+// ============================================================================
+
+// Permissive specifies whether we want to be able to load mesh-only characters (without skin
+// weights), and whether we want to bake the unhandled pose information into base skeleton.
+enum class Permissive { No, Yes };
+
+// ============================================================================
 // GLTF File Format
 // ============================================================================
 
@@ -74,7 +82,7 @@ struct FileSaveOptions {
   bool blendShapes = true;
 
   /// Permissive mode: allow saving mesh-only characters without skin weights (default: false)
-  bool permissive = false;
+  Permissive permissive = Permissive::No;
 
   // ---- FBX-Specific Options ----
 

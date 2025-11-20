@@ -341,7 +341,7 @@ void parseSkeleton(
     std::vector<const ofbx::Object*>& fbxObjects,
     CollisionGeometry& capsules,
     LocatorList& locators,
-    bool permissive) {
+    Permissive permissive) {
   MT_CHECK(curSkelNode, "Skeleton node for parent '{}' is null", parent);
 
   // Skip non-transform nodes:
@@ -393,7 +393,7 @@ void parseSkeleton(
     // get rotation order
     auto order = curSkelNode->getRotationOrder();
     if (order != ofbx::RotationOrder::EULER_XYZ) {
-      if (permissive) {
+      if (permissive == Permissive::Yes) {
         MT_LOGW(
             "momentum supports only XYZ rotation; joint {} has {} rotation order.",
             jointName,
@@ -409,7 +409,7 @@ void parseSkeleton(
     // get local rotation
     auto localRot = fbxEulerRotationToQuat(curSkelNode->getLocalRotation(), order);
     if (Eigen::AngleAxisd(localRot).angle() > 1e-2) {
-      if (permissive) {
+      if (permissive == Permissive::Yes) {
         MT_LOGW(
             "{}: Node {} has nonzero rest rotation ({}, {}, {}), which will be baked into the skeleton.",
             __func__,
@@ -465,7 +465,7 @@ void parseSkeleton(
 }
 
 std::tuple<Skeleton, std::vector<const ofbx::Object*>, LocatorList, CollisionGeometry>
-parseSkeleton(const ofbx::Object* sceneRoot, const std::string& skelRoot, bool permissive) {
+parseSkeleton(const ofbx::Object* sceneRoot, const std::string& skelRoot, Permissive permissive) {
   MT_CHECK(sceneRoot, "Scene root with skel root '{}' is null", skelRoot);
 
   Skeleton skeleton;
@@ -493,7 +493,7 @@ void parseSkinnedModel(
     std::unique_ptr<SkinWeights>& skinWeights,
     TransformationList& inverseBindPoseTransforms,
     BlendShape_p& blendShape,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes) {
   enum EMapping {
     MappingUnknown,
@@ -696,7 +696,7 @@ void parseSkinnedModel(
   const auto* fbxskin = geometry->getSkin();
   if (!fbxskin) {
     MT_THROW_IF(
-        !permissive,
+        permissive == Permissive::No,
         "No skin found for geometry. Enable permissive mode to allow saving as a mesh-only character.");
     return; // Just return a mesh-only character.
   }
@@ -879,7 +879,7 @@ MatrixXf parseAnimation(
     const std::vector<const ofbx::Object*>& boneFbxNodes,
     const Skeleton& skeleton,
     const float fps,
-    bool permissive) {
+    Permissive permissive) {
   // Return motion in numJointParameters X numFrames
   MatrixXf motion;
   std::vector<const ofbx::AnimationCurveNode*> skeletonAnimCurves;
@@ -917,7 +917,7 @@ MatrixXf parseAnimation(
     // up correctly.
     // Note that the rest translation is already baked into the translationOffset in
     // the skeleton so we don't want to set it here.
-    if (!permissive) {
+    if (permissive == Permissive::No) {
       // Local rotation is Euler angles:
       const auto localRot = boneFbxNodes[i]->getLocalRotation();
       motion.row(i * kParametersPerJoint + 3).setConstant(toRad(localRot.x));
@@ -1197,7 +1197,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     const std::span<const std::byte> inputData,
     KeepLocators keepLocators,
     bool loadAnim,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
@@ -1291,7 +1291,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 Character loadOpenFbxCharacter(
     const std::span<const std::byte> inputData,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   auto [character, motion, fps] =
@@ -1302,7 +1302,7 @@ Character loadOpenFbxCharacter(
 Character loadOpenFbxCharacter(
     const filesystem::path& path,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   auto [buffer, length] = readFileToBuffer(path);
@@ -1317,7 +1317,7 @@ Character loadOpenFbxCharacter(
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     std::span<const std::byte> inputData,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   return loadOpenFbx(inputData, keepLocators, true, permissive, loadBlendShapes, stripNamespaces);
@@ -1326,7 +1326,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
-    bool permissive,
+    Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
   auto [buffer, length] = readFileToBuffer(inputPath);

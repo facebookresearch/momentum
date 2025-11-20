@@ -31,7 +31,7 @@ enum class LoadBlendShapes { No, Yes };
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
@@ -41,7 +41,7 @@ Character loadFbxCharacter(
 Character loadFbxCharacter(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
@@ -49,7 +49,7 @@ Character loadFbxCharacter(
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
@@ -57,7 +57,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocatorss = KeepLocators::No,
-    bool permissive = false,
+    Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShape = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
