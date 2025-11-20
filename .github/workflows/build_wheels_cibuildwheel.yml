@@ -17,7 +17,7 @@ jobs:
       matrix:
         python: ['3.12', '3.13']
         package: ['cpu']  # Start with CPU, add GPU later
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,10 +39,10 @@ jobs:
           # Build configuration
           CIBW_BUILD: cp${{ matrix.python == '3.12' && '312' || '313' }}-manylinux_x86_64
           CIBW_SKIP: pp* *-musllinux_*
-          
+
           # Use manylinux_2_28 for Colab compatibility (glibc 2.28+)
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          
+
           # Install build dependencies in the manylinux container
           # This is the critical part - we need all momentum dependencies
           CIBW_BEFORE_ALL_LINUX: |
@@ -50,7 +50,7 @@ jobs:
             echo "=== Installing system packages ==="
             yum install -y wget tar gzip bzip2 gcc-c++ make cmake3 ninja-build git
             ln -sf /usr/bin/cmake3 /usr/bin/cmake || true
-            
+
             echo "=== Setting up Miniforge3 for conda dependencies ==="
             wget -q https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O miniforge.sh
             bash miniforge.sh -b -p /opt/miniforge3
@@ -58,7 +58,7 @@ jobs:
             export PATH="/opt/miniforge3/bin:$PATH"
             conda init bash
             source /root/.bashrc || true
-            
+
             echo "=== Installing momentum dependencies via conda-forge ==="
             conda create -y -n momentum -c conda-forge python=${{ matrix.python }} \
               'libboost-devel>=1.84' \
@@ -86,21 +86,21 @@ jobs:
               'pybind11>=2.13' \
               'scikit-build-core>=0.10' \
               'setuptools-scm>=8'
-            
+
             echo "=== Conda environment ready ==="
             conda info
             conda list -n momentum
-          
+
           # Set environment variables for the build
           CIBW_ENVIRONMENT_LINUX: |
             PATH="/opt/miniforge3/envs/momentum/bin:$PATH"
             CMAKE_PREFIX_PATH="/opt/miniforge3/envs/momentum"
             LD_LIBRARY_PATH="/opt/miniforge3/envs/momentum/lib:$LD_LIBRARY_PATH"
             PKG_CONFIG_PATH="/opt/miniforge3/envs/momentum/lib/pkgconfig"
-          
+
           # Build command
           CIBW_BUILD_FRONTEND: "build"
-          
+
           # Repair wheel - exclude PyTorch and CUDA libraries
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
             auditwheel repair \
@@ -111,7 +111,7 @@ jobs:
               --exclude 'libnv*.so*' \
               -w {dest_dir} \
               {wheel}
-          
+
           # Test the wheel after repair
           CIBW_TEST_REQUIRES: pytest numpy scipy
           CIBW_TEST_COMMAND: pytest {project}/pymomentum/test/*.py -k "not (test_save_motions or test_fbx)" || true
@@ -139,7 +139,7 @@ jobs:
     strategy:
       matrix:
         python: ['3.12']
-    
+
     steps:
       - name: Set up Python
         uses: actions/setup-python@v5

@@ -37,8 +37,9 @@ permissions:
   contents: read
 
 jobs:
-  build_cpu_wheels:
-    name: pypi-cpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
+  build_wheels_pixi:
+    name: Build wheels (pixi) - ${{ matrix.package-type }} - ${{ matrix.os }} - ${{ matrix.pixi-environment }}
+    if: github.event_name == 'workflow_dispatch' && inputs.use_cibuildwheel == 'false' || github.event_name != 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
