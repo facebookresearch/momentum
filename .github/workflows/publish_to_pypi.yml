@@ -94,14 +94,7 @@ jobs:
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
           CIBW_ARCHS_LINUX: x86_64
           CIBW_ARCHS_MACOS: arm64
-          CIBW_ENVIRONMENT_LINUX: >
-            CMAKE_PREFIX_PATH=/opt/miniforge/envs/build
-            PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig
-            CONDA_PREFIX=/opt/miniforge/envs/build
-            CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc
-            CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++
-            CMAKE=/opt/miniforge/envs/build/bin/cmake
-            CMAKE_MAKE_PROGRAM=/opt/miniforge/envs/build/bin/ninja
+          CIBW_ENVIRONMENT_LINUX: CMAKE_PREFIX_PATH=/opt/miniforge/envs/build PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig CONDA_PREFIX=/opt/miniforge/envs/build CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++ CMAKE=/opt/miniforge/envs/build/bin/cmake CMAKE_MAKE_PROGRAM=/opt/miniforge/envs/build/bin/ninja
           CIBW_BEFORE_ALL_LINUX: >
             curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh &&
             bash miniforge.sh -b -p /opt/miniforge &&
@@ -200,18 +193,7 @@ jobs:
           CIBW_SKIP: "*-musllinux_* *-win32 *-manylinux_i686 *-macos*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_LINUX: x86_64
-          CIBW_ENVIRONMENT_LINUX: >
-            CMAKE_PREFIX_PATH=/opt/miniforge/envs/build
-            PATH=/usr/local/cuda/bin:$PATH
-            PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig
-            LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/miniforge/envs/build/lib:$LD_LIBRARY_PATH
-            CUDA_HOME=/usr/local/cuda
-            TORCH_CUDA_ARCH_LIST=5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX
-            CONDA_PREFIX=/opt/miniforge/envs/build
-            CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc
-            CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++
-            CMAKE=/opt/miniforge/envs/build/bin/cmake
-            CMAKE_MAKE_PROGRAM=/opt/miniforge/envs/build/bin/ninja
+          CIBW_ENVIRONMENT_LINUX: CMAKE_PREFIX_PATH=/opt/miniforge/envs/build PATH=/usr/local/cuda/bin:$PATH PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/miniforge/envs/build/lib:$LD_LIBRARY_PATH CUDA_HOME=/usr/local/cuda TORCH_CUDA_ARCH_LIST=5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX CONDA_PREFIX=/opt/miniforge/envs/build CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++ CMAKE=/opt/miniforge/envs/build/bin/cmake CMAKE_MAKE_PROGRAM=/opt/miniforge/envs/build/bin/ninja
           CIBW_BEFORE_ALL_LINUX: >
             yum install -y wget &&
             wget https://developer.download.nvidia.com/compute/cuda/12.9.0/local_installers/cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm &&
