@@ -78,6 +78,19 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Free disk space
+        if: steps.should_run.outputs.run == 'true'
+        run: |
+          echo "Before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          echo "After cleanup:"
+          df -h
+
       - name: Generate pyproject configs
         if: steps.should_run.outputs.run == 'true'
         run: |
@@ -108,7 +121,7 @@ jobs:
               --exclude 'libmkl*.so'
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: >
-            pip install torch &&
+            pip install torch --index-url https://download.pytorch.org/whl/cpu &&
             cp pyproject-pypi-cpu-py${{ matrix.python-version == '3.12' && '312' || '313' }}.toml pyproject.toml
           CIBW_TEST_COMMAND: >
             python -c "import pymomentum; import torch; print('Import successful')"
