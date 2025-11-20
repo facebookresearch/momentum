@@ -116,9 +116,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ad89edb3c862d0446891a80850f26adae" id="r_ad89edb3c862d0446891a80850f26adae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1FileSaveOptions.html#ad89edb3c862d0446891a80850f26adae">blendShapes</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a></td></tr>
 <tr class="memdesc:ad89edb3c862d0446891a80850f26adae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Include blend shapes in the output (default: true)  <br /></td></tr>
 <tr class="separator:ad89edb3c862d0446891a80850f26adae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a965178e56b2c6a759f3cb6de1759646c" id="r_a965178e56b2c6a759f3cb6de1759646c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1FileSaveOptions.html#a965178e56b2c6a759f3cb6de1759646c">permissive</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
-<tr class="memdesc:a965178e56b2c6a759f3cb6de1759646c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Permissive mode: allow saving mesh-only characters without skin weights (default: false)  <br /></td></tr>
-<tr class="separator:a965178e56b2c6a759f3cb6de1759646c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66d5c683665478ce1fb2d15eaad0755e" id="r_a66d5c683665478ce1fb2d15eaad0755e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1FileSaveOptions.html#a66d5c683665478ce1fb2d15eaad0755e">permissive</a> = <a class="el" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077abafd7322c6e97d25b6299b5d6fe8920b">Permissive::No</a></td></tr>
+<tr class="memdesc:a66d5c683665478ce1fb2d15eaad0755e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Permissive mode: allow saving mesh-only characters without skin weights (default: false)  <br /></td></tr>
+<tr class="separator:a66d5c683665478ce1fb2d15eaad0755e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5744bd6f1bbb6c1d37e20808b387d67a" id="r_a5744bd6f1bbb6c1d37e20808b387d67a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1FbxCoordSystemInfo.html">FbxCoordSystemInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1FileSaveOptions.html#a5744bd6f1bbb6c1d37e20808b387d67a">coordSystemInfo</a> = {}</td></tr>
 <tr class="memdesc:a5744bd6f1bbb6c1d37e20808b387d67a"><td class="mdescLeft">&#160;</td><td class="mdescRight">FBX coordinate system configuration (default: Maya Y-up)  <br /></td></tr>
 <tr class="separator:a5744bd6f1bbb6c1d37e20808b387d67a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,7 +136,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>Unified options for saving files in both FBX and GLTF formats. </p>
 <p>This struct consolidates save options that were previously scattered across multiple function parameters. Format-specific options (e.g., FBX coordinate system, GLTF extensions) are included but only used by their respective formats. </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00061">61</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00069">69</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="ad89edb3c862d0446891a80850f26adae" name="ad89edb3c862d0446891a80850f26adae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad89edb3c862d0446891a80850f26adae">&#9670;&#160;</a></span>blendShapes</h2>
@@ -152,7 +152,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include blend shapes in the output (default: true) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00074">74</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00082">82</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -170,7 +170,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include collision geometry in the output (default: true) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00071">71</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00079">79</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -188,7 +188,7 @@ Public Attributes</h2></td></tr>
 
 <p>FBX coordinate system configuration (default: Maya Y-up) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00082">82</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00090">90</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -206,7 +206,7 @@ Public Attributes</h2></td></tr>
 
 <p>Enable GLTF extensions (default: true) Only used for GLTF output. </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00092">92</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00100">100</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -224,7 +224,7 @@ Public Attributes</h2></td></tr>
 
 <p>Optional namespace prefix for FBX node names (e.g., "ns" becomes "ns:") Only used for FBX output (default: empty = no namespace) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00086">86</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00094">94</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -242,7 +242,7 @@ Public Attributes</h2></td></tr>
 
 <p>GLTF file format selection (default: Auto) Only used for GLTF output. </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00096">96</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00104">104</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -260,7 +260,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include locators in the output (default: true) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00068">68</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00076">76</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -278,25 +278,25 @@ Public Attributes</h2></td></tr>
 
 <p>Include mesh geometry in the output (default: true) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00065">65</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00073">73</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
-<a id="a965178e56b2c6a759f3cb6de1759646c" name="a965178e56b2c6a759f3cb6de1759646c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a965178e56b2c6a759f3cb6de1759646c">&#9670;&#160;</a></span>permissive</h2>
+<a id="a66d5c683665478ce1fb2d15eaad0755e" name="a66d5c683665478ce1fb2d15eaad0755e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66d5c683665478ce1fb2d15eaad0755e">&#9670;&#160;</a></span>permissive</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> momentum::FileSaveOptions::permissive = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> momentum::FileSaveOptions::permissive = <a class="el" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077abafd7322c6e97d25b6299b5d6fe8920b">Permissive::No</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Permissive mode: allow saving mesh-only characters without skin weights (default: false) </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00077">77</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00085">85</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -309,7 +309,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a></li>
-    <li class="footer">Generated on Tue Nov 18 2025 23:42:10 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Nov 20 2025 01:31:56 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

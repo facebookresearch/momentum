@@ -1,1 +1,1 @@
-var searchData=[["rotationerrortype_0",["RotationErrorType",["../namespacemomentum.html#a11209afa2162ab698fcda33e188be23d",1,"momentum"]]]];
+var searchData=[["permissive_0",["Permissive",["../namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077",1,"momentum"]]]];
