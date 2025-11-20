@@ -97,6 +97,7 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: >
             CMAKE_PREFIX_PATH=/opt/miniforge/envs/build
             PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig
+            CONDA_PREFIX=/opt/miniforge/envs/build
             CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc
             CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++
             CMAKE=/opt/miniforge/envs/build/bin/cmake
@@ -205,6 +206,7 @@ jobs:
             LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/miniforge/envs/build/lib:$LD_LIBRARY_PATH
             CUDA_HOME=/usr/local/cuda
             TORCH_CUDA_ARCH_LIST=5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX
+            CONDA_PREFIX=/opt/miniforge/envs/build
             CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc
             CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++
             CMAKE=/opt/miniforge/envs/build/bin/cmake
