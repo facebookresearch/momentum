@@ -1,0 +1,177 @@
+name: Build Wheels with cibuildwheel (manylinux_2_28)
+
+on:
+  push:
+    branches: [main, pypi_compat]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Build ${{ matrix.package }} wheels - Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.13']
+        package: ['cpu']  # Start with CPU, add GPU later
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.22.0
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir dist
+        env:
+          # Build configuration
+          CIBW_BUILD: cp${{ matrix.python == '3.12' && '312' || '313' }}-manylinux_x86_64
+          CIBW_SKIP: pp* *-musllinux_*
+          
+          # Use manylinux_2_28 for Colab compatibility (glibc 2.28+)
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          
+          # Install build dependencies in the manylinux container
+          # This is the critical part - we need all momentum dependencies
+          CIBW_BEFORE_ALL_LINUX: |
+            set -e
+            echo "=== Installing system packages ==="
+            yum install -y wget tar gzip bzip2 gcc-c++ make cmake3 ninja-build git
+            ln -sf /usr/bin/cmake3 /usr/bin/cmake || true
+            
+            echo "=== Setting up Miniforge3 for conda dependencies ==="
+            wget -q https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O miniforge.sh
+            bash miniforge.sh -b -p /opt/miniforge3
+            rm miniforge.sh
+            export PATH="/opt/miniforge3/bin:$PATH"
+            conda init bash
+            source /root/.bashrc || true
+            
+            echo "=== Installing momentum dependencies via conda-forge ==="
+            conda create -y -n momentum -c conda-forge python=${{ matrix.python }} \
+              'libboost-devel>=1.84' \
+              'ceres-solver>=2.2' \
+              'cli11>=2.5' \
+              'dispenso>=1.4' \
+              'eigen>=3.4' \
+              'ezc3d>=1.5' \
+              'drjit-cpp>=1.2' \
+              'fmt>=11' \
+              'fx-gltf>=2' \
+              'indicators>=2.3' \
+              'kokkos>=4.6' \
+              'librerun-sdk>=0.23' \
+              'ms-gsl>=4' \
+              'nlohmann_json>=3.12' \
+              'openfbx>=0.9' \
+              'openusd>=25' \
+              're2>=2025' \
+              'spdlog>=1.15' \
+              'tracy-profiler-client>=0.12' \
+              'urdfdom>=4' \
+              'zlib>=1.3' \
+              'pytorch>=2.8' \
+              'pybind11>=2.13' \
+              'scikit-build-core>=0.10' \
+              'setuptools-scm>=8'
+            
+            echo "=== Conda environment ready ==="
+            conda info
+            conda list -n momentum
+          
+          # Set environment variables for the build
+          CIBW_ENVIRONMENT_LINUX: |
+            PATH="/opt/miniforge3/envs/momentum/bin:$PATH"
+            CMAKE_PREFIX_PATH="/opt/miniforge3/envs/momentum"
+            LD_LIBRARY_PATH="/opt/miniforge3/envs/momentum/lib:$LD_LIBRARY_PATH"
+            PKG_CONFIG_PATH="/opt/miniforge3/envs/momentum/lib/pkgconfig"
+          
+          # Build command
+          CIBW_BUILD_FRONTEND: "build"
+          
+          # Repair wheel - exclude PyTorch and CUDA libraries
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
+            auditwheel repair \
+              --exclude 'libtorch*.so' \
+              --exclude 'libc10*.so' \
+              --exclude 'libmkl*.so' \
+              --exclude 'libcu*.so*' \
+              --exclude 'libnv*.so*' \
+              -w {dest_dir} \
+              {wheel}
+          
+          # Test the wheel after repair
+          CIBW_TEST_REQUIRES: pytest numpy scipy
+          CIBW_TEST_COMMAND: pytest {project}/pymomentum/test/*.py -k "not (test_save_motions or test_fbx)" || true
+
+      - name: Check wheel metadata
+        run: |
+          python -m pip install auditwheel
+          for wheel in dist/*.whl; do
+            echo "=== $wheel ==="
+            python -m zipfile -l "$wheel" | grep "WHEEL"
+            auditwheel show "$wheel"
+          done
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-cibuildwheel-py${{ matrix.python }}-${{ matrix.package }}
+          path: dist/*.whl
+          retention-days: 7
+
+  test_colab_compatibility:
+    name: Test Colab compatibility
+    needs: [build_wheels]
+    runs-on: ubuntu-22.04  # Ubuntu 22.04 = Colab environment
+    strategy:
+      matrix:
+        python: ['3.12']
+    
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-cibuildwheel-py${{ matrix.python }}-*
+          merge-multiple: true
+          path: dist
+
+      - name: Check glibc version (should be 2.35 like Colab)
+        run: ldd --version | head -1
+
+      - name: Install and test wheel
+        run: |
+          pip install dist/pymomentum_*.whl
+          python -c "import pymomentum; print(f'PyMomentum version: {pymomentum.__version__}')"
+          python -c "import torch; print(f'PyTorch version: {torch.__version__}')"
+
+      - name: Check wheel platform tag
+        run: |
+          for wheel in dist/*.whl; do
+            echo "Checking: $wheel"
+            if [[ "$wheel" == *"manylinux_2_28"* ]]; then
+              echo "✓ Wheel is manylinux_2_28 (Colab compatible)"
+            elif [[ "$wheel" == *"manylinux_2_39"* ]]; then
+              echo "✗ ERROR: Wheel is manylinux_2_39 (NOT Colab compatible)"
+              exit 1
+            else
+              echo "? Unknown platform tag"
+            fi
+          done

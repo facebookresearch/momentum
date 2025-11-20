@@ -119,3 +119,42 @@ cmake.args = [
 version_scheme = "post-release"
 local_scheme = "no-local-version"
 version_file = "pymomentum/_version.py"
+
+[tool.cibuildwheel]
+# Build for CPython 3.12 and 3.13 only
+build = "cp312-* cp313-*"
+
+# Skip PyPy, musllinux, and 32-bit builds
+skip = "pp* *-musllinux_* *-win32 *-manylinux_i686"
+
+# Use manylinux_2_28 for Colab compatibility (glibc 2.28+)
+# This ensures wheels work on Ubuntu 20.04+, Colab, and most modern Linux
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+# Build dependencies needed inside the manylinux container
+[tool.cibuildwheel.linux]
+# Install system dependencies in manylinux container
+before-all = [
+    "yum install -y wget cmake ninja-build",
+    # Install conda-forge dependencies via micromamba
+    "wget -qO- https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba",
+    "./bin/micromamba create -y -n build -c conda-forge",
+    "./bin/micromamba install -y -n build -c conda-forge 'libboost-devel>=1.84' 'ceres-solver>=2.2' 'cli11>=2.5' 'dispenso>=1.4' 'eigen>=3.4' 'ezc3d>=1.5' 'drjit-cpp>=1.2' 'fmt>=11' 'fx-gltf>=2' 'indicators>=2.3' 'kokkos>=4.6' 'librerun-sdk>=0.23' 'ms-gsl>=4' 'nlohmann_json>=3.12' 'openfbx>=0.9' 'openusd>=25' 're2>=2025' 'spdlog>=1.15' 'tracy-profiler-client>=0.12' 'urdfdom>=4' 'zlib>=1.3'",
+]
+
+# Build command that uses conda environment
+build-frontend = "build"
+environment = { CMAKE_PREFIX_PATH="/opt/_internal/micromamba/envs/build" }
+
+# Test the wheel after building
+test-requires = ["pytest", "numpy", "scipy"]
+test-command = "pytest {project}/pymomentum/test/*.py"
+
+[tool.cibuildwheel.macos]
+# macOS doesn't need manylinux, uses delocate instead
+archs = ["x86_64", "arm64"]
+
+[tool.cibuildwheel.windows]
+# Windows uses delvewheel for repair
+archs = ["AMD64"]
