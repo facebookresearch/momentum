@@ -214,12 +214,22 @@ wheel_build = { cmd = """
 ], description = "Wheel: Build CPU wheel for current Python version. On CI (Ubuntu), produces Colab-compatible wheels. On newer systems (Fedora 42+), produces wheels for local testing only." }
 
 wheel_repair = { cmd = """
-    auditwheel repair \
-        --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libmkl*.so' \
-        dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ && \
-    rm dist/pymomentum_cpu-*-linux_x86_64.whl || \
-    echo "Skip auditwheel (non-Linux)"
-""", description = "Wheel: Repair CPU wheel with auditwheel (Linux only). On CI (Ubuntu glibc 2.35), auto-detects manylinux_2_28 for Colab compatibility. On newer systems (Fedora 42+ with glibc 2.41), may detect manylinux_2_39 (not Colab-compatible, for local testing only)." }
+    bash -c '
+    # Try to repair to manylinux_2_28 first (Colab compatible)
+    if auditwheel repair --plat manylinux_2_28 \
+        --exclude "libtorch*.so" --exclude "libc10*.so" --exclude "libmkl*.so" \
+        dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ 2>&1; then
+        echo "Successfully repaired to manylinux_2_28 (Colab compatible)"
+        rm dist/pymomentum_cpu-*-linux_x86_64.whl
+    else
+        echo "Cannot repair to manylinux_2_28, falling back to auto-detect"
+        auditwheel repair \
+            --exclude "libtorch*.so" --exclude "libc10*.so" --exclude "libmkl*.so" \
+            dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ && \
+        rm dist/pymomentum_cpu-*-linux_x86_64.whl
+    fi
+    ' || echo "Skip auditwheel (non-Linux)"
+""", description = "Wheel: Repair CPU wheel with auditwheel (Linux only). Attempts manylinux_2_28 for Colab compatibility, falls back to auto-detect if symbols are too recent." }
 
 wheel_publish = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
     "wheel_check",
@@ -489,13 +499,24 @@ wheel_build = { cmd = """
 ], description = "Wheel: Build GPU wheel for current Python version. On CI (Ubuntu), produces Colab-compatible wheels. On newer systems (Fedora 42+), produces wheels for local testing only." }
 
 wheel_repair = { cmd = """
-    auditwheel repair \
-        --exclude 'libtorch*.so' --exclude 'libc10*.so' \
-        --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
-        dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
-    rm dist/pymomentum_gpu-*-linux_x86_64.whl || \
-    echo "Skip auditwheel (non-Linux)"
-""", description = "Wheel: Repair GPU wheel with auditwheel (Linux only). On CI (Ubuntu glibc 2.35), auto-detects manylinux_2_28 for Colab compatibility. On newer systems (Fedora 42+ with glibc 2.41), may detect manylinux_2_39 (not Colab-compatible, for local testing only)." }
+    bash -c '
+    # Try to repair to manylinux_2_28 first (Colab compatible)
+    if auditwheel repair --plat manylinux_2_28 \
+        --exclude "libtorch*.so" --exclude "libc10*.so" \
+        --exclude "libcu*.so*" --exclude "libnv*.so*" --exclude "libmkl*.so" \
+        dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ 2>&1; then
+        echo "Successfully repaired to manylinux_2_28 (Colab compatible)"
+        rm dist/pymomentum_gpu-*-linux_x86_64.whl
+    else
+        echo "Cannot repair to manylinux_2_28, falling back to auto-detect"
+        auditwheel repair \
+            --exclude "libtorch*.so" --exclude "libc10*.so" \
+            --exclude "libcu*.so*" --exclude "libnv*.so*" --exclude "libmkl*.so" \
+            dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
+        rm dist/pymomentum_gpu-*-linux_x86_64.whl
+    fi
+    ' || echo "Skip auditwheel (non-Linux)"
+""", description = "Wheel: Repair GPU wheel with auditwheel (Linux only). Attempts manylinux_2_28 for Colab compatibility, falls back to auto-detect if symbols are too recent." }
 
 wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
@@ -518,13 +539,24 @@ wheel_build = { cmd = """
 ], description = "Wheel: Build GPU wheel for current Python version. On CI (Ubuntu), produces Colab-compatible wheels. On newer systems (Fedora 42+), produces wheels for local testing only." }
 
 wheel_repair = { cmd = """
-    auditwheel repair \
-        --exclude 'libtorch*.so' --exclude 'libc10*.so' \
-        --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
-        dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
-    rm dist/pymomentum_gpu-*-linux_x86_64.whl || \
-    echo "Skip auditwheel (non-Linux)"
-""", description = "Wheel: Repair GPU wheel with auditwheel (Linux only). On CI (Ubuntu glibc 2.35), auto-detects manylinux_2_28 for Colab compatibility. On newer systems (Fedora 42+ with glibc 2.41), may detect manylinux_2_39 (not Colab-compatible, for local testing only)." }
+    bash -c '
+    # Try to repair to manylinux_2_28 first (Colab compatible)
+    if auditwheel repair --plat manylinux_2_28 \
+        --exclude "libtorch*.so" --exclude "libc10*.so" \
+        --exclude "libcu*.so*" --exclude "libnv*.so*" --exclude "libmkl*.so" \
+        dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ 2>&1; then
+        echo "Successfully repaired to manylinux_2_28 (Colab compatible)"
+        rm dist/pymomentum_gpu-*-linux_x86_64.whl
+    else
+        echo "Cannot repair to manylinux_2_28, falling back to auto-detect"
+        auditwheel repair \
+            --exclude "libtorch*.so" --exclude "libc10*.so" \
+            --exclude "libcu*.so*" --exclude "libnv*.so*" --exclude "libmkl*.so" \
+            dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
+        rm dist/pymomentum_gpu-*-linux_x86_64.whl
+    fi
+    ' || echo "Skip auditwheel (non-Linux)"
+""", description = "Wheel: Repair GPU wheel with auditwheel (Linux only). Attempts manylinux_2_28 for Colab compatibility, falls back to auto-detect if symbols are too recent." }
 
 wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
