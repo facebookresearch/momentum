@@ -46,3 +46,59 @@ cmake.args = [
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
 ]
+
+[tool.cibuildwheel]
+build = "cp312-* cp313-*"
+skip = "pp* *-musllinux_* *-win32 *-manylinux_i686"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[tool.cibuildwheel.linux]
+before-all = """
+    # Install miniforge for conda-forge packages
+    curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh && \
+    bash miniforge.sh -b -p /opt/miniforge && \
+    rm miniforge.sh && \
+    /opt/miniforge/bin/conda init bash && \
+    source /root/.bashrc && \
+    /opt/miniforge/bin/mamba create -n build -y python=$PYTHON_VERSION && \
+    /opt/miniforge/bin/mamba install -n build -y -c conda-forge \
+        libboost-devel>=1.84 \
+        ceres-solver>=2.2 \
+        cli11>=2.5 \
+        dispenso>=1.4 \
+        eigen>=3.4 \
+        ezc3d>=1.5 \
+        drjit-cpp>=1.2 \
+        fmt>=11 \
+        fx-gltf>=2 \
+        indicators>=2.3 \
+        kokkos>=4.6 \
+        librerun-sdk>=0.23 \
+        ms-gsl>=4 \
+        nlohmann_json>=3.12 \
+        openfbx>=0.9 \
+        openusd>=25 \
+        re2>=2025 \
+        spdlog>=1.15 \
+        tracy-profiler-client>=0.12 \
+        urdfdom>=4 \
+        zlib>=1.3 \
+        pytorch>=2.8 \
+        pybind11>=2.13 \
+        scikit-build-core>=0.10 \
+        setuptools-scm>=8 \
+        ninja cmake c-compiler cxx-compiler && \
+    echo "Dependencies installed successfully"
+"""
+environment = { CMAKE_PREFIX_PATH="/opt/miniforge/envs/build", PATH="/opt/miniforge/envs/build/bin:$PATH", PKG_CONFIG_PATH="/opt/miniforge/envs/build/lib/pkgconfig" }
+repair-wheel-command = """
+    auditwheel repair \
+      --exclude 'libtorch*.so' \
+      --exclude 'libc10*.so' \
+      --exclude 'libmkl*.so' \
+      -w {dest_dir} {wheel}
+"""
+
+[tool.cibuildwheel.macos]
+environment = { CMAKE_PREFIX_PATH="/opt/homebrew", MACOSX_DEPLOYMENT_TARGET="11.0" }

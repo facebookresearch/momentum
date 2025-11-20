@@ -46,18 +46,10 @@ jobs:
         os: [ubuntu-latest, macos-14]
         python-version: ['3.12', '3.13']
         include:
-          - python-version: '3.12'
-            pixi-environment: py312
-          - python-version: '3.13'
-            pixi-environment: py313
           - os: ubuntu-latest
             os-short: ubuntu
           - os: macos-14
             os-short: mac-arm64
-    env:
-      # Enable compiler caching (ccache on Linux/macOS)
-      CMAKE_C_COMPILER_LAUNCHER: ccache
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
 
     steps:
       # Skip Python 3.13 builds on regular commits to reduce CI cost
@@ -82,47 +74,59 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up ccache
+      - name: Set up Python
         if: steps.should_run.outputs.run == 'true'
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: actions/setup-python@v5
         with:
-          key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}
-
-      - name: Set up pixi
-        if: steps.should_run.outputs.run == 'true'
-        uses: prefix-dev/setup-pixi@v0.9.3
-        with:
-          pixi-version: latest
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          environments: ${{ matrix.pixi-environment }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Generate pyproject configs
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} generate_pyproject
+        run: |
+          pip install jinja2
+          python scripts/generate_pyproject.py
 
-      - name: Clean distribution artifacts
+      - name: Build CPU wheels with cibuildwheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} clean_dist
-
-      - name: Build CPU wheel
-        if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
-
-      - name: Repair CPU wheel (Linux only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
-
-      - name: Print ccache stats
-        if: steps.should_run.outputs.run == 'true'
-        run: ccache -s
+        uses: pypa/cibuildwheel@v2.22.0
+        env:
+          CIBW_BUILD: cp${{ matrix.python-version == '3.12' && '312' || '313' }}-*
+          CIBW_SKIP: "*-musllinux_* *-win32 *-manylinux_i686"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+          CIBW_ARCHS_LINUX: x86_64
+          CIBW_ARCHS_MACOS: arm64
+          CIBW_ENVIRONMENT_LINUX: >
+            CMAKE_PREFIX_PATH=/opt/miniforge/envs/build
+            PATH=/opt/miniforge/envs/build/bin:$PATH
+            PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig
+          CIBW_BEFORE_ALL_LINUX: >
+            curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh &&
+            bash miniforge.sh -b -p /opt/miniforge &&
+            rm miniforge.sh &&
+            /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} &&
+            /opt/miniforge/bin/mamba install -n build -y -c conda-forge
+              libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf
+              indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2
+              spdlog tracy-profiler-client urdfdom zlib pytorch pybind11
+              scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair
+              --exclude 'libtorch*.so'
+              --exclude 'libc10*.so'
+              --exclude 'libmkl*.so'
+              -w {dest_dir} {wheel}
+          CIBW_BEFORE_BUILD: >
+            cp pyproject-pypi-cpu-py${{ matrix.python-version == '3.12' && '312' || '313' }}.toml pyproject.toml
+          CIBW_TEST_COMMAND: >
+            python -c "import pymomentum; import torch; print('Import successful')"
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
         uses: actions/upload-artifact@v5
         with:
           name: wheels-cpu-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: dist/*.whl
+          path: wheelhouse/*.whl
           retention-days: 7
 
   build_gpu_wheels:
@@ -135,18 +139,11 @@ jobs:
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
-            pixi-environment: py312-cuda129
             cuda-version: "12.9.0"
           - python-version: '3.13'
-            pixi-environment: py313-cuda129
             cuda-version: "12.9.0"
           - os: ubuntu-latest
             os-short: ubuntu
-    env:
-      FULL_CUDA_VERSION: ${{ matrix.cuda-version }}
-      # Enable compiler caching (ccache on Linux)
-      CMAKE_C_COMPILER_LAUNCHER: ccache
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
 
     steps:
       # Skip Python 3.13 builds on regular commits to reduce CI cost
@@ -167,7 +164,7 @@ jobs:
         shell: bash
 
       - name: Free disk space
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        if: steps.should_run.outputs.run == 'true'
         run: |
           echo "Before cleanup:"
           df -h
@@ -179,75 +176,154 @@ jobs:
           echo "After cleanup:"
           df -h
 
-      - name: Maximize build space (Ubuntu only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 30720
-          swap-size-mb: 1024
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-
       - uses: actions/checkout@v4
         if: steps.should_run.outputs.run == 'true'
         with:
           submodules: recursive
 
-      - name: Set up ccache
+      - name: Set up Python
         if: steps.should_run.outputs.run == 'true'
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: actions/setup-python@v5
         with:
-          key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}-gpu
-
-      - name: Setup CUDA
-        if: steps.should_run.outputs.run == 'true'
-        uses: ./.github/actions/setup-cuda
-        with:
-          cuda-version: ${{ matrix.cuda-version }}
-
-      - name: Set up pixi
-        if: steps.should_run.outputs.run == 'true'
-        uses: prefix-dev/setup-pixi@v0.9.3
-        with:
-          pixi-version: latest
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          environments: ${{ matrix.pixi-environment }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Generate pyproject configs
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} generate_pyproject
+        run: |
+          pip install jinja2
+          python scripts/generate_pyproject.py
 
-      - name: Clean distribution artifacts
+      - name: Build GPU wheels with cibuildwheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} clean_dist
-
-      - name: Build GPU wheel
-        if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
-
-      - name: Repair GPU wheel (Linux only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
-
-      - name: Print ccache stats
-        if: steps.should_run.outputs.run == 'true'
-        run: ccache -s
+        uses: pypa/cibuildwheel@v2.22.0
+        env:
+          CIBW_BUILD: cp${{ matrix.python-version == '3.12' && '312' || '313' }}-*
+          CIBW_SKIP: "*-musllinux_* *-win32 *-manylinux_i686 *-macos*"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_ARCHS_LINUX: x86_64
+          CIBW_ENVIRONMENT_LINUX: >
+            CMAKE_PREFIX_PATH=/opt/miniforge/envs/build
+            PATH=/opt/miniforge/envs/build/bin:/usr/local/cuda/bin:$PATH
+            PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig
+            LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/miniforge/envs/build/lib:$LD_LIBRARY_PATH
+            CUDA_HOME=/usr/local/cuda
+            TORCH_CUDA_ARCH_LIST=5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX
+          CIBW_BEFORE_ALL_LINUX: >
+            yum install -y wget &&
+            wget https://developer.download.nvidia.com/compute/cuda/12.9.0/local_installers/cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm &&
+            rpm -i cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm &&
+            yum clean all &&
+            yum -y install cuda-toolkit-12-9 &&
+            curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh &&
+            bash miniforge.sh -b -p /opt/miniforge &&
+            rm miniforge.sh &&
+            /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} &&
+            /opt/miniforge/bin/mamba install -n build -y -c conda-forge
+              libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf
+              indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2
+              spdlog tracy-profiler-client urdfdom zlib pytorch-gpu pybind11
+              scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache
+              cuda-toolkit cuda-version=12.9
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair
+              --exclude 'libtorch*.so'
+              --exclude 'libc10*.so'
+              --exclude 'libcu*.so*'
+              --exclude 'libnv*.so*'
+              --exclude 'libmkl*.so'
+              -w {dest_dir} {wheel}
+          CIBW_BEFORE_BUILD: >
+            cp pyproject-pypi-gpu.toml pyproject.toml
+          CIBW_TEST_COMMAND: >
+            python -c "import pymomentum; import torch; print('CUDA available:', torch.cuda.is_available()); print('Import successful')"
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
         uses: actions/upload-artifact@v5
         with:
           name: wheels-gpu-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: dist/*.whl
+          path: wheelhouse/*.whl
           retention-days: 7
+
+  test_ubuntu_22_04:
+    name: Test wheels on Ubuntu 22.04 (Colab environment)
+    needs: [build_cpu_wheels, build_gpu_wheels]
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.13']
+        variant: ['cpu']
+
+    steps:
+      - name: Check if should run
+        id: should_run
+        run: |
+          if [[ "${{ matrix.python-version }}" == "3.13" ]]; then
+            if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]] || \
+               [[ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' }}" == "true" ]]; then
+              echo "run=true" >> $GITHUB_OUTPUT
+            else
+              echo "run=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "run=true" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Set up Python
+        if: steps.should_run.outputs.run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download wheel artifacts (Linux only)
+        if: steps.should_run.outputs.run == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-${{ matrix.variant }}-ubuntu-latest-py${{ matrix.python-version }}
+          merge-multiple: true
+
+      - name: List downloaded wheels
+        if: steps.should_run.outputs.run == 'true'
+        run: |
+          echo "Downloaded wheels:"
+          ls -lh dist/
+          echo ""
+          echo "Wheel platform tags:"
+          python -m pip install --upgrade pip
+          for wheel in dist/*.whl; do
+            echo "Checking $wheel:"
+            unzip -l "$wheel" | grep -E "\.dist-info/WHEEL"
+            unzip -p "$wheel" "*dist-info/WHEEL"
+            echo ""
+          done
+
+      - name: Check glibc version (Ubuntu 22.04 has glibc 2.35, same as Colab)
+        if: steps.should_run.outputs.run == 'true'
+        run: |
+          echo "Current glibc version:"
+          ldd --version
+          echo ""
+          echo "Expected: Ubuntu 22.04 has GLIBC 2.35, wheel should be tagged manylinux_2_28"
+
+      - name: Install wheel
+        if: steps.should_run.outputs.run == 'true'
+        run: |
+          pip install dist/pymomentum_${{ matrix.variant }}-*-manylinux_2_28_x86_64.whl
+          pip list
+
+      - name: Test imports
+        if: steps.should_run.outputs.run == 'true'
+        run: |
+          python -c "import pymomentum; print('✅ pymomentum imported successfully')"
+          python -c "import torch; print('✅ torch imported successfully')"
+          python -c "import pymomentum; import torch; print('✅ All imports successful - Compatible with Ubuntu 22.04 (Colab environment)')"
 
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
-    needs: [build_cpu_wheels]
+    needs: [build_cpu_wheels, test_ubuntu_22_04]
     runs-on: ubuntu-latest
     environment:
       name: pypi-cpu
@@ -257,7 +333,7 @@ jobs:
 
     steps:
       - name: Download CPU wheel artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v4
         with:
           path: dist
           pattern: wheels-cpu-*
@@ -284,7 +360,7 @@ jobs:
 
     steps:
       - name: Download GPU wheel artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v4
         with:
           path: dist
           pattern: wheels-gpu-*
