@@ -105,11 +105,7 @@ jobs:
             bash miniforge.sh -b -p /opt/miniforge &&
             rm miniforge.sh &&
             /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} &&
-            /opt/miniforge/bin/mamba install -n build -y -c conda-forge
-              libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf
-              indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2
-              spdlog tracy-profiler-client urdfdom zlib pytorch pybind11
-              scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache
+            /opt/miniforge/bin/mamba install -n build -y -c conda-forge libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2 spdlog tracy-profiler-client urdfdom zlib pytorch pybind11 scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             auditwheel repair
               --exclude 'libtorch*.so'
@@ -218,12 +214,7 @@ jobs:
             bash miniforge.sh -b -p /opt/miniforge &&
             rm miniforge.sh &&
             /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} &&
-            /opt/miniforge/bin/mamba install -n build -y -c conda-forge
-              libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf
-              indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2
-              spdlog tracy-profiler-client urdfdom zlib pytorch-gpu pybind11
-              scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache
-              cuda-toolkit cuda-version=12.9
+            /opt/miniforge/bin/mamba install -n build -y -c conda-forge libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2 spdlog tracy-profiler-client urdfdom zlib pytorch-gpu pybind11 scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache cuda-toolkit cuda-version=12.9
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             auditwheel repair
               --exclude 'libtorch*.so'
