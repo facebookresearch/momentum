@@ -483,3 +483,26 @@ TEST(BlendShapeTest, DifferentSizes) {
   EXPECT_EQ(manyShapesBlendShape.modelSize(), modelSize);
   EXPECT_EQ(manyShapesBlendShape.shapeSize(), manyShapes);
 }
+
+TEST(BlendShapeTest, BlendShapeNames) {
+  const size_t modelSize = 10;
+  const size_t numShapes = 5;
+
+  BlendShapeBase blendShapeBase(modelSize, numShapes);
+
+  // check that we get names
+  for (size_t i = 0; i < numShapes; ++i) {
+    EXPECT_EQ(blendShapeBase.getShapeName(i), std::string("shape_") + std::to_string(i));
+  }
+
+  // do explicit names
+  std::vector<std::string> names;
+  for (size_t i = 0; i < numShapes; ++i) {
+    names.push_back(std::string("different_name_") + std::to_string(i));
+  }
+  BlendShapeBase namedBase(modelSize, numShapes, names);
+
+  for (size_t i = 0; i < numShapes; ++i) {
+    EXPECT_EQ(namedBase.getShapeName(i), names[i]);
+  }
+}

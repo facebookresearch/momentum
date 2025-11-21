@@ -22,14 +22,14 @@ struct BlendShapeBase {
 
   /// @param modelSize Number of vertices in the model
   /// @param numShapes Number of blend shapes
-  BlendShapeBase(size_t modelSize, size_t numShapes);
+  /// @param shapeNames Names of the blend shapes (will be automatically generated if empty or not
+  /// the right size)
+  BlendShapeBase(size_t modelSize, size_t numShapes, std::span<std::string> shapeNames = {});
 
   virtual ~BlendShapeBase() = default;
 
   /// @param shapeVectors Matrix where each column is a shape vector
-  void setShapeVectors(const MatrixXf& shapeVectors) {
-    shapeVectors_ = shapeVectors;
-  }
+  void setShapeVectors(const MatrixXf& shapeVectors, std::span<std::string> shapeNames = {});
 
   [[nodiscard]] const MatrixXf& getShapeVectors() const {
     return shapeVectors_;
@@ -54,7 +54,8 @@ struct BlendShapeBase {
 
   /// @param index Index of the shape vector to set
   /// @param shapeVector Vector of vertex offsets
-  void setShapeVector(size_t index, std::span<const Vector3f> shapeVector);
+  void
+  setShapeVector(size_t index, std::span<const Vector3f> shapeVector, std::string_view name = "");
 
   [[nodiscard]] Eigen::Index shapeSize() const {
     return shapeVectors_.cols();
@@ -65,8 +66,21 @@ struct BlendShapeBase {
     return shapeVectors_.rows() / 3;
   }
 
+  [[nodiscard]] const std::vector<std::string>& getShapeNames() const {
+    return shapeNames_;
+  }
+
+  [[nodiscard]] std::string_view getShapeName(size_t index) const {
+    return shapeNames_[index];
+  }
+
+  void setShapeName(size_t index, std::string_view name) {
+    shapeNames_[index] = name;
+  }
+
  protected:
   MatrixXf shapeVectors_;
+  std::vector<std::string> shapeNames_;
 };
 
 } // namespace momentum
