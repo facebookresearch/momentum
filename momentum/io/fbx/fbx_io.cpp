@@ -512,6 +512,7 @@ void saveBlendShapesToFbx(
 
   // add blendshape channels
   const auto& shapes = character.blendShape->getShapeVectors();
+  const auto& names = character.blendShape->getShapeNames();
   const auto& base = character.blendShape->getBaseShape();
   const int numVertices = character.mesh.get()->vertices.size();
 
@@ -522,12 +523,11 @@ void saveBlendShapesToFbx(
 
   for (size_t i = 0; i < character.blendShape->shapeSize(); i++) {
     ::fbxsdk::FbxBlendShapeChannel* blendShapeChannelPtr =
-        ::fbxsdk::FbxBlendShapeChannel::Create(scene, ("shape_c_" + std::to_string(i)).c_str());
+        ::fbxsdk::FbxBlendShapeChannel::Create(scene, ("channel_" + std::to_string(i)).c_str());
     blendShape->AddBlendShapeChannel(blendShapeChannelPtr);
 
     // add blendshape targets
-    ::fbxsdk::FbxShape* shape =
-        ::fbxsdk::FbxShape::Create(scene, ("shape_" + std::to_string(i)).c_str());
+    ::fbxsdk::FbxShape* shape = ::fbxsdk::FbxShape::Create(scene, names[i].c_str());
     shape->SetControlPointCount(numVertices);
     for (int j = 0; j < numVertices; j++) {
       const Eigen::Vector3f delta = shapes.block<3, 1>(j * 3, i);
