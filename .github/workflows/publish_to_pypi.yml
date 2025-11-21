@@ -43,14 +43,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14]
+        os: [ubuntu-22.04, macos-14]
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
             pixi-environment: py312
           - python-version: '3.13'
             pixi-environment: py313
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             os-short: ubuntu
           - os: macos-14
             os-short: mac-arm64
@@ -110,7 +110,7 @@ jobs:
         run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
 
       - name: Repair CPU wheel (Linux only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-22.04'
         run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
 
       - name: Print ccache stats
@@ -131,7 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-22.04]
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
@@ -140,7 +140,7 @@ jobs:
           - python-version: '3.13'
             pixi-environment: py313-cuda129
             cuda-version: "12.9.0"
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             os-short: ubuntu
     env:
       FULL_CUDA_VERSION: ${{ matrix.cuda-version }}
@@ -167,7 +167,7 @@ jobs:
         shell: bash
 
       - name: Free disk space
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-22.04'
         run: |
           echo "Before cleanup:"
           df -h
@@ -180,7 +180,7 @@ jobs:
           df -h
 
       - name: Maximize build space (Ubuntu only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-22.04'
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 30720
@@ -230,7 +230,7 @@ jobs:
         run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
 
       - name: Repair GPU wheel (Linux only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-22.04'
         run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
 
       - name: Print ccache stats
@@ -248,7 +248,7 @@ jobs:
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
     needs: [build_cpu_wheels]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment:
       name: pypi-cpu
       url: https://pypi.org/p/pymomentum-cpu
@@ -275,7 +275,7 @@ jobs:
   publish_gpu:
     name: Publish pymomentum-gpu to PyPI
     needs: [build_gpu_wheels]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment:
       name: pypi-gpu
       url: https://pypi.org/p/pymomentum-gpu
