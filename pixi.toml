@@ -232,7 +232,7 @@ publish_pypi = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum
 
 [target.linux-64.dependencies]
 nvtx-c = ">=3.1.0" # TODO: Add to pytorch as run dep
-sysroot_linux-64 = ">=2.28,<3"
+sysroot_linux-64 = "2.28.*"  # Pin to 2.28 for manylinux_2_28 compatibility
 patchelf = ">=0.17.2,<0.18"
 auditwheel = ">=6.4.2,<7"
 

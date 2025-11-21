@@ -96,7 +96,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}
-      
+
       # For manylinux container, manually set up ccache directory
       - name: Set up ccache (manylinux container)
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-22.04'
