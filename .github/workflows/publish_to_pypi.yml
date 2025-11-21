@@ -40,6 +40,8 @@ jobs:
   build_cpu_wheels:
     name: pypi-cpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
     runs-on: ${{ matrix.os }}
+    # Use manylinux_2_28 container for Linux builds to ensure glibc 2.28 compatibility
+    container: ${{ matrix.os == 'ubuntu-22.04' && 'quay.io/pypa/manylinux_2_28_x86_64' || null }}
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +83,13 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         with:
           submodules: recursive
+
+      # Install basic tools in manylinux container (git, curl are needed for pixi)
+      - name: Install basic tools (manylinux container only)
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-22.04'
+        run: |
+          yum install -y git curl
+        shell: bash
 
       - name: Set up ccache
         if: steps.should_run.outputs.run == 'true'
