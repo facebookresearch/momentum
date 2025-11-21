@@ -108,23 +108,10 @@ jobs:
           CIBW_ARCHS_LINUX: x86_64
           CIBW_ARCHS_MACOS: arm64
           CIBW_ENVIRONMENT_LINUX: "CMAKE_PREFIX_PATH=/opt/miniforge/envs/build PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig CONDA_PREFIX=/opt/miniforge/envs/build CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++ CMAKE=/opt/miniforge/envs/build/bin/cmake CMAKE_MAKE_PROGRAM=/opt/miniforge/envs/build/bin/ninja"
-          CIBW_BEFORE_ALL_LINUX: >
-            curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh &&
-            bash miniforge.sh -b -p /opt/miniforge &&
-            rm miniforge.sh &&
-            /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} &&
-            /opt/miniforge/bin/mamba install -n build -y -c conda-forge libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2 spdlog tracy-profiler-client urdfdom zlib pytorch pybind11 scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            auditwheel repair
-              --exclude 'libtorch*.so'
-              --exclude 'libc10*.so'
-              --exclude 'libmkl*.so'
-              -w {dest_dir} {wheel}
-          CIBW_BEFORE_BUILD: >
-            pip install torch --index-url https://download.pytorch.org/whl/cpu &&
-            cp pyproject-pypi-cpu-py${{ matrix.python-version == '3.12' && '312' || '313' }}.toml pyproject.toml
-          CIBW_TEST_COMMAND: >
-            python -c "import pymomentum; import torch; print('Import successful')"
+          CIBW_BEFORE_ALL_LINUX: "curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh && bash miniforge.sh -b -p /opt/miniforge && rm miniforge.sh && /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} && /opt/miniforge/bin/mamba install -n build -y -c conda-forge libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2 spdlog tracy-profiler-client urdfdom zlib pytorch pybind11 scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache"
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libmkl*.so' -w {dest_dir} {wheel}"
+          CIBW_BEFORE_BUILD: "pip install torch --index-url https://download.pytorch.org/whl/cpu && cp pyproject-pypi-cpu-py${{ matrix.python-version == '3.12' && '312' || '313' }}.toml pyproject.toml"
+          CIBW_TEST_COMMAND: "python -c \"import pymomentum; import torch; print('Import successful')\""
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
@@ -207,30 +194,10 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_LINUX: x86_64
           CIBW_ENVIRONMENT_LINUX: CMAKE_PREFIX_PATH=/opt/miniforge/envs/build PKG_CONFIG_PATH=/opt/miniforge/envs/build/lib/pkgconfig CUDA_HOME=/usr/local/cuda CONDA_PREFIX=/opt/miniforge/envs/build CC=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-gcc CXX=/opt/miniforge/envs/build/bin/x86_64-conda-linux-gnu-g++ CMAKE=/opt/miniforge/envs/build/bin/cmake CMAKE_MAKE_PROGRAM=/opt/miniforge/envs/build/bin/ninja PATH=/usr/local/cuda/bin:/opt/miniforge/envs/build/bin LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/miniforge/envs/build/lib
-          CIBW_BEFORE_ALL_LINUX: >
-            yum install -y wget &&
-            wget https://developer.download.nvidia.com/compute/cuda/12.9.0/local_installers/cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm &&
-            rpm -i cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm &&
-            yum clean all &&
-            yum -y install cuda-toolkit-12-9 &&
-            curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh &&
-            bash miniforge.sh -b -p /opt/miniforge &&
-            rm miniforge.sh &&
-            /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} &&
-            /opt/miniforge/bin/mamba install -n build -y -c conda-forge libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2 spdlog tracy-profiler-client urdfdom zlib pytorch-gpu pybind11 scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache cuda-toolkit cuda-version=12.9
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            auditwheel repair
-              --exclude 'libtorch*.so'
-              --exclude 'libc10*.so'
-              --exclude 'libcu*.so*'
-              --exclude 'libnv*.so*'
-              --exclude 'libmkl*.so'
-              -w {dest_dir} {wheel}
-          CIBW_BEFORE_BUILD: >
-            pip install torch &&
-            cp pyproject-pypi-gpu.toml pyproject.toml
-          CIBW_TEST_COMMAND: >
-            python -c "import pymomentum; import torch; print('CUDA available:', torch.cuda.is_available()); print('Import successful')"
+          CIBW_BEFORE_ALL_LINUX: "yum install -y wget && wget https://developer.download.nvidia.com/compute/cuda/12.9.0/local_installers/cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm && rpm -i cuda-repo-rhel8-12-9-local-12.9.0_560.28.03-1.x86_64.rpm && yum clean all && yum -y install cuda-toolkit-12-9 && curl -fsSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh && bash miniforge.sh -b -p /opt/miniforge && rm miniforge.sh && /opt/miniforge/bin/mamba create -n build -y python=${{ matrix.python-version }} && /opt/miniforge/bin/mamba install -n build -y -c conda-forge libboost-devel ceres-solver cli11 dispenso eigen ezc3d drjit-cpp fmt fx-gltf indicators kokkos librerun-sdk ms-gsl nlohmann_json openfbx openusd re2 spdlog tracy-profiler-client urdfdom zlib pytorch-gpu pybind11 scikit-build-core setuptools-scm ninja cmake c-compiler cxx-compiler ccache cuda-toolkit cuda-version=12.9"
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' -w {dest_dir} {wheel}"
+          CIBW_BEFORE_BUILD: "pip install torch && cp pyproject-pypi-gpu.toml pyproject.toml"
+          CIBW_TEST_COMMAND: "python -c \"import pymomentum; import torch; print('CUDA available:', torch.cuda.is_available()); print('Import successful')\""
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
