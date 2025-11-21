@@ -215,12 +215,11 @@ build_pypi_wheel = { cmd = """
 
 build_pypi_repair = { cmd = """
     auditwheel repair \
-        --plat manylinux_2_28_x86_64 \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libmkl*.so' \
         dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_cpu-*-linux_x86_64.whl || \
     echo "Skip auditwheel (non-Linux)"
-""", description = "Repair CPU wheel with auditwheel (Linux only)" }
+""", description = "Repair CPU wheel with auditwheel (Linux only) - uses system default manylinux" }
 
 publish_pypi = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
     "check_pypi",
@@ -491,13 +490,12 @@ build_pypi_wheel = { cmd = """
 
 build_pypi_repair = { cmd = """
     auditwheel repair \
-        --plat manylinux_2_28_x86_64 \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' \
         --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
         dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_gpu-*-linux_x86_64.whl || \
     echo "Skip auditwheel (non-Linux)"
-""", description = "Repair GPU wheel with auditwheel (Linux only)" }
+""", description = "Repair GPU wheel with auditwheel (Linux only) - uses system default manylinux" }
 
 publish_pypi = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "check_pypi",
@@ -521,13 +519,12 @@ build_pypi_wheel = { cmd = """
 
 build_pypi_repair = { cmd = """
     auditwheel repair \
-        --plat manylinux_2_28_x86_64 \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' \
         --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
         dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_gpu-*-linux_x86_64.whl || \
     echo "Skip auditwheel (non-Linux)"
-""", description = "Repair GPU wheel with auditwheel (Linux only)" }
+""", description = "Repair GPU wheel with auditwheel (Linux only) - uses system default manylinux" }
 
 publish_pypi = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "check_pypi",
