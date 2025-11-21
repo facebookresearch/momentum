@@ -215,7 +215,7 @@ build_pypi_wheel = { cmd = """
 
 build_pypi_repair = { cmd = """
     auditwheel repair \
-        --plat manylinux2014_x86_64 \
+        --plat manylinux_2_28_x86_64 \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libmkl*.so' \
         dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_cpu-*-linux_x86_64.whl || \
@@ -491,7 +491,7 @@ build_pypi_wheel = { cmd = """
 
 build_pypi_repair = { cmd = """
     auditwheel repair \
-        --plat manylinux2014_x86_64 \
+        --plat manylinux_2_28_x86_64 \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' \
         --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
         dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
@@ -521,7 +521,7 @@ build_pypi_wheel = { cmd = """
 
 build_pypi_repair = { cmd = """
     auditwheel repair \
-        --plat manylinux2014_x86_64 \
+        --plat manylinux_2_28_x86_64 \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' \
         --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
         dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
