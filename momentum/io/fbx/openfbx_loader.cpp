@@ -657,6 +657,7 @@ void parseSkinnedModel(
       newShapes += channel->getShapeCount();
     }
 
+    std::vector<std::string> shapeNames = blendShape->getShapeNames();
     MatrixXf shapes = blendShape->getShapeVectors();
     const int currentShapes = shapes.cols();
     shapes.conservativeResize(
@@ -664,6 +665,7 @@ void parseSkinnedModel(
     shapes.bottomRows(vertexPositions.size() * 3) =
         MatrixXf::Zero(vertexPositions.size() * 3, shapes.cols());
     shapes.rightCols(newShapes) = MatrixXf::Zero(shapes.rows(), newShapes);
+    shapeNames.resize(shapeNames.size() + newShapes, "");
 
     // now actually fill in the data
     int shapeIndex = 0;
@@ -682,12 +684,13 @@ void parseSkinnedModel(
           shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
           shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
         }
+        shapeNames[currentShapes + shapeIndex] = shape->name;
         shapeIndex++;
       }
     }
 
     // add shapes back to blendshapes
-    blendShape->setShapeVectors(shapes);
+    blendShape->setShapeVectors(shapes, shapeNames);
 
     // set the mean shape to the mesh
     blendShape->setBaseShape(mesh.vertices);
