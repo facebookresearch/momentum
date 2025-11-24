@@ -77,7 +77,7 @@ jobs:
           fi
         shell: bash
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: steps.should_run.outputs.run == 'true'
         with:
           submodules: recursive
@@ -191,7 +191,7 @@ jobs:
           remove-codeql: true
           remove-docker-images: true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: steps.should_run.outputs.run == 'true'
         with:
           submodules: recursive
