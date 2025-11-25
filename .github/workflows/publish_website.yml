@@ -37,7 +37,7 @@ jobs:
 
     # 1) Check out the repository
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     # 2) Build Docusaurus site with C++ docs (using Doxygen)
     - uses: actions/setup-node@v6
