@@ -220,6 +220,10 @@ PYBIND11_MODULE(geometry, m) {
           [](const mm::BlendShapeBase& blendShape) { return blendShape.shapeSize(); },
           "Number of shapes in the blend shape basis.")
       .def_property_readonly(
+          "shape_names",
+          [](const mm::BlendShapeBase& blendShape) { return blendShape.getShapeNames(); },
+          "Names of the shapes in the blend shape basis.")
+      .def_property_readonly(
           "n_vertices",
           [](const mm::BlendShapeBase& blendShape) { return blendShape.modelSize(); },
           "Number of vertices in the mesh.")
@@ -250,8 +254,10 @@ PYBIND11_MODULE(geometry, m) {
           R"(Create a blend shape basis (shape vectors) from numpy.ndarray.
 
 :param shape_vectors: A [nShapes x nPts x 3] ndarray containing the blend shape basis.
+:param shape_names: An optional list of shape names.
 :return: a :class:`BlendShapeBase`.)",
-          py::arg("shape_vectors"))
+          py::arg("shape_vectors"),
+          py::arg("shape_names") = std::vector<std::string>())
       .def(
           "compute_shape",
           [](py::object blendShape, at::Tensor coeffs) {
@@ -305,9 +311,11 @@ The resulting shape is equal to a linear combination of the shape vectors (plus 
 
 :param base_shape: A [nPts x 3] ndarray containing the base shape.
 :param shape_vectors: A [nShapes x nPts x 3] ndarray containing the blend shape basis.
+:param shape_names: An optional list of shape names.
 :return: a :class:`BlendShape`.)",
           py::arg("base_shape"),
-          py::arg("shape_vectors"))
+          py::arg("shape_vectors"),
+          py::arg("shape_names") = std::vector<std::string>())
       .def("__repr__", [](const mm::BlendShape& bs) {
         return fmt::format("BlendShape(shapes={}, vertices={})", bs.shapeSize(), bs.modelSize());
       });
