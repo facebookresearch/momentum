@@ -97,6 +97,19 @@ void parameterTransformToJson(const Character& character, nlohmann::json& j) {
       }
     }
   }
+  // write blendshape parameters
+  const auto blendShapeParameters = character.parameterTransform.blendShapeParameters;
+  const auto faceExpressionParameters = character.parameterTransform.faceExpressionParameters;
+  auto bs = nlohmann::json::array();
+  for (int i = 0; i < blendShapeParameters.size(); i++) {
+    bs.push_back(blendShapeParameters[i]);
+  }
+  auto fe = nlohmann::json::array();
+  for (int i = 0; i < faceExpressionParameters.size(); i++) {
+    fe.push_back(faceExpressionParameters[i]);
+  }
+  j["blendShapeParameters"] = bs;
+  j["faceExpressionParameters"] = fe;
 }
 
 ParameterTransform parameterTransformFromJson(const Character& character, const nlohmann::json& j) {
@@ -180,6 +193,26 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
   } catch (...) {
     // create an identity parameter transform
     pt = ParameterTransform::identity(character.skeleton.getJointNames());
+  }
+
+  // read blendshape parameters
+  auto blendShapeParameters = j.find("blendShapeParameters");
+  if (blendShapeParameters != j.end()) {
+    pt.blendShapeParameters.resize(blendShapeParameters->size());
+    for (int i = 0; i < blendShapeParameters->size(); i++) {
+      pt.blendShapeParameters[i] = (*blendShapeParameters)[i].get<int>();
+    }
+  } else {
+    pt.blendShapeParameters.resize(0);
+  }
+  auto faceExpressionParameters = j.find("faceExpressionParameters");
+  if (faceExpressionParameters != j.end()) {
+    pt.faceExpressionParameters.resize(faceExpressionParameters->size());
+    for (int i = 0; i < faceExpressionParameters->size(); i++) {
+      pt.faceExpressionParameters[i] = (*faceExpressionParameters)[i].get<int>();
+    }
+  } else {
+    pt.faceExpressionParameters.resize(0);
   }
 
   return pt;
