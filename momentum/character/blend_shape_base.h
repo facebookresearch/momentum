@@ -24,12 +24,12 @@ struct BlendShapeBase {
   /// @param numShapes Number of blend shapes
   /// @param shapeNames Names of the blend shapes (will be automatically generated if empty or not
   /// the right size)
-  BlendShapeBase(size_t modelSize, size_t numShapes, std::span<std::string> shapeNames = {});
+  BlendShapeBase(size_t modelSize, size_t numShapes, std::span<const std::string> shapeNames = {});
 
   virtual ~BlendShapeBase() = default;
 
   /// @param shapeVectors Matrix where each column is a shape vector
-  void setShapeVectors(const MatrixXf& shapeVectors, std::span<std::string> shapeNames = {});
+  void setShapeVectors(const MatrixXf& shapeVectors, std::span<const std::string> shapeNames = {});
 
   [[nodiscard]] const MatrixXf& getShapeVectors() const {
     return shapeVectors_;
