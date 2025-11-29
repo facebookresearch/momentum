@@ -88,13 +88,19 @@ VectorXf BlendShape::estimateCoefficients(
   }
 }
 
-BlendShape::BlendShape(std::span<const Vector3f> baseShape, const size_t numShapes)
-    : BlendShapeBase(baseShape.size(), numShapes),
+BlendShape::BlendShape(
+    std::span<const Vector3f> baseShape,
+    const size_t numShapes,
+    std::span<const std::string> shapeNames)
+    : BlendShapeBase(baseShape.size(), numShapes, shapeNames),
       baseShape_(baseShape.begin(), baseShape.end()),
       factorizationValid_(false) {}
 
-void BlendShape::setShapeVector(const size_t index, std::span<const Vector3f> shape) {
-  BlendShapeBase::setShapeVector(index, shape);
+void BlendShape::setShapeVector(
+    const size_t index,
+    std::span<const Vector3f> shape,
+    std::string_view name) {
+  BlendShapeBase::setShapeVector(index, shape, name);
 
   // mark as not up to date
   factorizationValid_ = false;

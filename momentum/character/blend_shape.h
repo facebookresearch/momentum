@@ -22,7 +22,12 @@ struct BlendShape : public BlendShapeBase {
 
   /// @param baseShape Base shape vertices
   /// @param numShapes Number of blend shapes
-  BlendShape(std::span<const Vector3f> baseShape, size_t numShapes);
+  /// @param shapeNames Names of the blend shapes (will be automatically generated if empty or not
+  /// the right size)
+  BlendShape(
+      std::span<const Vector3f> baseShape,
+      size_t numShapes,
+      std::span<const std::string> shapeNames = {});
 
   void setBaseShape(std::span<const Vector3f> baseShape) {
     baseShape_.assign(baseShape.begin(), baseShape.end());
@@ -75,7 +80,8 @@ struct BlendShape : public BlendShapeBase {
   ///
   /// @param index Index of the shape vector to set
   /// @param shapeVector Vector of vertex offsets
-  void setShapeVector(size_t index, std::span<const Vector3f> shapeVector);
+  void
+  setShapeVector(size_t index, std::span<const Vector3f> shapeVector, std::string_view name = "");
 
   /// Compares all components of two blend shapes
   ///

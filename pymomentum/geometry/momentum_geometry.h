@@ -120,11 +120,13 @@ void saveBlendShapeBaseToFile(const momentum::BlendShapeBase& blendShape, const 
 void saveBlendShapeToFile(const momentum::BlendShape& blendShape, const std::string& path);
 
 std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromTensors(
-    const pybind11::array_t<float>& shapeVectors);
+    const pybind11::array_t<float>& shapeVectors,
+    const std::vector<std::string>& shapeNames = {});
 
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
     const pybind11::array_t<float>& baseShape,
-    const pybind11::array_t<float>& shapeVectors);
+    const pybind11::array_t<float>& shapeVectors,
+    const std::vector<std::string>& shapeNames = {});
 
 // Strips out vertices attached to the lower body.
 // Does not actually change the skeleton, this is so you can
