@@ -70,7 +70,7 @@ jobs:
         run: ccache -s
 
   pymomentum:
-    if: false # Disabled: Redundant with Windows, macOS is most expensive
+    if: false # Disabled: Covered by cibuildwheel
     name: py-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:

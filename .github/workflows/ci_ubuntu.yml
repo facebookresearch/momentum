@@ -59,7 +59,7 @@ jobs:
           pixi run cmake --build momentum/examples/hello_world/build
 
   pymomentum:
-    if: false # Temporarily disabled to reduce CI cost
+    if: false # Disabled: Covered by cibuildwheel
     name: py-${{ matrix.pixi_env }}-ubuntu
     runs-on: ubuntu-latest
     strategy:

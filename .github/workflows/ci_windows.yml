@@ -64,7 +64,7 @@ jobs:
         run: sccache --show-stats
 
   pymomentum:
-    # Enabled: CPU-only for cost optimization (GPU disabled)
+    if: false # Disabled: Covered by cibuildwheel
     name: py-${{ matrix.pixi_env }}-win
     runs-on: windows-latest
     strategy:

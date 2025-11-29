@@ -20,3 +20,7 @@ dist/
 
 # Generated PyPI config files (generated from template during build)
 pyproject-pypi*.toml
+
+# Local build artifacts
+build.log
+pixi_bin
