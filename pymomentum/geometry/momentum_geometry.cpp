@@ -410,7 +410,8 @@ std::string formatDimensions(const py::array& array) {
 }
 
 std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromTensors(
-    const pybind11::array_t<float>& shapeVectors) {
+    const pybind11::array_t<float>& shapeVectors,
+    const std::vector<std::string>& shapeNames) {
   MT_THROW_IF(
       shapeVectors.ndim() != 3 || shapeVectors.shape(2) != 3,
       "In BlendShapeBase.from_tensors(), expected shape_vectors shape to be [n_shapes x n_pts x 3] but got {}",
@@ -429,14 +430,15 @@ std::shared_ptr<momentum::BlendShapeBase> loadBlendShapeBaseFromTensors(
     }
   }
 
-  auto result = std::make_shared<momentum::BlendShapeBase>(nPts, nShapes);
+  auto result = std::make_shared<momentum::BlendShapeBase>(nPts, nShapes, shapeNames);
   result->setShapeVectors(shapeVectorsRes);
   return result;
 }
 
 std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
     const pybind11::array_t<float>& baseShape,
-    const pybind11::array_t<float>& shapeVectors) {
+    const pybind11::array_t<float>& shapeVectors,
+    const std::vector<std::string>& shapeNames) {
   MT_THROW_IF(
       baseShape.ndim() != 2 || baseShape.shape(1) != 3,
       "In BlendShape.from_tensors(), expected base_shape to be [n_pts x 3] but got {}",
@@ -453,7 +455,8 @@ std::shared_ptr<momentum::BlendShape> loadBlendShapeFromTensors(
 
   // Create a BlendShape and get the shape vectors from the base
   auto result = std::make_shared<momentum::BlendShape>();
-  result->setShapeVectors(loadBlendShapeBaseFromTensors(shapeVectors)->getShapeVectors());
+  result->setShapeVectors(
+      loadBlendShapeBaseFromTensors(shapeVectors)->getShapeVectors(), shapeNames);
 
   // Set the base shape specific to BlendShape
   std::vector<Eigen::Vector3f> baseShapeRes(nPts, Eigen::Vector3f::Zero());
