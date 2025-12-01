@@ -504,6 +504,11 @@ size_t addBlendShapes(
     blendShape =
         std::make_unique<BlendShape>(std::span<const Vector3f>(baseVertices), numNewTargets);
 
+    // load blendshape names from extension
+    const auto& extension = getMomentumExtension(primitive.extensionsAndExtras);
+    std::vector<std::string> blendShapeNames =
+        extension.value("shapeNames", std::vector<std::string>());
+
     // Load each morph target
     for (size_t iTarget = 0; iTarget < numNewTargets; ++iTarget) {
       const auto& target = primitive.targets[iTarget];
@@ -527,7 +532,8 @@ size_t addBlendShapes(
           kNumNewVertices);
 
       // Set the shape vector for this target
-      blendShape->setShapeVector(iTarget, std::span<const Vector3f>(deltas));
+      blendShape->setShapeVector(
+          iTarget, std::span<const Vector3f>(deltas), blendShapeNames[iTarget]);
     }
   } else {
     // Append to existing BlendShape
