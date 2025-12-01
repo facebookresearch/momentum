@@ -209,10 +209,8 @@ publish_pypi_test = { cmd = "twine upload --repository testpypi --skip-existing 
 build_wheels = { cmd = """
     cp $(which pixi) pixi_bin && \
     python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
-    (if [ -d build ]; then mv build build_backup; fi) && \
     cibuildwheel --platform linux --output-dir dist; \
     STATUS=$?; \
-    (if [ -d build_backup ]; then mv build_backup build; fi) && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')" && \
     rm pixi_bin && \
     exit $STATUS

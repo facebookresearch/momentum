@@ -74,7 +74,7 @@ cmake.args = [
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 ]
 minimum-version = "0.10"
@@ -98,7 +98,7 @@ cmake.args = [
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 ]
 
@@ -116,6 +116,8 @@ cmake.args = [
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
     "-DCMAKE_C_COMPILER=/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-gcc",
     "-DCMAKE_CXX_COMPILER=/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-g++",
+    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
+    "-DCMAKE_C_FLAGS=-static-libgcc",
 ]
 
 
@@ -145,6 +147,7 @@ version_file = "pymomentum/_version.py"
 [tool.cibuildwheel]
 build-frontend = "pip; args: --no-build-isolation"
 build = "cp312-* cp313-*"
+build-verbosity = 3
 skip = "pp* *-musllinux*"
 archs = ["auto64"]
 manylinux-x86_64-image = "manylinux_2_28"
@@ -194,7 +197,7 @@ cd /tmp/build_env
 pixi install -e default
 """
 environment = { PATH = "$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CC = "/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-gcc", CXX = "/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-g++" }
-repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel} --exclude libtorch_cpu.so --exclude libtorch.so --exclude libc10.so"
+repair-wheel-command = "export LD_LIBRARY_PATH=/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH && echo 'Starting auditwheel...' && auditwheel -v repair -w {dest_dir} {wheel} --exclude libtorch_cpu.so --exclude libtorch.so --exclude libc10.so --exclude libmkl_intel_lp64.so --exclude libmkl_gnu_thread.so --exclude libmkl_core.so --exclude libmkl_def.so --exclude libmkl_rt.so --exclude libmkl_sequential.so --exclude libmkl_intel_thread.so --exclude libQt6Core.so --exclude libQt6Gui.so --exclude libQt6Widgets.so --exclude libQt6OpenGL.so --exclude libQt6Network.so --exclude libQt6Qml.so --exclude libQt6Quick.so --exclude libicui18n.so --exclude libicuuc.so --exclude libicudata.so --exclude libLLVM-18.so --exclude libvulkan.so --exclude libdrm.so > /project/auditwheel.log 2>&1 || (echo 'Auditwheel failed. Log content:' && cat /project/auditwheel.log && echo 'End of log' && exit 1)"
 
 [tool.cibuildwheel.macos]
 environment = { CMAKE_PREFIX_PATH = "{project}/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF" }

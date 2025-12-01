@@ -91,6 +91,7 @@ cmake.args = [
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
     "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    "-DCMAKE_DISABLE_FIND_PACKAGE_Arrow=ON",
 ]
 minimum-version = "0.10"
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
@@ -201,11 +202,11 @@ pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cpu
 # Install build backend dependencies manually since we use --no-build-isolation
 pip install scikit-build-core pybind11 setuptools-scm cmake ninja
 
-echo "Checking compilers in pixi env:"
-ls -l /tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-gcc
-ls -l /tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-g++
-echo "CC=$CC"
-echo "CXX=$CXX"
+    echo "Checking compilers in pixi env:"
+    ls -l /tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-gcc
+    ls -l /tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-g++
+    echo "CC=$CC"
+    echo "CXX=$CXX"
 """
 test-command = "python {project}/scripts/run_test.py"
 test-requires = ["numpy", "scipy"]
@@ -231,7 +232,7 @@ cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE
 cd /tmp/build_env
 pixi install -e default
 """
-environment = { PATH = "$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CC = "/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-gcc", CXX = "/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-g++" }
+environment = { PATH = "$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CC = "/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-gcc", CXX = "/tmp/build_env/.pixi/envs/default/bin/x86_64-conda-linux-gnu-g++" }
 repair-wheel-command = "export LD_LIBRARY_PATH=/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH && echo 'Starting auditwheel...' && auditwheel -v repair -w {dest_dir} {wheel} --exclude libtorch_cpu.so --exclude libtorch.so --exclude libc10.so --exclude libmkl_intel_lp64.so --exclude libmkl_gnu_thread.so --exclude libmkl_core.so --exclude libmkl_def.so --exclude libmkl_rt.so --exclude libmkl_sequential.so --exclude libmkl_intel_thread.so --exclude libQt6Core.so --exclude libQt6Gui.so --exclude libQt6Widgets.so --exclude libQt6OpenGL.so --exclude libQt6Network.so --exclude libQt6Qml.so --exclude libQt6Quick.so --exclude libicui18n.so --exclude libicuuc.so --exclude libicudata.so --exclude libLLVM-18.so --exclude libvulkan.so --exclude libdrm.so 2>&1 | tee /project/auditwheel.log || (echo 'Auditwheel failed.' && exit 1)"
 
 [tool.cibuildwheel.macos]
