@@ -168,6 +168,8 @@ void addMorphTargetsToModel(
     // enough shapes already exist; nothing to be done.
     return;
   }
+  auto& def = addMomentumExtension(prim.extensionsAndExtras);
+  def["shapeNames"] = shapes.getShapeNames();
 
   const MatrixXf& shapeVecs = shapes.getShapeVectors();
   for (size_t iShape = numShapesAdded; iShape < numShapes; ++iShape) {

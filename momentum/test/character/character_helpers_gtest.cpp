@@ -112,6 +112,8 @@ void compareBlendShapes(const BlendShape_const_p& refShapes, const BlendShape_co
         refShapes->getBaseShape(),
         testing::Pointwise(FloatNearPointwise(0.0001), shapes->getBaseShape()));
     EXPECT_TRUE(refShapes->getShapeVectors().isApprox(shapes->getShapeVectors(), 1e-3));
+    EXPECT_TRUE(shapes->getShapeNames().size() == refShapes->getShapeNames().size());
+    EXPECT_THAT(shapes->getShapeNames(), testing::ContainerEq(refShapes->getShapeNames()));
   }
 }
 
