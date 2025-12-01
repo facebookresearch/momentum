@@ -36,7 +36,7 @@ void BlendShapeBase::applyDeltas(
 BlendShapeBase::BlendShapeBase(
     const size_t modelSize,
     const size_t numShapes,
-    std::span<std::string> shapeNames)
+    std::span<const std::string> shapeNames)
     : shapeVectors_(MatrixXf::Zero(modelSize * 3, numShapes)) {
   shapeNames_.assign(shapeNames.begin(), shapeNames.end());
   if (shapeNames_.size() != numShapes) {
@@ -52,7 +52,7 @@ BlendShapeBase::BlendShapeBase(
 
 void BlendShapeBase::setShapeVectors(
     const MatrixXf& shapeVectors,
-    std::span<std::string> shapeNames) {
+    std::span<const std::string> shapeNames) {
   shapeVectors_ = shapeVectors;
 
   if (shapeNames.size() == static_cast<size_t>(shapeVectors_.cols())) {
