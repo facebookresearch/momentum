@@ -75,6 +75,7 @@ class TestBlendShapeBase(unittest.TestCase):
         shape1, shape2, coeffs = _apply_blend_coeffs(blend_shape, None, shape_vectors)
 
         self.assertTrue(shape1.allclose(shape2))
+        self.assertTrue(len(blend_shape.shape_names) == n_blend)
 
         torch.autograd.gradcheck(
             blend_shape.compute_shape,
@@ -106,6 +107,8 @@ class TestBlendShapeBase(unittest.TestCase):
 
         # Build a set of shape vectors and instantiate as blend shape base
         blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
+        self.assertTrue(len(blend_shape.shape_names) == 4)
+        self.assertTrue(blend_shape.shape_names[0] == "shape_0")
 
         c2 = c.with_face_expression_blend_shape(blend_shape)
         # Check the right parameters are retrieved
