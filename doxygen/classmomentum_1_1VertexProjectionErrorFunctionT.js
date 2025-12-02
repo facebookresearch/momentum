@@ -1,1 +1,15 @@
-var classmomentum_1_1VertexProjectionErrorFunctionT=[["VertexProjectionErrorFunctionT","classmomentum_1_1VertexProjectionErrorFunctionT.html#aa9099e1812e3c027a7b9aac5a19b3801",null],["~VertexProjectionErrorFunctionT","classmomentum_1_1VertexProjectionErrorFunctionT.html#a52f73747dfeab5589b5bcfe5866cf5c7",null],["addConstraint","classmomentum_1_1VertexProjectionErrorFunctionT.html#aba7c06528ad0a602f68896ebd9a7f865",null],["clearConstraints","classmomentum_1_1VertexProjectionErrorFunctionT.html#a3f6e2a0c515878b47a69c7fe3880e0f3",null],["getCharacter","classmomentum_1_1VertexProjectionErrorFunctionT.html#a37e2a0801418c9aeec365cc73c1429a8",null],["getConstraints","classmomentum_1_1VertexProjectionErrorFunctionT.html#a421b911a8a9bc22eeeb0d48cce606257",null],["getError","classmomentum_1_1VertexProjectionErrorFunctionT.html#a47910399cb1bfe7341b208e88c3924c1",null],["getGradient","classmomentum_1_1VertexProjectionErrorFunctionT.html#a46f0d7a08994fe37ae848dad4bc1e038",null],["getJacobian","classmomentum_1_1VertexProjectionErrorFunctionT.html#a74b3e9e246f0d7da9ee8a7a9a21c08cd",null],["getJacobianSize","classmomentum_1_1VertexProjectionErrorFunctionT.html#a8f7fbcb9457662fa869db675703acf2a",null],["needsMesh","classmomentum_1_1VertexProjectionErrorFunctionT.html#a9ea985d34cd265d4f0302db9c0f705a9",null],["numConstraints","classmomentum_1_1VertexProjectionErrorFunctionT.html#aecae45391586b74c278f4f169a36a6c0",null]];
+var classmomentum_1_1VertexProjectionErrorFunctionT =
+[
+    [ "VertexProjectionErrorFunctionT", "classmomentum_1_1VertexProjectionErrorFunctionT.html#aa9099e1812e3c027a7b9aac5a19b3801", null ],
+    [ "~VertexProjectionErrorFunctionT", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a52f73747dfeab5589b5bcfe5866cf5c7", null ],
+    [ "addConstraint", "classmomentum_1_1VertexProjectionErrorFunctionT.html#aba7c06528ad0a602f68896ebd9a7f865", null ],
+    [ "clearConstraints", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a3f6e2a0c515878b47a69c7fe3880e0f3", null ],
+    [ "getCharacter", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a37e2a0801418c9aeec365cc73c1429a8", null ],
+    [ "getConstraints", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a421b911a8a9bc22eeeb0d48cce606257", null ],
+    [ "getError", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a47910399cb1bfe7341b208e88c3924c1", null ],
+    [ "getGradient", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a46f0d7a08994fe37ae848dad4bc1e038", null ],
+    [ "getJacobian", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a74b3e9e246f0d7da9ee8a7a9a21c08cd", null ],
+    [ "getJacobianSize", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a8f7fbcb9457662fa869db675703acf2a", null ],
+    [ "needsMesh", "classmomentum_1_1VertexProjectionErrorFunctionT.html#a9ea985d34cd265d4f0302db9c0f705a9", null ],
+    [ "numConstraints", "classmomentum_1_1VertexProjectionErrorFunctionT.html#aecae45391586b74c278f4f169a36a6c0", null ]
+];

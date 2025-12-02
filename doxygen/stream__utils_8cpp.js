@@ -1,1 +1,4 @@
-var stream__utils_8cpp=[["GetLineCrossPlatform","stream__utils_8cpp.html#a94b50e1e83cd6d9bce4a253de470316f",null]];
+var stream__utils_8cpp =
+[
+    [ "GetLineCrossPlatform", "stream__utils_8cpp.html#a94b50e1e83cd6d9bce4a253de470316f", null ]
+];

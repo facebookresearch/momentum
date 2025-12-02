@@ -1,1 +1,6 @@
-var aim__error__function_8h=[["momentum::AimDataT< T >","structmomentum_1_1AimDataT.html","structmomentum_1_1AimDataT"],["momentum::AimDistErrorFunctionT< T >","classmomentum_1_1AimDistErrorFunctionT.html","classmomentum_1_1AimDistErrorFunctionT"],["momentum::AimDirErrorFunctionT< T >","classmomentum_1_1AimDirErrorFunctionT.html","classmomentum_1_1AimDirErrorFunctionT"]];
+var aim__error__function_8h =
+[
+    [ "momentum::AimDataT< T >", "structmomentum_1_1AimDataT.html", "structmomentum_1_1AimDataT" ],
+    [ "momentum::AimDistErrorFunctionT< T >", "classmomentum_1_1AimDistErrorFunctionT.html", "classmomentum_1_1AimDistErrorFunctionT" ],
+    [ "momentum::AimDirErrorFunctionT< T >", "classmomentum_1_1AimDirErrorFunctionT.html", "classmomentum_1_1AimDirErrorFunctionT" ]
+];

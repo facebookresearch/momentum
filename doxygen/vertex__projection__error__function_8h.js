@@ -1,1 +1,5 @@
-var vertex__projection__error__function_8h=[["momentum::VertexProjectionConstraintT< T >","structmomentum_1_1VertexProjectionConstraintT.html","structmomentum_1_1VertexProjectionConstraintT"],["momentum::VertexProjectionErrorFunctionT< T >","classmomentum_1_1VertexProjectionErrorFunctionT.html","classmomentum_1_1VertexProjectionErrorFunctionT"]];
+var vertex__projection__error__function_8h =
+[
+    [ "momentum::VertexProjectionConstraintT< T >", "structmomentum_1_1VertexProjectionConstraintT.html", "structmomentum_1_1VertexProjectionConstraintT" ],
+    [ "momentum::VertexProjectionErrorFunctionT< T >", "classmomentum_1_1VertexProjectionErrorFunctionT.html", "classmomentum_1_1VertexProjectionErrorFunctionT" ]
+];

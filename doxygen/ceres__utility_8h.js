@@ -1,1 +1,8 @@
-var ceres__utility_8h=[["buildJetMat","ceres__utility_8h.html#a87dd0c7cabfcef9a22353b9acbc8c976",null],["buildJetVec","ceres__utility_8h.html#a7375baa5eb34abac1d8c4c9f5ee8eef8",null],["getRotationDerivative","ceres__utility_8h.html#aa773db3b8cef4329d680981e7d164d23",null],["getScaleDerivative","ceres__utility_8h.html#a6b2cf2e81d6187d373c20619af80742d",null],["times_parameterTransform_times_v","ceres__utility_8h.html#a53436820624e74aeace11c89c25ccb0d",null]];
+var ceres__utility_8h =
+[
+    [ "buildJetMat", "ceres__utility_8h.html#a87dd0c7cabfcef9a22353b9acbc8c976", null ],
+    [ "buildJetVec", "ceres__utility_8h.html#a7375baa5eb34abac1d8c4c9f5ee8eef8", null ],
+    [ "getRotationDerivative", "ceres__utility_8h.html#aa773db3b8cef4329d680981e7d164d23", null ],
+    [ "getScaleDerivative", "ceres__utility_8h.html#a6b2cf2e81d6187d373c20619af80742d", null ],
+    [ "times_parameterTransform_times_v", "ceres__utility_8h.html#a53436820624e74aeace11c89c25ccb0d", null ]
+];

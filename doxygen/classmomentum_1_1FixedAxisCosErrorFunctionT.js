@@ -1,1 +1,6 @@
-var classmomentum_1_1FixedAxisCosErrorFunctionT=[["FixedAxisCosErrorFunctionT","classmomentum_1_1FixedAxisCosErrorFunctionT.html#a50860c3ad011022ddaa554f33b7bd905",null],["FixedAxisCosErrorFunctionT","classmomentum_1_1FixedAxisCosErrorFunctionT.html#a2665bb3f41e4ba6df1226c4d25ef9299",null],["evalFunction","classmomentum_1_1FixedAxisCosErrorFunctionT.html#ad16dfd535c973ac95414abedd32c3509",null]];
+var classmomentum_1_1FixedAxisCosErrorFunctionT =
+[
+    [ "FixedAxisCosErrorFunctionT", "classmomentum_1_1FixedAxisCosErrorFunctionT.html#a50860c3ad011022ddaa554f33b7bd905", null ],
+    [ "FixedAxisCosErrorFunctionT", "classmomentum_1_1FixedAxisCosErrorFunctionT.html#a2665bb3f41e4ba6df1226c4d25ef9299", null ],
+    [ "evalFunction", "classmomentum_1_1FixedAxisCosErrorFunctionT.html#ad16dfd535c973ac95414abedd32c3509", null ]
+];

@@ -1,1 +1,4 @@
-var joint__state_8cpp=[["RotationAxis","joint__state_8cpp.html#ad7a4eb26abfc152149b61fb2dd13e66f",null]];
+var joint__state_8cpp =
+[
+    [ "RotationAxis", "joint__state_8cpp.html#ad7a4eb26abfc152149b61fb2dd13e66f", null ]
+];

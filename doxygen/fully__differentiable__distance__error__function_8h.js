@@ -1,1 +1,6 @@
-var fully__differentiable__distance__error__function_8h=[["momentum::FullyDifferentiableDistanceErrorFunctionT< T >","classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html","classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT"],["MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS","fully__differentiable__distance__error__function_8h.html#aa0f2eba821b26212d0c64827d08c0d8e",null],["MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT","fully__differentiable__distance__error__function_8h.html#a8bd8fa38a761f90b81f80d5cf50607df",null]];
+var fully__differentiable__distance__error__function_8h =
+[
+    [ "momentum::FullyDifferentiableDistanceErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT" ],
+    [ "MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS", "fully__differentiable__distance__error__function_8h.html#aa0f2eba821b26212d0c64827d08c0d8e", null ],
+    [ "MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT", "fully__differentiable__distance__error__function_8h.html#a8bd8fa38a761f90b81f80d5cf50607df", null ]
+];

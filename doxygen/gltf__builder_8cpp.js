@@ -1,1 +1,5 @@
-var gltf__builder_8cpp=[["momentum::GltfBuilder::Impl","structmomentum_1_1GltfBuilder_1_1Impl.html","structmomentum_1_1GltfBuilder_1_1Impl"],["momentum::GltfBuilder::Impl::CharacterData","structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html","structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData"]];
+var gltf__builder_8cpp =
+[
+    [ "momentum::GltfBuilder::Impl", "structmomentum_1_1GltfBuilder_1_1Impl.html", "structmomentum_1_1GltfBuilder_1_1Impl" ],
+    [ "momentum::GltfBuilder::Impl::CharacterData", "structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html", "structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData" ]
+];

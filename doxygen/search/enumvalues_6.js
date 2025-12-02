@@ -1,1 +1,6 @@
-var searchData=[["general_0",["General",["../classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f",1,"momentum::GeneralizedLossT"]]],["global_1",["Global",["../namespacemomentum.html#ac3b087896c5e77b5bdd4dbbb9ac14eb9a4cc6684df7b4a92b1dec6fce3264fac8",1,"momentum"]]],["gltf_2",["Gltf",["../namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76ae8d5895cb2d3f8672b94967f6920c790",1,"momentum"]]]];
+var searchData=
+[
+  ['general_0',['General',['../classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f',1,'momentum::GeneralizedLossT']]],
+  ['global_1',['Global',['../namespacemomentum.html#ac3b087896c5e77b5bdd4dbbb9ac14eb9a4cc6684df7b4a92b1dec6fce3264fac8',1,'momentum']]],
+  ['gltf_2',['Gltf',['../namespacemomentum.html#a3f4912f0cc8069c889ee81f140254d76ae8d5895cb2d3f8672b94967f6920c790',1,'momentum']]]
+];

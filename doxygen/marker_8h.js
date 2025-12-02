@@ -1,1 +1,5 @@
-var marker_8h=[["momentum::Marker","structmomentum_1_1Marker.html","structmomentum_1_1Marker"],["momentum::MarkerSequence","structmomentum_1_1MarkerSequence.html","structmomentum_1_1MarkerSequence"]];
+var marker_8h =
+[
+    [ "momentum::Marker", "structmomentum_1_1Marker.html", "structmomentum_1_1Marker" ],
+    [ "momentum::MarkerSequence", "structmomentum_1_1MarkerSequence.html", "structmomentum_1_1MarkerSequence" ]
+];

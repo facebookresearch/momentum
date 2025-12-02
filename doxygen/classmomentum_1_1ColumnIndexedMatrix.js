@@ -1,1 +1,11 @@
-var classmomentum_1_1ColumnIndexedMatrix=[["VectorType","classmomentum_1_1ColumnIndexedMatrix.html#ace66ea271ffd3bf4552b99289f934470",null],["ColumnIndexedMatrix","classmomentum_1_1ColumnIndexedMatrix.html#aa837f11b13c20e8bad052718e5baf108",null],["ColumnIndexedMatrix","classmomentum_1_1ColumnIndexedMatrix.html#ac4a12e540ff974cab38bb0edccd5898c",null],["col","classmomentum_1_1ColumnIndexedMatrix.html#a75d3829625352d35fb133daa6fad9844",null],["cols","classmomentum_1_1ColumnIndexedMatrix.html#a82dd1455c29ca45f40cd467c8385716a",null],["columnIndices","classmomentum_1_1ColumnIndexedMatrix.html#a2906f140ed9dcedd141fc4958d95972f",null],["rows","classmomentum_1_1ColumnIndexedMatrix.html#a8e1b9bc5f65449978ba283ac01deff4b",null],["transpose_times","classmomentum_1_1ColumnIndexedMatrix.html#aac2dadc13abe4dbdcb4416ba62e87e78",null]];
+var classmomentum_1_1ColumnIndexedMatrix =
+[
+    [ "VectorType", "classmomentum_1_1ColumnIndexedMatrix.html#ace66ea271ffd3bf4552b99289f934470", null ],
+    [ "ColumnIndexedMatrix", "classmomentum_1_1ColumnIndexedMatrix.html#aa837f11b13c20e8bad052718e5baf108", null ],
+    [ "ColumnIndexedMatrix", "classmomentum_1_1ColumnIndexedMatrix.html#ac4a12e540ff974cab38bb0edccd5898c", null ],
+    [ "col", "classmomentum_1_1ColumnIndexedMatrix.html#a75d3829625352d35fb133daa6fad9844", null ],
+    [ "cols", "classmomentum_1_1ColumnIndexedMatrix.html#a82dd1455c29ca45f40cd467c8385716a", null ],
+    [ "columnIndices", "classmomentum_1_1ColumnIndexedMatrix.html#a2906f140ed9dcedd141fc4958d95972f", null ],
+    [ "rows", "classmomentum_1_1ColumnIndexedMatrix.html#a8e1b9bc5f65449978ba283ac01deff4b", null ],
+    [ "transpose_times", "classmomentum_1_1ColumnIndexedMatrix.html#aac2dadc13abe4dbdcb4416ba62e87e78", null ]
+];

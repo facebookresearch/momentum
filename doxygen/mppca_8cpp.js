@@ -1,1 +1,4 @@
-var mppca_8cpp=[["castMatrices","mppca_8cpp.html#a6b07c114caa2b57a84399c7d9d51765c",null]];
+var mppca_8cpp =
+[
+    [ "castMatrices", "mppca_8cpp.html#a6b07c114caa2b57a84399c7d9d51765c", null ]
+];

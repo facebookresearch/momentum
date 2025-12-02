@@ -1,1 +1,9 @@
-var namespaces_dup=[["Eigen","namespaceEigen.html",[["Vector3b","namespaceEigen.html#a3a36bf856cd11dc59ff31922df489a2c",null]]],["fx","namespacefx.html","namespacefx"],["momentum","namespacemomentum.html","namespacemomentum"],["rerun","namespacererun.html","namespacererun"]];
+var namespaces_dup =
+[
+    [ "Eigen", "namespaceEigen.html", [
+      [ "Vector3b", "namespaceEigen.html#a3a36bf856cd11dc59ff31922df489a2c", null ]
+    ] ],
+    [ "fx", "namespacefx.html", "namespacefx" ],
+    [ "momentum", "namespacemomentum.html", "namespacemomentum" ],
+    [ "rerun", "namespacererun.html", "namespacererun" ]
+];

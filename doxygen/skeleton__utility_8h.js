@@ -1,1 +1,7 @@
-var skeleton__utility_8h=[["extrapolateModelParameters","skeleton__utility_8h.html#ad1c40f1a4b724cbb22d44c2519265305",null],["extrapolateModelParameters","skeleton__utility_8h.html#afdd873ca61d784d99656e0081f1022ed",null],["kDefaultExtrapolateFactor","skeleton__utility_8h.html#a1e54e03d01c8dee568b7943561825fe5",null],["kDefaultExtrapolateMaxDelta","skeleton__utility_8h.html#ad3db0a570d65ff49c89aadde824c8986",null]];
+var skeleton__utility_8h =
+[
+    [ "extrapolateModelParameters", "skeleton__utility_8h.html#ad1c40f1a4b724cbb22d44c2519265305", null ],
+    [ "extrapolateModelParameters", "skeleton__utility_8h.html#afdd873ca61d784d99656e0081f1022ed", null ],
+    [ "kDefaultExtrapolateFactor", "skeleton__utility_8h.html#a1e54e03d01c8dee568b7943561825fe5", null ],
+    [ "kDefaultExtrapolateMaxDelta", "skeleton__utility_8h.html#ad3db0a570d65ff49c89aadde824c8986", null ]
+];

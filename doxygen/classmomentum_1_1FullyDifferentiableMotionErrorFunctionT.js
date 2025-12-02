@@ -1,1 +1,11 @@
-var classmomentum_1_1FullyDifferentiableMotionErrorFunctionT=[["FullyDifferentiableMotionErrorFunctionT","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#ad1c34c76a03a45ead6a006de63d90e45",null],["~FullyDifferentiableMotionErrorFunctionT","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a4cb2e309230a1fdfedf1ef62da904a20",null],["d_gradient_d_input_dot","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a5f23fe17e1361721bf90d784bddf1839",null],["getInputImp","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a3ec9dd8a2d7d00966ba874ea1cc71f86",null],["getInputSize","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a7ccf20ee96b7a297f773aaf525a8a7d1",null],["inputs","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a171d01d2c6017f3adad95b6e2d3a13ae",null],["name","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#abdef881cecd84e04bb8838067110a2a4",null],["setInputImp","classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#ad9034dcad1216428683ca79065a88bc7",null]];
+var classmomentum_1_1FullyDifferentiableMotionErrorFunctionT =
+[
+    [ "FullyDifferentiableMotionErrorFunctionT", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#ad1c34c76a03a45ead6a006de63d90e45", null ],
+    [ "~FullyDifferentiableMotionErrorFunctionT", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a4cb2e309230a1fdfedf1ef62da904a20", null ],
+    [ "d_gradient_d_input_dot", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a5f23fe17e1361721bf90d784bddf1839", null ],
+    [ "getInputImp", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a3ec9dd8a2d7d00966ba874ea1cc71f86", null ],
+    [ "getInputSize", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a7ccf20ee96b7a297f773aaf525a8a7d1", null ],
+    [ "inputs", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a171d01d2c6017f3adad95b6e2d3a13ae", null ],
+    [ "name", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#abdef881cecd84e04bb8838067110a2a4", null ],
+    [ "setInputImp", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#ad9034dcad1216428683ca79065a88bc7", null ]
+];

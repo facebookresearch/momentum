@@ -1,1 +1,4 @@
-var searchData=[["heighterrorfunctiont_0",["HeightErrorFunctionT",["../classmomentum_1_1HeightErrorFunctionT.html",1,"momentum"]]]];
+var searchData=
+[
+  ['heighterrorfunctiont_0',['HeightErrorFunctionT',['../classmomentum_1_1HeightErrorFunctionT.html',1,'momentum']]]
+];

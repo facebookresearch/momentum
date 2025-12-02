@@ -1,1 +1,4 @@
-var structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4=[["operator()","structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html#a15538c0a42444e80777bb1074044c095",null]];
+var structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4 =
+[
+    [ "operator()", "structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html#a15538c0a42444e80777bb1074044c095", null ]
+];

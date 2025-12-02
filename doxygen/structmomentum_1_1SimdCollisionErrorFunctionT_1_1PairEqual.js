@@ -1,1 +1,4 @@
-var structmomentum_1_1SimdCollisionErrorFunctionT_1_1PairEqual=[["operator()","structmomentum_1_1SimdCollisionErrorFunctionT_1_1PairEqual.html#a069165051f6fba8a2498bd4ab8df4ed5",null]];
+var structmomentum_1_1SimdCollisionErrorFunctionT_1_1PairEqual =
+[
+    [ "operator()", "structmomentum_1_1SimdCollisionErrorFunctionT_1_1PairEqual.html#a069165051f6fba8a2498bd4ab8df4ed5", null ]
+];

@@ -1,1 +1,8 @@
-var structmomentum_1_1VertexVertexDistanceConstraintT=[["cast","structmomentum_1_1VertexVertexDistanceConstraintT.html#ab5791b8d05cea1960c8d5a455c7479e5",null],["targetDistance","structmomentum_1_1VertexVertexDistanceConstraintT.html#aeb8927f4d65e94cfa8fa6fb2956c8f18",null],["vertexIndex1","structmomentum_1_1VertexVertexDistanceConstraintT.html#ac65feeb44b9f66b2189597946e7f6def",null],["vertexIndex2","structmomentum_1_1VertexVertexDistanceConstraintT.html#a37ecc94dbc55fd0b8e3583db24f7242e",null],["weight","structmomentum_1_1VertexVertexDistanceConstraintT.html#a84df82cc94bea2e794b09c2e674e5c34",null]];
+var structmomentum_1_1VertexVertexDistanceConstraintT =
+[
+    [ "cast", "structmomentum_1_1VertexVertexDistanceConstraintT.html#ab5791b8d05cea1960c8d5a455c7479e5", null ],
+    [ "targetDistance", "structmomentum_1_1VertexVertexDistanceConstraintT.html#aeb8927f4d65e94cfa8fa6fb2956c8f18", null ],
+    [ "vertexIndex1", "structmomentum_1_1VertexVertexDistanceConstraintT.html#ac65feeb44b9f66b2189597946e7f6def", null ],
+    [ "vertexIndex2", "structmomentum_1_1VertexVertexDistanceConstraintT.html#a37ecc94dbc55fd0b8e3583db24f7242e", null ],
+    [ "weight", "structmomentum_1_1VertexVertexDistanceConstraintT.html#a84df82cc94bea2e794b09c2e674e5c34", null ]
+];

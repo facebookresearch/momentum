@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmomentum_website=globalThis.webpackChunkmomentum_website||[]).push([[1954],{46645:e=>{e.exports=JSON.parse('{"name":"docusaurus-plugin-content-docs","id":"pymomentum"}')}}]);

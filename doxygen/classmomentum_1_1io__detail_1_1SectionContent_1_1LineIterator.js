@@ -1,1 +1,6 @@
-var classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator=[["LineIterator","classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html#ae4718f0fc1c9a07702cc9bfa29ddc804",null],["currentLine","classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html#a00ab88afc515aeb3c1bfdf797995a854",null],["getline","classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html#a83f85ac2709d1955e5e9ffb12521826e",null]];
+var classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator =
+[
+    [ "LineIterator", "classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html#ae4718f0fc1c9a07702cc9bfa29ddc804", null ],
+    [ "currentLine", "classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html#a00ab88afc515aeb3c1bfdf797995a854", null ],
+    [ "getline", "classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html#a83f85ac2709d1955e5e9ffb12521826e", null ]
+];

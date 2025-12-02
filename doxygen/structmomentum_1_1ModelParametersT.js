@@ -1,1 +1,4 @@
-var structmomentum_1_1ModelParametersT=[["t","structmomentum_1_1ModelParametersT.html#a4065804d7610fc8bc5432b7f01da0f16",null]];
+var structmomentum_1_1ModelParametersT =
+[
+    [ "t", "structmomentum_1_1ModelParametersT.html#a4065804d7610fc8bc5432b7f01da0f16", null ]
+];

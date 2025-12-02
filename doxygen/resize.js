@@ -1,2 +1,155 @@
-/*! For license information please see resize.js.LICENSE.txt */
-var once=1;function initResizable(){var e,t,i,o,n="doxygen",a=6;function r(e){if(window.chrome){if(o=localStorage.getItem(n+"_width"))return o}else{var t=n+"_"+e+"=";if(document.cookie){var i=document.cookie.indexOf(t);if(-1!=i){var o,a=i+t.length,r=document.cookie.indexOf(";",a);return-1==r&&(r=document.cookie.length),o=document.cookie.substring(a,r)}}}return 250}function d(e,t){if(window.chrome)localStorage.setItem(n+"_width",t);else{var i=new Date;i.setTime(i.getTime()+31536e7),expiration=i.toGMTString(),document.cookie=n+"_"+e+"="+t+"; SameSite=Lax; expires="+expiration+"; path=/"}}function s(){$(window).width();var t=$(e).outerWidth();i.css({marginLeft:parseInt(t)+"px"}),"undefined"!=typeof page_layout&&1==page_layout&&footer.css({marginLeft:parseInt(t)+"px"}),d("width",t-a)}function c(t){$(window).width();i.css({marginLeft:parseInt(t)+a+"px"}),"undefined"!=typeof page_layout&&1==page_layout&&footer.css({marginLeft:parseInt(t)+a+"px"}),e.css({width:t+"px"})}function h(){var n,a,r,d=o.outerHeight(),s=footer.outerHeight(),c=$(window).height();"undefined"==typeof page_layout||0==page_layout?(a=n=c-d-s,r=n):1==page_layout&&(n=c-s,a=c-d,r=c),i.css({height:n+"px"}),t.css({height:a+"px"}),e.css({height:r+"px"}),location.hash.slice(1)&&(document.getElementById(location.hash.slice(1))||document.body).scrollIntoView()}o=$("#top"),e=$("#side-nav"),i=$("#doc-content"),t=$("#nav-tree"),footer=$("#nav-path"),$(".side-nav-resizable").resizable({resize:function(e,t){s()}}),$(e).resizable({minWidth:0}),$(window).resize((function(){h()})),navigator.userAgent.toLowerCase().match(/(iphone|ipod|ipad|android)/)&&($(e).css({paddingRight:"20px"}),$(".ui-resizable-e").css({width:"20px"}),$("#nav-sync").css({right:"34px"}),a=20);var u=r("width");u?c(u):s(),h();var l=location.href,p=l.indexOf("#");p>=0&&(window.location.hash=l.substr(p));var f=function(e){e.preventDefault()};$("#splitbar").bind("dragstart",f).bind("selectstart",f),once&&($(".ui-resizable-handle").dblclick((function(){var t;if(e.width()>0)t=0;else{var i=r("width");t=i>250&&i<$(window).width()?i:250}c(t),d("width",$(e).outerWidth()-a)})),once=0),$(window).on("load",h)}
+/*
+ @licstart  The following is the entire license notice for the JavaScript code in this file.
+
+ The MIT License (MIT)
+
+ Copyright (C) 1997-2020 by Dimitri van Heesch
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ and associated documentation files (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all copies or
+ substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+ @licend  The above is the entire license notice for the JavaScript code in this file
+ */
+var once=1;
+function initResizable()
+{
+  var cookie_namespace = 'doxygen';
+  var sidenav,navtree,content,header,barWidth=6,desktop_vp=768,titleHeight;
+
+  function readSetting(cookie)
+  {
+    if (window.chrome) {
+      var val = localStorage.getItem(cookie_namespace+'_width');
+      if (val) return val;
+    } else {
+      var myCookie = cookie_namespace+"_"+cookie+"=";
+      if (document.cookie) {
+        var index = document.cookie.indexOf(myCookie);
+        if (index != -1) {
+          var valStart = index + myCookie.length;
+          var valEnd = document.cookie.indexOf(";", valStart);
+          if (valEnd == -1) {
+            valEnd = document.cookie.length;
+          }
+          var val = document.cookie.substring(valStart, valEnd);
+          return val;
+        }
+      }
+    }
+    return 250;
+  }
+
+  function writeSetting(cookie, val)
+  {
+    if (window.chrome) {
+      localStorage.setItem(cookie_namespace+"_width",val);
+    } else {
+      var date = new Date();
+      date.setTime(date.getTime()+(10*365*24*60*60*1000)); // default expiration is one week
+      expiration = date.toGMTString();
+      document.cookie = cookie_namespace + "_" + cookie + "=" + val + "; SameSite=Lax; expires=" + expiration+"; path=/";
+    }
+  }
+
+  function resizeWidth()
+  {
+    var windowWidth = $(window).width() + "px";
+    var sidenavWidth = $(sidenav).outerWidth();
+    content.css({marginLeft:parseInt(sidenavWidth)+"px"});
+    if (typeof page_layout!=='undefined' && page_layout==1) {
+      footer.css({marginLeft:parseInt(sidenavWidth)+"px"});
+    }
+    writeSetting('width',sidenavWidth-barWidth);
+  }
+
+  function restoreWidth(navWidth)
+  {
+    var windowWidth = $(window).width() + "px";
+    content.css({marginLeft:parseInt(navWidth)+barWidth+"px"});
+    if (typeof page_layout!=='undefined' && page_layout==1) {
+      footer.css({marginLeft:parseInt(navWidth)+barWidth+"px"});
+    }
+    sidenav.css({width:navWidth + "px"});
+  }
+
+  function resizeHeight()
+  {
+    var headerHeight = header.outerHeight();
+    var footerHeight = footer.outerHeight();
+    var windowHeight = $(window).height();
+    var contentHeight,navtreeHeight,sideNavHeight;
+    if (typeof page_layout==='undefined' || page_layout==0) { /* DISABLE_INDEX=NO */
+      contentHeight = windowHeight - headerHeight - footerHeight;
+      navtreeHeight = contentHeight;
+      sideNavHeight = contentHeight;
+    } else if (page_layout==1) { /* DISABLE_INDEX=YES */
+      contentHeight = windowHeight - footerHeight;
+      navtreeHeight = windowHeight - headerHeight;
+      sideNavHeight = windowHeight;
+    }
+    content.css({height:contentHeight + "px"});
+    navtree.css({height:navtreeHeight + "px"});
+    sidenav.css({height:sideNavHeight + "px"});
+    if (location.hash.slice(1)) {
+      (document.getElementById(location.hash.slice(1))||document.body).scrollIntoView();
+    }
+  }
+
+  function collapseExpand()
+  {
+    var newWidth;
+    if (sidenav.width()>0) {
+      newWidth=0;
+    }
+    else {
+      var width = readSetting('width');
+      newWidth = (width>250 && width<$(window).width()) ? width : 250;
+    }
+    restoreWidth(newWidth);
+    var sidenavWidth = $(sidenav).outerWidth();
+    writeSetting('width',sidenavWidth-barWidth);
+  }
+
+  header  = $("#top");
+  sidenav = $("#side-nav");
+  content = $("#doc-content");
+  navtree = $("#nav-tree");
+  footer  = $("#nav-path");
+  $(".side-nav-resizable").resizable({resize: function(e, ui) { resizeWidth(); } });
+  $(sidenav).resizable({ minWidth: 0 });
+  $(window).resize(function() { resizeHeight(); });
+  var device = navigator.userAgent.toLowerCase();
+  var touch_device = device.match(/(iphone|ipod|ipad|android)/);
+  if (touch_device) { /* wider split bar for touch only devices */
+    $(sidenav).css({ paddingRight:'20px' });
+    $('.ui-resizable-e').css({ width:'20px' });
+    $('#nav-sync').css({ right:'34px' });
+    barWidth=20;
+  }
+  var width = readSetting('width');
+  if (width) { restoreWidth(width); } else { resizeWidth(); }
+  resizeHeight();
+  var url = location.href;
+  var i=url.indexOf("#");
+  if (i>=0) window.location.hash=url.substr(i);
+  var _preventDefault = function(evt) { evt.preventDefault(); };
+  $("#splitbar").bind("dragstart", _preventDefault).bind("selectstart", _preventDefault);
+  if (once) {
+    $(".ui-resizable-handle").dblclick(collapseExpand);
+    once=0
+  }
+  $(window).on('load',resizeHeight);
+}
+/* @license-end */

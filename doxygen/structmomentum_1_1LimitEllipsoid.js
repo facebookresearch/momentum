@@ -1,1 +1,8 @@
-var structmomentum_1_1LimitEllipsoid=[["ellipsoid","structmomentum_1_1LimitEllipsoid.html#ab4b523218fe2430fa66434c16df667aa",null],["ellipsoidInv","structmomentum_1_1LimitEllipsoid.html#a30452a9a654f50dc7f7d1b2fbb8ccfa2",null],["ellipsoidParent","structmomentum_1_1LimitEllipsoid.html#adc19a699aff20eff5c04db429262e35f",null],["offset","structmomentum_1_1LimitEllipsoid.html#a596472ddd9eb627f6f99d43a494c1c01",null],["parent","structmomentum_1_1LimitEllipsoid.html#a0adbc3104f82467490e14793310f88c4",null]];
+var structmomentum_1_1LimitEllipsoid =
+[
+    [ "ellipsoid", "structmomentum_1_1LimitEllipsoid.html#ab4b523218fe2430fa66434c16df667aa", null ],
+    [ "ellipsoidInv", "structmomentum_1_1LimitEllipsoid.html#a30452a9a654f50dc7f7d1b2fbb8ccfa2", null ],
+    [ "ellipsoidParent", "structmomentum_1_1LimitEllipsoid.html#adc19a699aff20eff5c04db429262e35f", null ],
+    [ "offset", "structmomentum_1_1LimitEllipsoid.html#a596472ddd9eb627f6f99d43a494c1c01", null ],
+    [ "parent", "structmomentum_1_1LimitEllipsoid.html#a0adbc3104f82467490e14793310f88c4", null ]
+];

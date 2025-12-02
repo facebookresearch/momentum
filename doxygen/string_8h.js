@@ -1,1 +1,7 @@
-var string_8h=[["tokenize","string_8h.html#ab53d9f9a4dfad1f55e473a1ee36a14fa",null],["tokenize","string_8h.html#a9556e994cd3e64fc51c22f3ad0d48e9f",null],["trim","string_8h.html#a3861ba67bd9896ed1e15620408eceba7",null],["trim","string_8h.html#a1b06073550742d4ffb0e68c403825722",null]];
+var string_8h =
+[
+    [ "tokenize", "string_8h.html#ab53d9f9a4dfad1f55e473a1ee36a14fa", null ],
+    [ "tokenize", "string_8h.html#a9556e994cd3e64fc51c22f3ad0d48e9f", null ],
+    [ "trim", "string_8h.html#a3861ba67bd9896ed1e15620408eceba7", null ],
+    [ "trim", "string_8h.html#a1b06073550742d4ffb0e68c403825722", null ]
+];

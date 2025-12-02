@@ -1,1 +1,9 @@
-var classmomentum_1_1SubsetGaussNewtonSolverT=[["SubsetGaussNewtonSolverT","classmomentum_1_1SubsetGaussNewtonSolverT.html#af91ee407e9e2cc664120b2eb2a414c30",null],["doIteration","classmomentum_1_1SubsetGaussNewtonSolverT.html#a1ba7f72c7dd6101ff70ea6963328e71a",null],["getName","classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553",null],["initializeSolver","classmomentum_1_1SubsetGaussNewtonSolverT.html#a8201e42591b1aae799455930ba0be779",null],["setEnabledParameters","classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe",null],["setOptions","classmomentum_1_1SubsetGaussNewtonSolverT.html#a6993596c31cf66127d68c7f9d7f3e05a",null]];
+var classmomentum_1_1SubsetGaussNewtonSolverT =
+[
+    [ "SubsetGaussNewtonSolverT", "classmomentum_1_1SubsetGaussNewtonSolverT.html#af91ee407e9e2cc664120b2eb2a414c30", null ],
+    [ "doIteration", "classmomentum_1_1SubsetGaussNewtonSolverT.html#a1ba7f72c7dd6101ff70ea6963328e71a", null ],
+    [ "getName", "classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553", null ],
+    [ "initializeSolver", "classmomentum_1_1SubsetGaussNewtonSolverT.html#a8201e42591b1aae799455930ba0be779", null ],
+    [ "setEnabledParameters", "classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe", null ],
+    [ "setOptions", "classmomentum_1_1SubsetGaussNewtonSolverT.html#a6993596c31cf66127d68c7f9d7f3e05a", null ]
+];

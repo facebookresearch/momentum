@@ -1,1 +1,5 @@
-var structmomentum_1_1CharacterParametersT=[["offsets","structmomentum_1_1CharacterParametersT.html#a11b608a996b975c09c15b7282f08c629",null],["pose","structmomentum_1_1CharacterParametersT.html#a5e1f39e527b2e8a39d166faa35c0c8bd",null]];
+var structmomentum_1_1CharacterParametersT =
+[
+    [ "offsets", "structmomentum_1_1CharacterParametersT.html#a11b608a996b975c09c15b7282f08c629", null ],
+    [ "pose", "structmomentum_1_1CharacterParametersT.html#a5e1f39e527b2e8a39d166faa35c0c8bd", null ]
+];

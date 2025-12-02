@@ -1,1 +1,4 @@
-var structmomentum_1_1CollisionErrorFunctionT_1_1PairEqual=[["operator()","structmomentum_1_1CollisionErrorFunctionT_1_1PairEqual.html#aa6d10f5aaa188f9e9f328c8be9c49b2c",null]];
+var structmomentum_1_1CollisionErrorFunctionT_1_1PairEqual =
+[
+    [ "operator()", "structmomentum_1_1CollisionErrorFunctionT_1_1PairEqual.html#aa6d10f5aaa188f9e9f328c8be9c49b2c", null ]
+];

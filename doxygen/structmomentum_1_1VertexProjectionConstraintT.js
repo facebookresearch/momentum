@@ -1,1 +1,8 @@
-var structmomentum_1_1VertexProjectionConstraintT=[["cast","structmomentum_1_1VertexProjectionConstraintT.html#a6ad71ce6281dd03c92ed7faf688e3bb3",null],["projection","structmomentum_1_1VertexProjectionConstraintT.html#abecc12878955c0e7d9abff4260285a5d",null],["targetPosition","structmomentum_1_1VertexProjectionConstraintT.html#acfd2a88415e1c703527277defece8293",null],["vertexIndex","structmomentum_1_1VertexProjectionConstraintT.html#adc7dc4f7caf50de0c528c455c0add901",null],["weight","structmomentum_1_1VertexProjectionConstraintT.html#abace7d9dbab0ff5a36e2517bb1a1240d",null]];
+var structmomentum_1_1VertexProjectionConstraintT =
+[
+    [ "cast", "structmomentum_1_1VertexProjectionConstraintT.html#a6ad71ce6281dd03c92ed7faf688e3bb3", null ],
+    [ "projection", "structmomentum_1_1VertexProjectionConstraintT.html#abecc12878955c0e7d9abff4260285a5d", null ],
+    [ "targetPosition", "structmomentum_1_1VertexProjectionConstraintT.html#acfd2a88415e1c703527277defece8293", null ],
+    [ "vertexIndex", "structmomentum_1_1VertexProjectionConstraintT.html#adc7dc4f7caf50de0c528c455c0add901", null ],
+    [ "weight", "structmomentum_1_1VertexProjectionConstraintT.html#abace7d9dbab0ff5a36e2517bb1a1240d", null ]
+];

@@ -1,1 +1,5 @@
-var projection__error__function_8h=[["momentum::ProjectionConstraintDataT< T >","structmomentum_1_1ProjectionConstraintDataT.html","structmomentum_1_1ProjectionConstraintDataT"],["momentum::ProjectionErrorFunctionT< T >","classmomentum_1_1ProjectionErrorFunctionT.html","classmomentum_1_1ProjectionErrorFunctionT"]];
+var projection__error__function_8h =
+[
+    [ "momentum::ProjectionConstraintDataT< T >", "structmomentum_1_1ProjectionConstraintDataT.html", "structmomentum_1_1ProjectionConstraintDataT" ],
+    [ "momentum::ProjectionErrorFunctionT< T >", "classmomentum_1_1ProjectionErrorFunctionT.html", "classmomentum_1_1ProjectionErrorFunctionT" ]
+];

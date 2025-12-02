@@ -1,1 +1,6 @@
-var structmomentum_1_1LimitMinMaxJoint=[["jointIndex","structmomentum_1_1LimitMinMaxJoint.html#ac80ffb7df8514a13a31c6011fe5c9947",null],["jointParameter","structmomentum_1_1LimitMinMaxJoint.html#a69ba015f06d60b5aeeb5d266c876d458",null],["limits","structmomentum_1_1LimitMinMaxJoint.html#aef9d092d6c1945fe849484c2bdd4a905",null]];
+var structmomentum_1_1LimitMinMaxJoint =
+[
+    [ "jointIndex", "structmomentum_1_1LimitMinMaxJoint.html#ac80ffb7df8514a13a31c6011fe5c9947", null ],
+    [ "jointParameter", "structmomentum_1_1LimitMinMaxJoint.html#a69ba015f06d60b5aeeb5d266c876d458", null ],
+    [ "limits", "structmomentum_1_1LimitMinMaxJoint.html#aef9d092d6c1945fe849484c2bdd4a905", null ]
+];

@@ -1,1 +1,6 @@
-var structmomentum_1_1TrustRegionQROptions=[["TrustRegionQROptions","structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8",null],["TrustRegionQROptions","structmomentum_1_1TrustRegionQROptions.html#a4ce3a0ce9aed78e64bda79ff99b2cd5a",null],["trustRegionRadius_","structmomentum_1_1TrustRegionQROptions.html#abec36009808d5d1813fd0c3ab56bb8ed",null]];
+var structmomentum_1_1TrustRegionQROptions =
+[
+    [ "TrustRegionQROptions", "structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8", null ],
+    [ "TrustRegionQROptions", "structmomentum_1_1TrustRegionQROptions.html#a4ce3a0ce9aed78e64bda79ff99b2cd5a", null ],
+    [ "trustRegionRadius_", "structmomentum_1_1TrustRegionQROptions.html#abec36009808d5d1813fd0c3ab56bb8ed", null ]
+];

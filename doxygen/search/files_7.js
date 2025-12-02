@@ -1,1 +1,5 @@
-var searchData=[["height_5ferror_5ffunction_2ecpp_0",["height_error_function.cpp",["../height__error__function_8cpp.html",1,""]]],["height_5ferror_5ffunction_2eh_1",["height_error_function.h",["../height__error__function_8h.html",1,""]]]];
+var searchData=
+[
+  ['height_5ferror_5ffunction_2ecpp_0',['height_error_function.cpp',['../height__error__function_8cpp.html',1,'']]],
+  ['height_5ferror_5ffunction_2eh_1',['height_error_function.h',['../height__error__function_8h.html',1,'']]]
+];

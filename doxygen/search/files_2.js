@@ -1,1 +1,31 @@
-var searchData=[["c3d_5fio_2ecpp_0",["c3d_io.cpp",["../c3d__io_8cpp.html",1,""]]],["c3d_5fio_2eh_1",["c3d_io.h",["../c3d__io_8h.html",1,""]]],["ceres_5futility_2eh_2",["ceres_utility.h",["../ceres__utility_8h.html",1,""]]],["character_2ecpp_3",["character.cpp",["../character_8cpp.html",1,""]]],["character_2eh_4",["character.h",["../character_8h.html",1,""]]],["character_5fio_2ecpp_5",["character_io.cpp",["../character__io_8cpp.html",1,""]]],["character_5fio_2eh_6",["character_io.h",["../character__io_8h.html",1,""]]],["character_5fstate_2ecpp_7",["character_state.cpp",["../character__state_8cpp.html",1,""]]],["character_5fstate_2eh_8",["character_state.h",["../character__state_8h.html",1,""]]],["character_5futility_2ecpp_9",["character_utility.cpp",["../character__utility_8cpp.html",1,""]]],["character_5futility_2eh_10",["character_utility.h",["../character__utility_8h.html",1,""]]],["checks_2eh_11",["checks.h",["../checks_8h.html",1,""]]],["collision_5ferror_5ffunction_2ecpp_12",["collision_error_function.cpp",["../collision__error__function_8cpp.html",1,""]]],["collision_5ferror_5ffunction_2eh_13",["collision_error_function.h",["../collision__error__function_8h.html",1,""]]],["collision_5ferror_5ffunction_5fstateless_2ecpp_14",["collision_error_function_stateless.cpp",["../collision__error__function__stateless_8cpp.html",1,""]]],["collision_5ferror_5ffunction_5fstateless_2eh_15",["collision_error_function_stateless.h",["../collision__error__function__stateless_8h.html",1,""]]],["collision_5fgeometry_2eh_16",["collision_geometry.h",["../collision__geometry_8h.html",1,""]]],["collision_5fgeometry_5fstate_2ecpp_17",["collision_geometry_state.cpp",["../collision__geometry__state_8cpp.html",1,""]]],["collision_5fgeometry_5fstate_2eh_18",["collision_geometry_state.h",["../collision__geometry__state_8h.html",1,""]]],["constants_2eh_19",["constants.h",["../constants_8h.html",1,""]]],["constraint_5ferror_5ffunction_2dinl_2eh_20",["constraint_error_function-inl.h",["../constraint__error__function-inl_8h.html",1,""]]],["constraint_5ferror_5ffunction_2eh_21",["constraint_error_function.h",["../constraint__error__function_8h.html",1,""]]],["conversions_2ecpp_22",["conversions.cpp",["../conversions_8cpp.html",1,""]]],["conversions_2eh_23",["conversions.h",["../conversions_8h.html",1,""]]],["coordinate_5fsystem_2eh_24",["coordinate_system.h",["../coordinate__system_8h.html",1,""]]],["coordinate_5futils_2eh_25",["coordinate_utils.h",["../coordinate__utils_8h.html",1,""]]],["covariance_5fmatrix_2ecpp_26",["covariance_matrix.cpp",["../covariance__matrix_8cpp.html",1,""]]],["covariance_5fmatrix_2eh_27",["covariance_matrix.h",["../covariance__matrix_8h.html",1,""]]]];
+var searchData=
+[
+  ['c3d_5fio_2ecpp_0',['c3d_io.cpp',['../c3d__io_8cpp.html',1,'']]],
+  ['c3d_5fio_2eh_1',['c3d_io.h',['../c3d__io_8h.html',1,'']]],
+  ['ceres_5futility_2eh_2',['ceres_utility.h',['../ceres__utility_8h.html',1,'']]],
+  ['character_2ecpp_3',['character.cpp',['../character_8cpp.html',1,'']]],
+  ['character_2eh_4',['character.h',['../character_8h.html',1,'']]],
+  ['character_5fio_2ecpp_5',['character_io.cpp',['../character__io_8cpp.html',1,'']]],
+  ['character_5fio_2eh_6',['character_io.h',['../character__io_8h.html',1,'']]],
+  ['character_5fstate_2ecpp_7',['character_state.cpp',['../character__state_8cpp.html',1,'']]],
+  ['character_5fstate_2eh_8',['character_state.h',['../character__state_8h.html',1,'']]],
+  ['character_5futility_2ecpp_9',['character_utility.cpp',['../character__utility_8cpp.html',1,'']]],
+  ['character_5futility_2eh_10',['character_utility.h',['../character__utility_8h.html',1,'']]],
+  ['checks_2eh_11',['checks.h',['../checks_8h.html',1,'']]],
+  ['collision_5ferror_5ffunction_2ecpp_12',['collision_error_function.cpp',['../collision__error__function_8cpp.html',1,'']]],
+  ['collision_5ferror_5ffunction_2eh_13',['collision_error_function.h',['../collision__error__function_8h.html',1,'']]],
+  ['collision_5ferror_5ffunction_5fstateless_2ecpp_14',['collision_error_function_stateless.cpp',['../collision__error__function__stateless_8cpp.html',1,'']]],
+  ['collision_5ferror_5ffunction_5fstateless_2eh_15',['collision_error_function_stateless.h',['../collision__error__function__stateless_8h.html',1,'']]],
+  ['collision_5fgeometry_2eh_16',['collision_geometry.h',['../collision__geometry_8h.html',1,'']]],
+  ['collision_5fgeometry_5fstate_2ecpp_17',['collision_geometry_state.cpp',['../collision__geometry__state_8cpp.html',1,'']]],
+  ['collision_5fgeometry_5fstate_2eh_18',['collision_geometry_state.h',['../collision__geometry__state_8h.html',1,'']]],
+  ['constants_2eh_19',['constants.h',['../constants_8h.html',1,'']]],
+  ['constraint_5ferror_5ffunction_2dinl_2eh_20',['constraint_error_function-inl.h',['../constraint__error__function-inl_8h.html',1,'']]],
+  ['constraint_5ferror_5ffunction_2eh_21',['constraint_error_function.h',['../constraint__error__function_8h.html',1,'']]],
+  ['conversions_2ecpp_22',['conversions.cpp',['../conversions_8cpp.html',1,'']]],
+  ['conversions_2eh_23',['conversions.h',['../conversions_8h.html',1,'']]],
+  ['coordinate_5fsystem_2eh_24',['coordinate_system.h',['../coordinate__system_8h.html',1,'']]],
+  ['coordinate_5futils_2eh_25',['coordinate_utils.h',['../coordinate__utils_8h.html',1,'']]],
+  ['covariance_5fmatrix_2ecpp_26',['covariance_matrix.cpp',['../covariance__matrix_8cpp.html',1,'']]],
+  ['covariance_5fmatrix_2eh_27',['covariance_matrix.h',['../covariance__matrix_8h.html',1,'']]]
+];

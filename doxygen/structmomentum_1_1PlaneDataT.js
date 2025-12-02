@@ -1,1 +1,7 @@
-var structmomentum_1_1PlaneDataT=[["PlaneDataT","structmomentum_1_1PlaneDataT.html#a32dc07da6bb963eeeabb7e105d49fbb6",null],["d","structmomentum_1_1PlaneDataT.html#a949d9de15fe1bb44542b2ee10c6b1b93",null],["normal","structmomentum_1_1PlaneDataT.html#aadc2f648b8bad0a46a64ccf6b8b091b6",null],["offset","structmomentum_1_1PlaneDataT.html#a89c2a12535f0106bf7eee70de262aace",null]];
+var structmomentum_1_1PlaneDataT =
+[
+    [ "PlaneDataT", "structmomentum_1_1PlaneDataT.html#a32dc07da6bb963eeeabb7e105d49fbb6", null ],
+    [ "d", "structmomentum_1_1PlaneDataT.html#a949d9de15fe1bb44542b2ee10c6b1b93", null ],
+    [ "normal", "structmomentum_1_1PlaneDataT.html#aadc2f648b8bad0a46a64ccf6b8b091b6", null ],
+    [ "offset", "structmomentum_1_1PlaneDataT.html#a89c2a12535f0106bf7eee70de262aace", null ]
+];

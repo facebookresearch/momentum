@@ -1,1 +1,4 @@
-var searchData=[["permissive_0",["Permissive",["../namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077",1,"momentum"]]]];
+var searchData=
+[
+  ['permissive_0',['Permissive',['../namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077',1,'momentum']]]
+];

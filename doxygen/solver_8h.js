@@ -1,1 +1,5 @@
-var solver_8h=[["momentum::SolverOptions","structmomentum_1_1SolverOptions.html","structmomentum_1_1SolverOptions"],["momentum::SolverT< T >","classmomentum_1_1SolverT.html","classmomentum_1_1SolverT"]];
+var solver_8h =
+[
+    [ "momentum::SolverOptions", "structmomentum_1_1SolverOptions.html", "structmomentum_1_1SolverOptions" ],
+    [ "momentum::SolverT< T >", "classmomentum_1_1SolverT.html", "classmomentum_1_1SolverT" ]
+];

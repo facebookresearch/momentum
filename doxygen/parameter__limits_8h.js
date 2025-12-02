@@ -1,1 +1,27 @@
-var parameter__limits_8h=[["momentum::LimitMinMax","structmomentum_1_1LimitMinMax.html","structmomentum_1_1LimitMinMax"],["momentum::LimitMinMaxJoint","structmomentum_1_1LimitMinMaxJoint.html","structmomentum_1_1LimitMinMaxJoint"],["momentum::LimitLinear","structmomentum_1_1LimitLinear.html","structmomentum_1_1LimitLinear"],["momentum::LimitLinearJoint","structmomentum_1_1LimitLinearJoint.html","structmomentum_1_1LimitLinearJoint"],["momentum::LimitEllipsoid","structmomentum_1_1LimitEllipsoid.html","structmomentum_1_1LimitEllipsoid"],["momentum::LimitHalfPlane","structmomentum_1_1LimitHalfPlane.html","structmomentum_1_1LimitHalfPlane"],["momentum::LimitData","unionmomentum_1_1LimitData.html","unionmomentum_1_1LimitData"],["momentum::ParameterLimit","structmomentum_1_1ParameterLimit.html","structmomentum_1_1ParameterLimit"],["ParameterLimits","parameter__limits_8h.html#af510f44c571cb8771263cbfbb1971367",null],["LimitType","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83",[["MinMax","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83ae3aa2927e2c3961dd432412b0ce0f3f9",null],["MinMaxJoint","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83a44c96cc3ae9420f4bea29bf119c647c4",null],["MinMaxJointPassive","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aff2fd39fced70107e04a1b7d1745409c",null],["Linear","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354",null],["LinearJoint","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aa9a0cebd730427aeaeec2bb9d059feba",null],["Ellipsoid","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83a749186d8683f337b86da6d6b9999403e",null],["HalfPlane","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aa1b595ca46d9640a0ef5358729143ba8",null],["LimitTypeCount","parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83ada30bd1bec664cb5acae3ed319e14f6b",null]]],["applyPassiveJointParameterLimits","parameter__limits_8h.html#a611e3f0933e8874ccce1cf032506f804",null],["getPoseConstraintParameterLimits","parameter__limits_8h.html#adc6e190808bcf34f961e48daa25dd46d",null],["isInRange","parameter__limits_8h.html#ac6fde982d4dfa32bc253074c5df04e7c",null],["isInRange","parameter__limits_8h.html#a8ae68da88ca65a75081a499c628ff9b3",null],["toString","parameter__limits_8h.html#adf6b93d6b60161b6bd5167fb36826b1b",null]];
+var parameter__limits_8h =
+[
+    [ "momentum::LimitMinMax", "structmomentum_1_1LimitMinMax.html", "structmomentum_1_1LimitMinMax" ],
+    [ "momentum::LimitMinMaxJoint", "structmomentum_1_1LimitMinMaxJoint.html", "structmomentum_1_1LimitMinMaxJoint" ],
+    [ "momentum::LimitLinear", "structmomentum_1_1LimitLinear.html", "structmomentum_1_1LimitLinear" ],
+    [ "momentum::LimitLinearJoint", "structmomentum_1_1LimitLinearJoint.html", "structmomentum_1_1LimitLinearJoint" ],
+    [ "momentum::LimitEllipsoid", "structmomentum_1_1LimitEllipsoid.html", "structmomentum_1_1LimitEllipsoid" ],
+    [ "momentum::LimitHalfPlane", "structmomentum_1_1LimitHalfPlane.html", "structmomentum_1_1LimitHalfPlane" ],
+    [ "momentum::LimitData", "unionmomentum_1_1LimitData.html", "unionmomentum_1_1LimitData" ],
+    [ "momentum::ParameterLimit", "structmomentum_1_1ParameterLimit.html", "structmomentum_1_1ParameterLimit" ],
+    [ "ParameterLimits", "parameter__limits_8h.html#af510f44c571cb8771263cbfbb1971367", null ],
+    [ "LimitType", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83", [
+      [ "MinMax", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83ae3aa2927e2c3961dd432412b0ce0f3f9", null ],
+      [ "MinMaxJoint", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83a44c96cc3ae9420f4bea29bf119c647c4", null ],
+      [ "MinMaxJointPassive", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aff2fd39fced70107e04a1b7d1745409c", null ],
+      [ "Linear", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354", null ],
+      [ "LinearJoint", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aa9a0cebd730427aeaeec2bb9d059feba", null ],
+      [ "Ellipsoid", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83a749186d8683f337b86da6d6b9999403e", null ],
+      [ "HalfPlane", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83aa1b595ca46d9640a0ef5358729143ba8", null ],
+      [ "LimitTypeCount", "parameter__limits_8h.html#a9a0f06b01e5e0f7eff9212770dcf3f83ada30bd1bec664cb5acae3ed319e14f6b", null ]
+    ] ],
+    [ "applyPassiveJointParameterLimits", "parameter__limits_8h.html#a611e3f0933e8874ccce1cf032506f804", null ],
+    [ "getPoseConstraintParameterLimits", "parameter__limits_8h.html#adc6e190808bcf34f961e48daa25dd46d", null ],
+    [ "isInRange", "parameter__limits_8h.html#ac6fde982d4dfa32bc253074c5df04e7c", null ],
+    [ "isInRange", "parameter__limits_8h.html#a8ae68da88ca65a75081a499c628ff9b3", null ],
+    [ "toString", "parameter__limits_8h.html#adf6b93d6b60161b6bd5167fb36826b1b", null ]
+];
