@@ -710,23 +710,12 @@ Character addSkinnedLocatorParametersToTransform(Character character) {
   return character;
 }
 
-/// Calibrate character identity parameters (scaling, locators, blend shapes) from marker data.
-///
-/// This is the main calibration function that solves for global character parameters
-/// that remain constant across all frames. It uses a multi-stage approach:
-/// 1. Initialize poses with fixed identity
-/// 2. Alternate between solving global parameters and poses
-/// 3. Fine-tune locator positions
-///
-/// @param markerData Marker observations for each frame
-/// @param config Calibration configuration settings
-/// @param character Character model to calibrate (modified in-place)
-/// @param identity Output identity parameters (scaling, blend shapes)
 void calibrateModel(
     const std::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
     Character& character,
-    ModelParameters& identity) {
+    ModelParameters& identity,
+    const std::array<float, 3>& regularizerWeights) {
   MT_CHECK(
       identity.v.size() == character.parameterTransform.numAllModelParameters(),
       "Input identity parameters {} do not match character parameters {}",
@@ -809,7 +798,7 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           firstFrame,
-          0.0,
+          regularizerWeights.at(0),
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet); // still solving a subset
       std::tie(identity.v, character.locators, character.skinnedLocators) =
@@ -842,8 +831,8 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           frameIndices,
-          0.0,
-          /*regularizer*/ // allow large change at initialization without any regularization
+          regularizerWeights.at(0), // note: ideally allow large change at initialization with 0
+                                    // or low regularization weight
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet);
     } else {
@@ -859,7 +848,8 @@ void calibrateModel(
           calibBodySet, // only solve for identity and not markers
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
-          0.0 /*regularizer*/, // allow large change at initialization without any regularization
+          regularizerWeights.at(0), // note: ideally allow large change at initialization with 0
+                                    // or low regularization weight
           frameStride,
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet);
@@ -878,7 +868,8 @@ void calibrateModel(
           motion,
           trackingConfig,
           frameIndices,
-          0.0, // TODO: use a small regularization to prevent too large a change
+          regularizerWeights.at(
+              1), // note: ideally use a small regularization to prevent too large a change
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet); // still solving a subset
     } else {
@@ -888,7 +879,8 @@ void calibrateModel(
           locatorSet | calibBodySetExtended,
           motion,
           trackingConfig,
-          0.0, // TODO: use a small regularization to prevent too large a change
+          regularizerWeights.at(
+              1), // note: ideally use a small regularization to prevent too large a change
           frameStride,
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet); // still solving a subset
@@ -922,7 +914,6 @@ void calibrateModel(
   // Finally, fine tune marker offsets with fix identity.
   MT_LOGI_IF(config.debug, "Fine-tune marker offsets");
 
-  // TODO: use a larger regularizer to prevent too large a change.
   if (config.greedySampling > 0) {
     motion = trackSequence(
         markerData,
@@ -931,7 +922,8 @@ void calibrateModel(
         motion,
         trackingConfig,
         frameIndices,
-        0.0,
+        regularizerWeights.at(
+            2), // note: ideally use a higher regularizer weight to prevent too large a change
         config.enforceFloorInFirstFrame,
         config.firstFramePoseConstraintSet);
   } else {
@@ -941,7 +933,8 @@ void calibrateModel(
         locatorSet,
         motion,
         trackingConfig,
-        0.0,
+        regularizerWeights.at(
+            2), // note: ideally use a higher regularizer weight to prevent too large a change
         frameStride,
         config.enforceFloorInFirstFrame,
         config.firstFramePoseConstraintSet);
