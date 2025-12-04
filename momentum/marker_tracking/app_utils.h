@@ -50,6 +50,7 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIden
 /// @param[in] saveMarkerMesh (optional) Whether to save a visible cube mesh for the markers
 /// @param[in] saveScaleToMotion (optional) Whether to save the scale parameters to the motion or
 /// identity parameter vectors (saving to motion is preferred)
+/// @param[in] timestamps Per-frame timestamps. Size should match motion columns.
 void saveMotion(
     const std::string& outFile,
     const momentum::Character& character,
@@ -57,6 +58,7 @@ void saveMotion(
     Eigen::MatrixXf& finalMotion,
     std::span<const std::vector<momentum::Marker>> markerData,
     double fps,
-    bool saveMarkerMesh = true);
+    bool saveMarkerMesh = true,
+    std::span<const int64_t> timestamps = {});
 
 } // namespace momentum

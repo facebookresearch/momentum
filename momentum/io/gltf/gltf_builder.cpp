@@ -968,7 +968,8 @@ void GltfBuilder::addMotion(
     const MotionParameters& motion /*= {}*/,
     const IdentityParameters& offsets /*= {}*/,
     const bool addExtensions /*= true*/,
-    const std::string& customName /*= "default"*/) {
+    const std::string& customName /*= "default"*/,
+    std::span<const int64_t> timestamps /*= {}*/) {
   setFps(fps);
   if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
     // #TODO: Warn about this addition
@@ -996,6 +997,20 @@ void GltfBuilder::addMotion(
   if (animIter != impl_->document.animations.end()) {
     const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
     impl_->characterData[character.name].animationIndices.push_back(animIdx);
+  }
+
+  // Add timestamps to the FB_momentum extension
+  if (!timestamps.empty()) {
+    const auto& motionMatrix = std::get<1>(motion);
+    MT_THROW_IF(
+        timestamps.size() != motionMatrix.cols(),
+        "Timestamps size {} does not match motion size {}",
+        timestamps.size(),
+        motionMatrix.cols());
+    auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
+    // Store timestamps as a JSON array in the motion section
+    // The field definition follows the format of addMotionToModel above
+    def["motion"]["timestamps"] = std::vector<int64_t>(timestamps.begin(), timestamps.end());
   }
 }
 

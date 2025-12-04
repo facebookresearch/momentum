@@ -193,7 +193,8 @@ void saveMotion(
     Eigen::MatrixXf& finalMotion,
     std::span<const std::vector<momentum::Marker>> markerData,
     const double fps,
-    const bool saveMarkerMesh) {
+    const bool saveMarkerMesh /*= true*/,
+    std::span<const int64_t> timestamps /*= {}*/) {
   const filesystem::path output(outFile);
   const auto ext = output.extension();
 
@@ -212,7 +213,10 @@ void saveMotion(
         character,
         fps,
         std::make_tuple(character.parameterTransform.name, finalMotion),
-        std::make_tuple(character.skeleton.getJointNames(), idVec));
+        std::make_tuple(character.skeleton.getJointNames(), idVec),
+        /*addExtensions*/ true,
+        /*customName*/ "default",
+        timestamps);
     fileBuilder.addMarkerSequence(
         fps,
         markerData,

@@ -30,6 +30,13 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
     const filesystem::path& gltfFilename);
 
+/// Load per-frame timestamps from a glTF file.
+/// This function loads timestamps that were saved using GltfBuilder::addMotion
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return A vector of per-frame timestamps (usually in microsecond).
+std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename);
+
 /// Load a glTF character from a local file path.
 ///
 /// This function assumes the file format of the given path is glTF without checking the extension,

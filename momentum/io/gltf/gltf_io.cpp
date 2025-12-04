@@ -1193,6 +1193,33 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
   return {};
 }
 
+std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename) {
+  try {
+    fx::gltf::Document model = loadModel(gltfFilename);
+    const auto& def = getMomentumExtension(model.extensionsAndExtras);
+
+    // Check if motion section exists and has timestamps
+    if (def.count("motion") == 0) {
+      MT_LOGW("No motion data found in gltf file when loading timestamps");
+      return {};
+    }
+
+    const auto& motion = def["motion"];
+    if (!motion.contains("timestamps")) {
+      MT_LOGW("No timestamps found in gltf file");
+      return {};
+    }
+
+    // Extract timestamps from the JSON array
+    return motion["timestamps"].get<std::vector<int64_t>>();
+  } catch (const std::exception& err) {
+    MT_THROW(
+        "Unable to load timestamps from gltf file '{}'. Error: {}",
+        gltfFilename.string(),
+        err.what());
+  }
+}
+
 std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
     const filesystem::path& gltfFilename) {
   return loadCharacterWithMotionCommon(gltfFilename);

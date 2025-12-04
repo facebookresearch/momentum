@@ -59,13 +59,22 @@ class GltfBuilder final {
 
   /// Add a motion to the provided character. If addCharacter is not called before adding
   /// the motion, the character will be automatically added with the default settings.
+  ///
+  /// @param[in] character The character to add motion for.
+  /// @param[in] fps Frame rate of the motion in frames per second.
+  /// @param[in] motion Motion parameters (parameter names and poses matrix).
+  /// @param[in] offsets Identity/offset parameters (joint names and offsets vector).
+  /// @param[in] addExtensions Whether to add momentum extensions to the document.
+  /// @param[in] customName Custom name for the animation (default is "default").
+  /// @param[in] timestamps Per-frame timestamps. Size should match motion columns.
   void addMotion(
       const Character& character,
       float fps = 120.0f,
       const MotionParameters& motion = {},
       const IdentityParameters& offsets = {},
       bool addExtensions = true,
-      const std::string& customName = "default");
+      const std::string& customName = "default",
+      std::span<const int64_t> timestamps = {});
 
   /// Add a skeleton states to the provided character. If addCharacter is not called before adding
   /// the skeleton states, the character will be automatically added with the default settings.
