@@ -39,7 +39,7 @@ struct BoundingBox {
 
   [[nodiscard]] bool intersectsBranchless(
       const Eigen::Vector3<Scalar>& origin,
-      const Eigen::Vector3<Scalar>& direction) const;
+      const Eigen::Vector3<Scalar>& dirInv) const;
 
   [[nodiscard]] bool contains(const Eigen::Vector3<Scalar>& point) const;
   [[nodiscard]] bool contains(const BoundingBox& other) const;
