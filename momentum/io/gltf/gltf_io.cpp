@@ -532,8 +532,12 @@ size_t addBlendShapes(
           kNumNewVertices);
 
       // Set the shape vector for this target
-      blendShape->setShapeVector(
-          iTarget, std::span<const Vector3f>(deltas), blendShapeNames[iTarget]);
+      if (iTarget < blendShapeNames.size()) {
+        blendShape->setShapeVector(
+            iTarget, std::span<const Vector3f>(deltas), blendShapeNames[iTarget]);
+      } else {
+        blendShape->setShapeVector(iTarget, std::span<const Vector3f>(deltas));
+      }
     }
   } else {
     // Append to existing BlendShape
