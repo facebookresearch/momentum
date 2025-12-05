@@ -5,7 +5,7 @@ var marker__tracker_8h =
     [ "momentum::TrackingConfig", "structmomentum_1_1TrackingConfig.html", "structmomentum_1_1TrackingConfig" ],
     [ "momentum::RefineConfig", "structmomentum_1_1RefineConfig.html", "structmomentum_1_1RefineConfig" ],
     [ "calibrateLocators", "marker__tracker_8h.html#a09ca37c93f7fe8d9b455b77eee32c66c", null ],
-    [ "calibrateModel", "marker__tracker_8h.html#a8dde7d0f9259ad2608bd77c2521b94e6", null ],
+    [ "calibrateModel", "marker__tracker_8h.html#ae6981dbce97909093d894a710c0d2957", null ],
     [ "getLocatorError", "marker__tracker_8h.html#a26c6a0a6e2e13ba5f19fe7bce59c5a82", null ],
     [ "refineMotion", "marker__tracker_8h.html#a04399958e06447bd1d21106c80429e1c", null ],
     [ "trackPosesForFrames", "marker__tracker_8h.html#aa6c7e4afbc1ba077b988d4b24559ab3d", null ],

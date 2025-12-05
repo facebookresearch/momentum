@@ -9,5 +9,5 @@ var app__utils_8h =
     [ "addTrackingOptions", "app__utils_8h.html#a3275cdaa8cbb2daa4865dd03e3e2f4f6", null ],
     [ "loadCalibratedModel", "app__utils_8h.html#a1dc2f6bbb861ab198e98f3c896da1a31", null ],
     [ "loadCharacterWithIdentity", "app__utils_8h.html#ad1b607021b082409d115104fc93687e3", null ],
-    [ "saveMotion", "app__utils_8h.html#a6616419dbeec950d898958e93cdee98d", null ]
+    [ "saveMotion", "app__utils_8h.html#a58ad8adc5d58afedde2f2de6abb51bb5", null ]
 ];

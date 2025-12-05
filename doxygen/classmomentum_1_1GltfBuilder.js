@@ -11,7 +11,7 @@ var classmomentum_1_1GltfBuilder =
     [ "addCharacter", "classmomentum_1_1GltfBuilder.html#a98ddd6c2f36cecca4acd076e57a82c01", null ],
     [ "addMarkerSequence", "classmomentum_1_1GltfBuilder.html#a620a154d7f8d24c5ea434ea52b49d853", null ],
     [ "addMesh", "classmomentum_1_1GltfBuilder.html#a9cc5d8454d3344d9246d782e0144d4f1", null ],
-    [ "addMotion", "classmomentum_1_1GltfBuilder.html#aa32e8790cd60909466db5627acee6ec3", null ],
+    [ "addMotion", "classmomentum_1_1GltfBuilder.html#a5e553a3fbfbfd9afe9e9129488425138", null ],
     [ "addSkeletonStates", "classmomentum_1_1GltfBuilder.html#ad50ea074e34f1d4abecd94476ab10e41", null ],
     [ "forceEmbedResources", "classmomentum_1_1GltfBuilder.html#ad782f9bdb15b4bbbe18d8dee6c7f7766", null ],
     [ "getCharacterMotions", "classmomentum_1_1GltfBuilder.html#a761d6311d32e8dcd418e2730f7ecf889", null ],

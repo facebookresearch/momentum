@@ -11,6 +11,7 @@ var gltf__io_8h =
     [ "loadMotion", "gltf__io_8h.html#a06ff22b041f41c37ec0793777c9ce93e", null ],
     [ "loadMotionOnCharacter", "gltf__io_8h.html#ac95e977c8e17fcca2dc99db7fabaedb5", null ],
     [ "loadMotionOnCharacter", "gltf__io_8h.html#a38f41ae865b5e768feda8520d78f2c2b", null ],
+    [ "loadMotionTimestamps", "gltf__io_8h.html#af0f697e1c53a7096ceb6382fc2f4697b", null ],
     [ "makeCharacterDocument", "gltf__io_8h.html#ac3fe8a4ee2722309fab473889fcca308", null ],
     [ "saveCharacterToBytes", "gltf__io_8h.html#aa5543eb047cfc02c63d9cbfd0aa334f8", null ],
     [ "saveGltfCharacter", "gltf__io_8h.html#a5b67b4aed4cbd9e47a62aeca79db7395", null ],
