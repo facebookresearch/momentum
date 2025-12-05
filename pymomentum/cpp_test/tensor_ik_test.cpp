@@ -56,7 +56,7 @@ PositionErrorFunctionTensors toPositionTensors(
 
 at::Tensor concatBatch(std::vector<at::Tensor> tensors) {
   if (tensors.empty()) {
-    return at::Tensor();
+    return {};
   }
 
   const auto sizes = tensors[0].sizes();
