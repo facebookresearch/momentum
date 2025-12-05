@@ -13,6 +13,14 @@
 #include <Eigen/Core>
 #include <Eigen/Eigen>
 
+#ifdef True
+#undef True
+#endif // True
+
+#ifdef False
+#undef False
+#endif // False
+
 namespace axel {
 
 namespace detail {
@@ -71,7 +79,8 @@ class KdTree {
       typename = std::enable_if_t<
           detail::IsEigenTypeWithStorage<T> && // This check might be obsolete due to transitivity.
           std::is_same_v<std::decay_t<T>, std::decay_t<EigenMatrixType>>>>
-  explicit KdTree(T&& points) : points_(std::forward<T>(points)), tree_(points_.cols(), points_) {
+  explicit KdTree(T&& points)
+      : points_(std::forward<T>(points)), tree_(static_cast<int32_t>(points_.cols()), points_) {
     tree_.index->buildIndex();
   }
 
