@@ -930,15 +930,19 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_motion">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="Link to this definition"></a></dt>
-<dd><p>Load a character and a motion sequence from a gltf file.  Note that motion can only be read from GLTF files
-saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use
-<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_skel_states()</span></code></a>.</p>
+<dd><p>Load both character (skeleton/mesh) and motion data from a gltf file in a single call.</p>
+<p>Use this function when you need both the character structure and its animation together.
+For loading ONLY motion data without the character, use <a class="reference internal" href="#pymomentum.geometry.load_motion" title="pymomentum.geometry.load_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pymomentum.geometry.load_motion()</span></code></a> instead.</p>
+<p>Note that motion can only be read from GLTF files saved using momentum, which stores model parameters 
+in a custom extension. For GLTF files saved using other software, use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_skel_states()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.</p>
+<dd class="field-even"><p>a tuple [Character, motion, identity, fps], where Character is the complete character object, 
+motion is the motion matrix [nFrames x nParams], identity is a JointParameter at rest pose, 
+and fps is the frame rate. Does NOT include parameter names (unlike <a class="reference internal" href="#pymomentum.geometry.load_motion" title="pymomentum.geometry.load_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pymomentum.geometry.load_motion()</span></code></a>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3695,7 +3699,9 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.load_motion">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">load_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.load_motion" title="Link to this definition"></a></dt>
-<dd><p>Load a motion sequence from a gltf file.</p>
+<dd><p>Load ONLY motion data (animation parameters) from a gltf file, without loading the character.</p>
+<p>Use this function when you already have the character loaded separately and only need the motion data.
+For loading both character and motion together, use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion()</span></code></a>.</p>
 <p>Unless you can guarantee that the parameters in the motion files match your existing character,
 you will likely want to retarget the parameters using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mapParameters()</span></code> function.</p>
 <dl class="field-list simple">
@@ -3703,7 +3709,7 @@ you will likely want to retarget the parameters using the <code class="xref py p
 <dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a tuple [motionData, motionParameterNames, identityData, identityParameterNames].</p>
+<dd class="field-even"><p>a tuple [motionData, motionParameterNames, identityData, identityParameterNames]. Does NOT include the character or FPS.</p>
 </dd>
 </dl>
 </dd></dl>
