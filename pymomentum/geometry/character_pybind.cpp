@@ -665,12 +665,18 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           "load_gltf_with_motion",
           &loadGLTFCharacterWithMotion,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load a character and a motion sequence from a gltf file.  Note that motion can only be read from GLTF files
-saved using momentum, which stores model parameters in a custom extension.  For GLTF files saved using other software, use
-:meth:`load_gltf_with_skel_states`.
+          R"(Load both character (skeleton/mesh) and motion data from a gltf file in a single call.
+
+Use this function when you need both the character structure and its animation together.
+For loading ONLY motion data without the character, use :meth:`pymomentum.geometry.load_motion` instead.
+
+Note that motion can only be read from GLTF files saved using momentum, which stores model parameters 
+in a custom extension. For GLTF files saved using other software, use :meth:`load_gltf_with_skel_states`.
 
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
-:return: a tuple [Character, motion, identity, fps], where motion is the motion matrix [nFrames x nParams] and identity is a JointParameter at rest pose.
+:return: a tuple [Character, motion, identity, fps], where Character is the complete character object, 
+         motion is the motion matrix [nFrames x nParams], identity is a JointParameter at rest pose, 
+         and fps is the frame rate. Does NOT include parameter names (unlike :meth:`pymomentum.geometry.load_motion`).
       )",
           py::arg("gltf_filename"))
       .def_static(

@@ -749,13 +749,16 @@ The resulting tensors are as follows:
   m.def(
       "load_motion",
       &loadMotion,
-      R"(Load a motion sequence from a gltf file.
+      R"(Load ONLY motion data (animation parameters) from a gltf file, without loading the character.
+
+Use this function when you already have the character loaded separately and only need the motion data.
+For loading both character and motion together, use :meth:`Character.load_gltf_with_motion`.
 
 Unless you can guarantee that the parameters in the motion files match your existing character,
 you will likely want to retarget the parameters using the :meth:`mapParameters` function.
 
 :parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
-:return: a tuple [motionData, motionParameterNames, identityData, identityParameterNames].
+:return: a tuple [motionData, motionParameterNames, identityData, identityParameterNames]. Does NOT include the character or FPS.
       )",
       py::arg("gltf_filename"));
 
