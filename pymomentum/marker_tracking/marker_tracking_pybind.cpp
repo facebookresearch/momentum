@@ -330,7 +330,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::ModelOptions& self) {
             return fmt::format(
-                "ModelOptions(model=\"{}\", parameters=\"{}\", locators=\"{}\")",
+                R"(ModelOptions(model="{}", parameters="{}", locators="{}"))",
                 self.model,
                 self.parameters,
                 self.locators);
