@@ -103,4 +103,34 @@ at::Tensor modelParametersToFaceExpressionCoefficients(
 
 at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& parameterTransform);
 
+// Map model parameters from one character to another
+at::Tensor mapModelParameters(
+    const at::Tensor& motion_in,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter,
+    bool verbose);
+
+// Map model parameters from source names to target character
+at::Tensor mapModelParameters_names(
+    const at::Tensor& motion_in,
+    const std::vector<std::string>& parameterNames_in,
+    const momentum::Character& character_remap,
+    bool verbose);
+
+// Map joint parameters from one character to another
+at::Tensor mapJointParameters(
+    at::Tensor srcMotion,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter);
+
+// Convert uniform noise to model parameters
+at::Tensor uniformRandomToModelParameters(
+    const momentum::Character& character,
+    at::Tensor unifNoise);
+
+// Apply parameter limits to model parameters
+at::Tensor applyModelParameterLimits(
+    const momentum::Character& character,
+    const at::Tensor& modelParams);
+
 } // namespace pymomentum

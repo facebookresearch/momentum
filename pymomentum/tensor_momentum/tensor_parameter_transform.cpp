@@ -589,4 +589,248 @@ at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& param
   return transformDense;
 }
 
+namespace {
+
+// Use tensor.index_select() and tensor.index_copy() to copy data from srcTensor
+// to form a new tensor. The dimension the mapping is applied on is `dimension`.
+// The mapping is created by matching `srcNames` to `tgtNames`. The target slice
+// which has no corresponding source is filled with zero.
+at::Tensor mapTensor(
+    int64_t dimension,
+    const std::vector<std::string>& srcNames,
+    const std::vector<std::string>& tgtNames,
+    const at::Tensor& srcTensor) {
+  if (dimension < 0) {
+    dimension += srcTensor.ndimension();
+  }
+
+  MT_THROW_IF(
+      dimension < 0 || srcTensor.ndimension() <= dimension ||
+          srcTensor.size(dimension) != srcNames.size(),
+      "Unexpected error in mapTensor(): dimensions don't match.");
+
+  std::unordered_map<std::string, size_t> tgtNameMap;
+  for (size_t iTgt = 0; iTgt < tgtNames.size(); ++iTgt) {
+    tgtNameMap.insert({tgtNames[iTgt], iTgt});
+  }
+
+  const size_t expectedSize = std::min(srcNames.size(), tgtNames.size());
+
+  std::vector<int64_t> tgtIndices;
+  tgtIndices.reserve(expectedSize);
+  std::vector<int64_t> srcIndices;
+  srcIndices.reserve(expectedSize);
+
+  for (size_t iSrc = 0; iSrc < srcNames.size(); ++iSrc) {
+    auto itr = tgtNameMap.find(srcNames[iSrc]);
+    if (itr == tgtNameMap.end()) {
+      continue;
+    }
+
+    tgtIndices.push_back(itr->second);
+    srcIndices.push_back(iSrc);
+  }
+
+  at::Tensor srcIndicesTensor = to1DTensor(srcIndices).to(srcTensor.device());
+  at::Tensor tgtIndicesTensor = to1DTensor(tgtIndices).to(srcTensor.device());
+
+  std::vector<int64_t> tgtSizes;
+  for (int64_t i = 0; i < srcTensor.ndimension(); ++i) {
+    if (i == dimension) {
+      tgtSizes.push_back(tgtNames.size());
+    } else {
+      tgtSizes.push_back(srcTensor.size(i));
+    }
+  }
+
+  at::Tensor result = at::zeros(tgtSizes, srcTensor.scalar_type());
+  return result.index_copy(
+      dimension, tgtIndicesTensor, srcTensor.index_select(dimension, srcIndicesTensor));
+}
+
+template <typename T>
+at::Tensor applyModelParameterLimitsTemplate(
+    const momentum::Character& character,
+    at::Tensor modelParams) {
+  TensorChecker checker("applyBodyParameterLimits");
+  bool squeeze = false;
+  const int nModelParamsID = -1;
+  modelParams = checker.validateAndFixTensor(
+      modelParams,
+      "model_params",
+      {nModelParamsID},
+      {"nModelParams"},
+      toScalarType<T>(),
+      true,
+      false,
+      &squeeze);
+
+  const int64_t nModelParams = checker.getBoundValue(nModelParamsID);
+  MT_THROW_IF(
+      character.parameterTransform.numAllModelParameters() != nModelParams,
+      "pymomentum::applyModelParameterLimits(): model param size in input tensor does not match character");
+
+  // character.parameterLimits can be empty. In this case, there is no
+  // limit for all the model params.
+  if (!character.parameterLimits.empty()) {
+    // Store model param indices that have limits.
+    std::vector<int64_t> limitedIndices;
+    // Store the limit values.
+    std::vector<T> minLimits, maxLimits;
+    for (const auto& l : character.parameterLimits) {
+      if (l.type == momentum::LimitType::MinMax) {
+        limitedIndices.push_back(l.data.minMax.parameterIndex);
+        minLimits.push_back(l.data.minMax.limits.x());
+        maxLimits.push_back(l.data.minMax.limits.y());
+      }
+    }
+
+    // Build tensors for doing the differentiable computation:
+    // - We need an index tensor to call tensor.index_select() to get the slices
+    // from modelParams that have limits.
+    // - We then need to call torch.minimum() using a 1D tensor of upper
+    //   bounds to clamp those model parameters from above.
+    // - We also need torch.maximum() with a 1D tensor of lower bounds to
+    //   clamp those model parameters from below.
+    // - Finally, call tensor.index_copy() to combine those clamped model
+    //   parameters with the bounds-free model parameters to build the returned
+    //   tensor. The indices tensor used in this step is the same as the one in
+    //   tensor.index_select().
+
+    at::Tensor limitedIndicesTensor = to1DTensor(limitedIndices).to(modelParams.device());
+    at::Tensor minLimitsTensor =
+        to1DTensor(minLimits).to(modelParams.device(), modelParams.dtype());
+    at::Tensor maxLimitsTensor =
+        to1DTensor(maxLimits).to(modelParams.device(), modelParams.dtype());
+    modelParams = modelParams.index_copy(
+        -1,
+        limitedIndicesTensor,
+        torch::clamp(
+            modelParams.index_select(-1, limitedIndicesTensor), minLimitsTensor, maxLimitsTensor));
+  }
+
+  if (squeeze) {
+    modelParams = modelParams.squeeze(0);
+  }
+
+  return modelParams;
+}
+
+} // namespace
+
+at::Tensor mapModelParameters(
+    const at::Tensor& motion_in,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter,
+    bool verbose) {
+  return mapModelParameters_names(
+      motion_in, srcCharacter.parameterTransform.name, tgtCharacter, verbose);
+}
+
+at::Tensor mapModelParameters_names(
+    const at::Tensor& motion_in,
+    const std::vector<std::string>& parameterNames_in,
+    const momentum::Character& character_remap,
+    bool verbose) {
+  MT_THROW_IF(
+      motion_in.size(-1) != parameterNames_in.size(),
+      "Mismatch between motion size and parameter name count.");
+
+  std::vector<std::string> missingParams;
+  for (const auto& iParamSource : parameterNames_in) {
+    auto iParamRemap = character_remap.parameterTransform.getParameterIdByName(iParamSource);
+    if (iParamRemap == momentum::kInvalidIndex) {
+      missingParams.push_back(iParamSource);
+    }
+  }
+
+  if (verbose && !missingParams.empty()) {
+    // TODO better logging:
+    pybind11::print(
+        "WARNING: missing parameters found during map_model_parameters: ", missingParams);
+  }
+
+  // Map tensor at dimension -1.
+  return mapTensor(-1, parameterNames_in, character_remap.parameterTransform.name, motion_in);
+}
+
+at::Tensor mapJointParameters(
+    at::Tensor srcMotion,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter) {
+  // Make tensor into shape: [... x n_joint_params x 7]
+  bool unflattened = false;
+  srcMotion = unflattenJointParameters(srcCharacter, srcMotion, &unflattened);
+
+  // Map tensor at dimension -2.
+  at::Tensor result = mapTensor(
+      -2, srcCharacter.skeleton.getJointNames(), tgtCharacter.skeleton.getJointNames(), srcMotion);
+  if (unflattened) {
+    result = flattenJointParameters(tgtCharacter, result);
+  }
+  return result;
+}
+
+at::Tensor uniformRandomToModelParameters(
+    const momentum::Character& character,
+    at::Tensor unifNoise) {
+  unifNoise = unifNoise.contiguous().to(at::DeviceType::CPU, at::ScalarType::Float);
+
+  const auto& paramTransform = character.parameterTransform;
+
+  const auto nModelParam = (int64_t)paramTransform.numAllModelParameters();
+  assert(paramTransform.name.size() == nModelParam);
+
+  bool squeeze = false;
+  if (unifNoise.ndimension() == 1) {
+    unifNoise = unifNoise.unsqueeze(0);
+    squeeze = true;
+  }
+  const auto nBatch = unifNoise.size(0);
+
+  MT_THROW_IF(
+      unifNoise.size(1) != nModelParam,
+      "In uniformRandomToModelParameters(), expected array with size [nBatch, nModelParameters] with nModelParameters={}; got array with size {}",
+      nModelParam,
+      formatTensorSizes(unifNoise));
+
+  at::Tensor result = at::zeros({nBatch, nModelParam}, at::kFloat);
+
+  for (pybind11::ssize_t iBatch = 0; iBatch < nBatch; ++iBatch) {
+    auto res_i = toEigenMap<float>(result.select(0, iBatch));
+    auto unif_i = toEigenMap<float>(unifNoise.select(0, iBatch));
+
+    for (size_t iParam = 0; iParam < nModelParam; ++iParam) {
+      // TODO apply limits
+      const auto& name = paramTransform.name[iParam];
+      if (name.find("scale_") != std::string::npos) {
+        res_i[iParam] = 1.0f * (unif_i[iParam] - 0.5f);
+      } else if (
+          name.find("_tx") != std::string::npos || name.find("_ty") != std::string::npos ||
+          name.find("_tz") != std::string::npos) {
+        res_i[iParam] = 5.0f * (unif_i[iParam] - 0.5f);
+      } else {
+        // Assume it's a rotation parameter
+        res_i[iParam] = (momentum::pi<float>() / 4.0f) * (unif_i[iParam] - 0.5f);
+      }
+    }
+  }
+
+  if (squeeze) {
+    result = result.squeeze(0);
+  }
+
+  return result;
+}
+
+at::Tensor applyModelParameterLimits(
+    const momentum::Character& character,
+    const at::Tensor& modelParams) {
+  if (hasFloat64(modelParams)) {
+    return applyModelParameterLimitsTemplate<double>(character, modelParams);
+  } else {
+    return applyModelParameterLimitsTemplate<float>(character, modelParams);
+  }
+}
+
 } // namespace pymomentum
