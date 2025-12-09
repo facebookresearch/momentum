@@ -127,6 +127,20 @@ geometry_sources = [
     "geometry/skin_weights_pybind.cpp",
 ]
 
+diff_geometry_public_headers = [
+    "diff_geometry/diff_geometry_pybind.h",
+    "diff_geometry/diff_character_pybind.h",
+    "diff_geometry/diff_transform_pybind.h",
+    "diff_geometry/diff_blendshape_pybind.h",
+]
+
+diff_geometry_sources = [
+    "diff_geometry/diff_geometry_pybind.cpp",
+    "diff_geometry/diff_character_pybind.cpp",
+    "diff_geometry/diff_transform_pybind.cpp",
+    "diff_geometry/diff_blendshape_pybind.cpp",
+]
+
 solver_public_headers = [
     "solver/momentum_ik.h",
 ]
