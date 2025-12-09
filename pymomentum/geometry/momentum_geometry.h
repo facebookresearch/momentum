@@ -23,23 +23,6 @@ using RowMatrixd = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::
 using RowMatrixi = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 using RowMatrixb = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-at::Tensor mapModelParameters_names(
-    at::Tensor motion_in,
-    const std::vector<std::string>& srcParameterNames,
-    const momentum::Character& tgtCharacter,
-    bool verbose);
-
-at::Tensor mapModelParameters(
-    at::Tensor motion_in,
-    const momentum::Character& srcCharacter,
-    const momentum::Character& tgtCharacter,
-    bool verbose);
-
-at::Tensor mapJointParameters(
-    at::Tensor motion_in,
-    const momentum::Character& srcCharacter,
-    const momentum::Character& tgtCharacter);
-
 momentum::Character loadFBXCharacterFromFile(
     const std::string& fbxPath,
     const std::optional<std::string>& configPath = {},
@@ -82,17 +65,6 @@ momentum::Character loadConfigFromBytes(
 
 momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath);
 momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes);
-
-// Convert uniform noise to meaningful model parameters.
-// unifNoise: size: batchSize (optional) x #modelParameters, each entry
-//   range in [0, 1].
-// Return a Tensor of size batchSize (optional) x #modelParameters.
-//   Scale parameters range in [-0.5, 0.5].
-//   Translate parameters range in [-2.5, 2.5].
-//   Rotation angles range in [-Pi/8, Pi/8].
-at::Tensor uniformRandomToModelParameters(
-    const momentum::Character& character,
-    at::Tensor unifNoise);
 
 std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path);
 void savePosePriorToFile(const momentum::Mppca& mppca, const std::string& path);
@@ -223,13 +195,6 @@ std::vector<int> bitsetToJointList(const std::vector<bool>& jointMask);
 std::tuple<Eigen::VectorXi, RowMatrixf> getLocators(
     const momentum::Character& character,
     const std::vector<std::string>& names);
-
-// Clamp body model params to be within limits applied by
-// character.parameterLimits and return clamped model params.
-// Work with batched model params. The returned tensor's batch
-// dimension is dependent on the input tensor.
-// Differentiable, support both float and double dtypes.
-at::Tensor applyModelParameterLimits(const momentum::Character& character, at::Tensor modelParams);
 
 std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
     const momentum::Character& character);
