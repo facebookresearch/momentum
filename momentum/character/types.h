@@ -194,7 +194,7 @@ using MotionParameters = std::tuple<std::vector<std::string>, Eigen::MatrixXf>;
 // each joint wrt parent joint) during FK step The identity parameters are expressed as a vector of
 // size (numSkeletonJoints * momentum::kParametersPerJoint)
 
-using IdentityParameters = std::tuple<std::vector<std::string>, Eigen::VectorXf>;
+using IdentityParameters = std::tuple<std::vector<std::string>, JointParameters>;
 
 // define static kInvalidIndex for size_t
 inline constexpr size_t kInvalidIndex = std::numeric_limits<size_t>::max();

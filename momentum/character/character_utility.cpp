@@ -716,7 +716,7 @@ MatrixXf mapMotionToCharacter(
   return result;
 }
 
-VectorXf mapIdentityToCharacter(
+JointParameters mapIdentityToCharacter(
     const IdentityParameters& inputIdentity,
     const Character& targetCharacter) {
   // re-arrange offsets according to the character names
@@ -734,7 +734,7 @@ VectorXf mapIdentityToCharacter(
     const auto index = targetCharacter.skeleton.getJointIdByName(jointNames[i]);
     if (index != kInvalidIndex) {
       result.template middleRows<kParametersPerJoint>(index * kParametersPerJoint).noalias() =
-          identity.template middleRows<kParametersPerJoint>(i * kParametersPerJoint);
+          identity.v.template middleRows<kParametersPerJoint>(i * kParametersPerJoint);
     } else {
       MT_LOGW("Joint {} not found in source identity", jointNames[i]);
     }

@@ -12,6 +12,7 @@
 #include "momentum/character/character_state.h"
 #include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry_state.h"
+#include "momentum/character/inverse_parameter_transform.h"
 #include "momentum/character/joint.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
@@ -961,7 +962,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(fx::gltf::Doc
   return {};
 }
 
-std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotionCommon(
+std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionCommon(
     const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   // ---------------------------------------------
   // load Skeleton and Mesh
@@ -977,7 +978,7 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotionCommon(
 
     // check that there is actual motion data within the glb / gltf
     MT_LOGW_IF(std::get<1>(motion).cols() == 0, "No motion data found in gltf file");
-    return {character, std::get<1>(motion), std::get<1>(identity), fps};
+    return {character, std::get<1>(motion), JointParameters(std::get<1>(identity)), fps};
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
@@ -985,7 +986,7 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotionCommon(
   return {};
 }
 
-std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacterCommon(
+std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacterCommon(
     const std::variant<filesystem::path, std::span<const std::byte>>& input,
     const Character& character) {
   const auto [loadedChar, motion, identity, fps] = loadCharacterWithMotionCommon(input);
@@ -1224,14 +1225,82 @@ std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename) 
   }
 }
 
-std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
+std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotion(
     const filesystem::path& gltfFilename) {
   return loadCharacterWithMotionCommon(gltfFilename);
 }
 
-std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
+std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotion(
     std::span<const std::byte> byteSpan) {
   return loadCharacterWithMotionCommon(byteSpan);
+}
+
+std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
+    const filesystem::path& gltfFilename) {
+  // Read the file into a buffer
+  std::ifstream file(gltfFilename, std::ios::binary | std::ios::ate);
+  MT_THROW_IF(!file.is_open(), "Unable to open file: {}", gltfFilename.string());
+
+  const std::streamsize size = file.tellg();
+  file.seekg(0, std::ios::beg);
+
+  std::vector<std::byte> buffer(size);
+  if (!file.read(reinterpret_cast<char*>(buffer.data()), size)) {
+    MT_THROW("Unable to read file: {}", gltfFilename.string());
+  }
+
+  // Delegate to the byteSpan overload to avoid code duplication
+  return loadCharacterWithMotionModelParameterScales(std::span<const std::byte>(buffer));
+}
+
+std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
+    std::span<const std::byte> byteSpan) {
+  auto [character, motion, jointIdentity, fps] = loadCharacterWithMotionCommon(byteSpan);
+  MT_THROW_IF(
+      motion.rows() != character.parameterTransform.numAllModelParameters(),
+      "Mismatch between character and motion.");
+
+  const auto scalingParams = character.parameterTransform.getScalingParameters();
+  bool hasScaleParametersInMotion = false;
+  for (Eigen::Index iFrame = 0; iFrame < motion.cols(); ++iFrame) {
+    for (size_t iParam = 0; iParam < character.parameterTransform.numAllModelParameters();
+         ++iParam) {
+      if (scalingParams.test(iParam) && motion(iParam, iFrame) != 0) {
+        hasScaleParametersInMotion = true;
+        break;
+      }
+    }
+  }
+
+  // Convert joint identity parameters to model identity parameters
+  ModelParameters modelIdentity =
+      ModelParameters::Zero(character.parameterTransform.numAllModelParameters());
+  if (jointIdentity.size() > 0 && !jointIdentity.v.isZero()) {
+    if (hasScaleParametersInMotion) {
+      MT_LOGW("Motion already contains scale parameters, not adding joint identity parameters.");
+    }
+    const auto scalingTransform = character.parameterTransform.simplify(scalingParams);
+    const ModelParameters scaleParametersSubset =
+        InverseParameterTransform(scalingTransform).apply(jointIdentity).pose;
+
+    for (size_t iParam = 0; iParam < character.parameterTransform.numAllModelParameters();
+         iParam++) {
+      if (scalingParams.test(iParam)) {
+        auto subsetParamIdx =
+            scalingTransform.getParameterIdByName(character.parameterTransform.name[iParam]);
+        modelIdentity[iParam] = scaleParametersSubset(subsetParamIdx);
+
+        // Add the identity parameters into the motion:
+        if (!hasScaleParametersInMotion) {
+          for (Eigen::Index jFrame = 0; jFrame < motion.cols(); ++jFrame) {
+            motion(iParam, jFrame) += scaleParametersSubset(subsetParamIdx);
+          }
+        }
+      }
+    }
+  }
+
+  return {character, motion, modelIdentity, fps};
 }
 
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
@@ -1244,13 +1313,13 @@ loadCharacterWithSkeletonStates(const filesystem::path& gltfFilename) {
   return loadCharacterWithSkeletonStatesCommon(gltfFilename);
 }
 
-std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
+std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacter(
     const filesystem::path& gltfFilename,
     const Character& character) {
   return loadMotionOnCharacterCommon(gltfFilename, character);
 }
 
-std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
+std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacter(
     const std::span<const std::byte> byteSpan,
     const Character& character) {
   return loadMotionOnCharacterCommon(byteSpan, character);

@@ -136,7 +136,7 @@ node in the scene with the specified name.
              const mm::Character& character,
              float fps,
              const std::optional<mm::MotionParameters>& motion,
-             const std::optional<mm::IdentityParameters>& offsets,
+             const std::optional<std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
              bool addExtensions,
              const std::string& customName) {
             // Apply same validation and transposition as
@@ -152,11 +152,17 @@ node in the scene with the specified name.
                   poses.cols());
             }
 
+            mm::IdentityParameters identityParams;
+            if (offsets.has_value()) {
+              const auto& [names, params] = offsets.value();
+              identityParams = {names, params};
+            }
+
             builder.addMotion(
                 character,
                 fps,
                 pymomentum::transpose(motion.value_or(mm::MotionParameters{})),
-                offsets.value_or(mm::IdentityParameters{}),
+                identityParams,
                 addExtensions,
                 customName);
           },

@@ -81,7 +81,7 @@ MatrixXf mapMotionToCharacter(
 /// @param[in] inputIdentity Input JointParameter vector with joint names.
 /// @param[in] targetCharacter Target character that defines its own Joints.
 /// @return A vector of joint parameters for the target character.
-VectorXf mapIdentityToCharacter(
+JointParameters mapIdentityToCharacter(
     const IdentityParameters& inputIdentity,
     const Character& targetCharacter);
 
