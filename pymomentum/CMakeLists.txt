@@ -177,6 +177,24 @@ mt_python_binding(
     ${TORCH_CXX_FLAGS}
 )
 
+mt_python_binding(
+  NAME diff_geometry
+  PYMOMENTUM_HEADERS_VARS diff_geometry_public_headers
+  PYMOMENTUM_SOURCES_VARS diff_geometry_sources
+  INCLUDE_DIRECTORIES
+    ${ATEN_INCLUDE_DIR}
+    ${TORCH_INCLUDE_DIRS}
+  LINK_LIBRARIES
+    character
+    tensor_momentum
+    tensor_utility
+    ${ATEN_LIBRARIES}
+    ${TORCH_LIBRARIES}
+    ${torch_python}
+  COMPILE_OPTIONS
+    ${TORCH_CXX_FLAGS}
+)
+
 # Use 'pymomentum_solver' to avoid conflicts with the solver module
 mt_python_binding(
   NAME pymomentum_solver
