@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
     // load motion file if it exists
     MatrixXf poses;
-    VectorXf offsets;
+    JointParameters offsets;
     float fps = 120.0;
     const bool hasMotion = !options->input_motion_file.empty();
 
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
             }
           }
           fps = framerate;
-          offsets = character.parameterTransform.zero().v;
+          offsets = character.parameterTransform.zero();
         }
       } else {
         MT_LOGW(
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
           options->output_model_file,
           character,
           poses,
-          offsets,
+          offsets.v,
           fps,
           markerSequence.frames,
           fbxOptions);

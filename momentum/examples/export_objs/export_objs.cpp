@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) try {
   Character character;
   MatrixXf motion; // For GLB: single motion matrix
   std::vector<MatrixXf> motions; // For FBX: vector of motion matrices
-  VectorXf id; // Identity parameters (GLB only)
+  JointParameters id; // Identity parameters (GLB only)
   float fps = 0.0f;
 
   // Load character and motion based on file type

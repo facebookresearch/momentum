@@ -45,7 +45,7 @@ std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename);
 /// @param[in] filepath The path to the glTF character file.
 /// @return A tuple containing the loaded Character object, the motion represented in model
 /// parameters, the identity vector represented as joint parameters, and the fps.
-std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
+std::tuple<Character, MatrixXf, momentum::JointParameters, float> loadCharacterWithMotion(
     const filesystem::path& gltfFilename);
 
 /// Load a glTF character from a buffer.
@@ -53,8 +53,36 @@ std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
 /// @param[in] byteSpan The buffer containing the glTF character data.
 /// @return A tuple containing the loaded Character object, the motion represented in model
 /// parameters, the identity vector represented as joint parameters, and the fps.
-std::tuple<Character, MatrixXf, VectorXf, float> loadCharacterWithMotion(
+std::tuple<Character, MatrixXf, momentum::JointParameters, float> loadCharacterWithMotion(
     std::span<const std::byte> byteSpan);
+
+/// Load a glTF character with motion and apply scale parameters to the motion.
+///
+/// This function loads both the character and motion data from a glTF file, applying the
+/// character's scale parameters directly to the motion as model parameters. This approach is
+/// preferred over the deprecated method of storing scales in an offset vector in the parameter
+/// transform. The scale parameters from the identity vector are integrated into the motion data
+/// for each frame.
+///
+/// @param[in] byteSpan The buffer containing the glTF character data.
+/// @return A tuple containing the loaded Character object, the motion represented in model
+/// parameters with scales applied, the identity parameters as model parameters, and the fps.
+std::tuple<Character, MatrixXf, momentum::ModelParameters, float>
+loadCharacterWithMotionModelParameterScales(std::span<const std::byte> byteSpan);
+
+/// Load a glTF character with motion and apply scale parameters to the motion.
+///
+/// This function loads both the character and motion data from a glTF file, applying the
+/// character's scale parameters directly to the motion as model parameters. This approach is
+/// preferred over the deprecated method of storing scales in an offset vector in the parameter
+/// transform. The scale parameters from the identity vector are integrated into the motion data
+/// for each frame.
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return A tuple containing the loaded Character object, the motion represented in model
+/// parameters with scales applied, the identity parameters as model parameters, and the fps.
+std::tuple<Character, MatrixXf, momentum::ModelParameters, float>
+loadCharacterWithMotionModelParameterScales(const filesystem::path& gltfFilename);
 
 /// Load a GLTF Character with motion in the form of skeleton states (transform matrices)
 ///
@@ -77,7 +105,7 @@ loadCharacterWithSkeletonStates(const filesystem::path& gltfFilename);
 /// @return A tuple containing the motion represented in model parameters, the identity vector
 /// represented as joint parameters, and the fps. The model parameters and joint parameters are
 /// mapped to the input character by name matching.
-std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
+std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacter(
     const filesystem::path& gltfFilename,
     const Character& character);
 
@@ -88,7 +116,7 @@ std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
 /// @return A tuple containing the motion represented in model parameters, the identity vector
 /// represented as joint parameters, and the fps. The model parameters and joint parameters are
 /// mapped to the input character by name matching.
-std::tuple<MatrixXf, VectorXf, float> loadMotionOnCharacter(
+std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacter(
     std::span<const std::byte> byteSpan,
     const Character& character);
 

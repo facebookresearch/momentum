@@ -314,7 +314,7 @@ TEST_F(CharacterUtilityTest, MapIdentityToCharacter) {
   IdentityParameters inputIdentity = std::make_tuple(jointNames, identity);
 
   // Map the identity to the character
-  VectorXf resultIdentity = mapIdentityToCharacter(inputIdentity, this->character);
+  JointParameters resultIdentity = mapIdentityToCharacter(inputIdentity, this->character);
 
   // Check that the result identity has the correct size
   EXPECT_EQ(resultIdentity.size(), this->character.skeleton.joints.size() * kParametersPerJoint);
@@ -349,10 +349,10 @@ TEST_F(CharacterUtilityTest, MapIdentityToCharacter) {
   }
 
   // Test with empty identity
-  IdentityParameters emptyIdentity = std::make_tuple(std::vector<std::string>(), VectorXf());
-  VectorXf emptyResult = mapIdentityToCharacter(emptyIdentity, this->character);
+  IdentityParameters emptyIdentity = std::make_tuple(std::vector<std::string>(), JointParameters());
+  JointParameters emptyResult = mapIdentityToCharacter(emptyIdentity, this->character);
   EXPECT_EQ(emptyResult.size(), this->character.skeleton.joints.size() * kParametersPerJoint);
-  EXPECT_TRUE(emptyResult.isZero());
+  EXPECT_TRUE(emptyResult.v.isZero());
 }
 
 // Test replaceSkeletonHierarchy error cases

@@ -24,7 +24,7 @@ struct Document;
 namespace momentum {
 
 using MotionParameters = std::tuple<std::vector<std::string>, MatrixXf>;
-using IdentityParameters = std::tuple<std::vector<std::string>, VectorXf>;
+using IdentityParameters = std::tuple<std::vector<std::string>, JointParameters>;
 
 /// Helper class to build a glb scene. It supports adding multiple characters
 /// and motions for each character.
