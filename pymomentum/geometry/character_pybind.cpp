@@ -532,6 +532,46 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
   :return: a valid :class:`Character`.
         )",
           py::arg("gltf_bytes"))
+      .def_static(
+          "load_gltf_with_motion_model_parameter_scales",
+          &loadGLTFCharacterWithMotionModelParameterScales,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load BOTH character (skeleton/mesh) and motion data from a gltf file in a single call, 
+with model parameter scales instead of joint parameters.
+
+This function differs from :meth:`load_gltf_with_motion` by returning identity parameters 
+as model parameters (numAllModelParameters,) instead of joint parameters 
+(numJoints * kParametersPerJoint,). Additionally, the motion has the identity parameters 
+added back to the scale parameters.
+
+Use this function when you need the character structure, animation, and identity parameters 
+all expressed in model parameter space, which is the natural format for optimization and 
+character posing.
+
+:param gltf_filename: Path to the GLTF/GLB file to load.
+:return: A tuple (character, motion, model_identity, fps), where character is the loaded :class:`Character` object,
+         motion is a numpy array of shape (numFrames, numAllModelParameters) with identity added to scale parameters,
+         model_identity is the identity/scale parameters as a numpy array of shape (numAllModelParameters,),
+         and fps is the frames per second of the motion data.
+)",
+          py::arg("gltf_filename"))
+      .def_static(
+          "load_gltf_with_motion_model_parameter_scales_from_bytes",
+          &loadGLTFCharacterWithMotionModelParameterScalesFromBytes,
+          R"(Load BOTH character (skeleton/mesh) and motion data from a gltf byte array, 
+with model parameter scales instead of joint parameters.
+
+This is the byte array version of :meth:`load_gltf_with_motion_model_parameter_scales`.
+The function returns identity parameters as model parameters and adds them to the 
+motion's scale parameters.
+
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: A tuple (character, motion, model_identity, fps), where character is the loaded :class:`Character` object,
+         motion is a numpy array of shape (numFrames, numAllModelParameters) with identity added to scale parameters,
+         model_identity is the identity/scale parameters as a numpy array of shape (numAllModelParameters,),
+         and fps is the frames per second of the motion data.
+)",
+          py::arg("gltf_bytes"))
       // toGLTF(character, fps, motion)
       .def_static(
           "to_gltf",
