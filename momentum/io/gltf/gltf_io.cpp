@@ -963,7 +963,8 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(fx::gltf::Doc
 }
 
 std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionCommon(
-    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+    const std::variant<filesystem::path, std::span<const std::byte>>& input,
+    bool mapParameters = false) {
   // ---------------------------------------------
   // load Skeleton and Mesh
   // ---------------------------------------------
@@ -978,7 +979,11 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionC
 
     // check that there is actual motion data within the glb / gltf
     MT_LOGW_IF(std::get<1>(motion).cols() == 0, "No motion data found in gltf file");
-    return {character, std::get<1>(motion), JointParameters(std::get<1>(identity)), fps};
+    return {
+        character,
+        mapParameters ? mapMotionToCharacter(motion, character) : std::get<1>(motion),
+        mapParameters ? mapIdentityToCharacter(identity, character) : std::get<1>(identity),
+        fps};
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
@@ -1255,10 +1260,12 @@ std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionM
 
 std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
     std::span<const std::byte> byteSpan) {
-  auto [character, motion, jointIdentity, fps] = loadCharacterWithMotionCommon(byteSpan);
+  auto [character, motion, jointIdentity, fps] = loadCharacterWithMotionCommon(byteSpan, true);
   MT_THROW_IF(
       motion.rows() != character.parameterTransform.numAllModelParameters(),
-      "Mismatch between character and motion.");
+      "Mismatch between character and motion; character has {} model parameters while motion has {}.",
+      character.parameterTransform.numAllModelParameters(),
+      motion.rows());
 
   const auto scalingParams = character.parameterTransform.getScalingParameters();
   bool hasScaleParametersInMotion = false;
