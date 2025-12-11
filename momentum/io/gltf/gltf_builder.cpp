@@ -591,10 +591,10 @@ void addMotionToModel(
       fullAnimation = true;
     }
 
-    if (!jointNames.empty() && identity.size() > 0) {
+    if (!jointNames.empty() && identity.v.size() > 0) {
       def["motion"]["jointNames"] = jointNames;
       def["motion"]["offsets"] = createAccessorBuffer<const float>(
-          model, std::span<const float>(identity.data(), identity.size()));
+          model, std::span<const float>(identity.v.data(), identity.v.size()));
       fullAnimation = true;
     }
   } else {

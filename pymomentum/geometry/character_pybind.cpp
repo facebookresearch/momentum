@@ -752,10 +752,10 @@ support the proprietary momentum motion format for storing model parameters in G
           py::arg("path"),
           py::arg("character"),
           py::arg("fps") = 120.f,
-          py::arg("motion") = std::optional<momentum::MotionParameters>{},
-          py::arg("offsets") = std::optional<const momentum::IdentityParameters>{},
-          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
-          py::arg("options") = std::optional<momentum::FileSaveOptions>{})
+          py::arg("motion") = std::nullopt,
+          py::arg("offsets") = std::nullopt,
+          py::arg("markers") = std::nullopt,
+          py::arg("options") = std::nullopt)
       .def_static(
           "save_gltf_from_skel_states",
           &saveGLTFCharacterToFileFromSkelStates,

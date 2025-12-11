@@ -168,7 +168,7 @@ std::tuple<momentum::Character, momentum::ModelParameters> loadCharacterWithIden
           .empty()) { // Assume input has precomputed proportions and marker offsets etc.
     auto [c, m, id, fps] = loadCharacterWithMotion(modelFiles.model);
     character = c;
-    if (id.size() > 0) {
+    if (id.v.size() > 0) {
       identity = jointIdentityToModelIdentity(c, c.parameterTransform.getScalingParameters(), id);
     } else {
       identity = ModelParameters::Zero(character.parameterTransform.numAllModelParameters());

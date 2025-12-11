@@ -41,7 +41,7 @@ void saveGLTFCharacterToFile(
     const momentum::Character& character,
     float fps,
     const std::optional<const momentum::MotionParameters>& motion,
-    const std::optional<const momentum::IdentityParameters>& offsets,
+    const std::optional<const std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const std::optional<const momentum::FileSaveOptions>& options);
 
@@ -98,6 +98,12 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes);
+
+std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
+loadGLTFCharacterWithMotionModelParameterScales(const std::string& gltfFilename);
+
+std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
+loadGLTFCharacterWithMotionModelParameterScalesFromBytes(const pybind11::bytes& gltfBytes);
 
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
 loadGLTFCharacterWithSkelStates(const std::string& gltfFilename);
