@@ -1,7 +1,9 @@
 var gltf__io_8cpp =
 [
-    [ "loadCharacterWithMotion", "gltf__io_8cpp.html#ac0d98aaa83afdbe39513f5046e417e7f", null ],
-    [ "loadCharacterWithMotion", "gltf__io_8cpp.html#ac1a56aff98a0ff8c0e319bb1c1f4ef3c", null ],
+    [ "loadCharacterWithMotion", "gltf__io_8cpp.html#aef601ac879928cd839662071b92c6680", null ],
+    [ "loadCharacterWithMotion", "gltf__io_8cpp.html#ad20017d04a78b32f29f1179afe65eabc", null ],
+    [ "loadCharacterWithMotionModelParameterScales", "gltf__io_8cpp.html#a86ee17e3d1befb6b79c6afe6e901c32d", null ],
+    [ "loadCharacterWithMotionModelParameterScales", "gltf__io_8cpp.html#a7b4395d6536085ea2afa292c58cfbb08", null ],
     [ "loadCharacterWithSkeletonStates", "gltf__io_8cpp.html#afe2c32623495be8e7115b9f032e92482", null ],
     [ "loadCharacterWithSkeletonStates", "gltf__io_8cpp.html#a2f9c92ad13f1415cdca34045995174a1", null ],
     [ "loadGltfCharacter", "gltf__io_8cpp.html#a806967d366a08f1bbeeaf9dd230f4764", null ],
@@ -9,11 +11,11 @@ var gltf__io_8cpp =
     [ "loadGltfCharacter", "gltf__io_8cpp.html#ac00d6d69b68187eaeae5a937d3189e8f", null ],
     [ "loadMarkerSequence", "gltf__io_8cpp.html#aaf255ac6caa4128f5a31c7cfb089774d", null ],
     [ "loadMotion", "gltf__io_8cpp.html#a06ff22b041f41c37ec0793777c9ce93e", null ],
-    [ "loadMotionOnCharacter", "gltf__io_8cpp.html#ac95e977c8e17fcca2dc99db7fabaedb5", null ],
-    [ "loadMotionOnCharacter", "gltf__io_8cpp.html#a38f41ae865b5e768feda8520d78f2c2b", null ],
+    [ "loadMotionOnCharacter", "gltf__io_8cpp.html#ad685200370fc04b8a3c930fccb45fd74", null ],
+    [ "loadMotionOnCharacter", "gltf__io_8cpp.html#a3ea1dde6a08d08f94a8f2814725545e1", null ],
     [ "loadMotionTimestamps", "gltf__io_8cpp.html#af0f697e1c53a7096ceb6382fc2f4697b", null ],
-    [ "makeCharacterDocument", "gltf__io_8cpp.html#ac3fe8a4ee2722309fab473889fcca308", null ],
-    [ "saveCharacterToBytes", "gltf__io_8cpp.html#aa5543eb047cfc02c63d9cbfd0aa334f8", null ],
+    [ "makeCharacterDocument", "gltf__io_8cpp.html#af566f891ec9b728d92fa4455fa18a6cf", null ],
+    [ "saveCharacterToBytes", "gltf__io_8cpp.html#a81179d3c887e56081ab6b838a523dd7c", null ],
     [ "saveGltfCharacter", "gltf__io_8cpp.html#a5b67b4aed4cbd9e47a62aeca79db7395", null ],
     [ "saveGltfCharacter", "gltf__io_8cpp.html#a9570894b19a7adeaec2d2488a0df11cb", null ]
 ];
