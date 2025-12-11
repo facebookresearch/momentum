@@ -91,6 +91,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion_model_parameter_scales()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion_model_parameter_scales_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_skel_states()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_skel_states_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_legacy_json"><code class="docutils literal notranslate"><span class="pre">Character.load_legacy_json()</span></code></a></li>
@@ -961,6 +963,52 @@ and fps is the frame rate. Does NOT include parameter names (unlike <a class="re
 </dd>
 </dl>
 </div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_motion_model_parameter_scales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales" title="Link to this definition"></a></dt>
+<dd><p>Load BOTH character (skeleton/mesh) and motion data from a gltf file in a single call, 
+with model parameter scales instead of joint parameters.</p>
+<p>This function differs from <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a> by returning identity parameters 
+as model parameters (numAllModelParameters,) instead of joint parameters 
+(numJoints * kParametersPerJoint,). Additionally, the motion has the identity parameters 
+added back to the scale parameters.</p>
+<p>Use this function when you need the character structure, animation, and identity parameters 
+all expressed in model parameter space, which is the natural format for optimization and 
+character posing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – Path to the GLTF/GLB file to load.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (character, motion, model_identity, fps), where character is the loaded <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a> object,
+motion is a numpy array of shape (numFrames, numAllModelParameters) with identity added to scale parameters,
+model_identity is the identity/scale parameters as a numpy array of shape (numAllModelParameters,),
+and fps is the frames per second of the motion data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_motion_model_parameter_scales_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load BOTH character (skeleton/mesh) and motion data from a gltf byte array, 
+with model parameter scales instead of joint parameters.</p>
+<p>This is the byte array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales" title="pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion_model_parameter_scales()</span></code></a>.
+The function returns identity parameters as model parameters and adds them to the 
+motion’s scale parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (character, motion, model_identity, fps), where character is the loaded <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a> object,
+motion is a numpy array of shape (numFrames, numAllModelParameters) with identity added to scale parameters,
+model_identity is the identity/scale parameters as a numpy array of shape (numAllModelParameters,),
+and fps is the frames per second of the motion data.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
