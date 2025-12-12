@@ -94,8 +94,8 @@ Eigen::Vector3<T> computeTargetPosition(
 
 template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state,
+    const ModelParametersT<T>& /* modelParameters */,
+    const SkeletonStateT<T>& /* state */,
     const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 
@@ -212,7 +212,7 @@ Eigen::Vector3<T> calculateDWorldPos(
 
 template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculatePositionGradient(
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
@@ -393,7 +393,7 @@ std::array<Eigen::Matrix3<T>, 3> compute_d_targetPos_d_vertexPos(
 
 template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
@@ -548,7 +548,7 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
 
 template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculateNormalGradient(
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,

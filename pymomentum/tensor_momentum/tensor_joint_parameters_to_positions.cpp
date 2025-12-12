@@ -303,10 +303,10 @@ variable_list JointParametersToPositionsFunction<T>::backward(
 } // anonymous namespace
 
 at::Tensor jointParametersToPositions(
-    pybind11::object characters_in,
-    at::Tensor jointParameters,
-    at::Tensor parents,
-    at::Tensor offsets) {
+    [[maybe_unused]] pybind11::object characters_in,
+    [[maybe_unused]] at::Tensor jointParameters,
+    [[maybe_unused]] at::Tensor parents,
+    [[maybe_unused]] at::Tensor offsets) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<JointParametersToPositionsFunction>(
       characters_in.ptr(), jointParameters, parents, offsets)[0];

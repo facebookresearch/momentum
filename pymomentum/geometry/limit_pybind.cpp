@@ -342,7 +342,9 @@ Create a parameter limit with min and max values for a joint parameter.
       .def_readonly("linear_joint", &mm::LimitData::linearJoint, "Data for LinearJoint limit.")
       .def_readonly("halfplane", &mm::LimitData::halfPlane, "Data for HalfPlane limit.")
       .def_readonly("ellipsoid", &mm::LimitData::ellipsoid, "Data for Ellipsoid limit.")
-      .def("__repr__", [](const mm::LimitData& ld) { return fmt::format("LimitData()"); });
+      .def("__repr__", []([[maybe_unused]] const mm::LimitData& ld) {
+        return fmt::format("LimitData()");
+      });
 
   parameterLimitMinMaxClass
       .def_readonly(

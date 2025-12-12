@@ -187,8 +187,8 @@ variable_list ApplyParameterTransformFunction<T>::backward(
 } // anonymous namespace
 
 at::Tensor applyParamTransform(
-    const momentum::ParameterTransform* paramTransform,
-    at::Tensor modelParams) {
+    [[maybe_unused]] const momentum::ParameterTransform* paramTransform,
+    [[maybe_unused]] at::Tensor modelParams) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_CHECK_NOTNULL(paramTransform);
   PyObject* characters = nullptr;
@@ -199,7 +199,9 @@ at::Tensor applyParamTransform(
 #endif
 }
 
-at::Tensor applyParamTransform(pybind11::object characters, at::Tensor modelParams) {
+at::Tensor applyParamTransform(
+    [[maybe_unused]] pybind11::object characters,
+    [[maybe_unused]] at::Tensor modelParams) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_CHECK_NOTNULL(characters.ptr());
   const momentum::ParameterTransform* paramTransform = nullptr;
@@ -477,8 +479,8 @@ variable_list ApplyInverseParameterTransformFunction::backward(
 } // anonymous namespace
 
 at::Tensor applyInverseParamTransform(
-    const momentum::InverseParameterTransform* invParamTransform,
-    at::Tensor jointParams) {
+    [[maybe_unused]] const momentum::InverseParameterTransform* invParamTransform,
+    [[maybe_unused]] at::Tensor jointParams) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   return ApplyInverseParameterTransformFunction::apply(invParamTransform, jointParams)[0];
 #else
