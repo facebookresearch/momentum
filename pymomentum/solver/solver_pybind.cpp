@@ -115,7 +115,7 @@ PYBIND11_MODULE(solver, m) {
           "verbose", &SolverOptions::verbose, "Flag to print out solver progress (default: false).")
       .def("__repr__", [](const SolverOptions& options) {
         return fmt::format(
-            "SolverOptions(linear_solver=LinearSolverType.{}, levmar_lambda={}, min_iter={}, max_iter={}, threshold={}, line_search={})",
+            "SolverOptions(linear_solver=LinearSolverType.{}, levmar_lambda={}, min_iter={}, max_iter={}, threshold={}, line_search={}, verbose={})",
             toString(options.linearSolverType),
             options.levmar_lambda,
             options.minIter,
