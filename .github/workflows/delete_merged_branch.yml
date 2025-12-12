@@ -1,0 +1,77 @@
+name: Delete Merged Branch
+
+on:
+  pull_request:
+    types: [closed, labeled]
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const eventAction = context.payload.action;
+
+            // Fetch the current PR state to get the latest labels and status
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            const branchName = pr.head.ref;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const labels = pr.labels.map(l => l.name);
+            const isClosed = pr.state === 'closed';
+            const isMerged = pr.merged;
+            const hasMergedLabel = labels.some(l => l.toLowerCase() === 'merged');
+
+            console.log(`Event: ${eventAction}`);
+            console.log(`PR #${prNumber} state: ${pr.state}, merged: ${isMerged}`);
+            console.log(`Labels: ${labels.join(', ') || '(none)'}`);
+
+            // Only proceed if PR is closed AND (merged via GitHub OR has "Merged" label)
+            if (!isClosed) {
+              console.log('Skipping: PR is not closed');
+              return;
+            }
+
+            if (!isMerged && !hasMergedLabel) {
+              console.log('Skipping: PR was closed without merging and has no "Merged" label');
+              return;
+            }
+
+            // Skip if the branch is not in the same repository
+            const headRepo = pr.head.repo;
+            const baseRepoFullName = `${owner}/${repo}`;
+            if (!headRepo || headRepo.full_name !== baseRepoFullName) {
+              console.log(`Skipping: branch '${branchName}' is not in ${baseRepoFullName}`);
+              return;
+            }
+
+            // Skip protected branches
+            const protectedBranches = ['main', 'master'];
+            if (protectedBranches.includes(branchName)) {
+              console.log(`Skipping: branch '${branchName}' is protected`);
+              return;
+            }
+
+            try {
+              await github.rest.git.deleteRef({
+                owner,
+                repo,
+                ref: `heads/${branchName}`,
+              });
+              console.log(`Successfully deleted branch '${branchName}'`);
+            } catch (error) {
+              if (error.status === 422) {
+                console.log(`Branch '${branchName}' was already deleted`);
+              } else {
+                console.error(`Failed to delete branch '${branchName}': ${error.message}`);
+                throw error;
+              }
+            }
