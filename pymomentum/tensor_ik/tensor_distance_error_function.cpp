@@ -15,10 +15,6 @@
 
 namespace pymomentum {
 
-using momentum::DistanceErrorFunctionT;
-using momentum::FullyDifferentiableDistanceErrorFunction;
-using momentum::FullyDifferentiableDistanceErrorFunctionT;
-
 namespace {
 
 const int NCONS_IDX = -1;
@@ -56,31 +52,31 @@ TensorDistanceErrorFunction<T>::TensorDistanceErrorFunction(
           "distance_cons",
           batchSize,
           nFrames,
-          {{FullyDifferentiableDistanceErrorFunction::kOrigins,
+          {{momentum::FullyDifferentiableDistanceErrorFunction::kOrigins,
             origins,
             {NCONS_IDX, 3},
             TensorType::TYPE_FLOAT,
             TensorInput::DIFFERENTIABLE,
             TensorInput::REQUIRED},
-           {FullyDifferentiableDistanceErrorFunction::kParents,
+           {momentum::FullyDifferentiableDistanceErrorFunction::kParents,
             parents,
             {NCONS_IDX},
             TensorType::TYPE_INT,
             TensorInput::NON_DIFFERENTIABLE,
             TensorInput::REQUIRED},
-           {FullyDifferentiableDistanceErrorFunction::kOffsets,
+           {momentum::FullyDifferentiableDistanceErrorFunction::kOffsets,
             offsets,
             {NCONS_IDX, 3},
             TensorType::TYPE_FLOAT,
             TensorInput::DIFFERENTIABLE,
             TensorInput::OPTIONAL},
-           {FullyDifferentiableDistanceErrorFunction::kWeights,
+           {momentum::FullyDifferentiableDistanceErrorFunction::kWeights,
             weights,
             {NCONS_IDX},
             TensorType::TYPE_FLOAT,
             TensorInput::DIFFERENTIABLE,
             TensorInput::OPTIONAL},
-           {FullyDifferentiableDistanceErrorFunction::kTargets,
+           {momentum::FullyDifferentiableDistanceErrorFunction::kTargets,
             targets,
             {NCONS_IDX},
             TensorType::TYPE_FLOAT,
@@ -99,16 +95,21 @@ TensorDistanceErrorFunction<T>::createErrorFunctionImp(
   auto errorFun = std::make_unique<momentum::FullyDifferentiableDistanceErrorFunctionT<T>>(
       character.skeleton, character.parameterTransform);
 
-  const auto weights = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kWeights)
-                           .template toEigenMap<T>(iBatch, jFrame);
-  const auto origins = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kOrigins)
-                           .template toEigenMap<T>(iBatch, jFrame);
-  const auto offsets = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kOffsets)
-                           .template toEigenMap<T>(iBatch, jFrame);
-  const auto parents = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kParents)
-                           .template toEigenMap<int>(iBatch, jFrame);
-  const auto targets = this->getTensorInput(FullyDifferentiableDistanceErrorFunction::kTargets)
-                           .template toEigenMap<T>(iBatch, jFrame);
+  const auto weights =
+      this->getTensorInput(momentum::FullyDifferentiableDistanceErrorFunction::kWeights)
+          .template toEigenMap<T>(iBatch, jFrame);
+  const auto origins =
+      this->getTensorInput(momentum::FullyDifferentiableDistanceErrorFunction::kOrigins)
+          .template toEigenMap<T>(iBatch, jFrame);
+  const auto offsets =
+      this->getTensorInput(momentum::FullyDifferentiableDistanceErrorFunction::kOffsets)
+          .template toEigenMap<T>(iBatch, jFrame);
+  const auto parents =
+      this->getTensorInput(momentum::FullyDifferentiableDistanceErrorFunction::kParents)
+          .template toEigenMap<int>(iBatch, jFrame);
+  const auto targets =
+      this->getTensorInput(momentum::FullyDifferentiableDistanceErrorFunction::kTargets)
+          .template toEigenMap<T>(iBatch, jFrame);
 
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index kCons = 0; kCons < nCons; ++kCons) {

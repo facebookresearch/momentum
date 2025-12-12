@@ -16,9 +16,6 @@ namespace pymomentum {
 
 namespace {
 
-using momentum::FullyDifferentiablePosePriorErrorFunction;
-using momentum::FullyDifferentiablePosePriorErrorFunctionT;
-
 template <typename T>
 class TensorPosePriorErrorFunction : public TensorErrorFunction<T> {
  public:
@@ -47,31 +44,31 @@ TensorPosePriorErrorFunction<T>::TensorPosePriorErrorFunction(
           "pose_prior",
           batchSize,
           nFrames,
-          {{FullyDifferentiablePosePriorErrorFunction::kPi,
+          {{momentum::FullyDifferentiablePosePriorErrorFunction::kPi,
             at::Tensor(),
             {},
             TensorType::TYPE_SENTINEL,
             TensorInput::NON_DIFFERENTIABLE,
             TensorInput::OPTIONAL},
-           {FullyDifferentiablePosePriorErrorFunction::kMu,
+           {momentum::FullyDifferentiablePosePriorErrorFunction::kMu,
             at::Tensor(),
             {},
             TensorType::TYPE_SENTINEL,
             TensorInput::NON_DIFFERENTIABLE,
             TensorInput::OPTIONAL},
-           {FullyDifferentiablePosePriorErrorFunction::kW,
+           {momentum::FullyDifferentiablePosePriorErrorFunction::kW,
             at::Tensor(),
             {},
             TensorType::TYPE_SENTINEL,
             TensorInput::NON_DIFFERENTIABLE,
             TensorInput::OPTIONAL},
-           {FullyDifferentiablePosePriorErrorFunction::kSigma,
+           {momentum::FullyDifferentiablePosePriorErrorFunction::kSigma,
             at::Tensor(),
             {},
             TensorType::TYPE_SENTINEL,
             TensorInput::NON_DIFFERENTIABLE,
             TensorInput::OPTIONAL},
-           {FullyDifferentiablePosePriorErrorFunction::kParameterIndices,
+           {momentum::FullyDifferentiablePosePriorErrorFunction::kParameterIndices,
             at::Tensor(),
             {},
             TensorType::TYPE_SENTINEL,

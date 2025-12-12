@@ -27,12 +27,12 @@ namespace pymomentum {
 namespace py = pybind11;
 namespace mm = momentum;
 
-using torch::autograd::AutogradContext;
-using torch::autograd::variable_list;
-
 namespace {
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
+using torch::autograd::AutogradContext;
+using torch::autograd::variable_list;
+
 template <typename T>
 struct SkinPointsFunction : public torch::autograd::Function<SkinPointsFunction<T>> {
  public:

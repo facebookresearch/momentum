@@ -28,14 +28,13 @@
 namespace py = pybind11;
 namespace mm = momentum;
 
-using torch::autograd::AutogradContext;
-using torch::autograd::variable_list;
-
 namespace pymomentum {
 
 namespace {
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
+using torch::autograd::AutogradContext;
+using torch::autograd::variable_list;
 
 template <typename T>
 momentum::TransformT<T> computeLocalTransform(
