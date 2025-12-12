@@ -52,6 +52,7 @@ jobs:
         run: |
           pixi install -e default
           echo "CMAKE_PREFIX_PATH=$PWD/.pixi/envs/default" >> $GITHUB_ENV
+          echo "CONDA_PREFIX=$PWD/.pixi/envs/default" >> $GITHUB_ENV
         shell: bash
 
       - name: Build wheels

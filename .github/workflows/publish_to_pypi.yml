@@ -139,11 +139,11 @@ jobs:
 
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Repair GPU wheel (Linux only)
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_repair
 
       - name: Print ccache stats
         if: steps.should_run.outputs.run == 'true'
