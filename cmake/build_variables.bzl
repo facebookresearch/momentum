@@ -659,6 +659,10 @@ convert_model_sources = [
     "examples/convert_model/convert_model.cpp",
 ]
 
+print_fps_sources = [
+    "examples/print_fps/print_fps.cpp",
+]
+
 glb_viewer_sources = [
     "examples/glb_viewer/glb_viewer.cpp",
 ]
