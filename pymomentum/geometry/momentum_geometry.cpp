@@ -145,7 +145,7 @@ momentum::Character loadConfigFromFile(
   const auto [parameterTransform, parameterLimits] =
       momentum::loadModelDefinition(filesystem::path(configPath), character.skeleton);
 
-  return momentum::Character(
+  return {
       character.skeleton,
       parameterTransform,
       parameterLimits,
@@ -158,7 +158,7 @@ momentum::Character loadConfigFromFile(
       character.faceExpressionBlendShape,
       character.name,
       character.inverseBindPose,
-      character.skinnedLocators);
+      character.skinnedLocators};
 }
 
 momentum::Character loadFBXCharacterFromBytes(
@@ -180,7 +180,7 @@ momentum::Character loadConfigFromBytes(
   const auto [parameterTransform, parameterLimits] =
       momentum::loadModelDefinition(toSpan<std::byte>(bytes), character.skeleton);
 
-  return momentum::Character(
+  return {
       character.skeleton,
       parameterTransform,
       parameterLimits,
@@ -193,7 +193,7 @@ momentum::Character loadConfigFromBytes(
       character.faceExpressionBlendShape,
       character.name,
       character.inverseBindPose,
-      character.skinnedLocators);
+      character.skinnedLocators};
 }
 
 momentum::Character loadLocatorsFromBytes(
@@ -377,7 +377,7 @@ momentum::Character replaceRestMesh(const momentum::Character& character, RowMat
   }
   newMesh.updateNormals();
 
-  return momentum::Character(
+  return {
       character.skeleton,
       character.parameterTransform,
       character.parameterLimits,
@@ -390,7 +390,7 @@ momentum::Character replaceRestMesh(const momentum::Character& character, RowMat
       character.faceExpressionBlendShape,
       character.name,
       character.inverseBindPose,
-      character.skinnedLocators);
+      character.skinnedLocators};
 }
 
 // Get a boolean vector for selected vertices from selected bones.
