@@ -947,12 +947,85 @@ Character loadModelAndCharacter(
   return result;
 }
 
+namespace {
+
+/// Calculate FPS from GLTF animation data by analyzing time accessors
+///
+/// @param model The GLTF document containing animation data
+/// @return Estimated FPS, or 0.0f if unable to calculate
+float calculateFpsFromAnimationData(const fx::gltf::Document& model) {
+  if (model.animations.empty()) {
+    return 0.0f;
+  }
+
+  // Collect FPS values from each sampler
+  std::vector<float> fpsValues;
+  fpsValues.reserve(32);
+
+  // Iterate through all animations and their samplers
+  for (const auto& animation : model.animations) {
+    for (const auto& sampler : animation.samplers) {
+      const int32_t inputAccessorIndex = sampler.input;
+      if (inputAccessorIndex < 0 ||
+          inputAccessorIndex >= static_cast<int32_t>(model.accessors.size())) {
+        continue;
+      }
+
+      const auto& accessor = model.accessors[inputAccessorIndex];
+      if (accessor.count < 2) {
+        continue;
+      }
+
+      // Get time range from accessor min/max
+      if (accessor.min.empty() || accessor.max.empty()) {
+        continue;
+      }
+
+      const float minTime = accessor.min[0];
+      const float maxTime = accessor.max[0];
+      const float duration = maxTime - minTime;
+
+      if (duration <= 0.0f) {
+        continue;
+      }
+
+      // Calculate FPS for this sampler: (keyframes - 1) / duration
+      const float fps = static_cast<float>(accessor.count - 1) / duration;
+      fpsValues.push_back(fps);
+    }
+  }
+
+  if (fpsValues.empty()) {
+    return 0.0f;
+  }
+
+  // Use median FPS to be robust against outliers
+  std::sort(fpsValues.begin(), fpsValues.end());
+  const float medianFps = fpsValues[fpsValues.size() / 2];
+  return medianFps;
+}
+
+} // namespace
+
 std::tuple<MotionParameters, IdentityParameters, float> loadMotion(fx::gltf::Document& model) {
   // parse motion data
   try {
     // load motion
     const auto& def = getMomentumExtension(model.extensionsAndExtras);
-    const float fps = def.value("fps", 120.0f);
+    float fps = def.value("fps", 0.0f);
+
+    // If FPS is not found in momentum metadata, try to calculate from animation data
+    if (fps == 0.0f) {
+      fps = calculateFpsFromAnimationData(model);
+      if (fps > 0.0f) {
+        MT_LOGD("FPS not found in momentum metadata, calculated from animation data: {}", fps);
+      } else {
+        // Fall back to default if calculation fails
+        fps = 120.0f;
+        MT_LOGW("FPS not found in momentum metadata or animation data, using default: {}", fps);
+      }
+    }
+
     const auto& [motion, identity] = getMotionFromModel(model);
     return {motion, identity, fps};
   } catch (std::runtime_error& err) {
