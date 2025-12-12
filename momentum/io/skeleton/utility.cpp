@@ -7,8 +7,7 @@
 
 #include "momentum/io/skeleton/utility.h"
 
-namespace momentum {
-namespace io_detail {
+namespace momentum::io_detail {
 
 // LineIterator implementation
 SectionContent::LineIterator::LineIterator(const std::vector<SectionSegment>& segments)
@@ -51,5 +50,4 @@ std::string SectionContent::toString() const {
   return result;
 }
 
-} // namespace io_detail
-} // namespace momentum
+} // namespace momentum::io_detail
