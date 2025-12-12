@@ -84,7 +84,7 @@ class PointTriangleVertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
   static constexpr T kPositionWeight = PositionErrorFunctionT<T>::kLegacyWeight;
   static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
 
-  size_t getNumVertices() const;
+  [[nodiscard]] size_t getNumVertices() const;
   [[nodiscard]] const Character* getCharacter() const override {
     return &character_;
   }
