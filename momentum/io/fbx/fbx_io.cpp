@@ -599,6 +599,7 @@ void saveFbxCommon(
   // ---------------------------------------------
   ::fbxsdk::FbxScene* scene = ::fbxsdk::FbxScene::Create(manager, "momentum_scene");
   ::fbxsdk::FbxNode* root = scene->GetRootNode();
+  MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
 
   // set the coordinate system
   ::fbxsdk::FbxAxisSystem axis = toFbx(coordSystemInfo);
