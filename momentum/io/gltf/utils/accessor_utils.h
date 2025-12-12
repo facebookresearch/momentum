@@ -14,7 +14,7 @@
 
 namespace momentum {
 
-static inline int32_t getComponentSize(const fx::gltf::Accessor::ComponentType& componentType) {
+inline int32_t getComponentSize(const fx::gltf::Accessor::ComponentType& componentType) {
   switch (componentType) {
     case fx::gltf::Accessor::ComponentType::Byte:
     case fx::gltf::Accessor::ComponentType::UnsignedByte:
@@ -31,7 +31,7 @@ static inline int32_t getComponentSize(const fx::gltf::Accessor::ComponentType& 
   }
 }
 
-static inline int32_t getTypeSize(const fx::gltf::Accessor::Type& ty) {
+inline int32_t getTypeSize(const fx::gltf::Accessor::Type& ty) {
   switch (ty) {
     case fx::gltf::Accessor::Type::Scalar:
       return 1;

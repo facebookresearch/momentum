@@ -16,7 +16,7 @@
 namespace momentum {
 
 /// Maximum number of joints that can influence a single vertex
-inline static constexpr uint32_t kMaxSkinJoints = 8;
+inline constexpr uint32_t kMaxSkinJoints = 8;
 
 /// Matrix type for storing joint indices that influence each vertex
 ///
