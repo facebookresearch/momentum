@@ -24,9 +24,6 @@
 
 namespace pymomentum {
 
-namespace py = pybind11;
-namespace mm = momentum;
-
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 

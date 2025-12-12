@@ -19,8 +19,6 @@
 
 namespace pymomentum {
 
-namespace py = pybind11;
-
 void checkSkelState(at::Tensor skelState) {
   MT_THROW_IF(
       skelState.size(-1) != 8,
