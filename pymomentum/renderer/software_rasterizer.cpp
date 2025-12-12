@@ -14,6 +14,7 @@
 #include <momentum/character/linear_skinning.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/common/exception.h>
 #include <momentum/math/fwd.h>
 #include <momentum/math/mesh.h>
 
@@ -911,6 +912,11 @@ void rasterizeSkeleton(
 
     size_t grandparent = character.skeleton.joints[iJoint].parent;
     while (grandparent != momentum::kInvalidIndex && !activeJoints[grandparent]) {
+      MT_THROW_IF(
+          grandparent >= character.skeleton.joints.size(),
+          "Grandparent joint index {} exceeds skeleton size {}",
+          grandparent,
+          character.skeleton.joints.size());
       grandparent = character.skeleton.joints[grandparent].parent;
     }
 

@@ -655,7 +655,7 @@ Character removeJoints(const Character& character, std::span<const size_t> joint
         if (srcToResultJointsWithParents[iSrcJoint] != kInvalidIndex) {
           break;
         }
-        srcParent = srcSkeleton.joints[srcParent].parent;
+        srcParent = srcSkeleton.joints.at(srcParent).parent;
       }
     }
 
