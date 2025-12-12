@@ -1,0 +1,82 @@
+name: Build Wheels
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to PyPI'
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Jinja2
+        run: pip install jinja2
+
+      - name: Generate pyproject.toml
+        run: |
+          python scripts/generate_pyproject.py
+          # Set a default pyproject.toml for the initial setup
+          cp pyproject-pypi-cpu-py312.toml pyproject.toml
+
+      - name: Set up Pixi (macOS/Windows)
+        if: runner.os != 'Linux'
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.39.0
+          environments: default
+
+      - name: Install dependencies (macOS/Windows)
+        if: runner.os != 'Linux'
+        run: |
+          pixi install -e default
+          echo "CMAKE_PREFIX_PATH=$PWD/.pixi/envs/default" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
+        # Configuration is in pyproject.toml (generated from pyproject-pypi.toml.j2)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  upload_pypi:
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish == true)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-wheels-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

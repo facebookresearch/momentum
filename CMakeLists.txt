@@ -140,6 +140,19 @@ else()
   FetchContent_MakeAvailable(rerun_sdk)
 endif()
 
+# Workaround for Arrow build failure in cibuildwheel
+if(TARGET arrow_shared)
+  # If arrow_shared is already defined (e.g. by rerun_sdk), ensure we don't try to build it again
+  # or if it's an imported target, we are good.
+elseif(TARGET Arrow::arrow_shared)
+  # System arrow found
+else()
+  # If rerun_sdk didn't provide arrow, we might need to find it
+  if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
+    find_package(Arrow CONFIG REQUIRED)
+  endif()
+endif()
+
 if(MOMENTUM_ENABLE_PROFILING)
   if(MOMENTUM_USE_SYSTEM_TRACY)
     find_package(Tracy CONFIG REQUIRED)
@@ -160,15 +173,11 @@ if(MOMENTUM_ENABLE_PROFILING)
   endif()
 endif()
 
-# 1st party
-# TODO: Make Axel as a separate project and change to find_package(axel CONFIG REQUIRED)
-add_subdirectory(axel)
-
 #===============================================================================
 # Compiler Settings
 #===============================================================================
 
-if(MOMENTUM_BUILD_TESTING)
+if(MOMENTUM_BUILD_TESTING OR MOMENTUM_BUILD_PYMOMENTUM)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -176,6 +185,10 @@ if(MSVC)
   add_compile_options(/bigobj)
   add_compile_options(/utf-8)
 endif()
+
+# 1st party
+# TODO: Make Axel as a separate project and change to find_package(axel CONFIG REQUIRED)
+add_subdirectory(axel)
 
 #===============================================================================
 # Build momentum
