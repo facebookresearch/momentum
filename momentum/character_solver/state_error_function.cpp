@@ -263,7 +263,7 @@ double StateErrorFunctionT<T>::getError(
 
 template <typename T>
 double StateErrorFunctionT<T>::getGradient(
-    const ModelParametersT<T>& params,
+    const ModelParametersT<T>& /* params */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& /* meshState */,
     Ref<Eigen::VectorX<T>> gradient) {
