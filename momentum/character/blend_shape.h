@@ -57,9 +57,9 @@ struct BlendShape : public BlendShapeBase {
   ///
   /// @tparam T Scalar type (float or double)
   /// @param coefficients Weights for each shape vector
-  /// @param result [out] Resulting deformed shape
+  /// @param output [out] Resulting deformed shape
   template <typename T>
-  void computeShape(const BlendWeightsT<T>& coefficients, std::vector<Eigen::Vector3<T>>& result)
+  void computeShape(const BlendWeightsT<T>& coefficients, std::vector<Eigen::Vector3<T>>& output)
       const;
 
   /// Solves for blend weights that best approximate a target shape

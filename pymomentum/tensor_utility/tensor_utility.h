@@ -148,14 +148,14 @@ class TensorChecker {
   // first tensor is "special" in the sense that if it is unbatched then
   // all tensors must be.
   at::Tensor validateAndFixTensor(
-      at::Tensor tensor_in,
+      at::Tensor tensor_orig,
       const char* tensorName,
       const std::vector<int>& expectedSizes,
       const std::vector<const char*>& dimensionNames,
-      at::ScalarType expectedType,
+      at::ScalarType expectedScalarType,
       bool allowUnbatched = true,
       bool allowEmpty = false,
-      bool* unsqueezed = nullptr);
+      bool* needsSqueeze_out = nullptr);
 
   int64_t getBoundValue(int idx);
   int64_t getBatchSize();

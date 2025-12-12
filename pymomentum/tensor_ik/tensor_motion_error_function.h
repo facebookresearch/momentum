@@ -21,7 +21,7 @@ template <typename T>
 std::unique_ptr<TensorErrorFunction<T>> createMotionErrorFunction(
     size_t batchSize,
     size_t nFrames,
-    const momentum::ParameterTransform& parameterTransform,
+    const momentum::ParameterTransform& paramTransform,
     at::Tensor targetParameters,
     at::Tensor targetWeights);
 

@@ -131,19 +131,19 @@ template <typename T>
 std::unique_ptr<TensorErrorFunction<T>> createDistanceErrorFunction(
     size_t batchSize,
     size_t nFrames,
-    at::Tensor cameras,
+    at::Tensor origins,
     at::Tensor parents,
     at::Tensor offsets,
     at::Tensor weights,
     at::Tensor targets) {
   return std::make_unique<TensorDistanceErrorFunction<T>>(
-      batchSize, nFrames, cameras, parents, offsets, weights, targets);
+      batchSize, nFrames, origins, parents, offsets, weights, targets);
 }
 
 template std::unique_ptr<TensorErrorFunction<float>> createDistanceErrorFunction<float>(
     size_t batchSize,
     size_t nFrames,
-    at::Tensor cameras,
+    at::Tensor origins,
     at::Tensor parents,
     at::Tensor offsets,
     at::Tensor weights,
@@ -152,7 +152,7 @@ template std::unique_ptr<TensorErrorFunction<float>> createDistanceErrorFunction
 template std::unique_ptr<TensorErrorFunction<double>> createDistanceErrorFunction<double>(
     size_t batchSize,
     size_t nFrames,
-    at::Tensor cameras,
+    at::Tensor origins,
     at::Tensor parents,
     at::Tensor offsets,
     at::Tensor weights,
