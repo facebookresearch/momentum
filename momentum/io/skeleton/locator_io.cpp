@@ -66,11 +66,11 @@ LocatorList loadLocators(
   auto length = instream.tellg();
   instream.seekg(0, std::ios::beg);
 
-  auto buffer = std::make_unique<char[]>(length);
-  instream.read((char*)buffer.get(), length);
+  std::vector<char> buffer(length);
+  instream.read(buffer.data(), length);
 
   return loadLocatorsFromBuffer(
-      std::span<const std::byte>(reinterpret_cast<const std::byte*>(buffer.get()), length),
+      std::span<const std::byte>(reinterpret_cast<const std::byte*>(buffer.data()), length),
       skeleton,
       parameterTransform);
 }
