@@ -383,9 +383,10 @@ Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
   const size_t numTris = triangleIndices.size() / 3;
   Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> result(numTris, 3);
   for (size_t iTri = 0; iTri < numTris; iTri++) {
-    result(iTri, 0) = triangleIndices[iTri * 3 + 0];
-    result(iTri, 1) = triangleIndices[iTri * 3 + 1];
-    result(iTri, 2) = triangleIndices[iTri * 3 + 2];
+    const size_t baseIdx = iTri * 3;
+    result(iTri, 0) = triangleIndices.at(baseIdx + 0);
+    result(iTri, 1) = triangleIndices.at(baseIdx + 1);
+    result(iTri, 2) = triangleIndices.at(baseIdx + 2);
   }
   return result;
 }
