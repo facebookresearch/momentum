@@ -1434,7 +1434,7 @@ at::Tensor transformPoseImp(
     at::Tensor transforms,
     bool ensureContinuousOutput) {
   TensorChecker checker("ParameterTransform.apply");
-  bool squeeze;
+  bool squeeze = false;
 
   const int nModelParam = character.parameterTransform.numAllModelParameters();
 

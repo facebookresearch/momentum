@@ -70,7 +70,7 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> d_computeGradient(
     at::Tensor errorFunctionWeights,
     size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap) {
-  bool squeezeErrorFunctionWeights;
+  bool squeezeErrorFunctionWeights = false;
   std::tie(modelParams, errorFunctionWeights) = checkIKInputs<T>(
       characters,
       modelParams,
@@ -107,7 +107,7 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> d_computeGradient(
 
     Eigen::VectorX<T> residual;
     Eigen::MatrixX<T> jacobian;
-    size_t actualRows;
+    size_t actualRows = 0;
     solverFunction.getJacobian(modelParameters_cur.v, jacobian, residual, actualRows);
 
     // The gradient is grad_ik(theta) = 2 * J^T(theta) * r(theta).  We want to

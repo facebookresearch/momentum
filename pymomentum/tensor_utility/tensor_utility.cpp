@@ -141,7 +141,7 @@ at::Tensor TensorChecker::validateAndFixTensor(
   }
 
   // Validate the batch dimension:
-  bool needsSqueeze;
+  bool needsSqueeze = false;
   int batchSize_new = _batchSize;
   if (tensor_orig.ndimension() == nExpectedDim) {
     MT_THROW_IF(
