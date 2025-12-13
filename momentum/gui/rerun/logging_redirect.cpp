@@ -15,6 +15,8 @@
 
 #include <rerun.hpp>
 
+#include <bit>
+
 #if !defined(MOMENTUM_WITH_XR_LOGGER)
 #include <iostream>
 #endif
@@ -33,7 +35,7 @@ arvr::logging::LogResult callback(
     size_t /* messageSizeInBytes */,
     bool /*isFatalLog*/,
     arvr::logging::CustomUserData userData) {
-  const auto* rec = reinterpret_cast<const rerun::RecordingStream*>(userData);
+  const auto* rec = std::bit_cast<const rerun::RecordingStream*>(userData);
 
   rerun::TextLogLevel level;
   switch (logLevel) {
