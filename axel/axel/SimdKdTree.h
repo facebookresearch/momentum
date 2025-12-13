@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -366,16 +367,17 @@ class SimdKdTreeAvxf : public SimdKdTreef<nDim> {
   /// point values will get FAR_VALUE for their location (so we can safely use it in difference and
   /// squared norm operations) and INT_MAX for their index.
   struct PointBlock {
-    __m256 values[nDim]; // [ {x1 x2 x3 x4 x5 x6 x7 x8}, {y1 y2 y3 y4 y5 y6 y7 y8}, ... ]
+    std::array<__m256, nDim>
+        values; // [ {x1 x2 x3 x4 x5 x6 x7 x8}, {y1 y2 y3 y4 y5 y6 y7 y8}, ... ]
     __m256i indices; // [i1 i2 i3 i4 i5 i6 i7 i8]
   };
 
   struct NormalBlock {
-    __m256 values[nDim];
+    std::array<__m256, nDim> values;
   };
 
   struct ColorBlock {
-    __m256 values[4];
+    std::array<__m256, 4> values;
   };
 
   /// Initializes the k-d tree. This function is intended to be only called by the constructor.
@@ -405,13 +407,13 @@ SimdKdTreeAvxf<nDim>::closestPointWithAcceptance(
   }
 
   // Use an explicit stack for speed:
-  std::array<SizeType, kMaxDepth + 1> nodeStack;
+  std::array<SizeType, kMaxDepth + 1> nodeStack{};
 
   // Start with just the root on the stack:
   SizeType stackSize = 1;
   nodeStack[0] = this->root_;
 
-  __m256 query_p[nDim];
+  std::array<__m256, nDim> query_p{};
   for (SizeType iDim = 0; iDim < nDim; ++iDim) {
     query_p[iDim] = _mm256_broadcast_ss(&queryPoint(iDim));
   }
@@ -455,11 +457,12 @@ SimdKdTreeAvxf<nDim>::closestPointWithAcceptance(
             _mm256_andnot_si256(finalMaskInt, bestSqrDistIndicesBlock));
       }
 
-      alignas(AVX_ALIGNMENT) float bestSqrDist_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_ps(bestSqrDist_extract, bestSqrDistBlock);
+      alignas(AVX_ALIGNMENT) std::array<float, AVX_FLOAT_BLOCK_SIZE> bestSqrDist_extract{};
+      _mm256_store_ps(bestSqrDist_extract.data(), bestSqrDistBlock);
 
-      alignas(AVX_ALIGNMENT) SizeType bestSqrDistIndices_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE>
+          bestSqrDistIndices_extract{};
+      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       for (SizeType k = 0; k < AVX_FLOAT_BLOCK_SIZE; ++k) {
         if (bestSqrDist_extract[k] < bestSqrDist) {

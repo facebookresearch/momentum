@@ -11,6 +11,7 @@
 #include <drjit/array_router.h>
 #include <drjit/packet.h>
 #include <drjit/util.h>
+#include <array>
 #include <gsl/gsl>
 
 #include "axel/Profile.h"
@@ -36,7 +37,7 @@ template <>
 struct VecfP<2> {
   static constexpr int Dim = 2;
 
-  FloatP data[Dim];
+  std::array<FloatP, Dim> data;
 
   const FloatP& operator[](size_t i) const {
     return data[i];
@@ -51,7 +52,7 @@ template <>
 struct VecfP<3> {
   static constexpr int Dim = 3;
 
-  FloatP data[Dim];
+  std::array<FloatP, Dim> data;
 
   const FloatP& operator[](size_t i) const {
     return data[i];
@@ -66,7 +67,7 @@ template <>
 struct VecfP<4> {
   static constexpr int Dim = 4;
 
-  FloatP data[Dim];
+  std::array<FloatP, Dim> data;
 
   const FloatP& operator[](size_t i) const {
     return data[i];
@@ -191,10 +192,10 @@ SimdKdTreef<nDim>::closestPoint(const Vec& queryPoint, Scalar maxSqrDist) const 
             drjit::select(lessThanMask, block.indices, bestSqrDistIndicesBlock);
       }
 
-      alignas(kSimdAlignment) float bestSqrDist_extract[kSimdPacketSize];
-      drjit::store<FloatP>(bestSqrDist_extract, bestSqrDistBlock);
-      alignas(kSimdAlignment) SizeType bestSqrDistIndices_extract[kSimdPacketSize];
-      drjit::store<IntP>(bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(kSimdAlignment) std::array<float, kSimdPacketSize> bestSqrDist_extract{};
+      drjit::store<FloatP>(bestSqrDist_extract.data(), bestSqrDistBlock);
+      alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> bestSqrDistIndices_extract{};
+      drjit::store<IntP>(bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       // Find best point horizontally within the current best packet
       for (SizeType k = 0; k < gsl::narrow<SizeType>(kSimdPacketSize); ++k) {
@@ -321,10 +322,10 @@ SimdKdTreef<nDim>::closestPoint(
             drjit::select(finalMask, pointBlock.indices, bestSqrDistIndicesBlock);
       }
 
-      alignas(kSimdAlignment) float bestSqrDist_extract[kSimdPacketSize];
-      drjit::store<FloatP>(bestSqrDist_extract, bestSqrDistBlock);
-      alignas(kSimdAlignment) SizeType bestSqrDistIndices_extract[kSimdPacketSize];
-      drjit::store<IntP>(bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(kSimdAlignment) std::array<float, kSimdPacketSize> bestSqrDist_extract{};
+      drjit::store<FloatP>(bestSqrDist_extract.data(), bestSqrDistBlock);
+      alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> bestSqrDistIndices_extract{};
+      drjit::store<IntP>(bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       // Find best point horizontally within the current best packet
       for (SizeType k = 0; k < gsl::narrow<SizeType>(kSimdPacketSize); ++k) {
@@ -469,10 +470,10 @@ SimdKdTreef<nDim>::closestPoint(
             drjit::select(finalMask, pointBlock.indices, bestSqrDistIndicesBlock);
       }
 
-      alignas(kSimdAlignment) float bestSqrDist_extract[kSimdPacketSize];
-      drjit::store<FloatP>(bestSqrDist_extract, bestSqrDistBlock);
-      alignas(kSimdAlignment) SizeType bestSqrDistIndices_extract[kSimdPacketSize];
-      drjit::store<IntP>(bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(kSimdAlignment) std::array<float, kSimdPacketSize> bestSqrDist_extract{};
+      drjit::store<FloatP>(bestSqrDist_extract.data(), bestSqrDistBlock);
+      alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> bestSqrDistIndices_extract{};
+      drjit::store<IntP>(bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       for (SizeType k = 0; k < gsl::narrow<SizeType>(kSimdPacketSize); ++k) {
         if (bestSqrDistIndices_extract[k] == INT_MAX) {
@@ -581,10 +582,10 @@ SimdKdTreef<nDim>::closestPointWithAcceptance(
             drjit::select(lessThanMask, pointBlock.indices, bestSqrDistIndicesBlock);
       }
 
-      alignas(kSimdAlignment) float bestSqrDist_extract[kSimdPacketSize];
-      drjit::store<FloatP>(bestSqrDist_extract, bestSqrDistBlock);
-      alignas(kSimdAlignment) SizeType bestSqrDistIndices_extract[kSimdPacketSize];
-      drjit::store<IntP>(bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(kSimdAlignment) std::array<float, kSimdPacketSize> bestSqrDist_extract{};
+      drjit::store<FloatP>(bestSqrDist_extract.data(), bestSqrDistBlock);
+      alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> bestSqrDistIndices_extract{};
+      drjit::store<IntP>(bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       // Find best point horizontally within the current best packet
       for (SizeType k = 0; k < gsl::narrow<SizeType>(kSimdPacketSize); ++k) {
@@ -685,10 +686,10 @@ void SimdKdTreef<nDim>::pointsInNSphere(
           continue;
         }
 
-        alignas(kSimdAlignment) float sqrDist_extract[kSimdPacketSize];
-        drjit::store<FloatP>(sqrDist_extract, sqrDist);
-        alignas(kSimdAlignment) SizeType indices_extract[kSimdPacketSize];
-        drjit::store<IntP>(indices_extract, block.indices);
+        alignas(kSimdAlignment) std::array<float, kSimdPacketSize> sqrDist_extract{};
+        drjit::store<FloatP>(sqrDist_extract.data(), sqrDist);
+        alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> indices_extract{};
+        drjit::store<IntP>(indices_extract.data(), block.indices);
 
         for (SizeType k = 0; k < gsl::narrow<SizeType>(kSimdPacketSize); ++k) {
           if (sqrDist_extract[k] <= radiusSqr) {
@@ -834,19 +835,20 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     const Box& box) {
   const SizeType blocksStart = gsl::narrow<SizeType>(impl_->pointBlocks.size());
 
-  alignas(kSimdAlignment) float pValues[nDim][kSimdPacketSize];
-  alignas(kSimdAlignment) float nValues[nDim][kSimdPacketSize];
-  alignas(kSimdAlignment) float cValues[kColorDimensions][kSimdPacketSize];
-  alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> indices;
+  alignas(kSimdAlignment) std::array<std::array<float, kSimdPacketSize>, nDim> pValues{};
+  alignas(kSimdAlignment) std::array<std::array<float, kSimdPacketSize>, nDim> nValues{};
+  alignas(kSimdAlignment) std::array<std::array<float, kSimdPacketSize>, kColorDimensions>
+      cValues{};
+  alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> indices{};
 
   for (SizeType curBlockStart = start; curBlockStart < end; curBlockStart += kSimdPacketSize) {
     // Initialize pValues, nValues, cValues, and indices with the default values
     for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-      drjit::store(pValues[iDim], FloatP(kFarValueFloat));
-      drjit::store(nValues[iDim], drjit::zeros<FloatP>());
+      drjit::store(pValues[iDim].data(), FloatP(kFarValueFloat));
+      drjit::store(nValues[iDim].data(), drjit::zeros<FloatP>());
     }
     for (SizeType iDim = 0; iDim < kColorDimensions; ++iDim) {
-      drjit::store(cValues[iDim], drjit::zeros<FloatP>());
+      drjit::store(cValues[iDim].data(), drjit::zeros<FloatP>());
     }
     std::fill(indices.begin(), indices.end(), std::numeric_limits<int>::max());
 
@@ -875,7 +877,7 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     // PointBlock
     typename Implementation::PointBlock pointBlock;
     for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-      pointBlock.values[iDim] = drjit::load<FloatP>(pValues[iDim]);
+      pointBlock.values[iDim] = drjit::load<FloatP>(pValues[iDim].data());
     }
     pointBlock.indices = drjit::load<IntP>(indices.data());
     impl_->pointBlocks.push_back(pointBlock);
@@ -884,7 +886,7 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     if (!normals.empty()) {
       typename Implementation::NormalBlock normalBlock;
       for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-        normalBlock.values[iDim] = drjit::load<FloatP>(nValues[iDim]);
+        normalBlock.values[iDim] = drjit::load<FloatP>(nValues[iDim].data());
       }
       impl_->normalBlocks.push_back(normalBlock);
     }
@@ -893,7 +895,7 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     if (!colors.empty()) {
       typename Implementation::ColorBlock colorBlock;
       for (SizeType iDim = 0; iDim < kColorDimensions; ++iDim) {
-        colorBlock.values[iDim] = drjit::load<FloatP>(cValues[iDim]);
+        colorBlock.values[iDim] = drjit::load<FloatP>(cValues[iDim].data());
       }
       impl_->colorBlocks.push_back(colorBlock);
     }
@@ -966,13 +968,13 @@ void SimdKdTreef<nDim>::validateInternal(
     XR_CHECK(node.pointBlocksEnd > node.pointBlocksStart, "Invalid point block indices.");
 
     for (SizeType i = node.pointBlocksStart; i != node.pointBlocksEnd; ++i) {
-      alignas(kSimdAlignment) float pValues[nDim][kSimdPacketSize];
+      alignas(kSimdAlignment) std::array<std::array<float, kSimdPacketSize>, nDim> pValues{};
       for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-        drjit::store(pValues[iDim], impl_->pointBlocks[i].values[iDim]);
+        drjit::store(pValues[iDim].data(), impl_->pointBlocks[i].values[iDim]);
       }
 
-      alignas(kSimdAlignment) SizeType indices[kSimdPacketSize];
-      drjit::store(indices, impl_->pointBlocks[i].indices);
+      alignas(kSimdAlignment) std::array<SizeType, kSimdPacketSize> indices{};
+      drjit::store(indices.data(), impl_->pointBlocks[i].indices);
 
       for (SizeType jPoint = 0; jPoint < gsl::narrow<SizeType>(kSimdPacketSize); ++jPoint) {
         if (indices[jPoint] == INT_MAX) {
@@ -1062,19 +1064,20 @@ typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
 
   const SizeType blocksStart = (SizeType)pointBlocks_.size();
   for (SizeType curBlockStart = start; curBlockStart < end; curBlockStart += AVX_FLOAT_BLOCK_SIZE) {
-    alignas(AVX_ALIGNMENT) float pValues[nDim][AVX_FLOAT_BLOCK_SIZE];
-    alignas(AVX_ALIGNMENT) float nValues[nDim][AVX_FLOAT_BLOCK_SIZE];
-    alignas(AVX_ALIGNMENT) float cValues[kColorDimensions][AVX_FLOAT_BLOCK_SIZE];
+    alignas(AVX_ALIGNMENT) std::array<std::array<float, AVX_FLOAT_BLOCK_SIZE>, nDim> pValues{};
+    alignas(AVX_ALIGNMENT) std::array<std::array<float, AVX_FLOAT_BLOCK_SIZE>, nDim> nValues{};
+    alignas(AVX_ALIGNMENT) std::array<std::array<float, AVX_FLOAT_BLOCK_SIZE>, kColorDimensions>
+        cValues{};
 
     for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-      _mm256_store_ps(pValues[iDim], _mm256_set1_ps(kFarValueFloat));
-      _mm256_store_ps(nValues[iDim], _mm256_setzero_ps());
+      _mm256_store_ps(pValues[iDim].data(), _mm256_set1_ps(kFarValueFloat));
+      _mm256_store_ps(nValues[iDim].data(), _mm256_setzero_ps());
     }
     for (SizeType iDim = 0; iDim < kColorDimensions; ++iDim) {
-      _mm256_store_ps(cValues[iDim], _mm256_setzero_ps());
+      _mm256_store_ps(cValues[iDim].data(), _mm256_setzero_ps());
     }
 
-    alignas(AVX_ALIGNMENT) SizeType indices[AVX_FLOAT_BLOCK_SIZE] = {
+    alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE> indices = {
         INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX};
 
     const SizeType curBlockEnd = std::min(curBlockStart + AVX_FLOAT_BLOCK_SIZE, end);
@@ -1102,16 +1105,16 @@ typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
 
     PointBlock pointBlock;
     for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-      pointBlock.values[iDim] = _mm256_load_ps(pValues[iDim]);
+      pointBlock.values[iDim] = _mm256_load_ps(pValues[iDim].data());
     }
 
-    pointBlock.indices = _mm256_load_si256((const __m256i*)indices);
+    pointBlock.indices = _mm256_load_si256((const __m256i*)indices.data());
     pointBlocks_.push_back(pointBlock);
 
     if (!normals.empty()) {
       NormalBlock normalBlock;
       for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-        normalBlock.values[iDim] = _mm256_load_ps(nValues[iDim]);
+        normalBlock.values[iDim] = _mm256_load_ps(nValues[iDim].data());
       }
       normalBlocks_.push_back(normalBlock);
     }
@@ -1119,7 +1122,7 @@ typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
     if (!colors.empty()) {
       ColorBlock colorBlock;
       for (SizeType iDim = 0; iDim < kColorDimensions; ++iDim) {
-        colorBlock.values[iDim] = _mm256_load_ps(cValues[iDim]);
+        colorBlock.values[iDim] = _mm256_load_ps(cValues[iDim].data());
       }
       colorBlocks_.push_back(colorBlock);
     }
@@ -1143,13 +1146,13 @@ SimdKdTreeAvxf<nDim>::closestPoint(const Vec& queryPoint, Scalar maxSqrDist) con
   }
 
   // Use an explicit stack for speed:
-  std::array<SizeType, kMaxDepth + 1> nodeStack;
+  std::array<SizeType, kMaxDepth + 1> nodeStack{};
 
   // Start with just the root on the stack:
   SizeType stackSize = 1;
   nodeStack[0] = this->root_;
 
-  __m256 query_p[nDim];
+  std::array<__m256, nDim> query_p{};
   for (SizeType iDim = 0; iDim < nDim; ++iDim) {
     query_p[iDim] = _mm256_broadcast_ss(&queryPoint[iDim]);
   }
@@ -1189,11 +1192,12 @@ SimdKdTreeAvxf<nDim>::closestPoint(const Vec& queryPoint, Scalar maxSqrDist) con
             _mm256_andnot_si256(lessThanMask, bestSqrDistIndicesBlock));
       }
 
-      alignas(AVX_ALIGNMENT) float bestSqrDist_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_ps(bestSqrDist_extract, bestSqrDistBlock);
+      alignas(AVX_ALIGNMENT) std::array<float, AVX_FLOAT_BLOCK_SIZE> bestSqrDist_extract{};
+      _mm256_store_ps(bestSqrDist_extract.data(), bestSqrDistBlock);
 
-      alignas(AVX_ALIGNMENT) SizeType bestSqrDistIndices_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE>
+          bestSqrDistIndices_extract{};
+      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       for (SizeType k = 0; k < AVX_FLOAT_BLOCK_SIZE; ++k) {
         if (bestSqrDist_extract[k] < bestSqrDist) {
@@ -1257,14 +1261,14 @@ SimdKdTreeAvxf<nDim>::closestPoint(
   }
 
   // Use an explicit stack for speed:
-  std::array<SizeType, kMaxDepth + 1> nodeStack;
+  std::array<SizeType, kMaxDepth + 1> nodeStack{};
 
   // Start with just the root on the stack:
   SizeType stackSize = 1;
   nodeStack[0] = this->root_;
 
-  __m256 query_p[nDim];
-  __m256 query_normal[nDim];
+  std::array<__m256, nDim> query_p{};
+  std::array<__m256, nDim> query_normal{};
   for (SizeType iDim = 0; iDim < nDim; ++iDim) {
     query_p[iDim] = _mm256_broadcast_ss(&queryPoint[iDim]);
     query_normal[iDim] = _mm256_broadcast_ss(&queryNormal[iDim]);
@@ -1324,10 +1328,11 @@ SimdKdTreeAvxf<nDim>::closestPoint(
             _mm256_andnot_si256(finalMaskInt, bestSqrDistIndicesBlock));
       }
 
-      alignas(AVX_ALIGNMENT) float bestSqrDist_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_ps(bestSqrDist_extract, bestSqrDistBlock);
-      alignas(AVX_ALIGNMENT) SizeType bestSqrDistIndices_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(AVX_ALIGNMENT) std::array<float, AVX_FLOAT_BLOCK_SIZE> bestSqrDist_extract{};
+      _mm256_store_ps(bestSqrDist_extract.data(), bestSqrDistBlock);
+      alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE>
+          bestSqrDistIndices_extract{};
+      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       for (SizeType k = 0; k < AVX_FLOAT_BLOCK_SIZE; ++k) {
         if (bestSqrDistIndices_extract[k] == INT_MAX) {
@@ -1394,15 +1399,15 @@ SimdKdTreeAvxf<nDim>::closestPoint(
   }
 
   // Use an explicit stack for speed:
-  std::array<SizeType, kMaxDepth + 1> nodeStack;
+  std::array<SizeType, kMaxDepth + 1> nodeStack{};
 
   // Start with just the root on the stack:
   SizeType stackSize = 1;
   nodeStack[0] = this->root_;
 
-  __m256 query_p[nDim];
-  __m256 query_normal[nDim];
-  __m256 query_color[kColorDimensions];
+  std::array<__m256, nDim> query_p{};
+  std::array<__m256, nDim> query_normal{};
+  std::array<__m256, kColorDimensions> query_color{};
   for (SizeType iDim = 0; iDim < nDim; ++iDim) {
     query_p[iDim] = _mm256_broadcast_ss(&queryPoint[iDim]);
     query_normal[iDim] = _mm256_broadcast_ss(&queryNormal[iDim]);
@@ -1479,10 +1484,11 @@ SimdKdTreeAvxf<nDim>::closestPoint(
             _mm256_andnot_si256(finalMaskInt, bestSqrDistIndicesBlock));
       }
 
-      alignas(AVX_ALIGNMENT) float bestSqrDist_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_ps(bestSqrDist_extract, bestSqrDistBlock);
-      alignas(AVX_ALIGNMENT) SizeType bestSqrDistIndices_extract[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract, bestSqrDistIndicesBlock);
+      alignas(AVX_ALIGNMENT) std::array<float, AVX_FLOAT_BLOCK_SIZE> bestSqrDist_extract{};
+      _mm256_store_ps(bestSqrDist_extract.data(), bestSqrDistBlock);
+      alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE>
+          bestSqrDistIndices_extract{};
+      _mm256_store_si256((__m256i*)bestSqrDistIndices_extract.data(), bestSqrDistIndicesBlock);
 
       for (SizeType k = 0; k < AVX_FLOAT_BLOCK_SIZE; ++k) {
         if (bestSqrDistIndices_extract[k] == INT_MAX) {
@@ -1545,13 +1551,13 @@ void SimdKdTreeAvxf<nDim>::pointsInNSphere(
   alignas(AVX_ALIGNMENT) const __m256 radiusSqrBlock = _mm256_broadcast_ss(&radiusSqr);
 
   // Use an explicit stack for speed:
-  std::array<SizeType, kMaxDepth + 1> nodeStack;
+  std::array<SizeType, kMaxDepth + 1> nodeStack{};
 
   // Start with just the root on the stack:
   SizeType stackSize = 1;
   nodeStack[0] = this->root_;
 
-  __m256 query_p[nDim];
+  std::array<__m256, nDim> query_p{};
   for (SizeType iDim = 0; iDim < nDim; ++iDim) {
     query_p[iDim] = _mm256_broadcast_ss(&center_in[iDim]);
   }
@@ -1585,11 +1591,11 @@ void SimdKdTreeAvxf<nDim>::pointsInNSphere(
           continue;
         }
 
-        alignas(AVX_ALIGNMENT) SizeType indices_extract[AVX_FLOAT_BLOCK_SIZE];
-        _mm256_store_si256((__m256i*)indices_extract, block.indices);
+        alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE> indices_extract{};
+        _mm256_store_si256((__m256i*)indices_extract.data(), block.indices);
 
-        alignas(AVX_ALIGNMENT) float sqrDist_extract[AVX_FLOAT_BLOCK_SIZE];
-        _mm256_store_ps(sqrDist_extract, sqrDist);
+        alignas(AVX_ALIGNMENT) std::array<float, AVX_FLOAT_BLOCK_SIZE> sqrDist_extract{};
+        _mm256_store_ps(sqrDist_extract.data(), sqrDist);
 
         for (SizeType k = 0; k < AVX_FLOAT_BLOCK_SIZE; ++k) {
           if (sqrDist_extract[k] <= radiusSqr) {
@@ -1636,13 +1642,13 @@ void SimdKdTreeAvxf<nDim>::validateInternal(
     XR_CHECK(node.pointBlocksEnd > node.pointBlocksStart);
 
     for (SizeType i = node.pointBlocksStart; i != node.pointBlocksEnd; ++i) {
-      alignas(AVX_ALIGNMENT) float pValues[nDim][AVX_FLOAT_BLOCK_SIZE];
+      alignas(AVX_ALIGNMENT) std::array<std::array<float, AVX_FLOAT_BLOCK_SIZE>, nDim> pValues{};
       for (SizeType iDim = 0; iDim < nDim; ++iDim) {
-        _mm256_store_ps(pValues[iDim], pointBlocks_[i].values[iDim]);
+        _mm256_store_ps(pValues[iDim].data(), pointBlocks_[i].values[iDim]);
       }
 
-      alignas(AVX_ALIGNMENT) SizeType indices[AVX_FLOAT_BLOCK_SIZE];
-      _mm256_store_si256((__m256i*)indices, pointBlocks_[i].indices);
+      alignas(AVX_ALIGNMENT) std::array<SizeType, AVX_FLOAT_BLOCK_SIZE> indices{};
+      _mm256_store_si256((__m256i*)indices.data(), pointBlocks_[i].indices);
 
       for (SizeType jPoint = 0; jPoint < AVX_FLOAT_BLOCK_SIZE; ++jPoint) {
         if (indices[jPoint] == INT_MAX) {
