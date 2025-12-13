@@ -34,7 +34,7 @@ struct XYZEulerToQuaternionFunction
  public:
   static variable_list forward(AutogradContext* ctx, at::Tensor xyzEuler);
 
-  static variable_list backward(AutogradContext* ctx, variable_list grad_rotationMatrices);
+  static variable_list backward(AutogradContext* ctx, variable_list grad_outputs);
 };
 
 template <typename T>

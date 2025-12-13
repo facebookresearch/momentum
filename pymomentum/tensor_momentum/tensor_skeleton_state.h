@@ -24,11 +24,11 @@ at::Tensor jointParametersToLocalSkeletonState(pybind11::object characters, at::
 
 at::Tensor skeletonStateToJointParameters(
     const momentum::Character& character,
-    at::Tensor skel_state);
+    at::Tensor skelState);
 
 at::Tensor localSkeletonStateToJointParameters(
     const momentum::Character& character,
-    at::Tensor skel_state);
+    at::Tensor localSkelState);
 
 at::Tensor matricesToSkeletonStates(at::Tensor matrices);
 
