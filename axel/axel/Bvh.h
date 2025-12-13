@@ -95,8 +95,8 @@ class Bvh final : public BvhBase<S> {
   Bvh(const Bvh&) = default;
   Bvh& operator=(const Bvh&) = default;
 
-  Bvh(Bvh&&) = default;
-  Bvh& operator=(Bvh&&) = default;
+  Bvh(Bvh&&) noexcept = default;
+  Bvh& operator=(Bvh&&) noexcept = default;
 
   // Sets the bounding boxes of the leaf nodes of the BVH. This function calls build() internally,
   // so there's no need to call build() again after setting the bounding boxes.
