@@ -592,14 +592,20 @@ std::string writeParameterTransform(
       bool needsPlus = false;
 
       if (!influences.empty()) {
-        for (size_t i = 0; i < influences.size(); ++i) {
-          if (i > 0) {
+        bool firstTerm = true;
+        for (const auto& [modelParamIndex, weight] : influences) {
+          MT_THROW_IF(
+              modelParamIndex >= parameterTransform.name.size(),
+              "Model parameter index {} is out of bounds (name size: {})",
+              modelParamIndex,
+              parameterTransform.name.size());
+          if (!firstTerm) {
             oss << " + ";
           }
-          const auto [modelParamIndex, weight] = influences[i];
-          oss << weight << "*" << parameterTransform.name[modelParamIndex];
+          oss << weight << "*" << parameterTransform.name.at(modelParamIndex);
+          firstTerm = false;
+          needsPlus = true;
         }
-        needsPlus = true;
       }
 
       if (offset != 0.0f) {

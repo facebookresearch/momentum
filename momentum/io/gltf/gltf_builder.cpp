@@ -136,6 +136,7 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
     def["texcoords"] = createAccessorBuffer<const Vector2f>(model, mesh.texcoords, true);
     setBufferView(model, def["texcoords"], fx::gltf::BufferView::TargetType::ArrayBuffer);
 
+    MT_THROW_IF(mesh.texcoord_faces.empty(), "Mesh has texcoords but no texcoord_faces");
     const std::span<const int32_t> texFaces(
         &mesh.texcoord_faces[0][0], mesh.texcoord_faces.size() * 3);
     def["texfaces"] = createAccessorBuffer<const int32_t>(model, texFaces);
@@ -214,7 +215,15 @@ void addMorphWeightsToModel(
     return;
   }
 
-  // validate the mesh node
+  // validate the mesh node - bounds checking
+  MT_THROW_IF(
+      meshIndex >= model.nodes.size() || model.nodes[meshIndex].mesh < 0 ||
+          static_cast<size_t>(model.nodes[meshIndex].mesh) >= model.meshes.size(),
+      "Invalid mesh index for blendshape animation (meshIndex: {}, nodes size: {})",
+      meshIndex,
+      model.nodes.size());
+
+  // validate the mesh node - original logic
   if (model.meshes[model.nodes[meshIndex].mesh].primitives.size() != 1 ||
       model.meshes[model.nodes[meshIndex].mesh].primitives.at(0).targets.size() != numWeights) {
     MT_LOGW("No valid mesh to add blendshape animation for");

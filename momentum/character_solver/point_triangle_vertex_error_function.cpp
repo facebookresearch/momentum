@@ -17,6 +17,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
 
@@ -201,6 +202,12 @@ Eigen::Vector3<T> calculateDWorldPos(
     const auto w = skinWeights.weight(vertexIndex, i);
     const auto parentBone = skinWeights.index(vertexIndex, i);
     if (w > 0) {
+      MT_THROW_IF(
+          parentBone >= state.jointState.size() || parentBone >= character.inverseBindPose.size(),
+          "Parent bone index {} exceeds jointState size {} or inverseBindPose size {}",
+          parentBone,
+          state.jointState.size(),
+          character.inverseBindPose.size());
       d_worldPos += w *
           (state.jointState[parentBone].transform.toLinear() *
            (character.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
