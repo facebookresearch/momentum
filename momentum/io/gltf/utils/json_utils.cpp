@@ -228,6 +228,12 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
     switch (lim.type) {
       case MinMax:
         li["type"] = "minmax";
+        MT_THROW_IF(
+            character.parameterTransform.name.empty() ||
+                lim.data.minMax.parameterIndex >= character.parameterTransform.name.size(),
+            "MinMax parameter index {} is out of bounds (name size: {})",
+            lim.data.minMax.parameterIndex,
+            character.parameterTransform.name.size());
         li["parameter"] = character.parameterTransform.name[lim.data.minMax.parameterIndex];
         li["limits"] = lim.data.minMax.limits;
         break;
@@ -251,8 +257,20 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
         break;
       case Linear:
         li["type"] = "linear";
+        MT_THROW_IF(
+            character.parameterTransform.name.empty() ||
+                lim.data.linear.referenceIndex >= character.parameterTransform.name.size(),
+            "Linear referenceIndex {} is out of bounds (name size: {})",
+            lim.data.linear.referenceIndex,
+            character.parameterTransform.name.size());
         li["referenceParameter"] =
             character.parameterTransform.name[lim.data.linear.referenceIndex];
+        MT_THROW_IF(
+            character.parameterTransform.name.empty() ||
+                lim.data.linear.targetIndex >= character.parameterTransform.name.size(),
+            "Linear targetIndex {} is out of bounds (name size: {})",
+            lim.data.linear.targetIndex,
+            character.parameterTransform.name.size());
         li["targetParameter"] = character.parameterTransform.name[lim.data.linear.targetIndex];
         li["scale"] = lim.data.linear.scale;
         li["offset"] = lim.data.linear.offset;
@@ -287,7 +305,19 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
         break;
       case HalfPlane:
         li["type"] = "half_plane";
+        MT_THROW_IF(
+            character.parameterTransform.name.empty() ||
+                lim.data.halfPlane.param1 >= character.parameterTransform.name.size(),
+            "HalfPlane param1 index {} is out of bounds (name size: {})",
+            lim.data.halfPlane.param1,
+            character.parameterTransform.name.size());
         li["param1"] = character.parameterTransform.name[lim.data.halfPlane.param1];
+        MT_THROW_IF(
+            character.parameterTransform.name.empty() ||
+                lim.data.halfPlane.param2 >= character.parameterTransform.name.size(),
+            "HalfPlane param2 index {} is out of bounds (name size: {})",
+            lim.data.halfPlane.param2,
+            character.parameterTransform.name.size());
         li["param2"] = character.parameterTransform.name[lim.data.halfPlane.param2];
         li["normal"] = lim.data.halfPlane.normal;
         li["offset"] = lim.data.halfPlane.offset;

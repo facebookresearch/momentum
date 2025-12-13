@@ -18,6 +18,7 @@
 #include "momentum/math/mesh.h"
 #include "momentum/math/utility.h"
 
+#include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 
 #include "axel/math/PointTriangleProjectionDefinitions.h"
@@ -159,6 +160,18 @@ ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
   ClosestPointOnMeshResult result;
   for (size_t iTri = 0; iTri < mesh.faces.size(); ++iTri) {
     const auto& f = mesh.faces[iTri];
+
+    // Check bounds for face indices (including negative values)
+    MT_THROW_IF(
+        f(0) < 0 || f(1) < 0 || f(2) < 0 || f(0) >= static_cast<int>(mesh.vertices.size()) ||
+            f(1) >= static_cast<int>(mesh.vertices.size()) ||
+            f(2) >= static_cast<int>(mesh.vertices.size()),
+        "Face index out of bounds at triangle {}: face indices ({}, {}, {}), mesh vertices size {}",
+        iTri,
+        f(0),
+        f(1),
+        f(2),
+        mesh.vertices.size());
 
     float skinWeight = 0;
     for (int kTriVert = 0; kTriVert < 3; ++kTriVert) {
@@ -473,13 +486,11 @@ LocatorList extractLocatorsFromCharacter(
     const size_t jointId = locators[i].parent;
 
     // Check bounds for jointState access
-    if (jointId >= state.jointState.size()) {
-      MT_LOGW(
-          "Joint ID {} is out of bounds for jointState (size: {})",
-          jointId,
-          state.jointState.size());
-      continue;
-    }
+    MT_THROW_IF(
+        jointId >= state.jointState.size(),
+        "Joint ID {} is out of bounds for jointState (size: {})",
+        jointId,
+        state.jointState.size());
 
     // get global locator position
     const Vector3f pos = state.jointState[jointId].transform * locators[i].offset;
@@ -488,13 +499,11 @@ LocatorList extractLocatorsFromCharacter(
     result[i].parent = skeleton.joints[jointId].parent;
 
     // Check bounds for parent joint access
-    if (result[i].parent >= state.jointState.size()) {
-      MT_LOGW(
-          "Parent joint ID {} is out of bounds for jointState (size: {})",
-          result[i].parent,
-          state.jointState.size());
-      continue;
-    }
+    MT_THROW_IF(
+        result[i].parent >= state.jointState.size(),
+        "Parent joint ID {} is out of bounds for jointState (size: {})",
+        result[i].parent,
+        state.jointState.size());
 
     // calculate new offset
     const Vector3f offset = state.jointState[result[i].parent].transform.inverse() * pos;
