@@ -18,14 +18,6 @@
 namespace axel::test {
 namespace {
 
-using ::test_helpers::HoldsError;
-using ::testing::DoubleNear;
-using ::testing::FloatNear;
-using ::testing::IsEmpty;
-using ::testing::Not;
-using ::testing::SizeIs;
-using ::testing::UnorderedElementsAre;
-
 template <typename S>
 constexpr SphereMeshParameters<S> kSphereParams{3.0, 64, 64};
 
