@@ -113,9 +113,7 @@ SimdKdTreef<nDim>::SimdKdTreef(
 }
 
 template <int32_t nDim>
-SimdKdTreef<nDim>::~SimdKdTreef() {
-  // Do nothing
-}
+SimdKdTreef<nDim>::~SimdKdTreef() = default;
 
 template <int32_t nDim>
 bool SimdKdTreef<nDim>::empty() const {
@@ -1050,9 +1048,7 @@ SimdKdTreeAvxf<nDim>::SimdKdTreeAvxf(
 }
 
 template <int32_t nDim>
-SimdKdTreeAvxf<nDim>::~SimdKdTreeAvxf() {
-  // Do nothing
-}
+SimdKdTreeAvxf<nDim>::~SimdKdTreeAvxf() = default;
 
 template <int32_t nDim>
 typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
