@@ -802,7 +802,7 @@ class GradientFunction {
 
   static std::vector<at::Tensor> forward(
       const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
       [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       [[maybe_unused]] const SolverOptions& options,
       at::Tensor modelParams_init,
@@ -821,8 +821,8 @@ class GradientFunction {
 
   static std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> backward(
       const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       at::Tensor modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,
@@ -874,8 +874,8 @@ class ResidualFunction {
 
   static std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> backward(
       const std::vector<const momentum::Character*>& characters,
-      const momentum::ParameterSet& activeParams,
-      const momentum::ParameterSet& sharedParams,
+      [[maybe_unused]] const momentum::ParameterSet& activeParams,
+      [[maybe_unused]] const momentum::ParameterSet& sharedParams,
       at::Tensor modelParams_init,
       const std::vector<at::Tensor>& results,
       const std::vector<at::Tensor>& dLoss_dResults,

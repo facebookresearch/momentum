@@ -60,8 +60,8 @@ void VertexProjectionErrorFunctionT<T>::addConstraint(
 
 template <typename T>
 double VertexProjectionErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& modelParameters,
-    const SkeletonStateT<T>& state,
+    const ModelParametersT<T>& /* modelParameters */,
+    const SkeletonStateT<T>& /* state */,
     const MeshStateT<T>& meshState) {
   MT_PROFILE_FUNCTION();
 

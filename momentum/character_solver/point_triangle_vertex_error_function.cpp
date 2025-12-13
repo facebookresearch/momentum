@@ -685,7 +685,7 @@ double PointTriangleVertexErrorFunctionT<T>::calculateNormalGradient(
 
 template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculateNormalJacobian(
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     const PointTriangleVertexConstraintT<T>& constr,
