@@ -67,7 +67,7 @@ class VertexSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) const final;
 
-  bool needsMesh() const final {
+  [[nodiscard]] bool needsMesh() const final {
     return true;
   }
 

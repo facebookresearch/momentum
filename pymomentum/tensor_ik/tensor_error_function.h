@@ -63,7 +63,7 @@ struct TensorInput {
   template <typename T>
   Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> toEigenMap(size_t iBatch, size_t iFrame) const;
 
-  bool isTensorEmpty() const {
+  [[nodiscard]] bool isTensorEmpty() const {
     return ::pymomentum::isEmpty(tensor);
   }
 };
@@ -150,21 +150,21 @@ class TensorErrorFunction {
   std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>
   createErrorFunction(const momentum::Character& character, size_t iBatch, size_t jFrame) const;
 
-  const std::vector<TensorInput>& tensorInputs() const {
+  [[nodiscard]] const std::vector<TensorInput>& tensorInputs() const {
     return _tensorInputs;
   }
 
-  const TensorInput& getTensorInput(const char* name) const;
+  [[nodiscard]] const TensorInput& getTensorInput(const char* name) const;
 
-  const char* name() const {
+  [[nodiscard]] const char* name() const {
     return _name;
   }
 
-  const char* argumentPrefix() const {
+  [[nodiscard]] const char* argumentPrefix() const {
     return _argumentPrefix;
   }
 
-  std::string enumName() const {
+  [[nodiscard]] std::string enumName() const {
     return std::string("ErrorFunctionType.") + _name;
   }
 
@@ -174,9 +174,9 @@ class TensorErrorFunction {
   // Otherwise, assuming we have created this TensorErrorFunction, it couldn't
   // be in State 3, so we are now in State 2: a dummy function should be
   // created.
-  bool requiredTensorEmpty() const;
+  [[nodiscard]] bool requiredTensorEmpty() const;
 
-  size_t batchSize() const {
+  [[nodiscard]] size_t batchSize() const {
     return _batchSize;
   }
 
@@ -195,12 +195,12 @@ class TensorErrorFunction {
   // sharedDimensionFlag: the negative integer representing runtime dimension
   // size as described in TensorInput. Returns the actual size of that
   // dimension.
-  size_t sharedSize(int sharedDimensionFlag) const;
+  [[nodiscard]] size_t sharedSize(int sharedDimensionFlag) const;
 
  private:
   // Check if there are any tensors that are non empty because
   // non empty tensors need validation (checks for dimensions, etc.).
-  bool anyNonEmptyTensor() const;
+  [[nodiscard]] bool anyNonEmptyTensor() const;
 
   // Make sure the dimensions match the targets.
   void validateDimensions();
@@ -221,11 +221,12 @@ class TensorErrorFunction {
   // corresponding value in _sharedSizeNames will be printed as the name of this
   // dimension. Otherwise, print "Y<absolute value of the integer>".
   template <typename TVec>
-  std::string formatTensorSize(const TVec& sizes, bool includeBatchPrefix = false) const;
+  [[nodiscard]] std::string formatTensorSize(const TVec& sizes, bool includeBatchPrefix = false)
+      const;
 
-  std::string sharedSizeName(int iShared) const;
+  [[nodiscard]] std::string sharedSizeName(int iShared) const;
 
-  std::string fullArgumentName(const TensorInput& input) const;
+  [[nodiscard]] std::string fullArgumentName(const TensorInput& input) const;
 
   const char* _name;
   const char* _argumentPrefix;
