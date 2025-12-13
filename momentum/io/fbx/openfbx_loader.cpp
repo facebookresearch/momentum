@@ -1010,7 +1010,7 @@ MatrixXf parseAnimation(
   return motion;
 }
 
-std::tuple<std::unique_ptr<ofbx::u8[]>, size_t> readFileToBuffer(const filesystem::path& path) {
+std::vector<ofbx::u8> readFileToBuffer(const filesystem::path& path) {
   // The FBX SDK returns a confusing error if the file doesn't actually
   // exist, so we should trap that case and return a more helpful error instead.
   std::ifstream ifs(path.string(), std::ios::binary | std::ios::ate);
@@ -1021,11 +1021,11 @@ std::tuple<std::unique_ptr<ofbx::u8[]>, size_t> readFileToBuffer(const filesyste
 
   MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
 
-  auto buffer = std::make_unique<ofbx::u8[]>(length);
-  ifs.read((char*)buffer.get(), length);
+  std::vector<ofbx::u8> buffer(length);
+  ifs.read(reinterpret_cast<char*>(buffer.data()), length);
   MT_THROW_IF(!ifs.good(), "Error reading the entire FBX file from {}", path.string());
 
-  return std::make_tuple(std::move(buffer), length);
+  return buffer;
 }
 
 // Parse marker sequence from FBX animation data
@@ -1220,7 +1220,8 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     loadFlags |= ofbx::LoadFlags::IGNORE_ANIMATIONS;
   }
   std::unique_ptr<ofbx::IScene, decltype(ofbx_deleter)> scene(
-      ofbx::load(fbxCharDataRaw.data(), (int32_t)length, (ofbx::u16)loadFlags), ofbx_deleter);
+      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(length), (ofbx::u16)loadFlags),
+      ofbx_deleter);
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
 
@@ -1309,9 +1310,9 @@ Character loadOpenFbxCharacter(
     Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
-  auto [buffer, length] = readFileToBuffer(path);
+  auto buffer = readFileToBuffer(path);
   return loadOpenFbxCharacter(
-      gsl::as_bytes(gsl::make_span(buffer.get(), length)),
+      gsl::as_bytes(gsl::make_span(buffer)),
       keepLocators,
       permissive,
       loadBlendShapes,
@@ -1333,9 +1334,9 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
     Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
-  auto [buffer, length] = readFileToBuffer(inputPath);
+  auto buffer = readFileToBuffer(inputPath);
   return loadOpenFbxCharacterWithMotion(
-      gsl::as_bytes(gsl::make_span(buffer.get(), length)),
+      gsl::as_bytes(gsl::make_span(buffer)),
       keepLocators,
       permissive,
       loadBlendShapes,
@@ -1343,9 +1344,9 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
 }
 
 MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
-  auto [buffer, length] = readFileToBuffer(filename);
-  MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
-  auto fbxCharDataRaw = gsl::make_span(buffer.get(), length);
+  auto buffer = readFileToBuffer(filename);
+  MT_THROW_IF(buffer.size() > INT32_MAX, "File too large for OpenFBX.");
+  auto fbxCharDataRaw = gsl::make_span(buffer);
 
   auto ofbx_deleter = [](ofbx::IScene* s) { s->destroy(); };
   // We don't currently use blend shapes for anything and they can be very
@@ -1355,7 +1356,8 @@ MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool 
       ofbx::LoadFlags::IGNORE_BLEND_SHAPES;
 
   std::unique_ptr<ofbx::IScene, decltype(ofbx_deleter)> scene(
-      ofbx::load(fbxCharDataRaw.data(), (int32_t)length, (ofbx::u16)loadFlags), ofbx_deleter);
+      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(buffer.size()), (ofbx::u16)loadFlags),
+      ofbx_deleter);
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
 
