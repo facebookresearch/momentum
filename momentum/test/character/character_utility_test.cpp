@@ -897,7 +897,7 @@ Character createTestCharacterWithConstrainedJoints() {
   }
   parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
-  return Character(skeleton, parameterTransform);
+  return {skeleton, parameterTransform};
 }
 
 // Test fixture for SkeletonStateToJointParametersRespectingTransform tests
