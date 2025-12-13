@@ -27,6 +27,7 @@ template bool projectOnTriangle(
     Eigen::Vector3<double>& q,
     Eigen::Vector3<double>* barycentric);
 
+// NOLINTNEXTLINE(bugprone-macro-parentheses)
 #define INSTANTIATE_PROJECT_ON_TRIANGLE(Scalar)            \
   template WideMask<WideScalar<Scalar>> projectOnTriangle( \
       const WideVec3<Scalar>& p,                           \
