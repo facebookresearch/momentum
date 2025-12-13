@@ -7,9 +7,8 @@
 
 #include "pymomentum/renderer/mesh_processing.h"
 
+#include <momentum/common/exception.h>
 #include <momentum/rasterizer/geometry.h>
-
-#include <stdexcept>
 
 namespace pymomentum {
 
@@ -21,64 +20,57 @@ std::tuple<RowMatrixf, RowMatrixf, RowMatrixi, RowMatrixf, RowMatrixi> subdivide
     std::optional<RowMatrixi> textureTriangles,
     int levels,
     float max_edge_length) {
-  if (levels <= 0) {
-    throw std::runtime_error("Expected levels >= 1");
+  MT_THROW_IF(levels <= 0, "Expected levels >= 1, got {}", levels);
+
+  MT_THROW_IF(
+      levels > 5,
+      "Too many levels ({}), exiting to avoid excessive computation/memory usage",
+      levels);
+
+  MT_THROW_IF(vertices.cols() != 3, "Expected n x 3 vertices, got n x {}", vertices.cols());
+
+  MT_THROW_IF(normals.cols() != 3, "Expected n x 3 normals, got n x {}", normals.cols());
+
+  MT_THROW_IF(
+      vertices.rows() != normals.rows(),
+      "Number of vertices ({}) does not match number of normals ({})",
+      vertices.rows(),
+      normals.rows());
+
+  MT_THROW_IF(triangles.cols() != 3, "Expected n x 3 triangles, got n x {}", triangles.cols());
+
+  // Initialize optional parameters with default values if not provided
+  if (!textureTriangles.has_value()) {
+    textureTriangles = triangles;
   }
 
-  if (levels > 5) {
-    throw std::runtime_error(
-        "Too many levels, exiting to avoid excessive computation/memory usage");
+  MT_THROW_IF(
+      textureTriangles->cols() != 3,
+      "Expected n x 3 texture_triangles, got n x {}",
+      textureTriangles->cols());
+
+  if (!textureCoords.has_value()) {
+    textureCoords = RowMatrixf::Zero(vertices.rows(), 2);
   }
+
+  MT_THROW_IF(
+      textureCoords->cols() != 2,
+      "Expected n x 2 texture_coords, got n x {}",
+      textureCoords->cols());
+
+  // Validate triangle indices for the input (output of subdivideMeshNoSmoothing should be valid)
+  MT_THROW_IF(
+      triangles.minCoeff() < 0 || triangles.maxCoeff() >= vertices.rows(),
+      "Invalid triangle index; expected all triangle indices to be within [0, {})",
+      vertices.rows());
+
+  MT_THROW_IF(
+      textureTriangles->minCoeff() < 0 || textureTriangles->maxCoeff() >= textureCoords->rows(),
+      "Invalid texture_triangles index; expected all texture_triangles indices to be within [0, {})",
+      textureCoords->rows());
 
   for (int i = 0; i < levels; ++i) {
-    if (vertices.cols() != 3) {
-      throw std::runtime_error("Expected n x 3 vertices");
-    }
-
-    if (normals.cols() != 3) {
-      throw std::runtime_error("Expected n x 3 normals");
-    }
-
-    if (vertices.rows() != normals.rows()) {
-      throw std::runtime_error("number of vertices does not match number of normals");
-    }
-
-    if (triangles.cols() != 3) {
-      throw std::runtime_error("Expected n x 3 triangles");
-    }
-
-    if (!textureTriangles.has_value()) {
-      textureTriangles = triangles;
-    }
-
-    if (textureTriangles->cols() != 3) {
-      throw std::runtime_error("Expected n x 3 texture_triangles");
-    }
-
-    if (!textureCoords.has_value()) {
-      textureCoords = RowMatrixf::Zero(vertices.rows(), 2);
-    }
-
-    if (textureCoords->cols() != 2) {
-      throw std::runtime_error("Expected n x 2 texture_coords");
-    }
-
-    if (triangles.minCoeff() < 0 || triangles.maxCoeff() >= vertices.rows()) {
-      throw std::runtime_error(
-          "Invalid triangle index; expected all triangle indices to be within [0, nVerts)");
-    }
-
-    if (textureTriangles->minCoeff() < 0 || textureTriangles->maxCoeff() >= textureCoords->rows()) {
-      throw std::runtime_error(
-          "Invalid texture_triangles index; expected all texture_triangles indices to be within [0, nTextureCoords)");
-    }
-
-    const auto nVertOrig = vertices.rows();
     const auto nTrianglesOrig = triangles.rows();
-
-    if (triangles.maxCoeff() >= nVertOrig || triangles.minCoeff() < 0) {
-      throw std::runtime_error("Invalid triangle");
-    }
 
     float maxEdgeLengthCur = 0;
     for (int iTri = 0; iTri < nTrianglesOrig; ++iTri) {
