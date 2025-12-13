@@ -680,6 +680,7 @@ void parseSkinnedModel(
         const auto indexV = shape->getIndices();
         MT_CHECK(numIndices == numVertices);
         for (int v = 0; v < numVertices; ++v) {
+          MT_THROW_IF(v >= numIndices, "Vertex index {} exceeds numIndices {}", v, numIndices);
           shapes(vertexOffset * 3 + indexV[v] * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
           shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
           shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;

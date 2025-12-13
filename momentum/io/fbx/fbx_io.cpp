@@ -361,6 +361,10 @@ std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
 
       // Add timestamp and position for this marker
       const auto& index = markerNameToIndex.at(marker.name);
+      MT_THROW_IF(
+          index >= timestamps.size() || index >= markerPositions.size(),
+          "Marker index {} exceeds container size",
+          index);
       timestamps[index].push_back(timestamp);
       markerPositions[index].push_back(marker.pos);
     }
@@ -435,6 +439,11 @@ std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
       curveZ->KeyModifyBegin();
 
       for (size_t k = 0; k < timestamps[j].size(); ++k) {
+        MT_THROW_IF(
+            j >= markerPositions.size() || k >= markerPositions[j].size(),
+            "Marker position index out of bounds: j={}, k={}",
+            j,
+            k);
         ::fbxsdk::FbxTime time;
         time.SetSecondDouble(timestamps[j][k]);
 

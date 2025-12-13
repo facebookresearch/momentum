@@ -322,6 +322,10 @@ void addActorAnimationToModel(
 
       // get index
       const auto& index = markerNameToIndex.at(marker.name);
+      MT_THROW_IF(
+          index >= timestamps.size() || index >= markerPositions.size(),
+          "Marker index {} exceeds container size",
+          index);
       timestamps[index].push_back(timestamp);
       markerPositions[index].push_back(fromMomentumVec3f(marker.pos.cast<float>()));
     }
@@ -384,6 +388,11 @@ size_t addMeshToModel(
     const auto nodeIdx = model.nodes.size();
     model.nodes.emplace_back();
     auto& node = model.nodes.back();
+    MT_THROW_IF(
+        rootNodeIdx >= model.nodes.size(),
+        "Root node index {} exceeds model.nodes size {}",
+        rootNodeIdx,
+        model.nodes.size());
     model.nodes[rootNodeIdx].children.push_back(nodeIdx);
 
     // create model mesh

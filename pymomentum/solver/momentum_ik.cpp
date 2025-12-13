@@ -473,6 +473,11 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
   // cannot save a vector of custom enum type.
   std::vector<int64_t> activatedErrorTypes(activeErrorFunctions.size());
   for (size_t i = 0; i < activeErrorFunctions.size(); ++i) {
+    MT_THROW_IF(
+        i >= activatedErrorTypes.size(),
+        "Index {} exceeds activatedErrorTypes size {}",
+        i,
+        activatedErrorTypes.size());
     activatedErrorTypes[i] = static_cast<int>(activeErrorFunctions[i]);
   }
   ctx->saved_data["activeErrorFunctions"] = activatedErrorTypes;

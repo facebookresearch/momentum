@@ -163,6 +163,11 @@ std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> buildMomentumE
     result.push_back(errf->createErrorFunction(character, iBatch, jFrame));
     // weightsMap maps error type order in the enum to order in input
     // errorFunctionWeights.
+    MT_THROW_IF(
+        iErr >= weightsMap.size(),
+        "Error function index {} exceeds weightsMap size {}",
+        iErr,
+        weightsMap.size());
     T weight = weightsMap[iErr] < 0 ? T(0) : toEigenMap<T>(weights_cur)[weightsMap[iErr]];
     result.back()->setWeight(weight);
   }
@@ -207,6 +212,11 @@ std::unique_ptr<momentum::SequenceSolverFunctionT<T>> buildSequenceSolverFunctio
       auto errf_momentum = errf->createErrorFunction(character, iBatch, jFrame);
       // weightsMap maps error type order in the enum to order in input
       // errorFunctionWeights.
+      MT_THROW_IF(
+          iErr >= weightsMap.size(),
+          "Error function index {} exceeds weightsMap size {}",
+          iErr,
+          weightsMap.size());
       T weight = weightsMap[iErr] < 0 ? T(0) : toEigenMap<T>(weights_cur)[weightsMap[iErr]];
       errf_momentum->setWeight(weight);
 
@@ -238,6 +248,11 @@ std::vector<ErrorFunctionInput<T>> buildErrorFunctionInputs(
         continue;
       }
 
+      MT_THROW_IF(
+          iErrorFunction >= weightsMap.size(),
+          "Error function index {} exceeds weightsMap size {}",
+          iErrorFunction,
+          weightsMap.size());
       if (weightsMap[iErrorFunction] < 0) {
         continue;
       }

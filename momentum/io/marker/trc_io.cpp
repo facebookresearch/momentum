@@ -7,6 +7,7 @@
 
 #include "momentum/io/marker/trc_io.h"
 
+#include "momentum/common/exception.h"
 #include "momentum/common/string.h"
 #include "momentum/io/common/stream_utils.h"
 #include "momentum/io/marker/conversions.h"
@@ -76,6 +77,8 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
     // go over all markers
     for (size_t i = 0; i < numMarkers; i++) {
       const size_t pos = i * 3 + 2;
+      MT_THROW_IF(
+          i >= markerNames.size() || pos + 2 >= tokens.size(), "Marker index {} out of bounds", i);
       markers[i].name = markerNames[i];
       if (tokens[pos + 0].empty() || tokens[pos + 1].empty() || tokens[pos + 2].empty()) {
         markers[i].occluded = true;

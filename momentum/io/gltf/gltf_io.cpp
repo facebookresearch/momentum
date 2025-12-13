@@ -440,6 +440,7 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
     MT_CHECK(fidxDense.size() % 3 == 0, "{} % 3 = {}", fidxDense.size(), fidxDense.size() % 3);
     texfaces.resize(fidxDense.size() / 3);
     if (!fidxDense.empty()) {
+      MT_THROW_IF(texfaces.empty(), "texfaces is empty but fidxDense is not empty");
       std::copy_n(fidxDense.data(), fidxDense.size(), &texfaces[0][0]);
     }
   } else {
