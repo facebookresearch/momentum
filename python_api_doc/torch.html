@@ -110,6 +110,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.character.Skeleton"><code class="docutils literal notranslate"><span class="pre">Skeleton</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.__init__"><code class="docutils literal notranslate"><span class="pre">Skeleton.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.forward"><code class="docutils literal notranslate"><span class="pre">Skeleton.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.global_trs_to_local_trs"><code class="docutils literal notranslate"><span class="pre">Skeleton.global_trs_to_local_trs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">Skeleton.joint_parameters_to_local_skeleton_state()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_local_trs"><code class="docutils literal notranslate"><span class="pre">Skeleton.joint_parameters_to_local_trs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.character.Skeleton.joint_parameters_to_trs"><code class="docutils literal notranslate"><span class="pre">Skeleton.joint_parameters_to_trs()</span></code></a></li>
@@ -465,6 +466,40 @@ this function, one should call the <code class="xref py py-class docutils litera
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.character.Skeleton.global_trs_to_local_trs">
+<span class="sig-name descname"><span class="pre">global_trs_to_local_trs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_trs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.torch.character.Skeleton.global_trs_to_local_trs" title="Link to this definition"></a></dt>
+<dd><p>Convert global TRS state to local TRS state using inverse kinematics.</p>
+<p>This function performs inverse kinematics on the global TRS transformations
+to compute the local joint transformations. This is the TRS equivalent of
+skeleton_state_to_local_skeleton_state(). It’s useful when you have global
+TRS states and need to extract the local transformations for each joint.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>global_trs: Global TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Global joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Global joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>TRS transform tuple (translation, rotation_matrix, scale) where:</dt><dd><ul class="simple">
+<li><p>translation: Local joint translations, shape (batch_size, num_joints, 3)</p></li>
+<li><p>rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)</p></li>
+<li><p>scale: Local joint scales, shape (batch_size, num_joints, 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Note:</dt><dd><p>This function uses the TRS backend’s ik_from_global_state for efficient
+inverse kinematics computation. It’s the inverse operation of
+local_trs_to_global_trs().</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
