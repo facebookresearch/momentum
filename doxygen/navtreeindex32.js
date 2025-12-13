@@ -1,5 +1,11 @@
 var NAVTREEINDEX32 =
 {
+"structmomentum_1_1SimdPositionConstraints.html":[1,0,2,122],
+"structmomentum_1_1SimdPositionConstraints.html":[2,0,0,122],
+"structmomentum_1_1SimdPositionConstraints.html#a1f97453de3541be7b2b55774fd0bc2da":[1,0,2,122,4],
+"structmomentum_1_1SimdPositionConstraints.html#a1f97453de3541be7b2b55774fd0bc2da":[2,0,0,122,4],
+"structmomentum_1_1SimdPositionConstraints.html#a32763dfa7744b7f0242366beefcd04ad":[2,0,0,122,11],
+"structmomentum_1_1SimdPositionConstraints.html#a32763dfa7744b7f0242366beefcd04ad":[1,0,2,122,11],
 "structmomentum_1_1SimdPositionConstraints.html#a39e0f612aebe067e02ecc7354fc67539":[1,0,2,122,1],
 "structmomentum_1_1SimdPositionConstraints.html#a39e0f612aebe067e02ecc7354fc67539":[2,0,0,122,1],
 "structmomentum_1_1SimdPositionConstraints.html#a5639d078dd19329041a31bb85b689680":[2,0,0,122,5],
@@ -243,11 +249,5 @@ var NAVTREEINDEX32 =
 "structmomentum_1_1TrustRegionQROptions.html":[1,0,2,147],
 "structmomentum_1_1TrustRegionQROptions.html":[2,0,0,147],
 "structmomentum_1_1TrustRegionQROptions.html#a4ce3a0ce9aed78e64bda79ff99b2cd5a":[1,0,2,147,1],
-"structmomentum_1_1TrustRegionQROptions.html#a4ce3a0ce9aed78e64bda79ff99b2cd5a":[2,0,0,147,1],
-"structmomentum_1_1TrustRegionQROptions.html#abec36009808d5d1813fd0c3ab56bb8ed":[1,0,2,147,2],
-"structmomentum_1_1TrustRegionQROptions.html#abec36009808d5d1813fd0c3ab56bb8ed":[2,0,0,147,2],
-"structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8":[1,0,2,147,0],
-"structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8":[2,0,0,147,0],
-"structmomentum_1_1VertexConstraintT.html":[1,0,2,150],
-"structmomentum_1_1VertexConstraintT.html":[2,0,0,150]
+"structmomentum_1_1TrustRegionQROptions.html#a4ce3a0ce9aed78e64bda79ff99b2cd5a":[2,0,0,147,1]
 };

@@ -1,5 +1,11 @@
 var NAVTREEINDEX33 =
 {
+"structmomentum_1_1TrustRegionQROptions.html#abec36009808d5d1813fd0c3ab56bb8ed":[1,0,2,147,2],
+"structmomentum_1_1TrustRegionQROptions.html#abec36009808d5d1813fd0c3ab56bb8ed":[2,0,0,147,2],
+"structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8":[1,0,2,147,0],
+"structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8":[2,0,0,147,0],
+"structmomentum_1_1VertexConstraintT.html":[1,0,2,150],
+"structmomentum_1_1VertexConstraintT.html":[2,0,0,150],
 "structmomentum_1_1VertexConstraintT.html#a98221fe8e2f7feb3b6739b947534a7d6":[1,0,2,150,1],
 "structmomentum_1_1VertexConstraintT.html#a98221fe8e2f7feb3b6739b947534a7d6":[2,0,0,150,1],
 "structmomentum_1_1VertexConstraintT.html#aa1c44f54c358e107d88b6b84040fb651":[1,0,2,150,2],

@@ -5,6 +5,8 @@ var accessor__utils_8h =
     [ "createAccessorBuffer", "accessor__utils_8h.html#a65e4f3bb836d92bd4474c9bb24be6531", null ],
     [ "createSampler", "accessor__utils_8h.html#a40d55cd6636a9506da0b2c5e144330a2", null ],
     [ "createSampler", "accessor__utils_8h.html#abd885022e1a4a1cb6737ee7e1d0d5708", null ],
+    [ "getComponentSize", "accessor__utils_8h.html#a9d05b235978d035c6600f8f43488b95e", null ],
+    [ "getTypeSize", "accessor__utils_8h.html#a4114a4aff807dfa5707e889f3747ea0e", null ],
     [ "setAccessorType", "accessor__utils_8h.html#aa04cc8199948c106e94c3dd9aa77a13d", null ],
     [ "setAccessorType< const float >", "accessor__utils_8h.html#ae142e99c3964e7346b3e207d910c11e8", null ],
     [ "setAccessorType< const int32_t >", "accessor__utils_8h.html#a93a1fb0d6c2c0a39c63b59b1fde1fe5b", null ],

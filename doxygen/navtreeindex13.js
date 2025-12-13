@@ -1,5 +1,7 @@
 var NAVTREEINDEX13 =
 {
+"fully__differentiable__distance__error__function_8h.html#aa0f2eba821b26212d0c64827d08c0d8e":[3,0,4,4,1],
+"fully__differentiable__distance__error__function_8h_source.html":[3,0,4,4],
 "fully__differentiable__motion__error__function_8cpp.html":[3,0,4,5],
 "fully__differentiable__motion__error__function_8cpp_source.html":[3,0,4,5],
 "fully__differentiable__motion__error__function_8h.html":[3,0,4,6],
@@ -38,8 +40,8 @@ var NAVTREEINDEX13 =
 "functions_e.html":[2,3,0,5],
 "functions_enum.html":[2,3,4],
 "functions_f.html":[2,3,0,6],
-"functions_func.html":[2,3,1],
 "functions_func.html":[2,3,1,0],
+"functions_func.html":[2,3,1],
 "functions_func_b.html":[2,3,1,1],
 "functions_func_c.html":[2,3,1,2],
 "functions_func_d.html":[2,3,1,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX13 =
 "json__utils_8h.html#a9bb264a8b00945007bcbd040e79a8500":[3,0,6,2,0,3,9],
 "json__utils_8h.html#aaa1a7fbd414924422797c20e5a5241c2":[3,0,6,2,0,3,6],
 "json__utils_8h.html#ab96431ab5c9c4024c15c77a84a7bb191":[3,0,6,2,0,3,7],
-"json__utils_8h.html#acb8cef1c4ffba9a25bf0261f3d6c96c5":[3,0,6,2,0,3,4],
-"json__utils_8h.html#ae26c3dc6f93d764f27b701b6ba8e6fc1":[3,0,6,2,0,3,3],
-"json__utils_8h.html#ae6605834aeab3fb3f186aa02785979ce":[3,0,6,2,0,3,8]
+"json__utils_8h.html#acb8cef1c4ffba9a25bf0261f3d6c96c5":[3,0,6,2,0,3,4]
 };
