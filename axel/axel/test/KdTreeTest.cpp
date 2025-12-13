@@ -14,7 +14,6 @@ namespace axel::test {
 namespace {
 
 using ::testing::AllOf;
-using ::testing::DoubleEq;
 using ::testing::DoubleNear;
 using ::testing::Each;
 using ::testing::Eq;

@@ -18,7 +18,6 @@
 namespace axel::test {
 namespace {
 
-using ::test_helpers::HoldsError;
 using ::testing::DoubleNear;
 using ::testing::FloatNear;
 using ::testing::IsEmpty;
