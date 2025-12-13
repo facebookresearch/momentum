@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <momentum/math/random.h>
 
+#include <array>
+
 #include "axel/SimdKdTree.h"
 
 #ifdef AXEL_ENABLE_AVX
@@ -59,7 +61,7 @@ void validateKdTreeNearestNeighbor(
   EXPECT_EQ(found3, false);
 
   const size_t nNormalsToTest = 5;
-  Eigen::Vector3f queryNormals[nNormalsToTest] = {
+  std::array<Eigen::Vector3f, nNormalsToTest> queryNormals = {
       Eigen::Matrix<T, 3, 1>::UnitX(),
       -Eigen::Matrix<T, 3, 1>::UnitX(),
       Eigen::Matrix<T, 3, 1>::UnitY(),
@@ -90,7 +92,7 @@ void validateKdTreeNearestNeighbor(
   }
 
   const size_t nColorsToTest = 3;
-  Eigen::Vector4f queryColors[nColorsToTest] = {
+  std::array<Eigen::Vector4f, nColorsToTest> queryColors = {
       Eigen::Vector4f(1, 0, 0, 1), Eigen::Vector4f(0, 1, 0, 1), Eigen::Vector4f(0, 0, 1, 1)};
 
   // Find he closest point with momentum::normal and color criteria
@@ -160,17 +162,17 @@ void validateKdTreeNearestNeighborWithAcceptance(
           const int all_ones = ~all_zeros;
 
           // Do AVX magic: vector => []
-          alignas(kAvxAlignment) int32_t indices[kAvxFloatBlockSize];
-          _mm256_store_si256((__m256i*)indices, indices_in);
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> indices{};
+          _mm256_store_si256((__m256i*)indices.data(), indices_in);
 
           // For all kAvxFloatBlockSize indices in the AVX vector
-          alignas(kAvxAlignment) int32_t result[kAvxFloatBlockSize];
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> result{};
           for (int32_t j = 0; j < 8; ++j) {
             result[j] = all_ones;
           }
 
           // Return AVX vector
-          return _mm256_load_si256((const __m256i*)result);
+          return _mm256_load_si256((const __m256i*)result.data());
         });
     ASSERT_TRUE(found5);
     EXPECT_EQ(closestPoint, index5);
@@ -182,17 +184,17 @@ void validateKdTreeNearestNeighborWithAcceptance(
           const int all_zeros = 0;
 
           // Do AVX magic: vector => []
-          alignas(kAvxAlignment) int32_t indices[kAvxFloatBlockSize];
-          _mm256_store_si256((__m256i*)indices, indices_in);
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> indices{};
+          _mm256_store_si256((__m256i*)indices.data(), indices_in);
 
           // For all kAvxFloatBlockSize indices in the AVX vector
-          alignas(kAvxAlignment) int32_t result[kAvxFloatBlockSize];
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> result{};
           for (int32_t j = 0; j < 8; ++j) {
             result[j] = all_zeros;
           }
 
           // Return AVX vector
-          return _mm256_load_si256((const __m256i*)result);
+          return _mm256_load_si256((const __m256i*)result.data());
         });
     EXPECT_FALSE(found6);
 
@@ -206,17 +208,17 @@ void validateKdTreeNearestNeighborWithAcceptance(
           const int all_ones = ~all_zeros;
 
           // Do AVX magic: vector => []
-          alignas(kAvxAlignment) int32_t indices[kAvxFloatBlockSize];
-          _mm256_store_si256((__m256i*)indices, indices_in);
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> indices{};
+          _mm256_store_si256((__m256i*)indices.data(), indices_in);
 
           // For all kAvxFloatBlockSize indices in the AVX vector
-          alignas(kAvxAlignment) int32_t result[kAvxFloatBlockSize];
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> result{};
           for (int32_t j = 0; j < 8; ++j) {
             result[j] = (indices[j] % 2 == 0) ? all_ones : all_zeros;
           }
 
           // Return AVX vector
-          return _mm256_load_si256((const __m256i*)result);
+          return _mm256_load_si256((const __m256i*)result.data());
         });
     ASSERT_TRUE(found7);
     EXPECT_EQ(0, index7 % 2);
@@ -415,11 +417,11 @@ TEST(SimdKdTreeTest, EmptyTree) {
           const int all_ones = ~all_zeros;
 
           // Do AVX magic: vector => []
-          alignas(kAvxAlignment) int32_t indices[kAvxFloatBlockSize];
-          _mm256_store_si256((__m256i*)indices, indices_in);
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> indices{};
+          _mm256_store_si256((__m256i*)indices.data(), indices_in);
 
           // For all kAvxFloatBlockSize indices in the AVX vector
-          alignas(kAvxAlignment) int32_t result[kAvxFloatBlockSize];
+          alignas(kAvxAlignment) std::array<int32_t, kAvxFloatBlockSize> result{};
           for (int32_t j = 0; j < 8; ++j) {
             if (indices[j] % 2 == 0) {
               result[j] = all_ones;
@@ -429,7 +431,7 @@ TEST(SimdKdTreeTest, EmptyTree) {
           }
 
           // Return AVX vector
-          return _mm256_load_si256((const __m256i*)result);
+          return _mm256_load_si256((const __m256i*)result.data());
         });
     EXPECT_FALSE(found);
     EXPECT_EQ(index, std::numeric_limits<SimdKdTree3f::SizeType>::max());
