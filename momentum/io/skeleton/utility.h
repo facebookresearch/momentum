@@ -12,8 +12,7 @@
 #include <string_view>
 #include <vector>
 
-namespace momentum {
-namespace io_detail {
+namespace momentum::io_detail {
 
 /// Represents a single segment of a section (when sections are split across the file)
 struct SectionSegment {
@@ -63,5 +62,4 @@ class SectionContent {
   std::vector<SectionSegment> segments_;
 };
 
-} // namespace io_detail
-} // namespace momentum
+} // namespace momentum::io_detail

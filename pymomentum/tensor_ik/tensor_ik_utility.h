@@ -22,10 +22,8 @@
 
 // Utility functions that can be reused for different IK-related functions (e.g.
 // computeGradient, computeResidual, etc.).
-namespace pymomentum {
-
 // These functions should only be used internally to the TensorIK library.
-namespace detail {
+namespace pymomentum::detail {
 
 // Utility function to check if it's a valid IK problem.  Returns the "fixed"
 // modelParams and errorFunctionWeights.
@@ -98,6 +96,4 @@ torch::autograd::variable_list toTensors(
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
     const std::vector<ErrorFunctionInput<T>>& inputs_all);
 
-} // namespace detail
-
-} // namespace pymomentum
+} // namespace pymomentum::detail
