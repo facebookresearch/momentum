@@ -25,12 +25,11 @@
 
 namespace pymomentum {
 
-using torch::autograd::AutogradContext;
-using torch::autograd::variable_list;
-
 namespace {
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
+using torch::autograd::AutogradContext;
+using torch::autograd::variable_list;
 
 template <typename T>
 void jointParametersToPositions(

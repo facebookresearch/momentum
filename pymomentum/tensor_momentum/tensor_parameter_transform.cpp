@@ -24,12 +24,12 @@
 
 namespace pymomentum {
 
-using torch::autograd::AutogradContext;
-using torch::autograd::variable_list;
-
 namespace {
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
+
+using torch::autograd::AutogradContext;
+using torch::autograd::variable_list;
 
 template <typename T>
 struct ApplyParameterTransformFunction
@@ -366,6 +366,9 @@ at::Tensor findParameters(
 namespace {
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
+
+using torch::autograd::AutogradContext;
+using torch::autograd::variable_list;
 
 struct ApplyInverseParameterTransformFunction
     : public torch::autograd::Function<ApplyInverseParameterTransformFunction> {
