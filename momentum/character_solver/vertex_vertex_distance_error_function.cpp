@@ -32,7 +32,7 @@ VertexVertexDistanceErrorFunctionT<T>::VertexVertexDistanceErrorFunctionT(
 }
 
 template <typename T>
-VertexVertexDistanceErrorFunctionT<T>::~VertexVertexDistanceErrorFunctionT() {}
+VertexVertexDistanceErrorFunctionT<T>::~VertexVertexDistanceErrorFunctionT() = default;
 
 template <typename T>
 void VertexVertexDistanceErrorFunctionT<T>::addConstraint(
