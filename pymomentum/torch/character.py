@@ -224,6 +224,48 @@ class Skeleton(torch.nn.Module):
             ),
         )
 
+    def global_trs_to_local_trs(
+        self,
+        global_trs: pym_trs.TRSTransform,
+    ) -> pym_trs.TRSTransform:
+        """
+        Convert global TRS state to local TRS state using inverse kinematics.
+
+        This function performs inverse kinematics on the global TRS transformations
+        to compute the local joint transformations. This is the TRS equivalent of
+        skeleton_state_to_local_skeleton_state(). It's useful when you have global
+        TRS states and need to extract the local transformations for each joint.
+
+        Args:
+            global_trs: Global TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Global joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Global joint scales, shape (batch_size, num_joints, 1)
+
+        Returns:
+            TRS transform tuple (translation, rotation_matrix, scale) where:
+                - translation: Local joint translations, shape (batch_size, num_joints, 3)
+                - rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+                - scale: Local joint scales, shape (batch_size, num_joints, 1)
+
+        Note:
+            This function uses the TRS backend's ik_from_global_state for efficient
+            inverse kinematics computation. It's the inverse operation of
+            local_trs_to_global_trs().
+        """
+        global_state_t, global_state_r, global_state_s = global_trs
+        return trs_backend.ik_from_global_state(
+            global_state_t=global_state_t,
+            global_state_r=global_state_r,
+            global_state_s=global_state_s,
+            prefix_mul_indices=list(
+                self.pmi.split(
+                    split_size=self._pmi_buffer_sizes,
+                    dim=1,
+                )
+            ),
+        )
+
     def local_skeleton_state_to_skeleton_state(
         self, local_skel_state: torch.Tensor
     ) -> torch.Tensor:
