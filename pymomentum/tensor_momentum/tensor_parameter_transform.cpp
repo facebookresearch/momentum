@@ -580,7 +580,7 @@ at::Tensor modelParametersToFaceExpressionCoefficients(
 at::Tensor getParameterTransformTensor(const momentum::ParameterTransform& parameterTransform) {
   const auto& transformSparse = parameterTransform.transform;
 
-  const at::Tensor transformDense =
+  at::Tensor transformDense =
       at::zeros({transformSparse.rows(), transformSparse.cols()}, at::kFloat);
 
   auto transformAccessor = transformDense.accessor<float, 2>();
