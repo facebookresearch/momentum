@@ -23,7 +23,7 @@
 #include <pybind11/numpy.h>
 #include <Eigen/Core>
 
-#include <string.h>
+#include <cstring>
 
 namespace py = pybind11;
 
