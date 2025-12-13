@@ -164,7 +164,9 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
 // problem is that to do the latter we'd end up copying the whole tensor
 // every time we apply blend shapes.  Explicitly implementing this one
 // operation seems like a reasonable compromise.
-at::Tensor applyBlendShapeCoefficients(pybind11::object blendShape, at::Tensor coeffs) {
+at::Tensor applyBlendShapeCoefficients(
+    [[maybe_unused]] pybind11::object blendShape,
+    [[maybe_unused]] at::Tensor coeffs) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   return ApplyBlendShapeCoefficientsFunction::apply(blendShape.ptr(), coeffs)[0];
 #else

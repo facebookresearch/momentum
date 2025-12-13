@@ -324,9 +324,9 @@ variable_list SkinPointsFunction<T>::backward(AutogradContext* ctx, variable_lis
 } // namespace
 
 at::Tensor skinPoints(
-    pybind11::object characters,
-    at::Tensor skel_state,
-    std::optional<at::Tensor> restPoints) {
+    [[maybe_unused]] pybind11::object characters,
+    [[maybe_unused]] at::Tensor skel_state,
+    [[maybe_unused]] std::optional<at::Tensor> restPoints) {
   if (skel_state.size(-1) == 8) {
     // Assumed to be a skeleton state.
     skel_state = skeletonStateToTransforms(skel_state);

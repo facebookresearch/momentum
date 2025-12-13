@@ -469,7 +469,9 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
 
 } // anonymous namespace
 
-at::Tensor jointParametersToSkeletonState(pybind11::object characters, at::Tensor jointParams) {
+at::Tensor jointParametersToSkeletonState(
+    [[maybe_unused]] pybind11::object characters,
+    [[maybe_unused]] at::Tensor jointParams) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<JointParametersToSkeletonStateFunction>(
       characters.ptr(), jointParams)[0];
@@ -479,8 +481,8 @@ at::Tensor jointParametersToSkeletonState(pybind11::object characters, at::Tenso
 }
 
 at::Tensor jointParametersToLocalSkeletonState(
-    pybind11::object characters,
-    at::Tensor jointParams) {
+    [[maybe_unused]] pybind11::object characters,
+    [[maybe_unused]] at::Tensor jointParams) {
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<JointParametersToLocalSkeletonStateFunction>(
       characters.ptr(), jointParams)[0];
