@@ -39,6 +39,30 @@
 namespace py = pybind11;
 namespace mm = momentum;
 
+namespace {
+
+mm::Character withBlendShapeImpl(
+    const mm::Character& c,
+    const std::optional<mm::BlendShape_const_p>& blendShape,
+    int nShapes) {
+  if (!blendShape.has_value()) {
+    // Remove existing blend shape, if present:
+    return c.withBlendShape({}, 0);
+  }
+
+  MT_THROW_IF(!c.mesh, "Character has no mesh, cannot apply blend shapes.")
+
+  auto blendShapePtr = blendShape.value();
+  MT_THROW_IF(
+      blendShapePtr->modelSize() != c.mesh->vertices.size(),
+      "Blend shape has {} vertices, but mesh has {} vertices.",
+      blendShapePtr->modelSize(),
+      c.mesh->vertices.size());
+  return c.withBlendShape(blendShapePtr, nShapes < 0 ? INT_MAX : nShapes);
+}
+
+} // namespace
+
 namespace pymomentum {
 
 void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
@@ -337,12 +361,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           ":return: A list of :class:`TaperedCapsule` representing the character's collision geometry.")
       .def(
           "with_blend_shape",
-          [](const mm::Character& c,
-             const std::optional<mm::BlendShape_const_p>& blendShape,
-             int nShapes) {
-            return c.withBlendShape(
-                blendShape.value_or(mm::BlendShape_const_p{}), nShapes < 0 ? INT_MAX : nShapes);
-          },
+          &withBlendShapeImpl,
           R"(Returns a character that uses the parameter transform to control the passed-in blend shape basis.
 It can be used to solve for shapes and pose simultaneously.
 
