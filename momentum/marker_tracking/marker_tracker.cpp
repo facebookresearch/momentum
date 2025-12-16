@@ -7,6 +7,7 @@
 
 #include "momentum/marker_tracking/marker_tracker.h"
 
+#include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_limits.h"
@@ -890,6 +891,9 @@ void calibrateModel(
     std::tie(identity.v, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
     if (config.calibShape && solvingCharacter.blendShape && character.mesh) {
+      auto blendShapeParams =
+          extractBlendWeights(solvingCharacter.parameterTransform, ModelParameters(motion.col(0)));
+      MT_LOGI("Solved for blend shape coeffs: {}", blendShapeParams.v.transpose());
       *character.mesh = extractBlendShapeFromParams(motion.col(0), solvingCharacter);
     }
 
