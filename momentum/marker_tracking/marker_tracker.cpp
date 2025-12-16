@@ -696,6 +696,67 @@ Eigen::MatrixXf trackPosesForFrames(
   return outMotion;
 }
 
+namespace {
+
+/// Compute character height after calibration.
+///
+/// This function computes the height of a calibrated character by:
+/// 1. Setting scale and shape parameters from identity
+/// 2. Zeroing out all pose parameters
+/// 3. Running full skinning with shape
+/// 4. Computing the distance between largest and smallest Y values across all mesh vertices
+///
+/// @param character Character model with calibrated identity
+/// @param identity Identity parameters containing scale and shape
+/// @return Height of the character in world units
+float computeCharacterHeight(const Character& character, const ModelParameters& identity) {
+  if (!character.mesh) {
+    MT_LOGW("Character has no mesh, cannot compute height");
+    return 0.0f;
+  }
+
+  const ParameterTransform& pt = character.parameterTransform;
+
+  // Create a model parameters vector with scale and shape, but zero pose
+  ModelParameters neutralParams = identity;
+
+  // Zero out all pose parameters
+  const ParameterSet poseParams = pt.getPoseParameters();
+  for (size_t i = 0; i < neutralParams.v.size(); ++i) {
+    if (poseParams.test(i)) {
+      neutralParams.v[i] = 0.0f;
+    }
+  }
+
+  // Create skeleton state with the neutral (zero pose) parameters
+  const auto jointParams = pt.apply(neutralParams.v);
+  SkeletonState state;
+  state.set(jointParams, character.skeleton, false);
+
+  // Apply blend shape skinning to get the deformed mesh
+  Mesh skinnedMesh;
+  skinWithBlendShapes(character, state, neutralParams, skinnedMesh);
+
+  // Find min and max Y values across all vertices
+  if (skinnedMesh.vertices.empty()) {
+    MT_LOGW("Skinned mesh has no vertices, cannot compute height");
+    return 0.0f;
+  }
+
+  float minY = std::numeric_limits<float>::max();
+  float maxY = std::numeric_limits<float>::lowest();
+
+  for (const auto& vertex : skinnedMesh.vertices) {
+    minY = std::min(minY, vertex.y());
+    maxY = std::max(maxY, vertex.y());
+  }
+
+  const float height = maxY - minY;
+  return height;
+}
+
+} // namespace
+
 Character addSkinnedLocatorParametersToTransform(Character character) {
   if (character.skinnedLocators.empty()) {
     return character;
@@ -948,6 +1009,10 @@ void calibrateModel(
 
   // TODO: A hack to return the solved first frame as initialization for tracking later.
   identity.v = motion.col(0).head(transform.numAllModelParameters());
+
+  // Log the calibrated character height
+  const float height = computeCharacterHeight(character, identity);
+  MT_LOGI("Calibrated character height: {:.4f} cm", height);
 }
 
 /// Calibrate only locator positions with fixed character identity parameters.
