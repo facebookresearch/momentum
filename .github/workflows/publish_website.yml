@@ -73,7 +73,7 @@ jobs:
 
     # 5) Upload the built website as an artifact
     - name: Upload Built Website
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: built-website
         path: momentum/website/build
