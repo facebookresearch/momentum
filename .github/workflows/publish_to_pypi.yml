@@ -257,7 +257,7 @@ jobs:
 
     steps:
       - name: Download CPU wheel artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: dist
           pattern: wheels-cpu-*
@@ -284,7 +284,7 @@ jobs:
 
     steps:
       - name: Download GPU wheel artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: dist
           pattern: wheels-gpu-*
