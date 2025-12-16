@@ -128,16 +128,34 @@ find_package(urdfdom CONFIG REQUIRED)
 
 if(MOMENTUM_BUILD_RENDERER)
   find_package(Kokkos CONFIG REQUIRED) # For mdspan headers (vendored in Kokkos)
+  if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
+    find_package(rerun_sdk CONFIG REQUIRED)
+  else()
+    include(FetchContent)
+    FetchContent_Declare(
+      rerun_sdk
+      GIT_REPOSITORY https://github.com/rerun-io/rerun.git
+      GIT_TAG 0.20.3
+    )
+    # Disable Rerun tests and examples to speed up build
+    set(RERUN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    set(RERUN_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(RERUN_BUILD_WEB_VIEWER OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(rerun_sdk)
+  endif()
 endif()
 
-if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
-  find_package(rerun_sdk CONFIG REQUIRED)
+# Workaround for Arrow build failure in cibuildwheel
+if(TARGET arrow_shared)
+  # If arrow_shared is already defined (e.g. by rerun_sdk), ensure we don't try to build it again
+  # or if it's an imported target, we are good.
+elseif(TARGET Arrow::arrow_shared)
+  # System arrow found
 else()
-  include(FetchContent)
-  FetchContent_Declare(rerun_sdk
-    URL https://github.com/rerun-io/rerun/releases/download/0.23.3/rerun_cpp_sdk.zip
-  )
-  FetchContent_MakeAvailable(rerun_sdk)
+  # If rerun_sdk didn't provide arrow, we might need to find it
+  if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
+    find_package(Arrow CONFIG REQUIRED)
+  endif()
 endif()
 
 if(MOMENTUM_ENABLE_PROFILING)
@@ -160,15 +178,11 @@ if(MOMENTUM_ENABLE_PROFILING)
   endif()
 endif()
 
-# 1st party
-# TODO: Make Axel as a separate project and change to find_package(axel CONFIG REQUIRED)
-add_subdirectory(axel)
-
 #===============================================================================
 # Compiler Settings
 #===============================================================================
 
-if(MOMENTUM_BUILD_TESTING)
+if(MOMENTUM_BUILD_TESTING OR MOMENTUM_BUILD_PYMOMENTUM)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -176,6 +190,10 @@ if(MSVC)
   add_compile_options(/bigobj)
   add_compile_options(/utf-8)
 endif()
+
+# 1st party
+# TODO: Make Axel as a separate project and change to find_package(axel CONFIG REQUIRED)
+add_subdirectory(axel)
 
 #===============================================================================
 # Build momentum

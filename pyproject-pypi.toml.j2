@@ -89,7 +89,13 @@ cmake.args = [
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    "-DCMAKE_DISABLE_FIND_PACKAGE_Arrow=ON",
 ]
+# Read CMAKE_PREFIX_PATH from environment variable
+# This is needed for cibuildwheel where pixi installs deps to a custom location
+cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 minimum-version = "0.10"
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 sdist.exclude = [
@@ -112,7 +118,29 @@ cmake.args = [
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 ]
+cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "^linux"
+cmake.args = [
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
+    # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
+    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
+    "-DCMAKE_C_FLAGS=-static-libgcc",
+]
+cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 {% endif %}
 
 {% if variant == "gpu" %}
@@ -126,7 +154,13 @@ cmake.args = [
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
+    # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
+    # The pixi environment's pybind11 uses pybind11NewTools which requires python_add_library
+    # from CMake's FindPython, but pixi's Python only has Interpreter component
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
 ]
+cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 {% endif %}
 
 [[tool.scikit-build.overrides]]
@@ -139,10 +173,13 @@ cmake.args = [
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 {% if variant == "cpu" %}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {% endif %}
 ]
+cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 
 [tool.setuptools_scm]
 # Automatically determine version from git tags
@@ -151,3 +188,76 @@ cmake.args = [
 version_scheme = "post-release"
 local_scheme = "no-local-version"
 version_file = "pymomentum/_version.py"
+
+{% if variant == "cpu" %}
+[tool.cibuildwheel]
+build = "cp312-* cp313-*"
+build-verbosity = 3
+# Skip PyPy, musllinux, and Windows for now
+# Windows is skipped due to cibuildwheel shell issues with export/command substitution
+skip = "pp* *-musllinux* *-win*"
+archs = ["auto64"]
+manylinux-x86_64-image = "manylinux_2_28"
+
+# Common
+before-build = """
+VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+echo "Using pyproject.toml for Python $VER"
+cp pyproject-pypi-cpu-py${VER}.toml pyproject.toml
+
+# Install build dependencies that are not in build-system.requires
+# We need torch to link against libtorch
+# Use the same constraints as in the generated pyproject.toml
+pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cpu
+"""
+test-command = "python -c \"import pymomentum\""
+test-requires = ["numpy", "scipy"]
+before-test = "pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cpu"
+
+[tool.cibuildwheel.linux]
+before-all = """
+# Use local pixi binary if available to avoid network issues
+if [ -f /project/pixi_bin ]; then
+  echo "Using local pixi binary"
+  mkdir -p $HOME/.pixi/bin
+  cp /project/pixi_bin $HOME/.pixi/bin/pixi
+  chmod +x $HOME/.pixi/bin/pixi
+else
+  echo "Downloading pixi"
+  curl -fsSL https://pixi.sh/install.sh | bash
+fi
+export PATH=$HOME/.pixi/bin:$PATH
+
+# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
+mkdir -p /tmp/build_env
+cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
+cd /tmp/build_env
+pixi install -e default
+"""
+# Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
+# Pixi provides dependencies (headers/libs) but we use the container's compiler
+environment = { PATH = "$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF" }
+repair-wheel-command = """
+# Bundle libraries with auditwheel using linux_x86_64 (no ABI checks)
+# Then rename to manylinux_2_28_x86_64 for pip compatibility
+# This workaround is needed because conda-forge libraries use GCC 14+ with CXXABI_1.3.15 symbols
+# which are incompatible with manylinux_2_28's max CXXABI_1.3.11
+export LD_LIBRARY_PATH=/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH
+
+echo 'Step 1: Bundling libraries with auditwheel (linux_x86_64)...'
+auditwheel repair -w /tmp/linux_wheel {wheel} \
+    --plat linux_x86_64 \
+    --exclude 'libtorch*.so*' \
+    --exclude 'libc10*.so*' \
+    --exclude 'libmkl*.so*' \
+    --exclude 'libgomp*.so*' || (echo 'Auditwheel failed.' && exit 1)
+
+echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
+LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
+WHEEL_NAME=$(basename "$LINUX_WHEEL")
+NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+echo "Created $NEW_WHEEL_NAME"
+echo "Note: This wheel requires glibc 2.28+ and libstdc++ from GCC 11+"
+"""
+{% endif %}

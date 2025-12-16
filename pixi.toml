@@ -177,35 +177,39 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 # CPU environments (py312, py313) build CPU wheels
 # GPU environments (py312-cuda129, py313-cuda129) build GPU wheels
 # Usage:
-#   CPU: pixi run -e py312 build_pypi_wheel
-#   GPU: pixi run -e py312-cuda129 build_pypi_wheel
+#   CPU: pixi run -e py312 wheel_build
+#   GPU: pixi run -e py312-cuda129 wheel_build
 
 # Generate pyproject-pypi-{cpu,gpu}.toml from template
 # This task is mainly for CI. For local use, run directly:
 #   python scripts/generate_pyproject.py --torch-min-py312 X.X --torch-max-py312 X.X --torch-min-py313 Y.Y --torch-max-py313 Y.Y
 generate_pyproject = { cmd = "python scripts/generate_pyproject.py", description = "Generate pyproject-pypi-{cpu,gpu}.toml from template (uses defaults from script)" }
 
-# Clean distribution artifacts
-clean_dist = { cmd = """
-    rm -rf dist; \
+# Clean wheel build artifacts
+wheel_clean = { cmd = """
+    rm -rf dist wheelhouse; \
     find build -maxdepth 1 -type f \\( -name '*.whl' -o -name '*.tar.gz' \\) -delete 2>/dev/null || true
-""", description = "Remove distribution artifacts from previous builds" }
+""", description = "Clean wheel build artifacts for a fresh start" }
 
 # Check wheel files with twine
-check_pypi = { cmd = "twine check dist/pymomentum_*.whl", description = "Check wheel files with twine" }
+wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+    "wheel_build",
+], description = "Check wheel files with twine" }
 
 # Test wheel imports in a clean environment using uv
-test_pypi_wheel = { cmd = "python scripts/test_wheel.py", description = "Test wheel imports in a clean virtual environment using uv" }
+wheel_test = { cmd = "python scripts/test_wheel.py", depends-on = [
+    "wheel_build",
+], description = "Test wheel imports in a clean virtual environment using uv" }
 
 # Publish to TestPyPI for testing
-publish_pypi_test = { cmd = "twine upload --repository testpypi --skip-existing dist/pymomentum_*.whl", depends-on = [
-    "check_pypi",
-    "test_pypi_wheel",
+wheel_publish_testpypi = { cmd = "twine upload --repository testpypi --skip-existing dist/pymomentum_*.whl", depends-on = [
+    "wheel_check",
+    "wheel_test",
 ], description = "Publish to TestPyPI for testing" }
 
 # CPU-specific PyPI tasks - build CPU wheels (default)
 # CPU environments (py312, py313) use these tasks
-build_pypi_wheel = { cmd = """
+wheel_build = { cmd = """
     python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
     pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
@@ -213,17 +217,19 @@ build_pypi_wheel = { cmd = """
     "generate_pyproject",
 ], description = "Build CPU wheel for current Python version" }
 
-build_pypi_repair = { cmd = """
+wheel_repair = { cmd = """
     auditwheel repair \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libmkl*.so' \
         dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_cpu-*-linux_x86_64.whl || \
     echo "Skip auditwheel (non-Linux)"
-""", description = "Repair CPU wheel with auditwheel (Linux only)" }
+""", depends-on = [
+    "wheel_build",
+], description = "Repair CPU wheel with auditwheel (Linux only)" }
 
-publish_pypi = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
-    "check_pypi",
-    "test_pypi_wheel",
+wheel_publish = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
+    "wheel_check",
+    "wheel_test",
 ], description = "Publish CPU wheels to PyPI" }
 
 #===========
@@ -480,26 +486,28 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py312-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels
-build_pypi_wheel = { cmd = """
+wheel_build = { cmd = """
     python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
     pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
-""", depends-on = [
+""", env = { CMAKE_PREFIX_PATH = "$CONDA_PREFIX" }, depends-on = [
     "generate_pyproject",
 ], description = "Build GPU wheel for current Python version" }
 
-build_pypi_repair = { cmd = """
+wheel_repair = { cmd = """
     auditwheel repair \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' \
         --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
         dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_gpu-*-linux_x86_64.whl || \
     echo "Skip auditwheel (non-Linux)"
-""", description = "Repair GPU wheel with auditwheel (Linux only)" }
+""", depends-on = [
+    "wheel_build",
+], description = "Repair GPU wheel with auditwheel (Linux only)" }
 
-publish_pypi = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
-    "check_pypi",
-    "test_pypi_wheel",
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
+    "wheel_check",
+    "wheel_test",
 ], description = "Publish GPU wheels to PyPI" }
 
 [feature.py313-cuda129]
@@ -509,26 +517,28 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py313-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels
-build_pypi_wheel = { cmd = """
+wheel_build = { cmd = """
     python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
     pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
-""", depends-on = [
+""", env = { CMAKE_PREFIX_PATH = "$CONDA_PREFIX" }, depends-on = [
     "generate_pyproject",
 ], description = "Build GPU wheel for current Python version" }
 
-build_pypi_repair = { cmd = """
+wheel_repair = { cmd = """
     auditwheel repair \
         --exclude 'libtorch*.so' --exclude 'libc10*.so' \
         --exclude 'libcu*.so*' --exclude 'libnv*.so*' --exclude 'libmkl*.so' \
         dist/pymomentum_gpu-*-linux_x86_64.whl -w dist/ && \
     rm dist/pymomentum_gpu-*-linux_x86_64.whl || \
     echo "Skip auditwheel (non-Linux)"
-""", description = "Repair GPU wheel with auditwheel (Linux only)" }
+""", depends-on = [
+    "wheel_build",
+], description = "Repair GPU wheel with auditwheel (Linux only)" }
 
-publish_pypi = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
-    "check_pypi",
-    "test_pypi_wheel",
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
+    "wheel_check",
+    "wheel_test",
 ], description = "Publish GPU wheels to PyPI" }
 
 #==============
