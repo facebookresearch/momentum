@@ -31,6 +31,7 @@ sphinx-rtd-theme = ">=3.0.2,<4"
 tracy-profiler-gui = ">=0.11.1,<0.13"
 twine = ">=6.1.0,<7"
 jinja2 = ">=3.1.0,<4"
+cibuildwheel = ">=2.22.0,<3"
 
 # runtime dependencies
 blas = ">=2.135,<3"
@@ -217,15 +218,7 @@ wheel_build = { cmd = """
     "generate_pyproject",
 ], description = "Build CPU wheel for current Python version" }
 
-wheel_repair = { cmd = """
-    auditwheel repair \
-        --exclude 'libtorch*.so' --exclude 'libc10*.so' --exclude 'libmkl*.so' \
-        dist/pymomentum_cpu-*-linux_x86_64.whl -w dist/ && \
-    rm dist/pymomentum_cpu-*-linux_x86_64.whl || \
-    echo "Skip auditwheel (non-Linux)"
-""", depends-on = [
-    "wheel_build",
-], description = "Repair CPU wheel with auditwheel (Linux only)" }
+wheel_repair = { cmd = "echo 'wheel_repair is handled by platform-specific tasks'", description = "Repair wheel (platform-specific, see target.*.tasks)" }
 
 wheel_publish = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
     "wheel_check",
@@ -241,8 +234,14 @@ nvtx-c = ">=3.1.0" # TODO: Add to pytorch as run dep
 sysroot_linux-64 = ">=2.28,<3"
 patchelf = ">=0.17.2,<0.18"
 auditwheel = ">=6.4.2,<7"
+podman = ">=5.0.0,<6"
 
 [target.linux-64.tasks]
+# Linux CPU wheel build uses cibuildwheel with podman to produce manylinux_2_28 wheels
+wheel_build = { cmd = "python scripts/generate_pyproject.py && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))')-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && echo 'Wheels created:' && ls -la dist/", description = "Build CPU wheel using cibuildwheel in manylinux_2_28 container (Linux)" }
+
+wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op on Linux)" }
+
 # TODO: Check sha256 of fbx202037_fbxsdk_linux
 install_fbxsdk = { cmd = """
     mkdir -p .deps \
