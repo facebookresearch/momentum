@@ -38,9 +38,14 @@ momentum::Character createLocatorCharacter(
 /// @param sourceCharacter Character with locators to convert
 /// @param maxDistance Maximum distance to search for the closest point on the mesh surface.  If the
 /// locator is further than this distance, it will not be converted.
+/// @param minSkinWeight Minimum skin weight threshold for considering a mesh triangle as belonging
+/// to the same bone as the locator.
+/// @param verbose If true, print diagnostic messages about locators that could not be converted.
 momentum::Character locatorsToSkinnedLocators(
     const momentum::Character& sourceCharacter,
-    float maxDistance = 3.0f);
+    float maxDistance = 3.0f,
+    float minSkinWeight = 0.03f,
+    bool verbose = false);
 
 /// Convert skinned locators to regular locators by selecting the bone with the highest skin weight.
 /// This is useful when exporting to file formats that don't support skinned locators (e.g., Maya).

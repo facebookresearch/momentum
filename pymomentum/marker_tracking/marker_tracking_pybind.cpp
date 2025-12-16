@@ -515,9 +515,15 @@ influenced by multiple joints through skin weights.
 
 :param character: Character with mesh, skin weights, and locators to convert
 :param max_distance: Maximum distance from mesh surface to convert a locator (default: 3.0)
+:param min_skin_weight: Minimum skin weight threshold for considering a mesh triangle as
+    belonging to the same bone as the locator (default: 0.03)
+:param verbose: If True, print diagnostic messages about locators that could not be
+    converted (default: False)
 :return: New character with converted skinned locators and remaining regular locators)",
       py::arg("character"),
-      py::arg("max_distance") = 3.0f);
+      py::arg("max_distance") = 3.0f,
+      py::arg("min_skin_weight") = 0.03f,
+      py::arg("verbose") = false);
 
   m.def(
       "convert_skinned_locators_to_locators",

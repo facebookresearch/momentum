@@ -146,6 +146,7 @@ struct ClosestPointOnMeshResult {
   bool valid = false;
   size_t triangleIdx = kInvalidIndex;
   Eigen::Vector3f baryCoords = Eigen::Vector3f::Zero();
+  Eigen::Vector3f trianglePoint = Eigen::Vector3f::Zero();
   float distance = std::numeric_limits<float>::max();
 };
 
@@ -156,7 +157,7 @@ ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
     const momentum::SkinWeights& skin,
     const Eigen::Vector3f& p_world,
     uint32_t parentIdx,
-    float cutoffWeight = 0.1) {
+    float cutoffWeight = 0.02) {
   ClosestPointOnMeshResult result;
   for (size_t iTri = 0; iTri < mesh.faces.size(); ++iTri) {
     const auto& f = mesh.faces[iTri];
@@ -196,7 +197,7 @@ ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
         p_world, mesh.vertices[f(0)], mesh.vertices[f(1)], mesh.vertices[f(2)], p_tri, &bary);
     const float dist = (p_tri - p_world).norm();
     if (!result.valid || dist < result.distance) {
-      result = {true, iTri, bary, dist};
+      result = {true, iTri, bary, p_tri, dist};
     }
   }
 
@@ -205,8 +206,13 @@ ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
 
 momentum::Character locatorsToSkinnedLocators(
     const momentum::Character& sourceCharacter,
-    float maxDistance) {
+    float maxDistance,
+    float minSkinWeight,
+    bool verbose) {
   if (!sourceCharacter.mesh || !sourceCharacter.skinWeights) {
+    MT_LOGI_IF(
+        verbose,
+        "Can't convert locators to skinned locators because mesh or skin weights are missing");
     return sourceCharacter;
   }
 
@@ -218,6 +224,16 @@ momentum::Character locatorsToSkinnedLocators(
   LocatorList locators;
   for (size_t i = 0; i < sourceCharacter.locators.size(); ++i) {
     const auto& locator = sourceCharacter.locators[i];
+
+    if (!locator.attachedToSkin) {
+      MT_LOGI_IF(
+          verbose,
+          "Not converting locator {} to skinned locator because it is not attached to skin",
+          locator.name);
+      locators.push_back(locator);
+      continue;
+    }
+
     const auto& offset = locator.offset;
     const auto& parent = locator.parent;
     const Eigen::Vector3f p_world = restState.jointState[parent].transform * offset;
@@ -227,8 +243,26 @@ momentum::Character locatorsToSkinnedLocators(
         *sourceCharacter.mesh,
         *sourceCharacter.skinWeights,
         p_world,
-        gsl::narrow_cast<uint32_t>(parent));
-    if (!closestPointResult.valid || closestPointResult.distance > maxDistance) {
+        gsl::narrow_cast<uint32_t>(parent),
+        minSkinWeight);
+    if (!closestPointResult.valid) {
+      MT_LOGI_IF(
+          verbose,
+          "Not converting locator {} to skinned locator because no closest point found matching parent {} ({})",
+          locator.name,
+          sourceCharacter.skeleton.joints.at(parent).name,
+          parent);
+      locators.push_back(locator);
+      continue;
+    }
+
+    if (closestPointResult.distance > maxDistance) {
+      MT_LOGI_IF(
+          verbose,
+          "Not converting locator {} to skinned locator because distance {} is greater than threshold {}",
+          locator.name,
+          closestPointResult.distance,
+          maxDistance);
       locators.push_back(locator);
       continue;
     }
@@ -237,6 +271,7 @@ momentum::Character locatorsToSkinnedLocators(
     skinnedLocator.name = locator.name;
     skinnedLocator.position = p_world;
     skinnedLocator.weight = locator.weight;
+    MT_LOGT("Converting locator {} to skinned locator", locator.name);
 
     // Set the locator's parent to the closest face.
     std::tie(skinnedLocator.parents, skinnedLocator.skinWeights) = averageTriangleSkinWeights(
