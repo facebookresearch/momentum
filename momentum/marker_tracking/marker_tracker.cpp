@@ -29,6 +29,7 @@
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/tracker_utils.h"
+#include "momentum/math/fmt_eigen.h"
 #include "momentum/math/mesh.h"
 #include "momentum/solver/solver.h"
 
