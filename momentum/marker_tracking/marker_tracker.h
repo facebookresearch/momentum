@@ -47,6 +47,8 @@ struct CalibrationConfig : public BaseConfig {
   std::string firstFramePoseConstraintSet;
   /// Calibrate the character's shape
   bool calibShape = false;
+  /// Target height in cm for the character, if set to 0, no height constraint is applied
+  float targetHeightCm = 0.0f;
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
@@ -99,7 +101,8 @@ Eigen::MatrixXf trackSequence(
     float regularizer = 0.0,
     size_t frameStride = 1,
     bool enforceFloorInFirstFrame = false,
-    const std::string& firstFramePoseConstraintSet = "");
+    const std::string& firstFramePoseConstraintSet = "",
+    float targetHeightCm = 0.0f);
 
 /// Use multiple frames to solve for global parameters such as body proportions and/or marker
 /// offsets together with the motion.
@@ -127,7 +130,8 @@ Eigen::MatrixXf trackSequence(
     const std::vector<size_t>& frames,
     float regularizer = 0.0,
     bool enforceFloorInFirstFrame = false,
-    const std::string& firstFramePoseConstraintSet = "");
+    const std::string& firstFramePoseConstraintSet = "",
+    float targetHeightCm = 0.0f);
 
 /// Track poses per-frame given a calibrated character.
 ///

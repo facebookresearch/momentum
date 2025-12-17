@@ -111,7 +111,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
             return fmt::format(
-                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\", calib_shape={})",
+                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\", calib_shape={}, target_height_cm={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -124,7 +124,8 @@ PYBIND11_MODULE(marker_tracking, m) {
                 self.greedySampling,
                 boolToString(self.enforceFloorInFirstFrame),
                 self.firstFramePoseConstraintSet,
-                boolToString(self.calibShape));
+                boolToString(self.calibShape),
+                self.targetHeightCm);
           })
       .def(
           py::init<
@@ -140,7 +141,8 @@ PYBIND11_MODULE(marker_tracking, m) {
               size_t,
               bool,
               std::string,
-              bool>(),
+              bool,
+              float>(),
           R"(Create a CalibrationConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
@@ -154,6 +156,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           :param greedy_sampling: Enable greedy frame sampling with the given stride
           :param enforce_floor_in_first_frame: Force floor contact in first frame
           :param first_frame_pose_constraint_set: Name of pose constraint set to use in first frame
+          :param target_height_cm: Target height for character in cm.  Defaults to 0 (unspecified).
           )",
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
@@ -167,7 +170,8 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("greedy_sampling") = 0,
           py::arg("enforce_floor_in_first_frame") = false,
           py::arg("first_frame_pose_constraint_set") = "",
-          py::arg("calib_shape") = false)
+          py::arg("calib_shape") = false,
+          py::arg("target_height_cm") = 0.0)
       .def_readwrite(
           "calib_frames",
           &momentum::CalibrationConfig::calibFrames,
@@ -197,7 +201,11 @@ PYBIND11_MODULE(marker_tracking, m) {
           &momentum::CalibrationConfig::firstFramePoseConstraintSet,
           "Name of pose constraint set to use in first frame")
       .def_readwrite(
-          "calib_shape", &momentum::CalibrationConfig::calibShape, "Calibrate shape parameters");
+          "calib_shape", &momentum::CalibrationConfig::calibShape, "Calibrate shape parameters")
+      .def_readwrite(
+          "target_height_cm",
+          &momentum::CalibrationConfig::targetHeightCm,
+          "Target height for the character in cm (0 means no target height specified)");
 
   auto trackingConfig = py::class_<momentum::TrackingConfig, momentum::BaseConfig>(
       m, "TrackingConfig", "Config for the tracking optimization step");
