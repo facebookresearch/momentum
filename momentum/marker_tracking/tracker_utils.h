@@ -58,6 +58,7 @@ momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceC
 
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
+    const ModelParameters& modelParams,
     float targetDepth = 1.0f);
 
 // Extract locator offsets from a LocatorCharacter for a normal Character given input calibrated
