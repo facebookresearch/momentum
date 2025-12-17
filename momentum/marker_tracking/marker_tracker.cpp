@@ -276,7 +276,8 @@ Eigen::MatrixXf trackSequence(
 
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> skinnedLocatorMeshContraints;
   if ((globalParams & pt.getBlendShapeParameters()).any() && !character.skinnedLocators.empty()) {
-    skinnedLocatorMeshContraints = createSkinnedLocatorMeshConstraints(character, 1.0f);
+    skinnedLocatorMeshContraints =
+        createSkinnedLocatorMeshConstraints(character, initialMotion.col(0), 1.0f);
   }
 
   // set up the solver function

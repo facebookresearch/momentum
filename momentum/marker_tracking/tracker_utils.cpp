@@ -365,6 +365,7 @@ momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceC
 
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
+    const ModelParameters& modelParams,
     float targetDepth) {
   if (!character.mesh || !character.skinWeights) {
     return {};
@@ -375,7 +376,10 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     return {};
   }
 
-  const auto& mesh = *character.mesh;
+  auto mesh = *character.mesh;
+  if (modelParams.size() > 0) {
+    mesh = extractBlendShapeFromParams(modelParams, character);
+  }
 
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> result;
   result.reserve(character.skinnedLocators.size());
@@ -606,6 +610,7 @@ std::tuple<Eigen::VectorXf, LocatorList, SkinnedLocatorList> extractIdAndLocator
 Mesh extractBlendShapeFromParams(
     const momentum::ModelParameters& param,
     const momentum::Character& sourceCharacter) {
+  MT_CHECK(param.size() == sourceCharacter.parameterTransform.numAllModelParameters());
   Mesh result = *sourceCharacter.mesh;
   auto blendWeights = extractBlendWeights(sourceCharacter.parameterTransform, param);
   result.vertices = sourceCharacter.blendShape->computeShape<float>(blendWeights);
