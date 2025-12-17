@@ -362,6 +362,10 @@ loadMotion(const std::string& gltfFilename) {
       std::get<0>(identity)};
 }
 
+std::vector<int64_t> loadMotionTimestamps(const std::string& gltfFilename) {
+  return momentum::loadMotionTimestamps(gltfFilename);
+}
+
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     const std::string& path,
     const bool mainSubjectOnly,
