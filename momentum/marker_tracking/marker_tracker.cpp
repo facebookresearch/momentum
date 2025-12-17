@@ -18,6 +18,7 @@
 #include "momentum/character_solver/collision_error_function.h"
 #include "momentum/character_solver/collision_error_function_stateless.h"
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
+#include "momentum/character_solver/height_error_function.h"
 #include "momentum/character_solver/limit_error_function.h"
 #include "momentum/character_solver/model_parameters_error_function.h"
 #include "momentum/character_solver/plane_error_function.h"
@@ -194,7 +195,8 @@ Eigen::MatrixXf trackSequence(
     float regularizer,
     const size_t frameStride,
     bool enforceFloorInFirstFrame,
-    const std::string& firstFramePoseConstraintSet) {
+    const std::string& firstFramePoseConstraintSet,
+    float targetHeightCm) {
   // sanity checks
   const size_t numFrames = markerData.size();
   std::vector<size_t> frames;
@@ -211,7 +213,8 @@ Eigen::MatrixXf trackSequence(
       frames,
       regularizer,
       enforceFloorInFirstFrame,
-      firstFramePoseConstraintSet);
+      firstFramePoseConstraintSet,
+      targetHeightCm);
 }
 
 /// Track motion across multiple frames simultaneously for specific frame indices.
@@ -240,7 +243,8 @@ Eigen::MatrixXf trackSequence(
     const std::vector<size_t>& frames,
     float regularizer,
     bool enforceFloorInFirstFrame,
-    const std::string& firstFramePoseConstraintSet) {
+    const std::string& firstFramePoseConstraintSet,
+    float targetHeightCm) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
@@ -341,6 +345,14 @@ Eigen::MatrixXf trackSequence(
         blendShapeConstrFunc->setTargetParameters(
             ModelParameters::Zero(pt.numAllModelParameters()), weights);
         solverFunc.addErrorFunction(solverFrame, blendShapeConstrFunc);
+      }
+
+      // add height constraint if specified
+      if (targetHeightCm > 0.0f && solverFrame == 0) {
+        auto heightConstrFunc = std::make_shared<HeightErrorFunctionT<float>>(
+            character, targetHeightCm, Eigen::Vector3f::UnitY(), 10);
+        heightConstrFunc->setWeight(solvedFrames * 1.0f);
+        solverFunc.addErrorFunction(solverFrame, heightConstrFunc);
       }
 
       // prepare floor constraints
@@ -862,7 +874,8 @@ void calibrateModel(
           firstFrame,
           regularizerWeights.at(0),
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet); // still solving a subset
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm); // still solving a subset
       std::tie(identity.v, character.locators, character.skinnedLocators) =
           extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
@@ -896,7 +909,8 @@ void calibrateModel(
           regularizerWeights.at(0), // note: ideally allow large change at initialization with 0
                                     // or low regularization weight
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet);
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm);
     } else {
       motion.topRows(transform.numAllModelParameters()) =
           trackPosesPerframe(markerData, character, identity, trackingConfig, frameStride);
@@ -914,7 +928,8 @@ void calibrateModel(
                                     // or low regularization weight
           frameStride,
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet);
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm);
     }
   }
 
@@ -933,7 +948,8 @@ void calibrateModel(
           regularizerWeights.at(
               1), // note: ideally use a small regularization to prevent too large a change
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet); // still solving a subset
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm); // still solving a subset
     } else {
       motion = trackSequence(
           markerData,
@@ -945,7 +961,8 @@ void calibrateModel(
               1), // note: ideally use a small regularization to prevent too large a change
           frameStride,
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet); // still solving a subset
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm); // still solving a subset
     }
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
@@ -990,7 +1007,8 @@ void calibrateModel(
         regularizerWeights.at(
             2), // note: ideally use a higher regularizer weight to prevent too large a change
         config.enforceFloorInFirstFrame,
-        config.firstFramePoseConstraintSet);
+        config.firstFramePoseConstraintSet,
+        config.targetHeightCm);
   } else {
     motion = trackSequence(
         markerData,
@@ -1002,7 +1020,8 @@ void calibrateModel(
             2), // note: ideally use a higher regularizer weight to prevent too large a change
         frameStride,
         config.enforceFloorInFirstFrame,
-        config.firstFramePoseConstraintSet);
+        config.firstFramePoseConstraintSet,
+        config.targetHeightCm);
   }
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
