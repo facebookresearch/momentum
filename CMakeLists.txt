@@ -14,7 +14,13 @@ project(momentum)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # Needed by mt_defs.cmake
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+# For scikit-build-core builds, we use Development.Module (doesn't require libpython-dev)
+# For regular builds, we need full Development component
+if(SKBUILD)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
+else()
+  find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+endif()
 include(cmake/mt_defs.cmake)
 
 # Print intro

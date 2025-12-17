@@ -134,7 +134,10 @@ cmake.args = [
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
     "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
+    # The pixi environment's pybind11 uses pybind11NewTools which requires python3_add_library
+    # from CMake's FindPython, but manylinux Python only has Interpreter component
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
     # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
     # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
     "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
