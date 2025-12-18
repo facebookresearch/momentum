@@ -60,9 +60,10 @@ def main():
             check=True,
         )
 
-        # Install dependencies
+        # Install dependencies from the wheel's metadata
+        # This ensures we get the correct torch version that the wheel was built against
         subprocess.run(
-            ["uv", "pip", "install", "torch", "numpy", "scipy"],
+            ["uv", "pip", "install", str(wheel_file.absolute())],
             cwd=tmpdir,
             env=env,
             check=True,
