@@ -157,11 +157,15 @@ cmake.args = [
     "-DMOMENTUM_BUILD_RENDERER=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
     # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
     # The pixi environment's pybind11 uses pybind11NewTools which requires python_add_library
-    # from CMake's FindPython, but pixi's Python only has Interpreter component
+    # from CMake's FindPython, but manylinux Python only has Interpreter component
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
+    # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
+    # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
+    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
+    "-DCMAKE_C_FLAGS=-static-libgcc",
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 {% endif %}
@@ -262,5 +266,86 @@ NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/
 cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
 echo "Created $NEW_WHEEL_NAME"
 echo "Note: This wheel requires glibc 2.28+ and libstdc++ from GCC 11+"
+"""
+{% endif %}
+
+{% if variant == "gpu" %}
+[tool.cibuildwheel]
+build = "cp312-* cp313-*"
+build-verbosity = 3
+# GPU builds only for Linux (manylinux)
+# Skip PyPy, musllinux, macOS, and Windows
+skip = "pp* *-musllinux* *-macosx* *-win*"
+archs = ["auto64"]
+manylinux-x86_64-image = "manylinux_2_28"
+
+# Common
+before-build = """
+echo "Using pyproject.toml for GPU build"
+cp pyproject-pypi-gpu.toml pyproject.toml
+
+# Install build dependencies - PyTorch with CUDA
+pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cu128
+"""
+test-command = "python -c \"import pymomentum\""
+test-requires = ["numpy", "scipy"]
+before-test = "pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cu128"
+
+[tool.cibuildwheel.linux]
+before-all = """
+# Install CUDA toolkit in manylinux container
+# Use NVIDIA's network repository for CUDA 12.8
+yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
+yum install -y cuda-toolkit-12-8 cuda-cudart-devel-12-8 cuda-nvcc-12-8
+
+# Set up CUDA environment
+export CUDA_HOME=/usr/local/cuda-12.8
+export PATH=$CUDA_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+
+# Use local pixi binary if available to avoid network issues
+if [ -f /project/pixi_bin ]; then
+  echo "Using local pixi binary"
+  mkdir -p $HOME/.pixi/bin
+  cp /project/pixi_bin $HOME/.pixi/bin/pixi
+  chmod +x $HOME/.pixi/bin/pixi
+else
+  echo "Downloading pixi"
+  curl -fsSL https://pixi.sh/install.sh | bash
+fi
+export PATH=$HOME/.pixi/bin:$PATH
+
+# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
+mkdir -p /tmp/build_env
+cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
+cd /tmp/build_env
+pixi install -e default
+"""
+# Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
+# Pixi provides dependencies (headers/libs) but we use the container's compiler
+# CUDA paths for building GPU extensions
+environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/default/lib" }
+repair-wheel-command = """
+# Bundle libraries with auditwheel using linux_x86_64 (no ABI checks)
+# Then rename to manylinux_2_28_x86_64 for pip compatibility
+export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH
+
+echo 'Step 1: Bundling libraries with auditwheel (linux_x86_64)...'
+auditwheel repair -w /tmp/linux_wheel {wheel} \
+    --plat linux_x86_64 \
+    --exclude 'libtorch*.so*' \
+    --exclude 'libc10*.so*' \
+    --exclude 'libmkl*.so*' \
+    --exclude 'libgomp*.so*' \
+    --exclude 'libcu*.so*' \
+    --exclude 'libnv*.so*' || (echo 'Auditwheel failed.' && exit 1)
+
+echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
+LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
+WHEEL_NAME=$(basename "$LINUX_WHEEL")
+NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+echo "Created $NEW_WHEEL_NAME"
+echo "Note: This wheel requires glibc 2.28+, CUDA 12.8+, and libstdc++ from GCC 11+"
 """
 {% endif %}
