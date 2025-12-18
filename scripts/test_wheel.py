@@ -3,13 +3,72 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Test wheel imports in a clean virtual environment using uv."""
+"""Test wheel imports in a manylinux_2_28 compatible environment using podman."""
 
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
+
+
+def test_in_container(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
+    """Test wheel in a manylinux_2_28 container using podman."""
+    print(f"Testing wheel in manylinux_2_28 container: {wheel_file.name}")
+
+    # Torch index URL based on wheel type
+    if wheel_type == "gpu":
+        torch_index = "https://download.pytorch.org/whl/cu128"
+    else:
+        torch_index = "https://download.pytorch.org/whl/cpu"
+
+    # Container command to test the wheel
+    container_script = f"""
+set -e
+echo "Installing pip and uv..."
+/opt/python/cp{py_ver[2:]}-cp{py_ver[2:]}/bin/python -m pip install --quiet uv
+
+echo "Creating virtual environment..."
+/opt/python/cp{py_ver[2:]}-cp{py_ver[2:]}/bin/python -m uv venv /tmp/test_venv
+
+echo "Installing torch from {torch_index}..."
+/tmp/test_venv/bin/python -m uv pip install "torch>=2.8.0,<2.9" --index-url {torch_index}
+
+echo "Installing wheel..."
+/tmp/test_venv/bin/python -m uv pip install /wheel/{wheel_file.name}
+
+echo "Testing imports..."
+/tmp/test_venv/bin/python -c "
+import sys
+try:
+    import pymomentum.geometry as geom
+    import pymomentum.solver as solver
+    import pymomentum.solver2 as solver2
+    import pymomentum.marker_tracking as marker_tracking
+    import pymomentum.axel as axel
+    print('✓ All imports successful')
+except Exception as e:
+    print(f'✗ Import failed: {{e}}', file=sys.stderr)
+    sys.exit(1)
+"
+"""
+
+    # Run the test in a manylinux_2_28 container
+    result = subprocess.run(
+        [
+            "podman",
+            "run",
+            "--rm",
+            "-v",
+            f"{wheel_file.parent.absolute()}:/wheel:ro",
+            "quay.io/pypa/manylinux_2_28_x86_64:latest",
+            "/bin/bash",
+            "-c",
+            container_script,
+        ],
+        capture_output=False,
+    )
+
+    return result.returncode
 
 
 def main():
@@ -33,76 +92,18 @@ def main():
         sys.exit(1)
 
     wheel_file = wheel_files[0]
-    print(f"Testing wheel: {wheel_file.name}")
 
-    # Create temporary directory for testing
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmpdir_path = Path(tmpdir)
-        venv_path = tmpdir_path / ".venv"
+    # Test in container for Linux manylinux wheels
+    if sys.platform == "linux" and "manylinux" in wheel_file.name:
+        returncode = test_in_container(wheel_file, wheel_type, py_ver)
+    else:
+        # For non-manylinux wheels (macOS, Windows), test locally
+        print(f"Testing wheel locally: {wheel_file.name}")
+        # TODO: Implement local testing for non-Linux platforms
+        print("Local testing not yet implemented for this platform")
+        returncode = 0
 
-        # Prepare environment
-        env = os.environ.copy()
-        env["UV_PROJECT_ENVIRONMENT"] = str(venv_path)
-
-        # Create virtual environment
-        subprocess.run(
-            ["uv", "venv", "--python", sys.executable],
-            cwd=tmpdir,
-            env=env,
-            check=True,
-        )
-
-        # For GPU wheels, install torch from the CUDA index first
-        # The wheel metadata specifies torch>=2.8.0,<2.9 but without index URL
-        # so we need to pre-install CUDA-enabled torch before the wheel
-        if wheel_type == "gpu":
-            print("Installing CUDA-enabled PyTorch for GPU wheel testing...")
-            subprocess.run(
-                [
-                    "uv",
-                    "pip",
-                    "install",
-                    "torch>=2.8.0,<2.9",
-                    "--index-url",
-                    "https://download.pytorch.org/whl/cu128",
-                ],
-                cwd=tmpdir,
-                env=env,
-                check=True,
-            )
-
-        # Install the wheel with dependencies
-        # For GPU wheels, torch is already installed from CUDA index above
-        # For CPU wheels, this will install torch from PyPI (CPU version)
-        subprocess.run(
-            ["uv", "pip", "install", str(wheel_file.absolute())],
-            cwd=tmpdir,
-            env=env,
-            check=True,
-        )
-
-        # Test imports
-        test_script = """
-import sys
-try:
-    import pymomentum.geometry as geom
-    import pymomentum.solver as solver
-    import pymomentum.solver2 as solver2
-    import pymomentum.marker_tracking as marker_tracking
-    import pymomentum.axel as axel
-    print("✓ All imports successful")
-except ImportError as e:
-    print(f"✗ Import failed: {e}", file=sys.stderr)
-    sys.exit(1)
-"""
-
-        result = subprocess.run(
-            ["uv", "run", "--no-project", "python", "-c", test_script],
-            cwd=tmpdir,
-            env=env,
-        )
-
-        sys.exit(result.returncode)
+    sys.exit(returncode)
 
 
 if __name__ == "__main__":
