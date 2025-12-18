@@ -293,10 +293,13 @@ before-test = "pip install \"torch>=2.8.0,<2.9\" --index-url https://download.py
 
 [tool.cibuildwheel.linux]
 before-all = """
+# Install yum-utils to get yum-config-manager
+yum install -y yum-utils
+
 # Install CUDA toolkit in manylinux container
 # Use NVIDIA's network repository for CUDA 12.8
 yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-yum install -y cuda-toolkit-12-8 cuda-cudart-devel-12-8 cuda-nvcc-12-8
+yum install -y cuda-toolkit-12-8
 
 # Set up CUDA environment
 export CUDA_HOME=/usr/local/cuda-12.8
