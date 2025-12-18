@@ -555,16 +555,16 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           "load_gltf_with_motion_model_parameter_scales",
           &loadGLTFCharacterWithMotionModelParameterScales,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load BOTH character (skeleton/mesh) and motion data from a gltf file in a single call, 
+          R"(Load BOTH character (skeleton/mesh) and motion data from a gltf file in a single call,
 with model parameter scales instead of joint parameters.
 
-This function differs from :meth:`load_gltf_with_motion` by returning identity parameters 
-as model parameters (numAllModelParameters,) instead of joint parameters 
-(numJoints * kParametersPerJoint,). Additionally, the motion has the identity parameters 
+This function differs from :meth:`load_gltf_with_motion` by returning identity parameters
+as model parameters (numAllModelParameters,) instead of joint parameters
+(numJoints * kParametersPerJoint,). Additionally, the motion has the identity parameters
 added back to the scale parameters.
 
-Use this function when you need the character structure, animation, and identity parameters 
-all expressed in model parameter space, which is the natural format for optimization and 
+Use this function when you need the character structure, animation, and identity parameters
+all expressed in model parameter space, which is the natural format for optimization and
 character posing.
 
 :param gltf_filename: Path to the GLTF/GLB file to load.
@@ -577,11 +577,11 @@ character posing.
       .def_static(
           "load_gltf_with_motion_model_parameter_scales_from_bytes",
           &loadGLTFCharacterWithMotionModelParameterScalesFromBytes,
-          R"(Load BOTH character (skeleton/mesh) and motion data from a gltf byte array, 
+          R"(Load BOTH character (skeleton/mesh) and motion data from a gltf byte array,
 with model parameter scales instead of joint parameters.
 
 This is the byte array version of :meth:`load_gltf_with_motion_model_parameter_scales`.
-The function returns identity parameters as model parameters and adds them to the 
+The function returns identity parameters as model parameters and adds them to the
 motion's scale parameters.
 
 :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
@@ -729,12 +729,12 @@ motion's scale parameters.
 Use this function when you need both the character structure and its animation together.
 For loading ONLY motion data without the character, use :meth:`pymomentum.geometry.load_motion` instead.
 
-Note that motion can only be read from GLTF files saved using momentum, which stores model parameters 
+Note that motion can only be read from GLTF files saved using momentum, which stores model parameters
 in a custom extension. For GLTF files saved using other software, use :meth:`load_gltf_with_skel_states`.
 
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
-:return: a tuple [Character, motion, identity, fps], where Character is the complete character object, 
-         motion is the motion matrix [nFrames x nParams], identity is a JointParameter at rest pose, 
+:return: a tuple [Character, motion, identity, fps], where Character is the complete character object,
+         motion is the motion matrix [nFrames x nParams], identity is a JointParameter at rest pose,
          and fps is the frame rate. Does NOT include parameter names (unlike :meth:`pymomentum.geometry.load_motion`).
       )",
           py::arg("gltf_filename"))
@@ -761,6 +761,17 @@ support the proprietary momentum motion format for storing model parameters in G
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, skel_states, timestamps], where skel_states is the tensor [n_frames x n_joints x 8] and timestamps is [n_frames]
           )",
+          py::arg("gltf_filename"))
+      .def_static(
+          "load_motion_timestamps",
+          &loadMotionTimestamps,
+          R"(Load per-frame timestamps from a gltf file.
+
+Load timestamps stored in the momentum extension (usually in microseconds).
+
+:param gltf_filename: A .gltf file; e.g. character_s0.glb.
+:return: A list of timestamps (int64), one per frame. Empty list if no timestamps found.
+      )",
           py::arg("gltf_filename"))
 
       // loadGLTFCharacterFromFile(filename)

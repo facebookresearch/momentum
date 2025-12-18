@@ -185,7 +185,7 @@ std::pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>
 
   std::vector<std::unique_ptr<TensorErrorFunction<T>>> errorFunctions;
 
-  size_t numErrorTypes = static_cast<size_t>(ErrorFunctionType::NumTypes);
+  auto numErrorTypes = static_cast<size_t>(ErrorFunctionType::NumTypes);
 
   // To make the gradients computed from the backward pass to have the correct
   // order as the order of the input parameter for IK solve, we need to maintain
@@ -199,7 +199,7 @@ std::pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>
   // Value of -1 means this type is not active.
   std::vector<int> errorFunctionMap(numErrorTypes, -1);
   for (size_t iErr = 0; iErr < activeErrorFunctions.size(); ++iErr) {
-    size_t typeIndex = static_cast<size_t>(activeErrorFunctions[iErr]);
+    auto typeIndex = static_cast<size_t>(activeErrorFunctions[iErr]);
     // Check whether we have duplicated error function types here:
     MT_THROW_IF(
         errorFunctionMap[typeIndex] != -1,

@@ -211,7 +211,7 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
           py::arg("weight") = 1.0f)
       .def(
           "add_constraint",
-          [](mm::FixedAxisDiffErrorFunctionT<float>& self,
+          [](FixedAxisErrorFunctionT& self,
              const Eigen::Vector3f& localAxis,
              const Eigen::Vector3f& globalAxis,
              int parent,
@@ -226,7 +226,7 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
 
         :param local_axis: The axis in the parent's coordinate frame.
         :param global_axis: The target axis in the global frame.
-        :param parent_index: The index of the parent joint.
+        :param parent: The index of the parent joint.
         :param weight: The weight of the constraint.
         :param name: The name of the constraint (for debugging).)",
           py::arg("local_axis"),

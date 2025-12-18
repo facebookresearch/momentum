@@ -7,6 +7,7 @@
 
 #include "momentum/marker_tracking/marker_tracker.h"
 
+#include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_limits.h"
@@ -17,6 +18,7 @@
 #include "momentum/character_solver/collision_error_function.h"
 #include "momentum/character_solver/collision_error_function_stateless.h"
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
+#include "momentum/character_solver/height_error_function.h"
 #include "momentum/character_solver/limit_error_function.h"
 #include "momentum/character_solver/model_parameters_error_function.h"
 #include "momentum/character_solver/plane_error_function.h"
@@ -27,6 +29,7 @@
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/tracker_utils.h"
+#include "momentum/math/fmt_eigen.h"
 #include "momentum/math/mesh.h"
 #include "momentum/solver/solver.h"
 
@@ -193,7 +196,8 @@ Eigen::MatrixXf trackSequence(
     float regularizer,
     const size_t frameStride,
     bool enforceFloorInFirstFrame,
-    const std::string& firstFramePoseConstraintSet) {
+    const std::string& firstFramePoseConstraintSet,
+    float targetHeightCm) {
   // sanity checks
   const size_t numFrames = markerData.size();
   std::vector<size_t> frames;
@@ -210,7 +214,8 @@ Eigen::MatrixXf trackSequence(
       frames,
       regularizer,
       enforceFloorInFirstFrame,
-      firstFramePoseConstraintSet);
+      firstFramePoseConstraintSet,
+      targetHeightCm);
 }
 
 /// Track motion across multiple frames simultaneously for specific frame indices.
@@ -239,7 +244,8 @@ Eigen::MatrixXf trackSequence(
     const std::vector<size_t>& frames,
     float regularizer,
     bool enforceFloorInFirstFrame,
-    const std::string& firstFramePoseConstraintSet) {
+    const std::string& firstFramePoseConstraintSet,
+    float targetHeightCm) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
@@ -270,7 +276,8 @@ Eigen::MatrixXf trackSequence(
 
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> skinnedLocatorMeshContraints;
   if ((globalParams & pt.getBlendShapeParameters()).any() && !character.skinnedLocators.empty()) {
-    skinnedLocatorMeshContraints = createSkinnedLocatorMeshConstraints(character, 1.0f);
+    skinnedLocatorMeshContraints =
+        createSkinnedLocatorMeshConstraints(character, initialMotion.col(0), 1.0f);
   }
 
   // set up the solver function
@@ -340,6 +347,14 @@ Eigen::MatrixXf trackSequence(
         blendShapeConstrFunc->setTargetParameters(
             ModelParameters::Zero(pt.numAllModelParameters()), weights);
         solverFunc.addErrorFunction(solverFrame, blendShapeConstrFunc);
+      }
+
+      // add height constraint if specified
+      if (targetHeightCm > 0.0f && solverFrame == 0) {
+        auto heightConstrFunc = std::make_shared<HeightErrorFunctionT<float>>(
+            character, targetHeightCm, Eigen::Vector3f::UnitY(), 10);
+        heightConstrFunc->setWeight(solvedFrames * 1.0f);
+        solverFunc.addErrorFunction(solverFrame, heightConstrFunc);
       }
 
       // prepare floor constraints
@@ -695,6 +710,67 @@ Eigen::MatrixXf trackPosesForFrames(
   return outMotion;
 }
 
+namespace {
+
+/// Compute character height after calibration.
+///
+/// This function computes the height of a calibrated character by:
+/// 1. Setting scale and shape parameters from identity
+/// 2. Zeroing out all pose parameters
+/// 3. Running full skinning with shape
+/// 4. Computing the distance between largest and smallest Y values across all mesh vertices
+///
+/// @param character Character model with calibrated identity
+/// @param identity Identity parameters containing scale and shape
+/// @return Height of the character in world units
+float computeCharacterHeight(const Character& character, const ModelParameters& identity) {
+  if (!character.mesh) {
+    MT_LOGW("Character has no mesh, cannot compute height");
+    return 0.0f;
+  }
+
+  const ParameterTransform& pt = character.parameterTransform;
+
+  // Create a model parameters vector with scale and shape, but zero pose
+  ModelParameters neutralParams = identity;
+
+  // Zero out all pose parameters
+  const ParameterSet poseParams = pt.getPoseParameters();
+  for (size_t i = 0; i < neutralParams.v.size(); ++i) {
+    if (poseParams.test(i)) {
+      neutralParams.v[i] = 0.0f;
+    }
+  }
+
+  // Create skeleton state with the neutral (zero pose) parameters
+  const auto jointParams = pt.apply(neutralParams.v);
+  SkeletonState state;
+  state.set(jointParams, character.skeleton, false);
+
+  // Apply blend shape skinning to get the deformed mesh
+  Mesh skinnedMesh;
+  skinWithBlendShapes(character, state, neutralParams, skinnedMesh);
+
+  // Find min and max Y values across all vertices
+  if (skinnedMesh.vertices.empty()) {
+    MT_LOGW("Skinned mesh has no vertices, cannot compute height");
+    return 0.0f;
+  }
+
+  float minY = std::numeric_limits<float>::max();
+  float maxY = std::numeric_limits<float>::lowest();
+
+  for (const auto& vertex : skinnedMesh.vertices) {
+    minY = std::min(minY, vertex.y());
+    maxY = std::max(maxY, vertex.y());
+  }
+
+  const float height = maxY - minY;
+  return height;
+}
+
+} // namespace
+
 Character addSkinnedLocatorParametersToTransform(Character character) {
   if (character.skinnedLocators.empty()) {
     return character;
@@ -800,7 +876,8 @@ void calibrateModel(
           firstFrame,
           regularizerWeights.at(0),
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet); // still solving a subset
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm); // still solving a subset
       std::tie(identity.v, character.locators, character.skinnedLocators) =
           extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
@@ -834,7 +911,8 @@ void calibrateModel(
           regularizerWeights.at(0), // note: ideally allow large change at initialization with 0
                                     // or low regularization weight
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet);
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm);
     } else {
       motion.topRows(transform.numAllModelParameters()) =
           trackPosesPerframe(markerData, character, identity, trackingConfig, frameStride);
@@ -852,7 +930,8 @@ void calibrateModel(
                                     // or low regularization weight
           frameStride,
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet);
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm);
     }
   }
 
@@ -871,7 +950,8 @@ void calibrateModel(
           regularizerWeights.at(
               1), // note: ideally use a small regularization to prevent too large a change
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet); // still solving a subset
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm); // still solving a subset
     } else {
       motion = trackSequence(
           markerData,
@@ -883,13 +963,17 @@ void calibrateModel(
               1), // note: ideally use a small regularization to prevent too large a change
           frameStride,
           config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet); // still solving a subset
+          config.firstFramePoseConstraintSet,
+          config.targetHeightCm); // still solving a subset
     }
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
     std::tie(identity.v, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
     if (config.calibShape && solvingCharacter.blendShape && character.mesh) {
+      auto blendShapeParams =
+          extractBlendWeights(solvingCharacter.parameterTransform, ModelParameters(motion.col(0)));
+      MT_LOGI("Solved for blend shape coeffs: {}", blendShapeParams.v.transpose());
       *character.mesh = extractBlendShapeFromParams(motion.col(0), solvingCharacter);
     }
 
@@ -925,7 +1009,8 @@ void calibrateModel(
         regularizerWeights.at(
             2), // note: ideally use a higher regularizer weight to prevent too large a change
         config.enforceFloorInFirstFrame,
-        config.firstFramePoseConstraintSet);
+        config.firstFramePoseConstraintSet,
+        config.targetHeightCm);
   } else {
     motion = trackSequence(
         markerData,
@@ -937,13 +1022,18 @@ void calibrateModel(
             2), // note: ideally use a higher regularizer weight to prevent too large a change
         frameStride,
         config.enforceFloorInFirstFrame,
-        config.firstFramePoseConstraintSet);
+        config.firstFramePoseConstraintSet,
+        config.targetHeightCm);
   }
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
   // TODO: A hack to return the solved first frame as initialization for tracking later.
   identity.v = motion.col(0).head(transform.numAllModelParameters());
+
+  // Log the calibrated character height
+  const float height = computeCharacterHeight(character, identity);
+  MT_LOGI("Calibrated character height: {:.4f} cm", height);
 }
 
 /// Calibrate only locator positions with fixed character identity parameters.

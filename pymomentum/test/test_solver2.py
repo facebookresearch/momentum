@@ -761,10 +761,20 @@ class TestSolver(unittest.TestCase):
 
         # Create FixedAxisErrorFunction
         fixed_axis_error_function = pym_solver2.FixedAxisDiffErrorFunction(character)
+        fixed_axis_error_function2 = pym_solver2.FixedAxisCosErrorFunction(character)
+        fixed_axis_error_function3 = pym_solver2.FixedAxisAngleErrorFunction(character)
 
         # Add fixed axis constraint
         parent_idx: int = character.skeleton.size - 1
         fixed_axis_error_function.add_constraint(
+            local_axis, target_global_axis, parent=parent_idx, weight=1.0
+        )
+
+        # ensure all three variations work
+        fixed_axis_error_function2.add_constraint(
+            local_axis, target_global_axis, parent=parent_idx, weight=1.0
+        )
+        fixed_axis_error_function3.add_constraint(
             local_axis, target_global_axis, parent=parent_idx, weight=1.0
         )
 

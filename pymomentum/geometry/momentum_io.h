@@ -116,6 +116,13 @@ std::string toGLTF(const momentum::Character& character);
 std::tuple<RowMatrixf, std::vector<std::string>, Eigen::VectorXf, std::vector<std::string>>
 loadMotion(const std::string& gltfFilename);
 
+/// Load per-frame timestamps from a gltf file.
+/// Timestamps are stored in the momentum extension and are usually in microseconds.
+///
+/// @param[in] gltfFilename Path to the glTF file
+/// @return Vector of per-frame timestamps (int64_t). Empty if no timestamps found.
+std::vector<int64_t> loadMotionTimestamps(const std::string& gltfFilename);
+
 std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     const std::string& path,
     bool mainSubjectOnly = true,
