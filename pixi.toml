@@ -194,12 +194,10 @@ wheel_clean = { cmd = """
 
 # Check wheel files with twine
 wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
-    "wheel_build",
 ], description = "Check wheel files with twine" }
 
 # Test wheel imports in a clean environment using uv
 wheel_test = { cmd = "python scripts/test_wheel.py", depends-on = [
-    "wheel_build",
 ], description = "Test wheel imports in a clean virtual environment using uv" }
 
 # Publish to TestPyPI for testing
@@ -238,7 +236,7 @@ podman = ">=5.0.0,<6"
 
 [target.linux-64.tasks]
 # Linux CPU wheel build uses cibuildwheel with podman to produce manylinux_2_28 wheels
-wheel_build = { cmd = "python scripts/generate_pyproject.py && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-cpu-py$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))').toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))')-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build CPU wheel using cibuildwheel in manylinux_2_28 container (Linux)" }
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-cpu-py$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))').toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))')-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build CPU wheel using cibuildwheel in manylinux_2_28 container (Linux)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op on Linux)" }
 
@@ -485,11 +483,15 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py312-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-wheel_build = { cmd = "python scripts/generate_pyproject.py && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
-wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
+wheel_check = { cmd = "twine check dist/pymomentum_gpu-*cp312*.whl", description = "Check GPU wheel files with twine" }
+
+wheel_test = { cmd = "python scripts/test_wheel.py", description = "Test GPU wheel imports in a clean virtual environment" }
+
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*cp312*.whl", depends-on = [
     "wheel_check",
     "wheel_test",
 ], description = "Publish GPU wheels to PyPI" }
@@ -501,11 +503,15 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py313-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-wheel_build = { cmd = "python scripts/generate_pyproject.py && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
-wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
+wheel_check = { cmd = "twine check dist/pymomentum_gpu-*cp313*.whl", description = "Check GPU wheel files with twine" }
+
+wheel_test = { cmd = "python scripts/test_wheel.py", description = "Test GPU wheel imports in a clean virtual environment" }
+
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*cp313*.whl", depends-on = [
     "wheel_check",
     "wheel_test",
 ], description = "Publish GPU wheels to PyPI" }
