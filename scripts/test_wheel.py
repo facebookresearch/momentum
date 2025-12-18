@@ -52,16 +52,28 @@ def main():
             check=True,
         )
 
-        # Install the wheel without dependencies
-        subprocess.run(
-            ["uv", "pip", "install", "--no-deps", str(wheel_file.absolute())],
-            cwd=tmpdir,
-            env=env,
-            check=True,
-        )
+        # For GPU wheels, install torch from the CUDA index first
+        # The wheel metadata specifies torch>=2.8.0,<2.9 but without index URL
+        # so we need to pre-install CUDA-enabled torch before the wheel
+        if wheel_type == "gpu":
+            print("Installing CUDA-enabled PyTorch for GPU wheel testing...")
+            subprocess.run(
+                [
+                    "uv",
+                    "pip",
+                    "install",
+                    "torch>=2.8.0,<2.9",
+                    "--index-url",
+                    "https://download.pytorch.org/whl/cu128",
+                ],
+                cwd=tmpdir,
+                env=env,
+                check=True,
+            )
 
-        # Install dependencies from the wheel's metadata
-        # This ensures we get the correct torch version that the wheel was built against
+        # Install the wheel with dependencies
+        # For GPU wheels, torch is already installed from CUDA index above
+        # For CPU wheels, this will install torch from PyPI (CPU version)
         subprocess.run(
             ["uv", "pip", "install", str(wheel_file.absolute())],
             cwd=tmpdir,
