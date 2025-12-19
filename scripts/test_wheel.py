@@ -22,19 +22,23 @@ def test_in_container(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
         torch_index = "https://download.pytorch.org/whl/cpu"
 
     # Container command to test the wheel
+    # py_ver is like "cp312" or "cp313", so py_ver[2:] gives "312" or "313"
+    py_tag = py_ver[2:]  # e.g., "312" or "313"
     container_script = f"""
 set -e
-echo "Installing pip and uv..."
-/opt/python/cp{py_ver[2:]}-cp{py_ver[2:]}/bin/python -m pip install --quiet uv
+PYTHON=/opt/python/cp{py_tag}-cp{py_tag}/bin/python
 
-echo "Creating virtual environment..."
-/opt/python/cp{py_ver[2:]}-cp{py_ver[2:]}/bin/python -m uv venv /tmp/test_venv
+echo "Installing uv..."
+$PYTHON -m pip install --quiet --root-user-action=ignore uv
+
+echo "Creating virtual environment with Python {py_tag}..."
+$PYTHON -m uv venv --python $PYTHON /tmp/test_venv
 
 echo "Installing torch from {torch_index}..."
-/tmp/test_venv/bin/python -m uv pip install "torch>=2.8.0,<2.9" --index-url {torch_index}
+$PYTHON -m uv pip install --python /tmp/test_venv/bin/python "torch>=2.8.0,<2.9" --index-url {torch_index}
 
 echo "Installing wheel..."
-/tmp/test_venv/bin/python -m uv pip install /wheel/{wheel_file.name}
+$PYTHON -m uv pip install --python /tmp/test_venv/bin/python /wheel/{wheel_file.name}
 
 echo "Testing imports..."
 /tmp/test_venv/bin/python -c "
