@@ -257,7 +257,18 @@ auditwheel repair -w /tmp/linux_wheel {wheel} \
     --exclude 'libtorch*.so*' \
     --exclude 'libc10*.so*' \
     --exclude 'libmkl*.so*' \
-    --exclude 'libgomp*.so*' || (echo 'Auditwheel failed.' && exit 1)
+    --exclude 'libgomp*.so*' \
+    --exclude 'libpthread*.so*' \
+    --exclude 'libc.so*' \
+    --exclude 'libc-*.so*' \
+    --exclude 'libm.so*' \
+    --exclude 'libm-*.so*' \
+    --exclude 'libdl*.so*' \
+    --exclude 'librt*.so*' \
+    --exclude 'libresolv*.so*' \
+    --exclude 'libnss*.so*' \
+    --exclude 'ld-linux*.so*' \
+    --exclude 'libgcc_s*.so*' || (echo 'Auditwheel failed.' && exit 1)
 
 echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
 LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
@@ -341,7 +352,18 @@ auditwheel repair -w /tmp/linux_wheel {wheel} \
     --exclude 'libmkl*.so*' \
     --exclude 'libgomp*.so*' \
     --exclude 'libcu*.so*' \
-    --exclude 'libnv*.so*' || (echo 'Auditwheel failed.' && exit 1)
+    --exclude 'libnv*.so*' \
+    --exclude 'libpthread*.so*' \
+    --exclude 'libc.so*' \
+    --exclude 'libc-*.so*' \
+    --exclude 'libm.so*' \
+    --exclude 'libm-*.so*' \
+    --exclude 'libdl*.so*' \
+    --exclude 'librt*.so*' \
+    --exclude 'libresolv*.so*' \
+    --exclude 'libnss*.so*' \
+    --exclude 'ld-linux*.so*' \
+    --exclude 'libgcc_s*.so*' || (echo 'Auditwheel failed.' && exit 1)
 
 echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
 LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
