@@ -51,7 +51,7 @@ struct ProjectOnTriangleTestParams {
   Eigen::Vector3d particle;
   std::array<Eigen::Vector3d, 3> triangle;
   Eigen::Vector3d expectedProjection;
-  bool expectedInside;
+  bool expectedInside{};
 };
 
 struct ProjectOnTriangleVectorizedTestParams {
