@@ -194,10 +194,12 @@ wheel_clean = { cmd = """
 
 # Check wheel files with twine
 wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+    "wheel_build",
 ], description = "Check wheel files with twine" }
 
 # Test wheel imports in a clean environment using uv
 wheel_test = { cmd = "python scripts/test_wheel.py", depends-on = [
+    "wheel_build",
 ], description = "Test wheel imports in a clean virtual environment using uv" }
 
 # Publish to TestPyPI for testing
@@ -487,11 +489,7 @@ wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp*
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
-wheel_check = { cmd = "twine check dist/pymomentum_gpu-*cp312*.whl", description = "Check GPU wheel files with twine" }
-
-wheel_test = { cmd = "python scripts/test_wheel.py", description = "Test GPU wheel imports in a clean virtual environment" }
-
-wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*cp312*.whl", depends-on = [
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
     "wheel_test",
 ], description = "Publish GPU wheels to PyPI" }
@@ -507,11 +505,7 @@ wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp*
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
-wheel_check = { cmd = "twine check dist/pymomentum_gpu-*cp313*.whl", description = "Check GPU wheel files with twine" }
-
-wheel_test = { cmd = "python scripts/test_wheel.py", description = "Test GPU wheel imports in a clean virtual environment" }
-
-wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*cp313*.whl", depends-on = [
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
     "wheel_test",
 ], description = "Publish GPU wheels to PyPI" }
