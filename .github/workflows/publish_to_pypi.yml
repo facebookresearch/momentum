@@ -37,21 +37,53 @@ permissions:
   contents: read
 
 jobs:
+  # Linux CPU wheels are built with cibuildwheel (for manylinux_2_28 compatibility)
+  build_cpu_wheels_linux:
+    name: pypi-cpu-linux (cibuildwheel)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Jinja2
+        run: pip install jinja2
+
+      - name: Generate pyproject.toml
+        run: |
+          python scripts/generate_pyproject.py
+          # Set a default pyproject.toml for the initial setup
+          cp pyproject-pypi-cpu-py312.toml pyproject.toml
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-cpu-linux
+          path: ./wheelhouse/*.whl
+
+  # CPU wheels are built with pixi (non-Linux platforms)
+  # Linux CPU wheels are handled by build_cpu_wheels_linux above using cibuildwheel
   build_cpu_wheels:
     name: pypi-cpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14]
+        os: [macos-14]
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
             pixi-environment: py312
           - python-version: '3.13'
             pixi-environment: py313
-          - os: ubuntu-latest
-            os-short: ubuntu
           - os: macos-14
             os-short: mac-arm64
     env:
@@ -103,15 +135,11 @@ jobs:
 
       - name: Clean distribution artifacts
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} clean_dist
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
 
       - name: Build CPU wheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
-
-      - name: Repair CPU wheel (Linux only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Print ccache stats
         if: steps.should_run.outputs.run == 'true'
@@ -223,15 +251,15 @@ jobs:
 
       - name: Clean distribution artifacts
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} clean_dist
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
 
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_wheel
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Repair GPU wheel (Linux only)
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: pixi run -e ${{ matrix.pixi-environment }} build_pypi_repair
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_repair
 
       - name: Print ccache stats
         if: steps.should_run.outputs.run == 'true'
@@ -247,13 +275,17 @@ jobs:
 
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
-    needs: [build_cpu_wheels]
+    needs: [build_cpu_wheels_linux, build_cpu_wheels]
     runs-on: ubuntu-latest
     environment:
       name: pypi-cpu
       url: https://pypi.org/p/pymomentum-cpu
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
+    # Only publish on tag push or manual workflow dispatch with publish=true
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
 
     steps:
       - name: Download CPU wheel artifacts

@@ -8,9 +8,8 @@
 #===============================================================================
 
 if(NOT DEFINED ENV{CONDA_PREFIX})
-  message(FATAL_ERROR
-    "CONDA_PREFIX is not set. pymomentum currently only supports building"
-    "with Conda/Pixi. Please ensure you are using a Conda or Pixi environment."
+  message(STATUS
+    "CONDA_PREFIX is not set. Building without Conda/Pixi environment."
   )
 endif()
 
@@ -21,6 +20,13 @@ if(DEFINED ENV{CONDA_BUILD} AND NOT WIN32)
   set(libtorch_base_path $ENV{CONDA_PREFIX})
 else()
   # Windows or PyPI - use site-packages/torch
+  if(NOT DEFINED Python3_SITELIB)
+    execute_process(
+      COMMAND "${Python3_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_path('purelib'))"
+      OUTPUT_VARIABLE Python3_SITELIB
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
   set(libtorch_base_path ${Python3_SITELIB}/torch)
 endif()
 
