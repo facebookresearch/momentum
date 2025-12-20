@@ -110,6 +110,7 @@ structs = [
     "SequenceSolverOptions",
 ]
 template_classes = [
+    "AccelerationSequenceErrorFunction",
     "SequenceErrorFunction",
     "ModelParametersSequenceErrorFunction",
     "MultiposeSolver",

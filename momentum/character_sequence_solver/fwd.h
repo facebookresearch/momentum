@@ -34,6 +34,31 @@ using SequenceSolverOptions_const_u = ::std::unique_ptr<const SequenceSolverOpti
 using SequenceSolverOptions_const_w = ::std::weak_ptr<const SequenceSolverOptions>;
 
 template <typename T>
+class AccelerationSequenceErrorFunctionT;
+using AccelerationSequenceErrorFunction = AccelerationSequenceErrorFunctionT<float>;
+using AccelerationSequenceErrorFunctiond = AccelerationSequenceErrorFunctionT<double>;
+
+using AccelerationSequenceErrorFunction_p = ::std::shared_ptr<AccelerationSequenceErrorFunction>;
+using AccelerationSequenceErrorFunction_u = ::std::unique_ptr<AccelerationSequenceErrorFunction>;
+using AccelerationSequenceErrorFunction_w = ::std::weak_ptr<AccelerationSequenceErrorFunction>;
+using AccelerationSequenceErrorFunction_const_p =
+    ::std::shared_ptr<const AccelerationSequenceErrorFunction>;
+using AccelerationSequenceErrorFunction_const_u =
+    ::std::unique_ptr<const AccelerationSequenceErrorFunction>;
+using AccelerationSequenceErrorFunction_const_w =
+    ::std::weak_ptr<const AccelerationSequenceErrorFunction>;
+
+using AccelerationSequenceErrorFunctiond_p = ::std::shared_ptr<AccelerationSequenceErrorFunctiond>;
+using AccelerationSequenceErrorFunctiond_u = ::std::unique_ptr<AccelerationSequenceErrorFunctiond>;
+using AccelerationSequenceErrorFunctiond_w = ::std::weak_ptr<AccelerationSequenceErrorFunctiond>;
+using AccelerationSequenceErrorFunctiond_const_p =
+    ::std::shared_ptr<const AccelerationSequenceErrorFunctiond>;
+using AccelerationSequenceErrorFunctiond_const_u =
+    ::std::unique_ptr<const AccelerationSequenceErrorFunctiond>;
+using AccelerationSequenceErrorFunctiond_const_w =
+    ::std::weak_ptr<const AccelerationSequenceErrorFunctiond>;
+
+template <typename T>
 class SequenceErrorFunctionT;
 using SequenceErrorFunction = SequenceErrorFunctionT<float>;
 using SequenceErrorFunctiond = SequenceErrorFunctionT<double>;
