@@ -8,6 +8,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character_sequence_solver/acceleration_sequence_error_function.h>
 #include <momentum/character_sequence_solver/model_parameters_sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/state_sequence_error_function.h>
@@ -27,6 +28,82 @@ namespace mm = momentum;
 namespace pymomentum {
 
 void addSequenceErrorFunctions(pybind11::module_& m) {
+  py::class_<
+      mm::AccelerationSequenceErrorFunction,
+      mm::SequenceErrorFunction,
+      std::shared_ptr<mm::AccelerationSequenceErrorFunction>>(
+      m, "AccelerationSequenceErrorFunction")
+      .def(
+          py::init<>([](const mm::Character& character,
+                        float weight,
+                        const std::optional<Eigen::VectorXf>& jointWeights,
+                        const std::optional<Eigen::Vector3f>& targetAcceleration) {
+            validateWeight(weight, "weight");
+            validateWeights(jointWeights, "joint_weights");
+
+            auto result = std::make_shared<mm::AccelerationSequenceErrorFunction>(character);
+            result->setWeight(weight);
+
+            const auto nJoints = character.skeleton.joints.size();
+            if (jointWeights.has_value()) {
+              if (static_cast<size_t>(jointWeights->size()) != nJoints) {
+                throw std::runtime_error(
+                    "Invalid joint_weights; expected " + std::to_string(nJoints) +
+                    " values but got " + std::to_string(jointWeights->size()));
+              }
+              result->setTargetWeights(jointWeights.value());
+            }
+
+            if (targetAcceleration.has_value()) {
+              result->setTargetAcceleration(targetAcceleration.value());
+            }
+
+            return result;
+          }),
+          R"(A sequence error function that penalizes acceleration of joint positions.
+
+This error function uses a finite difference stencil [-1, 2, -1] over three consecutive
+frames to compute acceleration: pos[t+1] - 2*pos[t] + pos[t-1]. It penalizes deviations
+from a target acceleration, which is useful for:
+- Smoothness: set target_acceleration to (0, 0, 0) to penalize any acceleration
+- Ballistic motion: set target_acceleration to gravity vector (0, -9.8*dt^2, 0)
+- Other physical constraints on joint motion
+
+:param character: The character to use.
+:param weight: The weight of the error function. Defaults to 1.0.
+:param joint_weights: Per-joint weights for the acceleration penalty. Defaults to all 1s.
+:param target_acceleration: The target acceleration for all joints. Defaults to (0, 0, 0).)",
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f,
+          py::arg("joint_weights") = std::optional<Eigen::VectorXf>{},
+          py::arg("target_acceleration") = std::optional<Eigen::Vector3f>{})
+      .def(
+          "set_target_acceleration",
+          &mm::AccelerationSequenceErrorFunction::setTargetAcceleration,
+          R"(Sets the target acceleration for all joints.
+
+:param acceleration: The target acceleration vector (applied to all joints).)",
+          py::arg("acceleration"))
+      .def(
+          "set_target_accelerations",
+          &mm::AccelerationSequenceErrorFunction::setTargetAccelerations,
+          R"(Sets per-joint target accelerations.
+
+:param accelerations: A list of 3D acceleration vectors, one per joint.)",
+          py::arg("accelerations"))
+      .def(
+          "set_target_weights",
+          &mm::AccelerationSequenceErrorFunction::setTargetWeights,
+          R"(Sets per-joint weights for the acceleration penalty.
+
+:param weights: A vector of weights, one per joint.)",
+          py::arg("weights"))
+      .def(
+          "reset",
+          &mm::AccelerationSequenceErrorFunction::reset,
+          "Resets target weights to 1.0 and target accelerations to zero for all joints.");
+
   py::class_<
       mm::StateSequenceErrorFunction,
       mm::SequenceErrorFunction,

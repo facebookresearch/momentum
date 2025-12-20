@@ -1498,6 +1498,208 @@ class TestSolver(unittest.TestCase):
         self.assertIn("VertexSequenceErrorFunction", repr_str)
         self.assertIn("num_constraints=2", repr_str)
 
+    def test_acceleration_sequence_error_function(self) -> None:
+        """Test AccelerationSequenceErrorFunction to ensure joint accelerations match targets."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+        n_frames = 3  # AccelerationSequenceErrorFunction requires 3 frames
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        # Initialize model parameters for three frames
+        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+
+        # Create AccelerationSequenceErrorFunction
+        # Test basic construction
+        accel_error = pym_solver2.AccelerationSequenceErrorFunction(character)
+
+        # Test construction with parameters
+        accel_error_with_params = pym_solver2.AccelerationSequenceErrorFunction(
+            character,
+            weight=2.0,
+            joint_weights=np.ones(character.skeleton.size, dtype=np.float32),
+            target_acceleration=np.array([0.0, 0.0, 0.0], dtype=np.float32),
+        )
+        # Verify it was constructed (silence unused variable warning)
+        self.assertIsNotNone(accel_error_with_params)
+
+        # Test that set methods work
+        accel_error.set_target_acceleration(
+            np.array([0.0, -9.8, 0.0], dtype=np.float32)
+        )
+
+        # Create per-joint accelerations
+        per_joint_accels = [
+            np.array([0.0, 0.0, 0.0], dtype=np.float32)
+            for _ in range(character.skeleton.size)
+        ]
+        accel_error.set_target_accelerations(per_joint_accels)
+
+        # Test set_target_weights
+        joint_weights = np.ones(character.skeleton.size, dtype=np.float32)
+        joint_weights[0] = 2.0  # Give first joint more weight
+        accel_error.set_target_weights(joint_weights)
+
+        # Test reset
+        accel_error.reset()
+
+        # ========================================
+        # Test 1: Zero target acceleration (smoothness)
+        # Set up constant velocity motion: the solution should have zero acceleration
+        # ========================================
+        model_params_init[0, 0] = 0.0
+        model_params_init[1, 0] = 1.0
+        model_params_init[2, 0] = 2.0
+
+        solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
+
+        # Anchor first and last frames
+        first_frame_pos_error = pym_solver2.ModelParametersErrorFunction(character)
+        first_frame_pos_error.set_target_parameters(
+            model_params_init[0].numpy(), np.ones(n_params)
+        )
+        solver_function.add_error_function(0, first_frame_pos_error)
+
+        last_frame_pos_error = pym_solver2.ModelParametersErrorFunction(character)
+        last_frame_pos_error.set_target_parameters(
+            model_params_init[2].numpy(), np.ones(n_params)
+        )
+        solver_function.add_error_function(2, last_frame_pos_error)
+
+        # Add acceleration error with zero target (smoothness constraint)
+        accel_error_zero = pym_solver2.AccelerationSequenceErrorFunction(
+            character,
+            weight=1.0,
+            target_acceleration=np.array([0.0, 0.0, 0.0], dtype=np.float32),
+        )
+        solver_function.add_sequence_error_function(0, accel_error_zero)
+
+        solver_options = pym_solver2.SequenceSolverOptions()
+        solver_options.max_iterations = 50
+        solver_options.regularization = 1e-5
+
+        model_params_final = pym_solver2.solve_sequence(
+            solver_function, model_params_init.numpy(), solver_options
+        )
+
+        # Convert to skeleton states and verify accelerations match zero target
+        skel_states = [
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, torch.from_numpy(model_params_final[i])
+            )
+            for i in range(n_frames)
+        ]
+
+        for joint_idx in range(character.skeleton.size):
+            pos0 = skel_states[0][joint_idx, :3]
+            pos1 = skel_states[1][joint_idx, :3]
+            pos2 = skel_states[2][joint_idx, :3]
+
+            # Acceleration = pos[t+1] - 2*pos[t] + pos[t-1]
+            acceleration = pos2 - 2 * pos1 + pos0
+            target = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+
+            # Assert that measured acceleration matches target
+            self.assertTrue(
+                torch.allclose(
+                    acceleration,
+                    torch.from_numpy(target),
+                    rtol=0.1,
+                    atol=0.1,
+                ),
+                f"Joint {joint_idx}: acceleration {acceleration.numpy()} "
+                f"does not match target {target}",
+            )
+
+        # ========================================
+        # Test 2: Non-zero target acceleration (ballistic motion)
+        # For ballistic motion with constant acceleration a, the analytical solution is:
+        #   p(t) = p0 + v0*t + 0.5*a*t^2
+        # For three frames at t=0, 1, 2 with dt=1:
+        #   p0 = p0
+        #   p1 = p0 + v0 + 0.5*a
+        #   p2 = p0 + 2*v0 + 2*a
+        # The finite difference acceleration is:
+        #   accel_fd = p2 - 2*p1 + p0 = a (for dt=1)
+        # ========================================
+        target_accel = np.array([0.0, -1.0, 0.0], dtype=np.float32)  # Gravity-like
+
+        # Compute analytical positions for p0=(0,0,0), v0=(0,1,0), a=(0,-1,0)
+        p0 = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        v0 = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+        # p(t) = p0 + v0*t + 0.5*a*t^2
+        p1_analytical = p0 + v0 * 1.0 + 0.5 * target_accel * 1.0**2
+        p2_analytical = p0 + v0 * 2.0 + 0.5 * target_accel * 2.0**2
+
+        # Set up initial model parameters with these positions
+        model_params_init_ballistic = torch.zeros(
+            (n_frames, n_params), dtype=torch.float32
+        )
+        model_params_init_ballistic[0, :3] = torch.from_numpy(p0)
+        model_params_init_ballistic[1, :3] = torch.from_numpy(p1_analytical)
+        model_params_init_ballistic[2, :3] = torch.from_numpy(p2_analytical)
+
+        # Create a new solver
+        solver_function_ballistic = pym_solver2.SequenceSolverFunction(
+            character, n_frames
+        )
+
+        # Anchor first frame strongly
+        first_frame_error = pym_solver2.ModelParametersErrorFunction(character)
+        first_frame_error.set_target_parameters(
+            model_params_init_ballistic[0].numpy(), np.ones(n_params) * 10.0
+        )
+        solver_function_ballistic.add_error_function(0, first_frame_error)
+
+        # Add acceleration constraint with gravity target
+        accel_error_gravity = pym_solver2.AccelerationSequenceErrorFunction(
+            character,
+            weight=10.0,
+            target_acceleration=target_accel,
+        )
+        solver_function_ballistic.add_sequence_error_function(0, accel_error_gravity)
+
+        # Start from a perturbed initial guess
+        model_params_init_perturbed = model_params_init_ballistic.clone()
+        model_params_init_perturbed[1, 1] += 0.3  # Perturb y position of frame 1
+        model_params_init_perturbed[2, 1] += 0.5  # Perturb y position of frame 2
+
+        model_params_final_ballistic = pym_solver2.solve_sequence(
+            solver_function_ballistic,
+            model_params_init_perturbed.numpy(),
+            solver_options,
+        )
+
+        # Convert to skeleton states and verify accelerations match target
+        skel_states_ballistic = [
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, torch.from_numpy(model_params_final_ballistic[i])
+            )
+            for i in range(n_frames)
+        ]
+
+        # Check that acceleration matches target for root joint
+        pos0 = skel_states_ballistic[0][0, :3]
+        pos1 = skel_states_ballistic[1][0, :3]
+        pos2 = skel_states_ballistic[2][0, :3]
+        measured_accel = pos2 - 2 * pos1 + pos0
+
+        self.assertTrue(
+            torch.allclose(
+                measured_accel,
+                torch.from_numpy(target_accel),
+                rtol=0.1,
+                atol=0.1,
+            ),
+            f"Ballistic test: measured acceleration {measured_accel.numpy()} "
+            f"does not match target {target_accel}",
+        )
+
     def test_vertex_vertex_distance_constraint(self) -> None:
         """Test VertexVertexDistanceErrorFunction to ensure vertices are pulled to target distance."""
 
