@@ -14,6 +14,7 @@
 #include <momentum/character_solver/fixed_axis_error_function.h>
 #include <momentum/character_solver/height_error_function.h>
 #include <momentum/character_solver/joint_to_joint_distance_error_function.h>
+#include <momentum/character_solver/joint_to_joint_position_error_function.h>
 #include <momentum/character_solver/limit_error_function.h>
 #include <momentum/character_solver/model_parameters_error_function.h>
 #include <momentum/character_solver/normal_error_function.h>
@@ -1444,6 +1445,213 @@ such as maintaining a fixed distance between hands or ensuring two joints stay a
           "Returns the list of joint-to-joint distance constraints.");
 }
 
+void defJointToJointPositionErrorFunction(py::module_& m) {
+  py::class_<mm::JointToJointPositionDataT<float>>(m, "JointToJointPositionData")
+      .def(
+          "__repr__",
+          [](const mm::JointToJointPositionDataT<float>& self) {
+            return fmt::format(
+                "JointToJointPositionData(source_joint={}, reference_joint={}, source_offset=[{:.3f}, {:.3f}, {:.3f}], reference_offset=[{:.3f}, {:.3f}, {:.3f}], target=[{:.3f}, {:.3f}, {:.3f}], weight={})",
+                self.sourceJoint,
+                self.referenceJoint,
+                self.sourceOffset.x(),
+                self.sourceOffset.y(),
+                self.sourceOffset.z(),
+                self.referenceOffset.x(),
+                self.referenceOffset.y(),
+                self.referenceOffset.z(),
+                self.target.x(),
+                self.target.y(),
+                self.target.z(),
+                self.weight);
+          })
+      .def_readonly(
+          "source_joint",
+          &mm::JointToJointPositionDataT<float>::sourceJoint,
+          "The index of the source joint")
+      .def_readonly(
+          "reference_joint",
+          &mm::JointToJointPositionDataT<float>::referenceJoint,
+          "The index of the reference joint")
+      .def_readonly(
+          "source_offset",
+          &mm::JointToJointPositionDataT<float>::sourceOffset,
+          "The offset from source joint in the local coordinate system of source joint")
+      .def_readonly(
+          "reference_offset",
+          &mm::JointToJointPositionDataT<float>::referenceOffset,
+          "The offset from reference joint in the local coordinate system of reference joint")
+      .def_readonly(
+          "target",
+          &mm::JointToJointPositionDataT<float>::target,
+          "The target position in the reference joint's coordinate frame")
+      .def_readonly(
+          "weight", &mm::JointToJointPositionDataT<float>::weight, "The weight of the constraint")
+      .def_readonly(
+          "name", &mm::JointToJointPositionDataT<float>::name, "The name of the constraint");
+
+  py::class_<
+      mm::JointToJointPositionErrorFunctionT<float>,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::JointToJointPositionErrorFunctionT<float>>>(
+      m,
+      "JointToJointPositionErrorFunction",
+      R"(Error function that penalizes deviation from a target position expressed in a reference joint's coordinate frame.
+
+This is useful for constraints where you want to control the relative position
+between two body parts, such as keeping a hand at a specific position relative
+to the body, or maintaining a specific relationship between two joints that
+should move together.
+
+The error is computed as:
+  error = T_ref^{-1} * (T_src * src_offset) - target
+
+where T_ref and T_src are the global transformations of the reference and
+source joints respectively.)")
+      .def(
+          "__repr__",
+          [](const mm::JointToJointPositionErrorFunctionT<float>& self) {
+            return fmt::format(
+                "JointToJointPositionErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
+          py::init<>(
+              [](const mm::Character& character,
+                 float weight) -> std::shared_ptr<mm::JointToJointPositionErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
+                auto result =
+                    std::make_shared<mm::JointToJointPositionErrorFunctionT<float>>(character);
+                result->setWeight(weight);
+                return result;
+              }),
+          R"(Initialize a JointToJointPositionErrorFunction.
+
+            :param character: The character to use.
+            :param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::JointToJointPositionErrorFunctionT<float>& self,
+             size_t sourceJoint,
+             const Eigen::Vector3f& sourceOffset,
+             size_t referenceJoint,
+             const Eigen::Vector3f& referenceOffset,
+             const Eigen::Vector3f& target,
+             float weight,
+             const std::string& name) {
+            validateJointIndex(sourceJoint, "source_joint", self.getSkeleton());
+            validateJointIndex(referenceJoint, "reference_joint", self.getSkeleton());
+            validateWeight(weight, "weight");
+            self.addConstraint(
+                sourceJoint, sourceOffset, referenceJoint, referenceOffset, target, weight, name);
+          },
+          R"(Adds a joint-to-joint position constraint to the error function.
+
+        :param source_joint: The index of the source joint (the joint whose position we want to constrain).
+        :param source_offset: The offset from source joint in the local coordinate system of source joint.
+        :param reference_joint: The index of the reference joint (the joint whose coordinate frame we use).
+        :param reference_offset: The offset from reference joint in the local coordinate system of reference joint.
+        :param target: The target position in the reference joint's coordinate frame.
+        :param weight: The weight of the constraint.
+        :param name: The name of the constraint (for debugging).)",
+          py::arg("source_joint"),
+          py::arg("source_offset"),
+          py::arg("reference_joint"),
+          py::arg("reference_offset"),
+          py::arg("target"),
+          py::arg("weight") = 1.0f,
+          py::arg("name") = std::string{})
+      .def(
+          "add_constraints",
+          [](mm::JointToJointPositionErrorFunctionT<float>& self,
+             const py::array_t<int>& sourceJoint,
+             const py::array_t<float>& sourceOffset,
+             const py::array_t<int>& referenceJoint,
+             const py::array_t<float>& referenceOffset,
+             const py::array_t<float>& target,
+             const std::optional<py::array_t<float>>& weight,
+             const std::optional<std::vector<std::string>>& name) {
+            ArrayShapeValidator validator;
+            const int nConsIdx = -1;
+            validator.validate(sourceJoint, "source_joint", {nConsIdx}, {"n_cons"});
+            validateJointIndex(sourceJoint, "source_joint", self.getSkeleton());
+            validator.validate(sourceOffset, "source_offset", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(referenceJoint, "reference_joint", {nConsIdx}, {"n_cons"});
+            validateJointIndex(referenceJoint, "reference_joint", self.getSkeleton());
+            validator.validate(
+                referenceOffset, "reference_offset", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(target, "target", {nConsIdx, 3}, {"n_cons", "xyz"});
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+            validateWeights(weight, "weight");
+
+            if (name.has_value() && name->size() != sourceJoint.shape(0)) {
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      sourceJoint.shape(0),
+                      name->size()));
+            }
+
+            auto sourceJointAcc = sourceJoint.unchecked<1>();
+            auto sourceOffsetAcc = sourceOffset.unchecked<2>();
+            auto referenceJointAcc = referenceJoint.unchecked<1>();
+            auto referenceOffsetAcc = referenceOffset.unchecked<2>();
+            auto targetAcc = target.unchecked<2>();
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
+
+            py::gil_scoped_release release;
+
+            for (py::ssize_t i = 0; i < sourceJoint.shape(0); ++i) {
+              self.addConstraint(
+                  sourceJointAcc(i),
+                  Eigen::Vector3f(
+                      sourceOffsetAcc(i, 0), sourceOffsetAcc(i, 1), sourceOffsetAcc(i, 2)),
+                  referenceJointAcc(i),
+                  Eigen::Vector3f(
+                      referenceOffsetAcc(i, 0), referenceOffsetAcc(i, 1), referenceOffsetAcc(i, 2)),
+                  Eigen::Vector3f(targetAcc(i, 0), targetAcc(i, 1), targetAcc(i, 2)),
+                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                  name.has_value() ? name->at(i) : std::string{});
+            }
+          },
+          R"(Adds multiple joint-to-joint position constraints to the error function.
+
+        :param source_joint: A numpy array of indices for the source joints.
+        :param source_offset: A numpy array of shape (n, 3) for offsets from source joints in local coordinates.
+        :param reference_joint: A numpy array of indices for the reference joints.
+        :param reference_offset: A numpy array of shape (n, 3) for offsets from reference joints in local coordinates.
+        :param target: A numpy array of shape (n, 3) for target positions in reference joint coordinate frames.
+        :param weight: A numpy array of weights for the constraints.
+        :param name: An optional list of names for the constraints (for debugging).)",
+          py::arg("source_joint"),
+          py::arg("source_offset"),
+          py::arg("reference_joint"),
+          py::arg("reference_offset"),
+          py::arg("target"),
+          py::arg("weight") = std::nullopt,
+          py::arg("name") = std::nullopt)
+      .def(
+          "clear_constraints",
+          &mm::JointToJointPositionErrorFunctionT<float>::clearConstraints,
+          "Clears all joint-to-joint position constraints from the error function.")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::JointToJointPositionErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of joint-to-joint position constraints.")
+      .def(
+          "num_constraints",
+          &mm::JointToJointPositionErrorFunctionT<float>::numConstraints,
+          "Returns the number of constraints.");
+}
+
 } // namespace
 
 void addErrorFunctions(py::module_& m) {
@@ -2498,6 +2706,9 @@ rotation matrix to a target rotation.)")
 
   // Joint-to-joint distance error function
   defJointToJointDistanceErrorFunction(m);
+
+  // Joint-to-joint position error function
+  defJointToJointPositionErrorFunction(m);
 }
 
 } // namespace pymomentum
