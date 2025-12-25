@@ -1537,9 +1537,9 @@ source joints respectively.)")
       .def(
           "add_constraint",
           [](mm::JointToJointPositionErrorFunctionT<float>& self,
-             size_t sourceJoint,
+             int sourceJoint,
              const Eigen::Vector3f& sourceOffset,
-             size_t referenceJoint,
+             int referenceJoint,
              const Eigen::Vector3f& referenceOffset,
              const Eigen::Vector3f& target,
              float weight,
