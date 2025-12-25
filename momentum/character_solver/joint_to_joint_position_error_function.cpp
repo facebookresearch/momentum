@@ -20,7 +20,7 @@ template <typename T>
 JointToJointPositionErrorFunctionT<T>::JointToJointPositionErrorFunctionT(
     const Skeleton& skel,
     const ParameterTransform& pt)
-    : SkeletonErrorFunctionT<T>(skel, pt), jointGrad_(pt.numAllModelParameters()) {}
+    : SkeletonErrorFunctionT<T>(skel, pt) {}
 
 template <typename T>
 JointToJointPositionErrorFunctionT<T>::JointToJointPositionErrorFunctionT(

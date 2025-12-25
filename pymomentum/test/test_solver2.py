@@ -2062,6 +2062,163 @@ class TestSolver(unittest.TestCase):
         )
         self.assertEqual(len(pos_error_valid.constraints), 3)
 
+    def test_joint_to_joint_position_constraint(self) -> None:
+        """Test JointToJointPositionErrorFunction to ensure a source point matches a target position in reference frame."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+
+        # Choose two joints to constrain
+        source_joint = character.skeleton.size - 1  # Last joint
+        reference_joint = 0  # Root joint
+        source_offset = np.array([0.5, 0.0, 0.0], dtype=np.float32)
+        reference_offset = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        target_position = np.array(
+            [1.0, 0.5, 0.0], dtype=np.float32
+        )  # Target in reference frame
+        weight = 1.0
+
+        # Create JointToJointPositionErrorFunction
+        joint_position_error = pym_solver2.JointToJointPositionErrorFunction(character)
+
+        # Test basic properties
+        self.assertEqual(joint_position_error.num_constraints(), 0)
+        self.assertEqual(len(joint_position_error.constraints), 0)
+
+        # Add a single constraint
+        joint_position_error.add_constraint(
+            source_joint=source_joint,
+            source_offset=source_offset,
+            reference_joint=reference_joint,
+            reference_offset=reference_offset,
+            target=target_position,
+            weight=weight,
+        )
+
+        # Verify constraint was added
+        self.assertEqual(joint_position_error.num_constraints(), 1)
+        self.assertEqual(len(joint_position_error.constraints), 1)
+
+        constraint = joint_position_error.constraints[0]
+        self.assertEqual(constraint.source_joint, source_joint)
+        self.assertEqual(constraint.reference_joint, reference_joint)
+        self.assertTrue(np.allclose(constraint.source_offset, source_offset))
+        self.assertTrue(np.allclose(constraint.reference_offset, reference_offset))
+        self.assertTrue(np.allclose(constraint.target, target_position))
+        self.assertAlmostEqual(constraint.weight, weight)
+
+        # Create solver function with the joint position error
+        solver_function = pym_solver2.SkeletonSolverFunction(
+            character, [joint_position_error]
+        )
+
+        # Set solver options
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 100
+        solver_options.regularization = 1e-5
+
+        # Create and run the solver
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+        model_params_final = solver.solve(model_params_init.numpy())
+
+        # Convert final model parameters to skeleton state
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, torch.from_numpy(model_params_final)
+        )
+
+        # Compute final positions of the points
+        source_point_world = pym_skel_state.transform_points(
+            skel_state_final[source_joint],
+            torch.from_numpy(source_offset),
+        )
+        reference_point_world = pym_skel_state.transform_points(
+            skel_state_final[reference_joint],
+            torch.from_numpy(reference_offset),
+        )
+
+        # Transform source point into reference frame
+        # Get inverse rotation of reference joint
+        ref_quat = skel_state_final[reference_joint, 3:7]
+        ref_quat_inv = pym_quaternion.inverse(ref_quat)
+
+        # Compute source position in reference frame
+        source_in_ref_frame = pym_quaternion.rotate_vector(
+            ref_quat_inv, source_point_world - reference_point_world
+        )
+
+        # Assert that the source position in reference frame is close to the target
+        self.assertTrue(
+            torch.allclose(
+                source_in_ref_frame,
+                torch.from_numpy(target_position),
+                rtol=1e-2,
+                atol=1e-2,
+            ),
+            msg=f"Source position in ref frame {source_in_ref_frame.numpy()} does not match target {target_position}",
+        )
+
+        # Test multiple constraints using add_constraints
+        joint_position_error.clear_constraints()
+        self.assertEqual(joint_position_error.num_constraints(), 0)
+
+        # Add multiple constraints
+        source_joints = np.array([3, 2], dtype=np.int32)
+        source_offsets = np.array([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0]], dtype=np.float32)
+        reference_joints = np.array([0, 1], dtype=np.int32)
+        reference_offsets = np.array(
+            [[0.0, 0.0, 0.0], [0.0, 0.0, 0.5]], dtype=np.float32
+        )
+        target_positions = np.array(
+            [[0.8, 0.3, 0.0], [0.5, 0.6, 0.2]], dtype=np.float32
+        )
+        weights = np.array([1.0, 2.0], dtype=np.float32)
+
+        joint_position_error.add_constraints(
+            source_joint=source_joints,
+            source_offset=source_offsets,
+            reference_joint=reference_joints,
+            reference_offset=reference_offsets,
+            target=target_positions,
+            weight=weights,
+        )
+
+        # Verify multiple constraints were added
+        self.assertEqual(joint_position_error.num_constraints(), 2)
+        constraints = joint_position_error.constraints
+
+        # Check first constraint
+        self.assertEqual(constraints[0].source_joint, 3)
+        self.assertEqual(constraints[0].reference_joint, 0)
+        self.assertTrue(np.allclose(constraints[0].source_offset, [0.5, 0.0, 0.0]))
+        self.assertTrue(np.allclose(constraints[0].reference_offset, [0.0, 0.0, 0.0]))
+        self.assertTrue(np.allclose(constraints[0].target, [0.8, 0.3, 0.0]))
+        self.assertAlmostEqual(constraints[0].weight, 1.0)
+
+        # Check second constraint
+        self.assertEqual(constraints[1].source_joint, 2)
+        self.assertEqual(constraints[1].reference_joint, 1)
+        self.assertTrue(np.allclose(constraints[1].source_offset, [0.0, 0.5, 0.0]))
+        self.assertTrue(np.allclose(constraints[1].reference_offset, [0.0, 0.0, 0.5]))
+        self.assertTrue(np.allclose(constraints[1].target, [0.5, 0.6, 0.2]))
+        self.assertAlmostEqual(constraints[1].weight, 2.0)
+
+        # Test string representation
+        repr_str = repr(joint_position_error)
+        self.assertIn("JointToJointPositionErrorFunction", repr_str)
+        self.assertIn("num_constraints=2", repr_str)
+
+        # Test constraint string representation
+        constraint_repr = repr(constraints[0])
+        self.assertIn("JointToJointPositionData", constraint_repr)
+        self.assertIn("source_joint=3", constraint_repr)
+        self.assertIn("reference_joint=0", constraint_repr)
+
     def test_height_error_solver_convergence(self) -> None:
         """Test HeightErrorFunction can solve for the correct height using pose+scale parameters."""
 

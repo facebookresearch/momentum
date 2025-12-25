@@ -132,9 +132,6 @@ class JointToJointPositionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
  private:
   std::vector<JointToJointPositionDataT<T>> constraints_;
-
-  /// Intermediate storage for joint gradients.
-  VectorX<T> jointGrad_;
 };
 
 } // namespace momentum
