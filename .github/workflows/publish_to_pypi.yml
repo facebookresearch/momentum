@@ -62,7 +62,7 @@ jobs:
           cp pyproject-pypi-cpu-py312.toml pyproject.toml
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v3.3.0
 
       - uses: actions/upload-artifact@v6
         with:
