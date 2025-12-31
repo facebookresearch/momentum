@@ -35,7 +35,7 @@ template <typename Scalar>
 struct type_caster<Eigen::Quaternion<Scalar>> {
  public:
   using Type = Eigen::Quaternion<Scalar>;
-  using Vector4 = Eigen::Vector<Scalar, 4>;
+  using Vector4 = Eigen::Vector4<Scalar>;
 
   /// Standard pybind11 type caster interface
   PYBIND11_TYPE_CASTER(Type, const_name("numpy.ndarray[4]"));
