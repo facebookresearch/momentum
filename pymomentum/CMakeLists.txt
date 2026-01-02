@@ -336,12 +336,19 @@ if(MOMENTUM_BUILD_TESTING)
   enable_testing()
   mt_setup_gtest()
 
+  # For SKBUILD (scikit-build-core), the main CMakeLists.txt only requests
+  # Development.Module which doesn't provide Python3::Python. We need to
+  # explicitly find the Embed component for tests that require it.
+  if(NOT TARGET Python3::Python)
+    find_package(Python3 REQUIRED COMPONENTS Development.Embed)
+  endif()
+
   mt_test(
     NAME tensor_utility_test
     PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
     LINK_LIBRARIES
       tensor_utility
-      Python3::Module
+      Python3::Python
   )
 
   mt_test(
@@ -351,7 +358,7 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       tensor_ik
       tensor_utility
-      Python3::Module
+      Python3::Python
   )
 endif()
 
