@@ -341,7 +341,7 @@ if(MOMENTUM_BUILD_TESTING)
     PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
     LINK_LIBRARIES
       tensor_utility
-      Python3::Python
+      Python3::Module
   )
 
   mt_test(
@@ -351,7 +351,7 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       tensor_ik
       tensor_utility
-      Python3::Python
+      Python3::Module
   )
 endif()
 
