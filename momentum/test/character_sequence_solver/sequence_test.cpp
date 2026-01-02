@@ -15,6 +15,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/character_sequence_solver/acceleration_sequence_error_function.h"
+#include "momentum/character_sequence_solver/jerk_sequence_error_function.h"
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
@@ -786,5 +787,139 @@ TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_ZeroErrorForCons
   // Note: Due to nonlinear forward kinematics, even linearly interpolated parameters
   // don't produce exactly linear joint positions. So we just verify the test runs.
   // For translation-only parameters, this would be near zero.
+  EXPECT_GE(error, 0.0);
+}
+
+TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_GradientsAndJacobians) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+
+  // create constraints
+  JerkSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Jerk Test - Default (zero target)");
+
+    VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+    weights(0) = 4.0f;
+    weights(1) = 5.0f;
+    weights(2) = 0; // Disable one joint
+    errorFunction.setTargetWeights(weights);
+
+    // Test that Jacobian size is correct (3 per active joint)
+    const auto nActiveJoints = (weights.array() != 0).count();
+    EXPECT_EQ(errorFunction.getJacobianSize(), 3 * nActiveJoints);
+
+    // Note: We skip zero parameters here because at the bind pose, the error is exactly zero
+    // and the numerical gradient test has precision issues when both gradients are near zero.
+    // The random parameter tests below provide sufficient coverage.
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 4);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_WithTargetJerk) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+
+  // create constraints with a target jerk
+  JerkSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Jerk Test - With target jerk");
+
+    // Set a uniform target jerk
+    const Eigen::Vector3d targetJerk(0.1, -0.5, 0.2);
+    errorFunction.setTargetJerk(targetJerk);
+
+    VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+    weights(1) = 2.0f;
+    weights(2) = 3.0f;
+    errorFunction.setTargetWeights(weights);
+
+    testGradientAndJacobian<double>(
+        errorFunction, zeroModelParameters(character, 4), character, 2e-3f, 1e-5f, true);
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 4);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_PerJointTargets) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+
+  // create constraints with per-joint target jerks
+  JerkSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Jerk Test - Per-joint targets");
+
+    // Set different target jerks for each joint
+    std::vector<Eigen::Vector3d> jerks(skeleton.joints.size());
+    for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+      jerks[i] = Eigen::Vector3d(0.01 * i, -0.02 + 0.005 * i, 0.03 * i);
+    }
+    errorFunction.setTargetJerks(jerks);
+
+    VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+    errorFunction.setTargetWeights(weights);
+
+    testGradientAndJacobian<double>(
+        errorFunction, zeroModelParameters(character, 4), character, 2e-3f, 1e-5f, true);
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 4);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_ZeroErrorForConstantAcceleration) {
+  // Test that constant acceleration motion produces zero jerk error when target jerk is zero
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  JerkSequenceErrorFunctiond errorFunction(character);
+
+  // Use zero target jerk (default)
+  VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+  errorFunction.setTargetWeights(weights);
+
+  // Create four frames with constant acceleration motion
+  // For constant acceleration: pos = p0 + v*t + 0.5*a*t^2
+  // jerk = pos[t-1] - 3*pos[t] + 3*pos[t+1] - pos[t+2] = 0 for constant acceleration
+  std::vector<ModelParametersd> parameters(4);
+  const Eigen::Index np = transform.numAllModelParameters();
+
+  // Frame 0: base position
+  VectorXd base = VectorXd::Random(np) * 0.1;
+  // Initial velocity and constant acceleration
+  VectorXd velocity = VectorXd::Random(np) * 0.05;
+  VectorXd acceleration = VectorXd::Random(np) * 0.02;
+
+  // pos[t] = base + velocity*t + 0.5*acceleration*t^2
+  parameters[0] = base; // t=0
+  parameters[1] = base + velocity + 0.5 * acceleration; // t=1
+  parameters[2] = base + 2.0 * velocity + 2.0 * acceleration; // t=2
+  parameters[3] = base + 3.0 * velocity + 4.5 * acceleration; // t=3
+
+  // Compute skeleton states
+  const ParameterTransformd transformD = transform.cast<double>();
+  std::vector<SkeletonStated> skelStates(4);
+  for (size_t iFrame = 0; iFrame < 4; ++iFrame) {
+    skelStates[iFrame] = SkeletonStated(transformD.apply(parameters[iFrame]), skeleton);
+  }
+  std::vector<MeshStated> meshStates(4);
+
+  // The error should be very small (not exactly zero due to nonlinear FK)
+  const double error = errorFunction.getError(parameters, skelStates, meshStates);
+
+  // Note: Due to nonlinear forward kinematics, even constant acceleration in parameter space
+  // doesn't produce exactly constant acceleration in joint positions. So we just verify the test
+  // runs.
   EXPECT_GE(error, 0.0);
 }

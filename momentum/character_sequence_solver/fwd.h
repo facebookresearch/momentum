@@ -59,6 +59,56 @@ using AccelerationSequenceErrorFunctiond_const_w =
     ::std::weak_ptr<const AccelerationSequenceErrorFunctiond>;
 
 template <typename T>
+class FiniteDifferenceSequenceErrorFunctionT;
+using FiniteDifferenceSequenceErrorFunction = FiniteDifferenceSequenceErrorFunctionT<float>;
+using FiniteDifferenceSequenceErrorFunctiond = FiniteDifferenceSequenceErrorFunctionT<double>;
+
+using FiniteDifferenceSequenceErrorFunction_p =
+    ::std::shared_ptr<FiniteDifferenceSequenceErrorFunction>;
+using FiniteDifferenceSequenceErrorFunction_u =
+    ::std::unique_ptr<FiniteDifferenceSequenceErrorFunction>;
+using FiniteDifferenceSequenceErrorFunction_w =
+    ::std::weak_ptr<FiniteDifferenceSequenceErrorFunction>;
+using FiniteDifferenceSequenceErrorFunction_const_p =
+    ::std::shared_ptr<const FiniteDifferenceSequenceErrorFunction>;
+using FiniteDifferenceSequenceErrorFunction_const_u =
+    ::std::unique_ptr<const FiniteDifferenceSequenceErrorFunction>;
+using FiniteDifferenceSequenceErrorFunction_const_w =
+    ::std::weak_ptr<const FiniteDifferenceSequenceErrorFunction>;
+
+using FiniteDifferenceSequenceErrorFunctiond_p =
+    ::std::shared_ptr<FiniteDifferenceSequenceErrorFunctiond>;
+using FiniteDifferenceSequenceErrorFunctiond_u =
+    ::std::unique_ptr<FiniteDifferenceSequenceErrorFunctiond>;
+using FiniteDifferenceSequenceErrorFunctiond_w =
+    ::std::weak_ptr<FiniteDifferenceSequenceErrorFunctiond>;
+using FiniteDifferenceSequenceErrorFunctiond_const_p =
+    ::std::shared_ptr<const FiniteDifferenceSequenceErrorFunctiond>;
+using FiniteDifferenceSequenceErrorFunctiond_const_u =
+    ::std::unique_ptr<const FiniteDifferenceSequenceErrorFunctiond>;
+using FiniteDifferenceSequenceErrorFunctiond_const_w =
+    ::std::weak_ptr<const FiniteDifferenceSequenceErrorFunctiond>;
+
+template <typename T>
+class JerkSequenceErrorFunctionT;
+using JerkSequenceErrorFunction = JerkSequenceErrorFunctionT<float>;
+using JerkSequenceErrorFunctiond = JerkSequenceErrorFunctionT<double>;
+
+using JerkSequenceErrorFunction_p = ::std::shared_ptr<JerkSequenceErrorFunction>;
+using JerkSequenceErrorFunction_u = ::std::unique_ptr<JerkSequenceErrorFunction>;
+using JerkSequenceErrorFunction_w = ::std::weak_ptr<JerkSequenceErrorFunction>;
+using JerkSequenceErrorFunction_const_p = ::std::shared_ptr<const JerkSequenceErrorFunction>;
+using JerkSequenceErrorFunction_const_u = ::std::unique_ptr<const JerkSequenceErrorFunction>;
+using JerkSequenceErrorFunction_const_w = ::std::weak_ptr<const JerkSequenceErrorFunction>;
+
+using JerkSequenceErrorFunctiond_p = ::std::shared_ptr<JerkSequenceErrorFunctiond>;
+using JerkSequenceErrorFunctiond_u = ::std::unique_ptr<JerkSequenceErrorFunctiond>;
+using JerkSequenceErrorFunctiond_w = ::std::weak_ptr<JerkSequenceErrorFunctiond>;
+using JerkSequenceErrorFunctiond_const_p = ::std::shared_ptr<const JerkSequenceErrorFunctiond>;
+using JerkSequenceErrorFunctiond_const_u = ::std::unique_ptr<const JerkSequenceErrorFunctiond>;
+using JerkSequenceErrorFunctiond_const_w = ::std::weak_ptr<const JerkSequenceErrorFunctiond>;
+
+template <typename T>
 class SequenceErrorFunctionT;
 using SequenceErrorFunction = SequenceErrorFunctionT<float>;
 using SequenceErrorFunctiond = SequenceErrorFunctionT<double>;

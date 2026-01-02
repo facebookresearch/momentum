@@ -111,6 +111,8 @@ structs = [
 ]
 template_classes = [
     "AccelerationSequenceErrorFunction",
+    "FiniteDifferenceSequenceErrorFunction",
+    "JerkSequenceErrorFunction",
     "SequenceErrorFunction",
     "ModelParametersSequenceErrorFunction",
     "MultiposeSolver",
