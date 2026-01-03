@@ -97,6 +97,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators"><code class="docutils literal notranslate"><span class="pre">convert_locators_to_skinned_locators()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_skinned_locators_to_locators"><code class="docutils literal notranslate"><span class="pre">convert_skinned_locators_to_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.get_locator_error"><code class="docutils literal notranslate"><span class="pre">get_locator_error()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.process_marker_file"><code class="docutils literal notranslate"><span class="pre">process_marker_file()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.process_markers"><code class="docutils literal notranslate"><span class="pre">process_markers()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.refine_motion"><code class="docutils literal notranslate"><span class="pre">refine_motion()</span></code></a></li>
@@ -539,6 +540,32 @@ attachments. Any existing regular locators in the character are preserved.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>New character with skinned locators converted to regular locators</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.get_locator_error">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">get_locator_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.get_locator_error" title="Link to this definition"></a></dt>
+<dd><p>Compute average and maximum marker tracking errors across all frames.</p>
+<p>This is a utility function for evaluating tracking quality by measuring the
+Euclidean distance between observed marker positions and their corresponding
+locator positions on the character. It provides both average error per frame
+and the maximum error encountered across all markers and frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>marker_data</strong> – List of marker observations for each frame. Each frame contains
+a list of Marker objects with position and occlusion information.</p></li>
+<li><p><strong>motion</strong> – Solved motion parameters matrix. Can be in Python layout (frames, params)
+or C++ layout (params, frames) - the function handles both.</p></li>
+<li><p><strong>character</strong> – Character model with locators that correspond to the markers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (average_error, max_error) in world units (typically meters or cm
+depending on your character scale). average_error is the mean error per frame
+across all frames, max_error is the single largest marker error found.</p>
 </dd>
 </dl>
 </dd></dl>
