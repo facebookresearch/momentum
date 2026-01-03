@@ -52,6 +52,14 @@
 <li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.solver2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction"><code class="docutils literal notranslate"><span class="pre">AccelerationSequenceErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">AccelerationSequenceErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.reset"><code class="docutils literal notranslate"><span class="pre">AccelerationSequenceErrorFunction.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_acceleration"><code class="docutils literal notranslate"><span class="pre">AccelerationSequenceErrorFunction.set_target_acceleration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_accelerations"><code class="docutils literal notranslate"><span class="pre">AccelerationSequenceErrorFunction.set_target_accelerations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_weights"><code class="docutils literal notranslate"><span class="pre">AccelerationSequenceErrorFunction.set_target_weights()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.AimData"><code class="docutils literal notranslate"><span class="pre">AimData</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AimData.__init__"><code class="docutils literal notranslate"><span class="pre">AimData.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.AimData.global_target"><code class="docutils literal notranslate"><span class="pre">AimData.global_target</span></code></a></li>
@@ -178,6 +186,26 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceErrorFunction.add_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceErrorFunction.clear_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceErrorFunction.constraints</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.__init__"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.name"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.reference_joint"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.reference_joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.reference_offset"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.reference_offset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.source_joint"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.source_joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.source_offset"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.source_offset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.target"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.target</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData.weight"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData.weight</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction.add_constraint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction.add_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction.clear_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction.constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction.num_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionErrorFunction.num_constraints()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.LimitErrorFunction"><code class="docutils literal notranslate"><span class="pre">LimitErrorFunction</span></code></a><ul>
@@ -501,6 +529,73 @@
   <section id="module-pymomentum.solver2">
 <span id="pymomentum-solver2"></span><h1>pymomentum.solver2<a class="headerlink" href="#module-pymomentum.solver2" title="Link to this heading"></a></h1>
 <p>Inverse kinematics and other optimizations for momentum models.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.AccelerationSequenceErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">AccelerationSequenceErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.AccelerationSequenceErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SequenceErrorFunction" title="pymomentum.solver2.SequenceErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceErrorFunction</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.AccelerationSequenceErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction" title="pymomentum.solver2.AccelerationSequenceErrorFunction"><span class="pre">pymomentum.solver2.AccelerationSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>A sequence error function that penalizes acceleration of joint positions.</p>
+<p>This error function uses a finite difference stencil [-1, 2, -1] over three consecutive
+frames to compute acceleration: pos[t+1] - 2*pos[t] + pos[t-1]. It penalizes deviations
+from a target acceleration, which is useful for:
+- Smoothness: set target_acceleration to (0, 0, 0) to penalize any acceleration
+- Ballistic motion: set target_acceleration to gravity vector (0, -9.8*dt^2, 0)
+- Other physical constraints on joint motion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to use.</p></li>
+<li><p><strong>weight</strong> – The weight of the error function. Defaults to 1.0.</p></li>
+<li><p><strong>joint_weights</strong> – Per-joint weights for the acceleration penalty. Defaults to all 1s.</p></li>
+<li><p><strong>target_acceleration</strong> – The target acceleration for all joints. Defaults to (0, 0, 0).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.AccelerationSequenceErrorFunction.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction" title="pymomentum.solver2.AccelerationSequenceErrorFunction"><span class="pre">pymomentum.solver2.AccelerationSequenceErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.reset" title="Link to this definition"></a></dt>
+<dd><p>Resets target weights to 1.0 and target accelerations to zero for all joints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_acceleration">
+<span class="sig-name descname"><span class="pre">set_target_acceleration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction" title="pymomentum.solver2.AccelerationSequenceErrorFunction"><span class="pre">pymomentum.solver2.AccelerationSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_acceleration" title="Link to this definition"></a></dt>
+<dd><p>Sets the target acceleration for all joints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>acceleration</strong> – The target acceleration vector (applied to all joints).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_accelerations">
+<span class="sig-name descname"><span class="pre">set_target_accelerations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction" title="pymomentum.solver2.AccelerationSequenceErrorFunction"><span class="pre">pymomentum.solver2.AccelerationSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_accelerations" title="Link to this definition"></a></dt>
+<dd><p>Sets per-joint target accelerations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>accelerations</strong> – A list of 3D acceleration vectors, one per joint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_weights">
+<span class="sig-name descname"><span class="pre">set_target_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.AccelerationSequenceErrorFunction" title="pymomentum.solver2.AccelerationSequenceErrorFunction"><span class="pre">pymomentum.solver2.AccelerationSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_weights" title="Link to this definition"></a></dt>
+<dd><p>Sets per-joint weights for the acceleration penalty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>weights</strong> – A vector of weights, one per joint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.solver2.AimData">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">AimData</span></span><a class="headerlink" href="#pymomentum.solver2.AimData" title="Link to this definition"></a></dt>
@@ -940,7 +1035,7 @@ joint-local space) and a global axis using the angle between the vectors.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.FixedAxisAngleErrorFunction.add_constraint">
-<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.FixedAxisDiffErrorFunction" title="pymomentum.solver2.FixedAxisDiffErrorFunction"><span class="pre">pymomentum.solver2.FixedAxisDiffErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.FixedAxisAngleErrorFunction.add_constraint" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.FixedAxisAngleErrorFunction" title="pymomentum.solver2.FixedAxisAngleErrorFunction"><span class="pre">pymomentum.solver2.FixedAxisAngleErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.FixedAxisAngleErrorFunction.add_constraint" title="Link to this definition"></a></dt>
 <dd><p>Adds a fixed axis constraint to the error function.</p>
 <blockquote>
 <div><dl class="field-list simple">
@@ -950,7 +1045,7 @@ joint-local space) and a global axis using the angle between the vectors.</p>
 <dt class="field-even">param global_axis<span class="colon">:</span></dt>
 <dd class="field-even"><p>The target axis in the global frame.</p>
 </dd>
-<dt class="field-odd">param parent_index<span class="colon">:</span></dt>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The index of the parent joint.</p>
 </dd>
 <dt class="field-even">param weight<span class="colon">:</span></dt>
@@ -1033,7 +1128,7 @@ the vectors (which is the same as the dot product of the vectors).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.FixedAxisCosErrorFunction.add_constraint">
-<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.FixedAxisDiffErrorFunction" title="pymomentum.solver2.FixedAxisDiffErrorFunction"><span class="pre">pymomentum.solver2.FixedAxisDiffErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.FixedAxisCosErrorFunction.add_constraint" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.FixedAxisCosErrorFunction" title="pymomentum.solver2.FixedAxisCosErrorFunction"><span class="pre">pymomentum.solver2.FixedAxisCosErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.FixedAxisCosErrorFunction.add_constraint" title="Link to this definition"></a></dt>
 <dd><p>Adds a fixed axis constraint to the error function.</p>
 <blockquote>
 <div><dl class="field-list simple">
@@ -1043,7 +1138,7 @@ the vectors (which is the same as the dot product of the vectors).</p>
 <dt class="field-even">param global_axis<span class="colon">:</span></dt>
 <dd class="field-even"><p>The target axis in the global frame.</p>
 </dd>
-<dt class="field-odd">param parent_index<span class="colon">:</span></dt>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The index of the parent joint.</p>
 </dd>
 <dt class="field-even">param weight<span class="colon">:</span></dt>
@@ -1170,7 +1265,7 @@ joint-local space) and a global axis using element-wise differences.</p>
 <dt class="field-even">param global_axis<span class="colon">:</span></dt>
 <dd class="field-even"><p>The target axis in the global frame.</p>
 </dd>
-<dt class="field-odd">param parent_index<span class="colon">:</span></dt>
+<dt class="field-odd">param parent<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The index of the parent joint.</p>
 </dd>
 <dt class="field-even">param weight<span class="colon">:</span></dt>
@@ -1489,6 +1584,172 @@ such as maintaining a fixed distance between hands or ensuring two joints stay a
 <dt class="sig sig-object py" id="pymomentum.solver2.JointToJointDistanceErrorFunction.constraints">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.constraints" title="Link to this definition"></a></dt>
 <dd><p>Returns the list of joint-to-joint distance constraints.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">JointToJointPositionData</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.name" title="Link to this definition"></a></dt>
+<dd><p>The name of the constraint</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.reference_joint">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reference_joint</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.reference_joint" title="Link to this definition"></a></dt>
+<dd><p>The index of the reference joint</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.reference_offset">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reference_offset</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.reference_offset" title="Link to this definition"></a></dt>
+<dd><p>The offset from reference joint in the local coordinate system of reference joint</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.source_joint">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_joint</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.source_joint" title="Link to this definition"></a></dt>
+<dd><p>The index of the source joint</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.source_offset">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_offset</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.source_offset" title="Link to this definition"></a></dt>
+<dd><p>The offset from source joint in the local coordinate system of source joint</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.target">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.target" title="Link to this definition"></a></dt>
+<dd><p>The target position in the reference joint’s coordinate frame</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionData.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionData.weight" title="Link to this definition"></a></dt>
+<dd><p>The weight of the constraint</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">JointToJointPositionErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
+<p>Error function that penalizes deviation from a target position expressed in a reference joint’s coordinate frame.</p>
+<p>This is useful for constraints where you want to control the relative position
+between two body parts, such as keeping a hand at a specific position relative
+to the body, or maintaining a specific relationship between two joints that
+should move together.</p>
+<dl class="simple">
+<dt>The error is computed as:</dt><dd><p>error = T_ref^{-1} * (T_src * src_offset) - target</p>
+</dd>
+</dl>
+<p>where T_ref and T_src are the global transformations of the reference and
+source joints respectively.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction" title="pymomentum.solver2.JointToJointPositionErrorFunction"><span class="pre">pymomentum.solver2.JointToJointPositionErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a JointToJointPositionErrorFunction.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param character<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The character to use.</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>The weight applied to the error function.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction.add_constraint">
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction" title="pymomentum.solver2.JointToJointPositionErrorFunction"><span class="pre">pymomentum.solver2.JointToJointPositionErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction.add_constraint" title="Link to this definition"></a></dt>
+<dd><p>Adds a joint-to-joint position constraint to the error function.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param source_joint<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The index of the source joint (the joint whose position we want to constrain).</p>
+</dd>
+<dt class="field-even">param source_offset<span class="colon">:</span></dt>
+<dd class="field-even"><p>The offset from source joint in the local coordinate system of source joint.</p>
+</dd>
+<dt class="field-odd">param reference_joint<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The index of the reference joint (the joint whose coordinate frame we use).</p>
+</dd>
+<dt class="field-even">param reference_offset<span class="colon">:</span></dt>
+<dd class="field-even"><p>The offset from reference joint in the local coordinate system of reference joint.</p>
+</dd>
+<dt class="field-odd">param target<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The target position in the reference joint’s coordinate frame.</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>The weight of the constraint.</p>
+</dd>
+<dt class="field-odd">param name<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The name of the constraint (for debugging).</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction.add_constraints">
+<span class="sig-name descname"><span class="pre">add_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction" title="pymomentum.solver2.JointToJointPositionErrorFunction"><span class="pre">pymomentum.solver2.JointToJointPositionErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction.add_constraints" title="Link to this definition"></a></dt>
+<dd><p>Adds multiple joint-to-joint position constraints to the error function.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param source_joint<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of indices for the source joints.</p>
+</dd>
+<dt class="field-even">param source_offset<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of shape (n, 3) for offsets from source joints in local coordinates.</p>
+</dd>
+<dt class="field-odd">param reference_joint<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of indices for the reference joints.</p>
+</dd>
+<dt class="field-even">param reference_offset<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of shape (n, 3) for offsets from reference joints in local coordinates.</p>
+</dd>
+<dt class="field-odd">param target<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of shape (n, 3) for target positions in reference joint coordinate frames.</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of weights for the constraints.</p>
+</dd>
+<dt class="field-odd">param name<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An optional list of names for the constraints (for debugging).</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction.clear_constraints">
+<span class="sig-name descname"><span class="pre">clear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction" title="pymomentum.solver2.JointToJointPositionErrorFunction"><span class="pre">pymomentum.solver2.JointToJointPositionErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction.clear_constraints" title="Link to this definition"></a></dt>
+<dd><p>Clears all joint-to-joint position constraints from the error function.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction.constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction.constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of joint-to-joint position constraints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointPositionErrorFunction.num_constraints">
+<span class="sig-name descname"><span class="pre">num_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionErrorFunction" title="pymomentum.solver2.JointToJointPositionErrorFunction"><span class="pre">pymomentum.solver2.JointToJointPositionErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointPositionErrorFunction.num_constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of constraints.</p>
 </dd></dl>
 
 </dd></dl>

@@ -77,6 +77,7 @@ var hierarchy =
     [ "momentum::JointStateT< T >", "structmomentum_1_1JointStateT.html", null ],
     [ "momentum::JointT< T >", "structmomentum_1_1JointT.html", null ],
     [ "momentum::JointToJointDistanceConstraintT< T >", "structmomentum_1_1JointToJointDistanceConstraintT.html", null ],
+    [ "momentum::JointToJointPositionDataT< T >", "structmomentum_1_1JointToJointPositionDataT.html", null ],
     [ "momentum::LimitData", "unionmomentum_1_1LimitData.html", null ],
     [ "momentum::LimitEllipsoid", "structmomentum_1_1LimitEllipsoid.html", null ],
     [ "momentum::LimitHalfPlane", "structmomentum_1_1LimitHalfPlane.html", null ],
@@ -122,6 +123,7 @@ var hierarchy =
     [ "momentum::io_detail::SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", null ],
     [ "momentum::io_detail::SectionSegment", "structmomentum_1_1io__detail_1_1SectionSegment.html", null ],
     [ "momentum::SequenceErrorFunctionT< T >", "classmomentum_1_1SequenceErrorFunctionT.html", [
+      [ "momentum::AccelerationSequenceErrorFunctionT< T >", "classmomentum_1_1AccelerationSequenceErrorFunctionT.html", null ],
       [ "momentum::ModelParametersSequenceErrorFunctionT< T >", "classmomentum_1_1ModelParametersSequenceErrorFunctionT.html", null ],
       [ "momentum::StateSequenceErrorFunctionT< T >", "classmomentum_1_1StateSequenceErrorFunctionT.html", null ],
       [ "momentum::VertexSequenceErrorFunctionT< T >", "classmomentum_1_1VertexSequenceErrorFunctionT.html", null ]
@@ -163,6 +165,7 @@ var hierarchy =
       [ "momentum::FullyDifferentiablePositionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiablePositionErrorFunctionT.html", null ],
       [ "momentum::HeightErrorFunctionT< T >", "classmomentum_1_1HeightErrorFunctionT.html", null ],
       [ "momentum::JointToJointDistanceErrorFunctionT< T >", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html", null ],
+      [ "momentum::JointToJointPositionErrorFunctionT< T >", "classmomentum_1_1JointToJointPositionErrorFunctionT.html", null ],
       [ "momentum::LimitErrorFunctionT< T >", "classmomentum_1_1LimitErrorFunctionT.html", null ],
       [ "momentum::ModelParametersErrorFunctionT< T >", "classmomentum_1_1ModelParametersErrorFunctionT.html", [
         [ "momentum::FullyDifferentiableMotionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html", null ]

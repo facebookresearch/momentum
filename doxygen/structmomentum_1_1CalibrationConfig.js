@@ -7,5 +7,6 @@ var structmomentum_1_1CalibrationConfig =
     [ "globalScaleOnly", "structmomentum_1_1CalibrationConfig.html#aedcf855e2bb8320f43defaf25d01847d", null ],
     [ "greedySampling", "structmomentum_1_1CalibrationConfig.html#aa25ed2d4c69619b70b81bb614fb16fc1", null ],
     [ "locatorsOnly", "structmomentum_1_1CalibrationConfig.html#a068c1a609ef7706a7d0736eff65bbd04", null ],
-    [ "majorIter", "structmomentum_1_1CalibrationConfig.html#a4458418ebc5673dae39aa10eb9be7151", null ]
+    [ "majorIter", "structmomentum_1_1CalibrationConfig.html#a4458418ebc5673dae39aa10eb9be7151", null ],
+    [ "targetHeightCm", "structmomentum_1_1CalibrationConfig.html#a461f629b9c8a31e552d4449a6b1d47cb", null ]
 ];

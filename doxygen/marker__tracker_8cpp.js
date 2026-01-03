@@ -9,6 +9,6 @@ var marker__tracker_8cpp =
     [ "sampleFrames", "marker__tracker_8cpp.html#a073d24fb76f34befba58d6f95b12568e", null ],
     [ "trackPosesForFrames", "marker__tracker_8cpp.html#afe25a69a88f57192aacabcacbf577667", null ],
     [ "trackPosesPerframe", "marker__tracker_8cpp.html#a29d27d60cba3699dfd3eef43630405fe", null ],
-    [ "trackSequence", "marker__tracker_8cpp.html#a039b31a818adb9b00e7b783834f6e914", null ],
-    [ "trackSequence", "marker__tracker_8cpp.html#a1643ef4ebc3023be51443119ebbfc7c7", null ]
+    [ "trackSequence", "marker__tracker_8cpp.html#a88640dd64399b6abf97c5bc1866feb7b", null ],
+    [ "trackSequence", "marker__tracker_8cpp.html#a32dc25eda558fabf7896a1868ead3281", null ]
 ];

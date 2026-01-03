@@ -15,8 +15,10 @@ var searchData=
   ['smoothing_12',['smoothing',['../structmomentum_1_1TrackingConfig.html#aa8c2177d85f4b37039e69f9436e442e2',1,'momentum::TrackingConfig']]],
   ['smoothingweights_13',['smoothingWeights',['../structmomentum_1_1TrackingConfig.html#ac41e892cf77448f4611ddc0a895cd811',1,'momentum::TrackingConfig']]],
   ['solverfunction_5f_14',['solverFunction_',['../classmomentum_1_1SolverT.html#aee49a4cfe460ce8b148c3f52e90caef2',1,'momentum::SolverT']]],
-  ['sparsematrixthreshold_15',['sparseMatrixThreshold',['../structmomentum_1_1GaussNewtonSolverOptions.html#a141ef7753b9aa007a1b7be3ea6f4a75d',1,'momentum::GaussNewtonSolverOptions']]],
-  ['srcvertexindex_16',['srcVertexIndex',['../structmomentum_1_1PointTriangleVertexConstraintT.html#aba0935cdb83bee28cbd5b55a753a2513',1,'momentum::PointTriangleVertexConstraintT']]],
-  ['startline_17',['startLine',['../structmomentum_1_1io__detail_1_1SectionSegment.html#adb15936efeb1ab6382b1c62a60c3d454',1,'momentum::io_detail::SectionSegment']]],
-  ['storehistory_18',['storeHistory',['../classmomentum_1_1SolverT.html#aab663158e18cceccff07c2f5a4218cd2',1,'momentum::SolverT']]]
+  ['sourcejoint_15',['sourceJoint',['../structmomentum_1_1JointToJointPositionDataT.html#a42e31dff2462efec629fdc7c08193554',1,'momentum::JointToJointPositionDataT']]],
+  ['sourceoffset_16',['sourceOffset',['../structmomentum_1_1JointToJointPositionDataT.html#afb5f286ccf9398aa9819563f08a32da8',1,'momentum::JointToJointPositionDataT']]],
+  ['sparsematrixthreshold_17',['sparseMatrixThreshold',['../structmomentum_1_1GaussNewtonSolverOptions.html#a141ef7753b9aa007a1b7be3ea6f4a75d',1,'momentum::GaussNewtonSolverOptions']]],
+  ['srcvertexindex_18',['srcVertexIndex',['../structmomentum_1_1PointTriangleVertexConstraintT.html#aba0935cdb83bee28cbd5b55a753a2513',1,'momentum::PointTriangleVertexConstraintT']]],
+  ['startline_19',['startLine',['../structmomentum_1_1io__detail_1_1SectionSegment.html#adb15936efeb1ab6382b1c62a60c3d454',1,'momentum::io_detail::SectionSegment']]],
+  ['storehistory_20',['storeHistory',['../classmomentum_1_1SolverT.html#aab663158e18cceccff07c2f5a4218cd2',1,'momentum::SolverT']]]
 ];

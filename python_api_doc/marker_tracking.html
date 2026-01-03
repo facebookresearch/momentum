@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.greedy_sampling"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.greedy_sampling</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.locators_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.locators_only</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.major_iter"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.major_iter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.target_height_cm"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.target_height_cm</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions"><code class="docutils literal notranslate"><span class="pre">ModelOptions</span></code></a><ul>
@@ -202,7 +203,7 @@
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
 <li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig) -&gt; None</p></li>
-<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’, calib_shape: bool = False) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’, calib_shape: bool = False, target_height_cm: float = 0.0) -&gt; None</p></li>
 </ol>
 <p>Create a CalibrationConfig with specified parameters.</p>
 <blockquote>
@@ -239,6 +240,9 @@
 </dd>
 <dt class="field-odd">param first_frame_pose_constraint_set<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Name of pose constraint set to use in first frame</p>
+</dd>
+<dt class="field-even">param target_height_cm<span class="colon">:</span></dt>
+<dd class="field-even"><p>Target height for character in cm.  Defaults to 0 (unspecified).</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -290,6 +294,12 @@
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.major_iter">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">major_iter</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.major_iter" title="Link to this definition"></a></dt>
 <dd><p>Number of calibration loops to run</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.target_height_cm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_height_cm</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.target_height_cm" title="Link to this definition"></a></dt>
+<dd><p>Target height for the character in cm (0 means no target height specified)</p>
 </dd></dl>
 
 </dd></dl>
@@ -477,7 +487,7 @@ equal to number of model parameters and this overrides the value specific in smo
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.convert_locators_to_skinned_locators">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">convert_locators_to_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">convert_locators_to_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_skin_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.029999999329447746</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators" title="Link to this definition"></a></dt>
 <dd><p>Convert regular locators to skinned locators based on mesh proximity.</p>
 <p>This function converts locators attached to specific joints into skinned locators
 that are weighted across multiple joints based on the underlying mesh skin weights.
@@ -497,6 +507,10 @@ influenced by multiple joints through skin weights.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – Character with mesh, skin weights, and locators to convert</p></li>
 <li><p><strong>max_distance</strong> – Maximum distance from mesh surface to convert a locator (default: 3.0)</p></li>
+<li><p><strong>min_skin_weight</strong> – Minimum skin weight threshold for considering a mesh triangle as
+belonging to the same bone as the locator (default: 0.03)</p></li>
+<li><p><strong>verbose</strong> – If True, print diagnostic messages about locators that could not be
+converted (default: False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

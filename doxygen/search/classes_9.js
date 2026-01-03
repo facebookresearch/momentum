@@ -5,5 +5,7 @@ var searchData=
   ['jointstatet_2',['JointStateT',['../structmomentum_1_1JointStateT.html',1,'momentum']]],
   ['jointt_3',['JointT',['../structmomentum_1_1JointT.html',1,'momentum']]],
   ['jointtojointdistanceconstraintt_4',['JointToJointDistanceConstraintT',['../structmomentum_1_1JointToJointDistanceConstraintT.html',1,'momentum']]],
-  ['jointtojointdistanceerrorfunctiont_5',['JointToJointDistanceErrorFunctionT',['../classmomentum_1_1JointToJointDistanceErrorFunctionT.html',1,'momentum']]]
+  ['jointtojointdistanceerrorfunctiont_5',['JointToJointDistanceErrorFunctionT',['../classmomentum_1_1JointToJointDistanceErrorFunctionT.html',1,'momentum']]],
+  ['jointtojointpositiondatat_6',['JointToJointPositionDataT',['../structmomentum_1_1JointToJointPositionDataT.html',1,'momentum']]],
+  ['jointtojointpositionerrorfunctiont_7',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]]
 ];

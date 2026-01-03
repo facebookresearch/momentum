@@ -8,6 +8,7 @@ var annotated_dup =
         [ "SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", "classmomentum_1_1io__detail_1_1SectionContent" ],
         [ "SectionSegment", "structmomentum_1_1io__detail_1_1SectionSegment.html", "structmomentum_1_1io__detail_1_1SectionSegment" ]
       ] ],
+      [ "AccelerationSequenceErrorFunctionT", "classmomentum_1_1AccelerationSequenceErrorFunctionT.html", "classmomentum_1_1AccelerationSequenceErrorFunctionT" ],
       [ "AimDataT", "structmomentum_1_1AimDataT.html", "structmomentum_1_1AimDataT" ],
       [ "AimDirErrorFunctionT", "classmomentum_1_1AimDirErrorFunctionT.html", "classmomentum_1_1AimDirErrorFunctionT" ],
       [ "AimDistErrorFunctionT", "classmomentum_1_1AimDistErrorFunctionT.html", "classmomentum_1_1AimDistErrorFunctionT" ],
@@ -64,6 +65,8 @@ var annotated_dup =
       [ "JointT", "structmomentum_1_1JointT.html", "structmomentum_1_1JointT" ],
       [ "JointToJointDistanceConstraintT", "structmomentum_1_1JointToJointDistanceConstraintT.html", "structmomentum_1_1JointToJointDistanceConstraintT" ],
       [ "JointToJointDistanceErrorFunctionT", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html", "classmomentum_1_1JointToJointDistanceErrorFunctionT" ],
+      [ "JointToJointPositionDataT", "structmomentum_1_1JointToJointPositionDataT.html", "structmomentum_1_1JointToJointPositionDataT" ],
+      [ "JointToJointPositionErrorFunctionT", "classmomentum_1_1JointToJointPositionErrorFunctionT.html", "classmomentum_1_1JointToJointPositionErrorFunctionT" ],
       [ "LimitData", "unionmomentum_1_1LimitData.html", "unionmomentum_1_1LimitData" ],
       [ "LimitEllipsoid", "structmomentum_1_1LimitEllipsoid.html", "structmomentum_1_1LimitEllipsoid" ],
       [ "LimitErrorFunctionT", "classmomentum_1_1LimitErrorFunctionT.html", "classmomentum_1_1LimitErrorFunctionT" ],
