@@ -31,10 +31,12 @@ tensor_utility_sources = [
 array_utility_public_headers = [
     "array_utility/array_utility.h",
     "array_utility/batch_accessor.h",
+    "array_utility/geometry_accessors.h",
 ]
 
 array_utility_sources = [
     "array_utility/array_utility.cpp",
+    "array_utility/geometry_accessors.cpp",
 ]
 
 array_utility_test_sources = [
