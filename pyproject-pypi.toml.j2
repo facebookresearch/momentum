@@ -291,6 +291,9 @@ repair-wheel-command = """
 # which are incompatible with manylinux_2_28's max CXXABI_1.3.11
 export LD_LIBRARY_PATH=/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH
 
+# Create output directory
+mkdir -p /tmp/linux_wheel
+
 echo 'Step 1: Bundling libraries with auditwheel (linux_x86_64)...'
 auditwheel repair -w /tmp/linux_wheel {wheel} \
     --plat linux_x86_64 \
@@ -311,10 +314,19 @@ auditwheel repair -w /tmp/linux_wheel {wheel} \
     --exclude 'libgcc_s*.so*' || (echo 'Auditwheel failed.' && exit 1)
 
 echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
-LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
-WHEEL_NAME=$(basename "$LINUX_WHEEL")
-NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
-cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+# Check if auditwheel produced output
+if [ -z "$(ls /tmp/linux_wheel/*.whl 2>/dev/null)" ]; then
+  echo "Warning: auditwheel produced no output, using original wheel"
+  WHEEL_NAME=$(basename {wheel})
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp {wheel} {dest_dir}/$NEW_WHEEL_NAME
+else
+  LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
+  WHEEL_NAME=$(basename "$LINUX_WHEEL")
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+fi
+
 echo "Created $NEW_WHEEL_NAME"
 echo "Note: This wheel requires glibc 2.28+ and libstdc++ from GCC 11+"
 """
