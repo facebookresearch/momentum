@@ -205,6 +205,8 @@ build-verbosity = 3
 skip = "pp* *-musllinux* *-win*"
 archs = ["auto64"]
 manylinux-x86_64-image = "manylinux_2_28"
+# Disable build isolation so PyTorch installed by before-build is available for CMake
+build-frontend = { name = "pip", args = ["--no-build-isolation"] }
 
 # Common
 before-build = """
@@ -223,12 +225,26 @@ else
   exit 1
 fi
 
-# Install build dependencies that are not in build-system.requires
-# We need torch to link against libtorch
-# Use python -m pip to ensure we use the correct Python's pip
-echo "Installing PyTorch..."
+# Upgrade pip first
+echo "Upgrading pip..."
 python -m pip install --upgrade pip
-python -m pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cpu
+
+# Install build dependencies (required when using --no-build-isolation)
+# These are from [build-system].requires in pyproject.toml
+echo "Installing build dependencies..."
+python -m pip install scikit-build-core pybind11 setuptools-scm
+
+# Install PyTorch (needed at build time to link against libtorch)
+# PyTorch is a runtime dependency but also needed at build time for linking
+echo "Installing PyTorch for build..."
+if [ "$VER" = "312" ]; then
+  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+elif [ "$VER" = "313" ]; then
+  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+else
+  echo "Unsupported Python version: $VER"
+  exit 1
+fi
 
 # Verify torch is installed correctly
 echo "Verifying PyTorch installation..."
@@ -236,7 +252,14 @@ python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
-before-test = "python -m pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cpu"
+before-test = """
+VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+if [ "$VER" = "312" ]; then
+  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+elif [ "$VER" = "313" ]; then
+  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+fi
+"""
 
 [tool.cibuildwheel.linux]
 before-all = """
