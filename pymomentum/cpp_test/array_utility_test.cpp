@@ -9,14 +9,42 @@
 
 #include <pymomentum/array_utility/array_utility.h>
 #include <pymomentum/array_utility/batch_accessor.h>
+#include <pymomentum/array_utility/geometry_accessors.h>
+
+#include <momentum/character/joint.h>
+#include <momentum/character/parameter_transform.h>
+#include <momentum/math/transform.h>
+
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-// NOTE: Tests for geometry accessors (JointParametersAccessor, ModelParametersAccessor,
-// SkeletonStateAccessor) require numpy arrays and are better tested via Python unit tests.
-// The accessors themselves are designed to be called from Python code where numpy is
-// available. The C++ tests below focus on the core array infrastructure that doesn't
-// require numpy.
+// Helper to create buffer_info for testing accessors without numpy
+template <typename T>
+py::buffer_info createTestBuffer(const std::vector<py::ssize_t>& shape) {
+  // Calculate total size and C-contiguous strides
+  py::ssize_t totalSize = 1;
+  std::vector<py::ssize_t> strides(shape.size());
+  py::ssize_t stride = sizeof(T);
+
+  for (int64_t i = shape.size() - 1; i >= 0; --i) {
+    strides[i] = stride;
+    stride *= shape[i];
+    totalSize *= shape[i];
+  }
+
+  // Allocate data (note: this is a simplified test helper; in real usage
+  // the data would need to be kept alive for the lifetime of the accessor)
+  static std::vector<T> data;
+  data.resize(totalSize, T(0));
+
+  return py::buffer_info(
+      data.data(), sizeof(T), py::format_descriptor<T>::format(), shape.size(), shape, strides);
+}
+
+// NOTE: Accessor tests demonstrate that accessors can now work with plain buffer_info
+// without requiring numpy arrays. In production Python code, you would pass py::array
+// which automatically delegates to buffer_info via the convenience constructors.
 
 // ============================================================================
 // LeadingDimensions Tests
@@ -312,4 +340,107 @@ TEST(ArrayUtility, FormatExpectedDims) {
 
   result = pymomentum::formatExpectedDims(trailingDims, names, boundVars);
   EXPECT_EQ("[..., numItems(=10), dim2(=4)]", result);
+}
+
+// ============================================================================
+// Geometry Accessor Tests (using buffer_info directly, no numpy required!)
+// ============================================================================
+
+TEST(ArrayAccessors, JointParametersAccessor_BufferInfo_Roundtrip) {
+  const int nJoints = 3;
+  const int nJointParams = nJoints * 7;
+
+  // Create buffer with shape (2, 3, nJointParams) - flat format
+  auto bufferInfo = createTestBuffer<double>({2, 3, nJointParams});
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {2, 3};
+
+  // Create accessor using buffer_info directly (no numpy!)
+  pymomentum::JointParametersAccessor<double> accessor(
+      bufferInfo, leadingDims, nJoints, pymomentum::JointParamsShape::Flat);
+
+  // Create test joint parameters
+  Eigen::VectorXd jpVec(nJointParams);
+  for (int i = 0; i < nJointParams; ++i) {
+    jpVec(i) = static_cast<double>(i * 0.1 + 2.5);
+  }
+  momentum::JointParametersT<double> originalParams(jpVec);
+
+  // Set and get at multiple indices
+  accessor.set({0, 1}, originalParams);
+  accessor.set({1, 0}, originalParams);
+
+  auto retrieved01 = accessor.get({0, 1});
+  auto retrieved10 = accessor.get({1, 0});
+
+  // Verify lossless round-trip
+  for (int i = 0; i < nJointParams; ++i) {
+    EXPECT_DOUBLE_EQ(originalParams.v(i), retrieved01.v(i));
+    EXPECT_DOUBLE_EQ(originalParams.v(i), retrieved10.v(i));
+  }
+}
+
+TEST(ArrayAccessors, ModelParametersAccessor_BufferInfo_Roundtrip) {
+  const int nModelParams = 5;
+
+  // Create buffer with shape (4, nModelParams)
+  auto bufferInfo = createTestBuffer<float>({4, nModelParams});
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {4};
+
+  // Create accessor using buffer_info directly
+  pymomentum::ModelParametersAccessor<float> accessor(bufferInfo, leadingDims, nModelParams);
+
+  // Create test model parameters
+  Eigen::VectorXf mpVec(nModelParams);
+  for (int i = 0; i < nModelParams; ++i) {
+    mpVec(i) = static_cast<float>(i * 1.5f);
+  }
+  momentum::ModelParametersT<float> originalParams(mpVec);
+
+  // Set and get
+  accessor.set({2}, originalParams);
+  auto retrieved = accessor.get({2});
+
+  // Verify lossless round-trip
+  for (int i = 0; i < nModelParams; ++i) {
+    EXPECT_FLOAT_EQ(originalParams.v(i), retrieved.v(i));
+  }
+}
+
+TEST(ArrayAccessors, SkeletonStateAccessor_BufferInfo_Roundtrip) {
+  const int nJoints = 3;
+
+  // Create buffer with shape (2, nJoints, 8)
+  auto bufferInfo = createTestBuffer<float>({2, nJoints, 8});
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {2};
+
+  // Create accessor using buffer_info directly
+  pymomentum::SkeletonStateAccessor<float> accessor(bufferInfo, leadingDims, nJoints);
+
+  // Create test transforms
+  momentum::TransformListT<float> originalTransforms(nJoints);
+  for (int i = 0; i < nJoints; ++i) {
+    originalTransforms[i].translation = Eigen::Vector3f(i * 1.0f, i * 2.0f, i * 3.0f);
+    originalTransforms[i].rotation = Eigen::Quaternionf(1.0f, 0.0f, 0.0f, 0.0f);
+    originalTransforms[i].scale = 1.0f + i * 0.1f;
+  }
+
+  // Set and get
+  accessor.setTransforms({1}, originalTransforms);
+  auto retrieved = accessor.getTransforms({1});
+
+  // Verify lossless round-trip
+  ASSERT_EQ(originalTransforms.size(), retrieved.size());
+  for (size_t i = 0; i < originalTransforms.size(); ++i) {
+    EXPECT_FLOAT_EQ(originalTransforms[i].translation.x(), retrieved[i].translation.x());
+    EXPECT_FLOAT_EQ(originalTransforms[i].translation.y(), retrieved[i].translation.y());
+    EXPECT_FLOAT_EQ(originalTransforms[i].translation.z(), retrieved[i].translation.z());
+    EXPECT_FLOAT_EQ(originalTransforms[i].rotation.w(), retrieved[i].rotation.w());
+    EXPECT_FLOAT_EQ(originalTransforms[i].rotation.x(), retrieved[i].rotation.x());
+    EXPECT_FLOAT_EQ(originalTransforms[i].rotation.y(), retrieved[i].rotation.y());
+    EXPECT_FLOAT_EQ(originalTransforms[i].rotation.z(), retrieved[i].rotation.z());
+    EXPECT_FLOAT_EQ(originalTransforms[i].scale, retrieved[i].scale);
+  }
 }

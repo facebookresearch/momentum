@@ -1,0 +1,293 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#include "pymomentum/array_utility/geometry_accessors.h"
+
+#include <momentum/common/exception.h>
+
+namespace pymomentum {
+
+// ============================================================================
+// JointParametersAccessor implementation
+// ============================================================================
+
+template <typename T>
+JointParametersAccessor<T>::JointParametersAccessor(
+    const py::buffer_info& bufferInfo,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nJoints,
+    JointParamsShape shape)
+    : nJoints_(nJoints), shape_(shape), leadingNDim_(leadingDims.ndim()) {
+  data_ = static_cast<T*>(bufferInfo.ptr);
+
+  // Extract strides (convert from bytes to elements)
+  const auto totalNDim = bufferInfo.ndim;
+  strides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  }
+}
+
+template <typename T>
+py::ssize_t JointParametersAccessor<T>::computeOffset(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  py::ssize_t offset = 0;
+
+  // Apply strides for each dimension
+  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * strides_[i];
+  }
+
+  return offset;
+}
+
+template <typename T>
+momentum::JointParametersT<T> JointParametersAccessor<T>::get(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+  const auto nJointParams = nJoints_ * 7;
+
+  // Create a joint parameters vector
+  Eigen::Matrix<T, Eigen::Dynamic, 1> jpVec(nJointParams);
+
+  if (shape_ == JointParamsShape::Structured) {
+    // Input is (..., nJoints, 7) - read each joint's 7 values using strides
+    const auto rowStride = strides_[leadingNDim_]; // stride for joint dimension
+    const auto colStride = strides_[leadingNDim_ + 1]; // stride for parameter dimension
+
+    for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+      for (py::ssize_t iParam = 0; iParam < 7; ++iParam) {
+        const auto elementOffset = offset + iJoint * rowStride + iParam * colStride;
+        jpVec(iJoint * 7 + iParam) = data_[elementOffset];
+      }
+    }
+  } else {
+    // Input is (..., nJointParams) - read flat using strides
+    const auto paramStride = strides_[leadingNDim_];
+
+    for (py::ssize_t iParam = 0; iParam < nJointParams; ++iParam) {
+      const auto elementOffset = offset + iParam * paramStride;
+      jpVec(iParam) = data_[elementOffset];
+    }
+  }
+
+  return momentum::JointParametersT<T>(jpVec);
+}
+
+template <typename T>
+void JointParametersAccessor<T>::set(
+    const std::vector<py::ssize_t>& batchIndices,
+    const momentum::JointParametersT<T>& jointParams) {
+  const auto offset = computeOffset(batchIndices);
+  const auto& jpVec = jointParams.v;
+
+  if (shape_ == JointParamsShape::Structured) {
+    // Output is (..., nJoints, 7) - write each joint's 7 values using strides
+    const auto rowStride = strides_[leadingNDim_]; // stride for joint dimension
+    const auto colStride = strides_[leadingNDim_ + 1]; // stride for parameter dimension
+
+    for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+      for (py::ssize_t iParam = 0; iParam < 7; ++iParam) {
+        const auto elementOffset = offset + iJoint * rowStride + iParam * colStride;
+        data_[elementOffset] = jpVec(iJoint * 7 + iParam);
+      }
+    }
+  } else {
+    // Output is (..., nJointParams) - write flat using strides
+    const auto paramStride = strides_[leadingNDim_];
+    const auto nJointParams = nJoints_ * 7;
+
+    for (py::ssize_t iParam = 0; iParam < nJointParams; ++iParam) {
+      const auto elementOffset = offset + iParam * paramStride;
+      data_[elementOffset] = jpVec(iParam);
+    }
+  }
+}
+
+// Explicit template instantiations
+template class JointParametersAccessor<float>;
+template class JointParametersAccessor<double>;
+
+// ============================================================================
+// ModelParametersAccessor implementation
+// ============================================================================
+
+template <typename T>
+ModelParametersAccessor<T>::ModelParametersAccessor(
+    const py::buffer_info& bufferInfo,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nModelParams)
+    : nModelParams_(nModelParams), leadingNDim_(leadingDims.ndim()) {
+  data_ = static_cast<T*>(bufferInfo.ptr);
+
+  // Extract strides (convert from bytes to elements)
+  const auto totalNDim = bufferInfo.ndim;
+  strides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  }
+}
+
+template <typename T>
+py::ssize_t ModelParametersAccessor<T>::computeOffset(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  py::ssize_t offset = 0;
+
+  // Apply strides for each dimension
+  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * strides_[i];
+  }
+
+  return offset;
+}
+
+template <typename T>
+momentum::ModelParametersT<T> ModelParametersAccessor<T>::get(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  // Create a model parameters vector using strides
+  Eigen::Matrix<T, Eigen::Dynamic, 1> mpVec(nModelParams_);
+  const auto paramStride = strides_[leadingNDim_];
+
+  for (py::ssize_t iParam = 0; iParam < nModelParams_; ++iParam) {
+    const auto elementOffset = offset + iParam * paramStride;
+    mpVec(iParam) = data_[elementOffset];
+  }
+
+  return momentum::ModelParametersT<T>(mpVec);
+}
+
+template <typename T>
+void ModelParametersAccessor<T>::set(
+    const std::vector<py::ssize_t>& batchIndices,
+    const momentum::ModelParametersT<T>& modelParams) {
+  const auto offset = computeOffset(batchIndices);
+  const auto& mpVec = modelParams.v;
+  const auto paramStride = strides_[leadingNDim_];
+
+  for (py::ssize_t iParam = 0; iParam < nModelParams_; ++iParam) {
+    const auto elementOffset = offset + iParam * paramStride;
+    data_[elementOffset] = mpVec(iParam);
+  }
+}
+
+// Explicit template instantiations
+template class ModelParametersAccessor<float>;
+template class ModelParametersAccessor<double>;
+
+// ============================================================================
+// SkeletonStateAccessor implementation
+// ============================================================================
+
+template <typename T>
+SkeletonStateAccessor<T>::SkeletonStateAccessor(
+    const py::buffer_info& bufferInfo,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nJoints)
+    : nJoints_(nJoints), leadingNDim_(leadingDims.ndim()) {
+  data_ = static_cast<T*>(bufferInfo.ptr);
+
+  // Extract strides (convert from bytes to elements)
+  const auto totalNDim = bufferInfo.ndim;
+  strides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  }
+}
+
+template <typename T>
+py::ssize_t SkeletonStateAccessor<T>::computeOffset(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  py::ssize_t offset = 0;
+
+  // Apply strides for each dimension
+  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * strides_[i];
+  }
+
+  return offset;
+}
+
+template <typename T>
+momentum::TransformListT<T> SkeletonStateAccessor<T>::getTransforms(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  // Create transforms using strides
+  // Skeleton state format: (..., nJoints, 8) where each joint has
+  // [tx, ty, tz, rx, ry, rz, rw, scale]
+  momentum::TransformListT<T> transforms(nJoints_);
+
+  const auto rowStride = strides_[leadingNDim_]; // stride for joint dimension
+  const auto colStride = strides_[leadingNDim_ + 1]; // stride for parameter dimension
+
+  for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+    const auto jointOffset = offset + iJoint * rowStride;
+
+    // Read translation
+    transforms[iJoint].translation.x() = data_[jointOffset + 0 * colStride];
+    transforms[iJoint].translation.y() = data_[jointOffset + 1 * colStride];
+    transforms[iJoint].translation.z() = data_[jointOffset + 2 * colStride];
+
+    // Read rotation (quaternion in x,y,z,w format)
+    const T qx = data_[jointOffset + 3 * colStride];
+    const T qy = data_[jointOffset + 4 * colStride];
+    const T qz = data_[jointOffset + 5 * colStride];
+    const T qw = data_[jointOffset + 6 * colStride];
+    transforms[iJoint].rotation = Eigen::Quaternion<T>(qw, qx, qy, qz);
+
+    // Read scale
+    const T scale = data_[jointOffset + 7 * colStride];
+    transforms[iJoint].scale = scale;
+  }
+
+  return transforms;
+}
+
+template <typename T>
+void SkeletonStateAccessor<T>::setTransforms(
+    const std::vector<py::ssize_t>& batchIndices,
+    const momentum::TransformListT<T>& transforms) {
+  MT_THROW_IF(
+      static_cast<py::ssize_t>(transforms.size()) != nJoints_,
+      "setTransforms: expected {} transforms but got {}",
+      nJoints_,
+      transforms.size());
+
+  const auto offset = computeOffset(batchIndices);
+  const auto rowStride = strides_[leadingNDim_]; // stride for joint dimension
+  const auto colStride = strides_[leadingNDim_ + 1]; // stride for parameter dimension
+
+  for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+    const auto jointOffset = offset + iJoint * rowStride;
+    const auto& transform = transforms[iJoint];
+
+    // Write translation
+    data_[jointOffset + 0 * colStride] = transform.translation.x();
+    data_[jointOffset + 1 * colStride] = transform.translation.y();
+    data_[jointOffset + 2 * colStride] = transform.translation.z();
+
+    // Write rotation (quaternion in x,y,z,w format)
+    data_[jointOffset + 3 * colStride] = transform.rotation.x();
+    data_[jointOffset + 4 * colStride] = transform.rotation.y();
+    data_[jointOffset + 5 * colStride] = transform.rotation.z();
+    data_[jointOffset + 6 * colStride] = transform.rotation.w();
+
+    // Write scale
+    data_[jointOffset + 7 * colStride] = transform.scale;
+  }
+}
+
+// Explicit template instantiations
+template class SkeletonStateAccessor<float>;
+template class SkeletonStateAccessor<double>;
+
+} // namespace pymomentum
