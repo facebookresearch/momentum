@@ -552,4 +552,37 @@ attachments. Any existing regular locators in the character are preserved.
 :param character: Character with skinned locators to convert
 :return: New character with skinned locators converted to regular locators)",
       py::arg("character"));
+
+  m.def(
+      "get_locator_error",
+      [](const std::vector<std::vector<momentum::Marker>>& markerData,
+         const Eigen::MatrixXf& motion,
+         momentum::Character& character) {
+        // Python uses (frames, params) layout, C++ uses (params, frames)
+        Eigen::MatrixXf motionTransposed;
+        if (motion.cols() == character.parameterTransform.numAllModelParameters()) {
+          motionTransposed = motion.transpose();
+        } else {
+          motionTransposed = motion;
+        }
+        return momentum::getLocatorError(markerData, motionTransposed, character);
+      },
+      R"(Compute average and maximum marker tracking errors across all frames.
+
+This is a utility function for evaluating tracking quality by measuring the
+Euclidean distance between observed marker positions and their corresponding
+locator positions on the character. It provides both average error per frame
+and the maximum error encountered across all markers and frames.
+
+:param marker_data: List of marker observations for each frame. Each frame contains
+    a list of Marker objects with position and occlusion information.
+:param motion: Solved motion parameters matrix. Can be in Python layout (frames, params)
+    or C++ layout (params, frames) - the function handles both.
+:param character: Character model with locators that correspond to the markers.
+:return: Tuple of (average_error, max_error) in world units (typically meters or cm
+    depending on your character scale). average_error is the mean error per frame
+    across all frames, max_error is the single largest marker error found.)",
+      py::arg("marker_data"),
+      py::arg("motion"),
+      py::arg("character"));
 }
