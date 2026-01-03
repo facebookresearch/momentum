@@ -28,6 +28,19 @@ tensor_utility_sources = [
     "tensor_utility/tensor_utility.cpp",
 ]
 
+array_utility_public_headers = [
+    "array_utility/array_utility.h",
+    "array_utility/batch_accessor.h",
+]
+
+array_utility_sources = [
+    "array_utility/array_utility.cpp",
+]
+
+array_utility_test_sources = [
+    "cpp_test/array_utility_test.cpp",
+]
+
 tensor_utility_test_sources = [
     "cpp_test/tensor_utility_test.cpp",
 ]
