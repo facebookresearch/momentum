@@ -387,7 +387,7 @@ variable_list ApplyInverseParameterTransformFunction::forward(
     at::Tensor jointParams) {
   const auto nJointParam = (int)inverseParamTransform->numJointParameters();
 
-  TensorChecker checker("ParameterTransform.apply");
+  TensorChecker checker("InverseParameterTransform.apply");
   const auto input_device = jointParams.device();
 
   bool squeeze;
@@ -424,13 +424,13 @@ variable_list ApplyInverseParameterTransformFunction::backward(
     variable_list grad_outputs) {
   MT_THROW_IF(
       grad_outputs.size() != 1,
-      "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
+      "Invalid grad_outputs in ApplyInverseParameterTransformFunction::backward");
 
   // Restore variables:
   const auto inverseParamTransform = py::cast<const momentum::InverseParameterTransform*>(
       ctx->saved_data["inverseParameterTransform"].toPyObject());
 
-  const auto input_device = grad_outputs[0].device(); // grad_outputs size is guarded already
+  const auto input_device = grad_outputs[0].device();
 
   bool squeeze = false;
   auto dLoss_dModelParameters =

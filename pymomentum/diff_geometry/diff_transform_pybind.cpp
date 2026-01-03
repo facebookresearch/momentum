@@ -41,6 +41,24 @@ batching on the character.
       py::arg("character"),
       py::arg("model_parameters"));
 
+  // apply_inverse_parameter_transform(inverse_parameter_transform, joint_parameters)
+  m.def(
+      "apply_inverse_parameter_transform",
+      [](const momentum::InverseParameterTransform* invParamTransform, at::Tensor jointParameters) {
+        return applyInverseParamTransform(invParamTransform, std::move(jointParameters));
+      },
+      R"(Apply the inverse parameter transform to a [nBatch x nJointParams] tensor of joint parameters.
+This is functionally identical to :meth:`InverseParameterTransform.apply` except that it supports
+automatic differentiation.
+
+:param inverse_parameter_transform: An inverse parameter transform (from ParameterTransform.inverse()).
+:type inverse_parameter_transform: InverseParameterTransform
+:param joint_parameters: A [nBatch x nJointParams] tensor of joint parameters.
+
+:return: a tensor of model parameters.)",
+      py::arg("inverse_parameter_transform"),
+      py::arg("joint_parameters"));
+
   // model_parameters_to_blend_shape_coefficients(character, model_parameters)
   m.def(
       "model_parameters_to_blend_shape_coefficients",
