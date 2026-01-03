@@ -208,18 +208,35 @@ manylinux-x86_64-image = "manylinux_2_28"
 
 # Common
 before-build = """
+set -e  # Exit on error
+
 VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
-echo "Using pyproject.toml for Python $VER"
-cp pyproject-pypi-cpu-py${VER}.toml pyproject.toml
+echo "Building for Python $VER"
+
+# Copy the Python-version-specific pyproject.toml
+if [ -f "pyproject-pypi-cpu-py${VER}.toml" ]; then
+  cp pyproject-pypi-cpu-py${VER}.toml pyproject.toml
+  echo "Copied pyproject-pypi-cpu-py${VER}.toml"
+else
+  echo "ERROR: pyproject-pypi-cpu-py${VER}.toml not found!"
+  ls -la pyproject*.toml
+  exit 1
+fi
 
 # Install build dependencies that are not in build-system.requires
 # We need torch to link against libtorch
-# Use the same constraints as in the generated pyproject.toml
-pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cpu
+# Use python -m pip to ensure we use the correct Python's pip
+echo "Installing PyTorch..."
+python -m pip install --upgrade pip
+python -m pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cpu
+
+# Verify torch is installed correctly
+echo "Verifying PyTorch installation..."
+python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
-before-test = "pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cpu"
+before-test = "python -m pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cpu"
 
 [tool.cibuildwheel.linux]
 before-all = """
