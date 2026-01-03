@@ -93,14 +93,20 @@ class TestDiffGeometry(unittest.TestCase):
         jointParams = character.parameter_transform.apply(modelParams)
 
         # Validate that inversion works correctly:
-        modelParams2 = invTransform.apply(jointParams)
+        modelParams2 = pym_diff_geometry.apply_inverse_parameter_transform(
+            invTransform, jointParams
+        )
         diff = torch.norm(modelParams2 - modelParams)
         self.assertTrue(diff < 0.001)
 
         # Validate the gradients.
-        inputs = [jointParams]
+        inputs = [invTransform, jointParams]
         torch.autograd.gradcheck(
-            invTransform.apply, inputs, eps=1e-2, atol=1e-3, raise_exception=True
+            pym_diff_geometry.apply_inverse_parameter_transform,
+            inputs,
+            eps=1e-2,
+            atol=1e-3,
+            raise_exception=True,
         )
 
     def test_diffmodel_parameters_to_positions(self) -> None:
