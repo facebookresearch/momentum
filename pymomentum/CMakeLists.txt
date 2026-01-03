@@ -336,6 +336,50 @@ if(MOMENTUM_BUILD_TESTING)
   enable_testing()
   mt_setup_gtest()
 
+  # For SKBUILD (scikit-build-core), the main CMakeLists.txt only requests
+  # Development.Module which doesn't provide Python3::Python. We need to
+  # find a way to link against the Python library for test executables.
+  if(NOT TARGET Python3::Python)
+    # Try to find Development.Embed component which provides Python3::Python
+    find_package(Python3 QUIET COMPONENTS Development.Embed)
+
+    if(NOT TARGET Python3::Python)
+      # If Development.Embed is not available (e.g., in manylinux), try to
+      # create the Python3::Python target manually using the library path
+      if(Python3_LIBRARY)
+        add_library(Python3::Python IMPORTED INTERFACE)
+        set_target_properties(Python3::Python PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${Python3_INCLUDE_DIRS}"
+          INTERFACE_LINK_LIBRARIES "${Python3_LIBRARY}"
+        )
+        message(STATUS "Created Python3::Python target manually using ${Python3_LIBRARY}")
+      else()
+        # Try to find the library manually
+        find_library(Python3_LIBRARY
+          NAMES python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}
+                python${Python3_VERSION_MAJOR}
+                python
+          HINTS ${Python3_LIBRARY_DIRS}
+                ${Python3_RUNTIME_LIBRARY_DIRS}
+          PATH_SUFFIXES lib libs
+        )
+        if(Python3_LIBRARY)
+          add_library(Python3::Python IMPORTED INTERFACE)
+          set_target_properties(Python3::Python PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${Python3_INCLUDE_DIRS}"
+            INTERFACE_LINK_LIBRARIES "${Python3_LIBRARY}"
+          )
+          message(STATUS "Created Python3::Python target manually using ${Python3_LIBRARY}")
+        else()
+          message(FATAL_ERROR
+            "Could not find Python library for linking test executables. "
+            "Please ensure Python development files are installed."
+          )
+        endif()
+      endif()
+    endif()
+  endif()
+
   mt_test(
     NAME tensor_utility_test
     PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources

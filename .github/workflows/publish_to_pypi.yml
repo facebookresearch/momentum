@@ -313,6 +313,10 @@ jobs:
       url: https://pypi.org/p/pymomentum-gpu
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
+    # Only publish on tag push or manual workflow dispatch with publish=true
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
 
     steps:
       - name: Download GPU wheel artifacts

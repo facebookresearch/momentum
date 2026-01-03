@@ -24,3 +24,4 @@ pyproject-pypi*.toml
 # Local build artifacts
 build.log
 pixi_bin
+pyproject.toml.bak

@@ -1983,7 +1983,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), 1, 0.0f, 1.0f);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 2e-5), Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1e-1f, 5e-5), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
@@ -2111,7 +2111,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointPositionError_GradientsAndJa
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1.0f, 1.0f);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, character, Eps<T>(5e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(6e-2f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 

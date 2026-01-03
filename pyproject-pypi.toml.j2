@@ -205,21 +205,61 @@ build-verbosity = 3
 skip = "pp* *-musllinux* *-win*"
 archs = ["auto64"]
 manylinux-x86_64-image = "manylinux_2_28"
+# Disable build isolation so PyTorch installed by before-build is available for CMake
+build-frontend = { name = "pip", args = ["--no-build-isolation"] }
 
 # Common
 before-build = """
-VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
-echo "Using pyproject.toml for Python $VER"
-cp pyproject-pypi-cpu-py${VER}.toml pyproject.toml
+set -e  # Exit on error
 
-# Install build dependencies that are not in build-system.requires
-# We need torch to link against libtorch
-# Use the same constraints as in the generated pyproject.toml
-pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cpu
+VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+echo "Building for Python $VER"
+
+# Copy the Python-version-specific pyproject.toml
+if [ -f "pyproject-pypi-cpu-py${VER}.toml" ]; then
+  cp pyproject-pypi-cpu-py${VER}.toml pyproject.toml
+  echo "Copied pyproject-pypi-cpu-py${VER}.toml"
+else
+  echo "ERROR: pyproject-pypi-cpu-py${VER}.toml not found!"
+  ls -la pyproject*.toml
+  exit 1
+fi
+
+# Upgrade pip first
+echo "Upgrading pip..."
+python -m pip install --upgrade pip
+
+# Install build dependencies (required when using --no-build-isolation)
+# These are from [build-system].requires in pyproject.toml
+echo "Installing build dependencies..."
+python -m pip install scikit-build-core pybind11 setuptools-scm
+
+# Install PyTorch (needed at build time to link against libtorch)
+# PyTorch is a runtime dependency but also needed at build time for linking
+echo "Installing PyTorch for build..."
+if [ "$VER" = "312" ]; then
+  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+elif [ "$VER" = "313" ]; then
+  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+else
+  echo "Unsupported Python version: $VER"
+  exit 1
+fi
+
+# Verify torch is installed correctly
+echo "Verifying PyTorch installation..."
+python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
-before-test = "pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cpu"
+before-test = """
+VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+if [ "$VER" = "312" ]; then
+  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+elif [ "$VER" = "313" ]; then
+  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+fi
+"""
 
 [tool.cibuildwheel.linux]
 before-all = """
@@ -251,6 +291,9 @@ repair-wheel-command = """
 # which are incompatible with manylinux_2_28's max CXXABI_1.3.11
 export LD_LIBRARY_PATH=/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH
 
+# Create output directory
+mkdir -p /tmp/linux_wheel
+
 echo 'Step 1: Bundling libraries with auditwheel (linux_x86_64)...'
 auditwheel repair -w /tmp/linux_wheel {wheel} \
     --plat linux_x86_64 \
@@ -271,10 +314,19 @@ auditwheel repair -w /tmp/linux_wheel {wheel} \
     --exclude 'libgcc_s*.so*' || (echo 'Auditwheel failed.' && exit 1)
 
 echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
-LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
-WHEEL_NAME=$(basename "$LINUX_WHEEL")
-NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
-cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+# Check if auditwheel produced output
+if [ -z "$(ls /tmp/linux_wheel/*.whl 2>/dev/null)" ]; then
+  echo "Warning: auditwheel produced no output, using original wheel"
+  WHEEL_NAME=$(basename {wheel})
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp {wheel} {dest_dir}/$NEW_WHEEL_NAME
+else
+  LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
+  WHEEL_NAME=$(basename "$LINUX_WHEEL")
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+fi
+
 echo "Created $NEW_WHEEL_NAME"
 echo "Note: This wheel requires glibc 2.28+ and libstdc++ from GCC 11+"
 """
