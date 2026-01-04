@@ -308,7 +308,9 @@ simd_constraints_test_sources = [
 
 character_sequence_solver_public_headers = [
     "character_sequence_solver/acceleration_sequence_error_function.h",
+    "character_sequence_solver/finite_difference_sequence_error_function.h",
     "character_sequence_solver/fwd.h",
+    "character_sequence_solver/jerk_sequence_error_function.h",
     "character_sequence_solver/model_parameters_sequence_error_function.h",
     "character_sequence_solver/multipose_solver_function.h",
     "character_sequence_solver/multipose_solver.h",
@@ -321,6 +323,8 @@ character_sequence_solver_public_headers = [
 
 character_sequence_solver_sources = [
     "character_sequence_solver/acceleration_sequence_error_function.cpp",
+    "character_sequence_solver/finite_difference_sequence_error_function.cpp",
+    "character_sequence_solver/jerk_sequence_error_function.cpp",
     "character_sequence_solver/model_parameters_sequence_error_function.cpp",
     "character_sequence_solver/multipose_solver_function.cpp",
     "character_sequence_solver/multipose_solver.cpp",
