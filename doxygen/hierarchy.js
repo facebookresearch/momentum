@@ -123,7 +123,10 @@ var hierarchy =
     [ "momentum::io_detail::SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", null ],
     [ "momentum::io_detail::SectionSegment", "structmomentum_1_1io__detail_1_1SectionSegment.html", null ],
     [ "momentum::SequenceErrorFunctionT< T >", "classmomentum_1_1SequenceErrorFunctionT.html", [
-      [ "momentum::AccelerationSequenceErrorFunctionT< T >", "classmomentum_1_1AccelerationSequenceErrorFunctionT.html", null ],
+      [ "momentum::FiniteDifferenceSequenceErrorFunctionT< T >", "classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html", [
+        [ "momentum::AccelerationSequenceErrorFunctionT< T >", "classmomentum_1_1AccelerationSequenceErrorFunctionT.html", null ],
+        [ "momentum::JerkSequenceErrorFunctionT< T >", "classmomentum_1_1JerkSequenceErrorFunctionT.html", null ]
+      ] ],
       [ "momentum::ModelParametersSequenceErrorFunctionT< T >", "classmomentum_1_1ModelParametersSequenceErrorFunctionT.html", null ],
       [ "momentum::StateSequenceErrorFunctionT< T >", "classmomentum_1_1StateSequenceErrorFunctionT.html", null ],
       [ "momentum::VertexSequenceErrorFunctionT< T >", "classmomentum_1_1VertexSequenceErrorFunctionT.html", null ]

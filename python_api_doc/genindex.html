@@ -260,6 +260,8 @@
 </li>
         <li><a href="solver2.html#pymomentum.solver2.HeightErrorFunction.__init__">(pymomentum.solver2.HeightErrorFunction method)</a>
 </li>
+        <li><a href="solver2.html#pymomentum.solver2.JerkSequenceErrorFunction.__init__">(pymomentum.solver2.JerkSequenceErrorFunction method)</a>
+</li>
         <li><a href="solver2.html#pymomentum.solver2.JointToJointDistanceConstraint.__init__">(pymomentum.solver2.JointToJointDistanceConstraint method)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.JointToJointDistanceErrorFunction.__init__">(pymomentum.solver2.JointToJointDistanceErrorFunction method)</a>
@@ -1205,6 +1207,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.jacobian">jacobian() (in module pymomentum.solver)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.JerkSequenceErrorFunction">JerkSequenceErrorFunction (class in pymomentum.solver2)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Joint">Joint (class in pymomentum.geometry)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.JointToJointDistanceConstraint.joint1">joint1 (pymomentum.solver2.JointToJointDistanceConstraint property)</a>
@@ -1231,10 +1235,10 @@
       </ul></li>
       <li><a href="torch.html#pymomentum.torch.character.Skeleton.joint_parameters_to_local_trs">joint_parameters_to_local_trs() (pymomentum.torch.character.Skeleton method)</a>
 </li>
-      <li><a href="torch.html#pymomentum.torch.character.InverseParameterTransform.joint_parameters_to_model_parameters">joint_parameters_to_model_parameters() (pymomentum.torch.character.InverseParameterTransform method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="torch.html#pymomentum.torch.character.InverseParameterTransform.joint_parameters_to_model_parameters">joint_parameters_to_model_parameters() (pymomentum.torch.character.InverseParameterTransform method)</a>
+</li>
       <li><a href="torch.html#pymomentum.torch.character.AdvancedInverseParameterTransform.joint_parameters_to_model_parameters_with_known_scales">joint_parameters_to_model_parameters_with_known_scales() (pymomentum.torch.character.AdvancedInverseParameterTransform method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.joint_parameters_to_positions">joint_parameters_to_positions() (in module pymomentum.geometry)</a>
@@ -2180,7 +2184,11 @@
       <li><a href="geometry.html#pymomentum.geometry.replace_skeleton_hierarchy">replace_skeleton_hierarchy() (in module pymomentum.geometry)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.AccelerationSequenceErrorFunction.reset">reset() (pymomentum.solver2.AccelerationSequenceErrorFunction method)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.JerkSequenceErrorFunction.reset">(pymomentum.solver2.JerkSequenceErrorFunction method)</a>
 </li>
+      </ul></li>
       <li><a href="solver.html#pymomentum.solver.reset_gradient_statistics">reset_gradient_statistics() (in module pymomentum.solver)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.reset_solve_ik_statistics">reset_solve_ik_statistics() (in module pymomentum.solver)</a>
@@ -2285,6 +2293,10 @@
 </li>
       <li><a href="solver2.html#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_accelerations">set_target_accelerations() (pymomentum.solver2.AccelerationSequenceErrorFunction method)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.JerkSequenceErrorFunction.set_target_jerk">set_target_jerk() (pymomentum.solver2.JerkSequenceErrorFunction method)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.JerkSequenceErrorFunction.set_target_jerks">set_target_jerks() (pymomentum.solver2.JerkSequenceErrorFunction method)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.ModelParametersErrorFunction.set_target_parameters">set_target_parameters() (pymomentum.solver2.ModelParametersErrorFunction method)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.StateErrorFunction.set_target_state">set_target_state() (pymomentum.solver2.StateErrorFunction method)</a>
@@ -2294,7 +2306,11 @@
 </li>
       </ul></li>
       <li><a href="solver2.html#pymomentum.solver2.AccelerationSequenceErrorFunction.set_target_weights">set_target_weights() (pymomentum.solver2.AccelerationSequenceErrorFunction method)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.JerkSequenceErrorFunction.set_target_weights">(pymomentum.solver2.JerkSequenceErrorFunction method)</a>
 </li>
+      </ul></li>
       <li><a href="backend.html#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.setup_context">setup_context() (pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT static method)</a>
 
       <ul>
@@ -2325,6 +2341,8 @@
         <li><a href="torch.html#pymomentum.torch.character.Skeleton">(class in pymomentum.torch.character)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.skeleton">skeleton (pymomentum.geometry.Character property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.skeleton_state_to_joint_parameters">skeleton_state_to_joint_parameters() (in module pymomentum.geometry)</a>
@@ -2333,8 +2351,6 @@
         <li><a href="torch.html#pymomentum.torch.character.Skeleton.skeleton_state_to_joint_parameters">(pymomentum.torch.character.Skeleton method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="torch.html#pymomentum.torch.character.Skeleton.skeleton_state_to_local_skeleton_state">skeleton_state_to_local_skeleton_state() (pymomentum.torch.character.Skeleton method)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.SkeletonErrorFunction">SkeletonErrorFunction (class in pymomentum.solver2)</a>

@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classmomentum_1_1AccelerationSequenceE
 </div><!--header-->
 <div class="contents">
 
-<p>Error function that penalizes the acceleration of joint positions across three consecutive frames using a standard finite difference stencil [-1, 2, -1].  
+<p>Error function that penalizes the acceleration of joint positions across three consecutive frames using a standard finite difference stencil [1, -2, 1].  
  <a href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>&gt;</code></p>
@@ -109,7 +109,8 @@ $(document).ready(function(){initNavTree('classmomentum_1_1AccelerationSequenceE
  <div class="center">
   <img src="classmomentum_1_1AccelerationSequenceErrorFunctionT.png" usemap="#momentum::AccelerationSequenceErrorFunctionT_3C_20T_20_3E_map" alt=""/>
   <map id="momentum::AccelerationSequenceErrorFunctionT_3C_20T_20_3E_map" name="momentum::AccelerationSequenceErrorFunctionT_3C_20T_20_3E_map">
-<area href="classmomentum_1_1SequenceErrorFunctionT.html" alt="momentum::SequenceErrorFunctionT&lt; T &gt;" shape="rect" coords="0,0,321,24"/>
+<area href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html" title="Base class for error functions that penalize finite difference derivatives of joint positions across ..." alt="momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;" shape="rect" coords="0,56,340,80"/>
+<area href="classmomentum_1_1SequenceErrorFunctionT.html" alt="momentum::SequenceErrorFunctionT&lt; T &gt;" shape="rect" coords="0,0,340,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -119,16 +120,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4bf1fc5325c32724303ba74887623e92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9bc963403ad3da21a10d5c31df323dc" id="r_ae9bc963403ad3da21a10d5c31df323dc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#ae9bc963403ad3da21a10d5c31df323dc">AccelerationSequenceErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character)</td></tr>
 <tr class="separator:ae9bc963403ad3da21a10d5c31df323dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae581896175b58ea26ffd1d5dc3a598f4" id="r_ae581896175b58ea26ffd1d5dc3a598f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#ae581896175b58ea26ffd1d5dc3a598f4">numFrames</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
-<tr class="separator:ae581896175b58ea26ffd1d5dc3a598f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a5d81e981423dae90a369f53bc011b5" id="r_a4a5d81e981423dae90a369f53bc011b5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#a4a5d81e981423dae90a369f53bc011b5">getError</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshStates</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
-<tr class="separator:a4a5d81e981423dae90a369f53bc011b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc07600e00ced33b3ae4af25d851d4fe" id="r_acc07600e00ced33b3ae4af25d851d4fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#acc07600e00ced33b3ae4af25d851d4fe">getGradient</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshStates</a>, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
-<tr class="separator:acc07600e00ced33b3ae4af25d851d4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a447e6ac3b481d03ed4bb706e11525474" id="r_a447e6ac3b481d03ed4bb706e11525474"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#a447e6ac3b481d03ed4bb706e11525474">getJacobian</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshStates</a>, Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; residual, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &amp;usedRows) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
-<tr class="separator:a447e6ac3b481d03ed4bb706e11525474"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f9aba7ff49ca5dcccb748ecc5004adc" id="r_a0f9aba7ff49ca5dcccb748ecc5004adc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#a0f9aba7ff49ca5dcccb748ecc5004adc">getJacobianSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
-<tr class="separator:a0f9aba7ff49ca5dcccb748ecc5004adc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0409ff1b6a1188ffcf3a0ffca6829b2a" id="r_a0409ff1b6a1188ffcf3a0ffca6829b2a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#a0409ff1b6a1188ffcf3a0ffca6829b2a">setTargetWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;weights)</td></tr>
 <tr class="memdesc:a0409ff1b6a1188ffcf3a0ffca6829b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the per-joint weights for the acceleration error.  <br /></td></tr>
 <tr class="separator:a0409ff1b6a1188ffcf3a0ffca6829b2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,6 +136,39 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a91ae456d27cfaf8f8b1c048009c13d9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9f42ab77e13de6a8565c415679f309d" id="r_af9f42ab77e13de6a8565c415679f309d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html#af9f42ab77e13de6a8565c415679f309d">getTargetAccelerations</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:af9f42ab77e13de6a8565c415679f309d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;</a></td></tr>
+<tr class="memitem:a72ab8b09c6c147850796abf51eca9224 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a72ab8b09c6c147850796abf51eca9224"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a72ab8b09c6c147850796abf51eca9224">FiniteDifferenceSequenceErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pt</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">stencilCoefficients</a>)</td></tr>
+<tr class="separator:a72ab8b09c6c147850796abf51eca9224 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89aa793e23a95540223ed365cbf11069 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a89aa793e23a95540223ed365cbf11069"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a89aa793e23a95540223ed365cbf11069">FiniteDifferenceSequenceErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">stencilCoefficients</a>)</td></tr>
+<tr class="separator:a89aa793e23a95540223ed365cbf11069 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adadbfb35711001ee0ab24867fe5d26d3 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_adadbfb35711001ee0ab24867fe5d26d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#adadbfb35711001ee0ab24867fe5d26d3">numFrames</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
+<tr class="separator:adadbfb35711001ee0ab24867fe5d26d3 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a083c30949462b210c7ffa3148bcefe2a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a083c30949462b210c7ffa3148bcefe2a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a083c30949462b210c7ffa3148bcefe2a">getError</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshStates</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
+<tr class="separator:a083c30949462b210c7ffa3148bcefe2a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bcfd8cfa6358275c41b90ddd4544b5f inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a1bcfd8cfa6358275c41b90ddd4544b5f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a1bcfd8cfa6358275c41b90ddd4544b5f">getGradient</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshStates</a>, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
+<tr class="separator:a1bcfd8cfa6358275c41b90ddd4544b5f inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3eed0f96e0035aa6ad22ae6bbae8bef3 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a3eed0f96e0035aa6ad22ae6bbae8bef3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a3eed0f96e0035aa6ad22ae6bbae8bef3">getJacobian</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">modelParameters</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skelStates</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshStates</a>, Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; jacobian, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; residual, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &amp;usedRows) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
+<tr class="separator:a3eed0f96e0035aa6ad22ae6bbae8bef3 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae348ffa03ad5936ac28eabca8d5c990 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_aae348ffa03ad5936ac28eabca8d5c990"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#aae348ffa03ad5936ac28eabca8d5c990">getJacobianSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
+<tr class="separator:aae348ffa03ad5936ac28eabca8d5c990 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a809f0b9d9409028a391813b4b070e0af inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a809f0b9d9409028a391813b4b070e0af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a809f0b9d9409028a391813b4b070e0af">setTargetWeights</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;weights)</td></tr>
+<tr class="memdesc:a809f0b9d9409028a391813b4b070e0af inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the per-joint weights for the derivative error.  <br /></td></tr>
+<tr class="separator:a809f0b9d9409028a391813b4b070e0af inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e294a5e07f06489d77009a7ae5caefb inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a1e294a5e07f06489d77009a7ae5caefb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a1e294a5e07f06489d77009a7ae5caefb">setTargetValue</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetValue</a>)</td></tr>
+<tr class="memdesc:a1e294a5e07f06489d77009a7ae5caefb inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a single target value applied to all joints.  <br /></td></tr>
+<tr class="separator:a1e294a5e07f06489d77009a7ae5caefb inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eea947dfad764906fb0655ca627c49a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a0eea947dfad764906fb0655ca627c49a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a0eea947dfad764906fb0655ca627c49a">setTargetValues</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetValues</a>)</td></tr>
+<tr class="memdesc:a0eea947dfad764906fb0655ca627c49a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set per-joint target values.  <br /></td></tr>
+<tr class="separator:a0eea947dfad764906fb0655ca627c49a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeccbda524db59f70e995d4d4eb5cd72e inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_aeccbda524db59f70e995d4d4eb5cd72e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#aeccbda524db59f70e995d4d4eb5cd72e">reset</a> ()</td></tr>
+<tr class="memdesc:aeccbda524db59f70e995d4d4eb5cd72e inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset weights to ones and target values to zero.  <br /></td></tr>
+<tr class="separator:aeccbda524db59f70e995d4d4eb5cd72e inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c2a36780fdb87589a276e14cefb1d30 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a0c2a36780fdb87589a276e14cefb1d30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a0c2a36780fdb87589a276e14cefb1d30">getTargetWeights</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a0c2a36780fdb87589a276e14cefb1d30 inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c1482acf2adf5eb706497568c8ee69a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a7c1482acf2adf5eb706497568c8ee69a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a7c1482acf2adf5eb706497568c8ee69a">getTargetValues</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a7c1482acf2adf5eb706497568c8ee69a inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d32e998cfc7fe9374d36a8b07c6daa inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" id="r_a36d32e998cfc7fe9374d36a8b07c6daa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#a36d32e998cfc7fe9374d36a8b07c6daa">getStencilCoefficients</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a36d32e998cfc7fe9374d36a8b07c6daa inherit pub_methods_classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmomentum_1_1SequenceErrorFunctionT')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html">momentum::SequenceErrorFunctionT&lt; T &gt;</a></td></tr>
 <tr class="memitem:af9063080bf28e049fadca4719edffac0 inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT" id="r_af9063080bf28e049fadca4719edffac0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#af9063080bf28e049fadca4719edffac0">SequenceErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pt</a>)</td></tr>
 <tr class="separator:af9063080bf28e049fadca4719edffac0 inherit pub_methods_classmomentum_1_1SequenceErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -181,8 +205,8 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::AccelerationSequenceErrorFunctionT&lt; T &gt;</div><p>Error function that penalizes the acceleration of joint positions across three consecutive frames using a standard finite difference stencil [-1, 2, -1]. </p>
-<p>The acceleration residual for each joint is computed as: accel = pos[t+1] - 2*pos[t] + pos[t-1] - targetAcceleration</p>
+class momentum::AccelerationSequenceErrorFunctionT&lt; T &gt;</div><p>Error function that penalizes the acceleration of joint positions across three consecutive frames using a standard finite difference stencil [1, -2, 1]. </p>
+<p>The acceleration residual for each joint is computed as: accel = pos[t-1] - 2*pos[t] + pos[t+1] - targetAcceleration</p>
 <p>This is useful for ballistic motion constraints where joints should follow a specific acceleration (e.g., gravity). By default, the target acceleration is zero, which penalizes any non-zero acceleration (smoothness constraint on velocity).</p>
 <p>Note: This error function only constrains position acceleration, not rotation acceleration, as rotation acceleration involves significantly more complex mathematics. </p>
 
@@ -216,7 +240,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00019">19</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00015">15</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -246,216 +270,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00028">28</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00021">21</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a4a5d81e981423dae90a369f53bc011b5" name="a4a5d81e981423dae90a369f53bc011b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a5d81e981423dae90a369f53bc011b5">&#9670;&#160;</a></span>getError()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getError </td>
-          <td>(</td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>modelParameters</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>skelStates</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>meshStates</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#aedfc179672387a76cb061046503e90a6">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00058">58</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
-
-</div>
-</div>
-<a id="acc07600e00ced33b3ae4af25d851d4fe" name="acc07600e00ced33b3ae4af25d851d4fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acc07600e00ced33b3ae4af25d851d4fe">&#9670;&#160;</a></span>getGradient()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getGradient </td>
-          <td>(</td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>modelParameters</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>skelStates</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>meshStates</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>gradient</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a9972394ecd936521e88c77e90b2d4557">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00091">91</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
-
-</div>
-</div>
-<a id="a447e6ac3b481d03ed4bb706e11525474" name="a447e6ac3b481d03ed4bb706e11525474"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a447e6ac3b481d03ed4bb706e11525474">&#9670;&#160;</a></span>getJacobian()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobian </td>
-          <td>(</td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>modelParameters</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>skelStates</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>meshStates</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>jacobian</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
-          <td class="paramname"><em>residual</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &amp;&#160;</td>
-          <td class="paramname"><em>usedRows</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a29c013b26da97f1da0781124b77b3da3">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00200">200</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
-
-</div>
-</div>
-<a id="a0f9aba7ff49ca5dcccb748ecc5004adc" name="a0f9aba7ff49ca5dcccb748ecc5004adc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f9aba7ff49ca5dcccb748ecc5004adc">&#9670;&#160;</a></span>getJacobianSize()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobianSize </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reimplemented from <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a706388309ded580a3bf9c1865fef7dbd">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00193">193</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
-
-</div>
-</div>
 <a id="af9f42ab77e13de6a8565c415679f309d" name="af9f42ab77e13de6a8565c415679f309d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af9f42ab77e13de6a8565c415679f309d">&#9670;&#160;</a></span>getTargetAccelerations()</h2>
 
@@ -481,7 +300,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00079">79</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00062">62</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="finite__difference__sequence__error__function_8h_source.html#l00087">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::getTargetValues()</a>.</p>
 
 </div>
 </div>
@@ -510,38 +331,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00075">75</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00058">58</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
 
-</div>
-</div>
-<a id="ae581896175b58ea26ffd1d5dc3a598f4" name="ae581896175b58ea26ffd1d5dc3a598f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae581896175b58ea26ffd1d5dc3a598f4">&#9670;&#160;</a></span>numFrames()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::numFrames </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">final</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implements <a class="el" href="classmomentum_1_1SequenceErrorFunctionT.html#a6ec59de34d9ebf076525851414fbb547">momentum::SequenceErrorFunctionT&lt; T &gt;</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00034">34</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
+<p class="reference">References <a class="el" href="finite__difference__sequence__error__function_8h_source.html#l00083">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::getTargetWeights()</a>.</p>
 
 </div>
 </div>
@@ -552,6 +344,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div class="memproto">
 <div class="memtemplate">
 template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::reset </td>
@@ -560,11 +355,18 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Reset weights to ones and target accelerations to zero. </p>
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00033">33</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00054">54</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00039">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::reset()</a>.</p>
 
 </div>
 </div>
@@ -575,6 +377,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div class="memproto">
 <div class="memtemplate">
 template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::setTargetAcceleration </td>
@@ -584,6 +389,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Set a single target acceleration applied to all joints. </p>
@@ -594,7 +404,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00045">45</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00043">43</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
+
+<p class="reference">References <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00051">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::setTargetValue()</a>.</p>
 
 </div>
 </div>
@@ -605,6 +417,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div class="memproto">
 <div class="memtemplate">
 template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::setTargetAccelerations </td>
@@ -614,6 +429,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Set per-joint target accelerations. </p>
@@ -624,9 +444,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00051">51</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00049">49</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+<p class="reference">References <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00057">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::setTargetValues()</a>.</p>
 
 </div>
 </div>
@@ -637,6 +457,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div class="memproto">
 <div class="memtemplate">
 template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">momentum::AccelerationSequenceErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::setTargetWeights </td>
@@ -646,6 +469,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Set the per-joint weights for the acceleration error. </p>
@@ -656,9 +484,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8cpp_source.html#l00039">39</a> of file <a class="el" href="acceleration__sequence__error__function_8cpp_source.html">acceleration_sequence_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="acceleration__sequence__error__function_8h_source.html#l00036">36</a> of file <a class="el" href="acceleration__sequence__error__function_8h_source.html">acceleration_sequence_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+<p class="reference">References <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00045">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::setTargetWeights()</a>.</p>
 
 </div>
 </div>
@@ -672,7 +500,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1AccelerationSequenceErrorFunctionT.html">AccelerationSequenceErrorFunctionT</a></li>
-    <li class="footer">Generated on Sun Jan 4 2026 19:45:59 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jan 5 2026 21:20:54 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

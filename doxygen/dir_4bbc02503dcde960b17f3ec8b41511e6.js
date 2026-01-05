@@ -2,7 +2,11 @@ var dir_4bbc02503dcde960b17f3ec8b41511e6 =
 [
     [ "acceleration_sequence_error_function.cpp", "acceleration__sequence__error__function_8cpp.html", null ],
     [ "acceleration_sequence_error_function.h", "acceleration__sequence__error__function_8h.html", "acceleration__sequence__error__function_8h" ],
+    [ "finite_difference_sequence_error_function.cpp", "finite__difference__sequence__error__function_8cpp.html", null ],
+    [ "finite_difference_sequence_error_function.h", "finite__difference__sequence__error__function_8h.html", "finite__difference__sequence__error__function_8h" ],
     [ "fwd.h", "character__sequence__solver_2fwd_8h.html", "character__sequence__solver_2fwd_8h" ],
+    [ "jerk_sequence_error_function.cpp", "jerk__sequence__error__function_8cpp.html", null ],
+    [ "jerk_sequence_error_function.h", "jerk__sequence__error__function_8h.html", "jerk__sequence__error__function_8h" ],
     [ "model_parameters_sequence_error_function.cpp", "model__parameters__sequence__error__function_8cpp.html", null ],
     [ "model_parameters_sequence_error_function.h", "model__parameters__sequence__error__function_8h.html", "model__parameters__sequence__error__function_8h" ],
     [ "multipose_solver.cpp", "multipose__solver_8cpp.html", null ],
