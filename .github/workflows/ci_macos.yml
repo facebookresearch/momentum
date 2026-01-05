@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   momentum:
-    # Disabled: C++ testing moved to Ubuntu (cheaper). macOS now runs pymomentum only.
+    # Disabled: C++ testing moved to Ubuntu (cheaper).
     if: false
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
@@ -71,7 +71,6 @@ jobs:
         run: ccache -s
 
   pymomentum:
-    # Enabled: Moved from Windows to macOS (shorter job on expensive platform)
     name: py-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:
