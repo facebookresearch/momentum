@@ -19,12 +19,12 @@ concurrency:
 
 jobs:
   momentum:
-    # Disabled: Too slow for CI (use sccache on local development)
+    # Disabled: C++ momentum fails on Windows with DLL issues (exit code 0xc0000135)
     if: false
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-win
     runs-on: windows-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         mode: [""]  # TODO: Add -dev model
     env:
@@ -64,11 +64,11 @@ jobs:
         run: sccache --show-stats
 
   pymomentum:
-    # Enabled: CPU-only for cost optimization (GPU disabled)
+    # Enabled: C++ momentum fails on Windows (DLL issues). Keep pymomentum for Windows coverage.
     name: py-${{ matrix.pixi_env }}-win
     runs-on: windows-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - pixi_env: "py312"

@@ -75,7 +75,7 @@ jobs:
     name: pypi-cpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [macos-14]
         python-version: ['3.12', '3.13']
@@ -157,7 +157,7 @@ jobs:
     name: pypi-gpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.12', '3.13']
