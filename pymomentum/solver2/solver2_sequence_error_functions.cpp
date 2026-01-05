@@ -9,6 +9,7 @@
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_sequence_solver/acceleration_sequence_error_function.h>
+#include <momentum/character_sequence_solver/jerk_sequence_error_function.h>
 #include <momentum/character_sequence_solver/model_parameters_sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/state_sequence_error_function.h>
@@ -103,6 +104,81 @@ from a target acceleration, which is useful for:
           "reset",
           &mm::AccelerationSequenceErrorFunction::reset,
           "Resets target weights to 1.0 and target accelerations to zero for all joints.");
+
+  py::class_<
+      mm::JerkSequenceErrorFunction,
+      mm::SequenceErrorFunction,
+      std::shared_ptr<mm::JerkSequenceErrorFunction>>(m, "JerkSequenceErrorFunction")
+      .def(
+          py::init<>([](const mm::Character& character,
+                        float weight,
+                        const std::optional<Eigen::VectorXf>& jointWeights,
+                        const std::optional<Eigen::Vector3f>& targetJerk) {
+            validateWeight(weight, "weight");
+            validateWeights(jointWeights, "joint_weights");
+
+            auto result = std::make_shared<mm::JerkSequenceErrorFunction>(character);
+            result->setWeight(weight);
+
+            const auto nJoints = character.skeleton.joints.size();
+            if (jointWeights.has_value()) {
+              if (static_cast<size_t>(jointWeights->size()) != nJoints) {
+                throw std::runtime_error(
+                    "Invalid joint_weights; expected " + std::to_string(nJoints) +
+                    " values but got " + std::to_string(jointWeights->size()));
+              }
+              result->setTargetWeights(jointWeights.value());
+            }
+
+            if (targetJerk.has_value()) {
+              result->setTargetJerk(targetJerk.value());
+            }
+
+            return result;
+          }),
+          R"(A sequence error function that penalizes jerk (third derivative) of joint positions.
+
+This error function uses a finite difference stencil [1, -3, 3, -1] over four consecutive
+frames to compute jerk: pos[t-1] - 3*pos[t] + 3*pos[t+1] - pos[t+2]. It penalizes deviations
+from a target jerk, which is useful for:
+- Smoothness: set target_jerk to (0, 0, 0) to penalize any jerk (smooth acceleration changes)
+- Natural motion: minimizing jerk produces more natural-looking motion
+- Physics-based animation: controlling the rate of acceleration change
+
+:param character: The character to use.
+:param weight: The weight of the error function. Defaults to 1.0.
+:param joint_weights: Per-joint weights for the jerk penalty. Defaults to all 1s.
+:param target_jerk: The target jerk for all joints. Defaults to (0, 0, 0).)",
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f,
+          py::arg("joint_weights") = std::optional<Eigen::VectorXf>{},
+          py::arg("target_jerk") = std::optional<Eigen::Vector3f>{})
+      .def(
+          "set_target_jerk",
+          &mm::JerkSequenceErrorFunction::setTargetJerk,
+          R"(Sets the target jerk for all joints.
+
+:param jerk: The target jerk vector (applied to all joints).)",
+          py::arg("jerk"))
+      .def(
+          "set_target_jerks",
+          &mm::JerkSequenceErrorFunction::setTargetJerks,
+          R"(Sets per-joint target jerks.
+
+:param jerks: A list of 3D jerk vectors, one per joint.)",
+          py::arg("jerks"))
+      .def(
+          "set_target_weights",
+          &mm::JerkSequenceErrorFunction::setTargetWeights,
+          R"(Sets per-joint weights for the jerk penalty.
+
+:param weights: A vector of weights, one per joint.)",
+          py::arg("weights"))
+      .def(
+          "reset",
+          &mm::JerkSequenceErrorFunction::reset,
+          "Resets target weights to 1.0 and target jerks to zero for all joints.");
 
   py::class_<
       mm::StateSequenceErrorFunction,
