@@ -22,7 +22,7 @@ jobs:
     name: cpp${{ matrix.simd == 'ON' && '-simd' || '' }}-${{ matrix.mode == '' && 'opt' || 'dev' }}-ubuntu
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         simd: ["ON"]  # Only test SIMD=ON (production config) to reduce CI cost
         mode: [""]
@@ -63,7 +63,7 @@ jobs:
     name: py-${{ matrix.pixi_env }}-ubuntu
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - pixi_env: "py312"

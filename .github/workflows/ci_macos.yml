@@ -19,11 +19,12 @@ concurrency:
 
 jobs:
   momentum:
-    # Enabled for minimal macOS platform coverage
+    # Disabled: C++ testing moved to Ubuntu (cheaper).
+    if: false
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [macos-latest]
         mode: [""]
@@ -70,16 +71,24 @@ jobs:
         run: ccache -s
 
   pymomentum:
-    if: false # Disabled: Redundant with Windows, macOS is most expensive
     name: py-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [macos-latest]
+    env:
+      # Enable ccache for C++ compilation caching
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.workflow }}-${{ matrix.os }}-pymomentum
 
       - name: Install FBX SDK
         run: |
@@ -91,6 +100,7 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.9.3
         with:
           cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Build and test PyMomentum
         run: |
@@ -101,3 +111,6 @@ jobs:
         run: |
           MOMENTUM_BUILD_WITH_FBXSDK=ON \
             pixi run doc_py
+
+      - name: Print ccache stats
+        run: ccache -s

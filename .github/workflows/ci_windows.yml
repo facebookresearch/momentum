@@ -24,7 +24,7 @@ jobs:
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-win
     runs-on: windows-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         mode: [""]  # TODO: Add -dev model
     env:
@@ -68,7 +68,7 @@ jobs:
     name: py-${{ matrix.pixi_env }}-win
     runs-on: windows-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - pixi_env: "py312"
