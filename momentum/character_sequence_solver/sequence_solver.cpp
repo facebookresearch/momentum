@@ -177,8 +177,8 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computeSequenc
     int rows = 0;
     errorCur += errf->getJacobian(
         std::span(fn->frameParameters_).subspan(iFrame, nFrames),
-        skelStates,
-        meshStates,
+        skelStates.subspan(0, nFrames),
+        meshStates.subspan(0, nFrames),
         jacobian.block(offset, 0, n, nFrames * nFullParameters),
         residual.middleRows(offset, n),
         rows);

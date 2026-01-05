@@ -7,11 +7,13 @@
 
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character_sequence_solver/acceleration_sequence_error_function.h"
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
 #include "momentum/character_sequence_solver/multipose_solver.h"
 #include "momentum/character_sequence_solver/multipose_solver_function.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
+#include "momentum/character_sequence_solver/state_sequence_error_function.h"
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
 #include "momentum/character_solver/limit_error_function.h"
 #include "momentum/character_solver/model_parameters_error_function.h"
@@ -308,6 +310,66 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
   // Multipose solver should do at least as well as Gauss-Newton.
   EXPECT_NEAR(err_single, err_multi, Eps<T>(1e-7f, 1e-15));
   EXPECT_LE(err_single, err_gn + Eps<T>(5e-7f, 1e-14));
+}
+
+TYPED_TEST(SequenceSolverTest, MixedFrameCountErrorFunctions) {
+  using T = typename TestFixture::Type;
+
+  // Test combining error functions with different frame counts.
+  // StateSequenceErrorFunction uses 2 frames, AccelerationSequenceErrorFunction uses 3 frames.
+  // This tests that the solver correctly passes the right number of frames to each error function.
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet enabledParams;
+  enabledParams.set();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  // Need at least 4 frames to have both:
+  // - StateSequenceErrorFunction at frames 0,1,2 (2-frame windows)
+  // - AccelerationSequenceErrorFunction at frames 0,1 (3-frame windows)
+  const size_t nFrames = 5;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  SequenceSolverFunctionT<T> sequenceSolverFunction(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+
+  // Add per-frame position errors
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    sequenceSolverFunction.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+    sequenceSolverFunction.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+  }
+
+  // Add 2-frame sequence error function (StateSequenceErrorFunction)
+  auto stateError = std::make_shared<StateSequenceErrorFunctionT<T>>(character);
+  for (size_t iFrame = 0; iFrame < (nFrames - 1); ++iFrame) {
+    sequenceSolverFunction.addSequenceErrorFunction(iFrame, stateError);
+  }
+
+  // Add 3-frame sequence error function (AccelerationSequenceErrorFunction)
+  // This is the key part of the test: mixing 2-frame and 3-frame error functions
+  auto accelerationError = std::make_shared<AccelerationSequenceErrorFunctionT<T>>(character);
+  for (size_t iFrame = 0; iFrame < (nFrames - 2); ++iFrame) {
+    sequenceSolverFunction.addSequenceErrorFunction(iFrame, accelerationError);
+  }
+
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunction.getJoinedParameterVector();
+
+  // This should not crash - the bug was that passing a 3-frame skelStates span to a 2-frame
+  // error function would fail the MT_CHECK(skelStates.size() == 2) assertion.
+  SequenceSolverT<T> solver_sq(test::defaultSolverOptions(), &sequenceSolverFunction);
+  const T err_sq = test::checkAndTimeSolver<T>(sequenceSolverFunction, solver_sq, parametersInit);
+
+  // Also test with GaussNewton to verify correctness
+  GaussNewtonSolverT<T> solver_gn(test::defaultSolverOptions(), &sequenceSolverFunction);
+  const T err_gn = test::checkAndTimeSolver<T>(sequenceSolverFunction, solver_gn, parametersInit);
+
+  // SequenceSolver should do at least as well as Gauss-Newton.
+  EXPECT_LE(err_sq, (T(1.001) * err_gn + T(0.001)));
 }
 
 TYPED_TEST(SequenceSolverTest, OnlySharedParams) {
