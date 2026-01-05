@@ -5,27 +5,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character_sequence_solver/acceleration_sequence_error_function.h"
+#include "momentum/character_sequence_solver/jerk_sequence_error_function.h"
 
 #include "momentum/character/character.h"
 
 namespace momentum {
 
 template <typename T>
-AccelerationSequenceErrorFunctionT<T>::AccelerationSequenceErrorFunctionT(
+JerkSequenceErrorFunctionT<T>::JerkSequenceErrorFunctionT(
     const Skeleton& skel,
     const ParameterTransform& pt)
-    : FiniteDifferenceSequenceErrorFunctionT<T>(skel, pt, {T(1), T(-2), T(1)}) {}
+    : FiniteDifferenceSequenceErrorFunctionT<T>(skel, pt, {T(1), T(-3), T(3), T(-1)}) {}
 
 template <typename T>
-AccelerationSequenceErrorFunctionT<T>::AccelerationSequenceErrorFunctionT(
-    const Character& character)
+JerkSequenceErrorFunctionT<T>::JerkSequenceErrorFunctionT(const Character& character)
     : FiniteDifferenceSequenceErrorFunctionT<T>(
           character.skeleton,
           character.parameterTransform,
-          {T(1), T(-2), T(1)}) {}
+          {T(1), T(-3), T(3), T(-1)}) {}
 
-template class AccelerationSequenceErrorFunctionT<float>;
-template class AccelerationSequenceErrorFunctionT<double>;
+template class JerkSequenceErrorFunctionT<float>;
+template class JerkSequenceErrorFunctionT<double>;
 
 } // namespace momentum
