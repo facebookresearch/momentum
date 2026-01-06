@@ -9,6 +9,7 @@
 
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
+#include "momentum/character/linear_skinning.h"
 #include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_limits.h"
 #include "momentum/character/skeleton_state.h"
@@ -1211,6 +1212,8 @@ MatrixXf refineMotion(
 /// locator positions on the character. It provides both average error per frame
 /// and the maximum error encountered across all markers and frames.
 ///
+/// This function supports both regular locators and skinned locators.
+///
 /// @param markerData Marker observations for each frame
 /// @param motion Solved motion parameters matrix (parameters x frames)
 /// @param character Character model with locators
@@ -1235,6 +1238,12 @@ std::pair<float, float> getLocatorError(
     locatorLookup[character.locators[i].name] = i;
   }
 
+  // map skinned locator name to its index
+  std::unordered_map<std::string, size_t> skinnedLocatorLookup;
+  for (size_t i = 0; i < character.skinnedLocators.size(); i++) {
+    skinnedLocatorLookup[character.skinnedLocators[i].name] = i;
+  }
+
   SkeletonState state;
 
   // go over all frames and pose the locators and compute the error
@@ -1254,20 +1263,39 @@ std::pair<float, float> getLocatorError(
       if (jMarker.occluded) {
         continue;
       }
+
+      std::optional<Vector3f> locatorPos;
+
+      // First try regular locators
       auto query = locatorLookup.find(jMarker.name);
-      if (query == locatorLookup.end()) {
+      if (query != locatorLookup.end()) {
+        size_t locatorIdx = query->second;
+        if (locatorIdx < character.locators.size()) {
+          const auto& locator = character.locators[locatorIdx];
+          if (locator.parent < state.jointState.size()) {
+            locatorPos = state.jointState[locator.parent].transform * locator.offset;
+          }
+        }
+      }
+
+      // If not found, try skinned locators
+      if (!locatorPos.has_value()) {
+        auto skinnedQuery = skinnedLocatorLookup.find(jMarker.name);
+        if (skinnedQuery != skinnedLocatorLookup.end()) {
+          size_t locatorIdx = skinnedQuery->second;
+          if (locatorIdx < character.skinnedLocators.size()) {
+            const auto& skinnedLocator = character.skinnedLocators[locatorIdx];
+            locatorPos = getSkinnedLocatorPosition(
+                skinnedLocator, skinnedLocator.position, character.inverseBindPose, state);
+          }
+        }
+      }
+
+      if (!locatorPos.has_value()) {
         continue;
       }
-      size_t locatorIdx = query->second;
-      if (locatorIdx >= character.locators.size()) {
-        continue;
-      }
-      const auto& locator = character.locators[locatorIdx];
-      if (locator.parent >= state.jointState.size()) {
-        continue;
-      }
-      const Vector3f locatorPos = state.jointState[locator.parent].transform * locator.offset;
-      const Vector3f diff = locatorPos - jMarker.pos.cast<float>();
+
+      const Vector3f diff = *locatorPos - jMarker.pos.cast<float>();
       const float markerError = diff.norm();
       frameError += markerError;
       if (markerError > maxError) {
