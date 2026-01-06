@@ -581,6 +581,148 @@ class TestMarkerTracking(unittest.TestCase):
             msg="Larger max_distance should convert at least as many locators",
         )
 
+    def test_get_locator_error_with_skinned_locators(self) -> None:
+        """Test get_locator_error computes similar errors for regular and skinned locators."""
+        torch.manual_seed(42)
+
+        # Create a test character with mesh and skin weights
+        character = pym_geometry.create_test_character(num_joints=5)
+        self.assertIsNotNone(character.mesh)
+        self.assertIsNotNone(character.skin_weights)
+
+        # Get mesh vertices and their skinning data
+        n_vertices = character.mesh.vertices.shape[0]
+        if n_vertices == 0:
+            self.skipTest("Test character has no mesh vertices")
+            return
+
+        # Create regular locators positioned near mesh vertices
+        mesh_vertex_idx = 22  # Pick an arbitrary vertex
+        mesh_vertex_position = character.mesh.vertices[mesh_vertex_idx]
+
+        rest_model_params = torch.zeros(character.parameter_transform.size)
+        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, rest_model_params.unsqueeze(0)
+        )[0]
+        parent_joint_idx = character.skin_weights.index[mesh_vertex_idx][0]
+
+        # Create a locator positioned at the mesh vertex
+        test_locator = pym_geometry.Locator(
+            name="test_locator",
+            parent=parent_joint_idx,
+            offset=pym_skel_state.transform_points(
+                pym_skel_state.inverse(rest_skeleton_state[parent_joint_idx]),
+                torch.from_numpy(mesh_vertex_position),
+            ).numpy(),
+            attached_to_skin=True,
+        )
+
+        # Create character with regular locator
+        character_with_locator = character.with_locators([test_locator], replace=True)
+
+        # Convert to skinned locator
+        character_with_skinned = (
+            pym_marker_tracking.convert_locators_to_skinned_locators(
+                character_with_locator, max_distance=3.0
+            )
+        )
+
+        # Verify conversion happened
+        self.assertEqual(len(character_with_skinned.skinned_locators), 1)
+        self.assertEqual(
+            character_with_skinned.skinned_locators[0].name, "test_locator"
+        )
+
+        # Generate a short motion sequence
+        num_frames = 3
+        scaling_params = character.parameter_transform.scaling_parameters
+        model_params_cur = torch.zeros(character.parameter_transform.size)
+        identity_params = torch.where(
+            scaling_params, model_params_cur, torch.zeros_like(model_params_cur)
+        )
+
+        model_params_batch = torch.zeros(num_frames, character.parameter_transform.size)
+        for frame in range(num_frames):
+            model_params_cur = torch.where(
+                scaling_params,
+                identity_params,
+                model_params_cur + 0.3 * torch.rand(character.parameter_transform.size),
+            )
+            model_params_batch[frame, :] = model_params_cur
+
+        # Compute locator positions for the regular locator
+        locator_parents = torch.tensor([test_locator.parent])
+        locator_offsets = torch.from_numpy(test_locator.offset).unsqueeze(0)
+        regular_positions = pym_geometry.model_parameters_to_positions(
+            character_with_locator,
+            model_params_batch,
+            locator_parents,
+            locator_offsets,
+        )  # Shape: [num_frames, 1, 3]
+
+        # Add a known offset to create markers with measurable error (>2cm).
+        # This ensures we're testing that skinned locators actually compute
+        # meaningful positions rather than just returning zeros.
+        marker_offset = np.array([0.03, 0.0, 0.0], dtype=np.float32)  # 3cm offset
+
+        # Create marker data using regular locator positions + offset
+        marker_data = []
+        for frame_idx in range(num_frames):
+            marker = pym_geometry.Marker(
+                "test_locator",
+                regular_positions[frame_idx, 0].numpy() + marker_offset,
+                False,
+            )
+            marker_data.append([marker])
+
+        # Compute error with regular locator character
+        avg_error_regular, max_error_regular = pym_marker_tracking.get_locator_error(
+            marker_data, model_params_batch.numpy(), character_with_locator
+        )
+
+        # Compute error with skinned locator character
+        avg_error_skinned, max_error_skinned = pym_marker_tracking.get_locator_error(
+            marker_data, model_params_batch.numpy(), character_with_skinned
+        )
+
+        # Regular locator error should be approximately the offset magnitude (3cm)
+        expected_error = np.linalg.norm(marker_offset)
+        self.assertGreater(
+            avg_error_regular,
+            0.02,  # At least 2cm error
+            f"Regular locator avg error {avg_error_regular} should be significant (>2cm)",
+        )
+        self.assertLess(
+            abs(avg_error_regular - expected_error),
+            0.01,  # Should be close to 3cm
+            f"Regular locator error {avg_error_regular} should be close to expected {expected_error}",
+        )
+
+        # The skinned locator error should also be close to the expected error.
+        # This verifies that skinned locators are computing actual positions
+        # (if they returned zeros, the error would be much larger than 3cm).
+        self.assertGreater(
+            avg_error_skinned,
+            0.02,  # At least 2cm error (proves we're not just returning zeros)
+            f"Skinned locator avg error {avg_error_skinned} should be significant (>2cm)",
+        )
+        self.assertLess(
+            avg_error_skinned,
+            0.15,  # Allow tolerance for skinning differences, but not too large
+            f"Skinned locator avg error {avg_error_skinned} should be reasonably bounded",
+        )
+
+        # The errors should be similar (within a reasonable tolerance).
+        # This is the key test: if skinned locators returned zeros, their error
+        # would be much larger than the regular locator error.
+        error_diff = abs(avg_error_regular - avg_error_skinned)
+        self.assertLess(
+            error_diff,
+            0.1,
+            f"Error difference {error_diff} between regular ({avg_error_regular}) "
+            f"and skinned ({avg_error_skinned}) should be small",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
