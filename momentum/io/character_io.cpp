@@ -52,11 +52,12 @@ namespace {
 
 [[nodiscard]] std::optional<Character> loadCharacterByFormat(
     const CharacterFormat format,
-    const filesystem::path& filepath) {
+    const filesystem::path& filepath,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No) {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(filepath);
   } else if (format == CharacterFormat::Fbx) {
-    return loadFbxCharacter(filepath, KeepLocators::Yes);
+    return loadFbxCharacter(filepath, KeepLocators::Yes, Permissive::No, loadBlendShapes);
   } else if (format == CharacterFormat::Usd) {
 #ifdef MOMENTUM_IO_WITH_USD
     return loadUsdCharacter(filepath);
@@ -70,11 +71,12 @@ namespace {
 
 [[nodiscard]] std::optional<Character> loadCharacterByFormatFromBuffer(
     const CharacterFormat format,
-    const std::span<const std::byte> fileBuffer) {
+    const std::span<const std::byte> fileBuffer,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No) {
   if (format == CharacterFormat::Gltf) {
     return loadGltfCharacter(fileBuffer);
   } else if (format == CharacterFormat::Fbx) {
-    return loadFbxCharacter(fileBuffer, KeepLocators::Yes);
+    return loadFbxCharacter(fileBuffer, KeepLocators::Yes, Permissive::No, loadBlendShapes);
   } else if (format == CharacterFormat::Usd) {
 #ifdef MOMENTUM_IO_WITH_USD
     return loadUsdCharacter(fileBuffer);
@@ -91,14 +93,15 @@ namespace {
 Character loadFullCharacter(
     const std::string& characterPath,
     const std::string& parametersPath,
-    const std::string& locatorsPath) {
+    const std::string& locatorsPath,
+    LoadBlendShapes loadBlendShapes) {
   // Parse format
   const auto format = parseCharacterFormat(characterPath);
   MT_THROW_IF(
       format == CharacterFormat::Unknown, "Unknown character format for path: {}", characterPath);
 
   // Load character
-  auto character = loadCharacterByFormat(format, characterPath);
+  auto character = loadCharacterByFormat(format, characterPath, loadBlendShapes);
   MT_THROW_IF(!character, "Failed to load buffered character");
 
   // load parameter transform
@@ -120,9 +123,10 @@ Character loadFullCharacterFromBuffer(
     CharacterFormat format,
     const std::span<const std::byte> characterBuffer,
     const std::span<const std::byte> paramBuffer,
-    const std::span<const std::byte> locBuffer) {
+    const std::span<const std::byte> locBuffer,
+    LoadBlendShapes loadBlendShapes) {
   // Load character
-  auto character = loadCharacterByFormatFromBuffer(format, characterBuffer);
+  auto character = loadCharacterByFormatFromBuffer(format, characterBuffer, loadBlendShapes);
   MT_THROW_IF(!character, "Failed to load buffered character");
 
   // load parameter transform

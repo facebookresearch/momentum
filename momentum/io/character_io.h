@@ -10,6 +10,7 @@
 #include <momentum/character/fwd.h>
 #include <momentum/character/marker.h>
 #include <momentum/common/filesystem.h>
+#include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/file_save_options.h>
 #include <momentum/math/fwd.h>
 #include <momentum/math/types.h>
@@ -34,6 +35,7 @@ enum class CharacterFormat : uint8_t {
 /// character.
 /// @param[in] locatorsPath The optional path to the file containing additional locators for the
 /// character.
+/// @param[in] loadBlendShapes Whether to load blendshapes from the file (default: No).
 /// @return The loaded Character object.
 ///
 /// Currently, only supports .glb and .fbx. If you want to parse from a non-local path, you may need
@@ -42,7 +44,8 @@ enum class CharacterFormat : uint8_t {
 [[nodiscard]] Character loadFullCharacter(
     const std::string& characterPath,
     const std::string& parametersPath = std::string(),
-    const std::string& locatorsPath = std::string());
+    const std::string& locatorsPath = std::string(),
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
 
 /// Buffer version of loadFullCharacter function, supports .glb and .fbx file formats.
 ///
@@ -50,12 +53,14 @@ enum class CharacterFormat : uint8_t {
 /// @param[in] characterBuffer The buffer containing the character data.
 /// @param[in] paramBuffer The optional buffer containing additional parameters for the character.
 /// @param[in] locBuffer The optional buffer containing additional locators for the character.
+/// @param[in] loadBlendShapes Whether to load blendshapes from the file (default: No).
 /// @return The loaded Character object.
 [[nodiscard]] Character loadFullCharacterFromBuffer(
     CharacterFormat format,
     std::span<const std::byte> characterBuffer,
     std::span<const std::byte> paramBuffer = std::span<const std::byte>(),
-    std::span<const std::byte> locBuffer = std::span<const std::byte>());
+    std::span<const std::byte> locBuffer = std::span<const std::byte>(),
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No);
 
 /// High level function to save a character with motion and markers to any supported format.
 ///
