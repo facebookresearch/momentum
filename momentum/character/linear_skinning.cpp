@@ -359,4 +359,57 @@ template void applySSD<double>(
     const JointStateListT<double>& jointState,
     MeshT<double>& outputMesh);
 
+template <typename T>
+Vector3<T> getSkinnedLocatorPosition(
+    const SkinnedLocator& locator,
+    const Vector3<T>& restPosition,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<T>& state) {
+  Vector3<T> worldPos = Vector3<T>::Zero();
+  T weightSum = 0;
+  for (int k = 0; k < locator.skinWeights.size(); ++k) {
+    const auto weight = static_cast<T>(locator.skinWeights[k]);
+    if (weight == 0) {
+      break;
+    }
+    const auto boneIndex = locator.parents[k];
+    const auto& jointState = state.jointState[boneIndex];
+
+    worldPos +=
+        weight * (jointState.transform * (inverseBindPose[boneIndex].cast<T>() * restPosition));
+    weightSum += weight;
+  }
+
+  return worldPos / weightSum;
+}
+
+template Vector3<float> getSkinnedLocatorPosition<float>(
+    const SkinnedLocator& locator,
+    const Vector3<float>& restPosition,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<float>& state);
+template Vector3<double> getSkinnedLocatorPosition<double>(
+    const SkinnedLocator& locator,
+    const Vector3<double>& restPosition,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<double>& state);
+
+template <typename T>
+Vector3<T> getSkinnedLocatorPosition(
+    const SkinnedLocator& locator,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<T>& state) {
+  const Vector3<T> restPosition = locator.position.template cast<T>();
+  return getSkinnedLocatorPosition(locator, restPosition, inverseBindPose, state);
+}
+
+template Vector3<float> getSkinnedLocatorPosition<float>(
+    const SkinnedLocator& locator,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<float>& state);
+template Vector3<double> getSkinnedLocatorPosition<double>(
+    const SkinnedLocator& locator,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<double>& state);
+
 } // namespace momentum

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <momentum/character/fwd.h>
+#include <momentum/character/skinned_locator.h>
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
 #include <momentum/math/types.h>
@@ -135,5 +136,38 @@ void applyInverseSSD(
     std::span<const Vector3f> points,
     const SkeletonState& state,
     Mesh& mesh);
+
+/// Computes the world position of a skinned locator using linear blend skinning
+///
+/// This function applies linear blend skinning to transform a locator's rest position
+/// to its world position based on the current skeleton state. The position is computed
+/// by blending the transforms from each parent joint weighted by the corresponding
+/// skin weights.
+///
+/// @param locator The skinned locator containing parent joints and weights
+/// @param restPosition The locator's position in rest pose (bind pose)
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param state Current skeleton state containing joint transformations
+/// @return The locator's world position
+template <typename T>
+Vector3<T> getSkinnedLocatorPosition(
+    const SkinnedLocator& locator,
+    const Vector3<T>& restPosition,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<T>& state);
+
+/// Computes the world position of a skinned locator using linear blend skinning
+///
+/// Convenience overload that uses the locator's stored rest position.
+///
+/// @param locator The skinned locator containing parent joints, weights, and rest position
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param state Current skeleton state containing joint transformations
+/// @return The locator's world position
+template <typename T>
+Vector3<T> getSkinnedLocatorPosition(
+    const SkinnedLocator& locator,
+    const TransformationList& inverseBindPose,
+    const SkeletonStateT<T>& state);
 
 } // namespace momentum

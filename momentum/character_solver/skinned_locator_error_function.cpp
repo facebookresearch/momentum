@@ -78,21 +78,7 @@ Eigen::Vector3<T> SkinnedLocatorErrorFunctionT<T>::calculateSkinnedLocatorPositi
   MT_CHECK(locatorIndex >= 0 && locatorIndex < static_cast<int>(character_.skinnedLocators.size()));
   const auto& locator = character_.skinnedLocators[locatorIndex];
 
-  Eigen::Vector3<T> worldPos = Eigen::Vector3<T>::Zero();
-  T weightSum = 0;
-  for (int k = 0; k < locator.skinWeights.size(); ++k) {
-    const auto& weight = locator.skinWeights[k];
-    const auto boneIndex = locator.parents[k];
-    const auto& jointState = state.jointState[boneIndex];
-
-    worldPos += weight *
-        (jointState.transform *
-         (character_.inverseBindPose[boneIndex].template cast<T>() * locatorRestPos))
-            .template cast<T>();
-    weightSum += weight;
-  }
-
-  return worldPos / weightSum;
+  return getSkinnedLocatorPosition(locator, locatorRestPos, character_.inverseBindPose, state);
 }
 
 template <typename T>

@@ -37,10 +37,10 @@ struct SkinnedLocator {
   Eigen::Matrix<float, kMaxSkinJoints, 1> skinWeights;
 
   /// Position relative to rest pose of the character
-  Vector3f position;
+  Vector3f position = Vector3f::Zero();
 
   /// Influence weight of this locator when used in constraints
-  float weight;
+  float weight = 1.0f;
 
   /// Creates a locator with the specified properties
   ///
