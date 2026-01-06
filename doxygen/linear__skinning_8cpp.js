@@ -11,5 +11,11 @@ var linear__skinning_8cpp =
     [ "applySSD< float >", "linear__skinning_8cpp.html#afb78fb2727eda7b1c81ac90884384905", null ],
     [ "applySSD< float >", "linear__skinning_8cpp.html#ad00a9db8c9ec14020c07a435d625297b", null ],
     [ "applySSD< float >", "linear__skinning_8cpp.html#a8d2d2b7b9f5344c0e7f4381ae8899d22", null ],
-    [ "getInverseSSDTransformation", "linear__skinning_8cpp.html#a1c046a30172ce87a331d2008c989f42c", null ]
+    [ "getInverseSSDTransformation", "linear__skinning_8cpp.html#a1c046a30172ce87a331d2008c989f42c", null ],
+    [ "getSkinnedLocatorPosition", "linear__skinning_8cpp.html#ae04ea479567822296bffe2050b56402d", null ],
+    [ "getSkinnedLocatorPosition", "linear__skinning_8cpp.html#a5afe4f93d39b18dd26a348a9b5cf2cf5", null ],
+    [ "getSkinnedLocatorPosition< double >", "linear__skinning_8cpp.html#a067a42dadd71b957d59d21c052b52ee2", null ],
+    [ "getSkinnedLocatorPosition< double >", "linear__skinning_8cpp.html#a4421e1e37903cac723e8160cf7255977", null ],
+    [ "getSkinnedLocatorPosition< float >", "linear__skinning_8cpp.html#a79da04c44f986980fb7e23d27c011190", null ],
+    [ "getSkinnedLocatorPosition< float >", "linear__skinning_8cpp.html#a1cee18ed215c42c3a811adc03ec96da1", null ]
 ];
