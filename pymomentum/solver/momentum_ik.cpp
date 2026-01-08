@@ -778,8 +778,8 @@ class IKSolveFunction {
     MT_THROW_IF(
         results.size() != 1 || dLoss_dResults.size() != 1,
         "Mismatch in length of results list in IKSolveFunction::backward.");
-    const at::Tensor modelParams_final = results[0];
-    const at::Tensor dLoss_dModelParams = dLoss_dResults[0];
+    const at::Tensor& modelParams_final = results[0];
+    const at::Tensor& dLoss_dModelParams = dLoss_dResults[0];
 
     auto [grad_errorFunctionWeights, grad_inputs] = d_solveTensorIKProblem<T>(
         characters,
@@ -834,7 +834,7 @@ class GradientFunction {
         results.size() != 1 || dLoss_dResults.size() != 1,
         "Mismatch in length of results list in IKSolveFunction::backward.")
 
-    const at::Tensor dLoss_dGradient = dLoss_dResults[0];
+    const at::Tensor& dLoss_dGradient = dLoss_dResults[0];
     return d_computeGradient<T>(
         characters,
         modelParams_init,
@@ -883,8 +883,8 @@ class ResidualFunction {
       at::Tensor errorFunctionWeights,
       size_t numActiveErrorFunctions,
       const std::vector<int>& weightsMap) {
-    at::Tensor grad_resid = dLoss_dResults[0];
-    at::Tensor jacobian = results[1];
+    const at::Tensor& grad_resid = dLoss_dResults[0];
+    const at::Tensor& jacobian = results[1];
 
     // Conveniently, the derivative of the residual wrt the model parameters is
     // just the Jacobian. J = ([nBatch] x m x nParam) grad_resid = ([nBatch] x m
