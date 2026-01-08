@@ -93,8 +93,8 @@ const momentum::Character& anyCharacter(PyObject* obj, const char* context) {
 
 nlohmann::json from_msgpack(const pybind11::bytes& bytes) {
   py::buffer_info info(py::buffer(bytes).request());
-  const uint8_t* data = reinterpret_cast<const uint8_t*>(info.ptr);
-  const size_t length = static_cast<size_t>(info.size);
+  const auto* data = reinterpret_cast<const uint8_t*>(info.ptr);
+  const auto length = static_cast<size_t>(info.size);
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.")
 
@@ -116,7 +116,7 @@ PyBytesStreamBuffer::PyBytesStreamBuffer(const pybind11::bytes& bytes) {
   // C++ does not distinguish between const and non-const streambufs, but we
   // promise to only use this with std::istreams.
   char* data = const_cast<char*>(reinterpret_cast<const char*>(info.ptr));
-  const size_t length = static_cast<size_t>(info.size);
+  const auto length = static_cast<size_t>(info.size);
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.")
 
