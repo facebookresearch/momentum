@@ -12,8 +12,8 @@
 
 namespace momentum {
 
-/// Extended options specific to the Gauss-Newton optimization algorithm
-struct GaussNewtonSolverOptions : SolverOptions {
+/// Base options shared by all Gauss-Newton solver variants
+struct GaussNewtonSolverBaseOptions : SolverOptions {
   /// Damping parameter added to Hessian diagonal for numerical stability; see
   /// https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
   ///
@@ -23,6 +23,16 @@ struct GaussNewtonSolverOptions : SolverOptions {
   /// Enables backtracking line search to ensure error reduction at each step
   bool doLineSearch = false;
 
+  /// Default constructor
+  GaussNewtonSolverBaseOptions() = default;
+
+  /// Construct from base solver options while preserving Gauss-Newton defaults
+  /* implicit */ GaussNewtonSolverBaseOptions(const SolverOptions& baseOptions)
+      : SolverOptions(baseOptions) {}
+};
+
+/// Extended options specific to the Gauss-Newton optimization algorithm
+struct GaussNewtonSolverOptions : GaussNewtonSolverBaseOptions {
   /// Uses pre-computed JᵀJ and JᵀR from the solver function
   ///
   /// Can improve performance for problems with specialized structure
@@ -43,7 +53,7 @@ struct GaussNewtonSolverOptions : SolverOptions {
 
   /// Construct from base solver options while preserving Gauss-Newton defaults
   /* implicit */ GaussNewtonSolverOptions(const SolverOptions& baseOptions)
-      : SolverOptions(baseOptions) {}
+      : GaussNewtonSolverBaseOptions(baseOptions) {}
 };
 
 /// Implementation of the Gauss-Newton optimization algorithm

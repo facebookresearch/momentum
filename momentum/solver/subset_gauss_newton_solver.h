@@ -8,7 +8,7 @@
 #pragma once
 
 #include <momentum/solver/fwd.h>
-#include <momentum/solver/solver.h>
+#include <momentum/solver/gauss_newton_solver.h>
 
 namespace momentum {
 
@@ -16,22 +16,13 @@ namespace momentum {
 ///
 /// Provides configuration specific to the subset-based Gauss-Newton solver
 /// that optimizes only a selected subset of parameters
-struct SubsetGaussNewtonSolverOptions : SolverOptions {
-  /// Damping parameter added to Hessian diagonal for numerical stability; see
-  /// https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
-  ///
-  /// Higher values improve stability but may slow convergence
-  float regularization = 0.05f;
-
-  /// Enables backtracking line search to ensure error reduction at each step
-  bool doLineSearch = false;
-
+struct SubsetGaussNewtonSolverOptions : GaussNewtonSolverBaseOptions {
   /// Default constructor
   SubsetGaussNewtonSolverOptions() = default;
 
   /// Construct from base solver options while preserving Subset Gauss-Newton defaults
   /* implicit */ SubsetGaussNewtonSolverOptions(const SolverOptions& baseOptions)
-      : SolverOptions(baseOptions) {}
+      : GaussNewtonSolverBaseOptions(baseOptions) {}
 };
 
 /// Gauss-Newton solver that optimizes only a selected subset of parameters

@@ -11,27 +11,18 @@
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_solver_function.h>
 #include <momentum/math/online_householder_qr.h>
-#include <momentum/solver/solver.h>
+#include <momentum/solver/gauss_newton_solver.h>
 
 #include <Eigen/Core>
 
 namespace momentum {
 
 /// Gauss-Newton solver with QR decomposition specific options
-struct GaussNewtonSolverQROptions : SolverOptions {
-  /// Damping parameter added to Hessian diagonal for numerical stability; see
-  /// https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
-  float regularization = 0.05f;
-
-  /// Flag to enable line search during optimization.
-  bool doLineSearch = false;
-
+struct GaussNewtonSolverQROptions : GaussNewtonSolverBaseOptions {
   GaussNewtonSolverQROptions() = default;
 
   /* implicit */ GaussNewtonSolverQROptions(const SolverOptions& baseOptions)
-      : SolverOptions(baseOptions) {
-    // Empty
-  }
+      : GaussNewtonSolverBaseOptions(baseOptions) {}
 };
 
 template <typename T>
