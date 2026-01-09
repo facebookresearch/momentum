@@ -912,7 +912,7 @@ class SequenceIKSolveFunction {
       const std::vector<const momentum::Character*>& characters,
       const momentum::ParameterSet& activeParams,
       const momentum::ParameterSet& sharedParams,
-      const SolverOptions options,
+      const SolverOptions& options,
       at::Tensor modelParams_init,
       const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
       at::Tensor errorFunctionWeights,
