@@ -404,8 +404,35 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           "verbose", &mm::SolverOptions::verbose, "Enable detailed logging during optimization");
 
   py::class_<
-      mm::GaussNewtonSolverOptions,
+      mm::GaussNewtonSolverBaseOptions,
       mm::SolverOptions,
+      std::shared_ptr<mm::GaussNewtonSolverBaseOptions>>(
+      m, "GaussNewtonSolverBaseOptions", "Base options shared by all Gauss-Newton solver variants")
+      .def(py::init<>())
+      .def(
+          "__repr__",
+          [](const mm::GaussNewtonSolverBaseOptions& self) {
+            return fmt::format(
+                "GaussNewtonSolverBaseOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
+                self.minIterations,
+                self.maxIterations,
+                self.threshold,
+                boolToString(self.verbose),
+                self.regularization,
+                boolToString(self.doLineSearch));
+          })
+      .def_readwrite(
+          "regularization",
+          &mm::GaussNewtonSolverBaseOptions::regularization,
+          "Damping parameter added to Hessian diagonal for numerical stability")
+      .def_readwrite(
+          "do_line_search",
+          &mm::GaussNewtonSolverBaseOptions::doLineSearch,
+          "Enables backtracking line search to ensure error reduction at each step");
+
+  py::class_<
+      mm::GaussNewtonSolverOptions,
+      mm::GaussNewtonSolverBaseOptions,
       std::shared_ptr<mm::GaussNewtonSolverOptions>>(m, "GaussNewtonSolverOptions")
       .def(py::init<>())
       .def(
@@ -446,57 +473,37 @@ Note that if you're trying to actually solve a problem using SGD, you should con
 
   py::class_<
       mm::GaussNewtonSolverQROptions,
-      mm::SolverOptions,
+      mm::GaussNewtonSolverBaseOptions,
       std::shared_ptr<mm::GaussNewtonSolverQROptions>>(
       m, "GaussNewtonSolverQROptions", "Options specific to the Gauss-Newton QR solver")
       .def(py::init<>())
-      .def(
-          "__repr__",
-          [](const mm::GaussNewtonSolverQROptions& self) {
-            return fmt::format(
-                "GaussNewtonSolverQROptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
-                self.minIterations,
-                self.maxIterations,
-                self.threshold,
-                boolToString(self.verbose),
-                self.regularization,
-                boolToString(self.doLineSearch));
-          })
-      .def_readwrite(
-          "regularization",
-          &mm::GaussNewtonSolverQROptions::regularization,
-          "Regularization parameter for QR decomposition.")
-      .def_readwrite(
-          "do_line_search",
-          &mm::GaussNewtonSolverQROptions::doLineSearch,
-          "Flag to enable line search during optimization.");
+      .def("__repr__", [](const mm::GaussNewtonSolverQROptions& self) {
+        return fmt::format(
+            "GaussNewtonSolverQROptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
+            self.minIterations,
+            self.maxIterations,
+            self.threshold,
+            boolToString(self.verbose),
+            self.regularization,
+            boolToString(self.doLineSearch));
+      });
 
   py::class_<
       mm::SubsetGaussNewtonSolverOptions,
-      mm::SolverOptions,
+      mm::GaussNewtonSolverBaseOptions,
       std::shared_ptr<mm::SubsetGaussNewtonSolverOptions>>(
       m, "SubsetGaussNewtonSolverOptions", "Options specific to the Subset Gauss-Newton solver")
       .def(py::init<>())
-      .def(
-          "__repr__",
-          [](const mm::SubsetGaussNewtonSolverOptions& self) {
-            return fmt::format(
-                "SubsetGaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
-                self.minIterations,
-                self.maxIterations,
-                self.threshold,
-                boolToString(self.verbose),
-                self.regularization,
-                boolToString(self.doLineSearch));
-          })
-      .def_readwrite(
-          "regularization",
-          &mm::SubsetGaussNewtonSolverOptions::regularization,
-          "Damping parameter added to Hessian diagonal for numerical stability")
-      .def_readwrite(
-          "do_line_search",
-          &mm::SubsetGaussNewtonSolverOptions::doLineSearch,
-          "Enables backtracking line search to ensure error reduction at each step");
+      .def("__repr__", [](const mm::SubsetGaussNewtonSolverOptions& self) {
+        return fmt::format(
+            "SubsetGaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
+            self.minIterations,
+            self.maxIterations,
+            self.threshold,
+            boolToString(self.verbose),
+            self.regularization,
+            boolToString(self.doLineSearch));
+      });
 
   py::class_<
       mm::SequenceSolverOptions,
