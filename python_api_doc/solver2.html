@@ -145,6 +145,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolver.__init__"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolver.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions.__init__"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions.do_line_search"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions.do_line_search</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions.regularization"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions.regularization</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.__init__"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.direct_sparse_jtj"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.direct_sparse_jtj</span></code></a></li>
@@ -160,8 +166,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverQROptions"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQROptions</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverQROptions.__init__"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQROptions.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverQROptions.do_line_search"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQROptions.do_line_search</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverQROptions.regularization"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverQROptions.regularization</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.HeightErrorFunction"><code class="docutils literal notranslate"><span class="pre">HeightErrorFunction</span></code></a><ul>
@@ -421,8 +425,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.__init__"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.do_line_search"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions.do_line_search</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.regularization"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions.regularization</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint"><code class="docutils literal notranslate"><span class="pre">VertexConstraint</span></code></a><ul>
@@ -1338,9 +1340,33 @@ joint-local space) and a global axis using element-wise differences.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverBaseOptions">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">GaussNewtonSolverBaseOptions</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SolverOptions" title="pymomentum.solver2.SolverOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolverOptions</span></code></a></p>
+<p>Base options shared by all Gauss-Newton solver variants</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverBaseOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions" title="pymomentum.solver2.GaussNewtonSolverBaseOptions"><span class="pre">pymomentum.solver2.GaussNewtonSolverBaseOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverBaseOptions.do_line_search">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_line_search</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions.do_line_search" title="Link to this definition"></a></dt>
+<dd><p>Enables backtracking line search to ensure error reduction at each step</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverBaseOptions.regularization">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regularization</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions.regularization" title="Link to this definition"></a></dt>
+<dd><p>Damping parameter added to Hessian diagonal for numerical stability</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverOptions">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">GaussNewtonSolverOptions</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverOptions" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SolverOptions" title="pymomentum.solver2.SolverOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolverOptions</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions" title="pymomentum.solver2.GaussNewtonSolverBaseOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverOptions.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions" title="pymomentum.solver2.GaussNewtonSolverOptions"><span class="pre">pymomentum.solver2.GaussNewtonSolverOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverOptions.__init__" title="Link to this definition"></a></dt>
@@ -1393,24 +1419,12 @@ joint-local space) and a global axis using element-wise differences.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverQROptions">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">GaussNewtonSolverQROptions</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverQROptions" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SolverOptions" title="pymomentum.solver2.SolverOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolverOptions</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions" title="pymomentum.solver2.GaussNewtonSolverBaseOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions</span></code></a></p>
 <p>Options specific to the Gauss-Newton QR solver</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverQROptions.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverQROptions" title="pymomentum.solver2.GaussNewtonSolverQROptions"><span class="pre">pymomentum.solver2.GaussNewtonSolverQROptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverQROptions.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverQROptions.do_line_search">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_line_search</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverQROptions.do_line_search" title="Link to this definition"></a></dt>
-<dd><p>Flag to enable line search during optimization.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverQROptions.regularization">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regularization</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverQROptions.regularization" title="Link to this definition"></a></dt>
-<dd><p>Regularization parameter for QR decomposition.</p>
-</dd></dl>
 
 </dd></dl>
 
@@ -3224,24 +3238,12 @@ See <a class="reference internal" href="#pymomentum.solver2.RotationErrorType" t
 <dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.solver2.SubsetGaussNewtonSolverOptions">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">SubsetGaussNewtonSolverOptions</span></span><a class="headerlink" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SolverOptions" title="pymomentum.solver2.SolverOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">SolverOptions</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverBaseOptions" title="pymomentum.solver2.GaussNewtonSolverBaseOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussNewtonSolverBaseOptions</span></code></a></p>
 <p>Options specific to the Subset Gauss-Newton solver</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.SubsetGaussNewtonSolverOptions.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions" title="pymomentum.solver2.SubsetGaussNewtonSolverOptions"><span class="pre">pymomentum.solver2.SubsetGaussNewtonSolverOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.SubsetGaussNewtonSolverOptions.do_line_search">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_line_search</span></span><a class="headerlink" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.do_line_search" title="Link to this definition"></a></dt>
-<dd><p>Enables backtracking line search to ensure error reduction at each step</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.SubsetGaussNewtonSolverOptions.regularization">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regularization</span></span><a class="headerlink" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.regularization" title="Link to this definition"></a></dt>
-<dd><p>Damping parameter added to Hessian diagonal for numerical stability</p>
-</dd></dl>
 
 </dd></dl>
 

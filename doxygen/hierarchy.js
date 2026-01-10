@@ -209,12 +209,14 @@ var hierarchy =
       [ "momentum::SkeletonSolverFunctionT< T >", "classmomentum_1_1SkeletonSolverFunctionT.html", null ]
     ] ],
     [ "momentum::SolverOptions", "structmomentum_1_1SolverOptions.html", [
-      [ "momentum::GaussNewtonSolverOptions", "structmomentum_1_1GaussNewtonSolverOptions.html", null ],
-      [ "momentum::GaussNewtonSolverQROptions", "structmomentum_1_1GaussNewtonSolverQROptions.html", null ],
+      [ "momentum::GaussNewtonSolverBaseOptions", "structmomentum_1_1GaussNewtonSolverBaseOptions.html", [
+        [ "momentum::GaussNewtonSolverOptions", "structmomentum_1_1GaussNewtonSolverOptions.html", null ],
+        [ "momentum::GaussNewtonSolverQROptions", "structmomentum_1_1GaussNewtonSolverQROptions.html", null ],
+        [ "momentum::SubsetGaussNewtonSolverOptions", "structmomentum_1_1SubsetGaussNewtonSolverOptions.html", null ]
+      ] ],
       [ "momentum::GradientDescentSolverOptions", "structmomentum_1_1GradientDescentSolverOptions.html", null ],
       [ "momentum::MultiposeSolverOptions", "structmomentum_1_1MultiposeSolverOptions.html", null ],
       [ "momentum::SequenceSolverOptions", "structmomentum_1_1SequenceSolverOptions.html", null ],
-      [ "momentum::SubsetGaussNewtonSolverOptions", "structmomentum_1_1SubsetGaussNewtonSolverOptions.html", null ],
       [ "momentum::TrustRegionQROptions", "structmomentum_1_1TrustRegionQROptions.html", null ]
     ] ],
     [ "momentum::SolverT< T >", "classmomentum_1_1SolverT.html", [

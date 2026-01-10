@@ -49,6 +49,7 @@ var annotated_dup =
       [ "FullyDifferentiableProjectionErrorFunctionT", "classmomentum_1_1FullyDifferentiableProjectionErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableProjectionErrorFunctionT" ],
       [ "FullyDifferentiableSkeletonErrorFunctionT", "classmomentum_1_1FullyDifferentiableSkeletonErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableSkeletonErrorFunctionT" ],
       [ "FullyDifferentiableStateErrorFunctionT", "classmomentum_1_1FullyDifferentiableStateErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableStateErrorFunctionT" ],
+      [ "GaussNewtonSolverBaseOptions", "structmomentum_1_1GaussNewtonSolverBaseOptions.html", "structmomentum_1_1GaussNewtonSolverBaseOptions" ],
       [ "GaussNewtonSolverOptions", "structmomentum_1_1GaussNewtonSolverOptions.html", "structmomentum_1_1GaussNewtonSolverOptions" ],
       [ "GaussNewtonSolverQROptions", "structmomentum_1_1GaussNewtonSolverQROptions.html", "structmomentum_1_1GaussNewtonSolverQROptions" ],
       [ "GaussNewtonSolverQRT", "classmomentum_1_1GaussNewtonSolverQRT.html", "classmomentum_1_1GaussNewtonSolverQRT" ],

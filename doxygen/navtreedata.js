@@ -93,11 +93,11 @@ var NAVTREEINDEX =
 "point__triangle__vertex__error__function_8cpp.html#a75f92c9556cc340ba6afd88f1cbf3983",
 "skinning__weight__iterator_8h_source.html",
 "structmomentum_1_1CharacterParametersT.html#a5e1f39e527b2e8a39d166faa35c0c8bd",
-"structmomentum_1_1GaussNewtonSolverOptions.html#a91d46f41cf0589dcf48decfdc6e04ed6",
-"structmomentum_1_1LimitMinMax.html#aa6af55b49934bf24ae3dc34692e4e47a",
-"structmomentum_1_1ParameterTransformT.html#ae8b008863bf95c08ab8f9088e598c59a",
-"structmomentum_1_1SimdPositionConstraints.html#aa9b3281e38a5f8b283d786b432490052",
-"structmomentum_1_1VertexProjectionConstraintT.html#adc7dc4f7caf50de0c528c455c0add901"
+"structmomentum_1_1GaussNewtonSolverOptions.html#a141ef7753b9aa007a1b7be3ea6f4a75d",
+"structmomentum_1_1LimitMinMax.html#a9de0d86d4f0b380ddda41524ea0edee3",
+"structmomentum_1_1ParameterTransformT.html#ae61edbbd3ce78238af346e3e0a33c401",
+"structmomentum_1_1SimdPositionConstraints.html#a9faa8546a8742bbc5fa759db8e9d098a",
+"structmomentum_1_1VertexVelocityConstraintT.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
