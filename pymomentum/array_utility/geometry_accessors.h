@@ -41,21 +41,23 @@ class JointParametersAccessor {
       py::ssize_t nJoints,
       JointParamsShape shape);
 
-  // Convenience constructor that takes a py::array and extracts buffer_info
+  // Convenience constructor that takes a py::buffer and extracts buffer_info.
+  // This allows accepting any buffer-protocol object (numpy arrays, torch tensors, etc.)
+  // for backward compatibility.
   JointParametersAccessor(
-      py::array& array,
+      py::buffer& buffer,
       const LeadingDimensions& leadingDims,
       py::ssize_t nJoints,
       JointParamsShape shape)
-      : JointParametersAccessor(array.request(), leadingDims, nJoints, shape) {}
+      : JointParametersAccessor(buffer.request(), leadingDims, nJoints, shape) {}
 
   // Const convenience constructor
   JointParametersAccessor(
-      const py::array& array,
+      const py::buffer& buffer,
       const LeadingDimensions& leadingDims,
       py::ssize_t nJoints,
       JointParamsShape shape)
-      : JointParametersAccessor(array.request(), leadingDims, nJoints, shape) {}
+      : JointParametersAccessor(buffer.request(), leadingDims, nJoints, shape) {}
 
   // Get the joint parameters for the given batch indices.
   // Returns a JointParametersT<T> object constructed from the array data.
@@ -92,19 +94,21 @@ class ModelParametersAccessor {
       const LeadingDimensions& leadingDims,
       py::ssize_t nModelParams);
 
-  // Convenience constructor that takes a py::array and extracts buffer_info
+  // Convenience constructor that takes a py::buffer and extracts buffer_info.
+  // This allows accepting any buffer-protocol object (numpy arrays, torch tensors, etc.)
+  // for backward compatibility.
   ModelParametersAccessor(
-      py::array& array,
+      py::buffer& buffer,
       const LeadingDimensions& leadingDims,
       py::ssize_t nModelParams)
-      : ModelParametersAccessor(array.request(), leadingDims, nModelParams) {}
+      : ModelParametersAccessor(buffer.request(), leadingDims, nModelParams) {}
 
   // Const convenience constructor
   ModelParametersAccessor(
-      const py::array& array,
+      const py::buffer& buffer,
       const LeadingDimensions& leadingDims,
       py::ssize_t nModelParams)
-      : ModelParametersAccessor(array.request(), leadingDims, nModelParams) {}
+      : ModelParametersAccessor(buffer.request(), leadingDims, nModelParams) {}
 
   // Get the model parameters for the given batch indices.
   // Returns a ModelParametersT<T> object constructed from the array data.
@@ -141,16 +145,21 @@ class SkeletonStateAccessor {
       const LeadingDimensions& leadingDims,
       py::ssize_t nJoints);
 
-  // Convenience constructor that takes a py::array and extracts buffer_info
-  SkeletonStateAccessor(py::array& array, const LeadingDimensions& leadingDims, py::ssize_t nJoints)
-      : SkeletonStateAccessor(array.request(), leadingDims, nJoints) {}
+  // Convenience constructor that takes a py::buffer and extracts buffer_info.
+  // This allows accepting any buffer-protocol object (numpy arrays, torch tensors, etc.)
+  // for backward compatibility.
+  SkeletonStateAccessor(
+      py::buffer& buffer,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t nJoints)
+      : SkeletonStateAccessor(buffer.request(), leadingDims, nJoints) {}
 
   // Const convenience constructor
   SkeletonStateAccessor(
-      const py::array& array,
+      const py::buffer& buffer,
       const LeadingDimensions& leadingDims,
       py::ssize_t nJoints)
-      : SkeletonStateAccessor(array.request(), leadingDims, nJoints) {}
+      : SkeletonStateAccessor(buffer.request(), leadingDims, nJoints) {}
 
   // Get the transforms for the given batch indices.
   // Returns a vector of transforms (one per joint).
