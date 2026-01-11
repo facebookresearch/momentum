@@ -257,7 +257,17 @@ jobs:
 
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
+        timeout-minutes: 60
+        run: |
+          echo "=== Starting GPU wheel build ==="
+          echo "Environment: ${{ matrix.pixi-environment }}"
+          echo "Docker version:"
+          docker --version || echo "Docker not available"
+          echo "=== Checking Docker status ==="
+          docker info || echo "Docker info failed"
+          echo "=== Running wheel_build ==="
+          pixi run -e ${{ matrix.pixi-environment }} wheel_build
+          echo "=== Build completed ==="
 
       - name: Repair GPU wheel (Linux only)
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
