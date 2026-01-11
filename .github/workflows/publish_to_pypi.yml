@@ -208,7 +208,9 @@ jobs:
           df -h
 
       - name: Maximize build space (Ubuntu only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        # DISABLED: This action restructures the filesystem and breaks Docker functionality
+        # The "Free disk space" step above provides enough space for the build
+        if: false && steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 30720
