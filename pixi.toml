@@ -485,7 +485,8 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py312-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+# Note: Uses Docker (default) instead of podman for CI compatibility (podman has permission issues in GitHub Actions)
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -501,7 +502,8 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py313-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+# Note: Uses Docker (default) instead of podman for CI compatibility (podman has permission issues in GitHub Actions)
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
