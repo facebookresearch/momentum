@@ -217,7 +217,7 @@ jobs:
           remove-android: true
           remove-haskell: true
           remove-codeql: true
-          remove-docker-images: true
+          remove-docker-images: false  # Keep Docker for cibuildwheel
 
       - uses: actions/checkout@v6
         if: steps.should_run.outputs.run == 'true'
