@@ -10,9 +10,7 @@ import tempfile
 import unittest
 
 import numpy as np
-
 import pymomentum.geometry as pym_geometry
-
 from pymomentum.marker_tracking import (
     CalibrationConfig,
     ModelOptions,

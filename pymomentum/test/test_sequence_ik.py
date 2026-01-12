@@ -9,7 +9,6 @@ import unittest
 
 import pymomentum.geometry as pym_geometry
 import pymomentum.solver as pym_solver
-
 import torch
 from pymomentum.solver import ErrorFunctionType
 

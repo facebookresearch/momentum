@@ -34,7 +34,6 @@ Related Modules:
 from typing import List, Tuple
 
 import torch as th
-
 from pymomentum import quaternion, skel_state, trs
 from pymomentum.backend.trs_backend import unpose_from_global_joint_state
 

@@ -9,12 +9,10 @@ import unittest
 
 import numpy as np
 import numpy.typing as npt
-
 import pymomentum.geometry as pym_geometry
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.solver2 as pym_solver2
-
 import torch
 
 

@@ -8,11 +8,9 @@
 import unittest
 
 import numpy as np
-
 import pymomentum.geometry as pym_geometry
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.solver as pym_solver
-
 import torch
 from pymomentum.solver import ErrorFunctionType
 

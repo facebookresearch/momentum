@@ -10,7 +10,6 @@ import unittest
 
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
-
 import pymomentum.trs as pym_trs
 import torch
 
