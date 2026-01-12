@@ -158,6 +158,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
+      # Run GPU builds sequentially to avoid disk space exhaustion
+      # Each PyTorch+CUDA install needs ~3GB and Docker overlay shares host disk
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.12', '3.13']
