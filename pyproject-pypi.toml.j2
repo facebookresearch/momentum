@@ -392,6 +392,17 @@ fi
 echo ">>> Step 5: Verifying PyTorch package installation..."
 python -c "import importlib.util; spec = importlib.util.find_spec('torch'); print(f'PyTorch package found at: {spec.origin}')" || echo "Warning: PyTorch verification failed, but continuing anyway..."
 
+# Set CMAKE_PREFIX_PATH to include PyTorch's cmake files
+# This allows CMake to find libtorch for linking
+echo ">>> Step 6: Setting up CMAKE_PREFIX_PATH for PyTorch..."
+TORCH_CMAKE_DIR=$(python -c "import torch; print(torch.utils.cmake_prefix_path)" 2>/dev/null || echo "")
+if [ -n "$TORCH_CMAKE_DIR" ] && [ -d "$TORCH_CMAKE_DIR" ]; then
+  export CMAKE_PREFIX_PATH="$TORCH_CMAKE_DIR:$CMAKE_PREFIX_PATH"
+  echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+else
+  echo "Warning: Could not find PyTorch cmake path, build may fail"
+fi
+
 # Show disk space after installation
 echo ">>> Disk space after installation:"
 df -h / || true
@@ -415,6 +426,10 @@ fi
 before-all = """
 # Install yum-utils to get yum-config-manager
 yum install -y yum-utils
+
+# Install basic build dependencies via yum (instead of pixi to save disk space)
+# pixi would use ~4GB which doesn't leave enough space for PyTorch CUDA
+yum install -y cmake ninja-build
 
 # Add NVIDIA CUDA repository
 yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
@@ -441,38 +456,18 @@ echo ">>> Checking CUDA installation..."
 nvcc --version || echo "CUDA nvcc not found!"
 echo ">>> Disk space after CUDA install:"
 df -h /
-
-# Use local pixi binary if available to avoid network issues
-if [ -f /project/pixi_bin ]; then
-  echo "Using local pixi binary"
-  mkdir -p $HOME/.pixi/bin
-  cp /project/pixi_bin $HOME/.pixi/bin/pixi
-  chmod +x $HOME/.pixi/bin/pixi
-else
-  echo "Downloading pixi"
-  curl -fsSL https://pixi.sh/install.sh | bash
-fi
-export PATH=$HOME/.pixi/bin:$PATH
-
-# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
-mkdir -p /tmp/build_env
-cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
-cd /tmp/build_env
-pixi install -e default
-
-# Clean up pixi cache to free disk space
-rm -rf $HOME/.cache/rattler 2>/dev/null || true
-echo ">>> Disk space after pixi install:"
-df -h /
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
-# Pixi provides dependencies (headers/libs) but we use the container's compiler
-# CUDA paths for building GPU extensions
-environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/default/lib" }
+# Build dependencies (cmake, ninja) installed via yum to save disk space
+# PyTorch provides CMAKE_PREFIX_PATH for libtorch linking
+environment = { PATH = "/usr/local/cuda-12.8/bin:$PATH", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64" }
 repair-wheel-command = """
 # Bundle libraries with auditwheel using linux_x86_64 (no ABI checks)
 # Then rename to manylinux_2_28_x86_64 for pip compatibility
-export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH
+
+# Create output directory
+mkdir -p /tmp/linux_wheel
 
 echo 'Step 1: Bundling libraries with auditwheel (linux_x86_64)...'
 auditwheel repair -w /tmp/linux_wheel {wheel} \
@@ -496,10 +491,19 @@ auditwheel repair -w /tmp/linux_wheel {wheel} \
     --exclude 'libgcc_s*.so*' || (echo 'Auditwheel failed.' && exit 1)
 
 echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
-LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
-WHEEL_NAME=$(basename "$LINUX_WHEEL")
-NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
-cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+# Check if auditwheel produced output
+if [ -z "$(ls /tmp/linux_wheel/*.whl 2>/dev/null)" ]; then
+  echo "Warning: auditwheel produced no output, using original wheel"
+  WHEEL_NAME=$(basename {wheel})
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp {wheel} {dest_dir}/$NEW_WHEEL_NAME
+else
+  LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
+  WHEEL_NAME=$(basename "$LINUX_WHEEL")
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+fi
+
 echo "Created $NEW_WHEEL_NAME"
 echo "Note: This wheel requires glibc 2.28+, CUDA 12.8+, and libstdc++ from GCC 11+"
 """
