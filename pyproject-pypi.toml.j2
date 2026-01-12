@@ -374,14 +374,18 @@ python -m pip cache purge || true
 echo ">>> Step 3: Installing build dependencies..."
 python -m pip install --no-cache-dir scikit-build-core pybind11 setuptools-scm
 
-# Install PyTorch with CUDA (needed at build time to link against libtorch)
-# The CUDA libraries are bundled in the wheel - no driver needed for building
-# Use --no-cache-dir to avoid filling up disk with cached packages
-echo ">>> Step 4: Installing PyTorch with CUDA for build..."
+# Install PyTorch CPU for building (needed at build time to link against libtorch)
+# NOTE: We use CPU PyTorch during build to save ~2GB disk space in the Docker container
+# The GPU wheel will still work at runtime with GPU PyTorch because:
+# 1. libtorch's API is the same for CPU and GPU versions
+# 2. CUDA functionality is loaded dynamically at runtime
+# 3. The wheel only links against libtorch (CPU version is sufficient for linking)
+# At runtime, users will install GPU PyTorch which provides CUDA support
+echo ">>> Step 4: Installing PyTorch CPU for build (to save disk space)..."
 if [ "$VER" = "312" ]; then
-  python -m pip install --no-cache-dir "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
 elif [ "$VER" = "313" ]; then
-  python -m pip install --no-cache-dir "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
 else
   echo "Unsupported Python version: $VER"
   exit 1
