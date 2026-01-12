@@ -417,12 +417,15 @@ echo "====================================="
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
+# For testing, we use CPU PyTorch to save disk space in the Docker container
+# The import test doesn't need CUDA - it just verifies the wheel can be imported
+# Users will install GPU PyTorch when they use the package
 before-test = """
 VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
 if [ "$VER" = "312" ]; then
-  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
 elif [ "$VER" = "313" ]; then
-  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
 fi
 """
 
