@@ -551,6 +551,16 @@ void saveBlendShapesToFbx(
   mesh->AddDeformer(blendShape);
 }
 
+void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character) {
+  // add metadata
+  if (skeletonRootNode != nullptr) {
+    ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
+        .Set(FbxString(character.metadata.c_str()));
+    ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
+        .Set(FbxString(character.name.c_str()));
+  }
+}
+
 void saveFbxCommon(
     const filesystem::path& filename,
     const Character& character,
@@ -657,6 +667,9 @@ void saveFbxCommon(
       skeletonNodes[joint.parent]->AddChild(skeletonNode);
     }
   }
+
+  // add metadata
+  addMetaData(skeletonRootNode, character);
 
   // ---------------------------------------------
   // create the locator nodes

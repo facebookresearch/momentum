@@ -70,6 +70,9 @@ struct CharacterT {
   /// Character identifier
   std::string name;
 
+  /// Metadata (as a JSON-serialized string)
+  std::string metadata;
+
   /// @}
 
   /// Default constructor
@@ -92,6 +95,8 @@ struct CharacterT {
   /// @param faceExpressionBlendShapes Optional facial expression blend shapes
   /// @param nameIn Optional character identifier
   /// @param inverseBindPose Optional inverse bind pose transformations
+  /// @param skinnedLocators Optional points of interest attached to joints, with skinning weights
+  /// @param metadataIn Optional metadata
   CharacterT(
       const Skeleton& s,
       const ParameterTransform& pt,
@@ -105,7 +110,8 @@ struct CharacterT {
       BlendShapeBase_const_p faceExpressionBlendShapes = {},
       const std::string& nameIn = "",
       const momentum::TransformationList& inverseBindPose = {},
-      const SkinnedLocatorList& skinnedLocators = {});
+      const SkinnedLocatorList& skinnedLocators = {},
+      std::string_view metadataIn = "");
 
   /// Copy constructor
   CharacterT(const CharacterT& c);

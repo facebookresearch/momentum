@@ -182,6 +182,9 @@ TYPED_TEST(CharacterTest, CopyConstructor) {
     copiedCharacter.mesh->vertices[0] = Vector3f(99, 99, 99);
     EXPECT_NE(copiedCharacter.mesh->vertices[0], this->character.mesh->vertices[0]);
   }
+
+  // Check that we preserve metadata
+  EXPECT_EQ(copiedCharacter.metadata, this->character.metadata);
 }
 
 // Test assignment operator
@@ -227,6 +230,9 @@ TYPED_TEST(CharacterTest, AssignmentOperator) {
     assignedCharacter = temp;
   }
   EXPECT_EQ(assignedCharacter.name, "assigned");
+
+  // Check that we preserve metadata
+  EXPECT_EQ(assignedCharacter.metadata, this->character.metadata);
 }
 
 // Test move constructor
@@ -258,6 +264,9 @@ TYPED_TEST(CharacterTest, MoveConstructor) {
     const auto bindPose = movedCharacter.bindPose();
     EXPECT_EQ(bindPose.pose.size(), static_cast<Eigen::Index>(originalParamCount));
   }
+
+  // Check that we preserve metadata
+  EXPECT_EQ(movedCharacter.metadata, this->character.metadata);
 }
 
 // Test move assignment operator
@@ -543,6 +552,9 @@ TYPED_TEST(CharacterTest, SimplifySkeleton) {
 
   // Check that the locators were remapped
   EXPECT_EQ(simplifiedCharacter.locators.size(), this->character.locators.size());
+
+  // Check that we preserve metadata
+  EXPECT_EQ(simplifiedCharacter.metadata, this->character.metadata);
 }
 
 // Test simplifyParameterTransform method
@@ -573,6 +585,9 @@ TYPED_TEST(CharacterTest, SimplifyParameterTransform) {
   EXPECT_EQ(simplifiedCharacter.mesh->vertices.size(), this->character.mesh->vertices.size());
   EXPECT_EQ(
       simplifiedCharacter.skinWeights->index.rows(), this->character.skinWeights->index.rows());
+
+  // Check that we preserve metadata
+  EXPECT_EQ(simplifiedCharacter.metadata, this->character.metadata);
 }
 
 // Test simplify method
@@ -599,6 +614,9 @@ TYPED_TEST(CharacterTest, Simplify) {
   // EXPECT_EQ(simplifiedCharacter.parameterTransform.name[0], "root_tx");
   // EXPECT_EQ(simplifiedCharacter.parameterTransform.name[1], "root_rx");
   // EXPECT_EQ(simplifiedCharacter.parameterTransform.name[2], "joint1_rx");
+
+  // Check that we preserve metadata
+  EXPECT_EQ(simplifiedCharacter.metadata, this->character.metadata);
 }
 
 // Test remapSkinWeights method

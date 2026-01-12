@@ -24,6 +24,7 @@
 #include "momentum/math/mesh.h"
 #include "momentum/math/utility.h"
 
+#include <nlohmann/json.hpp>
 #include <ofbx.h>
 #include <gsl/span_ext>
 
@@ -218,6 +219,20 @@ double resolveDoubleProperty(const ofbx::Object& object, const char* name) {
   } else {
     MT_THROW(
         "For property {}, expected float/double but got {}.", name, propertyTypeStr(x->getType()));
+  }
+}
+
+std::string resolveStringProperty(const ofbx::Object& object, const char* name) {
+  const ofbx::IElement* element = resolveProperty(object, name);
+  MT_THROW_IF(element == nullptr, "Unable to find property element in {}", object.name);
+  const ofbx::IElementProperty* x = getElementProperty(element, 4);
+  MT_THROW_IF(x == nullptr, "Unable to find property {} in {}", name, object.name);
+  if (x->getType() == ofbx::IElementProperty::STRING) {
+    char result[65536];
+    x->getValue().toString(result);
+    return {result};
+  } else {
+    MT_THROW("For property {}, expected string but got {}.", name, propertyTypeStr(x->getType()));
   }
 }
 
@@ -1238,6 +1253,25 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   const auto [skeleton, jointFbxNodes, locators, collision] =
       parseSkeleton(scene->getRoot(), {}, permissive);
 
+  std::string name;
+  std::string metadata = "{}"; // empty json string
+  if (!jointFbxNodes.empty()) {
+    auto* resName = resolveProperty(*jointFbxNodes[0], "name");
+    if (resName != nullptr) {
+      name = resolveStringProperty(*jointFbxNodes[0], "name");
+    }
+    auto* resMeta = resolveProperty(*jointFbxNodes[0], "metadata");
+    if (resMeta != nullptr) {
+      metadata = resolveStringProperty(*jointFbxNodes[0], "metadata");
+    }
+  }
+  // ensure metadata is valid JSON
+  try {
+    auto json = nlohmann::json::parse(metadata);
+  } catch (const nlohmann::json::parse_error& e) {
+    MT_LOGW("Failed to parse metadata: {}", e.what());
+  }
+
   TransformationList inverseBindPoseTransforms;
   for (const auto& j : jointFbxNodes) {
     Eigen::Affine3d mat = Eigen::Affine3d::Identity();
@@ -1284,7 +1318,12 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       skinWeights.get(),
       collision.empty() ? nullptr : &collision,
       nullptr,
-      blendShape);
+      blendShape,
+      {}, // faceExpressionBlendShapes
+      name, // nameIn
+      {}, // inverseBindPose
+      {}, // skinnedLocators
+      metadata);
   result.resetJointMap();
   result.inverseBindPose = inverseBindPoseTransforms;
 

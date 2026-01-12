@@ -237,7 +237,8 @@ CharacterT<T> createTestCharacter(size_t numJoints) {
       BlendShapeBase_const_p{},
       std::string("test character"),
       momentum::TransformationList{},
-      createDefaultSkinnedLocatorList(skeleton));
+      createDefaultSkinnedLocatorList(skeleton),
+      std::string(R"({"name":"testCharacterV1","version":1})"));
 }
 
 template CharacterT<float> createTestCharacter(size_t numJoints);

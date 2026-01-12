@@ -69,6 +69,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // =====================================================
   // momentum::Character
   // - name
+  // - metadata
   // - skeleton
   // - parameter_transform
   // - locators
@@ -176,7 +177,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.faceExpressionBlendShape,
                 character.name,
                 character.inverseBindPose,
-                character.skinnedLocators);
+                character.skinnedLocators,
+                character.metadata);
           },
           "Adds mesh and skin weight to the character and return a new character instance",
           py::arg("mesh"),
@@ -197,7 +199,9 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.blendShape,
                 character.faceExpressionBlendShape,
                 character.name,
-                character.inverseBindPose);
+                character.inverseBindPose,
+                character.skinnedLocators,
+                character.metadata);
           },
           "Returns a new character with the parameter limits set to the passed-in limits.",
           py::arg("parameter_limits"))
@@ -231,7 +235,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.faceExpressionBlendShape,
                 character.name,
                 character.inverseBindPose,
-                character.skinnedLocators);
+                character.skinnedLocators,
+                character.metadata);
           },
           R"(Returns a new character with the passed-in locators.  If 'replace' is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.
 
@@ -282,7 +287,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.faceExpressionBlendShape,
                 character.name,
                 character.inverseBindPose,
-                combinedSkinnedLocators);
+                combinedSkinnedLocators,
+                character.metadata);
           },
           R"(Returns a new character with the passed-in skinned locators.  If 'replace' is true, the existing skinned locators are replaced, otherwise (the default) the new skinned locators are appended to the existing ones.
 
@@ -292,6 +298,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           py::arg("skinned_locators"),
           py::arg("replace") = false)
       .def_readonly("name", &mm::Character::name, "The character's name.")
+      .def_readonly("metadata", &mm::Character::metadata, "The character's metadata.")
       .def_readonly(
           "skeleton", &mm::Character::skeleton, "The character's skeleton. See :class:`Skeleton`.")
       .def_readonly(
@@ -401,7 +408,9 @@ It can be used to solve for facial expressions.
                 c.blendShape,
                 c.faceExpressionBlendShape,
                 c.name,
-                c.inverseBindPose);
+                c.inverseBindPose,
+                c.skinnedLocators,
+                c.metadata);
           },
           "Returns a new :class:`Character` with the collision geometry replaced.")
       .def(
