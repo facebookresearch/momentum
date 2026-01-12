@@ -79,7 +79,7 @@ def main():
     # Generate CPU configs for each Python version
     for py_ver in ["312", "313"]:
         py_ver_min = f"3.{py_ver[1:]}"
-        py_ver_max = f"3.{int(py_ver[1:])+1}"
+        py_ver_max = f"3.{int(py_ver[1:]) + 1}"
         cpu_config = template.render(
             variant="cpu",
             description_suffix="CPU-only version for Linux, macOS Intel, and macOS ARM",
