@@ -427,22 +427,18 @@ before-all = """
 # Install yum-utils to get yum-config-manager
 yum install -y yum-utils
 
-# Install basic build dependencies via yum (instead of pixi to save disk space)
-# pixi would use ~4GB which doesn't leave enough space for PyTorch CUDA
+# Install basic build dependencies via yum
 yum install -y cmake ninja-build
 
 # Add NVIDIA CUDA repository
 yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
 
 # Install ONLY the absolute minimum CUDA packages for compilation
-# NOTE: PyTorch's wheel includes all CUDA runtime libraries (nvidia-cublas, nvidia-cusolver, etc.)
-# We only need nvcc (compiler) and development headers for building
-# The runtime libs from yum would duplicate what PyTorch provides and waste disk space
 yum install -y --setopt=install_weak_deps=false \
   cuda-nvcc-12-8 \
   cuda-cudart-devel-12-8
 
-# Clean up yum cache to free disk space (important for Docker overlay)
+# Clean up yum cache to free disk space
 yum clean all
 rm -rf /var/cache/yum
 
@@ -456,11 +452,42 @@ echo ">>> Checking CUDA installation..."
 nvcc --version || echo "CUDA nvcc not found!"
 echo ">>> Disk space after CUDA install:"
 df -h /
+
+# Use local pixi binary if available to avoid network issues
+if [ -f /project/pixi_bin ]; then
+  echo "Using local pixi binary"
+  mkdir -p $HOME/.pixi/bin
+  cp /project/pixi_bin $HOME/.pixi/bin/pixi
+  chmod +x $HOME/.pixi/bin/pixi
+else
+  echo "Downloading pixi"
+  curl -fsSL https://pixi.sh/install.sh | bash
+fi
+export PATH=$HOME/.pixi/bin:$PATH
+
+# Create a tmpfs mount to avoid using overlay disk space
+# GitHub Actions runners have plenty of RAM, so we can use it for pixi
+echo ">>> Creating tmpfs for pixi to save disk space..."
+mkdir -p /tmp/pixi_env
+mount -t tmpfs -o size=4G tmpfs /tmp/pixi_env || echo "Warning: tmpfs mount failed, using regular disk"
+
+# Install dependencies in tmpfs directory
+mkdir -p /tmp/pixi_env/build_env
+cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/pixi_env/build_env/
+cd /tmp/pixi_env/build_env
+pixi install -e default
+
+# Clean up pixi cache to free space
+rm -rf $HOME/.cache/rattler 2>/dev/null || true
+
+echo ">>> Disk space after pixi install:"
+df -h /
+df -h /tmp/pixi_env || true
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
-# Build dependencies (cmake, ninja) installed via yum to save disk space
-# PyTorch provides CMAKE_PREFIX_PATH for libtorch linking
-environment = { PATH = "/usr/local/cuda-12.8/bin:$PATH", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64" }
+# Pixi provides dependencies (headers/libs) but we use the container's compiler
+# CUDA paths for building GPU extensions
+environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/pixi_env/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/pixi_env/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/pixi_env/build_env/.pixi/envs/default/lib" }
 repair-wheel-command = """
 # Bundle libraries with auditwheel using linux_x86_64 (no ABI checks)
 # Then rename to manylinux_2_28_x86_64 for pip compatibility
