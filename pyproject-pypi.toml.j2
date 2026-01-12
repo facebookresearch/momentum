@@ -395,15 +395,30 @@ before-all = """
 # Install yum-utils to get yum-config-manager
 yum install -y yum-utils
 
-# Install CUDA toolkit in manylinux container
-# Use NVIDIA's network repository for CUDA 12.8
+# Install only minimal CUDA toolkit packages in manylinux container
+# The full cuda-toolkit-12-8 meta-package requires ~4GB and includes unnecessary tools
+# We only need: compiler (nvcc), runtime (cudart), and headers for building
 yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-yum install -y cuda-toolkit-12-8
+
+# Install minimal CUDA packages (much smaller than full toolkit)
+yum install -y \
+  cuda-cudart-devel-12-8 \
+  cuda-nvcc-12-8 \
+  cuda-nvrtc-devel-12-8 \
+  cuda-driver-devel-12-8 \
+  libcublas-devel-12-8 \
+  libcurand-devel-12-8 \
+  libcusparse-devel-12-8 \
+  libcusolver-devel-12-8 \
+  libcufft-devel-12-8
 
 # Set up CUDA environment
 export CUDA_HOME=/usr/local/cuda-12.8
 export PATH=$CUDA_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+
+# Verify CUDA is installed
+nvcc --version || echo "CUDA nvcc not found!"
 
 # Use local pixi binary if available to avoid network issues
 if [ -f /project/pixi_bin ]; then
