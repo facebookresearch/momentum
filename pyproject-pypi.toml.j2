@@ -416,22 +416,20 @@ before-all = """
 # Install yum-utils to get yum-config-manager
 yum install -y yum-utils
 
-# Install only minimal CUDA toolkit packages in manylinux container
-# The full cuda-toolkit-12-8 meta-package requires ~4GB and includes unnecessary tools
-# We only need: compiler (nvcc), runtime (cudart), and headers for building
+# Add NVIDIA CUDA repository
 yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
 
-# Install minimal CUDA packages (much smaller than full toolkit)
-yum install -y \
-  cuda-cudart-devel-12-8 \
+# Install ONLY the absolute minimum CUDA packages for compilation
+# NOTE: PyTorch's wheel includes all CUDA runtime libraries (nvidia-cublas, nvidia-cusolver, etc.)
+# We only need nvcc (compiler) and development headers for building
+# The runtime libs from yum would duplicate what PyTorch provides and waste disk space
+yum install -y --setopt=install_weak_deps=false \
   cuda-nvcc-12-8 \
-  cuda-nvrtc-devel-12-8 \
-  cuda-driver-devel-12-8 \
-  libcublas-devel-12-8 \
-  libcurand-devel-12-8 \
-  libcusparse-devel-12-8 \
-  libcusolver-devel-12-8 \
-  libcufft-devel-12-8
+  cuda-cudart-devel-12-8
+
+# Clean up yum cache to free disk space (important for Docker overlay)
+yum clean all
+rm -rf /var/cache/yum
 
 # Set up CUDA environment
 export CUDA_HOME=/usr/local/cuda-12.8
@@ -439,7 +437,10 @@ export PATH=$CUDA_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 
 # Verify CUDA is installed
+echo ">>> Checking CUDA installation..."
 nvcc --version || echo "CUDA nvcc not found!"
+echo ">>> Disk space after CUDA install:"
+df -h /
 
 # Use local pixi binary if available to avoid network issues
 if [ -f /project/pixi_bin ]; then
@@ -458,6 +459,11 @@ mkdir -p /tmp/build_env
 cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
 cd /tmp/build_env
 pixi install -e default
+
+# Clean up pixi cache to free disk space
+rm -rf $HOME/.cache/rattler 2>/dev/null || true
+echo ">>> Disk space after pixi install:"
+df -h /
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
