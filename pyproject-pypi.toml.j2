@@ -471,23 +471,23 @@ echo ">>> Creating tmpfs for pixi to save disk space..."
 mkdir -p /tmp/pixi_env
 mount -t tmpfs -o size=4G tmpfs /tmp/pixi_env || echo "Warning: tmpfs mount failed, using regular disk"
 
-# Install dependencies in tmpfs directory
-mkdir -p /tmp/pixi_env/build_env
-cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/pixi_env/build_env/
-cd /tmp/pixi_env/build_env
-pixi install -e default
+# Install dependencies in /tmp/build_env using the minimal-build environment
+# The minimal-build environment is ~2GB smaller than default, saving disk space for PyTorch CUDA
+mkdir -p /tmp/build_env
+cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
+cd /tmp/build_env
+pixi install -e minimal-build
 
 # Clean up pixi cache to free space
 rm -rf $HOME/.cache/rattler 2>/dev/null || true
 
 echo ">>> Disk space after pixi install:"
 df -h /
-df -h /tmp/pixi_env || true
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
 # CUDA paths for building GPU extensions
-environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/pixi_env/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/pixi_env/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/pixi_env/build_env/.pixi/envs/default/lib" }
+environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/minimal-build", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/minimal-build", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/minimal-build/lib" }
 repair-wheel-command = """
 # Bundle libraries with auditwheel using linux_x86_64 (no ABI checks)
 # Then rename to manylinux_2_28_x86_64 for pip compatibility
