@@ -353,6 +353,10 @@ echo "====================================="
 echo "Building GPU wheel for Python $VER"
 echo "====================================="
 
+# Check available disk space
+echo ">>> Disk space before installation:"
+df -h / || true
+
 # Copy the GPU pyproject.toml
 echo ">>> Step 1: Copying pyproject-pypi-gpu.toml"
 cp pyproject-pypi-gpu.toml pyproject.toml
@@ -361,18 +365,23 @@ cp pyproject-pypi-gpu.toml pyproject.toml
 echo ">>> Step 2: Upgrading pip..."
 python -m pip install --upgrade pip
 
+# Clean pip cache to free up space before large installs
+echo ">>> Step 2.5: Cleaning pip cache to free disk space..."
+python -m pip cache purge || true
+
 # Install build dependencies (required when using --no-build-isolation)
 # These are from [build-system].requires in pyproject.toml
 echo ">>> Step 3: Installing build dependencies..."
-python -m pip install scikit-build-core pybind11 setuptools-scm
+python -m pip install --no-cache-dir scikit-build-core pybind11 setuptools-scm
 
 # Install PyTorch with CUDA (needed at build time to link against libtorch)
 # The CUDA libraries are bundled in the wheel - no driver needed for building
+# Use --no-cache-dir to avoid filling up disk with cached packages
 echo ">>> Step 4: Installing PyTorch with CUDA for build..."
 if [ "$VER" = "312" ]; then
-  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cu128
 elif [ "$VER" = "313" ]; then
-  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cu128
 else
   echo "Unsupported Python version: $VER"
   exit 1
@@ -382,6 +391,11 @@ fi
 # This verification is not strictly necessary - the build will fail later if torch is missing
 echo ">>> Step 5: Verifying PyTorch package installation..."
 python -c "import importlib.util; spec = importlib.util.find_spec('torch'); print(f'PyTorch package found at: {spec.origin}')" || echo "Warning: PyTorch verification failed, but continuing anyway..."
+
+# Show disk space after installation
+echo ">>> Disk space after installation:"
+df -h / || true
+
 echo "====================================="
 echo "Before-build completed for Python $VER"
 echo "====================================="
