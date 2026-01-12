@@ -424,33 +424,12 @@ fi
 
 [tool.cibuildwheel.linux]
 before-all = """
-# Install yum-utils to get yum-config-manager
-yum install -y yum-utils
+# NOTE: We don't install CUDA toolkit from yum because:
+# 1. pymomentum doesn't have custom CUDA code (no .cu files)
+# 2. PyTorch's CUDA wheel includes all CUDA runtime libraries
+# 3. This saves ~2GB of disk space for the PyTorch installation
 
-# Install basic build dependencies via yum
-yum install -y cmake ninja-build
-
-# Add NVIDIA CUDA repository
-yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-
-# Install ONLY the absolute minimum CUDA packages for compilation
-yum install -y --setopt=install_weak_deps=false \
-  cuda-nvcc-12-8 \
-  cuda-cudart-devel-12-8
-
-# Clean up yum cache to free disk space
-yum clean all
-rm -rf /var/cache/yum
-
-# Set up CUDA environment
-export CUDA_HOME=/usr/local/cuda-12.8
-export PATH=$CUDA_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
-
-# Verify CUDA is installed
-echo ">>> Checking CUDA installation..."
-nvcc --version || echo "CUDA nvcc not found!"
-echo ">>> Disk space after CUDA install:"
+echo ">>> Disk space at start:"
 df -h /
 
 # Use local pixi binary if available to avoid network issues
@@ -465,13 +444,7 @@ else
 fi
 export PATH=$HOME/.pixi/bin:$PATH
 
-# Create a tmpfs mount to avoid using overlay disk space
-# GitHub Actions runners have plenty of RAM, so we can use it for pixi
-echo ">>> Creating tmpfs for pixi to save disk space..."
-mkdir -p /tmp/pixi_env
-mount -t tmpfs -o size=4G tmpfs /tmp/pixi_env || echo "Warning: tmpfs mount failed, using regular disk"
-
-# Install dependencies in /tmp/build_env using the minimal-build environment
+# Install dependencies using the minimal-build environment
 # The minimal-build environment is ~2GB smaller than default, saving disk space for PyTorch CUDA
 mkdir -p /tmp/build_env
 cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
