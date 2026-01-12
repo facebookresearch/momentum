@@ -196,38 +196,16 @@ jobs:
 
       - name: Free disk space
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: |
-          echo "Before cleanup:"
-          df -h
-          echo "Removing large directories..."
-          # Remove .NET, Android, Haskell, CodeQL
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          # Remove additional large directories
-          sudo rm -rf /opt/microsoft
-          sudo rm -rf /opt/hostedtoolcache/PyPy
-          sudo rm -rf /opt/hostedtoolcache/Ruby
-          sudo rm -rf /opt/hostedtoolcache/go
-          sudo rm -rf /opt/hostedtoolcache/node
-          sudo rm -rf /opt/hostedtoolcache/Python
-          sudo rm -rf /usr/local/share/powershell
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /usr/share/az_*
-          # Remove LLVM/Clang tools we don't need
-          sudo rm -rf /usr/local/lib/heroku
-          sudo rm -rf /usr/local/share/vcpkg
-          # Remove snap packages (large)
-          sudo rm -rf /snap
-          # Remove additional tool caches
-          sudo rm -rf /opt/hostedtoolcache/Java*
-          # Prune Docker images to free more space
-          sudo docker image prune --all --force
-          # Clean apt cache
-          sudo apt-get clean
-          echo "After cleanup:"
-          df -h
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # Remove all default tools and applications
+          tool-cache: false  # Keep tool cache for Python
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false  # Keep Docker for cibuildwheel
+          swap-storage: true
 
       - name: Maximize build space (Ubuntu only)
         # DISABLED: This action restructures the filesystem and breaks Docker functionality
