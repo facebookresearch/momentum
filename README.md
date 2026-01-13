@@ -79,6 +79,15 @@ Visit our [**documentation website**](https://facebookresearch.github.io/momentu
 - 🐍 [**Python API Reference**](https://facebookresearch.github.io/momentum/python_api_doc/index.html) - Complete Python API documentation
 - ⚙️ [**C++ API Reference**](https://facebookresearch.github.io/momentum/doxygen/index.html) - Complete C++ API documentation
 
+## 🎭 Character Models
+
+For character models compatible with Momentum, see the **Momentum Human Rig (MHR)** project:
+
+- **Repository:** [github.com/facebookresearch/MHR](https://github.com/facebookresearch/MHR)
+- **Contents:** Base rig, parameterization, linear shape, and expression models at 8 LOD levels (595-115K vertices)
+
+MHR is powered by the Momentum library and provides everything needed to get started with character animation and body tracking.
+
 ## Contributing
 
 Check our [contributing guide](CONTRIBUTING.md) to learn about how to contribute
