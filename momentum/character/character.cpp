@@ -38,7 +38,8 @@ CharacterT<T>::CharacterT(
     BlendShapeBase_const_p faceExpressionBlendShapes,
     const std::string& nameIn,
     const momentum::TransformationList& inverseBindPose_in,
-    const SkinnedLocatorList& skinnedLocators)
+    const SkinnedLocatorList& skinnedLocators,
+    std::string_view metadataIn)
     : skeleton(s),
       parameterTransform(pt),
       parameterLimits(pl),
@@ -47,7 +48,8 @@ CharacterT<T>::CharacterT(
       blendShape(std::move(blendShapes)),
       faceExpressionBlendShape(std::move(faceExpressionBlendShapes)),
       inverseBindPose(inverseBindPose_in),
-      name(nameIn) {
+      name(nameIn),
+      metadata(metadataIn) {
   if (m) {
     mesh = std::make_unique<Mesh>(*m);
     // create skinweights copy only if both mesh and skinweights exist
@@ -87,7 +89,8 @@ CharacterT<T>::CharacterT(const CharacterT& c)
       faceExpressionBlendShape(c.faceExpressionBlendShape),
       inverseBindPose(c.inverseBindPose),
       jointMap(c.jointMap),
-      name(c.name) {
+      name(c.name),
+      metadata(c.metadata) {
   if (c.mesh) {
     mesh = std::make_unique<Mesh>(*c.mesh);
     // create skinweights copy only if both mesh and skinweights exist
@@ -136,6 +139,7 @@ CharacterT<T>& CharacterT<T>::operator=(const CharacterT& rhs) {
   std::swap(blendShape, tmp.blendShape);
   std::swap(faceExpressionBlendShape, tmp.faceExpressionBlendShape);
   std::swap(name, tmp.name);
+  std::swap(metadata, tmp.metadata);
 
   return *this;
 }
@@ -320,6 +324,8 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
 
   // create character result
   CharacterT<T> result(simplifiedSkeleton, simplifiedTransform);
+  result.name = name;
+  result.metadata = metadata;
 
   result.jointMap = simplifiedJointMap;
 
@@ -387,7 +393,8 @@ CharacterT<T> CharacterT<T>::simplifyParameterTransform(const ParameterSet& para
       faceExpressionBlendShape,
       name,
       inverseBindPose,
-      skinnedLocators);
+      skinnedLocators,
+      metadata);
 }
 
 template <typename T>

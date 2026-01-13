@@ -798,6 +798,15 @@ void loadGlobalExtensions(const fx::gltf::Document& model, Character& character)
     if (def.count("parameterLimits") > 0) {
       character.parameterLimits = parameterLimitsFromJson(character, def["parameterLimits"]);
     }
+    if (def.count("metadata") > 0) {
+      character.metadata = def.value<std::string>("metadata", {});
+      // ensure metadata is valid JSON
+      try {
+        auto json = nlohmann::json::parse(character.metadata);
+      } catch (const nlohmann::json::parse_error& e) {
+        MT_LOGW("Failed to parse metadata: {}", e.what());
+      }
+    }
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
