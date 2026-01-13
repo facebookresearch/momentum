@@ -11,7 +11,10 @@ requires-python = ">=3.10"
 authors = [
     { name = "Meta Reality Labs Research", email = "jeongseok@meta.com" },
 ]
-classifiers = ["License :: OSI Approved :: MIT License"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+]
 dependencies = []
 
 [project.urls]
