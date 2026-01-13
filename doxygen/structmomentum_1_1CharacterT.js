@@ -2,7 +2,7 @@ var structmomentum_1_1CharacterT =
 [
     [ "CharacterT", "structmomentum_1_1CharacterT.html#a7693c5d25dd84cfe1afe85d166ef87ae", null ],
     [ "~CharacterT", "structmomentum_1_1CharacterT.html#a38123d0ec98148d5f4f525e28b046ee3", null ],
-    [ "CharacterT", "structmomentum_1_1CharacterT.html#a99818b75cfa6b8196aaec2f8905d29b4", null ],
+    [ "CharacterT", "structmomentum_1_1CharacterT.html#a5de6bf87b06c27aa3c7e75b4ef1bf003", null ],
     [ "CharacterT", "structmomentum_1_1CharacterT.html#a6f912a911ee342836fee22ad310eeb61", null ],
     [ "CharacterT", "structmomentum_1_1CharacterT.html#a0d63506200cf7359fd3914e93b6d4853", null ],
     [ "activeJointsToParameters", "structmomentum_1_1CharacterT.html#a230d456ed31edc291d3ac83eb15abb8f", null ],
@@ -34,6 +34,7 @@ var structmomentum_1_1CharacterT =
     [ "jointMap", "structmomentum_1_1CharacterT.html#a01de8e80724eb13efc8cb399b616b151", null ],
     [ "locators", "structmomentum_1_1CharacterT.html#a3d0c2d4bc6e1d750544076c1db705de8", null ],
     [ "mesh", "structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e", null ],
+    [ "metadata", "structmomentum_1_1CharacterT.html#ae652fdd4b0947d309e7c824e91531bc1", null ],
     [ "name", "structmomentum_1_1CharacterT.html#a5397c2a59176a09f5ac2ad84d2b4ec36", null ],
     [ "parameterLimits", "structmomentum_1_1CharacterT.html#aefa3941feb4c13fee35ab74c3046dd3a", null ],
     [ "parameterTransform", "structmomentum_1_1CharacterT.html#a78603211539ffff34921f4a21990a6f7", null ],

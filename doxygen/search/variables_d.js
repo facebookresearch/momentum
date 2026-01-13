@@ -8,12 +8,13 @@ var searchData=
   ['mesh_5',['mesh',['../structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e',1,'momentum::CharacterT::mesh'],['../structmomentum_1_1FileSaveOptions.html#a2d264f561aa6a1d552b08fd0a71089de',1,'momentum::FileSaveOptions::mesh']]],
   ['meshindex_6',['meshIndex',['../structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html#a92e9456dd390facfd1d65fb072d5fded',1,'momentum::GltfBuilder::Impl::CharacterData']]],
   ['meshstate_7',['meshstate',['../structmomentum_1_1CharacterStateT.html#a53da7d99688d40c918c3c4faf2c79d73',1,'momentum::CharacterStateT::meshState'],['../structmomentum_1_1PerFrameStateT.html#ab8db9a5868c542582dfbc7fe873db31f',1,'momentum::PerFrameStateT::meshState']]],
-  ['miniterations_8',['minIterations',['../structmomentum_1_1SolverOptions.html#a0391e9638fea2cc4838c4c59876f4f4d',1,'momentum::SolverOptions']]],
-  ['minmax_9',['minMax',['../unionmomentum_1_1LimitData.html#a2e083fe17c3380ee808224d9bd943cd0',1,'momentum::LimitData']]],
-  ['minmaxjoint_10',['minMaxJoint',['../unionmomentum_1_1LimitData.html#a67343c1edb541fb6f0feddbadf9da56c',1,'momentum::LimitData']]],
-  ['minvispercent_11',['minVisPercent',['../structmomentum_1_1BaseConfig.html#a68fc30982e603214cb49277909bcacc4',1,'momentum::BaseConfig']]],
-  ['mmu_5f_12',['mmu_',['../classmomentum_1_1FullyDifferentiablePosePriorErrorFunctionT.html#a5f25e1ca7c6998b0fce3baa37815add5',1,'momentum::FullyDifferentiablePosePriorErrorFunctionT']]],
-  ['model_13',['model',['../structmomentum_1_1ModelOptions.html#a182f8055a3f06e61d4ef0efbe7a6d377',1,'momentum::ModelOptions']]],
-  ['mu_14',['mu',['../structmomentum_1_1MppcaT.html#a9d6ed4e3f8262d2b5ffb33faab07bcb1',1,'momentum::MppcaT']]],
-  ['multithreaded_15',['multithreaded',['../structmomentum_1_1SequenceSolverOptions.html#ac151d3ae1f604a5c9705b1fc3e8aa687',1,'momentum::SequenceSolverOptions']]]
+  ['metadata_8',['metadata',['../structmomentum_1_1CharacterT.html#ae652fdd4b0947d309e7c824e91531bc1',1,'momentum::CharacterT']]],
+  ['miniterations_9',['minIterations',['../structmomentum_1_1SolverOptions.html#a0391e9638fea2cc4838c4c59876f4f4d',1,'momentum::SolverOptions']]],
+  ['minmax_10',['minMax',['../unionmomentum_1_1LimitData.html#a2e083fe17c3380ee808224d9bd943cd0',1,'momentum::LimitData']]],
+  ['minmaxjoint_11',['minMaxJoint',['../unionmomentum_1_1LimitData.html#a67343c1edb541fb6f0feddbadf9da56c',1,'momentum::LimitData']]],
+  ['minvispercent_12',['minVisPercent',['../structmomentum_1_1BaseConfig.html#a68fc30982e603214cb49277909bcacc4',1,'momentum::BaseConfig']]],
+  ['mmu_5f_13',['mmu_',['../classmomentum_1_1FullyDifferentiablePosePriorErrorFunctionT.html#a5f25e1ca7c6998b0fce3baa37815add5',1,'momentum::FullyDifferentiablePosePriorErrorFunctionT']]],
+  ['model_14',['model',['../structmomentum_1_1ModelOptions.html#a182f8055a3f06e61d4ef0efbe7a6d377',1,'momentum::ModelOptions']]],
+  ['mu_15',['mu',['../structmomentum_1_1MppcaT.html#a9d6ed4e3f8262d2b5ffb33faab07bcb1',1,'momentum::MppcaT']]],
+  ['multithreaded_16',['multithreaded',['../structmomentum_1_1SequenceSolverOptions.html#ac151d3ae1f604a5c9705b1fc3e8aa687',1,'momentum::SequenceSolverOptions']]]
 ];
