@@ -269,12 +269,29 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
 
+      - name: Determine version for Docker builds
+        if: steps.should_run.outputs.run == 'true'
+        id: get_version
+        run: |
+          # Install setuptools_scm to determine version from git tags
+          pip install setuptools_scm
+          # Get the version that setuptools_scm would generate
+          VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          echo "Detected version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
         timeout-minutes: 60
+        env:
+          # Pass version to cibuildwheel so Docker containers can use it
+          # Without this, setuptools_scm inside Docker would generate 0.0.post1
+          CIBW_ENVIRONMENT_PASS_LINUX: SETUPTOOLS_SCM_PRETEND_VERSION
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.get_version.outputs.version }}
         run: |
           echo "=== Starting GPU wheel build ==="
           echo "Environment: ${{ matrix.pixi-environment }}"
+          echo "Version: $SETUPTOOLS_SCM_PRETEND_VERSION"
           echo "Docker version:"
           docker --version || echo "Docker not available"
           echo "=== Checking Docker status ==="
