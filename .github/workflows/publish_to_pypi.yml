@@ -28,6 +28,11 @@ on:
         required: false
         type: boolean
         default: false
+      test_pypi:
+        description: 'Publish to TestPyPI instead of PyPI (for testing)'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -313,10 +318,17 @@ jobs:
       - name: List CPU distributions
         run: ls -lh dist/
 
+      - name: Publish CPU to TestPyPI
+        if: |
+          github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
       - name: Publish CPU to PyPI
         if: |
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi != 'true')
         uses: pypa/gh-action-pypi-publish@release/v1
 
   publish_gpu:
@@ -344,8 +356,15 @@ jobs:
       - name: List GPU distributions
         run: ls -lh dist/
 
+      - name: Publish GPU to TestPyPI
+        if: |
+          github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
       - name: Publish GPU to PyPI
         if: |
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi != 'true')
         uses: pypa/gh-action-pypi-publish@release/v1
