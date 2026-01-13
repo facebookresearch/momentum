@@ -1,3 +1,79 @@
+{#- Jinja2 macros for DRY CMake configuration -#}
+
+{#- Base CMake args shared by all platforms -#}
+{%- macro cmake_base_args() %}
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
+{%- endmacro %}
+
+{#- Linux-specific args for manylinux compatibility -#}
+{%- macro cmake_linux_args() %}
+{{ cmake_base_args() }}
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
+    # The pixi environment's pybind11 uses pybind11NewTools which requires python3_add_library
+    # from CMake's FindPython, but manylinux Python only has Interpreter component
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
+    # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
+    # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
+    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
+    "-DCMAKE_C_FLAGS=-static-libgcc",
+{%- endmacro %}
+
+{#- macOS-specific args -#}
+{%- macro cmake_macos_args() %}
+{{ cmake_base_args() }}
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+{%- endmacro %}
+
+{#- Windows-specific args (maintains original order with -G after SHARED_LIBS) -#}
+{%- macro cmake_windows_args() %}
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-G Visual Studio 17 2022",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+{% if variant == "cpu" %}
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+{% endif %}
+{%- endmacro %}
+
+{#- Common cibuildwheel before-all script for Linux -#}
+{%- macro cibw_linux_before_all() %}
+# Use local pixi binary if available to avoid network issues
+if [ -f /project/pixi_bin ]; then
+  echo "Using local pixi binary"
+  mkdir -p $HOME/.pixi/bin
+  cp /project/pixi_bin $HOME/.pixi/bin/pixi
+  chmod +x $HOME/.pixi/bin/pixi
+else
+  echo "Downloading pixi"
+  curl -fsSL https://pixi.sh/install.sh | bash
+fi
+export PATH=$HOME/.pixi/bin:$PATH
+
+# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
+mkdir -p /tmp/build_env
+cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
+cd /tmp/build_env
+pixi install -e default
+{%- endmacro %}
+
+{#- ============================================================================ -#}
+{#- MAIN TEMPLATE CONTENT -#}
+{#- ============================================================================ -#}
+
 [build-system]
 requires = ["scikit-build-core", "pybind11", "setuptools-scm"]
 build-backend = "scikit_build_core.build"
@@ -82,12 +158,7 @@ Changelog = "https://github.com/facebookresearch/momentum/releases"
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=OFF",
-    "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD=OFF",
+{{ cmake_base_args() }}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
     "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
@@ -111,37 +182,14 @@ wheel.exclude = ["geometry_test_helper.*"]
 [[tool.scikit-build.overrides]]
 if.platform-system = "^darwin"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=OFF",
-    "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+{{ cmake_macos_args() }}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^linux"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=OFF",
-    "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
-    # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
-    # The pixi environment's pybind11 uses pybind11NewTools which requires python3_add_library
-    # from CMake's FindPython, but manylinux Python only has Interpreter component
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
-    # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
-    # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
-    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
-    "-DCMAKE_C_FLAGS=-static-libgcc",
+{{ cmake_linux_args() }}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 {% endif %}
@@ -150,22 +198,7 @@ cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 [[tool.scikit-build.overrides]]
 if.platform-system = "^linux"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=OFF",
-    "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
-    # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
-    # The pixi environment's pybind11 uses pybind11NewTools which requires python_add_library
-    # from CMake's FindPython, but manylinux Python only has Interpreter component
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
-    # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
-    # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
-    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
-    "-DCMAKE_C_FLAGS=-static-libgcc",
+{{ cmake_linux_args() }}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 {% endif %}
@@ -173,18 +206,7 @@ cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
 cmake.args = [
-    "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 17 2022",
-    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
-    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
-    "-DMOMENTUM_BUILD_TESTING=OFF",
-    "-DMOMENTUM_BUILD_RENDERER=OFF",
-    "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
-{% if variant == "cpu" %}
-    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-{% endif %}
+{{ cmake_windows_args() }}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 
@@ -263,23 +285,7 @@ fi
 
 [tool.cibuildwheel.linux]
 before-all = """
-# Use local pixi binary if available to avoid network issues
-if [ -f /project/pixi_bin ]; then
-  echo "Using local pixi binary"
-  mkdir -p $HOME/.pixi/bin
-  cp /project/pixi_bin $HOME/.pixi/bin/pixi
-  chmod +x $HOME/.pixi/bin/pixi
-else
-  echo "Downloading pixi"
-  curl -fsSL https://pixi.sh/install.sh | bash
-fi
-export PATH=$HOME/.pixi/bin:$PATH
-
-# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
-mkdir -p /tmp/build_env
-cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
-cd /tmp/build_env
-pixi install -e default
+{{ cibw_linux_before_all() }}
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
@@ -369,23 +375,7 @@ export CUDA_HOME=/usr/local/cuda-12.8
 export PATH=$CUDA_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 
-# Use local pixi binary if available to avoid network issues
-if [ -f /project/pixi_bin ]; then
-  echo "Using local pixi binary"
-  mkdir -p $HOME/.pixi/bin
-  cp /project/pixi_bin $HOME/.pixi/bin/pixi
-  chmod +x $HOME/.pixi/bin/pixi
-else
-  echo "Downloading pixi"
-  curl -fsSL https://pixi.sh/install.sh | bash
-fi
-export PATH=$HOME/.pixi/bin:$PATH
-
-# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
-mkdir -p /tmp/build_env
-cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
-cd /tmp/build_env
-pixi install -e default
+{{ cibw_linux_before_all() }}
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
