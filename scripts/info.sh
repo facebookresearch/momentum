@@ -6,7 +6,7 @@
 
 set -e
 
-version='0.0.2'
+version='1.0.0'
 cb='```'
 
 if [ ! -x "$(command -v cmake)" ]; then
