@@ -28,6 +28,11 @@ on:
         required: false
         type: boolean
         default: false
+      test_pypi:
+        description: 'Publish to TestPyPI instead of PyPI (for testing)'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,6 +51,8 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+          fetch-depth: 0  # Fetch full history for setuptools_scm version detection
+          fetch-tags: true  # Ensure all tags are fetched
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -113,6 +120,8 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         with:
           submodules: recursive
+          fetch-depth: 0  # Fetch full history for setuptools_scm version detection
+          fetch-tags: true  # Ensure all tags are fetched
 
       - name: Set up ccache
         if: steps.should_run.outputs.run == 'true'
@@ -158,6 +167,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
+      # Run GPU builds sequentially to avoid disk space exhaustion
+      # Each PyTorch+CUDA install needs ~3GB and Docker overlay shares host disk
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.12', '3.13']
@@ -196,19 +208,21 @@ jobs:
 
       - name: Free disk space
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
-        run: |
-          echo "Before cleanup:"
-          df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo docker image prune --all --force
-          echo "After cleanup:"
-          df -h
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # Remove all default tools and applications
+          tool-cache: false  # Keep tool cache for Python
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false  # Keep Docker for cibuildwheel
+          swap-storage: true
 
       - name: Maximize build space (Ubuntu only)
-        if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
+        # DISABLED: This action restructures the filesystem and breaks Docker functionality
+        # The "Free disk space" step above provides enough space for the build
+        if: false && steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 30720
@@ -217,12 +231,14 @@ jobs:
           remove-android: true
           remove-haskell: true
           remove-codeql: true
-          remove-docker-images: true
+          remove-docker-images: false  # Keep Docker for cibuildwheel
 
       - uses: actions/checkout@v6
         if: steps.should_run.outputs.run == 'true'
         with:
           submodules: recursive
+          fetch-depth: 0  # Fetch full history for setuptools_scm version detection
+          fetch-tags: true  # Ensure all tags are fetched
 
       - name: Set up ccache
         if: steps.should_run.outputs.run == 'true'
@@ -253,9 +269,40 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
 
+      - name: Determine version for Docker builds
+        if: steps.should_run.outputs.run == 'true'
+        id: get_version
+        run: |
+          # Install setuptools_scm to determine version from git tags
+          pip install setuptools_scm
+          # Get the version that setuptools_scm would generate
+          FULL_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          echo "Detected version: $FULL_VERSION"
+          # Strip local version part (e.g., +gad8997da8) - PyPI doesn't allow local versions
+          # This converts "0.1.101.dev26+gad8997da8" to "0.1.101.dev26"
+          VERSION=$(echo "$FULL_VERSION" | sed 's/+.*//')
+          echo "Version for PyPI: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
+        timeout-minutes: 60
+        env:
+          # Pass version to cibuildwheel so Docker containers can use it
+          # Without this, setuptools_scm inside Docker would generate 0.0.post1
+          CIBW_ENVIRONMENT_PASS_LINUX: SETUPTOOLS_SCM_PRETEND_VERSION
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          echo "=== Starting GPU wheel build ==="
+          echo "Environment: ${{ matrix.pixi-environment }}"
+          echo "Version: $SETUPTOOLS_SCM_PRETEND_VERSION"
+          echo "Docker version:"
+          docker --version || echo "Docker not available"
+          echo "=== Checking Docker status ==="
+          docker info || echo "Docker info failed"
+          echo "=== Running wheel_build ==="
+          pixi run -e ${{ matrix.pixi-environment }} wheel_build
+          echo "=== Build completed ==="
 
       - name: Repair GPU wheel (Linux only)
         if: steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
@@ -298,10 +345,17 @@ jobs:
       - name: List CPU distributions
         run: ls -lh dist/
 
+      - name: Publish CPU to TestPyPI
+        if: |
+          github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
       - name: Publish CPU to PyPI
         if: |
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi != 'true')
         uses: pypa/gh-action-pypi-publish@release/v1
 
   publish_gpu:
@@ -329,8 +383,15 @@ jobs:
       - name: List GPU distributions
         run: ls -lh dist/
 
+      - name: Publish GPU to TestPyPI
+        if: |
+          github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
       - name: Publish GPU to PyPI
         if: |
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi != 'true')
         uses: pypa/gh-action-pypi-publish@release/v1

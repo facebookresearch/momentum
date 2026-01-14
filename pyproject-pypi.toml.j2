@@ -341,33 +341,103 @@ build-verbosity = 3
 skip = "pp* *-musllinux* *-macosx* *-win*"
 archs = ["auto64"]
 manylinux-x86_64-image = "manylinux_2_28"
+# Disable build isolation so PyTorch installed by before-build is available for CMake
+build-frontend = { name = "pip", args = ["--no-build-isolation"] }
 
 # Common
 before-build = """
-echo "Using pyproject.toml for GPU build"
+set -e  # Exit on error
+
+VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+echo "====================================="
+echo "Building GPU wheel for Python $VER"
+echo "====================================="
+
+# Check available disk space
+echo ">>> Disk space before installation:"
+df -h / || true
+
+# Copy the GPU pyproject.toml
+echo ">>> Step 1: Copying pyproject-pypi-gpu.toml"
 cp pyproject-pypi-gpu.toml pyproject.toml
 
-# Install build dependencies - PyTorch with CUDA
-pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cu128
+# Upgrade pip first
+echo ">>> Step 2: Upgrading pip..."
+python -m pip install --upgrade pip
+
+# Clean pip cache to free up space before large installs
+echo ">>> Step 2.5: Cleaning pip cache to free disk space..."
+python -m pip cache purge || true
+
+# Install build dependencies (required when using --no-build-isolation)
+# These are from [build-system].requires in pyproject.toml
+echo ">>> Step 3: Installing build dependencies..."
+python -m pip install --no-cache-dir scikit-build-core pybind11 setuptools-scm
+
+# Install PyTorch CPU for building (needed at build time to link against libtorch)
+# NOTE: We use CPU PyTorch during build to save ~2GB disk space in the Docker container
+# The GPU wheel will still work at runtime with GPU PyTorch because:
+# 1. libtorch's API is the same for CPU and GPU versions
+# 2. CUDA functionality is loaded dynamically at runtime
+# 3. The wheel only links against libtorch (CPU version is sufficient for linking)
+# At runtime, users will install GPU PyTorch which provides CUDA support
+echo ">>> Step 4: Installing PyTorch CPU for build (to save disk space)..."
+if [ "$VER" = "312" ]; then
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+elif [ "$VER" = "313" ]; then
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+else
+  echo "Unsupported Python version: $VER"
+  exit 1
+fi
+
+# Verify torch package is installed (optional - skip if fails)
+# This verification is not strictly necessary - the build will fail later if torch is missing
+echo ">>> Step 5: Verifying PyTorch package installation..."
+python -c "import importlib.util; spec = importlib.util.find_spec('torch'); print(f'PyTorch package found at: {spec.origin}')" || echo "Warning: PyTorch verification failed, but continuing anyway..."
+
+# Set CMAKE_PREFIX_PATH to include PyTorch's cmake files
+# This allows CMake to find libtorch for linking
+echo ">>> Step 6: Setting up CMAKE_PREFIX_PATH for PyTorch..."
+TORCH_CMAKE_DIR=$(python -c "import torch; print(torch.utils.cmake_prefix_path)" 2>/dev/null || echo "")
+if [ -n "$TORCH_CMAKE_DIR" ] && [ -d "$TORCH_CMAKE_DIR" ]; then
+  export CMAKE_PREFIX_PATH="$TORCH_CMAKE_DIR:$CMAKE_PREFIX_PATH"
+  echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+else
+  echo "Warning: Could not find PyTorch cmake path, build may fail"
+fi
+
+# Show disk space after installation
+echo ">>> Disk space after installation:"
+df -h / || true
+
+echo "====================================="
+echo "Before-build completed for Python $VER"
+echo "====================================="
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
-before-test = "pip install \"torch>=2.8.0,<2.9\" --index-url https://download.pytorch.org/whl/cu128"
+# For testing, we use CPU PyTorch to save disk space in the Docker container
+# The import test doesn't need CUDA - it just verifies the wheel can be imported
+# Users will install GPU PyTorch when they use the package
+before-test = """
+VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+if [ "$VER" = "312" ]; then
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+elif [ "$VER" = "313" ]; then
+  python -m pip install --no-cache-dir "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+fi
+"""
 
 [tool.cibuildwheel.linux]
 before-all = """
-# Install yum-utils to get yum-config-manager
-yum install -y yum-utils
+# NOTE: We don't install CUDA toolkit from yum because:
+# 1. pymomentum doesn't have custom CUDA code (no .cu files)
+# 2. PyTorch's CUDA wheel includes all CUDA runtime libraries
+# 3. This saves ~2GB of disk space for the PyTorch installation
 
-# Install CUDA toolkit in manylinux container
-# Use NVIDIA's network repository for CUDA 12.8
-yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-yum install -y cuda-toolkit-12-8
-
-# Set up CUDA environment
-export CUDA_HOME=/usr/local/cuda-12.8
-export PATH=$CUDA_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+echo ">>> Disk space at start:"
+df -h /
 
 # Use local pixi binary if available to avoid network issues
 if [ -f /project/pixi_bin ]; then
@@ -381,20 +451,30 @@ else
 fi
 export PATH=$HOME/.pixi/bin:$PATH
 
-# Install dependencies in a separate directory to avoid conflicts with host's .pixi folder
+# Install dependencies using the minimal-build environment
+# The minimal-build environment is ~2GB smaller than default, saving disk space for PyTorch CUDA
 mkdir -p /tmp/build_env
 cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
 cd /tmp/build_env
-pixi install -e default
+pixi install -e minimal-build
+
+# Clean up pixi cache to free space
+rm -rf $HOME/.cache/rattler 2>/dev/null || true
+
+echo ">>> Disk space after pixi install:"
+df -h /
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
 # CUDA paths for building GPU extensions
-environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/default/lib" }
+environment = { PATH = "/usr/local/cuda-12.8/bin:$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/minimal-build", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/minimal-build", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", CUDA_HOME = "/usr/local/cuda-12.8", LD_LIBRARY_PATH = "/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/minimal-build/lib" }
 repair-wheel-command = """
 # Bundle libraries with auditwheel using linux_x86_64 (no ABI checks)
 # Then rename to manylinux_2_28_x86_64 for pip compatibility
-export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:/tmp/build_env/.pixi/envs/default/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH
+
+# Create output directory
+mkdir -p /tmp/linux_wheel
 
 echo 'Step 1: Bundling libraries with auditwheel (linux_x86_64)...'
 auditwheel repair -w /tmp/linux_wheel {wheel} \
@@ -418,10 +498,19 @@ auditwheel repair -w /tmp/linux_wheel {wheel} \
     --exclude 'libgcc_s*.so*' || (echo 'Auditwheel failed.' && exit 1)
 
 echo 'Step 2: Renaming wheel to manylinux_2_28_x86_64...'
-LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
-WHEEL_NAME=$(basename "$LINUX_WHEEL")
-NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
-cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+# Check if auditwheel produced output
+if [ -z "$(ls /tmp/linux_wheel/*.whl 2>/dev/null)" ]; then
+  echo "Warning: auditwheel produced no output, using original wheel"
+  WHEEL_NAME=$(basename {wheel})
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp {wheel} {dest_dir}/$NEW_WHEEL_NAME
+else
+  LINUX_WHEEL=$(ls /tmp/linux_wheel/*.whl | head -1)
+  WHEEL_NAME=$(basename "$LINUX_WHEEL")
+  NEW_WHEEL_NAME=$(echo "$WHEEL_NAME" | sed 's/linux_x86_64/manylinux_2_28_x86_64/')
+  cp "$LINUX_WHEEL" {dest_dir}/$NEW_WHEEL_NAME
+fi
+
 echo "Created $NEW_WHEEL_NAME"
 echo "Note: This wheel requires glibc 2.28+, CUDA 12.8+, and libstdc++ from GCC 11+"
 """

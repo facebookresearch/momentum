@@ -475,6 +475,39 @@ dependencies = { python = "3.12.*" }
 dependencies = { python = "3.13.*" }
 
 #==============
+# Feature: Minimal Build (for GPU wheel builds with limited disk space)
+# This feature includes only the essential dependencies for building pymomentum
+# It's significantly smaller than the full default environment (~1.5GB vs ~4GB)
+#==============
+
+[feature.minimal-build]
+platforms = ["linux-64"]
+
+# Essential build tools and runtime/build dependencies (from CMakeLists.txt find_package calls)
+[feature.minimal-build.dependencies]
+cmake = ">=3.28.0,<4"
+ninja = ">=1.13.1,<2"
+blas = ">=2.135,<3"
+ceres-solver = ">=2.2.0,<3"
+cli11 = ">=2.5.0,<3"
+dispenso = ">=1.4.0,<2"
+eigen = ">=3.4.0,<4"
+ezc3d = ">=1.5.19,<2"
+drjit-cpp = ">=1.2.0,<2"
+fmt = ">=11.2.0,<12"
+fx-gltf = ">=2.0.0,<3"
+indicators = ">=2.3,<3"
+kokkos = ">=4.6.2,<5"
+ms-gsl = ">=4.2.0,<5"
+nlohmann_json = ">=3.12.0,<4"
+openfbx = ">=0.9,<0.10"
+re2 = ">=2025.8.12,<2026"
+spdlog = ">=1.15.3,<2"
+urdfdom = ">=4.0.1,<5"
+zlib = ">=1.3.1,<2"
+librerun-sdk = ">=0.23.3,<0.24"
+
+#==============
 # Feature: GPU
 #==============
 
@@ -485,7 +518,8 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py312-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+# Note: Uses Docker (default) instead of podman for CI compatibility (podman has permission issues in GitHub Actions)
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -501,7 +535,8 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py313-cuda129.tasks]
 # GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+# Note: Uses Docker (default) instead of podman for CI compatibility (podman has permission issues in GitHub Actions)
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -523,6 +558,9 @@ py313 = ["py313"]
 py312-cuda129 = ["py312-cuda129"]
 py313-cuda129 = ["py313-cuda129"]
 gpu = ["py312-cuda129"]
+
+# Minimal build environment (for GPU wheel builds with limited disk space in Docker containers)
+minimal-build = ["minimal-build"]
 
 # Default environment
 default = ["py312"]
