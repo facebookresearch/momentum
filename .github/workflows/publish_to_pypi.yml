@@ -276,8 +276,12 @@ jobs:
           # Install setuptools_scm to determine version from git tags
           pip install setuptools_scm
           # Get the version that setuptools_scm would generate
-          VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
-          echo "Detected version: $VERSION"
+          FULL_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          echo "Detected version: $FULL_VERSION"
+          # Strip local version part (e.g., +gad8997da8) - PyPI doesn't allow local versions
+          # This converts "0.1.101.dev26+gad8997da8" to "0.1.101.dev26"
+          VERSION=$(echo "$FULL_VERSION" | sed 's/+.*//')
+          echo "Version for PyPI: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build GPU wheel
