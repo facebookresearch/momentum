@@ -254,6 +254,37 @@ using StateSequenceErrorFunctiond_const_u = ::std::unique_ptr<const StateSequenc
 using StateSequenceErrorFunctiond_const_w = ::std::weak_ptr<const StateSequenceErrorFunctiond>;
 
 template <typename T>
+class VelocityMagnitudeSequenceErrorFunctionT;
+using VelocityMagnitudeSequenceErrorFunction = VelocityMagnitudeSequenceErrorFunctionT<float>;
+using VelocityMagnitudeSequenceErrorFunctiond = VelocityMagnitudeSequenceErrorFunctionT<double>;
+
+using VelocityMagnitudeSequenceErrorFunction_p =
+    ::std::shared_ptr<VelocityMagnitudeSequenceErrorFunction>;
+using VelocityMagnitudeSequenceErrorFunction_u =
+    ::std::unique_ptr<VelocityMagnitudeSequenceErrorFunction>;
+using VelocityMagnitudeSequenceErrorFunction_w =
+    ::std::weak_ptr<VelocityMagnitudeSequenceErrorFunction>;
+using VelocityMagnitudeSequenceErrorFunction_const_p =
+    ::std::shared_ptr<const VelocityMagnitudeSequenceErrorFunction>;
+using VelocityMagnitudeSequenceErrorFunction_const_u =
+    ::std::unique_ptr<const VelocityMagnitudeSequenceErrorFunction>;
+using VelocityMagnitudeSequenceErrorFunction_const_w =
+    ::std::weak_ptr<const VelocityMagnitudeSequenceErrorFunction>;
+
+using VelocityMagnitudeSequenceErrorFunctiond_p =
+    ::std::shared_ptr<VelocityMagnitudeSequenceErrorFunctiond>;
+using VelocityMagnitudeSequenceErrorFunctiond_u =
+    ::std::unique_ptr<VelocityMagnitudeSequenceErrorFunctiond>;
+using VelocityMagnitudeSequenceErrorFunctiond_w =
+    ::std::weak_ptr<VelocityMagnitudeSequenceErrorFunctiond>;
+using VelocityMagnitudeSequenceErrorFunctiond_const_p =
+    ::std::shared_ptr<const VelocityMagnitudeSequenceErrorFunctiond>;
+using VelocityMagnitudeSequenceErrorFunctiond_const_u =
+    ::std::unique_ptr<const VelocityMagnitudeSequenceErrorFunctiond>;
+using VelocityMagnitudeSequenceErrorFunctiond_const_w =
+    ::std::weak_ptr<const VelocityMagnitudeSequenceErrorFunctiond>;
+
+template <typename T>
 class VertexSequenceErrorFunctionT;
 using VertexSequenceErrorFunction = VertexSequenceErrorFunctionT<float>;
 using VertexSequenceErrorFunctiond = VertexSequenceErrorFunctionT<double>;

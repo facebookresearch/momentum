@@ -21,6 +21,7 @@
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
 #include "momentum/character_sequence_solver/state_sequence_error_function.h"
+#include "momentum/character_sequence_solver/velocity_magnitude_sequence_error_function.h"
 #include "momentum/character_sequence_solver/vertex_sequence_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/math/mesh.h"
@@ -922,4 +923,124 @@ TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_ZeroErrorForConstantAcce
   // doesn't produce exactly constant acceleration in joint positions. So we just verify the test
   // runs.
   EXPECT_GE(error, 0.0);
+}
+
+TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_GradientsAndJacobians) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+
+  // create constraints
+  VelocityMagnitudeSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Velocity Magnitude Test - Default (zero target speed)");
+
+    VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+    weights(0) = 4.0f;
+    weights(1) = 5.0f;
+    weights(2) = 0; // Disable one joint
+    errorFunction.setTargetWeights(weights);
+
+    // Test that Jacobian size is correct (1 per active joint - scalar speed residual)
+    const auto nActiveJoints = (weights.array() != 0).count();
+    EXPECT_EQ(errorFunction.getJacobianSize(), nActiveJoints);
+
+    // Note: We skip zero parameters here because at zero velocity, the norm gradient is undefined.
+    // Only test with random parameters that produce non-zero velocities.
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_WithTargetSpeed) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+
+  // create constraints with a target speed
+  VelocityMagnitudeSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Velocity Magnitude Test - With target speed");
+
+    // Set a uniform target speed
+    const double targetSpeed = 0.5;
+    errorFunction.setTargetSpeed(targetSpeed);
+
+    VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+    weights(1) = 2.0f;
+    weights(2) = 3.0f;
+    errorFunction.setTargetWeights(weights);
+
+    // Note: We skip zero parameters here because at zero velocity, the norm gradient is undefined.
+    // Only test with random parameters that produce non-zero velocities.
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_PerJointTargets) {
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+
+  // create constraints with per-joint target speeds
+  VelocityMagnitudeSequenceErrorFunctiond errorFunction(character);
+  {
+    SCOPED_TRACE("Velocity Magnitude Test - Per-joint targets");
+
+    // Set different target speeds for each joint
+    VectorXd speeds = VectorXd::Zero(skeleton.joints.size());
+    for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+      speeds[i] = 0.1 + 0.05 * i;
+    }
+    errorFunction.setTargetSpeeds(speeds);
+
+    VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+    errorFunction.setTargetWeights(weights);
+
+    // Note: We skip zero parameters here because at zero velocity, the norm gradient is undefined.
+    // Only test with random parameters that produce non-zero velocities.
+    for (size_t i = 0; i < 10; i++) {
+      auto parameters = randomModelParameters(character, 2);
+      testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
+    }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_ZeroErrorForTargetSpeed) {
+  // Test that when the actual velocity magnitude matches the target speed, the error is minimal
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  VelocityMagnitudeSequenceErrorFunctiond errorFunction(character);
+
+  // Use zero target speed (default)
+  VectorXd weights = VectorXd::Ones(skeleton.joints.size());
+  errorFunction.setTargetWeights(weights);
+
+  // Create two identical frames (zero velocity)
+  std::vector<ModelParametersd> parameters(2);
+  const Eigen::Index np = transform.numAllModelParameters();
+
+  Random<> gen(1234);
+  auto base = gen.uniform<VectorXd>(np, -0.1, 0.1);
+  parameters[0] = base;
+  parameters[1] = base; // Same as frame 0, so velocity is zero
+
+  // Compute skeleton states
+  const ParameterTransformd transformD = transform.cast<double>();
+  std::vector<SkeletonStated> skelStates(2);
+  for (size_t iFrame = 0; iFrame < 2; ++iFrame) {
+    skelStates[iFrame] = SkeletonStated(transformD.apply(parameters[iFrame]), skeleton);
+  }
+  std::vector<MeshStated> meshStates(2);
+
+  // The error should be zero for identical frames with zero target speed
+  const double error = errorFunction.getError(parameters, skelStates, meshStates);
+  EXPECT_NEAR(error, 0.0, 1e-10);
 }
