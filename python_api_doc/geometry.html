@@ -456,6 +456,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.find_closest_points"><code class="docutils literal notranslate"><span class="pre">find_closest_points()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.find_closest_points_on_mesh"><code class="docutils literal notranslate"><span class="pre">find_closest_points_on_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.is_fbxsdk_available"><code class="docutils literal notranslate"><span class="pre">is_fbxsdk_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.is_usd_available"><code class="docutils literal notranslate"><span class="pre">is_usd_available()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_local_skeleton_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_positions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_skeleton_state()</span></code></a></li>
@@ -3687,6 +3688,13 @@ The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of
 <dt class="sig sig-object py" id="pymomentum.geometry.is_fbxsdk_available">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">is_fbxsdk_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.is_fbxsdk_available" title="Link to this definition"></a></dt>
 <dd><p>When FBXSDK is available, you can save fbx files as output.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.is_usd_available">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">is_usd_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.is_usd_available" title="Link to this definition"></a></dt>
+<dd><p>Check if USD file format support is available.</p>
+<p>When USD is available, you can load and save USD files (.usd, .usda, .usdc, .usdz).</p>
 </dd></dl>
 
 <dl class="py function">
