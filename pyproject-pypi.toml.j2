@@ -49,7 +49,7 @@
 {% endif %}
 {%- endmacro %}
 
-{#- Common cibuildwheel before-all script for Linux -#}
+{#- Common cibuildwheel before-all script for Linux (CPU builds) -#}
 {%- macro cibw_linux_before_all() %}
 # Use local pixi binary if available to avoid network issues
 if [ -f /project/pixi_bin ]; then
@@ -68,6 +68,29 @@ mkdir -p /tmp/build_env
 cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
 cd /tmp/build_env
 pixi install -e default
+{%- endmacro %}
+
+{#- GPU-specific cibuildwheel before-all script for Linux -#}
+{#- Uses minimal-build environment to save ~2.5GB disk space in Docker container -#}
+{%- macro cibw_linux_before_all_gpu() %}
+# Use local pixi binary if available to avoid network issues
+if [ -f /project/pixi_bin ]; then
+  echo "Using local pixi binary"
+  mkdir -p $HOME/.pixi/bin
+  cp /project/pixi_bin $HOME/.pixi/bin/pixi
+  chmod +x $HOME/.pixi/bin/pixi
+else
+  echo "Downloading pixi"
+  curl -fsSL https://pixi.sh/install.sh | bash
+fi
+export PATH=$HOME/.pixi/bin:$PATH
+
+# Install minimal-build environment (smaller footprint for GPU Docker builds)
+# This environment contains only essential build dependencies from CMakeLists.txt
+mkdir -p /tmp/build_env
+cp {project}/pixi.toml {project}/pixi.lock {project}/README.md {project}/LICENSE /tmp/build_env/
+cd /tmp/build_env
+pixi install -e minimal-build
 {%- endmacro %}
 
 {#- ============================================================================ -#}
@@ -450,7 +473,7 @@ export CUDA_HOME=/usr/local/cuda-12.8
 export PATH=$CUDA_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 
-{{ cibw_linux_before_all() }}
+{{ cibw_linux_before_all_gpu() }}
 """
 # Use manylinux container's gcc-toolset-12 compiler for manylinux_2_28 compatibility
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
