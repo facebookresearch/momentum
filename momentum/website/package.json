@@ -43,7 +43,8 @@
     "**/js-yaml": ">=4.1.1",
     "**/gray-matter": ">=4.0.3",
     "**/node-forge": "1.3.2",
-    "@docusaurus/**/mdast-util-to-hast": "13.2.1"
+    "@docusaurus/**/mdast-util-to-hast": "13.2.1",
+    "**/diff": ">=8.0.3"
   },
   "browserslist": {
     "production": [
