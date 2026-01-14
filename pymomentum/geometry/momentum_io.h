@@ -137,4 +137,6 @@ std::vector<momentum::SkeletonState> arrayToSkeletonStates(
 
 bool isFbxsdkAvailable();
 
+bool isUsdAvailable();
+
 } // namespace pymomentum

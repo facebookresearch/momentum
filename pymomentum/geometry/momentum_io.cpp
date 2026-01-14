@@ -389,4 +389,12 @@ bool isFbxsdkAvailable() {
   return false;
 #endif
 }
+
+bool isUsdAvailable() {
+#ifdef MOMENTUM_WITH_USD
+  return true;
+#else
+  return false;
+#endif
+}
 } // namespace pymomentum

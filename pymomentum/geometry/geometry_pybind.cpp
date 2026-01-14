@@ -1257,6 +1257,14 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.
       &isFbxsdkAvailable,
       R"(When FBXSDK is available, you can save fbx files as output.)");
 
+  // isUsdAvailable()
+  m.def(
+      "is_usd_available",
+      &isUsdAvailable,
+      R"(Check if USD file format support is available.
+
+When USD is available, you can load and save USD files (.usd, .usda, .usdc, .usdz).)");
+
   registerMeshBindings(meshClass);
   registerJointBindings(jointClass);
   registerSkeletonBindings(skeletonClass);
