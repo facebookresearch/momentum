@@ -813,6 +813,44 @@ Load timestamps stored in the momentum extension (usually in microseconds).
 :param urdf_bytes: Bytes array containing the urdf definition.
       )",
           py::arg("urdf_bytes"))
+#ifdef MOMENTUM_WITH_USD
+      // loadUSDCharacterFromFile(usdPath)
+      .def_static(
+          "load_usd",
+          &loadUSDCharacterFromFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from a USD file.
+
+Supports .usd, .usda, .usdc, and .usdz file formats.
+
+:param usd_filename: Path to the USD file.
+:return: A :class:`Character` object containing the loaded skeleton, mesh, and skin weights.
+      )",
+          py::arg("usd_filename"))
+      // loadUSDCharacterFromBytes(usdBytes)
+      .def_static(
+          "load_usd_from_bytes",
+          &loadUSDCharacterFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from USD bytes.
+
+:param usd_bytes: Bytes array containing the USD data.
+:return: A :class:`Character` object containing the loaded skeleton, mesh, and skin weights.
+      )",
+          py::arg("usd_bytes"))
+      // saveUSDCharacterToFile(path, character)
+      .def_static(
+          "save_usd",
+          &saveUSDCharacterToFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character to a USD file.
+
+:param path: Path to save the USD file.
+:param character: The :class:`Character` object to save.
+      )",
+          py::arg("path"),
+          py::arg("character"))
+#endif // MOMENTUM_WITH_USD
       // saveGLTFCharacterToFile(filename, character)
       .def_static(
           "save_gltf",
