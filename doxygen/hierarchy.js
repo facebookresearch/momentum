@@ -129,6 +129,7 @@ var hierarchy =
       ] ],
       [ "momentum::ModelParametersSequenceErrorFunctionT< T >", "classmomentum_1_1ModelParametersSequenceErrorFunctionT.html", null ],
       [ "momentum::StateSequenceErrorFunctionT< T >", "classmomentum_1_1StateSequenceErrorFunctionT.html", null ],
+      [ "momentum::VelocityMagnitudeSequenceErrorFunctionT< T >", "classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html", null ],
       [ "momentum::VertexSequenceErrorFunctionT< T >", "classmomentum_1_1VertexSequenceErrorFunctionT.html", null ]
     ] ],
     [ "momentum::SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html", null ],

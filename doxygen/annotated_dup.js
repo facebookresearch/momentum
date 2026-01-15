@@ -162,6 +162,7 @@ var annotated_dup =
       [ "TrustRegionQROptions", "structmomentum_1_1TrustRegionQROptions.html", "structmomentum_1_1TrustRegionQROptions" ],
       [ "TrustRegionQRT", "classmomentum_1_1TrustRegionQRT.html", "classmomentum_1_1TrustRegionQRT" ],
       [ "UnionErrorFunctionT", "classmomentum_1_1UnionErrorFunctionT.html", "classmomentum_1_1UnionErrorFunctionT" ],
+      [ "VelocityMagnitudeSequenceErrorFunctionT", "classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html", "classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT" ],
       [ "VertexConstraintT", "structmomentum_1_1VertexConstraintT.html", "structmomentum_1_1VertexConstraintT" ],
       [ "VertexErrorFunctionT", "classmomentum_1_1VertexErrorFunctionT.html", "classmomentum_1_1VertexErrorFunctionT" ],
       [ "VertexProjectionConstraintT", "structmomentum_1_1VertexProjectionConstraintT.html", "structmomentum_1_1VertexProjectionConstraintT" ],
