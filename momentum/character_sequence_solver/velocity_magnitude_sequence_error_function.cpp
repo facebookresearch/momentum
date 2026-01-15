@@ -15,14 +15,6 @@
 
 namespace momentum {
 
-namespace {
-
-// Small epsilon to avoid division by zero when velocity is very small
-template <typename T>
-constexpr T kVelocityEpsilon = T(1e-8);
-
-} // namespace
-
 template <typename T>
 VelocityMagnitudeSequenceErrorFunctionT<T>::VelocityMagnitudeSequenceErrorFunctionT(
     const Skeleton& skel,
@@ -85,11 +77,14 @@ double VelocityMagnitudeSequenceErrorFunctionT<T>::getError(
     const Eigen::Vector3<T> velocity =
         nextState.jointState[i].translation() - prevState.jointState[i].translation();
 
-    // Compute velocity magnitude
-    const T speed = velocity.norm();
+    // Compute smooth velocity magnitude: ||v||_smooth = sqrt(||v||^2 + eps^2)
+    // This provides a smooth, differentiable approximation to the velocity magnitude.
+    const T speedSquared = velocity.squaredNorm();
+    const T smoothSpeed =
+        std::sqrt(speedSquared + kVelocityMagnitudeEpsilon<T> * kVelocityMagnitudeEpsilon<T>);
 
-    // Compute residual: speed - targetSpeed
-    const T residual = speed - targetSpeeds_[i];
+    // Compute residual: smoothSpeed - targetSpeed
+    const T residual = smoothSpeed - targetSpeeds_[i];
 
     error += residual * residual * targetWeights_[i];
   }
@@ -124,24 +119,22 @@ double VelocityMagnitudeSequenceErrorFunctionT<T>::getGradient(
     const Eigen::Vector3<T> velocity =
         nextState.jointState[i].translation() - prevState.jointState[i].translation();
 
-    // Compute velocity magnitude
-    const T speed = velocity.norm();
+    // Compute smooth velocity magnitude: ||v||_smooth = sqrt(||v||^2 + eps^2)
+    const T speedSquared = velocity.squaredNorm();
+    const T smoothSpeed =
+        std::sqrt(speedSquared + kVelocityMagnitudeEpsilon<T> * kVelocityMagnitudeEpsilon<T>);
 
-    // Compute residual: speed - targetSpeed
-    const T residual = speed - targetSpeeds_[i];
+    // Compute residual: smoothSpeed - targetSpeed
+    const T residual = smoothSpeed - targetSpeeds_[i];
 
     const T wgt = targetWeights_[i] * this->weight_;
     error += residual * residual * wgt;
 
-    // Compute gradient direction: d(||v||)/d(v) = v / ||v|| (unit direction)
-    // When speed is very small, the gradient direction is undefined, so we skip
-    if (speed < kVelocityEpsilon<T>) {
-      continue;
-    }
-
+    // Compute smooth gradient direction: d(||v||_smooth)/d(v) = v / ||v||_smooth
+    // This is always well-defined since ||v||_smooth >= eps > 0
+    const Eigen::Vector3<T> gradDir = velocity / smoothSpeed;
     // d(error)/d(pos) = 2 * (||v|| - s) * (v / ||v||) * d(v)/d(pos)
     // d(v)/d(pos0) = -I, d(v)/d(pos1) = I
-    const Eigen::Vector3<T> gradDir = velocity / speed;
     const T gradScale = T(2) * wgt * residual;
 
     // Gradient for prevState (frame 0) - negative because d(v)/d(pos0) = -I
@@ -327,11 +320,13 @@ double VelocityMagnitudeSequenceErrorFunctionT<T>::getJacobian(
     const Eigen::Vector3<T> velocity =
         nextState.jointState[i].translation() - prevState.jointState[i].translation();
 
-    // Compute velocity magnitude
-    const T speed = velocity.norm();
+    // Compute smooth velocity magnitude: ||v||_smooth = sqrt(||v||^2 + eps^2)
+    const T speedSquared = velocity.squaredNorm();
+    const T smoothSpeed =
+        std::sqrt(speedSquared + kVelocityMagnitudeEpsilon<T> * kVelocityMagnitudeEpsilon<T>);
 
-    // Compute residual: speed - targetSpeed
-    const T res = speed - targetSpeeds_[i];
+    // Compute residual: smoothSpeed - targetSpeed
+    const T res = smoothSpeed - targetSpeeds_[i];
 
     const T wgt = targetWeights_[i] * this->weight_;
     const T sqrtWgt = std::sqrt(wgt);
@@ -339,12 +334,9 @@ double VelocityMagnitudeSequenceErrorFunctionT<T>::getJacobian(
     error += res * res * wgt;
     residual(offset) = res * sqrtWgt;
 
-    // Compute Jacobian direction: d(||v||)/d(v) = v / ||v||
-    // When speed is very small, the Jacobian is zero (or undefined)
-    Eigen::Vector3<T> gradDir = Eigen::Vector3<T>::Zero();
-    if (speed >= kVelocityEpsilon<T>) {
-      gradDir = velocity / speed;
-    }
+    // Compute smooth Jacobian direction: d(||v||_smooth)/d(v) = v / ||v||_smooth
+    // This is always well-defined since ||v||_smooth >= eps > 0
+    const Eigen::Vector3<T> gradDir = velocity / smoothSpeed;
 
     // Jacobian for prevState (frame 0) - negative because d(v)/d(pos0) = -I
     processFrame(prevState, i, 0, T(-1), sqrtWgt, gradDir);
