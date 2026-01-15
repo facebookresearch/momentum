@@ -945,8 +945,10 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_GradientsAn
     const auto nActiveJoints = (weights.array() != 0).count();
     EXPECT_EQ(errorFunction.getJacobianSize(), nActiveJoints);
 
-    // Note: We skip zero parameters here because at zero velocity, the norm gradient is undefined.
-    // Only test with random parameters that produce non-zero velocities.
+    // Note: We skip zero parameters for gradient/Jacobian check because at zero velocity,
+    // the epsilon smoothing creates a gradient that is analytically zero but numerically
+    // non-zero due to finite difference approximations. Random parameters produce non-zero
+    // velocities where the gradient is well-defined.
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
       testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
@@ -973,8 +975,10 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_WithTargetS
     weights(2) = 3.0f;
     errorFunction.setTargetWeights(weights);
 
-    // Note: We skip zero parameters here because at zero velocity, the norm gradient is undefined.
-    // Only test with random parameters that produce non-zero velocities.
+    // Note: We skip zero parameters for gradient/Jacobian check because at zero velocity,
+    // the epsilon smoothing creates a gradient that is analytically zero but numerically
+    // non-zero due to finite difference approximations. Random parameters produce non-zero
+    // velocities where the gradient is well-defined.
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
       testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
@@ -1002,8 +1006,10 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_PerJointTar
     VectorXd weights = VectorXd::Ones(skeleton.joints.size());
     errorFunction.setTargetWeights(weights);
 
-    // Note: We skip zero parameters here because at zero velocity, the norm gradient is undefined.
-    // Only test with random parameters that produce non-zero velocities.
+    // Note: We skip zero parameters for gradient/Jacobian check because at zero velocity,
+    // the epsilon smoothing creates a gradient that is analytically zero but numerically
+    // non-zero due to finite difference approximations. Random parameters produce non-zero
+    // velocities where the gradient is well-defined.
     for (size_t i = 0; i < 10; i++) {
       auto parameters = randomModelParameters(character, 2);
       testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-5f, true);
@@ -1040,7 +1046,10 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_ZeroErrorFo
   }
   std::vector<MeshStated> meshStates(2);
 
-  // The error should be zero for identical frames with zero target speed
+  // The error should be close to kVelocityMagnitudeEpsilon^2 * numJoints for identical frames
+  // with zero target speed (smoothSpeed = eps, residual = eps - 0 = eps)
   const double error = errorFunction.getError(parameters, skelStates, meshStates);
-  EXPECT_NEAR(error, 0.0, 1e-10);
+  const double expectedError = kVelocityMagnitudeEpsilon<double> *
+      kVelocityMagnitudeEpsilon<double> * skeleton.joints.size();
+  EXPECT_NEAR(error, expectedError, 1e-15);
 }

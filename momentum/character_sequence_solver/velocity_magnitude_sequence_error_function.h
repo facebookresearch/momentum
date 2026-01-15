@@ -13,20 +13,33 @@
 
 namespace momentum {
 
+/// Epsilon for smooth velocity magnitude approximation: ||v||_smooth = sqrt(||v||^2 + eps^2)
+///
+/// This provides a smooth, differentiable approximation to the velocity magnitude
+/// with well-defined gradients even when velocity is near zero.
+template <typename T>
+inline constexpr T kVelocityMagnitudeEpsilon = T(1e-6);
+
 /// Error function that penalizes the deviation of per-joint velocity magnitude from a target speed.
 ///
 /// Given two consecutive frames, this error function computes the velocity for each joint as:
 ///   velocity = pos[t+1] - pos[t]
 ///
-/// The residual for each joint is the difference between the velocity magnitude and a target speed:
-///   residual = ||velocity|| - targetSpeed
+/// The velocity magnitude is computed using a smooth approximation to avoid discontinuities:
+///   ||v||_smooth = sqrt(||v||^2 + eps^2)
+///
+/// This provides a differentiable approximation to the velocity magnitude with well-defined
+/// gradients even when velocity is near zero. The gradient is:
+///   d(||v||_smooth)/d(v) = v / ||v||_smooth
+///
+/// The residual for each joint is the difference between the smooth velocity magnitude and a target
+/// speed:
+///   residual = ||v||_smooth - targetSpeed
 ///
 /// This is useful for constraining character motion to maintain a specific speed profile, such as
 /// ensuring that joints move at a consistent pace during walking or running animations.
 ///
 /// Note: This error function only constrains position velocity magnitude, not rotation velocity.
-/// When the velocity is very small (near zero), a small epsilon is added to avoid numerical issues
-/// in the gradient computation.
 template <typename T>
 class VelocityMagnitudeSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
  public:
