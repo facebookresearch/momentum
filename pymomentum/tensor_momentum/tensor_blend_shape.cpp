@@ -22,11 +22,12 @@
 #endif
 #include <Eigen/Core>
 
+namespace py = pybind11;
+
 namespace pymomentum {
 
 namespace {
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
@@ -45,7 +46,11 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
     at::Tensor blendShapeCoefficients) {
   const auto nCoeffs_idx = -1;
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   ctx->saved_data["blendShape"] = c10::ivalue::ConcretePyObjectHolder::create(blendShape_in);
+#else
+  (void)ctx;
+#endif
   ctx->save_for_backward({blendShapeCoefficients});
 
   TensorChecker checker("applyBlendShapeCoefficients");
@@ -104,6 +109,7 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
 variable_list ApplyBlendShapeCoefficientsFunction::backward(
     AutogradContext* ctx,
     variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
@@ -154,8 +160,12 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
   }
 
   return {at::Tensor(), dLoss_dBlendShapeCoeffs};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
-#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
@@ -164,14 +174,8 @@ variable_list ApplyBlendShapeCoefficientsFunction::backward(
 // problem is that to do the latter we'd end up copying the whole tensor
 // every time we apply blend shapes.  Explicitly implementing this one
 // operation seems like a reasonable compromise.
-at::Tensor applyBlendShapeCoefficients(
-    [[maybe_unused]] pybind11::object blendShape,
-    [[maybe_unused]] at::Tensor coeffs) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+at::Tensor applyBlendShapeCoefficients(pybind11::object blendShape, at::Tensor coeffs) {
   return ApplyBlendShapeCoefficientsFunction::apply(blendShape.ptr(), coeffs)[0];
-#else
-  MT_THROW("applyBlendShapeCoefficients is not supported in limited PyTorch API mode");
-#endif
 }
 
 } // namespace pymomentum

@@ -27,7 +27,6 @@ namespace pymomentum {
 
 namespace {
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
@@ -175,7 +174,11 @@ variable_list JointParametersToPositionsFunction<T>::forward(
   const auto nBatch = checker.getBatchSize();
   const auto characters = toCharacterList(characters_in, nBatch, "joint_parameters_to_positions()");
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+#else
+  (void)ctx;
+#endif
   ctx->save_for_backward({jointParameters, parents, offsets});
 
   at::Tensor result = at::zeros({nBatch, nPoints, 3}, at::CPU(toScalarType<T>()));
@@ -207,6 +210,7 @@ template <typename T>
 variable_list JointParametersToPositionsFunction<T>::backward(
     AutogradContext* ctx,
     variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
@@ -295,23 +299,22 @@ variable_list JointParametersToPositionsFunction<T>::backward(
 
   return {
       at::Tensor(), d_jointParameters.to(input_device), at::Tensor(), d_offsets.to(input_device)};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
-
-#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
 at::Tensor jointParametersToPositions(
-    [[maybe_unused]] pybind11::object characters_in,
-    [[maybe_unused]] at::Tensor jointParameters,
-    [[maybe_unused]] at::Tensor parents,
-    [[maybe_unused]] at::Tensor offsets) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+    pybind11::object characters_in,
+    at::Tensor jointParameters,
+    at::Tensor parents,
+    at::Tensor offsets) {
   return applyTemplatedAutogradFunction<JointParametersToPositionsFunction>(
       characters_in.ptr(), jointParameters, parents, offsets)[0];
-#else
-  MT_THROW("jointParametersToPositions is not supported in limited PyTorch API mode");
-#endif
 }
 
 at::Tensor modelParametersToPositions(

@@ -29,7 +29,6 @@ namespace pymomentum {
 
 namespace {
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
@@ -239,7 +238,11 @@ variable_list JointParametersToSkeletonStateFunction<T>::forward(
       &squeeze);
   const auto nBatch = checker.getBatchSize();
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+#else
+  (void)ctx;
+#endif
   ctx->save_for_backward({jointParameters});
 
   const auto characters =
@@ -270,6 +273,7 @@ template <typename T>
 variable_list JointParametersToSkeletonStateFunction<T>::backward(
     AutogradContext* ctx,
     variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in JointParametersToSkeletonStateFunction::backward");
@@ -331,6 +335,11 @@ variable_list JointParametersToSkeletonStateFunction<T>::backward(
   }
 
   return {at::Tensor(), result.to(input_device)};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
 
 template <typename T>
@@ -369,7 +378,11 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::forward(
       &squeeze);
   const auto nBatch = checker.getBatchSize();
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+#else
+  (void)ctx;
+#endif
   ctx->save_for_backward({jointParameters});
 
   const auto characters =
@@ -401,6 +414,7 @@ template <typename T>
 variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
     AutogradContext* ctx,
     variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in JointParametersToLocalSkeletonStateFunction::backward");
@@ -462,32 +476,25 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
   }
 
   return {at::Tensor(), result.to(input_device)};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
-
-#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
-at::Tensor jointParametersToSkeletonState(
-    [[maybe_unused]] pybind11::object characters,
-    [[maybe_unused]] at::Tensor jointParams) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+at::Tensor jointParametersToSkeletonState(pybind11::object characters, at::Tensor jointParams) {
   return applyTemplatedAutogradFunction<JointParametersToSkeletonStateFunction>(
       characters.ptr(), jointParams)[0];
-#else
-  MT_THROW("jointParametersToSkeletonState is not supported in limited PyTorch API mode");
-#endif
 }
 
 at::Tensor jointParametersToLocalSkeletonState(
-    [[maybe_unused]] pybind11::object characters,
-    [[maybe_unused]] at::Tensor jointParams) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+    pybind11::object characters,
+    at::Tensor jointParams) {
   return applyTemplatedAutogradFunction<JointParametersToLocalSkeletonStateFunction>(
       characters.ptr(), jointParams)[0];
-#else
-  MT_THROW("jointParametersToLocalSkeletonState is not supported in limited PyTorch API mode");
-#endif
 }
 
 at::Tensor modelParametersToSkeletonState(pybind11::object characters, at::Tensor modelParams) {

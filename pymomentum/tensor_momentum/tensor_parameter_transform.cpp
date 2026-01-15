@@ -26,8 +26,6 @@ namespace pymomentum {
 
 namespace {
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
-
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
@@ -91,12 +89,16 @@ variable_list ApplyParameterTransformFunction<T>::forward(
       false,
       &squeeze);
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   if (paramTransform) {
     ctx->saved_data["parameterTransform"] =
         c10::ivalue::ConcretePyObjectHolder::create(py::cast(paramTransform));
   } else {
     ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters);
   }
+#else
+  (void)ctx;
+#endif
 
   const auto nBatch = checker.getBatchSize();
   MT_CHECK(paramTransform != nullptr || characters != nullptr);
@@ -123,6 +125,7 @@ template <typename T>
 variable_list ApplyParameterTransformFunction<T>::backward(
     AutogradContext* ctx,
     variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in ApplyParameterTransformFunction::backward");
@@ -180,36 +183,29 @@ variable_list ApplyParameterTransformFunction<T>::backward(
   }
 
   return {at::Tensor(), at::Tensor(), result.to(input_device)};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
-
-#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
 at::Tensor applyParamTransform(
-    [[maybe_unused]] const momentum::ParameterTransform* paramTransform,
-    [[maybe_unused]] at::Tensor modelParams) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+    const momentum::ParameterTransform* paramTransform,
+    at::Tensor modelParams) {
   MT_CHECK_NOTNULL(paramTransform);
   PyObject* characters = nullptr;
   return applyTemplatedAutogradFunction<ApplyParameterTransformFunction>(
       characters, paramTransform, modelParams)[0];
-#else
-  MT_THROW("applyParamTransform is not supported in limited PyTorch API mode");
-#endif
 }
 
-at::Tensor applyParamTransform(
-    [[maybe_unused]] pybind11::object characters,
-    [[maybe_unused]] at::Tensor modelParams) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+at::Tensor applyParamTransform(pybind11::object characters, at::Tensor modelParams) {
   MT_CHECK_NOTNULL(characters.ptr());
   const momentum::ParameterTransform* paramTransform = nullptr;
   return applyTemplatedAutogradFunction<ApplyParameterTransformFunction>(
       characters.ptr(), paramTransform, modelParams)[0];
-#else
-  MT_THROW("applyParamTransform is not supported in limited PyTorch API mode");
-#endif
 }
 
 at::Tensor parameterSetToTensor(
@@ -365,8 +361,6 @@ at::Tensor findParameters(
 
 namespace {
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
-
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
@@ -403,8 +397,13 @@ variable_list ApplyInverseParameterTransformFunction::forward(
 
   const auto nBatch = checker.getBatchSize();
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   ctx->saved_data["inverseParameterTransform"] =
       c10::ivalue::ConcretePyObjectHolder::create(py::cast(inverseParamTransform));
+#else
+  (void)ctx;
+  (void)inverseParamTransform;
+#endif
 
   auto result = at::zeros({nBatch, inverseParamTransform->numAllModelParameters()}, at::kFloat);
   for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
@@ -422,6 +421,7 @@ variable_list ApplyInverseParameterTransformFunction::forward(
 variable_list ApplyInverseParameterTransformFunction::backward(
     AutogradContext* ctx,
     variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(
       grad_outputs.size() != 1,
       "Invalid grad_outputs in ApplyInverseParameterTransformFunction::backward");
@@ -475,20 +475,19 @@ variable_list ApplyInverseParameterTransformFunction::backward(
   }
 
   return {at::Tensor(), result.to(input_device)};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
-
-#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // anonymous namespace
 
 at::Tensor applyInverseParamTransform(
-    [[maybe_unused]] const momentum::InverseParameterTransform* invParamTransform,
-    [[maybe_unused]] at::Tensor jointParams) {
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
+    const momentum::InverseParameterTransform* invParamTransform,
+    at::Tensor jointParams) {
   return ApplyInverseParameterTransformFunction::apply(invParamTransform, jointParams)[0];
-#else
-  MT_THROW("applyInverseParamTransform is not supported in limited PyTorch API mode");
-#endif
 }
 
 std::unique_ptr<momentum::InverseParameterTransform> createInverseParameterTransform(

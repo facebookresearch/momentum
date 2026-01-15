@@ -26,7 +26,6 @@ namespace pymomentum {
 
 namespace {
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
 using torch::autograd::AutogradContext;
 using torch::autograd::variable_list;
 
@@ -77,7 +76,11 @@ variable_list SkinPointsFunction<T>::forward(
       !firstCharacter.mesh || !firstCharacter.skinWeights,
       "When skinning points, character is missing a mesh.");
 
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   ctx->saved_data["character"] = c10::ivalue::ConcretePyObjectHolder::create(characters_in);
+#else
+  (void)ctx;
+#endif
   ctx->save_for_backward({transforms, restPoints});
 
   const int nJoints = firstCharacter.skeleton.joints.size();
@@ -166,6 +169,7 @@ variable_list SkinPointsFunction<T>::forward(
 
 template <typename T>
 variable_list SkinPointsFunction<T>::backward(AutogradContext* ctx, variable_list grad_outputs) {
+#ifndef PYMOMENTUM_LIMITED_TORCH_API
   MT_THROW_IF(grad_outputs.size() != 1, "Invalid grad_outputs in SkinPointsFunction::backward");
 
   const auto& firstCharacter =
@@ -318,15 +322,19 @@ variable_list SkinPointsFunction<T>::backward(AutogradContext* ctx, variable_lis
   }
 
   return {at::Tensor(), dLoss_dTransforms, dLoss_dRestPositions};
+#else
+  (void)ctx;
+  (void)grad_outputs;
+  MT_THROW("Backward pass is not supported when PYMOMENTUM_LIMITED_TORCH_API is defined");
+#endif
 }
-#endif // PYMOMENTUM_LIMITED_TORCH_API
 
 } // namespace
 
 at::Tensor skinPoints(
-    [[maybe_unused]] pybind11::object characters,
-    [[maybe_unused]] at::Tensor skel_state,
-    [[maybe_unused]] std::optional<at::Tensor> restPoints) {
+    pybind11::object characters,
+    at::Tensor skel_state,
+    std::optional<at::Tensor> restPoints) {
   if (skel_state.size(-1) == 8) {
     // Assumed to be a skeleton state.
     skel_state = skeletonStateToTransforms(skel_state);
@@ -339,12 +347,8 @@ at::Tensor skinPoints(
         formatTensorSizes(skel_state));
   }
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
   return applyTemplatedAutogradFunction<SkinPointsFunction>(
       characters.ptr(), skel_state, denullify(restPoints))[0];
-#else
-  MT_THROW("skinPoints is not supported in limited PyTorch API mode");
-#endif
 }
 
 at::Tensor computeVertexNormals(at::Tensor vertex_positions, at::Tensor triangles) {
