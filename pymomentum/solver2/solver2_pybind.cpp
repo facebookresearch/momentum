@@ -39,6 +39,50 @@ std::string boolToString(bool value) {
   return value ? "True" : "False";
 }
 
+// Helper function to copy frame parameters from input array to solver function
+void copyInputFrameParameters(
+    const py::detail::unchecked_reference<float, 2>& modelParams_acc,
+    mm::SequenceSolverFunction& solverFunction,
+    py::ssize_t nFrames,
+    py::ssize_t nParams) {
+  for (py::ssize_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    Eigen::VectorXf modelParams_frame = Eigen::VectorXf::Zero(nParams);
+    for (py::ssize_t k = 0; k < nParams; ++k) {
+      modelParams_frame(k) = modelParams_acc(iFrame, k);
+    }
+    solverFunction.setFrameParameters(iFrame, modelParams_frame);
+  }
+}
+
+// Helper function to copy frame parameters from solver function to output array
+void copyOutputFrameParameters(
+    py::detail::unchecked_mutable_reference<float, 2>& result_acc,
+    const mm::SequenceSolverFunction& solverFunction,
+    py::ssize_t nFrames,
+    py::ssize_t nParams) {
+  for (py::ssize_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    const auto& modelParams_frame = solverFunction.getFrameParameters(iFrame);
+    for (py::ssize_t k = 0; k < nParams; ++k) {
+      result_acc(iFrame, k) = modelParams_frame(k);
+    }
+  }
+}
+
+// Helper function to format error functions list for __repr__
+std::string formatErrorFunctionsList(
+    const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>& errorFunctions) {
+  std::string result;
+  for (size_t i = 0; i < errorFunctions.size(); ++i) {
+    // Call the __repr__ method of each error function
+    py::object pyErrorFunction = py::cast(errorFunctions[i]);
+    result += py::str(pyErrorFunction);
+    if (i + 1 < errorFunctions.size()) {
+      result += ", ";
+    }
+  }
+  return result;
+}
+
 PYBIND11_MODULE(solver2, m) {
   // TODO more explanation
   m.attr("__name__") = "pymomentum.solver2";
@@ -155,15 +199,7 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
           "__repr__",
           [](const mm::SkeletonSolverFunction& self) {
             std::string result = "SkeletonSolverFunction(error_functions=[";
-            const auto& errorFunctions = self.getErrorFunctions();
-            for (size_t i = 0; i < errorFunctions.size(); ++i) {
-              // Call the __repr__ method of each error function
-              py::object pyErrorFunction = py::cast(errorFunctions[i]);
-              result += py::str(pyErrorFunction);
-              if (i + 1 < errorFunctions.size()) {
-                result += ", ";
-              }
-            }
+            result += formatErrorFunctionsList(self.getErrorFunctions());
             result += "])";
             return result;
           })
@@ -632,13 +668,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
         {
           auto modelParams_acc = modelParams.unchecked<2>();
           py::gil_scoped_release release;
-          for (int iFrame = 0; iFrame < nFrames; ++iFrame) {
-            Eigen::VectorXf modelParams_frame = Eigen::VectorXf::Zero(nParams);
-            for (int k = 0; k < nParams; ++k) {
-              modelParams_frame(k) = modelParams_acc(iFrame, k);
-            }
-            solverFunction.setFrameParameters(iFrame, modelParams_frame);
-          }
+          copyInputFrameParameters(modelParams_acc, solverFunction, nFrames, nParams);
         }
 
         {
@@ -652,12 +682,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
         {
           auto result_acc = result.mutable_unchecked<2>();
           py::gil_scoped_release release;
-          for (int iFrame = 0; iFrame < nFrames; ++iFrame) {
-            const auto& modelParams_frame = solverFunction.getFrameParameters(iFrame);
-            for (int k = 0; k < nParams; ++k) {
-              result_acc(iFrame, k) = modelParams_frame(k);
-            }
-          }
+          copyOutputFrameParameters(result_acc, solverFunction, nFrames, nParams);
         }
 
         return result;
