@@ -1,5 +1,6 @@
 var NAVTREEINDEX24 =
 {
+"namespacemomentum.html#ab34cc9c1dc617873b946cfa439b9db13":[1,0,2,805],
 "namespacemomentum.html#ab3530089191b83439f5b8a65e33b05ea":[1,0,2,673],
 "namespacemomentum.html#ab3a6827caf1bba19cf2b7e9987addc35":[1,0,2,1462],
 "namespacemomentum.html#ab3b7737bee529a44fdce7ed744fe670b":[1,0,2,517],
@@ -248,6 +249,5 @@ var NAVTREEINDEX24 =
 "namespacemomentum.html#ad07bbb974a90a32a8ac05a7a8e07a8fa":[1,0,2,815],
 "namespacemomentum.html#ad09532f5c10a860039c593569251060d":[1,0,2,708],
 "namespacemomentum.html#ad09c4d33ef63df5812cbd447b7fc3bfd":[1,0,2,1003],
-"namespacemomentum.html#ad0bdb1933cb14e2b69cd9331738abcbd":[1,0,2,1006],
-"namespacemomentum.html#ad0c76e93e6cc73c56d45a83d52407333":[1,0,2,1657]
+"namespacemomentum.html#ad0bdb1933cb14e2b69cd9331738abcbd":[1,0,2,1006]
 };

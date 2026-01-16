@@ -427,6 +427,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.__init__"><code class="docutils literal notranslate"><span class="pre">SubsetGaussNewtonSolverOptions.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.reset"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_speed"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.set_target_speed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_speeds"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.set_target_speeds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_weights"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.set_target_weights()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_speeds"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.target_speeds</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_weights"><code class="docutils literal notranslate"><span class="pre">VelocityMagnitudeSequenceErrorFunction.target_weights</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint"><code class="docutils literal notranslate"><span class="pre">VertexConstraint</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.__init__"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.target_normal"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.target_normal</span></code></a></li>
@@ -3244,6 +3254,89 @@ See <a class="reference internal" href="#pymomentum.solver2.RotationErrorType" t
 <dt class="sig sig-object py" id="pymomentum.solver2.SubsetGaussNewtonSolverOptions.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions" title="pymomentum.solver2.SubsetGaussNewtonSolverOptions"><span class="pre">pymomentum.solver2.SubsetGaussNewtonSolverOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.SubsetGaussNewtonSolverOptions.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VelocityMagnitudeSequenceErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SequenceErrorFunction" title="pymomentum.solver2.SequenceErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceErrorFunction</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction" title="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction"><span class="pre">pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>A sequence error function that penalizes the deviation of per-joint velocity magnitude from a target speed.</p>
+<p>This error function computes the velocity between two consecutive frames as:
+velocity = pos[t+1] - pos[t]</p>
+<p>The residual for each joint is the difference between the velocity magnitude (speed) and a target speed:
+residual = ||velocity|| - targetSpeed</p>
+<p>This is useful for:
+- Constant speed constraints: set target_speed to the desired movement speed
+- Stationary constraints: set target_speed to 0 to penalize any movement
+- Per-joint speed profiles: use set_target_speeds() for different speeds per joint</p>
+<p>Note: The gradient is undefined when velocity is exactly zero. In such cases,
+the gradient contribution is set to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to use.</p></li>
+<li><p><strong>weight</strong> – The weight of the error function. Defaults to 1.0.</p></li>
+<li><p><strong>joint_weights</strong> – Per-joint weights for the velocity magnitude penalty. Defaults to all 1s.</p></li>
+<li><p><strong>target_speed</strong> – The target speed (velocity magnitude) for all joints. Defaults to 0.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction" title="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction"><span class="pre">pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.reset" title="Link to this definition"></a></dt>
+<dd><p>Resets target weights to 1.0 and target speeds to zero for all joints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_speed">
+<span class="sig-name descname"><span class="pre">set_target_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction" title="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction"><span class="pre">pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_speed" title="Link to this definition"></a></dt>
+<dd><p>Sets the target speed for all joints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>speed</strong> – The target speed (velocity magnitude) for all joints.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_speeds">
+<span class="sig-name descname"><span class="pre">set_target_speeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction" title="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction"><span class="pre">pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">speeds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_speeds" title="Link to this definition"></a></dt>
+<dd><p>Sets per-joint target speeds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>speeds</strong> – A vector of target speeds, one per joint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_weights">
+<span class="sig-name descname"><span class="pre">set_target_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction" title="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction"><span class="pre">pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.set_target_weights" title="Link to this definition"></a></dt>
+<dd><p>Sets per-joint weights for the velocity magnitude penalty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>weights</strong> – A vector of weights, one per joint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_speeds">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_speeds</span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_speeds" title="Link to this definition"></a></dt>
+<dd><p>Returns the per-joint target speeds.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_weights">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_weights</span></span><a class="headerlink" href="#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_weights" title="Link to this definition"></a></dt>
+<dd><p>Returns the per-joint weights for the velocity magnitude penalty.</p>
+</dd></dl>
 
 </dd></dl>
 

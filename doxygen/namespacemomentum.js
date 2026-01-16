@@ -2392,5 +2392,6 @@ var namespacemomentum =
     [ "kPositionWeight", "namespacemomentum.html#a5470b1a65954dbd823cdd5107c58c0ba", null ],
     [ "kSimdAlignment", "namespacemomentum.html#a48aa47b7e646b6dc4ed28a60cc6a75a1", null ],
     [ "kSimdPacketSize", "namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9", null ],
+    [ "kVelocityMagnitudeEpsilon", "namespacemomentum.html#a836334ec7f4027de24eb23e07171cf8b", null ],
     [ "RotationAxis", "namespacemomentum.html#ad7a4eb26abfc152149b61fb2dd13e66f", null ]
 ];
