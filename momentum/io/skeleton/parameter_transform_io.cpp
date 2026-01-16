@@ -78,7 +78,7 @@ std::unordered_map<std::string, SectionContent> loadMomentumModelCommon(std::ist
     }
 
     // look for new section
-    static const re2::RE2 reg("\\[(\\w+)\\]");
+    static const re2::RE2 reg(R"(\[(\w+)\])");
     std::string newSectionName;
     if (re2::RE2::FullMatch(line, reg, &newSectionName)) {
       // new section, store old section
