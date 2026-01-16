@@ -13,6 +13,7 @@
 #include <momentum/character_sequence_solver/model_parameters_sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/state_sequence_error_function.h>
+#include <momentum/character_sequence_solver/velocity_magnitude_sequence_error_function.h>
 #include <momentum/character_sequence_solver/vertex_sequence_error_function.h>
 
 #include <pybind11/eigen.h>
@@ -47,11 +48,11 @@ void addSequenceErrorFunctions(pybind11::module_& m) {
 
             const auto nJoints = character.skeleton.joints.size();
             if (jointWeights.has_value()) {
-              if (static_cast<size_t>(jointWeights->size()) != nJoints) {
-                throw std::runtime_error(
-                    "Invalid joint_weights; expected " + std::to_string(nJoints) +
-                    " values but got " + std::to_string(jointWeights->size()));
-              }
+              MT_THROW_IF(
+                  static_cast<size_t>(jointWeights->size()) != nJoints,
+                  "Invalid joint_weights; expected {} values but got {}",
+                  nJoints,
+                  jointWeights->size());
               result->setTargetWeights(jointWeights.value());
             }
 
@@ -122,11 +123,11 @@ from a target acceleration, which is useful for:
 
             const auto nJoints = character.skeleton.joints.size();
             if (jointWeights.has_value()) {
-              if (static_cast<size_t>(jointWeights->size()) != nJoints) {
-                throw std::runtime_error(
-                    "Invalid joint_weights; expected " + std::to_string(nJoints) +
-                    " values but got " + std::to_string(jointWeights->size()));
-              }
+              MT_THROW_IF(
+                  static_cast<size_t>(jointWeights->size()) != nJoints,
+                  "Invalid joint_weights; expected {} values but got {}",
+                  nJoints,
+                  jointWeights->size());
               result->setTargetWeights(jointWeights.value());
             }
 
@@ -179,6 +180,97 @@ from a target jerk, which is useful for:
           "reset",
           &mm::JerkSequenceErrorFunction::reset,
           "Resets target weights to 1.0 and target jerks to zero for all joints.");
+
+  py::class_<
+      mm::VelocityMagnitudeSequenceErrorFunction,
+      mm::SequenceErrorFunction,
+      std::shared_ptr<mm::VelocityMagnitudeSequenceErrorFunction>>(
+      m, "VelocityMagnitudeSequenceErrorFunction")
+      .def(
+          py::init<>([](const mm::Character& character,
+                        float weight,
+                        const std::optional<Eigen::VectorXf>& jointWeights,
+                        const std::optional<float>& targetSpeed) {
+            validateWeight(weight, "weight");
+            validateWeights(jointWeights, "joint_weights");
+
+            auto result = std::make_shared<mm::VelocityMagnitudeSequenceErrorFunction>(character);
+            result->setWeight(weight);
+
+            const auto nJoints = character.skeleton.joints.size();
+            if (jointWeights.has_value()) {
+              MT_THROW_IF(
+                  static_cast<size_t>(jointWeights->size()) != nJoints,
+                  "Invalid joint_weights; expected {} values but got {}",
+                  nJoints,
+                  jointWeights->size());
+              result->setTargetWeights(jointWeights.value());
+            }
+
+            if (targetSpeed.has_value()) {
+              result->setTargetSpeed(targetSpeed.value());
+            }
+
+            return result;
+          }),
+          R"(A sequence error function that penalizes the deviation of per-joint velocity magnitude from a target speed.
+
+This error function computes the velocity between two consecutive frames as:
+velocity = pos[t+1] - pos[t]
+
+The residual for each joint is the difference between the velocity magnitude (speed) and a target speed:
+residual = ||velocity|| - targetSpeed
+
+This is useful for:
+- Constant speed constraints: set target_speed to the desired movement speed
+- Stationary constraints: set target_speed to 0 to penalize any movement
+- Per-joint speed profiles: use set_target_speeds() for different speeds per joint
+
+Note: The gradient is undefined when velocity is exactly zero. In such cases,
+the gradient contribution is set to zero.
+
+:param character: The character to use.
+:param weight: The weight of the error function. Defaults to 1.0.
+:param joint_weights: Per-joint weights for the velocity magnitude penalty. Defaults to all 1s.
+:param target_speed: The target speed (velocity magnitude) for all joints. Defaults to 0.)",
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f,
+          py::arg("joint_weights") = std::optional<Eigen::VectorXf>{},
+          py::arg("target_speed") = std::optional<float>{})
+      .def(
+          "set_target_speed",
+          &mm::VelocityMagnitudeSequenceErrorFunction::setTargetSpeed,
+          R"(Sets the target speed for all joints.
+
+:param speed: The target speed (velocity magnitude) for all joints.)",
+          py::arg("speed"))
+      .def(
+          "set_target_speeds",
+          &mm::VelocityMagnitudeSequenceErrorFunction::setTargetSpeeds,
+          R"(Sets per-joint target speeds.
+
+:param speeds: A vector of target speeds, one per joint.)",
+          py::arg("speeds"))
+      .def(
+          "set_target_weights",
+          &mm::VelocityMagnitudeSequenceErrorFunction::setTargetWeights,
+          R"(Sets per-joint weights for the velocity magnitude penalty.
+
+:param weights: A vector of weights, one per joint.)",
+          py::arg("weights"))
+      .def(
+          "reset",
+          &mm::VelocityMagnitudeSequenceErrorFunction::reset,
+          "Resets target weights to 1.0 and target speeds to zero for all joints.")
+      .def_property_readonly(
+          "target_weights",
+          &mm::VelocityMagnitudeSequenceErrorFunction::getTargetWeights,
+          "Returns the per-joint weights for the velocity magnitude penalty.")
+      .def_property_readonly(
+          "target_speeds",
+          &mm::VelocityMagnitudeSequenceErrorFunction::getTargetSpeeds,
+          "Returns the per-joint target speeds.");
 
   py::class_<
       mm::StateSequenceErrorFunction,
@@ -273,12 +365,11 @@ from a target jerk, which is useful for:
             result->setWeight(weight);
 
             if (targetWeights.has_value()) {
-              if (targetWeights->size() != character.parameterTransform.numAllModelParameters()) {
-                throw std::runtime_error(
-                    "Invalid target weights; expected " +
-                    std::to_string(character.parameterTransform.numAllModelParameters()) +
-                    " values but got " + std::to_string(targetWeights->size()));
-              }
+              MT_THROW_IF(
+                  targetWeights->size() != character.parameterTransform.numAllModelParameters(),
+                  "Invalid target weights; expected {} values but got {}",
+                  character.parameterTransform.numAllModelParameters(),
+                  targetWeights->size());
               result->setTargetWeights(targetWeights.value());
             }
 
