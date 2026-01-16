@@ -2424,3 +2424,167 @@ class TestSolver(unittest.TestCase):
             np.isclose(actual_height_2, target_height_2, rtol=1e-2, atol=1e-2),
             f"Solved height {actual_height_2} does not match second target height {target_height_2}",
         )
+
+    def test_velocity_magnitude_sequence_error_function(self) -> None:
+        """Test VelocityMagnitudeSequenceErrorFunction to ensure joint velocity magnitudes match targets."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+        n_joints = character.skeleton.size
+        n_frames = 2  # VelocityMagnitudeSequenceErrorFunction requires 2 frames
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        # Initialize model parameters for two frames
+        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+
+        # ========================================
+        # Test basic construction
+        # ========================================
+        vel_mag_error = pym_solver2.VelocityMagnitudeSequenceErrorFunction(character)
+        self.assertIsNotNone(vel_mag_error)
+
+        # Test construction with parameters
+        vel_mag_error_with_params = pym_solver2.VelocityMagnitudeSequenceErrorFunction(
+            character,
+            weight=2.0,
+            joint_weights=np.ones(n_joints, dtype=np.float32),
+            target_speed=0.5,
+        )
+        self.assertIsNotNone(vel_mag_error_with_params)
+
+        # ========================================
+        # Test setter methods
+        # ========================================
+        vel_mag_error.set_target_speed(1.0)
+
+        # Test set_target_speeds (per-joint)
+        per_joint_speeds = np.linspace(0.0, 1.0, n_joints).astype(np.float32)
+        vel_mag_error.set_target_speeds(per_joint_speeds)
+
+        # Test set_target_weights
+        joint_weights = np.ones(n_joints, dtype=np.float32)
+        joint_weights[0] = 2.0  # Give first joint more weight
+        vel_mag_error.set_target_weights(joint_weights)
+
+        # Test property accessors
+        retrieved_speeds = vel_mag_error.target_speeds
+        self.assertEqual(len(retrieved_speeds), n_joints)
+
+        retrieved_weights = vel_mag_error.target_weights
+        self.assertEqual(len(retrieved_weights), n_joints)
+
+        # Test reset
+        vel_mag_error.reset()
+
+        # ========================================
+        # Test 1: Zero target speed (stationary constraint)
+        # Set up motion where velocity should be penalized
+        # ========================================
+        # Set up frames with some initial movement
+        model_params_init[0, 0] = 0.0  # First frame at x=0
+        model_params_init[1, 0] = 1.0  # Second frame at x=1 (moving)
+
+        solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
+
+        # Anchor first frame
+        first_frame_error = pym_solver2.ModelParametersErrorFunction(character)
+        first_frame_error.set_target_parameters(
+            model_params_init[0].numpy(), np.ones(n_params)
+        )
+        solver_function.add_error_function(0, first_frame_error)
+
+        # Add velocity magnitude error with zero target (stationary constraint)
+        vel_mag_error_zero = pym_solver2.VelocityMagnitudeSequenceErrorFunction(
+            character,
+            weight=1.0,
+            target_speed=0.0,
+        )
+        solver_function.add_sequence_error_function(0, vel_mag_error_zero)
+
+        solver_options = pym_solver2.SequenceSolverOptions()
+        solver_options.max_iterations = 50
+        solver_options.regularization = 1e-5
+
+        model_params_final = pym_solver2.solve_sequence(
+            solver_function, model_params_init.numpy(), solver_options
+        )
+
+        # Convert to skeleton states and verify velocity magnitudes are close to zero
+        skel_states = [
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, torch.from_numpy(model_params_final[i])
+            )
+            for i in range(n_frames)
+        ]
+
+        speeds = []
+        for joint_idx in range(n_joints):
+            pos0 = skel_states[0][joint_idx, :3]
+            pos1 = skel_states[1][joint_idx, :3]
+
+            # Velocity = pos[t+1] - pos[t]
+            velocity = pos1 - pos0
+            speed = torch.norm(velocity).item()
+
+            speeds.append(speed)
+            # Assert that measured speed is close to zero target
+            self.assertLess(
+                speed,
+                1e-3,
+                f"Joint {joint_idx}: speed {speed} should be close to 0",
+            )
+
+        # ========================================
+        # Test 2: Non-zero target speed
+        # Set up motion where velocity magnitude should match a target
+        # ========================================
+        target_speed = 0.5
+
+        # Reset solver
+        solver_function2 = pym_solver2.SequenceSolverFunction(character, n_frames)
+
+        # Anchor first frame
+        first_frame_error2 = pym_solver2.ModelParametersErrorFunction(character)
+        first_frame_error2.set_target_parameters(
+            np.zeros(n_params, dtype=np.float32), np.ones(n_params)
+        )
+        solver_function2.add_error_function(0, first_frame_error2)
+
+        # Add velocity magnitude error with non-zero target
+        vel_mag_error_target = pym_solver2.VelocityMagnitudeSequenceErrorFunction(
+            character,
+            weight=1.0,
+            target_speed=target_speed,
+        )
+        solver_function2.add_sequence_error_function(0, vel_mag_error_target)
+
+        # Start from a configuration with some movement
+        model_params_init2 = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        model_params_init2[1, 0] = 1.0  # Initial guess with movement in x
+
+        model_params_final2 = pym_solver2.solve_sequence(
+            solver_function2, model_params_init2.numpy(), solver_options
+        )
+
+        # Convert to skeleton states and verify velocity magnitudes match target
+        skel_states2 = [
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, torch.from_numpy(model_params_final2[i])
+            )
+            for i in range(n_frames)
+        ]
+
+        # Check root joint velocity magnitude
+        pos0 = skel_states2[0][0, :3]
+        pos1 = skel_states2[1][0, :3]
+        measured_speed = torch.norm(pos1 - pos0).item()
+
+        self.assertTrue(
+            np.isclose(measured_speed, target_speed, rtol=1e-3, atol=1e-3),
+            f"Root joint: measured speed {measured_speed} does not match target {target_speed}",
+        )
