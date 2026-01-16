@@ -7,28 +7,43 @@
 import os
 import tempfile
 import unittest
+from typing import Optional
 
 import pymomentum.geometry as pym_geometry
 
-# Check USD availability once at module load for skipIf decorator
-_USD_AVAILABLE = pym_geometry.is_usd_available()
+
+def load_tests(
+    loader: unittest.TestLoader,
+    standard_tests: unittest.TestSuite,
+    pattern: Optional[str],
+) -> unittest.TestSuite:
+    """
+    Custom test loader that excludes USD tests when USD is unavailable.
+
+    This prevents 'Skipping' notifications in CI by not discovering
+    the tests at all, rather than discovering and then skipping them.
+    Works with uses_legacy_listing = True (static listing handles
+    this correctly by finding 0 tests when load_tests returns empty).
+    """
+    if not pym_geometry.is_usd_available():
+        return unittest.TestSuite()
+    return standard_tests
 
 
 class TestUsd(unittest.TestCase):
-    @unittest.skipIf(not _USD_AVAILABLE, "USD support not available")
     def test_is_usd_available(self) -> None:
         """Test that USD support is available.
 
-        In BUCK builds, USD is always available (preprocessor_flags includes
-        -DMOMENTUM_WITH_USD). In OSS/CMake builds, availability depends on
-        MOMENTUM_BUILD_IO_USD option.
+        Note: USD is only available in ARVR BUCK builds, not fbcode builds.
+        In fbcode builds, USD is disabled to avoid binary size explosion
+        (OpenUSD is >4GB). This test only runs when USD is available;
+        otherwise load_tests() returns an empty suite.
         """
         result = pym_geometry.is_usd_available()
         self.assertIsInstance(result, bool)
         # When this test runs, USD should be available
         self.assertTrue(result)
 
-    @unittest.skipIf(not _USD_AVAILABLE, "USD support not available")
     def test_save_and_load_usd_character(self) -> None:
         """Test saving and reloading a USD character."""
 
@@ -77,7 +92,6 @@ class TestUsd(unittest.TestCase):
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
-    @unittest.skipIf(not _USD_AVAILABLE, "USD support not available")
     def test_load_usd_from_bytes(self) -> None:
         """Test loading a USD character from bytes after saving."""
         # Create a test character and save it
