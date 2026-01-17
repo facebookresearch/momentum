@@ -65,24 +65,26 @@ class ArrayChecker {
  public:
   explicit ArrayChecker(const char* functionName, ArrayDtype expectedDtype = ArrayDtype::Auto);
 
-  // Validates array shape, dtype, and handles broadcasting.
-  // Does NOT return a copy - the input array is validated but not modified.
+  // Validates buffer shape, dtype, and handles broadcasting.
+  // Does NOT return a copy - the input buffer is validated but not modified.
+  // Accepts any buffer-protocol object (numpy arrays, torch tensors, etc.)
+  // for backward compatibility.
   //
   // Parameters:
-  //   array: Input numpy array to validate
-  //   arrayName: Name of the array for error messages
+  //   buffer: Input buffer to validate (any object supporting buffer protocol)
+  //   bufferName: Name of the buffer for error messages
   //   trailingDims: Expected trailing dimensions. Negative values indicate
   //       "variable" dimensions that are bound on first use and validated on
   //       subsequent uses (e.g., {-1, 3} means "variable size x 3").
   //   dimensionNames: Names for each trailing dimension for error messages
-  //   allowEmpty: Whether to allow empty arrays
+  //   allowEmpty: Whether to allow empty buffers
   //
-  // The array is expected to have shape [..., trailingDims], where "..." are
-  // the leading dimensions that must match or broadcast with other arrays
+  // The buffer is expected to have shape [..., trailingDims], where "..." are
+  // the leading dimensions that must match or broadcast with other buffers
   // validated by this checker.
-  void validateArray(
-      const py::array& array,
-      const char* arrayName,
+  void validateBuffer(
+      const py::buffer& buffer,
+      const char* bufferName,
       const std::vector<int>& trailingDims,
       const std::vector<const char*>& dimensionNames,
       bool allowEmpty = false);
@@ -90,25 +92,25 @@ class ArrayChecker {
   // Helper validation methods for common geometry types
   // These validate against a Character's dimensions
 
-  // Validate skeleton state array with shape (..., nJoints, 8)
+  // Validate skeleton state buffer with shape (..., nJoints, 8)
   void validateSkeletonState(
-      const py::array& array,
-      const char* arrayName,
+      const py::buffer& buffer,
+      const char* bufferName,
       const momentum::Character& character);
 
-  // Validate joint parameters array
+  // Validate joint parameters buffer
   // Accepts EITHER:
   //   - (..., nJoints, 7): structured format
   //   - (..., nJointParams): flat format where nJointParams = nJoints * 7
   JointParamsShape validateJointParameters(
-      const py::array& array,
-      const char* arrayName,
+      const py::buffer& buffer,
+      const char* bufferName,
       const momentum::Character& character);
 
-  // Validate model parameters array with shape (..., nModelParams)
+  // Validate model parameters buffer with shape (..., nModelParams)
   void validateModelParameters(
-      const py::array& array,
-      const char* arrayName,
+      const py::buffer& buffer,
+      const char* bufferName,
       const momentum::Character& character);
 
   // Get bound variable value (for negative indices in trailingDims)
@@ -142,10 +144,10 @@ class ArrayChecker {
   bool leadingDimsSet_ = false;
   std::unordered_map<int, int64_t> boundVariableSizes_;
 
-  void detectAndValidateDtype(const py::array& array, const char* arrayName);
+  void detectAndValidateDtype(const py::buffer_info& bufInfo, const char* bufferName);
   void validateAndUpdateLeadingDims(
-      const py::array& array,
-      const char* arrayName,
+      const py::buffer_info& bufInfo,
+      const char* bufferName,
       size_t numTrailingDims);
 };
 

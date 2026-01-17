@@ -83,87 +83,87 @@ LeadingDimensions LeadingDimensions::broadcastWith(const LeadingDimensions& othe
 ArrayChecker::ArrayChecker(const char* functionName, ArrayDtype expectedDtype)
     : functionName_(functionName), requestedDtype_(expectedDtype) {}
 
-void ArrayChecker::detectAndValidateDtype(const py::array& array, const char* arrayName) {
-  bool isFloat32 = array.dtype().is(py::dtype::of<float>());
-  bool isFloat64 = array.dtype().is(py::dtype::of<double>());
+void ArrayChecker::detectAndValidateDtype(const py::buffer_info& bufInfo, const char* bufferName) {
+  bool isFloat32 = (bufInfo.format == py::format_descriptor<float>::format());
+  bool isFloat64 = (bufInfo.format == py::format_descriptor<double>::format());
 
   if (!isFloat32 && !isFloat64) {
     MT_THROW(
-        "In {}, array argument {} has dtype {} but expected float32 or float64",
+        "In {}, buffer argument {} has dtype {} but expected float32 or float64",
         functionName_,
-        arrayName,
-        py::str(array.dtype()).cast<std::string>());
+        bufferName,
+        bufInfo.format);
   }
 
-  ArrayDtype arrayDtype = isFloat64 ? ArrayDtype::Float64 : ArrayDtype::Float32;
+  ArrayDtype bufDtype = isFloat64 ? ArrayDtype::Float64 : ArrayDtype::Float32;
 
   if (detectedDtype_ == ArrayDtype::Auto) {
-    // First array - detect dtype
+    // First buffer - detect dtype
     if (requestedDtype_ != ArrayDtype::Auto) {
       // User requested specific dtype - validate
       MT_THROW_IF(
-          requestedDtype_ != arrayDtype,
-          "In {}, array argument {} has dtype {} but {} was requested",
+          requestedDtype_ != bufDtype,
+          "In {}, buffer argument {} has dtype {} but {} was requested",
           functionName_,
-          arrayName,
+          bufferName,
           isFloat64 ? "float64" : "float32",
           requestedDtype_ == ArrayDtype::Float64 ? "float64" : "float32");
     }
-    detectedDtype_ = arrayDtype;
+    detectedDtype_ = bufDtype;
   } else {
-    // Subsequent arrays - must match first
+    // Subsequent buffers - must match first
     MT_THROW_IF(
-        detectedDtype_ != arrayDtype,
-        "In {}, dtype mismatch: first array was {}, but {} is {}",
+        detectedDtype_ != bufDtype,
+        "In {}, dtype mismatch: first buffer was {}, but {} is {}",
         functionName_,
         detectedDtype_ == ArrayDtype::Float64 ? "float64" : "float32",
-        arrayName,
+        bufferName,
         isFloat64 ? "float64" : "float32");
   }
 }
 
 void ArrayChecker::validateAndUpdateLeadingDims(
-    const py::array& array,
-    const char* arrayName,
+    const py::buffer_info& bufInfo,
+    const char* bufferName,
     size_t numTrailingDims) {
-  const auto totalNdim = static_cast<size_t>(array.ndim());
+  const auto totalNdim = static_cast<size_t>(bufInfo.ndim);
   const size_t leadingNdim = totalNdim - numTrailingDims;
 
-  // Extract leading dimensions from this array
-  LeadingDimensions arrayLeadingDims;
-  arrayLeadingDims.dims.resize(leadingNdim);
+  // Extract leading dimensions from this buffer
+  LeadingDimensions bufLeadingDims;
+  bufLeadingDims.dims.resize(leadingNdim);
   for (size_t i = 0; i < leadingNdim; ++i) {
-    arrayLeadingDims.dims[i] = array.shape(i);
+    bufLeadingDims.dims[i] = bufInfo.shape[i];
   }
 
   if (!leadingDimsSet_) {
-    // First array - set the leading dimensions
-    leadingDims_ = arrayLeadingDims;
+    // First buffer - set the leading dimensions
+    leadingDims_ = bufLeadingDims;
     leadingDimsSet_ = true;
   } else {
-    // Subsequent arrays - validate and broadcast
+    // Subsequent buffers - validate and broadcast
     MT_THROW_IF(
-        leadingDims_.ndim() != arrayLeadingDims.ndim(),
-        "In {}, array argument {} has {} leading dimensions but expected {} "
-        "(to match previous arrays). Array has shape {}.",
+        leadingDims_.ndim() != bufLeadingDims.ndim(),
+        "In {}, buffer argument {} has {} leading dimensions but expected {} "
+        "(to match previous buffers). Buffer has shape {}.",
         functionName_,
-        arrayName,
-        arrayLeadingDims.ndim(),
+        bufferName,
+        bufLeadingDims.ndim(),
         leadingDims_.ndim(),
-        formatArrayDims(array));
+        formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
 
     MT_THROW_IF(
-        !leadingDims_.broadcastCompatibleWith(arrayLeadingDims),
-        "In {}, array argument {} has incompatible leading dimensions. "
-        "Expected dimensions broadcastable with {} but got {}. Array has shape {}.",
+        !leadingDims_.broadcastCompatibleWith(bufLeadingDims),
+        "In {}, buffer argument {} has incompatible leading dimensions. "
+        "Expected dimensions broadcastable with {} but got {}. Buffer has shape {}.",
         functionName_,
-        arrayName,
+        bufferName,
         formatArrayDims(leadingDims_.dims),
-        formatArrayDims(arrayLeadingDims.dims),
-        formatArrayDims(array));
+        formatArrayDims(bufLeadingDims.dims),
+        formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
 
     // Update leading dims with broadcasted result
-    leadingDims_ = leadingDims_.broadcastWith(arrayLeadingDims);
+    leadingDims_ = leadingDims_.broadcastWith(bufLeadingDims);
   }
 }
 
@@ -176,9 +176,9 @@ int64_t ArrayChecker::getBoundValue(int idx) const {
   return itr->second;
 }
 
-void ArrayChecker::validateArray(
-    const py::array& array,
-    const char* arrayName,
+void ArrayChecker::validateBuffer(
+    const py::buffer& buffer,
+    const char* bufferName,
     const std::vector<int>& trailingDims,
     const std::vector<const char*>& dimensionNames,
     bool allowEmpty) {
@@ -189,37 +189,40 @@ void ArrayChecker::validateArray(
 
   const size_t numTrailingDims = trailingDims.size();
 
-  // Handle empty arrays
-  if (array.size() == 0) {
+  // Get buffer info
+  py::buffer_info bufInfo = buffer.request();
+
+  // Handle empty buffers
+  if (bufInfo.size == 0) {
     MT_THROW_IF(
         !allowEmpty,
-        "In {}, array argument {} is empty. Expected {} trailing dimensions.",
+        "In {}, buffer argument {} is empty. Expected {} trailing dimensions.",
         functionName_,
-        arrayName,
+        bufferName,
         formatExpectedDims(trailingDims, dimensionNames, boundVariableSizes_));
     return;
   }
 
   // Validate dtype
-  detectAndValidateDtype(array, arrayName);
+  detectAndValidateDtype(bufInfo, bufferName);
 
-  // Validate array has at least numTrailingDims dimensions
+  // Validate buffer has at least numTrailingDims dimensions
   MT_THROW_IF(
-      static_cast<size_t>(array.ndim()) < numTrailingDims,
-      "In {}, array argument {} has shape {} but expected at least {} trailing dimensions: {}",
+      static_cast<size_t>(bufInfo.ndim) < numTrailingDims,
+      "In {}, buffer argument {} has shape {} but expected at least {} trailing dimensions: {}",
       functionName_,
-      arrayName,
-      formatArrayDims(array),
+      bufferName,
+      formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())),
       numTrailingDims,
       formatExpectedDims(trailingDims, dimensionNames, boundVariableSizes_));
 
   // Validate and update leading dimensions
-  validateAndUpdateLeadingDims(array, arrayName, numTrailingDims);
+  validateAndUpdateLeadingDims(bufInfo, bufferName, numTrailingDims);
 
   // Validate trailing dimensions
-  const size_t leadingNdim = static_cast<size_t>(array.ndim()) - numTrailingDims;
+  const size_t leadingNdim = static_cast<size_t>(bufInfo.ndim) - numTrailingDims;
   for (size_t i = 0; i < numTrailingDims; ++i) {
-    const auto foundSize = array.shape(leadingNdim + i);
+    const auto foundSize = bufInfo.shape[leadingNdim + i];
     const int expectedSize = trailingDims[i];
 
     if (expectedSize < 0) {
@@ -230,45 +233,48 @@ void ArrayChecker::validateArray(
       } else {
         MT_THROW_IF(
             foundSize != itr->second,
-            "In {}, for array argument {}, mismatch in dimension {}; expected {} but found {}. "
-            "Array has shape {}.",
+            "In {}, for buffer argument {}, mismatch in dimension {}; expected {} but found {}. "
+            "Buffer has shape {}.",
             functionName_,
-            arrayName,
+            bufferName,
             dimensionNames[i],
             itr->second,
             foundSize,
-            formatArrayDims(array));
+            formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
       }
     } else {
       // Fixed dimension - validate
       MT_THROW_IF(
           foundSize != expectedSize,
-          "In {}, for array argument {}, mismatch in dimension {}; expected {} but found {}. "
-          "Array has shape {}.",
+          "In {}, for buffer argument {}, mismatch in dimension {}; expected {} but found {}. "
+          "Buffer has shape {}.",
           functionName_,
-          arrayName,
+          bufferName,
           dimensionNames[i],
           expectedSize,
           foundSize,
-          formatArrayDims(array));
+          formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
     }
   }
 }
 
 void ArrayChecker::validateSkeletonState(
-    const py::array& array,
-    const char* arrayName,
+    const py::buffer& buffer,
+    const char* bufferName,
     const momentum::Character& character) {
   const auto nJoints = static_cast<int>(character.skeleton.joints.size());
-  validateArray(array, arrayName, {nJoints, 8}, {"numJoints", "8"});
+  validateBuffer(buffer, bufferName, {nJoints, 8}, {"numJoints", "8"});
 }
 
 JointParamsShape ArrayChecker::validateJointParameters(
-    const py::array& array,
-    const char* arrayName,
+    const py::buffer& buffer,
+    const char* bufferName,
     const momentum::Character& character) {
   const auto nJoints = static_cast<int>(character.skeleton.joints.size());
   const auto nJointParams = nJoints * 7; // kParametersPerJoint
+
+  // Get buffer info
+  py::buffer_info bufInfo = buffer.request();
 
   // Joint parameters can be passed in two formats:
   // 1. Structured: (..., nJoints, 7)
@@ -276,38 +282,38 @@ JointParamsShape ArrayChecker::validateJointParameters(
   //
   // We determine which format by checking the last dimension
 
-  if (array.ndim() == 0) {
+  if (bufInfo.ndim == 0) {
     MT_THROW(
-        "In {}, array argument {} is a scalar but expected shape "
+        "In {}, buffer argument {} is a scalar but expected shape "
         "(..., {}, 7) or (..., {})",
         functionName_,
-        arrayName,
+        bufferName,
         nJoints,
         nJointParams);
   }
 
-  const auto lastDim = array.shape(array.ndim() - 1);
+  const auto lastDim = bufInfo.shape[bufInfo.ndim - 1];
 
-  if (lastDim == 7 && array.ndim() >= 2) {
+  if (lastDim == 7 && bufInfo.ndim >= 2) {
     // Structured format: (..., nJoints, 7)
-    const auto secondLastDim = array.shape(array.ndim() - 2);
+    const auto secondLastDim = bufInfo.shape[bufInfo.ndim - 2];
     if (secondLastDim == nJoints) {
-      validateArray(array, arrayName, {nJoints, 7}, {"numJoints", "7"});
+      validateBuffer(buffer, bufferName, {nJoints, 7}, {"numJoints", "7"});
       return JointParamsShape::Structured;
     }
   }
 
   // Either flat format or invalid - validate as flat and let it throw if wrong
-  validateArray(array, arrayName, {nJointParams}, {"numJointParams"});
+  validateBuffer(buffer, bufferName, {nJointParams}, {"numJointParams"});
   return JointParamsShape::Flat;
 }
 
 void ArrayChecker::validateModelParameters(
-    const py::array& array,
-    const char* arrayName,
+    const py::buffer& buffer,
+    const char* bufferName,
     const momentum::Character& character) {
   const auto nModelParams = static_cast<int>(character.parameterTransform.numAllModelParameters());
-  validateArray(array, arrayName, {nModelParams}, {"numModelParams"});
+  validateBuffer(buffer, bufferName, {nModelParams}, {"numModelParams"});
 }
 
 // ============================================================================
