@@ -88,6 +88,12 @@ PYBIND11_MODULE(solver2, m) {
   m.attr("__name__") = "pymomentum.solver2";
   m.doc() = "Inverse kinematics and other optimizations for momentum models.";
 
+#ifdef PYMOMENTUM_LIMITED_TORCH_API
+  m.attr("AUTOGRAD_ENABLED") = false;
+#else
+  m.attr("AUTOGRAD_ENABLED") = true;
+#endif
+
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
 

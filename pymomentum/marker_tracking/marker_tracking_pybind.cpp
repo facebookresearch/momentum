@@ -60,6 +60,12 @@ PYBIND11_MODULE(marker_tracking, m) {
   m.doc() = "Module for exposing the C++ APIs of the marker tracking pipeline ";
   m.attr("__name__") = "pymomentum.marker_tracking";
 
+#ifdef PYMOMENTUM_LIMITED_TORCH_API
+  m.attr("AUTOGRAD_ENABLED") = false;
+#else
+  m.attr("AUTOGRAD_ENABLED") = true;
+#endif
+
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
 
