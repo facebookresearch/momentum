@@ -247,6 +247,12 @@ PYBIND11_MODULE(diff_geometry, m) {
       "Differentiable geometry and forward kinematics for momentum models using PyTorch tensors.";
   m.attr("__name__") = "pymomentum.diff_geometry";
 
+#ifdef PYMOMENTUM_LIMITED_TORCH_API
+  m.attr("AUTOGRAD_ENABLED") = false;
+#else
+  m.attr("AUTOGRAD_ENABLED") = true;
+#endif
+
   pybind11::module_::import("torch"); // @dep=//caffe2:torch
   pybind11::module_::import("pymomentum.geometry"); // @dep=//pymomentum:geometry
 
