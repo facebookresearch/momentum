@@ -15,6 +15,7 @@
 #include "momentum/character/locator_state.h"
 #include "momentum/character/marker.h"
 #include "momentum/gui/rerun/eigen_adapters.h"
+#include "momentum/gui/rerun/rerun_compat.h"
 #include "momentum/math/mesh.h"
 
 #include <axel/Bvh.h>
@@ -93,7 +94,10 @@ void logJoints(
                 rerun::datatypes::Mat3x3(jointStates[iJoint].transform.toRotationMatrix().data()))
             .with_translation(
                 rerun::datatypes::Vec3D(jointStates[iJoint].transform.translation.data()))
-            .with_axis_length(rerun::components::AxisLength(10)));
+#if !defined(RERUN_VERSION_GE) || !RERUN_VERSION_GE(0, 24, 0)
+            .with_axis_length(rerun::components::AxisLength(10))
+#endif
+    );
   }
   rec.log(
       streamName,
@@ -222,9 +226,9 @@ void logModelParams(
 
   for (size_t iParam = 0; iParam < nParams; ++iParam) {
     if (names[iParam].find("root") != std::string::npos) {
-      rec.log(fmt::format("{}/{}", worldPrefix, names[iParam]), rerun::Scalar(params[iParam]));
+      rec.log(fmt::format("{}/{}", worldPrefix, names[iParam]), makeScalar(params[iParam]));
     } else {
-      rec.log(fmt::format("{}/{}", posePrefix, names[iParam]), rerun::Scalar(params[iParam]));
+      rec.log(fmt::format("{}/{}", posePrefix, names[iParam]), makeScalar(params[iParam]));
     }
   }
 }
@@ -243,9 +247,9 @@ void logJointParams(
       const size_t paramIdx = iJoint * kParametersPerJoint + jParam;
       if (names[iJoint].find("world") != std::string::npos ||
           names[iJoint].find("root") != std::string::npos) {
-        rec.log(fmt::format("{}/{}", worldPrefix, channelName), rerun::Scalar(params[paramIdx]));
+        rec.log(fmt::format("{}/{}", worldPrefix, channelName), makeScalar(params[paramIdx]));
       } else {
-        rec.log(fmt::format("{}/{}", posePrefix, channelName), rerun::Scalar(params[paramIdx]));
+        rec.log(fmt::format("{}/{}", posePrefix, channelName), makeScalar(params[paramIdx]));
       }
     }
   }
@@ -258,9 +262,9 @@ void logModelParamNames(
     std::span<const std::string> names) {
   for (const auto& name : names) {
     if (name.find("root") != std::string::npos) {
-      rec.log_static(fmt::format("{}/{}", worldPrefix, name), rerun::SeriesLine().with_name(name));
+      rec.log_static(fmt::format("{}/{}", worldPrefix, name), makeSeriesLineWithName(name));
     } else {
-      rec.log_static(fmt::format("{}/{}", posePrefix, name), rerun::SeriesLine().with_name(name));
+      rec.log_static(fmt::format("{}/{}", posePrefix, name), makeSeriesLineWithName(name));
     }
   }
 }
@@ -275,12 +279,10 @@ void logJointParamNames(
       const std::string channelName = name + "_" + jointParameterName;
       if (name.find("world") != std::string::npos || name.find("root") != std::string::npos) {
         rec.log_static(
-            fmt::format("{}/{}", worldPrefix, channelName),
-            rerun::SeriesLine().with_name(channelName));
+            fmt::format("{}/{}", worldPrefix, channelName), makeSeriesLineWithName(channelName));
       } else {
         rec.log_static(
-            fmt::format("{}/{}", posePrefix, channelName),
-            rerun::SeriesLine().with_name(channelName));
+            fmt::format("{}/{}", posePrefix, channelName), makeSeriesLineWithName(channelName));
       }
     }
   }

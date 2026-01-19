@@ -12,6 +12,7 @@
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
 #include <momentum/gui/rerun/logging_redirect.h>
+#include <momentum/gui/rerun/rerun_compat.h>
 #include <momentum/io/usd/usd_io.h>
 #include <momentum/math/mesh.h>
 
@@ -102,7 +103,7 @@ int main(int argc, char* argv[]) {
 
     try {
       rec.set_time_sequence("frame_index", 0);
-      rec.set_time_seconds("log_time", 0.0f);
+      momentum::setTimeSeconds(rec, "log_time", 0.0f);
 
       if (character.mesh && !character.mesh->vertices.empty()) {
         if (character.mesh->normals.empty()) {
