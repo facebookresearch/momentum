@@ -13,14 +13,13 @@
 #include "pymomentum/tensor_momentum/tensor_joint_parameters_to_positions.h"
 #include "pymomentum/tensor_momentum/tensor_kd_tree.h"
 #include "pymomentum/tensor_momentum/tensor_skeleton_state.h"
+#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/character.h>
 #include <momentum/character/character_utility.h>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/python.h>
 
 #include <limits>
 

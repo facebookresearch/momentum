@@ -11,6 +11,7 @@
 #include "pymomentum/geometry/momentum_io.h"
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 #include "pymomentum/tensor_momentum/tensor_skinning.h"
+#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
@@ -26,8 +27,6 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/python.h>
 #include <Eigen/Core>
 
 #include <algorithm>

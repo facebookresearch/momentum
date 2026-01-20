@@ -9,6 +9,7 @@
 
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
+#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/parameter_transform.h>
@@ -16,8 +17,6 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/python.h>
 
 #include <fmt/format.h>
 
@@ -149,8 +148,7 @@ The array will be converted to a sparse matrix internally for efficient storage 
           "Size of the model parameter vector.")
       .def(
           "apply",
-          [](const mm::ParameterTransform* paramTransform,
-             torch::Tensor modelParams) -> torch::Tensor {
+          [](const mm::ParameterTransform* paramTransform, at::Tensor modelParams) -> at::Tensor {
             return applyParamTransform(paramTransform, std::move(modelParams));
           },
           R"(Apply the parameter transform to a k-dimensional model parameter vector (returns the 7*nJoints joint parameter vector).

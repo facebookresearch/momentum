@@ -8,14 +8,13 @@
 #pragma once
 
 #include <pymomentum/tensor_ik/solver_options.h>
+#include <pymomentum/torch_bridge.h>
 
 #include <momentum/character_solver/vertex_error_function.h>
 #include <momentum/math/mppca.h>
 
 #include <ATen/ATen.h>
 #include <pybind11/pybind11.h>
-#include <torch/extension.h> // @manual=//caffe2:torch_extension
-#include <torch/torch.h>
 
 #include <optional>
 

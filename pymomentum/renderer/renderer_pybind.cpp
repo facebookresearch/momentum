@@ -10,6 +10,7 @@
 #include <pymomentum/renderer/software_rasterizer.h>
 #include <pymomentum/tensor_momentum/tensor_parameter_transform.h>
 #include <pymomentum/tensor_momentum/tensor_skeleton_state.h>
+#include <pymomentum/torch_bridge.h>
 
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton_state.h>
@@ -19,8 +20,7 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/python.h>
+#include <pybind11/stl.h>
 #include <Eigen/Core>
 
 #include <optional>
