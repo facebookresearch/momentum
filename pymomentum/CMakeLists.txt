@@ -106,6 +106,21 @@ mt_library(
 )
 
 mt_library(
+  NAME array_utility
+  PYMOMENTUM_HEADERS_VARS array_utility_public_headers
+  PYMOMENTUM_SOURCES_VARS array_utility_sources
+  PUBLIC_INCLUDE_DIRECTORIES
+    ${Python3_INCLUDE_DIRS}
+  PUBLIC_LINK_LIBRARIES
+    momentum
+    pybind11::pybind11_headers
+    Python3::Module
+    Dispenso::dispenso
+    Eigen3::Eigen
+  NO_INSTALL
+)
+
+mt_library(
   NAME tensor_momentum
   PYMOMENTUM_HEADERS_VARS tensor_momentum_public_headers
   PYMOMENTUM_SOURCES_VARS tensor_momentum_sources
@@ -162,6 +177,7 @@ mt_python_binding(
     ${ATEN_INCLUDE_DIR}
     ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
+    array_utility
     character
     character_test_helpers
     io
