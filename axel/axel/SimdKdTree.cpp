@@ -771,7 +771,7 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::split(
       });
 
   // Get the index of the mid point
-  SizeType mid = static_cast<SizeType>(std::distance(points.begin(), it));
+  auto mid = static_cast<SizeType>(std::distance(points.begin(), it));
 
   // If the split doesn't carve any blocks off, then we need to do something to avoid an infinite
   // recursion; in this case we'll fall back to computing the median partition:
@@ -833,7 +833,7 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     SizeType start,
     SizeType end,
     const Box& box) {
-  const SizeType blocksStart = gsl::narrow<SizeType>(impl_->pointBlocks.size());
+  const auto blocksStart = gsl::narrow<SizeType>(impl_->pointBlocks.size());
 
   alignas(kSimdAlignment) std::array<std::array<float, kSimdPacketSize>, nDim> pValues{};
   alignas(kSimdAlignment) std::array<std::array<float, kSimdPacketSize>, nDim> nValues{};
@@ -901,7 +901,7 @@ typename SimdKdTreef<nDim>::SizeType SimdKdTreef<nDim>::createLeafNode(
     }
   }
 
-  const SizeType blocksEnd = gsl::narrow<SizeType>(impl_->pointBlocks.size());
+  const auto blocksEnd = gsl::narrow<SizeType>(impl_->pointBlocks.size());
 
   const auto nodeId = gsl::narrow<SizeType>(nodes_.size());
   nodes_.emplace_back(blocksStart, blocksEnd, box);
@@ -1060,9 +1060,9 @@ typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
     SizeType start,
     SizeType end,
     const Box& box) {
-  const SizeType node_id = (SizeType)this->nodes_.size();
+  const auto node_id = (SizeType)this->nodes_.size();
 
-  const SizeType blocksStart = (SizeType)pointBlocks_.size();
+  const auto blocksStart = (SizeType)pointBlocks_.size();
   for (SizeType curBlockStart = start; curBlockStart < end; curBlockStart += AVX_FLOAT_BLOCK_SIZE) {
     alignas(AVX_ALIGNMENT) std::array<std::array<float, AVX_FLOAT_BLOCK_SIZE>, nDim> pValues{};
     alignas(AVX_ALIGNMENT) std::array<std::array<float, AVX_FLOAT_BLOCK_SIZE>, nDim> nValues{};
@@ -1128,7 +1128,7 @@ typename SimdKdTreeAvxf<nDim>::SizeType SimdKdTreeAvxf<nDim>::createLeafNode(
     }
   }
 
-  const SizeType blocksEnd = (SizeType)pointBlocks_.size();
+  const auto blocksEnd = (SizeType)pointBlocks_.size();
 
   this->nodes_.push_back(Node(blocksStart, blocksEnd, box));
   return node_id;
