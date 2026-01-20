@@ -175,15 +175,17 @@ jobs:
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
-            pixi-environment: py312-cuda129
+            pixi-environment: gpu-wheel-build-py312
             cuda-version: "12.9.0"
           - python-version: '3.13'
-            pixi-environment: py313-cuda129
+            pixi-environment: gpu-wheel-build-py313
             cuda-version: "12.9.0"
           - os: ubuntu-latest
             os-short: ubuntu
     env:
       FULL_CUDA_VERSION: ${{ matrix.cuda-version }}
+      # Use docker for CI builds (default for cibuildwheel on GitHub Actions)
+      CIBW_CONTAINER_ENGINE: docker
       # Enable compiler caching (ccache on Linux)
       CMAKE_C_COMPILER_LAUNCHER: ccache
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
@@ -245,12 +247,6 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}-gpu
-
-      - name: Setup CUDA
-        if: steps.should_run.outputs.run == 'true'
-        uses: ./.github/actions/setup-cuda
-        with:
-          cuda-version: ${{ matrix.cuda-version }}
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'

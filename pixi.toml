@@ -508,7 +508,8 @@ zlib = ">=1.3.1,<2"
 librerun-sdk = ">=0.23.3,<0.24"
 
 #==============
-# Feature: GPU
+# Feature: GPU Development (requires CUDA on host)
+# For development and testing with GPU - NOT for wheel building
 #==============
 
 [feature.py312-cuda129]
@@ -516,33 +517,66 @@ platforms = ["linux-64", "win-64"]
 system-requirements = { cuda = "12" }
 dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*", python = "3.12.*", pytorch-gpu = ">=2.8.0,<3" }
 
-[feature.py312-cuda129.tasks]
-# GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-# Note: Uses Docker (default) instead of podman for CI compatibility (podman has permission issues in GitHub Actions)
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_BUILD=\"cp312-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
-
-wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
-
-wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
-    "wheel_check",
-    "wheel_test",
-], description = "Publish GPU wheels to PyPI" }
-
 [feature.py313-cuda129]
 platforms = ["linux-64", "win-64"]
 system-requirements = { cuda = "12" }
 dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*", python = "3.13.*", pytorch-gpu = ">=2.8.0,<3" }
 
-[feature.py313-cuda129.tasks]
-# GPU-specific PyPI tasks - build GPU wheels using cibuildwheel in manylinux_2_28 container
-# Note: Uses Docker (default) instead of podman for CI compatibility (podman has permission issues in GitHub Actions)
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && CIBW_BUILD=\"cp313-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . && mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build GPU wheel using cibuildwheel in manylinux_2_28 container with CUDA" }
+#==============
+# Feature: GPU Wheel Build (no CUDA required on host)
+# For building GPU wheels via cibuildwheel - builds happen in containers
+# Works both locally (podman) and in CI (docker)
+#==============
+
+[feature.gpu-wheel-build]
+platforms = ["linux-64"]
+
+[feature.gpu-wheel-build.dependencies]
+jinja2 = ">=3.1.0,<4"
+cibuildwheel = ">=2.22.0,<3"
+twine = ">=6.1.0,<7"
+pip = ">=25.2,<26"
+
+[feature.gpu-wheel-build-py312]
+platforms = ["linux-64"]
+dependencies = { python = "3.12.*" }
+
+[feature.gpu-wheel-build-py312.tasks]
+# GPU wheel build using cibuildwheel in manylinux_2_28 container
+# Container engine selection via CIBW_CONTAINER_ENGINE env var:
+#   - Default: podman (set in env block below)
+#   - Override for CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py312 wheel_build
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp312-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
+wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+    "wheel_build",
+], description = "Check wheel files with twine" }
+
 wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
-    "wheel_test",
+], description = "Publish GPU wheels to PyPI" }
+
+[feature.gpu-wheel-build-py313]
+platforms = ["linux-64"]
+dependencies = { python = "3.13.*" }
+
+[feature.gpu-wheel-build-py313.tasks]
+# GPU wheel build using cibuildwheel in manylinux_2_28 container
+# Container engine selection via CIBW_CONTAINER_ENGINE env var:
+#   - Default: podman (set in env block below)
+#   - Override for CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py313 wheel_build
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp313-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
+
+wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
+
+wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+    "wheel_build",
+], description = "Check wheel files with twine" }
+
+wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
+    "wheel_check",
 ], description = "Publish GPU wheels to PyPI" }
 
 #==============
@@ -554,10 +588,18 @@ wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentu
 py312 = ["py312"]
 py313 = ["py313"]
 
-# GPU environments
+# GPU development environments (requires CUDA on host)
+# Use these for testing GPU features locally
 py312-cuda129 = ["py312-cuda129"]
 py313-cuda129 = ["py313-cuda129"]
 gpu = ["py312-cuda129"]
+
+# GPU wheel build environments (no CUDA required on host)
+# Use these for building GPU wheels - builds happen in containers
+# Local: pixi run -e gpu-wheel-build-py312 wheel_build (uses podman)
+# CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py312 wheel_build
+gpu-wheel-build-py312 = ["gpu-wheel-build", "gpu-wheel-build-py312"]
+gpu-wheel-build-py313 = ["gpu-wheel-build", "gpu-wheel-build-py313"]
 
 # Minimal build environment (for GPU wheel builds with limited disk space in Docker containers)
 minimal-build = ["minimal-build"]
