@@ -14,6 +14,9 @@ import pymomentum.skel_state as pym_skel_state
 import torch
 from torch.nn import Parameter as P
 
+# Flag to check if autograd is enabled (disabled in arvr build modes)
+AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+
 
 def generate_skel_state_components(
     sz: int,
@@ -24,7 +27,7 @@ def generate_skel_state_components(
         std=4,
         size=(sz, 3),
         dtype=torch.float64,
-        requires_grad=True,
+        requires_grad=AUTOGRAD_ENABLED,
     )
 
     rot: torch.Tensor = pym_quaternion.normalize(
@@ -33,12 +36,12 @@ def generate_skel_state_components(
             std=4,
             size=(sz, 4),
             dtype=torch.float64,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
         )
     )
 
     scale: torch.Tensor = torch.rand(
-        size=(sz, 1), dtype=torch.float64, requires_grad=True
+        size=(sz, 1), dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
     )
     return (trans, rot, scale)
 
@@ -55,7 +58,7 @@ class TestSkelState(unittest.TestCase):
         modelParams = 0.2 * torch.ones(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
         joint_params = character.parameter_transform.apply(modelParams)
@@ -66,13 +69,14 @@ class TestSkelState(unittest.TestCase):
             character, joint_params.to(torch.double)
         )
         inputs = [skel_state_d]
-        torch.autograd.gradcheck(
-            pym_skel_state.to_matrix,
-            inputs,
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_skel_state.to_matrix,
+                inputs,
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
         self.assertTrue(torch.allclose(skel_state, skel_state_d, atol=1e-3))
 
@@ -370,6 +374,7 @@ class TestSkelState(unittest.TestCase):
 
         self.assertTrue(torch.allclose(p1, p2, atol=1e-5, rtol=1e-5))
 
+    @unittest.skipUnless(AUTOGRAD_ENABLED, "Autograd not available in ARVR build modes")
     def test_bulk_multiplication_backward(self) -> None:
         """Test multiplication backward pass using the same approach as sim3 tests"""
         torch.manual_seed(10023893)
@@ -382,7 +387,6 @@ class TestSkelState(unittest.TestCase):
         state = pym_skel_state.multiply(ps1, ps2)
         grad = torch.randn_like(state)
 
-        # Test autograd computation
         ds1, ds2 = torch.autograd.grad(
             outputs=[state],
             inputs=[ps1, ps2],
@@ -413,6 +417,7 @@ class TestSkelState(unittest.TestCase):
         state3 = pym_skel_state.multiply(state_inv, state)
         self.assertTrue(torch.allclose(state3, state_expected, atol=1e-5, rtol=1e-5))
 
+    @unittest.skipUnless(AUTOGRAD_ENABLED, "Autograd not available in ARVR build modes")
     def test_multiply_backprop(self) -> None:
         """Test multiply_backprop function matches autograd gradients"""
         torch.manual_seed(10023893)
@@ -425,7 +430,6 @@ class TestSkelState(unittest.TestCase):
         state = pym_skel_state.multiply(ps1, ps2)
         grad = torch.randn_like(state)
 
-        # Test autograd computation
         ds1_autograd, ds2_autograd = torch.autograd.grad(
             outputs=[state],
             inputs=[ps1, ps2],

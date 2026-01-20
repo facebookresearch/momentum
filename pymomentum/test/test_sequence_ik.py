@@ -12,6 +12,8 @@ import pymomentum.solver as pym_solver
 import torch
 from pymomentum.solver import ErrorFunctionType
 
+AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+
 
 class TestSolver(unittest.TestCase):
     def test_sequence_ik_basic(self) -> None:
@@ -68,7 +70,7 @@ class TestSolver(unittest.TestCase):
         error_function_weights = 100 * torch.ones(
             n_frames,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
