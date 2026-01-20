@@ -750,8 +750,12 @@ at::Tensor mapModelParameters_names(
 
   if (verbose && !missingParams.empty()) {
     // TODO better logging:
+    pybind11::list pyMissingParams;
+    for (const auto& param : missingParams) {
+      pyMissingParams.append(param);
+    }
     pybind11::print(
-        "WARNING: missing parameters found during map_model_parameters: ", missingParams);
+        "WARNING: missing parameters found during map_model_parameters: ", pyMissingParams);
   }
 
   // Map tensor at dimension -1.
