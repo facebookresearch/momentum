@@ -47,7 +47,6 @@ void SparseGaussNewtonSolverT<T>::initializeSolver() {
   // This is called from the solver base class .solve()
   alpha_ = regularization_;
   this->newParameterPattern_ = true;
-  this->lastError_ = std::numeric_limits<double>::max();
 }
 
 template <typename T>
