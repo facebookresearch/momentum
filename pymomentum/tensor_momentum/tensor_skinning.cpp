@@ -87,7 +87,7 @@ variable_list SkinPointsFunction<T>::forward(
   const int nVertices = firstCharacter.mesh->vertices.size();
 
   TensorChecker checker("skin_points");
-  bool squeeze;
+  bool squeeze = false;
   transforms = checker.validateAndFixTensor(
       transforms,
       "transforms",
