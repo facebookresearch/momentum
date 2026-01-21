@@ -120,6 +120,12 @@ PYBIND11_MODULE(axel, m) {
   m.attr("__name__") = "pymomentum.axel";
   m.doc() = "Python bindings for Axel library classes including SignedDistanceField.";
 
+#ifdef PYMOMENTUM_LIMITED_TORCH_API
+  m.attr("AUTOGRAD_ENABLED") = false;
+#else
+  m.attr("AUTOGRAD_ENABLED") = true;
+#endif
+
   // Bind BoundingBox
   py::class_<axel::BoundingBox<float>>(m, "BoundingBox")
       .def(
