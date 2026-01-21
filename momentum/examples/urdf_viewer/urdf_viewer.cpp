@@ -11,6 +11,7 @@
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
 #include <momentum/gui/rerun/logging_redirect.h>
+#include <momentum/gui/rerun/rerun_compat.h>
 #include <momentum/io/urdf/urdf_io.h>
 
 #include <CLI/CLI.hpp>
@@ -100,7 +101,7 @@ int main(int argc, char* argv[]) {
     for (auto i = 0; i < kNumFrames; ++i) {
       // log timeline
       rec.set_time_sequence("frame_index", i);
-      rec.set_time_seconds("log_time", (float)i / fps);
+      momentum::setTimeSeconds(rec, "log_time", (float)i / fps);
 
       charParams.pose = motion.col(i);
       charState.set(

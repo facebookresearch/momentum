@@ -9,6 +9,7 @@
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
 #include <momentum/gui/rerun/logging_redirect.h>
+#include <momentum/gui/rerun/rerun_compat.h>
 #include <momentum/io/marker/c3d_io.h>
 
 #include <CLI/CLI.hpp>
@@ -67,27 +68,27 @@ int main(int argc, char* argv[]) {
         for (const auto& marker : actor.frames[0]) {
           rec.log_static(
               streamName + "/" + marker.name + "/x",
-              rerun::SeriesLine().with_name(marker.name + ".x"));
+              momentum::makeSeriesLineWithName(marker.name + ".x"));
           rec.log_static(
               streamName + "/" + marker.name + "/y",
-              rerun::SeriesLine().with_name(marker.name + ".y"));
+              momentum::makeSeriesLineWithName(marker.name + ".y"));
           rec.log_static(
               streamName + "/" + marker.name + "/z",
-              rerun::SeriesLine().with_name(marker.name + ".z"));
+              momentum::makeSeriesLineWithName(marker.name + ".z"));
         }
       }
 
       for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
         rec.set_time_sequence("frame_index", iFrame);
-        rec.set_time_seconds("log_time", (float)iFrame / actor.fps);
+        momentum::setTimeSeconds(rec, "log_time", (float)iFrame / actor.fps);
         logMarkers(rec, "world/" + streamName, actor.frames.at(iFrame));
 
         if (options->plot) {
           for (const auto& marker : actor.frames.at(iFrame)) {
             if (!marker.occluded) {
-              rec.log(streamName + "/" + marker.name + "/x", rerun::Scalar(marker.pos.x()));
-              rec.log(streamName + "/" + marker.name + "/y", rerun::Scalar(marker.pos.y()));
-              rec.log(streamName + "/" + marker.name + "/z", rerun::Scalar(marker.pos.z()));
+              rec.log(streamName + "/" + marker.name + "/x", momentum::makeScalar(marker.pos.x()));
+              rec.log(streamName + "/" + marker.name + "/y", momentum::makeScalar(marker.pos.y()));
+              rec.log(streamName + "/" + marker.name + "/z", momentum::makeScalar(marker.pos.z()));
             }
           }
         }
