@@ -12,6 +12,7 @@
 #include <momentum/character/types.h>
 #include <momentum/character_sequence_solver/fwd.h>
 #include <momentum/character_solver/fwd.h>
+#include <momentum/math/online_householder_qr.h>
 #include <momentum/solver/solver_function.h>
 
 #include <atomic>
@@ -40,11 +41,17 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
 
   double getGradient(const Eigen::VectorX<T>& parameters, Eigen::VectorX<T>& gradient) final;
 
-  double getJacobian(
+  // Block-wise Jacobian interface
+  void initializeJacobianComputation(const Eigen::VectorX<T>& parameters) override;
+  [[nodiscard]] size_t getJacobianBlockCount() const override;
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override;
+  double computeJacobianBlock(
       const Eigen::VectorX<T>& parameters,
-      Eigen::MatrixX<T>& jacobian,
-      Eigen::VectorX<T>& residual,
-      size_t& actualRows) final;
+      size_t blockIndex,
+      Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+      Eigen::Ref<Eigen::VectorX<T>> residualBlock,
+      size_t& actualRows) override;
+  void finalizeJacobianComputation() override;
 
   void updateParameters(Eigen::VectorX<T>& parameters, const Eigen::VectorX<T>& gradient) final;
   void setEnabledParameters(const ParameterSet& parameterSet) final;
@@ -143,6 +150,9 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
 
   std::vector<std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>>> perFrameErrorFunctions_;
   std::vector<std::vector<std::shared_ptr<SequenceErrorFunctionT<T>>>> sequenceErrorFunctions_;
+
+  /// Pre-allocated temporary storage for block-wise Jacobian computation
+  ResizeableMatrix<T> tempJac_;
 
   std::atomic<size_t> numTotalPerFrameErrorFunctions_ = 0;
   std::atomic<size_t> numTotalSequenceErrorFunctions_ = 0;
