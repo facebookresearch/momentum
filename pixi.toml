@@ -559,10 +559,9 @@ dependencies = { python = "3.12.*" }
 
 [feature.gpu-wheel-build-py312.tasks]
 # GPU wheel build using cibuildwheel in manylinux_2_28 container
-# Container engine selection via CIBW_CONTAINER_ENGINE env var:
-#   - Default: podman (set in env block below)
-#   - Override for CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py312 wheel_build
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp312-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
+# Container engine defaults to docker (cibuildwheel default)
+# For local builds with podman: CIBW_CONTAINER_ENGINE=podman pixi run -e gpu-wheel-build-py312 wheel_build
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp312-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (uses docker by default, set CIBW_CONTAINER_ENGINE=podman for local podman)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -580,10 +579,9 @@ dependencies = { python = "3.13.*" }
 
 [feature.gpu-wheel-build-py313.tasks]
 # GPU wheel build using cibuildwheel in manylinux_2_28 container
-# Container engine selection via CIBW_CONTAINER_ENGINE env var:
-#   - Default: podman (set in env block below)
-#   - Override for CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py313 wheel_build
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp313-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
+# Container engine defaults to docker (cibuildwheel default)
+# For local builds with podman: CIBW_CONTAINER_ENGINE=podman pixi run -e gpu-wheel-build-py313 wheel_build
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp313-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (uses docker by default, set CIBW_CONTAINER_ENGINE=podman for local podman)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -612,8 +610,8 @@ gpu = ["py312-cuda129", "rerun-latest"]
 
 # GPU wheel build environments (no CUDA required on host)
 # Use these for building GPU wheels - builds happen in containers
-# Local: pixi run -e gpu-wheel-build-py312 wheel_build (uses podman)
-# CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py312 wheel_build
+# CI: pixi run -e gpu-wheel-build-py312 wheel_build (uses docker, the cibuildwheel default)
+# Local with podman: CIBW_CONTAINER_ENGINE=podman pixi run -e gpu-wheel-build-py312 wheel_build
 gpu-wheel-build-py312 = ["gpu-wheel-build", "gpu-wheel-build-py312"]
 gpu-wheel-build-py313 = ["gpu-wheel-build", "gpu-wheel-build-py313"]
 
