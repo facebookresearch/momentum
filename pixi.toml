@@ -238,7 +238,7 @@ podman = ">=5.0.0,<6"
 
 [target.linux-64.tasks]
 # Linux CPU wheel build uses cibuildwheel with podman to produce manylinux_2_28 wheels
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-cpu-py$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))').toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))')-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build CPU wheel using cibuildwheel in manylinux_2_28 container (Linux)" }
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-cpu-py$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))').toml pyproject.toml && CIBW_CONTAINER_ENGINE=podman CIBW_BUILD=\"cp$(python -c 'import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))')-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", description = "Build CPU wheel using cibuildwheel in manylinux_2_28 container (Linux)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op on Linux)" }
 
@@ -546,7 +546,7 @@ dependencies = { python = "3.12.*" }
 # Container engine selection via CIBW_CONTAINER_ENGINE env var:
 #   - Default: podman (set in env block below)
 #   - Override for CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py312 wheel_build
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp312-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp312-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -567,7 +567,7 @@ dependencies = { python = "3.13.*" }
 # Container engine selection via CIBW_CONTAINER_ENGINE env var:
 #   - Default: podman (set in env block below)
 #   - Override for CI: CIBW_CONTAINER_ENGINE=docker pixi run -e gpu-wheel-build-py313 wheel_build
-wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml .tmp-pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv .tmp-pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp313-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
+wheel_build = { cmd = "python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; mv /tmp/pyproject-backup.toml pyproject.toml && echo 'Wheels created:' && ls -la dist/", env = { CIBW_BUILD = "cp313-manylinux_x86_64", CIBW_CONTAINER_ENGINE = "podman" }, description = "Build GPU wheel using cibuildwheel (uses podman by default, set CIBW_CONTAINER_ENGINE=docker for CI)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
