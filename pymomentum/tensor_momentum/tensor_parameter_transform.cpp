@@ -76,7 +76,7 @@ variable_list ApplyParameterTransformFunction<T>::forward(
             .parameterTransform.numAllModelParameters();
 
   TensorChecker checker("ParameterTransform.apply");
-  bool squeeze;
+  bool squeeze = false;
   const auto input_device = modelParams.device();
 
   modelParams = checker.validateAndFixTensor(
@@ -384,7 +384,7 @@ variable_list ApplyInverseParameterTransformFunction::forward(
   TensorChecker checker("InverseParameterTransform.apply");
   const auto input_device = jointParams.device();
 
-  bool squeeze;
+  bool squeeze = false;
   jointParams = checker.validateAndFixTensor(
       jointParams,
       "jointParameters",
