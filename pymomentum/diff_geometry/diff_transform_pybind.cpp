@@ -8,13 +8,12 @@
 #include "pymomentum/diff_geometry/diff_transform_pybind.h"
 
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
+#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/character.h>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/python.h>
 
 #include <utility>
 

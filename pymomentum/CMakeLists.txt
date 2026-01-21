@@ -74,6 +74,18 @@ endif()
 # Build PyMomentum
 #===============================================================================
 
+# TorchBridge INTERFACE library for OSS builds
+set(TORCH_BRIDGE_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/torch_bridge_include)
+file(MAKE_DIRECTORY ${TORCH_BRIDGE_INCLUDE_DIR}/pymomentum)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/oss/torch_bridge.h.in
+  ${TORCH_BRIDGE_INCLUDE_DIR}/pymomentum/torch_bridge.h
+  COPYONLY
+)
+
+add_library(torch_bridge INTERFACE)
+target_include_directories(torch_bridge INTERFACE ${TORCH_BRIDGE_INCLUDE_DIR})
+
 mt_library(
   NAME tensor_utility
   PYMOMENTUM_HEADERS_VARS tensor_utility_public_headers
@@ -131,6 +143,7 @@ mt_library(
   PUBLIC_LINK_LIBRARIES
     momentum
     diff_ik
+    torch_bridge
     ${ATEN_LIBRARIES}
     pybind11::pybind11
   PRIVATE_LINK_LIBRARIES
@@ -193,6 +206,7 @@ mt_python_binding(
     python_utility
     tensor_momentum
     tensor_utility
+    torch_bridge
     ${ATEN_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${torch_python}
@@ -212,6 +226,7 @@ mt_python_binding(
     character
     tensor_momentum
     tensor_utility
+    torch_bridge
     ${ATEN_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${torch_python}
@@ -236,6 +251,7 @@ mt_python_binding(
     tensor_ik
     tensor_momentum
     tensor_utility
+    torch_bridge
     ${ATEN_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${torch_python}
@@ -257,6 +273,7 @@ mt_python_binding(
     math
     skeleton
     solver
+    torch_bridge
     ${ATEN_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${torch_python}
@@ -268,13 +285,12 @@ mt_python_binding(
   NAME marker_tracking
   PYMOMENTUM_HEADERS_VARS marker_tracking_public_headers
   PYMOMENTUM_SOURCES_VARS marker_tracking_sources
-  INCLUDE_DIRECTORIES
   LINK_LIBRARIES
     character
     marker_tracker
     math
     process_markers
-  COMPILE_OPTIONS
+    torch_bridge
 )
 
 mt_python_binding(
@@ -311,6 +327,7 @@ if(MOMENTUM_BUILD_RENDERER)
       skeleton
       tensor_momentum
       tensor_utility
+      torch_bridge
       ${ATEN_LIBRARIES}
       ${TORCH_LIBRARIES}
       ${torch_python}

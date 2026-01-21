@@ -9,13 +9,12 @@
 
 #include "pymomentum/tensor_momentum/tensor_blend_shape.h"
 #include "pymomentum/tensor_momentum/tensor_skinning.h"
+#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/blend_shape.h>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <torch/csrc/utils/pybind.h>
-#include <torch/python.h>
 
 namespace py = pybind11;
 
