@@ -22,6 +22,9 @@ import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import torch
 
+# Flag to check if autograd is enabled (disabled in arvr build modes)
+AUTOGRAD_ENABLED: bool = pym_diff_geometry.AUTOGRAD_ENABLED
+
 
 def _brute_force_closest_points(
     src_pts: torch.Tensor,
@@ -66,7 +69,7 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = pym_diff_geometry.uniform_random_to_model_parameters(
             character, torch.rand(nBatch, nParams)
         ).double()
-        modelParams.requires_grad = True
+        modelParams.requires_grad = AUTOGRAD_ENABLED
 
         jp = character.parameter_transform.apply(modelParams)
 
@@ -75,11 +78,12 @@ class TestDiffGeometry(unittest.TestCase):
             self.assertTrue(jp1.allclose(jp.select(0, i)))
 
         inputs = [character, modelParams]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.apply_parameter_transform,
-            inputs,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_diff_geometry.apply_parameter_transform,
+                inputs,
+                raise_exception=True,
+            )
 
     def test_diffInverseParamTransform(self) -> None:
         character = pym_geometry.create_test_character()
@@ -88,7 +92,7 @@ class TestDiffGeometry(unittest.TestCase):
         nBatch = 2
         # Some nonzero vector as 0 always maps to 0 in momentum:
         modelParams = 0.3 * torch.ones(
-            nBatch, character.parameter_transform.size, requires_grad=True
+            nBatch, character.parameter_transform.size, requires_grad=AUTOGRAD_ENABLED
         )
         jointParams = character.parameter_transform.apply(modelParams)
 
@@ -100,14 +104,15 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue(diff < 0.001)
 
         # Validate the gradients.
-        inputs = [invTransform, jointParams]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.apply_inverse_parameter_transform,
-            inputs,
-            eps=1e-2,
-            atol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            inputs = [invTransform, jointParams]
+            torch.autograd.gradcheck(
+                pym_diff_geometry.apply_inverse_parameter_transform,
+                inputs,
+                eps=1e-2,
+                atol=1e-3,
+                raise_exception=True,
+            )
 
     def test_diffmodel_parameters_to_positions(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
@@ -118,7 +123,7 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = torch.zeros(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
         nConstraints = 4 * nJoints
@@ -129,11 +134,12 @@ class TestDiffGeometry(unittest.TestCase):
         )
         posConstraints_offsets = torch.normal(mean=0, std=4, size=(nConstraints, 3))
         inputs = [character, modelParams, posConstraint_parents, posConstraints_offsets]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.model_parameters_to_positions,
-            inputs,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_diff_geometry.model_parameters_to_positions,
+                inputs,
+                raise_exception=True,
+            )
 
     def test_multiCharacter(self) -> None:
         # Test basic multi-character support.
@@ -154,7 +160,7 @@ class TestDiffGeometry(unittest.TestCase):
             characters[0], torch.rand(nBatch, nParams)
         )
         posConstraint_parents = torch.Tensor(list(range(nJoints)))
-        posConstraint_offsets = torch.zeros(nJoints, 3, requires_grad=True)
+        posConstraint_offsets = torch.zeros(nJoints, 3, requires_grad=AUTOGRAD_ENABLED)
 
         positions_full = pym_diff_geometry.model_parameters_to_positions(
             characters, modelParams, posConstraint_parents, posConstraint_offsets
@@ -185,7 +191,7 @@ class TestDiffGeometry(unittest.TestCase):
             high=character.skeleton.size,
             size=[nConstraints],
         )
-        posConstraint_offsets = torch.zeros(nJoints, 3, requires_grad=True)
+        posConstraint_offsets = torch.zeros(nJoints, 3, requires_grad=AUTOGRAD_ENABLED)
 
         def bad_joints(
             character: pym_geometry.Character = character,
@@ -211,7 +217,7 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = 0.2 * torch.ones(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
         jointParams = character.parameter_transform.apply(modelParams).type(
@@ -240,11 +246,12 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue(positions_1.allclose(positions_2))
 
         inputs = [character, jointParams, posConstraint_parents, posConstraints_offsets]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.joint_parameters_to_positions,
-            inputs,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_diff_geometry.joint_parameters_to_positions,
+                inputs,
+                raise_exception=True,
+            )
 
     def test_diffmodel_parameters_to_skeleton_state(self) -> None:
         character = pym_geometry.create_test_character()
@@ -252,17 +259,18 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = 0.2 * torch.ones(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
         inputs = [character, modelParams]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.model_parameters_to_skeleton_state,
-            inputs,
-            eps=1e-2,
-            atol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_diff_geometry.model_parameters_to_skeleton_state,
+                inputs,
+                eps=1e-2,
+                atol=1e-3,
+                raise_exception=True,
+            )
 
     def test_diffmodel_parameters_to_local_skeleton_state(self) -> None:
         character = pym_geometry.create_test_character()
@@ -270,7 +278,7 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = 0.2 * torch.ones(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -306,13 +314,14 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue(torch.allclose(accum, global_mat))
 
         inputs = [character, modelParams]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.model_parameters_to_local_skeleton_state,
-            inputs,
-            eps=1e-2,
-            atol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_diff_geometry.model_parameters_to_local_skeleton_state,
+                inputs,
+                eps=1e-2,
+                atol=1e-3,
+                raise_exception=True,
+            )
 
     def test_local_skeleton_state_to_joint_parameters(self) -> None:
         character = pym_geometry.create_test_character()
@@ -320,7 +329,7 @@ class TestDiffGeometry(unittest.TestCase):
         model_params = 0.2 * torch.ones(
             n_batch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -367,7 +376,7 @@ class TestDiffGeometry(unittest.TestCase):
         model_params = 0.2 * torch.ones(
             n_batch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -415,7 +424,7 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = 0.2 * torch.ones(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -437,18 +446,19 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = 0.2 * torch.ones(
             nBatch,
             character.parameter_transform.size,
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
         jointParams = character.parameter_transform.apply(modelParams)
         inputs = [character, jointParams]
-        torch.autograd.gradcheck(
-            pym_diff_geometry.joint_parameters_to_skeleton_state,
-            inputs,
-            eps=1e-2,
-            atol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_diff_geometry.joint_parameters_to_skeleton_state,
+                inputs,
+                eps=1e-2,
+                atol=1e-3,
+                raise_exception=True,
+            )
 
     def test_map_model_parameters(self) -> None:
         # map onto a "reduced" character and back:
@@ -500,13 +510,15 @@ class TestDiffGeometry(unittest.TestCase):
         n_batch = 2
         # Create uniform distribution of [-2.5, 2.5)
         model_params = (
-            torch.rand(n_batch, n_model_params, requires_grad=True) * 5.0 - 2.5
+            torch.rand(n_batch, n_model_params, requires_grad=AUTOGRAD_ENABLED) * 5.0
+            - 2.5
         )
         clamped_params = pym_diff_geometry.apply_model_param_limits(c, model_params)
 
         self.assertTrue(clamped_params.shape == model_params.shape)
         # Check differentiability:
-        clamped_params.backward(gradient=torch.ones(clamped_params.shape))
+        if AUTOGRAD_ENABLED:
+            clamped_params.backward(gradient=torch.ones(clamped_params.shape))
         # Check no-limit model params are the same:
         self.assertTrue((clamped_params[:, 1:] == model_params[:, 1:]).all())
         self.assertTrue((clamped_params[:, 0] <= 0.1).all())
@@ -660,7 +672,7 @@ class TestDiffGeometry(unittest.TestCase):
         n_batch = 1
         n_model_params = c.parameter_transform.size
         model_params = torch.rand(
-            n_batch, n_model_params, dtype=torch.float64, requires_grad=True
+            n_batch, n_model_params, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
         )
 
         skel_state = pym_diff_geometry.model_parameters_to_skeleton_state(
@@ -718,13 +730,14 @@ class TestDiffGeometry(unittest.TestCase):
         )
 
         # Test gradients
-        torch.autograd.gradcheck(
-            lambda skel: pym_diff_geometry.skin_skinned_locators(c, skel),
-            (skel_state,),
-            eps=1e-4,
-            atol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                lambda skel: pym_diff_geometry.skin_skinned_locators(c, skel),
+                (skel_state,),
+                eps=1e-4,
+                atol=1e-3,
+                raise_exception=True,
+            )
 
         # Test single batch case
         skel_state_single = skel_state[0]  # Remove batch dimension
@@ -782,7 +795,12 @@ class TestDiffGeometry(unittest.TestCase):
 
         n_batch = 2
         model_params = (
-            torch.rand(n_batch, n_model_params, requires_grad=True, dtype=torch.float64)
+            torch.rand(
+                n_batch,
+                n_model_params,
+                requires_grad=AUTOGRAD_ENABLED,
+                dtype=torch.float64,
+            )
             * 5.0
             - 2.5
         )
@@ -793,24 +811,25 @@ class TestDiffGeometry(unittest.TestCase):
         transforms = pym_skel_state.to_matrix(skel_state)
 
         # Derivatives with default rest points:
-        torch.autograd.gradcheck(
-            lambda xf: pym_diff_geometry.skin_points(c, xf),
-            [transforms],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                lambda xf: pym_diff_geometry.skin_points(c, xf),
+                [transforms],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
-        # Derivatives with specified rest points:
-        rest_points = torch.from_numpy(c.mesh.vertices).double()
-        rest_points.requires_grad = True
-        torch.autograd.gradcheck(
-            lambda xf, rp: pym_diff_geometry.skin_points(c, xf, rp),
-            [transforms, rest_points],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+            # Derivatives with specified rest points:
+            rest_points = torch.from_numpy(c.mesh.vertices).double()
+            rest_points.requires_grad = AUTOGRAD_ENABLED
+            torch.autograd.gradcheck(
+                lambda xf, rp: pym_diff_geometry.skin_points(c, xf, rp),
+                [transforms, rest_points],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_diff_apply_blend_coeffs_base(self) -> None:
         """Test BlendShapeBase.compute_shape with gradcheck."""
@@ -824,7 +843,9 @@ class TestDiffGeometry(unittest.TestCase):
 
         nBatch = 2
         n_coeffs = min(blend_shape.n_shapes, 10)
-        coeffs = torch.rand(nBatch, n_coeffs, dtype=torch.float64, requires_grad=True)
+        coeffs = torch.rand(
+            nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
+        )
 
         shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
         c1 = coeffs.select(0, 0).detach().numpy()
@@ -837,13 +858,14 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue(shape1.allclose(torch.from_numpy(shape2).float()))
         self.assertTrue(len(blend_shape.shape_names) == n_blend)
 
-        torch.autograd.gradcheck(
-            blend_shape.compute_shape,
-            [coeffs],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                blend_shape.compute_shape,
+                [coeffs],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_diff_apply_blend_coeffs(self) -> None:
         """Test BlendShape.compute_shape with gradcheck."""
@@ -858,7 +880,9 @@ class TestDiffGeometry(unittest.TestCase):
 
         nBatch = 2
         n_coeffs = min(blend_shape.n_shapes, 10)
-        coeffs = torch.rand(nBatch, n_coeffs, dtype=torch.float64, requires_grad=True)
+        coeffs = torch.rand(
+            nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
+        )
 
         shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
         c1 = coeffs.select(0, 0).detach().numpy()
@@ -873,13 +897,14 @@ class TestDiffGeometry(unittest.TestCase):
 
         self.assertTrue(shape1.allclose(torch.from_numpy(shape2).float()))
 
-        torch.autograd.gradcheck(
-            blend_shape.compute_shape,
-            [coeffs],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                blend_shape.compute_shape,
+                [coeffs],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_compute_blend_shape(self) -> None:
         """Test diff_geometry.compute_blend_shape wrapper function."""
@@ -894,7 +919,9 @@ class TestDiffGeometry(unittest.TestCase):
 
         nBatch = 2
         n_coeffs = blend_shape.n_shapes
-        coeffs = torch.rand(nBatch, n_coeffs, dtype=torch.float64, requires_grad=True)
+        coeffs = torch.rand(
+            nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
+        )
 
         # Test the module-level function
         result1 = pym_diff_geometry.compute_blend_shape(blend_shape, coeffs)
@@ -903,13 +930,14 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue(torch.allclose(result1, result2))
 
         # Test gradients
-        torch.autograd.gradcheck(
-            lambda c: pym_diff_geometry.compute_blend_shape(blend_shape, c),
-            [coeffs],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                lambda c: pym_diff_geometry.compute_blend_shape(blend_shape, c),
+                [coeffs],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_find_closest_points(self) -> None:
         """Test find_closest_points (without normals)."""

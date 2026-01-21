@@ -14,6 +14,9 @@ from pymomentum.solver import ErrorFunctionType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+# Flag to check if autograd is enabled (disabled in arvr build modes)
+AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+
 
 class TestPosePrior(unittest.TestCase):
     def test_ik_pose_prior(self) -> None:
@@ -43,20 +46,20 @@ class TestPosePrior(unittest.TestCase):
         pos_cons_offsets = torch.normal(
             mean=0, std=4, size=(n_pos_cons, 3), dtype=torch.float64
         )
-        pos_cons_offsets.requires_grad = True
+        pos_cons_offsets.requires_grad = AUTOGRAD_ENABLED
         pos_cons_targets = pym_geometry.model_parameters_to_positions(
             character, model_params_init, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
         )
-        pos_cons_targets.requires_grad = True
+        pos_cons_targets.requires_grad = AUTOGRAD_ENABLED
         pos_cons_weights = torch.ones(
-            batch_size, n_pos_cons, requires_grad=True, dtype=torch.float64
+            batch_size, n_pos_cons, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
 
         orient_cons_parents = torch.arange(n_joints)
         orient_cons_weights = torch.ones(
-            batch_size, n_joints, requires_grad=True, dtype=torch.float64
+            batch_size, n_joints, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
         skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
             character, model_params_init
@@ -67,17 +70,17 @@ class TestPosePrior(unittest.TestCase):
 
         n_modes = 1
         posePrior_pi = torch.ones(n_modes, dtype=torch.float64)
-        posePrior_pi.requires_grad = True
+        posePrior_pi.requires_grad = AUTOGRAD_ENABLED
         posePrior_mu = torch.normal(
             mean=0, std=1, size=(n_modes, n_params), dtype=torch.float64
         )
-        posePrior_mu.requires_grad = True
+        posePrior_mu.requires_grad = AUTOGRAD_ENABLED
         posePrior_W = torch.normal(
             mean=0, std=1, size=(n_modes, 2, n_params), dtype=torch.float64
         )
-        posePrior_W.requires_grad = True
+        posePrior_W.requires_grad = AUTOGRAD_ENABLED
         posePrior_sigma = torch.ones(n_modes, dtype=torch.float64)
-        posePrior_sigma.requires_grad = True
+        posePrior_sigma.requires_grad = AUTOGRAD_ENABLED
         posePrior_parameterIndices = torch.arange(0, n_params)
 
         # =============== End building constraints
@@ -94,7 +97,7 @@ class TestPosePrior(unittest.TestCase):
         error_function_weights = torch.ones(
             batch_size,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -174,22 +177,23 @@ class TestPosePrior(unittest.TestCase):
             posePrior_W,
             posePrior_sigma,
         ]
-        torch.autograd.gradcheck(
-            solve_ik,
-            inputs,
-            eps=0.0001,
-            atol=1e-1,
-            rtol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                solve_ik,
+                inputs,
+                eps=0.0001,
+                atol=1e-1,
+                rtol=1e-3,
+                raise_exception=True,
+            )
 
-        loss_func = torch.nn.MSELoss()
-        result = loss_func(model_params_final, model_params_init)
-        result.backward()
+            loss_func = torch.nn.MSELoss()
+            result = loss_func(model_params_final, model_params_init)
+            result.backward()
 
-        (nNonZero, nTotal) = pym_solver.get_gradient_statistics()
-        self.assertEqual(nNonZero, 0)
-        self.assertGreater(nTotal, 0)
+            (nNonZero, nTotal) = pym_solver.get_gradient_statistics()
+            self.assertEqual(nNonZero, 0)
+            self.assertGreater(nTotal, 0)
 
 
 if __name__ == "__main__":

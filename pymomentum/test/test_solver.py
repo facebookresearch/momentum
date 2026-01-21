@@ -14,6 +14,9 @@ import pymomentum.solver as pym_solver
 import torch
 from pymomentum.solver import ErrorFunctionType
 
+# Flag to check if autograd is enabled (disabled in arvr build modes)
+AUTOGRAD_ENABLED: bool = pym_solver.AUTOGRAD_ENABLED
+
 
 def solve_one_ik_problem(index: int) -> torch.Tensor:
     character = pym_geometry.create_test_character()
@@ -38,9 +41,9 @@ def solve_one_ik_problem(index: int) -> torch.Tensor:
 
     # TODO randomize
     pos_cons_weights = torch.ones(
-        batch_size, n_joints, requires_grad=True, dtype=torch.float64
+        batch_size, n_joints, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
     )
-    pos_cons_weights.requires_grad = True
+    pos_cons_weights.requires_grad = AUTOGRAD_ENABLED
 
     active_error_functions = [
         ErrorFunctionType.Limit,
@@ -49,7 +52,7 @@ def solve_one_ik_problem(index: int) -> torch.Tensor:
     error_function_weights = torch.ones(
         batch_size,
         len(active_error_functions),
-        requires_grad=True,
+        requires_grad=AUTOGRAD_ENABLED,
         dtype=torch.float64,
     )
 
@@ -98,24 +101,24 @@ class TestSolver(unittest.TestCase):
         pos_cons_offsets = torch.normal(
             mean=0, std=4, size=(n_pos_cons, 3), dtype=torch.float64
         )
-        pos_cons_offsets.requires_grad = True
+        pos_cons_offsets.requires_grad = AUTOGRAD_ENABLED
 
         pos_cons_targets = pym_geometry.model_parameters_to_positions(
             character, model_params_init, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
         )
-        pos_cons_targets.requires_grad = True
+        pos_cons_targets.requires_grad = AUTOGRAD_ENABLED
 
         # TODO randomize
         pos_cons_weights = torch.ones(
-            batch_size, n_pos_cons, requires_grad=True, dtype=torch.float64
+            batch_size, n_pos_cons, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
 
         # =============== Orientation constraints:
         orient_cons_parents = torch.arange(n_joints)
         orient_cons_weights = torch.ones(
-            batch_size, n_joints, requires_grad=True, dtype=torch.float64
+            batch_size, n_joints, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
 
         skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
@@ -127,9 +130,9 @@ class TestSolver(unittest.TestCase):
 
         # =============== Motion constraints:
         motion_targets = model_params_init.detach().clone().double()
-        # motion_targets.requires_grad = True
+        # motion_targets.requires_grad = AUTOGRAD_ENABLED
         motion_weights = torch.ones(
-            batch_size, n_params, dtype=torch.float64, requires_grad=True
+            batch_size, n_params, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
         )
 
         # =============== End building constraints
@@ -146,7 +149,7 @@ class TestSolver(unittest.TestCase):
         error_function_weights = torch.ones(
             batch_size,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -208,21 +211,22 @@ class TestSolver(unittest.TestCase):
             motion_targets,
             motion_weights,
         ]
-        torch.autograd.gradcheck(
-            pym_solver.solve_ik,
-            inputs,
-            eps=0.001,
-            atol=1e-3,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_solver.solve_ik,
+                inputs,
+                eps=0.001,
+                atol=1e-3,
+                raise_exception=True,
+            )
 
-        loss_func = torch.nn.MSELoss()
-        result = loss_func(model_params_final, model_params_init)
-        result.backward()
+            loss_func = torch.nn.MSELoss()
+            result = loss_func(model_params_final, model_params_init)
+            result.backward()
 
-        (nNonZero, nTotal) = pym_solver.get_gradient_statistics()
-        self.assertEqual(nNonZero, 0)
-        self.assertGreater(nTotal, 0)
+            (nNonZero, nTotal) = pym_solver.get_gradient_statistics()
+            self.assertEqual(nNonZero, 0)
+            self.assertGreater(nTotal, 0)
 
     def test_ik_multithreaded(self) -> None:
         n_workers = 3
@@ -281,7 +285,7 @@ class TestSolver(unittest.TestCase):
         # Ensure repeatability in the rng:
         torch.manual_seed(0)
         model_params = torch.zeros(
-            batch_size, n_params, dtype=torch.float64, requires_grad=True
+            batch_size, n_params, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
         )
 
         # Position constraints:
@@ -294,18 +298,18 @@ class TestSolver(unittest.TestCase):
         pos_cons_offsets = torch.normal(
             mean=0, std=4, size=(n_pos_cons, 3), dtype=torch.float64
         )
-        pos_cons_offsets.requires_grad = True
+        pos_cons_offsets.requires_grad = AUTOGRAD_ENABLED
 
         pos_cons_targets = pym_geometry.model_parameters_to_positions(
             character, model_params, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
         )
-        pos_cons_targets.requires_grad = True
+        pos_cons_targets.requires_grad = AUTOGRAD_ENABLED
 
         # TODO randomize
         pos_cons_weights = torch.ones(
-            batch_size, n_pos_cons, requires_grad=True, dtype=torch.float64
+            batch_size, n_pos_cons, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
 
         motion_targets = model_params.detach().clone()
@@ -318,7 +322,7 @@ class TestSolver(unittest.TestCase):
         error_function_weights = torch.ones(
             batch_size,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -354,13 +358,14 @@ class TestSolver(unittest.TestCase):
         ]
         # I believe we have to use a slightly larger atol here than we would otherwise like because
         # the approximate d/dTheta (dErr/dTheta) = J^T * J drops the higher-order terms.
-        torch.autograd.gradcheck(
-            pym_solver.gradient,
-            inputs,
-            eps=1e-4,
-            atol=1e-2,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_solver.gradient,
+                inputs,
+                eps=1e-4,
+                atol=1e-2,
+                raise_exception=True,
+            )
 
     def test_residual(self) -> None:
         character = pym_geometry.create_test_character()
@@ -374,7 +379,7 @@ class TestSolver(unittest.TestCase):
         # Ensure repeatability in the rng:
         torch.manual_seed(0)
         model_params = torch.zeros(
-            batch_size, n_params, dtype=torch.float64, requires_grad=True
+            batch_size, n_params, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
         )
 
         # Position constraints:
@@ -463,11 +468,12 @@ class TestSolver(unittest.TestCase):
             motion_weights,
         ]
 
-        torch.autograd.gradcheck(
-            pym_solver.residual,
-            inputs,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                pym_solver.residual,
+                inputs,
+                raise_exception=True,
+            )
 
     def test_nonzero_gradient(self) -> None:
         """Test to make sure the gradient is nonzero check triggers."""
@@ -503,7 +509,7 @@ class TestSolver(unittest.TestCase):
             mean=0, std=5, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
         )
         pos_cons_weights = torch.ones(
-            batch_size, n_pos_cons, requires_grad=True, dtype=torch.float64
+            batch_size, n_pos_cons, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
         active_error_functions = [
             ErrorFunctionType.Limit,
@@ -512,7 +518,7 @@ class TestSolver(unittest.TestCase):
         error_function_weights = torch.ones(
             batch_size,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -537,16 +543,17 @@ class TestSolver(unittest.TestCase):
             position_cons_targets=pos_cons_targets,
         )
 
-        loss_func = torch.nn.MSELoss()
-        result = loss_func(model_params_final, model_params_init)
-        result.backward()
+        if AUTOGRAD_ENABLED:
+            loss_func = torch.nn.MSELoss()
+            result = loss_func(model_params_final, model_params_init)
+            result.backward()
 
-        (nNonZero, nTotal) = pym_solver.get_gradient_statistics()
-        self.assertGreater(nNonZero, 0)
+            (nNonZero, nTotal) = pym_solver.get_gradient_statistics()
+            self.assertGreater(nNonZero, 0)
 
-        # Because of nonzero gradient, all error function gradients should be 0:
-        self.assertTrue(torch.norm(pos_cons_weights.grad) == 0)
-        self.assertTrue(torch.norm(error_function_weights.grad) == 0)
+            # Because of nonzero gradient, all error function gradients should be 0:
+            self.assertTrue(torch.norm(pos_cons_weights.grad) == 0)
+            self.assertTrue(torch.norm(error_function_weights.grad) == 0)
 
     def test_solver_stats(self) -> None:
         """Test solver stats."""
@@ -582,7 +589,7 @@ class TestSolver(unittest.TestCase):
             mean=0, std=5, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
         )
         pos_cons_weights = torch.ones(
-            batch_size, n_pos_cons, requires_grad=True, dtype=torch.float64
+            batch_size, n_pos_cons, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
         active_error_functions = [
             ErrorFunctionType.Limit,
@@ -591,7 +598,7 @@ class TestSolver(unittest.TestCase):
         error_function_weights = torch.ones(
             batch_size,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 
@@ -692,9 +699,9 @@ class TestSolver(unittest.TestCase):
                 ]
             ]
         )
-        vert_proj_cons_weights.requires_grad = True
+        vert_proj_cons_weights.requires_grad = AUTOGRAD_ENABLED
         vert_proj_cons_target_positions = torch.FloatTensor([[1.0, 1.0]])
-        vert_proj_cons_target_positions.requires_grad = True
+        vert_proj_cons_target_positions.requires_grad = AUTOGRAD_ENABLED
         vert_proj_cons_projection = torch.FloatTensor(
             [
                 [
@@ -719,7 +726,7 @@ class TestSolver(unittest.TestCase):
                 ]
             ]
         )
-        vert_proj_cons_projection.requires_grad = True
+        vert_proj_cons_projection.requires_grad = AUTOGRAD_ENABLED
 
         # =============== End building constraints
 
@@ -732,7 +739,7 @@ class TestSolver(unittest.TestCase):
         error_function_weights = torch.ones(
             1,
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
 

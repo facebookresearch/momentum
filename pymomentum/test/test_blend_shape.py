@@ -14,6 +14,9 @@ import pymomentum.solver as pym_solver
 import torch
 from pymomentum.solver import ErrorFunctionType
 
+# Flag to check if autograd is enabled (disabled in arvr build modes)
+AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+
 
 def _build_shape_vectors(
     c: pym_geometry.Character,
@@ -46,7 +49,9 @@ def _apply_blend_coeffs(
 
     nBatch = 2
     n_coeffs = min(blend_shape.n_shapes, 10)
-    coeffs = torch.rand(nBatch, n_coeffs, dtype=torch.float64, requires_grad=True)
+    coeffs = torch.rand(
+        nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
+    )
 
     shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
     c1 = coeffs.select(0, 0).detach().numpy()
@@ -75,13 +80,14 @@ class TestBlendShapeBase(unittest.TestCase):
         self.assertTrue(shape1.allclose(shape2))
         self.assertTrue(len(blend_shape.shape_names) == n_blend)
 
-        torch.autograd.gradcheck(
-            blend_shape.compute_shape,
-            [coeffs],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                blend_shape.compute_shape,
+                [coeffs],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_save_and_load(self) -> None:
         torch.manual_seed(0)
@@ -154,7 +160,7 @@ class TestBlendShapeBase(unittest.TestCase):
         active_error_functions = [ErrorFunctionType.Limit, ErrorFunctionType.Vertex]
         error_function_weights = torch.ones(
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
         )
         model_params_init = torch.zeros(c.parameter_transform.size)
 
@@ -209,13 +215,14 @@ class TestBlendShape(unittest.TestCase):
 
         self.assertTrue(shape1.allclose(shape2))
 
-        torch.autograd.gradcheck(
-            blend_shape.compute_shape,
-            [coeffs],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            torch.autograd.gradcheck(
+                blend_shape.compute_shape,
+                [coeffs],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_blend_shape_character(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
@@ -290,7 +297,12 @@ class TestBlendShape(unittest.TestCase):
 
         n_batch = 2
         model_params = (
-            torch.rand(n_batch, n_model_params, requires_grad=True, dtype=torch.float64)
+            torch.rand(
+                n_batch,
+                n_model_params,
+                requires_grad=AUTOGRAD_ENABLED,
+                dtype=torch.float64,
+            )
             * 5.0
             - 2.5
         )
@@ -298,25 +310,26 @@ class TestBlendShape(unittest.TestCase):
         skel_state = pym_geometry.joint_parameters_to_skeleton_state(c, joint_params)
         transforms = pym_skel_state.to_matrix(skel_state)
 
-        # Derivatives with default rest points:
-        torch.autograd.gradcheck(
-            c.skin_points,
-            [transforms],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+        if AUTOGRAD_ENABLED:
+            # Derivatives with default rest points:
+            torch.autograd.gradcheck(
+                c.skin_points,
+                [transforms],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
-        # Derivatives with specified rest points:
-        rest_points = torch.from_numpy(c.mesh.vertices).double()
-        rest_points.requires_grad = True
-        torch.autograd.gradcheck(
-            c.skin_points,
-            [transforms, rest_points],
-            eps=1e-3,
-            atol=1e-4,
-            raise_exception=True,
-        )
+            # Derivatives with specified rest points:
+            rest_points = torch.from_numpy(c.mesh.vertices).double()
+            rest_points.requires_grad = AUTOGRAD_ENABLED
+            torch.autograd.gradcheck(
+                c.skin_points,
+                [transforms, rest_points],
+                eps=1e-3,
+                atol=1e-4,
+                raise_exception=True,
+            )
 
     def test_solve_blend_shape(self) -> None:
         c = pym_geometry.create_test_character()
@@ -342,7 +355,7 @@ class TestBlendShape(unittest.TestCase):
         active_error_functions = [ErrorFunctionType.Limit, ErrorFunctionType.Vertex]
         error_function_weights = torch.ones(
             len(active_error_functions),
-            requires_grad=True,
+            requires_grad=AUTOGRAD_ENABLED,
         )
         model_params_init = torch.zeros(c.parameter_transform.size)
 
