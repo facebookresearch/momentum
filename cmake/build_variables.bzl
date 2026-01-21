@@ -650,6 +650,7 @@ rerun_eigen_adapters_public_headers = [
 rerun_public_headers = [
     "gui/rerun/logger.h",
     "gui/rerun/logging_redirect.h",
+    "gui/rerun/rerun_compat.h",
 ]
 
 rerun_sources = [
