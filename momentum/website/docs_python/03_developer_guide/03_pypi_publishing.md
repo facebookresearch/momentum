@@ -66,23 +66,17 @@ To support Python 3.14+:
 ## Platform Support
 
 ### Supported Platforms
-- **Linux** (x86_64): Full support for CPU and GPU packages
-- **macOS** (Intel and ARM): CPU package only
-- **Windows**: Currently NOT supported
 
-### Windows Support Status
+| Platform | CPU | GPU (CUDA) | Notes |
+|----------|-----|------------|-------|
+| **Linux** (x86_64) | ✅ | ✅ | Built with cibuildwheel (manylinux_2_28) |
+| **macOS** (ARM64) | ✅ | ❌ | Apple Silicon native; GPU not available on macOS |
+| **Windows** (x64) | ✅ | ✅ | Native builds with CUDA 12.9 support |
 
-**Windows wheels are currently unavailable** due to technical limitations:
+### Python Version Support
 
-1. **RPATH limitation**: Unlike Linux/macOS, Windows doesn't support RPATH for dynamic library loading. PyTorch DLLs must either be:
-   - Bundled in the wheel (exceeds PyPI's 100MB limit)
-   - Located via system PATH or explicit code
-
-2. **Package size**: Including PyTorch DLLs results in wheels >100MB, exceeding PyPI's size limit for projects without special approval.
-
-We are tracking Windows support via a [pending request to increase the package size limit](#). Users requiring Windows support can:
-- Build from source using `pixi run -e py312 build_py`
-- Wait for PyPI size limit approval
+- **Python 3.12**: Full support on all platforms
+- **Python 3.13**: Full support on all platforms (builds run on releases and manual triggers)
 
 ### Platform-Specific Constraints
 
