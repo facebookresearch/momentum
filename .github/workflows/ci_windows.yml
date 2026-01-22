@@ -64,7 +64,9 @@ jobs:
         run: sccache --show-stats
 
   pymomentum:
-    # Enabled: CPU-only for cost optimization (GPU disabled)
+    # Disabled: PyPI workflow now covers Windows builds (publish_to_pypi.yml)
+    # This reduces CI cost while maintaining Windows build coverage through PyPI publishing
+    if: false
     name: py-${{ matrix.pixi_env }}-win
     runs-on: windows-latest
     strategy:
