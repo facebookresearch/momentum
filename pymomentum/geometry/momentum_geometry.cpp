@@ -54,7 +54,7 @@ std::span<const T> toSpan(const pybind11::bytes& bytes) {
   pybind11::gil_scoped_acquire acquire;
   py::buffer_info info(py::buffer(bytes).request());
   const T* data = reinterpret_cast<const T*>(info.ptr);
-  const size_t length = static_cast<size_t>(info.size);
+  const auto length = static_cast<size_t>(info.size);
 
   MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
