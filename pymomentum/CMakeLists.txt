@@ -47,14 +47,15 @@ find_package(Torch CONFIG REQUIRED HINTS
   ${libtorch_base_path}
 )
 
-# Re-find Python3 after Torch to ensure Development.Module is available for pybind11.
-# Torch's CMake calls find_package(Python COMPONENTS Interpreter) which doesn't provide
-# the python_add_library() command needed by pybind11NewTools.cmake.
-# This re-establishes the Python3::Module target.
+# Re-find Python after Torch to ensure Development.Module is available for pybind11.
+# Torch's CMake calls find_package(Python COMPONENTS Interpreter) which sets Python_FOUND
+# but doesn't provide the python_add_library() command needed by pybind11NewTools.cmake.
+# We re-call find_package(Python) with the Development component to restore it.
+# NOTE: Use "Python" (not "Python3") because pybind11 checks Python_FOUND first.
 if(SKBUILD)
-  find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
+  find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 else()
-  find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+  find_package(Python REQUIRED COMPONENTS Interpreter Development)
 endif()
 
 find_library(torch_python
