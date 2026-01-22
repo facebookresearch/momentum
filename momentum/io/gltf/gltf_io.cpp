@@ -376,6 +376,10 @@ loadHierarchy(const fx::gltf::Document& model) {
     int l2Parent = l2.parent == kInvalidIndex ? -1 : static_cast<int>(l2.parent);
     return l1Parent < l2Parent;
   });
+  // remove the collision geometry if it was empty to begin with
+  if (collision->empty()) {
+    collision.reset();
+  }
   return std::make_tuple(name, joints, std::move(collision), locators, nodeToObjectMap);
 }
 
@@ -850,9 +854,10 @@ Character populateCharacterFromModel(
     result.blendShape = std::move(loadedBlendShape);
   }
 
-  // No skinning nodes found but there are meshes in the scene. We will create a joint to parent
+  // Check if there's no skeleton and no skinning nodes found
+  // but there are meshes in the scene. We will create a joint to parent
   // them.
-  if (result.mesh != nullptr && result.skinWeights == nullptr) {
+  if (result.skeleton.joints.empty() && result.mesh != nullptr && result.skinWeights == nullptr) {
     result.skeleton.joints = createSkeletonWithOnlyRoot();
     for (auto& locator : result.locators) {
       locator.parent = 0;

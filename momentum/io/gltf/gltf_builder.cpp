@@ -926,8 +926,10 @@ void GltfBuilder::addCharacter(
     parameterLimitsToJson(character, def["parameterLimits"]);
     parameterSetsToJson(character, def["parameterSet"]);
     poseConstraintsToJson(character, def["poseConstraints"]);
-    // add metadata
-    def["metadata"] = character.metadata;
+    // add metadata if it exists
+    if (!character.metadata.empty()) {
+      def["metadata"] = character.metadata;
+    }
   }
 }
 
