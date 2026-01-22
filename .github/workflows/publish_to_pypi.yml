@@ -157,6 +157,10 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
+      - name: Test wheel in clean environment
+        if: steps.should_run.outputs.run == 'true'
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_test
+
       - name: Print ccache stats
         if: steps.should_run.outputs.run == 'true' && matrix.os != 'windows-latest'
         run: ccache -s
@@ -408,6 +412,10 @@ jobs:
       - name: Repair GPU wheel
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_repair
+
+      - name: Test wheel in clean environment
+        if: steps.should_run.outputs.run == 'true'
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_test
 
       - name: Print sccache stats
         if: steps.should_run.outputs.run == 'true'
