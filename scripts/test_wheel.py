@@ -35,7 +35,7 @@ def test_locally(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             # Check if uv is available
             uv_cmd = shutil.which("uv")
             if not uv_cmd:
-                print("✗ uv not found. Installing uv...", file=sys.stderr)
+                print("[ERROR] uv not found. Installing uv...", file=sys.stderr)
                 subprocess.run(
                     [sys.executable, "-m", "pip", "install", "uv"],
                     check=True,
@@ -128,14 +128,14 @@ except Exception as e:
             )
 
             if result.returncode != 0:
-                print(f"✗ Import test failed: {result.stderr}", file=sys.stderr)
+                print(f"[FAIL] Import test failed: {result.stderr}", file=sys.stderr)
                 return 1
 
-            print("✓ " + result.stdout.strip())
+            print("[OK] " + result.stdout.strip())
             return 0
 
         except subprocess.CalledProcessError as e:
-            print(f"✗ Test failed: {e}", file=sys.stderr)
+            print(f"[FAIL] Test failed: {e}", file=sys.stderr)
             if e.stderr:
                 print(
                     f"  stderr: {e.stderr.decode() if isinstance(e.stderr, bytes) else e.stderr}",
@@ -245,7 +245,7 @@ def main():
     ]
 
     if not wheel_files:
-        print(f"✗ No wheel found for {wheel_type} {py_ver}", file=sys.stderr)
+        print(f"[ERROR] No wheel found for {wheel_type} {py_ver}", file=sys.stderr)
         sys.exit(1)
 
     wheel_file = wheel_files[0]
