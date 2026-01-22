@@ -136,9 +136,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 {% if variant == "gpu" %}
     "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
 {% else %}
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
 {% endif %}
     "Programming Language :: C++",
     "Programming Language :: Python :: 3",
@@ -154,17 +156,17 @@ dependencies = [
     "numpy>=1.20.0",
     "scipy>=1.7.0",
     # PyTorch version constraints - platform and Python version specific
-    # Linux: Support latest PyTorch with CUDA
+    # Linux/Windows: Support latest PyTorch with CUDA
     # macOS: Limited to older PyTorch versions (CPU only)
 {% if variant == "gpu" %}
-    # GPU package only for Linux
-    "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
-    "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
+    # GPU package for Linux and Windows
+    "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; (platform_system == 'Linux' or platform_system == 'Windows') and python_version == '3.12'",
+    "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; (platform_system == 'Linux' or platform_system == 'Windows') and python_version == '3.13'",
 {% else %}
-    # CPU package for Linux and macOS ARM64 (Apple Silicon only - Intel Macs not supported)
-    # Linux uses latest PyTorch
-    "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
-    "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
+    # CPU package for Linux, Windows, and macOS ARM64 (Apple Silicon only - Intel Macs not supported)
+    # Linux and Windows use latest PyTorch
+    "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; (platform_system == 'Linux' or platform_system == 'Windows') and python_version == '3.12'",
+    "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; (platform_system == 'Linux' or platform_system == 'Windows') and python_version == '3.13'",
     # macOS ARM64 (Apple Silicon) - PyTorch 2.8+ available
     "torch>={{ torch_min_py312_macos }},<{{ torch_max_py312_macos }}; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.12'",
     "torch>={{ torch_min_py313_macos }},<{{ torch_max_py313_macos }}; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.13'",
@@ -245,8 +247,8 @@ version_file = "pymomentum/_version.py"
 [tool.cibuildwheel]
 build = "cp312-* cp313-*"
 build-verbosity = 3
-# Skip PyPy, musllinux, and Windows for now
-# Windows is skipped due to cibuildwheel shell issues with export/command substitution
+# Skip PyPy and musllinux
+# Windows is now supported via native builds (not cibuildwheel containers)
 skip = "pp* *-musllinux* *-win*"
 archs = ["auto64"]
 manylinux-x86_64-image = "manylinux_2_28"

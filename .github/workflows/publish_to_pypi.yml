@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-14]
+        os: [macos-14, windows-latest]
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
@@ -93,10 +93,13 @@ jobs:
             pixi-environment: py313
           - os: macos-14
             os-short: mac-arm64
+          - os: windows-latest
+            os-short: win
     env:
-      # Enable compiler caching (ccache on Linux/macOS)
-      CMAKE_C_COMPILER_LAUNCHER: ccache
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      # Enable compiler caching (ccache on macOS, sccache on Windows)
+      CMAKE_C_COMPILER_LAUNCHER: ${{ matrix.os == 'windows-latest' && 'sccache' || 'ccache' }}
+      CMAKE_CXX_COMPILER_LAUNCHER: ${{ matrix.os == 'windows-latest' && 'sccache' || 'ccache' }}
+      SCCACHE_GHA_ENABLED: ${{ matrix.os == 'windows-latest' && 'true' || 'false' }}
 
     steps:
       # Skip Python 3.13 builds on regular commits to reduce CI cost
@@ -124,10 +127,14 @@ jobs:
           fetch-tags: true  # Ensure all tags are fetched
 
       - name: Set up ccache
-        if: steps.should_run.outputs.run == 'true'
+        if: steps.should_run.outputs.run == 'true' && matrix.os != 'windows-latest'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}
+
+      - name: Set up sccache
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'windows-latest'
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
@@ -151,8 +158,12 @@ jobs:
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Print ccache stats
-        if: steps.should_run.outputs.run == 'true'
+        if: steps.should_run.outputs.run == 'true' && matrix.os != 'windows-latest'
         run: ccache -s
+
+      - name: Print sccache stats
+        if: steps.should_run.outputs.run == 'true' && matrix.os == 'windows-latest'
+        run: sccache --show-stats
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
@@ -316,6 +327,100 @@ jobs:
           path: dist/*.whl
           retention-days: 7
 
+  # Windows GPU wheels are built with pixi + CUDA (native builds, not containerized)
+  build_gpu_wheels_windows:
+    name: pypi-gpu-py${{ matrix.python-version }}-win
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ['3.12', '3.13']
+        include:
+          - python-version: '3.12'
+            pixi-environment: py312-cuda129
+            cuda-version: "12.9.0"
+          - python-version: '3.13'
+            pixi-environment: py313-cuda129
+            cuda-version: "12.9.0"
+    env:
+      FULL_CUDA_VERSION: ${{ matrix.cuda-version }}
+      # Enable sccache for C++ compilation caching on Windows
+      CMAKE_C_COMPILER_LAUNCHER: sccache
+      CMAKE_CXX_COMPILER_LAUNCHER: sccache
+      SCCACHE_GHA_ENABLED: "true"
+
+    steps:
+      # Skip Python 3.13 builds on regular commits to reduce CI cost
+      - name: Check if should run
+        id: should_run
+        run: |
+          if ("${{ matrix.python-version }}" -eq "3.13") {
+            if ("${{ startsWith(github.ref, 'refs/tags/v') }}" -eq "true" -or `
+                "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' }}" -eq "true") {
+              echo "run=true" >> $env:GITHUB_OUTPUT
+            } else {
+              echo "run=false" >> $env:GITHUB_OUTPUT
+            }
+          } else {
+            echo "run=true" >> $env:GITHUB_OUTPUT
+          }
+        shell: pwsh
+
+      - uses: actions/checkout@v6
+        if: steps.should_run.outputs.run == 'true'
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup CUDA
+        if: steps.should_run.outputs.run == 'true'
+        uses: ./.github/actions/setup-cuda
+        with:
+          cuda-version: ${{ matrix.cuda-version }}
+
+      - name: Set up sccache
+        if: steps.should_run.outputs.run == 'true'
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Set up pixi
+        if: steps.should_run.outputs.run == 'true'
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          pixi-version: latest
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          environments: ${{ matrix.pixi-environment }}
+
+      - name: Generate pyproject configs
+        if: steps.should_run.outputs.run == 'true'
+        run: pixi run -e ${{ matrix.pixi-environment }} generate_pyproject
+
+      - name: Clean distribution artifacts
+        if: steps.should_run.outputs.run == 'true'
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
+
+      - name: Build GPU wheel
+        if: steps.should_run.outputs.run == 'true'
+        timeout-minutes: 90
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
+
+      - name: Repair GPU wheel
+        if: steps.should_run.outputs.run == 'true'
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_repair
+
+      - name: Print sccache stats
+        if: steps.should_run.outputs.run == 'true'
+        run: sccache --show-stats
+
+      - name: Upload wheel artifacts
+        if: steps.should_run.outputs.run == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: wheels-gpu-windows-py${{ matrix.python-version }}
+          path: dist/*.whl
+          retention-days: 7
+
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
     needs: [build_cpu_wheels_linux, build_cpu_wheels]
@@ -356,7 +461,7 @@ jobs:
 
   publish_gpu:
     name: Publish pymomentum-gpu to PyPI
-    needs: [build_gpu_wheels]
+    needs: [build_gpu_wheels, build_gpu_wheels_windows]
     runs-on: ubuntu-latest
     environment:
       name: pypi-gpu
