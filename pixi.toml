@@ -463,30 +463,23 @@ test_py = { cmd = "pytest pymomentum/test/*.py -k 'not ((TestFBXIO and (test_sav
 ] }
 
 # Windows CPU wheel build using pip directly (no cibuildwheel containers on Windows)
-# Uses PowerShell-compatible commands for Windows CI
+# Uses Python for cross-platform file operations (pixi uses POSIX-like shell parser)
 wheel_build = { cmd = """
-  python scripts/generate_pyproject.py
-  $pyver = python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))"
-  Copy-Item "pyproject.toml" -Destination ".tmp/pyproject-backup.toml" -Force
-  New-Item -ItemType Directory -Force -Path ".tmp" | Out-Null
-  Copy-Item "pyproject-pypi-cpu-py$pyver.toml" -Destination "pyproject.toml" -Force
-  pip wheel . --no-deps --no-build-isolation --wheel-dir=dist
-  Move-Item ".tmp/pyproject-backup.toml" -Destination "pyproject.toml" -Force
+  python scripts/generate_pyproject.py && \
+  python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
+  pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
+  python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = ["generate_pyproject"], description = "Build CPU wheel for Windows" }
 
 # Windows wheel repair using delvewheel to bundle DLLs
+# Uses Python glob for cross-platform file discovery
 wheel_repair = { cmd = """
-  $wheels = Get-ChildItem -Path dist -Filter "pymomentum_*.whl"
-  foreach ($wheel in $wheels) {
-    Write-Host "Repairing $($wheel.Name)..."
-    delvewheel repair --wheel-dir dist --no-mangle-all $wheel.FullName
-  }
+  python -c "import glob, subprocess, sys; wheels = glob.glob('dist/pymomentum_*.whl'); [print(f'Repairing {w}...') or subprocess.run([sys.executable, '-m', 'delvewheel', 'repair', '--wheel-dir', 'dist', '--no-mangle-all', w], check=True) for w in wheels]"
 """, description = "Repair wheel with delvewheel (bundle DLLs)" }
 
-# Windows-compatible wheel clean
+# Windows-compatible wheel clean using Python
 wheel_clean = { cmd = """
-  if (Test-Path dist) { Remove-Item -Recurse -Force dist }
-  if (Test-Path wheelhouse) { Remove-Item -Recurse -Force wheelhouse }
+  python -c "import shutil; shutil.rmtree('dist', True); shutil.rmtree('wheelhouse', True)"
 """, description = "Clean wheel build artifacts for Windows" }
 
 
@@ -563,26 +556,20 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py312-cuda129.target.win-64.tasks]
 # Windows GPU wheel build using pip directly
+# Uses Python for cross-platform file operations (pixi uses POSIX-like shell parser)
 wheel_build = { cmd = """
-  python scripts/generate_pyproject.py
-  New-Item -ItemType Directory -Force -Path ".tmp" | Out-Null
-  Copy-Item "pyproject.toml" -Destination ".tmp/pyproject-backup.toml" -Force
-  Copy-Item "pyproject-pypi-gpu.toml" -Destination "pyproject.toml" -Force
-  pip wheel . --no-deps --no-build-isolation --wheel-dir=dist
-  Move-Item ".tmp/pyproject-backup.toml" -Destination "pyproject.toml" -Force
+  python scripts/generate_pyproject.py && \
+  python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
+  pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
+  python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = ["generate_pyproject"], description = "Build GPU wheel for Windows (Python 3.12)" }
 
 wheel_repair = { cmd = """
-  $wheels = Get-ChildItem -Path dist -Filter "pymomentum_*.whl"
-  foreach ($wheel in $wheels) {
-    Write-Host "Repairing $($wheel.Name)..."
-    delvewheel repair --wheel-dir dist --no-mangle-all $wheel.FullName
-  }
+  python -c "import glob, subprocess, sys; wheels = glob.glob('dist/pymomentum_*.whl'); [print(f'Repairing {w}...') or subprocess.run([sys.executable, '-m', 'delvewheel', 'repair', '--wheel-dir', 'dist', '--no-mangle-all', w], check=True) for w in wheels]"
 """, description = "Repair GPU wheel with delvewheel (bundle DLLs)" }
 
 wheel_clean = { cmd = """
-  if (Test-Path dist) { Remove-Item -Recurse -Force dist }
-  if (Test-Path wheelhouse) { Remove-Item -Recurse -Force wheelhouse }
+  python -c "import shutil; shutil.rmtree('dist', True); shutil.rmtree('wheelhouse', True)"
 """, description = "Clean wheel build artifacts" }
 
 [feature.py313-cuda129]
@@ -592,26 +579,20 @@ dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version
 
 [feature.py313-cuda129.target.win-64.tasks]
 # Windows GPU wheel build using pip directly
+# Uses Python for cross-platform file operations (pixi uses POSIX-like shell parser)
 wheel_build = { cmd = """
-  python scripts/generate_pyproject.py
-  New-Item -ItemType Directory -Force -Path ".tmp" | Out-Null
-  Copy-Item "pyproject.toml" -Destination ".tmp/pyproject-backup.toml" -Force
-  Copy-Item "pyproject-pypi-gpu.toml" -Destination "pyproject.toml" -Force
-  pip wheel . --no-deps --no-build-isolation --wheel-dir=dist
-  Move-Item ".tmp/pyproject-backup.toml" -Destination "pyproject.toml" -Force
+  python scripts/generate_pyproject.py && \
+  python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
+  pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
+  python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = ["generate_pyproject"], description = "Build GPU wheel for Windows (Python 3.13)" }
 
 wheel_repair = { cmd = """
-  $wheels = Get-ChildItem -Path dist -Filter "pymomentum_*.whl"
-  foreach ($wheel in $wheels) {
-    Write-Host "Repairing $($wheel.Name)..."
-    delvewheel repair --wheel-dir dist --no-mangle-all $wheel.FullName
-  }
+  python -c "import glob, subprocess, sys; wheels = glob.glob('dist/pymomentum_*.whl'); [print(f'Repairing {w}...') or subprocess.run([sys.executable, '-m', 'delvewheel', 'repair', '--wheel-dir', 'dist', '--no-mangle-all', w], check=True) for w in wheels]"
 """, description = "Repair GPU wheel with delvewheel (bundle DLLs)" }
 
 wheel_clean = { cmd = """
-  if (Test-Path dist) { Remove-Item -Recurse -Force dist }
-  if (Test-Path wheelhouse) { Remove-Item -Recurse -Force wheelhouse }
+  python -c "import shutil; shutil.rmtree('dist', True); shutil.rmtree('wheelhouse', True)"
 """, description = "Clean wheel build artifacts" }
 
 #==============
