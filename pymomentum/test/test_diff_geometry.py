@@ -852,7 +852,7 @@ class TestDiffGeometry(unittest.TestCase):
             )
 
     def test_diff_apply_blend_coeffs_base(self) -> None:
-        """Test BlendShapeBase.compute_shape with gradcheck."""
+        """Test diff_geometry.compute_blend_shape with BlendShapeBase and gradcheck."""
         np.random.seed(0)
 
         n_pts = 10
@@ -867,7 +867,7 @@ class TestDiffGeometry(unittest.TestCase):
             nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
         )
 
-        shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
+        shape1 = pym_diff_geometry.compute_blend_shape(blend_shape, coeffs).select(0, 0)
         c1 = coeffs.select(0, 0).detach().numpy()
 
         # Compute the shape another way:
@@ -880,7 +880,7 @@ class TestDiffGeometry(unittest.TestCase):
 
         if AUTOGRAD_ENABLED:
             torch.autograd.gradcheck(
-                blend_shape.compute_shape,
+                lambda c: pym_diff_geometry.compute_blend_shape(blend_shape, c),
                 [coeffs],
                 eps=1e-3,
                 atol=1e-4,
@@ -888,7 +888,7 @@ class TestDiffGeometry(unittest.TestCase):
             )
 
     def test_diff_apply_blend_coeffs(self) -> None:
-        """Test BlendShape.compute_shape with gradcheck."""
+        """Test diff_geometry.compute_blend_shape with BlendShape and gradcheck."""
         np.random.seed(0)
 
         n_pts = 10
@@ -904,7 +904,7 @@ class TestDiffGeometry(unittest.TestCase):
             nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
         )
 
-        shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
+        shape1 = pym_diff_geometry.compute_blend_shape(blend_shape, coeffs).select(0, 0)
         c1 = coeffs.select(0, 0).detach().numpy()
 
         # Compute the shape another way:
@@ -919,7 +919,7 @@ class TestDiffGeometry(unittest.TestCase):
 
         if AUTOGRAD_ENABLED:
             torch.autograd.gradcheck(
-                blend_shape.compute_shape,
+                lambda c: pym_diff_geometry.compute_blend_shape(blend_shape, c),
                 [coeffs],
                 eps=1e-3,
                 atol=1e-4,
@@ -945,9 +945,10 @@ class TestDiffGeometry(unittest.TestCase):
 
         # Test the module-level function
         result1 = pym_diff_geometry.compute_blend_shape(blend_shape, coeffs)
-        result2 = blend_shape.compute_shape(coeffs)
+        # geometry.compute_shape returns numpy, convert to tensor for comparison
+        result2 = torch.from_numpy(blend_shape.compute_shape(coeffs.detach().numpy()))
 
-        self.assertTrue(torch.allclose(result1, result2))
+        self.assertTrue(torch.allclose(result1, result2.float()))
 
         # Test gradients
         if AUTOGRAD_ENABLED:

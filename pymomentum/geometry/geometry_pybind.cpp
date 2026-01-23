@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "pymomentum/geometry/array_blend_shape.h"
 #include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/array_skeleton_state.h"
 #include "pymomentum/geometry/character_pybind.h"
@@ -267,16 +268,16 @@ PYBIND11_MODULE(geometry, m) {
           py::arg("shape_names") = std::vector<std::string>())
       .def(
           "compute_shape",
-          [](py::object blendShape, at::Tensor coeffs) {
-            return applyBlendShapeCoefficients(std::move(blendShape), std::move(coeffs));
-          },
+          &computeBlendShapeArray,
           R"(Apply the blend shape coefficients to compute the rest shape.
 
 The resulting shape is equal to a linear combination of the shape vectors (plus the base shape, if it is a BlendShape object).
 
-:param coeffs: A torch.Tensor of size [n_batch x n_shapes] containing blend shape coefficients.
-:result: A [n_batch x n_vertices x 3] tensor containing the vertex positions.)",
-          py::arg("coeffs"));
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
+
+:param coefficients: A numpy array of shape [..., n_shapes] containing blend shape coefficients.
+:return: A [..., n_vertices, 3] numpy array containing the vertex positions.)",
+          py::arg("coefficients"));
 
   blendShapeClass
       .def_property_readonly(

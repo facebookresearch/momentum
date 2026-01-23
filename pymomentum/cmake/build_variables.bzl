@@ -116,6 +116,7 @@ tensor_ik_test_sources = [
 ]
 
 geometry_public_headers = [
+    "geometry/array_blend_shape.h",
     "geometry/array_parameter_transform.h",
     "geometry/array_skeleton_state.h",
     "geometry/character_pybind.h",
@@ -131,6 +132,7 @@ geometry_public_headers = [
 ]
 
 geometry_sources = [
+    "geometry/array_blend_shape.cpp",
     "geometry/array_parameter_transform.cpp",
     "geometry/array_skeleton_state.cpp",
     "geometry/character_pybind.cpp",
