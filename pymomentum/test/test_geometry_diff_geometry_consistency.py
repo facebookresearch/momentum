@@ -358,6 +358,55 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "BlendShape.compute_shape with character should match diff_geometry.compute_blend_shape",
         )
 
+    def test_compute_vertex_normals_matches(self) -> None:
+        """Verify that diff_geometry.compute_vertex_normals matches geometry.compute_vertex_normals."""
+        np.random.seed(42)
+
+        # Test with a simple triangle (no batch dimension)
+        triangles_np = np.array([[0, 1, 2]], dtype=np.int32)
+        vertices_np = np.array([[0, 0, 0], [0, 1, 0], [0, 1, 1]], dtype=np.float32)
+
+        # Call geometry version (numpy)
+        normals_geometry = pym_geometry.compute_vertex_normals(
+            vertices_np, triangles_np
+        )
+
+        # Call diff_geometry version (torch)
+        normals_diff_geometry = pym_diff_geometry.compute_vertex_normals(
+            torch.from_numpy(vertices_np), torch.from_numpy(triangles_np)
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(normals_geometry, normals_diff_geometry.numpy()),
+            "diff_geometry.compute_vertex_normals should match geometry.compute_vertex_normals",
+        )
+
+        # Test with batch dimension
+        character = pym_geometry.create_test_character(num_joints=5)
+        vertex_positions_np = character.mesh.vertices.astype(np.float32)
+        triangles_np = character.mesh.faces
+
+        # Create batched input
+        vertex_positions_batch_np = np.expand_dims(vertex_positions_np, 0)
+        vertex_positions_batch_np = np.tile(vertex_positions_batch_np, (2, 1, 1))
+
+        # Call geometry version (numpy)
+        normals_geometry_batch = pym_geometry.compute_vertex_normals(
+            vertex_positions_batch_np, triangles_np
+        )
+
+        # Call diff_geometry version (torch)
+        normals_diff_geometry_batch = pym_diff_geometry.compute_vertex_normals(
+            torch.from_numpy(vertex_positions_batch_np), torch.from_numpy(triangles_np)
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(normals_geometry_batch, normals_diff_geometry_batch.numpy()),
+            "Batched diff_geometry.compute_vertex_normals should match geometry.compute_vertex_normals",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

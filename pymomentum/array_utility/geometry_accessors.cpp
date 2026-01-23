@@ -296,15 +296,15 @@ template class SkeletonStateAccessor<float>;
 template class SkeletonStateAccessor<double>;
 
 // ============================================================================
-// VertexPositionsAccessor implementation
+// VectorArrayAccessor implementation
 // ============================================================================
 
-template <typename T>
-VertexPositionsAccessor<T>::VertexPositionsAccessor(
+template <typename T, int Dim>
+VectorArrayAccessor<T, Dim>::VectorArrayAccessor(
     const py::buffer_info& bufferInfo,
     const LeadingDimensions& leadingDims,
-    py::ssize_t nVertices)
-    : nVertices_(nVertices), leadingNDim_(leadingDims.ndim()) {
+    py::ssize_t nElements)
+    : nElements_(nElements), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
   // Extract strides (convert from bytes to elements)
@@ -313,10 +313,14 @@ VertexPositionsAccessor<T>::VertexPositionsAccessor(
   for (int i = 0; i < totalNDim; ++i) {
     strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
   }
+
+  // Cache the row and column strides for the trailing dimensions
+  rowStride_ = strides_[leadingNDim_]; // stride for element dimension
+  colStride_ = strides_[leadingNDim_ + 1]; // stride for vector component dimension
 }
 
-template <typename T>
-py::ssize_t VertexPositionsAccessor<T>::computeOffset(
+template <typename T, int Dim>
+py::ssize_t VectorArrayAccessor<T, Dim>::computeOffset(
     const std::vector<py::ssize_t>& batchIndices) const {
   py::ssize_t offset = 0;
 
@@ -329,52 +333,245 @@ py::ssize_t VertexPositionsAccessor<T>::computeOffset(
   return offset;
 }
 
-template <typename T>
-std::vector<Eigen::Vector3<T>> VertexPositionsAccessor<T>::get(
+template <typename T, int Dim>
+typename VectorArrayAccessor<T, Dim>::ElementView VectorArrayAccessor<T, Dim>::view(
+    const std::vector<py::ssize_t>& batchIndices) {
+  const auto offset = computeOffset(batchIndices);
+  return ElementView(data_ + offset, nElements_, rowStride_, colStride_);
+}
+
+template <typename T, int Dim>
+typename VectorArrayAccessor<T, Dim>::ElementView VectorArrayAccessor<T, Dim>::view(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+  // const_cast is safe here because we control access at the call site
+  return ElementView(const_cast<T*>(data_) + offset, nElements_, rowStride_, colStride_);
+}
+
+template <typename T, int Dim>
+std::vector<typename VectorArrayAccessor<T, Dim>::VectorType> VectorArrayAccessor<T, Dim>::get(
     const std::vector<py::ssize_t>& batchIndices) const {
   const auto offset = computeOffset(batchIndices);
 
-  // Create a vector of Vector3<T> using strides
-  // Vertex positions format: (..., nVertices, 3) where each vertex has [x, y, z]
-  std::vector<Eigen::Vector3<T>> positions(nVertices_);
-
-  const auto rowStride = strides_[leadingNDim_]; // stride for vertex dimension
-  const auto colStride = strides_[leadingNDim_ + 1]; // stride for xyz dimension
-
-  for (py::ssize_t iVert = 0; iVert < nVertices_; ++iVert) {
-    const auto vertOffset = offset + iVert * rowStride;
-    positions[iVert].x() = data_[vertOffset + 0 * colStride];
-    positions[iVert].y() = data_[vertOffset + 1 * colStride];
-    positions[iVert].z() = data_[vertOffset + 2 * colStride];
+  std::vector<VectorType> result(nElements_);
+  for (py::ssize_t i = 0; i < nElements_; ++i) {
+    const auto elemOffset = offset + i * rowStride_;
+    for (int d = 0; d < Dim; ++d) {
+      result[i][d] = data_[elemOffset + d * colStride_];
+    }
   }
 
-  return positions;
+  return result;
 }
 
-template <typename T>
-void VertexPositionsAccessor<T>::set(
+template <typename T, int Dim>
+void VectorArrayAccessor<T, Dim>::set(
     const std::vector<py::ssize_t>& batchIndices,
-    const std::vector<Eigen::Vector3<T>>& positions) {
+    const std::vector<VectorType>& values) {
   MT_THROW_IF(
-      static_cast<py::ssize_t>(positions.size()) != nVertices_,
-      "set: expected {} vertices but got {}",
-      nVertices_,
-      positions.size());
+      static_cast<py::ssize_t>(values.size()) != nElements_,
+      "set: expected {} elements but got {}",
+      nElements_,
+      values.size());
 
   const auto offset = computeOffset(batchIndices);
-  const auto rowStride = strides_[leadingNDim_]; // stride for vertex dimension
-  const auto colStride = strides_[leadingNDim_ + 1]; // stride for xyz dimension
-
-  for (py::ssize_t iVert = 0; iVert < nVertices_; ++iVert) {
-    const auto vertOffset = offset + iVert * rowStride;
-    data_[vertOffset + 0 * colStride] = positions[iVert].x();
-    data_[vertOffset + 1 * colStride] = positions[iVert].y();
-    data_[vertOffset + 2 * colStride] = positions[iVert].z();
+  for (py::ssize_t i = 0; i < nElements_; ++i) {
+    const auto elemOffset = offset + i * rowStride_;
+    for (int d = 0; d < Dim; ++d) {
+      data_[elemOffset + d * colStride_] = values[i][d];
+    }
   }
 }
 
-// Explicit template instantiations
-template class VertexPositionsAccessor<float>;
-template class VertexPositionsAccessor<double>;
+// Explicit template instantiations for VectorArrayAccessor
+template class VectorArrayAccessor<float, 3>;
+template class VectorArrayAccessor<double, 3>;
+template class VectorArrayAccessor<int, 3>;
+
+// ============================================================================
+// IntVectorArrayAccessor implementation
+// ============================================================================
+
+template <int Dim>
+IntVectorArrayAccessor<Dim>::IntVectorArrayAccessor(
+    const py::buffer& buffer,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nElements)
+    : nElements_(nElements), leadingNDim_(leadingDims.ndim()) {
+  auto bufferInfo = buffer.request();
+  data_ = bufferInfo.ptr;
+
+  // Detect the source dtype based on format code and itemsize.
+  // Format codes 'l' (long) and 'L' (unsigned long) are platform-dependent:
+  // - LP64 (Linux/macOS 64-bit): long is 64-bit
+  // - LLP64 (Windows 64-bit): long is 32-bit
+  // We use itemsize to disambiguate these cases.
+  const auto& fmt = bufferInfo.format;
+  const auto itemsize = bufferInfo.itemsize;
+
+  // Check for signed integer types
+  const bool isSignedInt = fmt == py::format_descriptor<int32_t>::format() ||
+      fmt == py::format_descriptor<int>::format() ||
+      fmt == py::format_descriptor<int64_t>::format() ||
+      fmt == "l"; // C long (size varies by platform)
+
+  // Check for unsigned integer types
+  const bool isUnsignedInt = fmt == py::format_descriptor<uint32_t>::format() ||
+      fmt == py::format_descriptor<uint64_t>::format() ||
+      fmt == "L"; // C unsigned long (size varies by platform)
+
+  if (isSignedInt) {
+    if (itemsize == 4) {
+      dtype_ = SourceDtype::Int32;
+    } else if (itemsize == 8) {
+      dtype_ = SourceDtype::Int64;
+    } else {
+      MT_THROW(
+          "IntVectorArrayAccessor: unexpected itemsize {} for signed integer format '{}'",
+          itemsize,
+          fmt);
+    }
+  } else if (isUnsignedInt) {
+    if (itemsize == 4) {
+      dtype_ = SourceDtype::UInt32;
+    } else if (itemsize == 8) {
+      dtype_ = SourceDtype::UInt64;
+    } else {
+      MT_THROW(
+          "IntVectorArrayAccessor: unexpected itemsize {} for unsigned integer format '{}'",
+          itemsize,
+          fmt);
+    }
+  } else {
+    MT_THROW(
+        "IntVectorArrayAccessor: expected integer dtype (int32, int64, uint32, or uint64), got format '{}'",
+        fmt);
+  }
+
+  // Store byte strides (not element strides) - we'll convert in get()
+  const auto totalNDim = bufferInfo.ndim;
+  byteStrides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    byteStrides_[i] = bufferInfo.strides[i];
+  }
+
+  // Cache the row and column byte strides for the trailing dimensions
+  rowByteStride_ = byteStrides_[leadingNDim_];
+  colByteStride_ = byteStrides_[leadingNDim_ + 1];
+}
+
+template <int Dim>
+py::ssize_t IntVectorArrayAccessor<Dim>::computeByteOffset(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  py::ssize_t offset = 0;
+
+  // Apply byte strides for each dimension
+  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * byteStrides_[i];
+  }
+
+  return offset;
+}
+
+template <int Dim>
+typename IntVectorArrayAccessor<Dim>::ElementView IntVectorArrayAccessor<Dim>::view(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  const auto byteOffset = computeByteOffset(batchIndices);
+  const auto* offsetData = static_cast<const char*>(data_) + byteOffset;
+  return ElementView(offsetData, nElements_, rowByteStride_, colByteStride_, dtype_);
+}
+
+template <int Dim>
+typename IntVectorArrayAccessor<Dim>::VectorType IntVectorArrayAccessor<Dim>::ElementView::get(
+    py::ssize_t index) const {
+  VectorType result;
+
+  switch (dtype_) {
+    case SourceDtype::Int32: {
+      const auto elemStride = rowStride_ / static_cast<py::ssize_t>(sizeof(int32_t));
+      const auto compStride = colStride_ / static_cast<py::ssize_t>(sizeof(int32_t));
+      const auto* ptr = static_cast<const int32_t*>(data_);
+      for (int d = 0; d < Dim; ++d) {
+        result[d] = static_cast<int>(ptr[index * elemStride + d * compStride]);
+      }
+      break;
+    }
+    case SourceDtype::Int64: {
+      const auto elemStride = rowStride_ / static_cast<py::ssize_t>(sizeof(int64_t));
+      const auto compStride = colStride_ / static_cast<py::ssize_t>(sizeof(int64_t));
+      const auto* ptr = static_cast<const int64_t*>(data_);
+      for (int d = 0; d < Dim; ++d) {
+        result[d] = static_cast<int>(ptr[index * elemStride + d * compStride]);
+      }
+      break;
+    }
+    case SourceDtype::UInt32: {
+      const auto elemStride = rowStride_ / static_cast<py::ssize_t>(sizeof(uint32_t));
+      const auto compStride = colStride_ / static_cast<py::ssize_t>(sizeof(uint32_t));
+      const auto* ptr = static_cast<const uint32_t*>(data_);
+      for (int d = 0; d < Dim; ++d) {
+        result[d] = static_cast<int>(ptr[index * elemStride + d * compStride]);
+      }
+      break;
+    }
+    case SourceDtype::UInt64: {
+      const auto elemStride = rowStride_ / static_cast<py::ssize_t>(sizeof(uint64_t));
+      const auto compStride = colStride_ / static_cast<py::ssize_t>(sizeof(uint64_t));
+      const auto* ptr = static_cast<const uint64_t*>(data_);
+      for (int d = 0; d < Dim; ++d) {
+        result[d] = static_cast<int>(ptr[index * elemStride + d * compStride]);
+      }
+      break;
+    }
+  }
+
+  return result;
+}
+
+template <int Dim>
+std::pair<int, int> IntVectorArrayAccessor<Dim>::ElementView::minmax() const {
+  if (nElements_ == 0) {
+    return {INT_MAX, INT_MIN};
+  }
+
+  int minVal = INT_MAX;
+  int maxVal = INT_MIN;
+
+  // Helper lambda to compute min/max for a given source type
+  auto computeMinMax = [&]<typename SourceT>() {
+    const auto elemStride = rowStride_ / static_cast<py::ssize_t>(sizeof(SourceT));
+    const auto compStride = colStride_ / static_cast<py::ssize_t>(sizeof(SourceT));
+    const auto* ptr = static_cast<const SourceT*>(data_);
+
+    for (py::ssize_t i = 0; i < nElements_; ++i) {
+      for (int d = 0; d < Dim; ++d) {
+        const int val = static_cast<int>(ptr[i * elemStride + d * compStride]);
+        minVal = std::min(minVal, val);
+        maxVal = std::max(maxVal, val);
+      }
+    }
+  };
+
+  switch (dtype_) {
+    case SourceDtype::Int32:
+      computeMinMax.template operator()<int32_t>();
+      break;
+    case SourceDtype::Int64:
+      computeMinMax.template operator()<int64_t>();
+      break;
+    case SourceDtype::UInt32:
+      computeMinMax.template operator()<uint32_t>();
+      break;
+    case SourceDtype::UInt64:
+      computeMinMax.template operator()<uint64_t>();
+      break;
+  }
+
+  return {minVal, maxVal};
+}
+
+// Explicit template instantiations for IntVectorArrayAccessor
+template class IntVectorArrayAccessor<3>;
 
 } // namespace pymomentum

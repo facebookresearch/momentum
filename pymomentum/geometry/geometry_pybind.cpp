@@ -8,6 +8,7 @@
 #include "pymomentum/geometry/array_blend_shape.h"
 #include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/array_skeleton_state.h"
+#include "pymomentum/geometry/array_vertex_normals.h"
 #include "pymomentum/geometry/character_pybind.h"
 #include "pymomentum/geometry/gltf_builder_pybind.h"
 #include "pymomentum/geometry/limit_pybind.h"
@@ -1254,13 +1255,18 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
 
   m.def(
       "compute_vertex_normals",
-      &computeVertexNormals,
+      &computeVertexNormalsArray,
       R"(
-Computes vertex normals for a triangle mesh given its positions.
+Computes smooth vertex normals for a triangle mesh given its positions.
 
-:param vertex_positions: [nBatch] x nVert x 3 Tensor of vertex positions.
-:param triangles: nTriangles x 3 Tensor of triangle indices.
-:return: Smooth per-vertex normals.
+For each vertex, the normal is computed as the normalized sum of the face
+normals of all triangles that share that vertex.
+
+Supports arbitrary leading dimensions and both float32/float64 dtypes.
+
+:param vertex_positions: [..., nVertices, 3] numpy array of vertex positions.
+:param triangles: [nTriangles, 3] numpy array of triangle indices (int32).
+:return: [..., nVertices, 3] numpy array of smooth per-vertex normals.
     )",
       py::arg("vertex_positions"),
       py::arg("triangles"));
