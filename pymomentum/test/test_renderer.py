@@ -310,10 +310,14 @@ class TestRendering(unittest.TestCase):
 
         # Create random joint parameters
         torch.manual_seed(42)
-        joint_parameters = torch.randn(character.skeleton.size * 7)
-        skeleton_states = pym_geometry.joint_parameters_to_skeleton_state(
-            character, joint_parameters
+        joint_parameters = torch.randn(character.skeleton.size * 7).reshape(
+            character.skeleton.size, 7
         )
+        skeleton_states = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                character, joint_parameters.unsqueeze(0).numpy()
+            )
+        ).squeeze(0)
 
         # Create cameras using old function
         cameras_old = pym_renderer.build_cameras_for_body(
@@ -338,9 +342,13 @@ class TestRendering(unittest.TestCase):
         # Create random joint parameters with batch size 3
         torch.manual_seed(42)
         n_frames = 3
-        joint_parameters = torch.randn(n_frames, character.skeleton.size * 7)
-        skeleton_states = pym_geometry.joint_parameters_to_skeleton_state(
-            character, joint_parameters
+        joint_parameters = torch.randn(n_frames, character.skeleton.size * 7).reshape(
+            n_frames, character.skeleton.size, 7
+        )
+        skeleton_states = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                character, joint_parameters.numpy()
+            )
         )
 
         # Create cameras using old function

@@ -8,6 +8,7 @@
 import unittest
 from typing import Tuple
 
+import numpy as np
 import pymomentum.geometry as pym_geometry
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
@@ -55,19 +56,19 @@ class TestSkelState(unittest.TestCase):
     def test_skel_state_to_transforms(self) -> None:
         character = pym_geometry.create_test_character()
         nBatch = 2
-        modelParams = 0.2 * torch.ones(
-            nBatch,
-            character.parameter_transform.size,
-            requires_grad=AUTOGRAD_ENABLED,
-            dtype=torch.float64,
+        modelParams = 0.2 * np.ones(
+            (nBatch, character.parameter_transform.size),
+            dtype=np.float64,
         )
         joint_params = character.parameter_transform.apply(modelParams)
-        skel_state = pym_geometry.joint_parameters_to_skeleton_state(
-            character, joint_params
+        skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(character, joint_params)
         )
-        skel_state_d = pym_geometry.joint_parameters_to_skeleton_state(
-            character, joint_params.to(torch.double)
-        )
+        skel_state_d = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                character, joint_params.astype(np.float64)
+            )
+        ).requires_grad_(True)
         inputs = [skel_state_d]
         if AUTOGRAD_ENABLED:
             torch.autograd.gradcheck(
@@ -78,7 +79,7 @@ class TestSkelState(unittest.TestCase):
                 raise_exception=True,
             )
 
-        self.assertTrue(torch.allclose(skel_state, skel_state_d, atol=1e-3))
+        self.assertTrue(torch.allclose(skel_state, skel_state_d.detach(), atol=1e-3))
 
     def test_multiply(self) -> None:
         nMats = 6

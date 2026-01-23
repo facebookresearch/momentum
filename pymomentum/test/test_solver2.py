@@ -36,8 +36,10 @@ class TestSolver(unittest.TestCase):
         model_params_init = torch.zeros(n_params, dtype=torch.float32)
 
         model_params_target = torch.rand_like(model_params_init)
-        skel_state_target = pym_geometry.model_parameters_to_skeleton_state(
-            character, model_params_target
+        skel_state_target = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_target.numpy()
+            )
         )
 
         pos_error = pym_solver2.PositionErrorFunction(character)
@@ -69,8 +71,10 @@ class TestSolver(unittest.TestCase):
         solver_options.regularization = 1e-5
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
         model_params_final = solver.solve(model_params_init.numpy())
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         self.assertTrue(
@@ -364,8 +368,10 @@ class TestSolver(unittest.TestCase):
         model_params_target = torch.rand_like(model_params_init)
 
         # Convert target model parameters to a target skeleton state
-        skel_state_target = pym_geometry.model_parameters_to_skeleton_state(
-            character, model_params_target
+        skel_state_target = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_target.numpy()
+            )
         )
 
         # Create StateErrorFunction
@@ -389,8 +395,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Assert that the solved skeleton state is close to the target
@@ -519,8 +527,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position of the point
@@ -592,8 +602,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position of the vertex
@@ -717,8 +729,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position and direction of the local ray
@@ -791,8 +805,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final local axis in global space
@@ -854,8 +870,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position and normal in global space
@@ -925,8 +943,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position of the point in global space
@@ -1013,8 +1033,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final orientation
@@ -1086,8 +1108,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position of the point in global space
@@ -1127,8 +1151,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_below.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position of the point in global space
@@ -1206,8 +1232,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final position of the point in global space
@@ -1298,8 +1326,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute the final mesh
@@ -1415,11 +1445,15 @@ class TestSolver(unittest.TestCase):
         )
 
         # Convert final model parameters to skeleton states
-        skel_state_frame0 = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final[0])
+        skel_state_frame0 = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final[0]
+            )
         )
-        skel_state_frame1 = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final[1])
+        skel_state_frame1 = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final[1]
+            )
         )
 
         # Compute final meshes for both frames
@@ -1462,11 +1496,15 @@ class TestSolver(unittest.TestCase):
         )
 
         # Convert to skeleton states
-        skel_state_frame0_zero = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final_zero[0])
+        skel_state_frame0_zero = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final_zero[0]
+            )
         )
-        skel_state_frame1_zero = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final_zero[1])
+        skel_state_frame1_zero = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final_zero[1]
+            )
         )
 
         # Compute meshes
@@ -1588,7 +1626,7 @@ class TestSolver(unittest.TestCase):
         # Convert to skeleton states and verify accelerations match zero target
         skel_states = [
             pym_geometry.model_parameters_to_skeleton_state(
-                character, torch.from_numpy(model_params_final[i])
+                character, model_params_final[i]
             )
             for i in range(n_frames)
         ]
@@ -1604,13 +1642,13 @@ class TestSolver(unittest.TestCase):
 
             # Assert that measured acceleration matches target
             self.assertTrue(
-                torch.allclose(
+                np.allclose(
                     acceleration,
-                    torch.from_numpy(target),
+                    target,
                     rtol=0.1,
                     atol=0.1,
                 ),
-                f"Joint {joint_idx}: acceleration {acceleration.numpy()} "
+                f"Joint {joint_idx}: acceleration {acceleration} "
                 f"does not match target {target}",
             )
 
@@ -1676,7 +1714,7 @@ class TestSolver(unittest.TestCase):
         # Convert to skeleton states and verify accelerations match target
         skel_states_ballistic = [
             pym_geometry.model_parameters_to_skeleton_state(
-                character, torch.from_numpy(model_params_final_ballistic[i])
+                character, model_params_final_ballistic[i]
             )
             for i in range(n_frames)
         ]
@@ -1688,13 +1726,13 @@ class TestSolver(unittest.TestCase):
         measured_accel = pos2 - 2 * pos1 + pos0
 
         self.assertTrue(
-            torch.allclose(
+            np.allclose(
                 measured_accel,
-                torch.from_numpy(target_accel),
+                target_accel,
                 rtol=0.1,
                 atol=0.1,
             ),
-            f"Ballistic test: measured acceleration {measured_accel.numpy()} "
+            f"Ballistic test: measured acceleration {measured_accel} "
             f"does not match target {target_accel}",
         )
 
@@ -1794,8 +1832,10 @@ class TestSolver(unittest.TestCase):
 
         # Convert to skeleton states and verify jerk matches zero target
         skel_states = [
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, torch.from_numpy(model_params_final[i])
+            torch.from_numpy(
+                pym_geometry.model_parameters_to_skeleton_state(
+                    character, model_params_final[i]
+                )
             )
             for i in range(n_frames)
         ]
@@ -1840,8 +1880,10 @@ class TestSolver(unittest.TestCase):
         weight = 1.0
 
         # Get initial positions of the vertices
-        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
-            character, model_params_init
+        skel_state_init = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_init.numpy()
+            )
         )
         initial_mesh = character.skin_points(skel_state_init)
         initial_pos1 = initial_mesh[vertex_index1, :3]
@@ -1888,8 +1930,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute final mesh and vertex positions
@@ -1980,8 +2024,10 @@ class TestSolver(unittest.TestCase):
         weight = 1.0
 
         # Get initial positions of the points
-        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
-            character, model_params_init
+        skel_state_init = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_init.numpy()
+            )
         )
         initial_point1 = pym_skel_state.transform_points(
             skel_state_init[joint_index1],
@@ -2035,8 +2081,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute final positions of the points
@@ -2249,8 +2297,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
 
         # Compute final positions of the points
@@ -2377,8 +2427,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init)
 
         # Compute actual height from optimized parameters
-        skel_state = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final)
+        skel_state = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
         )
         mesh_vertices = character.skin_points(skel_state)
 
@@ -2410,8 +2462,10 @@ class TestSolver(unittest.TestCase):
         model_params_final_2 = solver.solve(model_params_init)
 
         # Compute actual height from optimized parameters
-        skel_state_2 = pym_geometry.model_parameters_to_skeleton_state(
-            character, torch.from_numpy(model_params_final_2)
+        skel_state_2 = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final_2
+            )
         )
         mesh_vertices_2 = character.skin_points(skel_state_2)
 
@@ -2517,7 +2571,7 @@ class TestSolver(unittest.TestCase):
         # Convert to skeleton states and verify velocity magnitudes are close to zero
         skel_states = [
             pym_geometry.model_parameters_to_skeleton_state(
-                character, torch.from_numpy(model_params_final[i])
+                character, model_params_final[i]
             )
             for i in range(n_frames)
         ]
@@ -2529,7 +2583,7 @@ class TestSolver(unittest.TestCase):
 
             # Velocity = pos[t+1] - pos[t]
             velocity = pos1 - pos0
-            speed = torch.norm(velocity).item()
+            speed = float(np.linalg.norm(velocity))
 
             speeds.append(speed)
             # Assert that measured speed is close to zero target
@@ -2574,7 +2628,7 @@ class TestSolver(unittest.TestCase):
         # Convert to skeleton states and verify velocity magnitudes match target
         skel_states2 = [
             pym_geometry.model_parameters_to_skeleton_state(
-                character, torch.from_numpy(model_params_final2[i])
+                character, model_params_final2[i]
             )
             for i in range(n_frames)
         ]
@@ -2582,7 +2636,7 @@ class TestSolver(unittest.TestCase):
         # Check root joint velocity magnitude
         pos0 = skel_states2[0][0, :3]
         pos1 = skel_states2[1][0, :3]
-        measured_speed = torch.norm(pos1 - pos0).item()
+        measured_speed = float(np.linalg.norm(pos1 - pos0))
 
         self.assertTrue(
             np.isclose(measured_speed, target_speed, rtol=1e-3, atol=1e-3),

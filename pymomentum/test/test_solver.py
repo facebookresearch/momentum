@@ -8,6 +8,7 @@
 import unittest
 from multiprocessing.dummy import Pool
 
+import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.solver as pym_solver
@@ -121,7 +122,7 @@ class TestSolver(unittest.TestCase):
             batch_size, n_joints, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
 
-        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+        skel_state_init = pym_diff_geometry.model_parameters_to_skeleton_state(
             character, model_params_init
         )
         orient_cons_targets = skel_state_init.index_select(1, orient_cons_parents)[
@@ -639,7 +640,7 @@ class TestSolver(unittest.TestCase):
             character, torch.rand(nBatch, nParams)
         ).double()
 
-        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+        skel_state_init = pym_diff_geometry.model_parameters_to_skeleton_state(
             character, model_params_init
         )
 
@@ -660,7 +661,7 @@ class TestSolver(unittest.TestCase):
         model_params_final = pym_solver.transform_pose(
             character, model_params_init, transform
         )
-        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+        skel_state_final = pym_diff_geometry.model_parameters_to_skeleton_state(
             character, model_params_final
         )
 

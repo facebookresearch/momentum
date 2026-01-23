@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "pymomentum/geometry/array_parameter_transform.h"
+#include "pymomentum/geometry/array_skeleton_state.h"
 #include "pymomentum/geometry/character_pybind.h"
 #include "pymomentum/geometry/gltf_builder_pybind.h"
 #include "pymomentum/geometry/limit_pybind.h"
@@ -851,20 +853,24 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 
   m.def(
       "apply_parameter_transform",
-      [](py::object character, at::Tensor modelParameters) {
-        return applyParamTransform(character, modelParameters);
+      [](const mm::Character& character, const py::buffer& modelParameters, bool flatten) {
+        return applyParameterTransformArray(character.parameterTransform, modelParameters, flatten);
       },
-      R"(Apply the parameter transform to a [nBatch x nParams] tensor of model parameters.
-This is functionally identical to :meth:`ParameterTransform.apply` except that it allows
-batching on the character.
+      R"(Apply the parameter transform to model parameters.
 
-:param character: A character or list of characters.
-:type character: Union[Character, List[Character]]
-:param model_parameters: A [nBatch x nParams] tensor of model parameters.
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
-:return: a tensor of joint parameters.)",
+Input shape: [..., numModelParams]
+Output shape: [..., numJoints * 7] if flatten=True, [..., numJoints, 7] if flatten=False
+
+:param character: A character.
+:param model_parameters: Numpy array containing model parameters.
+:param flatten: If True (default), return shape [..., numJoints * 7]. If False, return shape [..., numJoints, 7].
+
+:return: Numpy array containing joint parameters.)",
       py::arg("character"),
-      py::arg("model_parameters"));
+      py::arg("model_parameters"),
+      py::arg("flatten") = true);
 
   m.def(
       "model_parameters_to_blend_shape_coefficients",
@@ -935,78 +941,90 @@ function is provided as a convenience because motion read from external files ge
       py::arg("parents"),
       py::arg("offsets"));
 
-  // modelParametersToSkeletonState(characters, modelParameters)
+  // modelParametersToSkeletonState(character, modelParameters)
   m.def(
       "model_parameters_to_skeleton_state",
-      &modelParametersToSkeletonState,
+      &modelParametersToSkeletonStateArray,
       R"(Map from the k modelParameters to the 8*nJoints global skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to worldspace.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.
+
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
-:param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
+:param model_parameters: Numpy array containing the model parameters.
+  Shape: [..., numModelParams]
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
+:return: Numpy array containing the skeleton state.
+  Shape: [..., numJoints, 8])",
       py::arg("character"),
       py::arg("model_parameters"));
 
-  // modelParametersToLocalSkeletonState(characters, modelParameters)
+  // modelParametersToLocalSkeletonState(character, modelParameters)
   m.def(
       "model_parameters_to_local_skeleton_state",
-      &modelParametersToLocalSkeletonState,
+      &modelParametersToLocalSkeletonStateArray,
       R"(Map from the k modelParameters to the 8*nJoints local skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.
+
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
-:param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
+:param model_parameters: Numpy array containing the model parameters.
+  Shape: [..., numModelParams]
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
+:return: Numpy array containing the local skeleton state.
+  Shape: [..., numJoints, 8])",
       py::arg("character"),
       py::arg("model_parameters"));
 
   // jointParametersToSkeletonState(character, jointParameters)
   m.def(
       "joint_parameters_to_skeleton_state",
-      &jointParametersToSkeletonState,
+      &jointParametersToSkeletonStateArray,
       R"(Map from the 7*nJoints jointParameters to the 8*nJoints global skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to worldspace.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.
+
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
-:param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
+:param joint_parameters: Numpy array containing the joint parameters.
+  Shape: [..., numJointParams]
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
+:return: Numpy array containing the skeleton state.
+  Shape: [..., numJoints, 8])",
       py::arg("character"),
       py::arg("joint_parameters"));
 
   // jointParametersToLocalSkeletonState(character, jointParameters)
   m.def(
       "joint_parameters_to_local_skeleton_state",
-      &jointParametersToLocalSkeletonState,
+      &jointParametersToLocalSkeletonStateArray,
       R"(Map from the 7*nJoints jointParameters (representing transforms to the parent joint) to the 8*nJoints local skeleton state.
 
 The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
-Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
+Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.
+
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
-:param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
+:param joint_parameters: Numpy array containing the joint parameters.
+  Shape: [..., numJointParams]
 
-:return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
+:return: Numpy array containing the local skeleton state.
+  Shape: [..., numJoints, 8])",
       py::arg("character"),
       py::arg("joint_parameters"));
 
-  // localSkeletonStateToJointParameters(character, skelState)
+  // skeletonStateToJointParameters(character, skelState)
   m.def(
       "skeleton_state_to_joint_parameters",
-      &skeletonStateToJointParameters,
+      &skeletonStateToJointParametersArray,
       R"(Map from the 8*nJoints skeleton state (representing transforms to world-space) to the 7*nJoints jointParameters.  This performs the following operations:
 
 * Removing the translation offset.
@@ -1016,17 +1034,21 @@ Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately id
 The skeleton state is stored (tx, ty, tz; rx, ry, rz, rw; s) and transforms from the joint's local space to world-space.
 The joint parameters are stored (tx, ty, tz; ry, rz, ry; s) where rotations are in Euler angles and are relative to the parent joint.
 
-:param character: Character to use.
-:param skel_state: torch.Tensor containing the ([nBatch] x nJoints x 8) skeleton state.
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
-:return: torch.Tensor of size ([nBatch] x nJoints x 7) containing the joint parameters.)",
+:param character: Character to use.
+:param skel_state: Numpy array containing the skeleton state.
+  Shape: [..., numJoints, 8]
+
+:return: Numpy array containing the joint parameters.
+  Shape: [..., numJointParams])",
       py::arg("character"),
       py::arg("skel_state"));
 
-  // localSkeletonStateToJointParameters(character, skelState)
+  // localSkeletonStateToJointParameters(character, localSkelState)
   m.def(
       "local_skeleton_state_to_joint_parameters",
-      &localSkeletonStateToJointParameters,
+      &localSkeletonStateToJointParametersArray,
       R"(Map from the 8*nJoints local skeleton state to the 7*nJoints jointParameters.  This performs the following operations:
 
 * Removing the translation offset.
@@ -1036,10 +1058,14 @@ The joint parameters are stored (tx, ty, tz; ry, rz, ry; s) where rotations are 
 The local skeleton state is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the transform from the joint's local space to its parent joint space.
 The joint parameters are stored (tx, ty, tz; ry, rz, ry; s) where rotations are in Euler angles and are relative to the parent joint.
 
-:param character: Character to use.
-:param local_skel_state: torch.Tensor containing the ([nBatch] x nJoints x 8) skeleton state.
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
 
-:return: torch.Tensor of size ([nBatch] x nJoints x 7) containing the joint parameters.)",
+:param character: Character to use.
+:param local_skel_state: Numpy array containing the local skeleton state.
+  Shape: [..., numJoints, 8]
+
+:return: Numpy array containing the joint parameters.
+  Shape: [..., numJointParams])",
       py::arg("character"),
       py::arg("local_skel_state"));
 

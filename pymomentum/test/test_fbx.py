@@ -24,7 +24,14 @@ class TestFBX(unittest.TestCase):
         self.model_params = pym_geometry.uniform_random_to_model_parameters(
             self.character, torch.rand(nBatch, nParams)
         ).double()
-        self.joint_params = self.character.parameter_transform.apply(self.model_params)
+        self.joint_params = torch.from_numpy(
+            self.character.parameter_transform.apply(self.model_params.numpy())
+        )
+        self.skeleton_state = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                self.character, self.model_params.numpy()
+            )
+        )
 
     def test_load_animation(self) -> None:
         """
@@ -83,8 +90,8 @@ class TestFBX(unittest.TestCase):
             )
         )
 
-        skel_state = pym_geometry.joint_parameters_to_skeleton_state(
-            character, torch.from_numpy(joint_params)
+        skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(character, joint_params)
         )
 
         skel_state_first = skel_state[0]
@@ -93,35 +100,23 @@ class TestFBX(unittest.TestCase):
         # Start and end values read out from Maya.
         # 3-joint chain basically just rotates by 90 degrees.
         self.assertTrue(
-            torch.allclose(
-                skel_state_first[joint1][0:3], torch.Tensor([0, 0, 4]), atol=1e-5
-            )
+            np.allclose(skel_state_first[joint1][0:3], np.array([0, 0, 4]), atol=1e-5)
         )
         self.assertTrue(
-            torch.allclose(
-                skel_state_first[joint2][0:3], torch.Tensor([4, 0, 4]), atol=1e-5
-            )
+            np.allclose(skel_state_first[joint2][0:3], np.array([4, 0, 4]), atol=1e-5)
         )
         self.assertTrue(
-            torch.allclose(
-                skel_state_first[joint3][0:3], torch.Tensor([4, 0, 8]), atol=1e-5
-            )
+            np.allclose(skel_state_first[joint3][0:3], np.array([4, 0, 8]), atol=1e-5)
         )
 
         self.assertTrue(
-            torch.allclose(
-                skel_state_last[joint1][0:3], torch.Tensor([0, 0, 4]), atol=1e-5
-            )
+            np.allclose(skel_state_last[joint1][0:3], np.array([0, 0, 4]), atol=1e-5)
         )
         self.assertTrue(
-            torch.allclose(
-                skel_state_last[joint2][0:3], torch.Tensor([0, 0, 0]), atol=1e-5
-            )
+            np.allclose(skel_state_last[joint2][0:3], np.array([0, 0, 0]), atol=1e-5)
         )
         self.assertTrue(
-            torch.allclose(
-                skel_state_last[joint3][0:3], torch.Tensor([4, 0, 0]), atol=1e-5
-            )
+            np.allclose(skel_state_last[joint3][0:3], np.array([4, 0, 0]), atol=1e-5)
         )
 
     def test_save_motions_with_model_params(self) -> None:
