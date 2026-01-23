@@ -789,33 +789,19 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
       py::arg("main_subject_only") = true,
       py::arg("up") = mm::UpVector::Y);
 
-  // mapModelParameters_names(motionData, sourceParameterNames,
-  // targetCharacter)
-  m.def(
-      "map_model_parameters",
-      &mapModelParameters_names,
-      R"(Remap model parameters from one character to another.
-
-:param motionData: The source motion data as a nFrames x nParams torch.Tensor.
-:param sourceParameterNames: The source parameter names as a list of strings (e.g. c.parameterTransform.name).
-:param targetCharacter: The target character to remap onto.
-
-:return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
-      )",
-      py::arg("motion_data"),
-      py::arg("source_parameter_names"),
-      py::arg("target_character"),
-      py::arg("verbose") = false);
-
   // mapModelParameters(motionData, sourceCharacter, targetCharacter)
+  // Note: This overload is registered FIRST to ensure proper overload resolution.
+  // When called with (array, Character, Character), pybind11 will match this first.
   m.def(
       "map_model_parameters",
-      &mapModelParameters,
+      &mapModelParametersArray,
       R"(Remap model parameters from one character to another.
 
-:param motionData: The source motion data as a nFrames x nParams torch.Tensor.
-:param sourceCharacter: The source character.
-:param targetCharacter: The target character to remap onto.
+Supports arbitrary leading dimensions and both float32/float64 dtypes.
+
+:param motion_data: The source motion data as a [..., nSourceParams] numpy array.
+:param source_character: The source character.
+:param target_character: The target character to remap onto.
 :param verbose: If true, print out warnings about missing parameters.
 
 :return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
@@ -825,15 +811,40 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
       py::arg("target_character"),
       py::arg("verbose") = true);
 
+  // mapModelParameters_names(motionData, sourceParameterNames,
+  // targetCharacter)
+  m.def(
+      "map_model_parameters",
+      &mapModelParametersNamesArray,
+      R"(Remap model parameters from one character to another.
+
+Supports arbitrary leading dimensions and both float32/float64 dtypes.
+
+:param motion_data: The source motion data as a [..., nSourceParams] numpy array.
+:param source_parameter_names: The source parameter names as a list of strings (e.g. c.parameter_transform.name).
+:param target_character: The target character to remap onto.
+:param verbose: If true, print out warnings about missing parameters.
+
+:return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
+      )",
+      py::arg("motion_data"),
+      py::arg("source_parameter_names"),
+      py::arg("target_character"),
+      py::arg("verbose") = false);
+
   // mapJointParameters(motionData, sourceCharacter, targetCharacter)
   m.def(
       "map_joint_parameters",
-      &mapJointParameters,
+      &mapJointParametersArray,
       R"(Remap joint parameters from one character to another.
 
-:param motionData: The source motion data as a [nFrames x (nBones * 7)] torch.Tensor.
-:param sourceCharacter: The source character.
-:param targetCharacter: The target character to remap onto.
+Supports arbitrary leading dimensions and both float32/float64 dtypes.
+Accepts both flat format [..., nJoints * 7] and structured format [..., nJoints, 7].
+Output format matches input format.
+
+:param motion_data: The source motion data as a numpy array.
+:param source_character: The source character.
+:param target_character: The target character to remap onto.
 
 :return: The motion with the parameters remapped to match the passed-in Character. The fields with no match are filled with zero.
       )",

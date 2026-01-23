@@ -481,4 +481,251 @@ py::array modelParametersToFaceExpressionCoefficientsArray(
   }
 }
 
+namespace {
+
+// Helper to build a mapping from source names to target names.
+// Returns two vectors: srcIndices and tgtIndices, where
+// srcIndices[i] maps to tgtIndices[i].
+std::pair<std::vector<py::ssize_t>, std::vector<py::ssize_t>> buildNameMapping(
+    const std::vector<std::string>& srcNames,
+    const std::vector<std::string>& tgtNames) {
+  // Build a map from target names to indices for O(1) lookup
+  std::unordered_map<std::string, size_t> tgtNameMap;
+  for (size_t iTgt = 0; iTgt < tgtNames.size(); ++iTgt) {
+    tgtNameMap.emplace(tgtNames[iTgt], iTgt);
+  }
+
+  const size_t expectedSize = std::min(srcNames.size(), tgtNames.size());
+
+  std::vector<py::ssize_t> srcIndices;
+  std::vector<py::ssize_t> tgtIndices;
+  srcIndices.reserve(expectedSize);
+  tgtIndices.reserve(expectedSize);
+
+  for (size_t iSrc = 0; iSrc < srcNames.size(); ++iSrc) {
+    auto itr = tgtNameMap.find(srcNames[iSrc]);
+    if (itr != tgtNameMap.end()) {
+      srcIndices.push_back(static_cast<py::ssize_t>(iSrc));
+      tgtIndices.push_back(static_cast<py::ssize_t>(itr->second));
+    }
+  }
+
+  return {srcIndices, tgtIndices};
+}
+
+template <typename T>
+py::array_t<T> mapModelParametersImpl(
+    const py::array& motionData,
+    const std::vector<std::string>& srcNames,
+    const std::vector<std::string>& tgtNames,
+    const LeadingDimensions& leadingDims) {
+  const auto nSrcParams = static_cast<py::ssize_t>(srcNames.size());
+  const auto nTgtParams = static_cast<py::ssize_t>(tgtNames.size());
+  const auto nBatch = leadingDims.totalBatchElements();
+
+  // Build the mapping between source and target parameter indices
+  const auto indexMapping = buildNameMapping(srcNames, tgtNames);
+  const auto& srcIndices = indexMapping.first;
+  const auto& tgtIndices = indexMapping.second;
+
+  // Create output array
+  auto result = createOutputArray<T>(leadingDims, {nTgtParams});
+
+  // Create batch indexer
+  BatchIndexer indexer(leadingDims);
+
+  // Create accessors
+  ModelParametersAccessor<T> inputAcc(motionData, leadingDims, nSrcParams);
+  ModelParametersAccessor<T> outputAcc(result, leadingDims, nTgtParams);
+
+  // Release GIL for parallel computation
+  {
+    py::gil_scoped_release release;
+    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+      // Convert flat batch index to multi-dimensional indices
+      auto indices = indexer.decompose(iBatch);
+
+      // Get source model parameters
+      auto srcParams = inputAcc.get(indices);
+
+      // Create output model parameters (initialized to zero)
+      momentum::ModelParametersT<T> tgtParams = Eigen::VectorX<T>::Zero(nTgtParams);
+
+      // Copy matching parameters
+      for (size_t i = 0; i < srcIndices.size(); ++i) {
+        tgtParams[tgtIndices[i]] = srcParams[srcIndices[i]];
+      }
+
+      // Write output
+      outputAcc.set(indices, tgtParams);
+    });
+  }
+
+  return result;
+}
+
+template <typename T>
+py::array_t<T> mapJointParametersImpl(
+    const py::array& motionData,
+    const std::vector<std::string>& srcJointNames,
+    const std::vector<std::string>& tgtJointNames,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nSrcJoints,
+    py::ssize_t nTgtJoints,
+    JointParamsShape inputShape) {
+  const auto nBatch = leadingDims.totalBatchElements();
+
+  // Build the mapping between source and target joint indices
+  const auto jointIndexMapping = buildNameMapping(srcJointNames, tgtJointNames);
+  const auto& srcJointIndices = jointIndexMapping.first;
+  const auto& tgtJointIndices = jointIndexMapping.second;
+
+  // Create output array with same format as input
+  py::array_t<T> result;
+  if (inputShape == JointParamsShape::Structured) {
+    result = createOutputArray<T>(leadingDims, {nTgtJoints, static_cast<py::ssize_t>(7)});
+  } else {
+    result = createOutputArray<T>(leadingDims, {nTgtJoints * 7});
+  }
+
+  // Create batch indexer
+  BatchIndexer indexer(leadingDims);
+
+  // Create accessors
+  JointParametersAccessor<T> inputAcc(motionData, leadingDims, nSrcJoints, inputShape);
+  JointParametersAccessor<T> outputAcc(result, leadingDims, nTgtJoints, inputShape);
+
+  // Release GIL for parallel computation
+  {
+    py::gil_scoped_release release;
+    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+      // Convert flat batch index to multi-dimensional indices
+      auto indices = indexer.decompose(iBatch);
+
+      // Get source joint parameters
+      auto srcParams = inputAcc.get(indices);
+
+      // Create output joint parameters (initialized to zero)
+      momentum::JointParametersT<T> tgtParams =
+          Eigen::VectorX<T>::Zero(nTgtJoints * momentum::kParametersPerJoint);
+
+      // Copy matching joints (each joint has 7 parameters)
+      for (size_t i = 0; i < srcJointIndices.size(); ++i) {
+        const auto srcJoint = srcJointIndices[i];
+        const auto tgtJoint = tgtJointIndices[i];
+        for (int p = 0; p < momentum::kParametersPerJoint; ++p) {
+          tgtParams[tgtJoint * momentum::kParametersPerJoint + p] =
+              srcParams[srcJoint * momentum::kParametersPerJoint + p];
+        }
+      }
+
+      // Write output
+      outputAcc.set(indices, tgtParams);
+    });
+  }
+
+  return result;
+}
+
+} // namespace
+
+py::array mapModelParametersNamesArray(
+    py::buffer motionData,
+    const std::vector<std::string>& sourceParameterNames,
+    const momentum::Character& targetCharacter,
+    bool verbose) {
+  const auto nSrcParams = static_cast<int>(sourceParameterNames.size());
+  const auto& tgtNames = targetCharacter.parameterTransform.name;
+
+  ArrayChecker checker("map_model_parameters");
+  checker.validateBuffer(motionData, "motion_data", {nSrcParams}, {"numSourceParams"});
+
+  // Check for missing parameters and warn if verbose
+  if (verbose) {
+    std::vector<std::string> missingParams;
+    for (const auto& srcName : sourceParameterNames) {
+      auto iParam = targetCharacter.parameterTransform.getParameterIdByName(srcName);
+      if (iParam == momentum::kInvalidIndex) {
+        missingParams.push_back(srcName);
+      }
+    }
+    if (!missingParams.empty()) {
+      // Convert to Python list for printing
+      py::list pyMissingParams;
+      for (const auto& name : missingParams) {
+        pyMissingParams.append(name);
+      }
+      py::print("WARNING: missing parameters found during map_model_parameters: ", pyMissingParams);
+    }
+  }
+
+  const auto& leadingDims = checker.getLeadingDimensions();
+
+  if (checker.isFloat64()) {
+    return mapModelParametersImpl<double>(motionData, sourceParameterNames, tgtNames, leadingDims);
+  } else {
+    return mapModelParametersImpl<float>(motionData, sourceParameterNames, tgtNames, leadingDims);
+  }
+}
+
+py::array mapModelParametersArray(
+    py::buffer motionData,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter,
+    bool verbose) {
+  return mapModelParametersNamesArray(
+      motionData, srcCharacter.parameterTransform.name, tgtCharacter, verbose);
+}
+
+py::array mapJointParametersArray(
+    py::buffer motionData,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter) {
+  const auto& srcSkeleton = srcCharacter.skeleton;
+  const auto& tgtSkeleton = tgtCharacter.skeleton;
+  const auto nSrcJoints = static_cast<py::ssize_t>(srcSkeleton.joints.size());
+  const auto nTgtJoints = static_cast<py::ssize_t>(tgtSkeleton.joints.size());
+
+  // Detect input format: structured (..., nJoints, 7) or flat (..., nJointParams)
+  ArrayChecker checker("map_joint_parameters");
+  py::buffer_info bufInfo = motionData.request();
+  JointParamsShape inputShape;
+
+  if (bufInfo.ndim >= 2 && bufInfo.shape[bufInfo.ndim - 1] == 7 &&
+      bufInfo.shape[bufInfo.ndim - 2] == nSrcJoints) {
+    // Structured format: (..., nJoints, 7)
+    checker.validateBuffer(
+        motionData, "motion_data", {static_cast<int>(nSrcJoints), 7}, {"numJoints", "7"});
+    inputShape = JointParamsShape::Structured;
+  } else {
+    // Flat format: (..., nJointParams)
+    const auto nSrcJointParams = nSrcJoints * momentum::kParametersPerJoint;
+    checker.validateBuffer(
+        motionData, "motion_data", {static_cast<int>(nSrcJointParams)}, {"numJointParams"});
+    inputShape = JointParamsShape::Flat;
+  }
+
+  const auto& leadingDims = checker.getLeadingDimensions();
+
+  if (checker.isFloat64()) {
+    return mapJointParametersImpl<double>(
+        motionData,
+        srcSkeleton.getJointNames(),
+        tgtSkeleton.getJointNames(),
+        leadingDims,
+        nSrcJoints,
+        nTgtJoints,
+        inputShape);
+  } else {
+    return mapJointParametersImpl<float>(
+        motionData,
+        srcSkeleton.getJointNames(),
+        tgtSkeleton.getJointNames(),
+        leadingDims,
+        nSrcJoints,
+        nTgtJoints,
+        inputShape);
+  }
+}
+
 } // namespace pymomentum

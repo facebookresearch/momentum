@@ -407,6 +407,78 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "Batched diff_geometry.compute_vertex_normals should match geometry.compute_vertex_normals",
         )
 
+    def test_map_model_parameters_matches(self) -> None:
+        """Verify that diff_geometry.map_model_parameters matches geometry.map_model_parameters."""
+        c = pym_geometry.create_test_character()
+        active = np.zeros(c.parameter_transform.size, dtype=bool)
+        active[0] = True
+        active[3] = True
+        active[5] = True
+
+        c2 = pym_geometry.reduce_to_selected_model_parameters(
+            c, torch.from_numpy(active)
+        )
+
+        np.random.seed(0)
+        nBatch = 5
+        mp_np = pym_geometry.uniform_random_to_model_parameters(
+            c2, np.random.rand(nBatch, c2.parameter_transform.size).astype(np.float32)
+        )
+
+        # Call geometry version (numpy)
+        mp2_geometry = pym_geometry.map_model_parameters(mp_np, c2, c)
+        mp3_geometry = pym_geometry.map_model_parameters(mp2_geometry, c, c2)
+
+        # Call diff_geometry version (torch)
+        mp_torch = torch.from_numpy(mp_np)
+        mp2_diff_geometry = pym_diff_geometry.map_model_parameters(mp_torch, c2, c)
+        mp3_diff_geometry = pym_diff_geometry.map_model_parameters(
+            mp2_diff_geometry, c, c2
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(mp2_geometry, mp2_diff_geometry.numpy()),
+            "diff_geometry.map_model_parameters should match geometry.map_model_parameters",
+        )
+        self.assertTrue(
+            np.allclose(mp3_geometry, mp3_diff_geometry.numpy()),
+            "Round-trip diff_geometry.map_model_parameters should match geometry.map_model_parameters",
+        )
+
+    def test_map_joint_parameters_matches(self) -> None:
+        """Verify that diff_geometry.map_joint_parameters matches geometry.map_joint_parameters."""
+        c = pym_geometry.create_test_character()
+        c2 = pym_geometry.create_test_character()
+
+        np.random.seed(0)
+        nBatch = 5
+        mp_np = pym_geometry.uniform_random_to_model_parameters(
+            c2, np.random.rand(nBatch, c2.parameter_transform.size).astype(np.float32)
+        )
+        jp_np = c.parameter_transform.apply(mp_np)
+
+        # Call geometry version (numpy)
+        jp2_geometry = pym_geometry.map_joint_parameters(jp_np, c2, c)
+        jp3_geometry = pym_geometry.map_joint_parameters(jp2_geometry, c, c2)
+
+        # Call diff_geometry version (torch)
+        jp_torch = torch.from_numpy(jp_np)
+        jp2_diff_geometry = pym_diff_geometry.map_joint_parameters(jp_torch, c2, c)
+        jp3_diff_geometry = pym_diff_geometry.map_joint_parameters(
+            jp2_diff_geometry, c, c2
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(jp2_geometry, jp2_diff_geometry.numpy()),
+            "diff_geometry.map_joint_parameters should match geometry.map_joint_parameters",
+        )
+        self.assertTrue(
+            np.allclose(jp3_geometry, jp3_diff_geometry.numpy()),
+            "Round-trip diff_geometry.map_joint_parameters should match geometry.map_joint_parameters",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
