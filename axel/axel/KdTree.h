@@ -105,7 +105,7 @@ class KdTree {
   template <typename EigenVectorType>
   void radiusSearch(
       EigenVectorType&& query,
-      const Scalar radius,
+      const Scalar& radius,
       const SortByDistance sort,
       RadiusSearchResults& results) const {
     static_assert(detail::IsContiguousEigenVectorBaseWithLength<EigenVectorType, kDimensionality>);
@@ -125,7 +125,7 @@ class KdTree {
    */
   template <typename EigenVectorType>
   RadiusSearchResults
-  radiusSearch(EigenVectorType&& query, const Scalar radius, const SortByDistance sort) const {
+  radiusSearch(EigenVectorType&& query, const Scalar& radius, const SortByDistance sort) const {
     static_assert(detail::IsContiguousEigenVectorBaseWithLength<EigenVectorType, kDimensionality>);
     RadiusSearchResults results{};
     radiusSearch(query, radius, sort, results);
