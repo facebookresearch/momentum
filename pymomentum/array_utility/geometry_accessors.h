@@ -13,13 +13,85 @@
 #include <momentum/character/parameter_transform.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character/types.h>
 #include <momentum/math/transform.h>
 
 #include <pybind11/numpy.h>
 
+#include <span>
+
 namespace pymomentum {
 
 namespace py = pybind11;
+
+// Generic accessor for Eigen-vector-based strong types (ModelParametersT, BlendWeightsT, etc.)
+// Provides access to the strong type directly, supporting arbitrary strides without
+// requiring contiguous memory.
+//
+// StrongType must be an Eigen vector wrapper with:
+//   - A member `v` of type Eigen::VectorX<T>
+//   - A constructor that takes Eigen::VectorX<T>
+//
+// Supported strong types:
+//   - momentum::ModelParametersT<T>
+//   - momentum::BlendWeightsT<T>
+//   - momentum::JointParametersT<T> (flat format only)
+//
+// Array format: (..., vectorSize) where vectorSize is the size of the Eigen vector.
+template <typename T, template <typename> class StrongType>
+class VectorAccessor {
+ public:
+  // Construct from buffer info with shape (..., vectorSize)
+  VectorAccessor(
+      const py::buffer_info& bufferInfo,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t vectorSize);
+
+  // Convenience constructor that takes a py::buffer and extracts buffer_info.
+  VectorAccessor(py::buffer& buffer, const LeadingDimensions& leadingDims, py::ssize_t vectorSize)
+      : VectorAccessor(buffer.request(), leadingDims, vectorSize) {}
+
+  // Const convenience constructor
+  VectorAccessor(
+      const py::buffer& buffer,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t vectorSize)
+      : VectorAccessor(buffer.request(), leadingDims, vectorSize) {}
+
+  // Get the vector for the given batch indices.
+  // Returns a StrongType<T> object constructed from the array data.
+  // Handles broadcasting: if a dimension has stride 0, its index is ignored.
+  StrongType<T> get(std::span<const py::ssize_t> batchIndices) const;
+
+  // Set the vector for the given batch indices.
+  // Writes the StrongType<T> data to the array using strides.
+  // Handles broadcasting: if a dimension has stride 0, its index is ignored.
+  void set(std::span<const py::ssize_t> batchIndices, const StrongType<T>& value);
+
+ private:
+  T* data_;
+  py::ssize_t vectorSize_{};
+  std::vector<py::ssize_t> strides_;
+  size_t leadingNDim_{};
+
+  // Compute the flat offset into the data array for given batch indices.
+  [[nodiscard]] py::ssize_t computeOffset(std::span<const py::ssize_t> batchIndices) const;
+};
+
+// Type aliases for common strong types
+template <typename T>
+using ModelParametersAccessor = VectorAccessor<T, momentum::ModelParametersT>;
+
+template <typename T>
+using BlendWeightsAccessor = VectorAccessor<T, momentum::BlendWeightsT>;
+
+// Note: JointParametersAccessor is NOT implemented using VectorAccessor because it needs
+// to handle two different array formats:
+//   - Flat: (..., nJoints * 7) - could use VectorAccessor
+//   - Structured: (..., nJoints, 7) - requires 2D trailing dimension handling
+// The structured format is important for user-facing APIs where the per-joint structure
+// is more intuitive. Since both formats need to be supported transparently, we keep
+// JointParametersAccessor as a separate implementation.
 
 // Accessor for joint parameters that handles both structured and flat formats.
 // Provides access to JointParametersT<T> objects directly, supporting arbitrary
@@ -62,13 +134,13 @@ class JointParametersAccessor {
   // Get the joint parameters for the given batch indices.
   // Returns a JointParametersT<T> object constructed from the array data.
   // Handles broadcasting: if a dimension has stride 0, its index is ignored.
-  momentum::JointParametersT<T> get(const std::vector<py::ssize_t>& batchIndices) const;
+  momentum::JointParametersT<T> get(std::span<const py::ssize_t> batchIndices) const;
 
   // Set the joint parameters for the given batch indices.
   // Writes the JointParametersT<T> data to the array using strides.
   // Handles broadcasting: if a dimension has stride 0, its index is ignored.
   void set(
-      const std::vector<py::ssize_t>& batchIndices,
+      std::span<const py::ssize_t> batchIndices,
       const momentum::JointParametersT<T>& jointParams);
 
  private:
@@ -80,57 +152,7 @@ class JointParametersAccessor {
 
   // Compute the flat offset into the data array for given batch indices.
   // Handles broadcasting by using stride=0 for broadcast dimensions.
-  [[nodiscard]] py::ssize_t computeOffset(const std::vector<py::ssize_t>& batchIndices) const;
-};
-
-// Accessor for model parameters.
-// Provides access to ModelParametersT<T> objects directly.
-template <typename T>
-class ModelParametersAccessor {
- public:
-  // Construct from buffer info with shape (..., nModelParams)
-  ModelParametersAccessor(
-      const py::buffer_info& bufferInfo,
-      const LeadingDimensions& leadingDims,
-      py::ssize_t nModelParams);
-
-  // Convenience constructor that takes a py::buffer and extracts buffer_info.
-  // This allows accepting any buffer-protocol object (numpy arrays, torch tensors, etc.)
-  // for backward compatibility.
-  ModelParametersAccessor(
-      py::buffer& buffer,
-      const LeadingDimensions& leadingDims,
-      py::ssize_t nModelParams)
-      : ModelParametersAccessor(buffer.request(), leadingDims, nModelParams) {}
-
-  // Const convenience constructor
-  ModelParametersAccessor(
-      const py::buffer& buffer,
-      const LeadingDimensions& leadingDims,
-      py::ssize_t nModelParams)
-      : ModelParametersAccessor(buffer.request(), leadingDims, nModelParams) {}
-
-  // Get the model parameters for the given batch indices.
-  // Returns a ModelParametersT<T> object constructed from the array data.
-  // Handles broadcasting: if a dimension has stride 0, its index is ignored.
-  momentum::ModelParametersT<T> get(const std::vector<py::ssize_t>& batchIndices) const;
-
-  // Set the model parameters for the given batch indices.
-  // Writes the ModelParametersT<T> data to the array using strides.
-  // Handles broadcasting: if a dimension has stride 0, its index is ignored.
-  void set(
-      const std::vector<py::ssize_t>& batchIndices,
-      const momentum::ModelParametersT<T>& modelParams);
-
- private:
-  T* data_;
-  py::ssize_t nModelParams_{};
-  std::vector<py::ssize_t> strides_;
-  size_t leadingNDim_{};
-
-  // Compute the flat offset into the data array for given batch indices.
-  // Handles broadcasting by using stride=0 for broadcast dimensions.
-  [[nodiscard]] py::ssize_t computeOffset(const std::vector<py::ssize_t>& batchIndices) const;
+  [[nodiscard]] py::ssize_t computeOffset(std::span<const py::ssize_t> batchIndices) const;
 };
 
 // Accessor for skeleton states.
@@ -164,13 +186,13 @@ class SkeletonStateAccessor {
   // Get the transforms for the given batch indices.
   // Returns a vector of transforms (one per joint).
   // Handles broadcasting: if a dimension has stride 0, its index is ignored.
-  momentum::TransformListT<T> getTransforms(const std::vector<py::ssize_t>& batchIndices) const;
+  momentum::TransformListT<T> getTransforms(std::span<const py::ssize_t> batchIndices) const;
 
   // Set the transforms for the given batch indices.
   // Writes transform data to the array using strides.
   // Handles broadcasting: if a dimension has stride 0, its index is ignored.
   void setTransforms(
-      const std::vector<py::ssize_t>& batchIndices,
+      std::span<const py::ssize_t> batchIndices,
       const momentum::TransformListT<T>& transforms);
 
  private:
@@ -181,7 +203,7 @@ class SkeletonStateAccessor {
 
   // Compute the flat offset into the data array for given batch indices.
   // Handles broadcasting by using stride=0 for broadcast dimensions.
-  [[nodiscard]] py::ssize_t computeOffset(const std::vector<py::ssize_t>& batchIndices) const;
+  [[nodiscard]] py::ssize_t computeOffset(std::span<const py::ssize_t> batchIndices) const;
 };
 
 } // namespace pymomentum

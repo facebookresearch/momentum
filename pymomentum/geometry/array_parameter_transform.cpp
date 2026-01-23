@@ -11,6 +11,7 @@
 #include <pymomentum/array_utility/batch_accessor.h>
 #include <pymomentum/array_utility/geometry_accessors.h>
 
+#include <momentum/character/blend_shape_skinning.h>
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/joint.h>
 #include <momentum/character/parameter_transform.h>
@@ -324,6 +325,160 @@ py::array_t<float> getParameterTransformMatrix(
   }
 
   return result;
+}
+
+py::array uniformRandomToModelParametersArray(
+    const momentum::Character& character,
+    py::buffer unifNoise) {
+  const auto& paramTransform = character.parameterTransform;
+  const auto nModelParams = static_cast<int>(paramTransform.numAllModelParameters());
+
+  ArrayChecker checker("uniform_random_to_model_parameters");
+  checker.validateBuffer(unifNoise, "unif_noise", {nModelParams}, {"numModelParams"});
+
+  const auto& leadingDims = checker.getLeadingDimensions();
+  const auto nBatch = leadingDims.totalBatchElements();
+
+  // Create output array with same shape as input
+  auto result = createOutputArray<float>(leadingDims, {static_cast<py::ssize_t>(nModelParams)});
+
+  // Create batch indexer
+  BatchIndexer indexer(leadingDims);
+
+  // Create accessors
+  ModelParametersAccessor<float> inputAcc(unifNoise, leadingDims, nModelParams);
+  ModelParametersAccessor<float> outputAcc(result, leadingDims, nModelParams);
+
+  // Release GIL for parallel computation
+  {
+    py::gil_scoped_release release;
+    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+      // Convert flat batch index to multi-dimensional indices
+      auto indices = indexer.decompose(iBatch);
+
+      // Get input model parameters
+      auto unifParams = inputAcc.get(indices);
+
+      // Create output model parameters
+      momentum::ModelParametersT<float> outParams(nModelParams);
+
+      // Process each parameter
+      for (int iParam = 0; iParam < nModelParams; ++iParam) {
+        const float unifValue = unifParams[iParam];
+        const auto& name = paramTransform.name[iParam];
+
+        float result_val = NAN;
+        if (name.find("scale_") != std::string::npos) {
+          result_val = 1.0f * (unifValue - 0.5f);
+        } else if (
+            name.find("_tx") != std::string::npos || name.find("_ty") != std::string::npos ||
+            name.find("_tz") != std::string::npos) {
+          result_val = 5.0f * (unifValue - 0.5f);
+        } else {
+          // Assume it's a rotation parameter
+          result_val = (momentum::pi<float>() / 4.0f) * (unifValue - 0.5f);
+        }
+        outParams[iParam] = result_val;
+      }
+
+      // Write output
+      outputAcc.set(indices, outParams);
+    });
+  }
+
+  return result;
+}
+
+namespace {
+
+// Helper template for extracting coefficients from model parameters
+// using a vector of parameter indices (blendShapeParameters or faceExpressionParameters)
+template <typename T>
+py::array_t<T> extractCoefficientsImpl(
+    const Eigen::VectorXi& parameterIndices,
+    const py::array& modelParams,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nModelParams) {
+  const auto nCoeffs = static_cast<py::ssize_t>(parameterIndices.size());
+  const auto nBatch = leadingDims.totalBatchElements();
+
+  // Create output array
+  auto result = createOutputArray<T>(leadingDims, {nCoeffs});
+
+  // Create batch indexer
+  BatchIndexer indexer(leadingDims);
+
+  // Create accessors
+  ModelParametersAccessor<T> inputAcc(modelParams, leadingDims, nModelParams);
+  BlendWeightsAccessor<T> outputAcc(result, leadingDims, nCoeffs);
+
+  // Release GIL for parallel computation
+  {
+    py::gil_scoped_release release;
+    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+      // Convert flat batch index to multi-dimensional indices
+      auto indices = indexer.decompose(iBatch);
+
+      // Get input model parameters
+      auto modelParamsT = inputAcc.get(indices);
+
+      // Extract coefficients
+      momentum::BlendWeightsT<T> coeffs = Eigen::VectorX<T>::Zero(nCoeffs);
+      for (Eigen::Index iCoeff = 0; iCoeff < nCoeffs; ++iCoeff) {
+        const auto paramIdx = parameterIndices[iCoeff];
+        if (paramIdx >= 0 && paramIdx < modelParamsT.size()) {
+          coeffs(iCoeff) = modelParamsT(paramIdx);
+        }
+      }
+
+      // Write output
+      outputAcc.set(indices, coeffs);
+    });
+  }
+
+  return result;
+}
+
+} // namespace
+
+py::array modelParametersToBlendShapeCoefficientsArray(
+    const momentum::Character& character,
+    const py::buffer& modelParameters) {
+  const auto& paramTransform = character.parameterTransform;
+  const auto nModelParams = static_cast<int>(paramTransform.numAllModelParameters());
+
+  ArrayChecker checker("model_parameters_to_blend_shape_coefficients");
+  checker.validateBuffer(modelParameters, "model_parameters", {nModelParams}, {"numModelParams"});
+
+  const auto& leadingDims = checker.getLeadingDimensions();
+
+  if (checker.isFloat64()) {
+    return extractCoefficientsImpl<double>(
+        paramTransform.blendShapeParameters, modelParameters, leadingDims, nModelParams);
+  } else {
+    return extractCoefficientsImpl<float>(
+        paramTransform.blendShapeParameters, modelParameters, leadingDims, nModelParams);
+  }
+}
+
+py::array modelParametersToFaceExpressionCoefficientsArray(
+    const momentum::Character& character,
+    const py::buffer& modelParameters) {
+  const auto& paramTransform = character.parameterTransform;
+  const auto nModelParams = static_cast<int>(paramTransform.numAllModelParameters());
+
+  ArrayChecker checker("model_parameters_to_face_expression_coefficients");
+  checker.validateBuffer(modelParameters, "model_parameters", {nModelParams}, {"numModelParams"});
+
+  const auto& leadingDims = checker.getLeadingDimensions();
+
+  if (checker.isFloat64()) {
+    return extractCoefficientsImpl<double>(
+        paramTransform.faceExpressionParameters, modelParameters, leadingDims, nModelParams);
+  } else {
+    return extractCoefficientsImpl<float>(
+        paramTransform.faceExpressionParameters, modelParameters, leadingDims, nModelParams);
+  }
 }
 
 } // namespace pymomentum

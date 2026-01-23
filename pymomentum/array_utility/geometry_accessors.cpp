@@ -9,7 +9,81 @@
 
 #include <momentum/common/exception.h>
 
+#include <span>
+
 namespace pymomentum {
+
+// ============================================================================
+// VectorAccessor implementation (generic for all Eigen vector strong types)
+// ============================================================================
+
+template <typename T, template <typename> class StrongType>
+VectorAccessor<T, StrongType>::VectorAccessor(
+    const py::buffer_info& bufferInfo,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t vectorSize)
+    : vectorSize_(vectorSize), leadingNDim_(leadingDims.ndim()) {
+  data_ = static_cast<T*>(bufferInfo.ptr);
+
+  // Extract strides (convert from bytes to elements)
+  const auto totalNDim = bufferInfo.ndim;
+  strides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  }
+}
+
+template <typename T, template <typename> class StrongType>
+py::ssize_t VectorAccessor<T, StrongType>::computeOffset(
+    std::span<const py::ssize_t> batchIndices) const {
+  py::ssize_t offset = 0;
+
+  // Apply strides for each dimension
+  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * strides_[i];
+  }
+
+  return offset;
+}
+
+template <typename T, template <typename> class StrongType>
+StrongType<T> VectorAccessor<T, StrongType>::get(std::span<const py::ssize_t> batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  // Create a vector using strides
+  Eigen::Matrix<T, Eigen::Dynamic, 1> vec(vectorSize_);
+  const auto paramStride = strides_[leadingNDim_];
+
+  for (py::ssize_t i = 0; i < vectorSize_; ++i) {
+    const auto elementOffset = offset + i * paramStride;
+    vec(i) = data_[elementOffset];
+  }
+
+  return StrongType<T>(vec);
+}
+
+template <typename T, template <typename> class StrongType>
+void VectorAccessor<T, StrongType>::set(
+    std::span<const py::ssize_t> batchIndices,
+    const StrongType<T>& value) {
+  const auto offset = computeOffset(batchIndices);
+  const auto& vec = value.v;
+  const auto paramStride = strides_[leadingNDim_];
+
+  for (py::ssize_t i = 0; i < vectorSize_; ++i) {
+    const auto elementOffset = offset + i * paramStride;
+    data_[elementOffset] = vec(i);
+  }
+}
+
+// Explicit template instantiations for VectorAccessor
+template class VectorAccessor<float, momentum::ModelParametersT>;
+template class VectorAccessor<double, momentum::ModelParametersT>;
+template class VectorAccessor<float, momentum::BlendWeightsT>;
+template class VectorAccessor<double, momentum::BlendWeightsT>;
+template class VectorAccessor<float, momentum::JointParametersT>;
+template class VectorAccessor<double, momentum::JointParametersT>;
 
 // ============================================================================
 // JointParametersAccessor implementation
@@ -34,7 +108,7 @@ JointParametersAccessor<T>::JointParametersAccessor(
 
 template <typename T>
 py::ssize_t JointParametersAccessor<T>::computeOffset(
-    const std::vector<py::ssize_t>& batchIndices) const {
+    std::span<const py::ssize_t> batchIndices) const {
   py::ssize_t offset = 0;
 
   // Apply strides for each dimension
@@ -48,7 +122,7 @@ py::ssize_t JointParametersAccessor<T>::computeOffset(
 
 template <typename T>
 momentum::JointParametersT<T> JointParametersAccessor<T>::get(
-    const std::vector<py::ssize_t>& batchIndices) const {
+    std::span<const py::ssize_t> batchIndices) const {
   const auto offset = computeOffset(batchIndices);
   const auto nJointParams = nJoints_ * 7;
 
@@ -81,7 +155,7 @@ momentum::JointParametersT<T> JointParametersAccessor<T>::get(
 
 template <typename T>
 void JointParametersAccessor<T>::set(
-    const std::vector<py::ssize_t>& batchIndices,
+    std::span<const py::ssize_t> batchIndices,
     const momentum::JointParametersT<T>& jointParams) {
   const auto offset = computeOffset(batchIndices);
   const auto& jpVec = jointParams.v;
@@ -114,75 +188,6 @@ template class JointParametersAccessor<float>;
 template class JointParametersAccessor<double>;
 
 // ============================================================================
-// ModelParametersAccessor implementation
-// ============================================================================
-
-template <typename T>
-ModelParametersAccessor<T>::ModelParametersAccessor(
-    const py::buffer_info& bufferInfo,
-    const LeadingDimensions& leadingDims,
-    py::ssize_t nModelParams)
-    : nModelParams_(nModelParams), leadingNDim_(leadingDims.ndim()) {
-  data_ = static_cast<T*>(bufferInfo.ptr);
-
-  // Extract strides (convert from bytes to elements)
-  const auto totalNDim = bufferInfo.ndim;
-  strides_.resize(totalNDim);
-  for (int i = 0; i < totalNDim; ++i) {
-    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
-  }
-}
-
-template <typename T>
-py::ssize_t ModelParametersAccessor<T>::computeOffset(
-    const std::vector<py::ssize_t>& batchIndices) const {
-  py::ssize_t offset = 0;
-
-  // Apply strides for each dimension
-  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
-  for (size_t i = 0; i < batchIndices.size(); ++i) {
-    offset += batchIndices[i] * strides_[i];
-  }
-
-  return offset;
-}
-
-template <typename T>
-momentum::ModelParametersT<T> ModelParametersAccessor<T>::get(
-    const std::vector<py::ssize_t>& batchIndices) const {
-  const auto offset = computeOffset(batchIndices);
-
-  // Create a model parameters vector using strides
-  Eigen::Matrix<T, Eigen::Dynamic, 1> mpVec(nModelParams_);
-  const auto paramStride = strides_[leadingNDim_];
-
-  for (py::ssize_t iParam = 0; iParam < nModelParams_; ++iParam) {
-    const auto elementOffset = offset + iParam * paramStride;
-    mpVec(iParam) = data_[elementOffset];
-  }
-
-  return momentum::ModelParametersT<T>(mpVec);
-}
-
-template <typename T>
-void ModelParametersAccessor<T>::set(
-    const std::vector<py::ssize_t>& batchIndices,
-    const momentum::ModelParametersT<T>& modelParams) {
-  const auto offset = computeOffset(batchIndices);
-  const auto& mpVec = modelParams.v;
-  const auto paramStride = strides_[leadingNDim_];
-
-  for (py::ssize_t iParam = 0; iParam < nModelParams_; ++iParam) {
-    const auto elementOffset = offset + iParam * paramStride;
-    data_[elementOffset] = mpVec(iParam);
-  }
-}
-
-// Explicit template instantiations
-template class ModelParametersAccessor<float>;
-template class ModelParametersAccessor<double>;
-
-// ============================================================================
 // SkeletonStateAccessor implementation
 // ============================================================================
 
@@ -204,7 +209,7 @@ SkeletonStateAccessor<T>::SkeletonStateAccessor(
 
 template <typename T>
 py::ssize_t SkeletonStateAccessor<T>::computeOffset(
-    const std::vector<py::ssize_t>& batchIndices) const {
+    std::span<const py::ssize_t> batchIndices) const {
   py::ssize_t offset = 0;
 
   // Apply strides for each dimension
@@ -218,7 +223,7 @@ py::ssize_t SkeletonStateAccessor<T>::computeOffset(
 
 template <typename T>
 momentum::TransformListT<T> SkeletonStateAccessor<T>::getTransforms(
-    const std::vector<py::ssize_t>& batchIndices) const {
+    std::span<const py::ssize_t> batchIndices) const {
   const auto offset = computeOffset(batchIndices);
 
   // Create transforms using strides
@@ -254,7 +259,7 @@ momentum::TransformListT<T> SkeletonStateAccessor<T>::getTransforms(
 
 template <typename T>
 void SkeletonStateAccessor<T>::setTransforms(
-    const std::vector<py::ssize_t>& batchIndices,
+    std::span<const py::ssize_t> batchIndices,
     const momentum::TransformListT<T>& transforms) {
   MT_THROW_IF(
       static_cast<py::ssize_t>(transforms.size()) != nJoints_,

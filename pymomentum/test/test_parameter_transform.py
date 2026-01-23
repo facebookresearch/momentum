@@ -7,6 +7,7 @@
 
 import unittest
 
+import numpy as np
 import torch
 from pymomentum.geometry import (
     Character,
@@ -22,14 +23,14 @@ class TestParameterTransform(unittest.TestCase):
         transform = character.parameter_transform.transform
         self.assertEqual(tuple(transform.shape), (3 * 7, 10))
 
-        torch.manual_seed(42)
+        np.random.seed(42)
         model_params = uniform_random_to_model_parameters(
-            character, torch.rand(1, 10)
+            character, np.random.rand(1, 10).astype(np.float32)
         ).squeeze()
         joint_params_1 = torch.from_numpy(
-            character.parameter_transform.apply(model_params.numpy()[None, :])
+            character.parameter_transform.apply(model_params[None, :])
         ).flatten()
-        joint_params_2 = torch.matmul(transform, model_params)
+        joint_params_2 = torch.matmul(transform, torch.from_numpy(model_params))
         self.assertTrue(torch.allclose(joint_params_1, joint_params_2))
 
     def test_parameter_transform_round_trip(self) -> None:
@@ -50,13 +51,13 @@ class TestParameterTransform(unittest.TestCase):
         )
 
         # Verify the transform produces identical results
-        torch.manual_seed(42)
-        model_params = uniform_random_to_model_parameters(character, torch.rand(5, 10))
-
-        joint_params_original = torch.from_numpy(
-            original_pt.apply(model_params.numpy())
+        np.random.seed(42)
+        model_params = uniform_random_to_model_parameters(
+            character, np.random.rand(5, 10).astype(np.float32)
         )
-        joint_params_new = torch.from_numpy(new_pt.apply(model_params.numpy()))
+
+        joint_params_original = torch.from_numpy(original_pt.apply(model_params))
+        joint_params_new = torch.from_numpy(new_pt.apply(model_params))
 
         self.assertTrue(
             torch.allclose(joint_params_original, joint_params_new, atol=1e-6)

@@ -21,8 +21,11 @@ class TestFBX(unittest.TestCase):
 
         nBatch = 5
         nParams = self.character.parameter_transform.size
-        self.model_params = pym_geometry.uniform_random_to_model_parameters(
-            self.character, torch.rand(nBatch, nParams)
+        np.random.seed(0)  # ensure repeatability
+        self.model_params = torch.from_numpy(
+            pym_geometry.uniform_random_to_model_parameters(
+                self.character, np.random.rand(nBatch, nParams).astype(np.float32)
+            )
         ).double()
         self.joint_params = torch.from_numpy(
             self.character.parameter_transform.apply(self.model_params.numpy())
