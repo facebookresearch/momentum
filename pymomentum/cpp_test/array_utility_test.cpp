@@ -367,11 +367,13 @@ TEST(ArrayAccessors, JointParametersAccessor_BufferInfo_Roundtrip) {
   momentum::JointParametersT<double> originalParams(jpVec);
 
   // Set and get at multiple indices
-  accessor.set({0, 1}, originalParams);
-  accessor.set({1, 0}, originalParams);
+  std::array<py::ssize_t, 2> idx01 = {0, 1};
+  std::array<py::ssize_t, 2> idx10 = {1, 0};
+  accessor.set(idx01, originalParams);
+  accessor.set(idx10, originalParams);
 
-  auto retrieved01 = accessor.get({0, 1});
-  auto retrieved10 = accessor.get({1, 0});
+  auto retrieved01 = accessor.get(idx01);
+  auto retrieved10 = accessor.get(idx10);
 
   // Verify lossless round-trip
   for (int i = 0; i < nJointParams; ++i) {
@@ -399,8 +401,9 @@ TEST(ArrayAccessors, ModelParametersAccessor_BufferInfo_Roundtrip) {
   momentum::ModelParametersT<float> originalParams(mpVec);
 
   // Set and get
-  accessor.set({2}, originalParams);
-  auto retrieved = accessor.get({2});
+  std::array<py::ssize_t, 1> idx2 = {2};
+  accessor.set(idx2, originalParams);
+  auto retrieved = accessor.get(idx2);
 
   // Verify lossless round-trip
   for (int i = 0; i < nModelParams; ++i) {
@@ -428,8 +431,9 @@ TEST(ArrayAccessors, SkeletonStateAccessor_BufferInfo_Roundtrip) {
   }
 
   // Set and get
-  accessor.setTransforms({1}, originalTransforms);
-  auto retrieved = accessor.getTransforms({1});
+  std::array<py::ssize_t, 1> idx1 = {1};
+  accessor.setTransforms(idx1, originalTransforms);
+  auto retrieved = accessor.getTransforms(idx1);
 
   // Verify lossless round-trip
   ASSERT_EQ(originalTransforms.size(), retrieved.size());

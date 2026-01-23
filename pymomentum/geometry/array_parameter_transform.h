@@ -83,4 +83,30 @@ py::array_t<bool> findParametersArray(
 py::array_t<float> getParameterTransformMatrix(
     const momentum::ParameterTransform& parameterTransform);
 
+// Convert uniform random values [0, 1] to valid model parameters.
+// Maps uniform noise to appropriate ranges based on parameter type:
+// - Scale parameters: [-0.5, 0.5]
+// - Translation parameters: [-2.5, 2.5]
+// - Rotation parameters: [-pi/8, pi/8]
+//
+// Input shape: [..., numModelParams]
+// Output shape: [..., numModelParams]
+py::array uniformRandomToModelParametersArray(
+    const momentum::Character& character,
+    py::buffer unifNoise);
+
+// Extract blend shape coefficients from model parameters.
+// Input: (..., nModelParams) - model parameters
+// Output: (..., nBlendShapes) - blend shape coefficients
+py::array modelParametersToBlendShapeCoefficientsArray(
+    const momentum::Character& character,
+    const py::buffer& modelParameters);
+
+// Extract face expression blend shape coefficients from model parameters.
+// Input: (..., nModelParams) - model parameters
+// Output: (..., nFaceExpressionBlendShapes) - face expression coefficients
+py::array modelParametersToFaceExpressionCoefficientsArray(
+    const momentum::Character& character,
+    const py::buffer& modelParameters);
+
 } // namespace pymomentum

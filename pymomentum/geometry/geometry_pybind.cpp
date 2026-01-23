@@ -842,12 +842,19 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
   // uniformRandomToModelParameters(character, unifNoise)
   m.def(
       "uniform_random_to_model_parameters",
-      &uniformRandomToModelParameters,
+      &uniformRandomToModelParametersArray,
       R"(Convert a uniform noise vector into a valid body pose.
 
-:parameter character: The character to use.
-:parameter unifNoise: A uniform noise tensor, with dimensions (nBatch x nModelParams).
-:return: A torch.Tensor with dimensions (nBatch x nModelParams).)",
+Maps uniform noise [0, 1] to appropriate ranges based on parameter type:
+- Scale parameters: [-0.5, 0.5]
+- Translation parameters: [-2.5, 2.5]
+- Rotation parameters: [-pi/8, pi/8]
+
+Supports arbitrary leading dimensions and float32 dtype.
+
+:param character: The character to use.
+:param unif_noise: Numpy array of uniform noise, with shape [..., numModelParams].
+:return: Numpy array with shape [..., numModelParams].)",
       py::arg("character"),
       py::arg("unif_noise"));
 
@@ -874,26 +881,26 @@ Output shape: [..., numJoints * 7] if flatten=True, [..., numJoints, 7] if flatt
 
   m.def(
       "model_parameters_to_blend_shape_coefficients",
-      &modelParametersToBlendShapeCoefficients,
+      &modelParametersToBlendShapeCoefficientsArray,
       R"(Extract the model parameters that correspond to the blend shape coefficients, in the order
 required to call `meth:BlendShape.compute_shape`.
 
 :param character: A character.
-:parameter model_parameters: A [nBatch x nParams] tensor of model parameters.
+:param model_parameters: A [..., nParams] numpy array of model parameters.
 
-:return: A [nBatch x nBlendShape] torch.Tensor of blend shape coefficients.)",
+:return: A [..., nBlendShape] numpy array of blend shape coefficients.)",
       py::arg("character"),
       py::arg("model_parameters"));
 
   m.def(
       "model_parameters_to_face_expression_coefficients",
-      &modelParametersToFaceExpressionCoefficients,
+      &modelParametersToFaceExpressionCoefficientsArray,
       R"(Extract the model parameters that correspond to the face expression coefficients.
 
 :param character: A character.
-:parameter model_parameters: A [nBatch x nParams] tensor of model parameters.
+:param model_parameters: A [..., nParams] numpy array of model parameters.
 
-:return: A [nBatch x nBlendShape] torch.Tensor of blend shape coefficients.)",
+:return: A [..., nFaceExpressionBlendShapes] numpy array of face expression blend shape coefficients.)",
       py::arg("character"),
       py::arg("model_parameters"));
 

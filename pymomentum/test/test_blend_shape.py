@@ -115,12 +115,10 @@ class TestBlendShapeBase(unittest.TestCase):
 
         c2 = c.with_face_expression_blend_shape(blend_shape)
         # Check the right parameters are retrieved
-        params = torch.from_numpy(
-            np.random.rand(c2.parameter_transform.size).astype(np.float32)
-        )
-        bp1 = params[c2.parameter_transform.face_expression_parameters]
+        params = np.random.rand(c2.parameter_transform.size).astype(np.float32)
+        bp1 = params[c2.parameter_transform.face_expression_parameters.numpy()]
         bp2 = pym_geometry.model_parameters_to_face_expression_coefficients(c2, params)
-        self.assertTrue(bp1.allclose(bp2))
+        self.assertTrue(np.allclose(bp1, bp2))
 
         # Check the shape vectors have been passed on correctly
         blend_shape_2 = c2.face_expression_blend_shape
@@ -146,16 +144,17 @@ class TestBlendShapeBase(unittest.TestCase):
             pt.pose_parameters | pt.scaling_parameters | pt.blend_shape_parameters,
             0,
         )
-        gt_joint_params = torch.from_numpy(
-            pym_geometry.apply_parameter_transform(c, gt_model_params.numpy())
+        gt_joint_params = pym_geometry.apply_parameter_transform(
+            c, gt_model_params.numpy()
         )
         gt_blend_coeffs = pym_geometry.model_parameters_to_face_expression_coefficients(
-            c, gt_model_params
+            c, gt_model_params.numpy()
         )
+        gt_blend_coeffs = torch.from_numpy(gt_blend_coeffs)
         rest_shape = torch.from_numpy(c.mesh.vertices)
         gt_shape = rest_shape + blend_shape.compute_shape(gt_blend_coeffs)
         gt_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params.numpy())
+            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params)
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_shape)
 
@@ -177,21 +176,18 @@ class TestBlendShapeBase(unittest.TestCase):
             vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
             vertex_cons_target_positions=gt_posed_shape,
         )
-        test_joint_params = torch.from_numpy(
-            pym_geometry.apply_parameter_transform(
-                c, test_model_params.detach().numpy()
-            )
+        test_joint_params = pym_geometry.apply_parameter_transform(
+            c, test_model_params.detach().numpy()
         )
         test_blend_coeffs = (
             pym_geometry.model_parameters_to_face_expression_coefficients(
-                c, test_model_params
+                c, test_model_params.detach().numpy()
             )
         )
+        test_blend_coeffs = torch.from_numpy(test_blend_coeffs)
         test_shape = rest_shape + blend_shape.compute_shape(test_blend_coeffs)
         test_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(
-                c, test_joint_params.detach().numpy()
-            )
+            pym_geometry.joint_parameters_to_skeleton_state(c, test_joint_params)
         )
         test_posed_shape = c.skin_points(test_skel_state, test_shape)
 
@@ -242,12 +238,10 @@ class TestBlendShape(unittest.TestCase):
         blend_shape = _build_blend_shape_basis(c)
 
         c2 = c.with_blend_shape(blend_shape)
-        params = torch.from_numpy(
-            np.random.rand(c2.parameter_transform.size).astype(np.float32)
-        )
-        bp1 = params[c2.parameter_transform.blend_shape_parameters]
+        params = np.random.rand(c2.parameter_transform.size).astype(np.float32)
+        bp1 = params[c2.parameter_transform.blend_shape_parameters.numpy()]
         bp2 = pym_geometry.model_parameters_to_blend_shape_coefficients(c2, params)
-        self.assertTrue(bp1.allclose(bp2))
+        self.assertTrue(np.allclose(bp1, bp2))
 
         blend_shape_2 = c2.blend_shape
         self.assertTrue(blend_shape_2 is not None)
@@ -285,17 +279,14 @@ class TestBlendShape(unittest.TestCase):
         torch.manual_seed(0)  # ensure repeatability
         n_model_params = c.parameter_transform.size
 
-        model_params = torch.rand(n_model_params) * 5.0 - 2.5
-        joint_params = torch.from_numpy(
-            pym_geometry.apply_parameter_transform(c, model_params.numpy())
-        )
+        model_params = np.random.rand(n_model_params).astype(np.float32) * 5.0 - 2.5
+        joint_params = pym_geometry.apply_parameter_transform(c, model_params)
+        joint_params_tensor = torch.from_numpy(joint_params)
         skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(
-                c, joint_params.detach().numpy()
-            )
+            pym_geometry.joint_parameters_to_skeleton_state(c, joint_params)
         )
 
-        m1 = torch.from_numpy(c.pose_mesh(joint_params.numpy()).vertices)
+        m1 = torch.from_numpy(c.pose_mesh(joint_params_tensor).vertices)
         m2 = c.skin_points(skel_state)
         self.assertTrue(m1.allclose(m2, rtol=1e-5, atol=1e-6))
 
@@ -303,56 +294,10 @@ class TestBlendShape(unittest.TestCase):
         m3 = c.skin_points(pym_skel_state.to_matrix(skel_state), rest_points)
         self.assertTrue(m1.allclose(m3, rtol=1e-5, atol=1e-6))
 
-    def test_skinning_check_derivatives(self) -> None:
-        """Check the skinning derivatives."""
-
-        torch.set_printoptions(profile="full")
-
-        c = pym_geometry.create_test_character()
-        torch.manual_seed(0)  # ensure repeatability
-        n_model_params = c.parameter_transform.size
-
-        n_batch = 2
-        model_params = (
-            torch.rand(
-                n_batch,
-                n_model_params,
-                requires_grad=AUTOGRAD_ENABLED,
-                dtype=torch.float64,
-            )
-            * 5.0
-            - 2.5
-        )
-        joint_params = torch.from_numpy(
-            pym_geometry.apply_parameter_transform(c, model_params.detach().numpy())
-        )
-        skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(
-                c, joint_params.detach().numpy()
-            )
-        )
-        transforms = pym_skel_state.to_matrix(skel_state).requires_grad_(True)
-
-        if AUTOGRAD_ENABLED:
-            # Derivatives with default rest points:
-            torch.autograd.gradcheck(
-                c.skin_points,
-                [transforms],
-                eps=1e-3,
-                atol=1e-4,
-                raise_exception=True,
-            )
-
-            # Derivatives with specified rest points:
-            rest_points = torch.from_numpy(c.mesh.vertices).double()
-            rest_points.requires_grad = AUTOGRAD_ENABLED
-            torch.autograd.gradcheck(
-                c.skin_points,
-                [transforms, rest_points],
-                eps=1e-3,
-                atol=1e-4,
-                raise_exception=True,
-            )
+    # NOTE: Skinning derivative tests are now in test_diff_geometry.py
+    # (test_skinning_check_derivatives) since pymomentum.geometry uses numpy
+    # arrays without gradient support. Use pymomentum.diff_geometry for
+    # differentiable operations with PyTorch autograd.
 
     def test_solve_blend_shape(self) -> None:
         c = pym_geometry.create_test_character()
@@ -364,15 +309,16 @@ class TestBlendShape(unittest.TestCase):
             pt.pose_parameters | pt.scaling_parameters,
             0,
         )
-        gt_joint_params = torch.from_numpy(
-            pym_geometry.apply_parameter_transform(c, gt_model_params.numpy())
+        gt_joint_params = pym_geometry.apply_parameter_transform(
+            c, gt_model_params.numpy()
         )
         gt_blend_coeffs = pym_geometry.model_parameters_to_blend_shape_coefficients(
-            c, gt_model_params
+            c, gt_model_params.numpy()
         )
+        gt_blend_coeffs = torch.from_numpy(gt_blend_coeffs)
         gt_rest_shape = blend_shape.compute_shape(gt_blend_coeffs)
         gt_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params.numpy())
+            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params)
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_rest_shape)
 
@@ -394,19 +340,16 @@ class TestBlendShape(unittest.TestCase):
             vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
             vertex_cons_target_positions=gt_posed_shape,
         )
-        test_joint_params = torch.from_numpy(
-            pym_geometry.apply_parameter_transform(
-                c, test_model_params.detach().numpy()
-            )
+        test_joint_params = pym_geometry.apply_parameter_transform(
+            c, test_model_params.detach().numpy()
         )
         test_blend_coeffs = pym_geometry.model_parameters_to_blend_shape_coefficients(
-            c, test_model_params
+            c, test_model_params.detach().numpy()
         )
+        test_blend_coeffs = torch.from_numpy(test_blend_coeffs)
         test_rest_shape = blend_shape.compute_shape(test_blend_coeffs)
         test_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(
-                c, test_joint_params.detach().numpy()
-            )
+            pym_geometry.joint_parameters_to_skeleton_state(c, test_joint_params)
         )
         test_posed_shape = c.skin_points(test_skel_state, test_rest_shape)
 

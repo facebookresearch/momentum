@@ -8,6 +8,7 @@
 import unittest
 from multiprocessing.dummy import Pool
 
+import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
 import pymomentum.skel_state as pym_skel_state
@@ -632,12 +633,14 @@ class TestSolver(unittest.TestCase):
 
     def test_transform_pose(self) -> None:
         character = pym_geometry.create_test_character()
-        torch.manual_seed(0)  # ensure repeatability
+        np.random.seed(0)  # ensure repeatability
 
         nBatch = 5
         nParams = character.parameter_transform.size
-        model_params_init = pym_geometry.uniform_random_to_model_parameters(
-            character, torch.rand(nBatch, nParams)
+        model_params_init = torch.from_numpy(
+            pym_geometry.uniform_random_to_model_parameters(
+                character, np.random.rand(nBatch, nParams).astype(np.float32)
+            )
         ).double()
 
         skel_state_init = pym_diff_geometry.model_parameters_to_skeleton_state(
