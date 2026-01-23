@@ -28,14 +28,14 @@ struct Ray3 {
   inline Ray3(
       const Eigen::Vector3<ScalarType>& origin,
       const Eigen::Vector3<ScalarType>& direction,
-      const ScalarType maxT)
+      const ScalarType& maxT)
       : origin(origin), direction(direction), maxT(maxT) {}
 
   inline Ray3(
       const Eigen::Vector3<ScalarType>& origin,
       const Eigen::Vector3<ScalarType>& direction,
-      const ScalarType maxT,
-      const ScalarType minT)
+      const ScalarType& maxT,
+      const ScalarType& minT)
       : origin(origin), minT(minT), direction(direction), maxT(maxT) {}
 };
 
