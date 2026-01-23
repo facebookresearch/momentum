@@ -27,10 +27,12 @@ class TestMarkerTracking(unittest.TestCase):
         mesh_vertex_position = character.mesh.vertices[mesh_vertex_idx]
         print("mesh_vertex_position: ", mesh_vertex_position)
 
-        rest_model_params = torch.zeros(character.parameter_transform.size)
-        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
-            character, rest_model_params.unsqueeze(0)
-        )[0]  # Remove batch dimension
+        rest_model_params = np.zeros((1, character.parameter_transform.size))
+        rest_skeleton_state = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, rest_model_params
+            )[0]  # Remove batch dimension
+        )
         parent_joint_idx = character.skin_weights.index[mesh_vertex_idx][0]
 
         # Create a locator positioned at the mesh vertex
@@ -101,15 +103,15 @@ class TestMarkerTracking(unittest.TestCase):
 
         # Compute converted skinned locator's world space position
         # Skinned locator position is already in world space coordinates
-        converted_world_pos = torch.from_numpy(converted_locator.position)
+        converted_world_pos = converted_locator.position
 
         # Compare world space positions
-        position_diff = torch.norm(converted_world_pos - mesh_vertex_position).item()
+        position_diff = np.linalg.norm(converted_world_pos - mesh_vertex_position)
         self.assertLess(
             position_diff,
             0.01,  # Tight tolerance since they should match exactly
             msg=f"Converted locator world position should match original locator world position. "
-            f"Original: {mesh_vertex_position}, Converted: {converted_world_pos.numpy()}, "
+            f"Original: {mesh_vertex_position}, Converted: {converted_world_pos}, "
             f"Diff: {position_diff}",
         )
 
@@ -184,10 +186,12 @@ class TestMarkerTracking(unittest.TestCase):
 
         # Verify that the world position is preserved
         # Compute the world position of the converted locator in rest pose
-        rest_model_params = torch.zeros(character.parameter_transform.size)
-        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
-            character, rest_model_params.unsqueeze(0)
-        )[0]
+        rest_model_params = np.zeros((1, character.parameter_transform.size))
+        rest_skeleton_state = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, rest_model_params
+            )[0]
+        )
 
         # Transform the offset to world space using the parent bone's transform
         converted_world_pos = pym_skel_state.transform_points(
@@ -271,8 +275,10 @@ class TestMarkerTracking(unittest.TestCase):
             model_params_batch[frame, :] = model_params_cur
 
         # Convert model parameters to skeleton states
-        skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
-            character, model_params_batch
+        skeleton_states = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_batch.numpy()
+            )
         )
 
         # Compute skinned locator positions for all frames using the new function
@@ -322,8 +328,8 @@ class TestMarkerTracking(unittest.TestCase):
         tracked_motion_tensor = torch.from_numpy(tracked_motion)
 
         # Convert tracked motion to skeleton states
-        tracked_skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
-            character, tracked_motion_tensor
+        tracked_skeleton_states = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(character, tracked_motion)
         )
 
         # Compute all skinned locator positions for all tracked frames using the new function
@@ -600,10 +606,14 @@ class TestMarkerTracking(unittest.TestCase):
         mesh_vertex_idx = 22  # Pick an arbitrary vertex
         mesh_vertex_position = character.mesh.vertices[mesh_vertex_idx]
 
-        rest_model_params = torch.zeros(character.parameter_transform.size)
-        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
-            character, rest_model_params.unsqueeze(0)
-        )[0]
+        rest_model_params = np.zeros(
+            (1, character.parameter_transform.size), dtype=np.float32
+        )
+        rest_skeleton_state = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, rest_model_params
+            )[0]
+        )
         parent_joint_idx = character.skin_weights.index[mesh_vertex_idx][0]
 
         # Create a locator positioned at the mesh vertex

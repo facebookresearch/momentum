@@ -61,8 +61,10 @@ class TestPosePrior(unittest.TestCase):
         orient_cons_weights = torch.ones(
             batch_size, n_joints, requires_grad=AUTOGRAD_ENABLED, dtype=torch.float64
         )
-        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
-            character, model_params_init
+        skel_state_init = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_init.numpy()
+            )
         )
         orient_cons_targets = skel_state_init.index_select(1, orient_cons_parents)[
             :, :, 3:7

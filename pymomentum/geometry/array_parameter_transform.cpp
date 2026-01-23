@@ -100,7 +100,9 @@ py::array_t<float> applyInverseParameterTransformImpl(
   {
     py::gil_scoped_release release;
     // InverseParameterTransform.apply() takes JointParametersT and returns CharacterParameters
-    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+    // Eigen SparseQR is triggering a data race for some reason even though the solve() function is
+    // declared const, so do this single-threaded.
+    for (py::ssize_t iBatch = 0; iBatch < nBatch; ++iBatch) {
       // Convert flat batch index to multi-dimensional indices
       auto indices = indexer.decompose(iBatch);
 
@@ -112,7 +114,7 @@ py::array_t<float> applyInverseParameterTransformImpl(
 
       // Write model parameters directly
       outputAcc.set(indices, charParams.pose);
-    });
+    }
   }
 
   return result;

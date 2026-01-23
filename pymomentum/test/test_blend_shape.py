@@ -104,7 +104,6 @@ class TestBlendShapeBase(unittest.TestCase):
         )
 
     def test_blend_shape_character(self) -> None:
-        torch.manual_seed(0)
         np.random.seed(0)
 
         c = pym_geometry.create_test_character()
@@ -116,7 +115,9 @@ class TestBlendShapeBase(unittest.TestCase):
 
         c2 = c.with_face_expression_blend_shape(blend_shape)
         # Check the right parameters are retrieved
-        params = torch.rand(c2.parameter_transform.size)
+        params = torch.from_numpy(
+            np.random.rand(c2.parameter_transform.size).astype(np.float32)
+        )
         bp1 = params[c2.parameter_transform.face_expression_parameters]
         bp2 = pym_geometry.model_parameters_to_face_expression_coefficients(c2, params)
         self.assertTrue(bp1.allclose(bp2))
@@ -132,7 +133,7 @@ class TestBlendShapeBase(unittest.TestCase):
         c3 = c.with_face_expression_blend_shape(None)
         self.assertTrue(c3.face_expression_blend_shape is None)
         self.assertTrue(
-            torch.sum(c3.parameter_transform.face_expression_parameters) == 0
+            np.sum(c3.parameter_transform.face_expression_parameters.numpy()) == 0
         )
 
     def test_solve_face_expression_parameters(self) -> None:
@@ -145,14 +146,16 @@ class TestBlendShapeBase(unittest.TestCase):
             pt.pose_parameters | pt.scaling_parameters | pt.blend_shape_parameters,
             0,
         )
-        gt_joint_params = pym_geometry.apply_parameter_transform(c, gt_model_params)
+        gt_joint_params = torch.from_numpy(
+            pym_geometry.apply_parameter_transform(c, gt_model_params.numpy())
+        )
         gt_blend_coeffs = pym_geometry.model_parameters_to_face_expression_coefficients(
             c, gt_model_params
         )
         rest_shape = torch.from_numpy(c.mesh.vertices)
         gt_shape = rest_shape + blend_shape.compute_shape(gt_blend_coeffs)
-        gt_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
-            c, gt_joint_params
+        gt_skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params.numpy())
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_shape)
 
@@ -174,15 +177,21 @@ class TestBlendShapeBase(unittest.TestCase):
             vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
             vertex_cons_target_positions=gt_posed_shape,
         )
-        test_joint_params = pym_geometry.apply_parameter_transform(c, test_model_params)
+        test_joint_params = torch.from_numpy(
+            pym_geometry.apply_parameter_transform(
+                c, test_model_params.detach().numpy()
+            )
+        )
         test_blend_coeffs = (
             pym_geometry.model_parameters_to_face_expression_coefficients(
                 c, test_model_params
             )
         )
         test_shape = rest_shape + blend_shape.compute_shape(test_blend_coeffs)
-        test_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
-            c, test_joint_params
+        test_skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                c, test_joint_params.detach().numpy()
+            )
         )
         test_posed_shape = c.skin_points(test_skel_state, test_shape)
 
@@ -225,8 +234,7 @@ class TestBlendShape(unittest.TestCase):
             )
 
     def test_blend_shape_character(self) -> None:
-        torch.manual_seed(0)  # ensure repeatability
-        np.random.seed(0)
+        np.random.seed(0)  # ensure repeatability
 
         c = pym_geometry.create_test_character()
 
@@ -234,7 +242,9 @@ class TestBlendShape(unittest.TestCase):
         blend_shape = _build_blend_shape_basis(c)
 
         c2 = c.with_blend_shape(blend_shape)
-        params = torch.rand(c2.parameter_transform.size)
+        params = torch.from_numpy(
+            np.random.rand(c2.parameter_transform.size).astype(np.float32)
+        )
         bp1 = params[c2.parameter_transform.blend_shape_parameters]
         bp2 = pym_geometry.model_parameters_to_blend_shape_coefficients(c2, params)
         self.assertTrue(bp1.allclose(bp2))
@@ -248,11 +258,12 @@ class TestBlendShape(unittest.TestCase):
 
         c3 = c.with_blend_shape(None)
         self.assertTrue(c3.blend_shape is None)
-        self.assertTrue(torch.sum(c3.parameter_transform.blend_shape_parameters) == 0)
+        self.assertTrue(
+            np.sum(c3.parameter_transform.blend_shape_parameters.numpy()) == 0
+        )
 
     def test_save_and_load(self) -> None:
-        torch.manual_seed(0)  # ensure repeatability
-        np.random.seed(0)
+        np.random.seed(0)  # ensure repeatability
 
         c = pym_geometry.create_test_character()
 
@@ -275,8 +286,14 @@ class TestBlendShape(unittest.TestCase):
         n_model_params = c.parameter_transform.size
 
         model_params = torch.rand(n_model_params) * 5.0 - 2.5
-        joint_params = pym_geometry.apply_parameter_transform(c, model_params)
-        skel_state = pym_geometry.joint_parameters_to_skeleton_state(c, joint_params)
+        joint_params = torch.from_numpy(
+            pym_geometry.apply_parameter_transform(c, model_params.numpy())
+        )
+        skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                c, joint_params.detach().numpy()
+            )
+        )
 
         m1 = torch.from_numpy(c.pose_mesh(joint_params.numpy()).vertices)
         m2 = c.skin_points(skel_state)
@@ -306,9 +323,15 @@ class TestBlendShape(unittest.TestCase):
             * 5.0
             - 2.5
         )
-        joint_params = pym_geometry.apply_parameter_transform(c, model_params)
-        skel_state = pym_geometry.joint_parameters_to_skeleton_state(c, joint_params)
-        transforms = pym_skel_state.to_matrix(skel_state)
+        joint_params = torch.from_numpy(
+            pym_geometry.apply_parameter_transform(c, model_params.detach().numpy())
+        )
+        skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                c, joint_params.detach().numpy()
+            )
+        )
+        transforms = pym_skel_state.to_matrix(skel_state).requires_grad_(True)
 
         if AUTOGRAD_ENABLED:
             # Derivatives with default rest points:
@@ -341,13 +364,15 @@ class TestBlendShape(unittest.TestCase):
             pt.pose_parameters | pt.scaling_parameters,
             0,
         )
-        gt_joint_params = pym_geometry.apply_parameter_transform(c, gt_model_params)
+        gt_joint_params = torch.from_numpy(
+            pym_geometry.apply_parameter_transform(c, gt_model_params.numpy())
+        )
         gt_blend_coeffs = pym_geometry.model_parameters_to_blend_shape_coefficients(
             c, gt_model_params
         )
         gt_rest_shape = blend_shape.compute_shape(gt_blend_coeffs)
-        gt_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
-            c, gt_joint_params
+        gt_skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params.numpy())
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_rest_shape)
 
@@ -369,13 +394,19 @@ class TestBlendShape(unittest.TestCase):
             vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
             vertex_cons_target_positions=gt_posed_shape,
         )
-        test_joint_params = pym_geometry.apply_parameter_transform(c, test_model_params)
+        test_joint_params = torch.from_numpy(
+            pym_geometry.apply_parameter_transform(
+                c, test_model_params.detach().numpy()
+            )
+        )
         test_blend_coeffs = pym_geometry.model_parameters_to_blend_shape_coefficients(
             c, test_model_params
         )
         test_rest_shape = blend_shape.compute_shape(test_blend_coeffs)
-        test_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
-            c, test_joint_params
+        test_skel_state = torch.from_numpy(
+            pym_geometry.joint_parameters_to_skeleton_state(
+                c, test_joint_params.detach().numpy()
+            )
         )
         test_posed_shape = c.skin_points(test_skel_state, test_rest_shape)
 
@@ -392,8 +423,7 @@ class TestBlendShape(unittest.TestCase):
 
     def test_bake_blend_shape(self) -> None:
         """Test the bake_blend_shape method with numpy arrays."""
-        torch.manual_seed(0)  # ensure repeatability
-        np.random.seed(0)
+        np.random.seed(0)  # ensure repeatability
 
         # Create test character with blend shapes
         c = pym_geometry.create_test_character()
@@ -416,11 +446,11 @@ class TestBlendShape(unittest.TestCase):
         # Verify blend shape parameters are removed from parameter transform
         # Original character should have blend shape parameters
         self.assertGreater(
-            torch.sum(c_with_blend.parameter_transform.blend_shape_parameters).item(), 0
+            np.sum(c_with_blend.parameter_transform.blend_shape_parameters.numpy()), 0
         )
         # Baked character should have no blend shape parameters
         self.assertEqual(
-            torch.sum(c_baked.parameter_transform.blend_shape_parameters).item(), 0
+            np.sum(c_baked.parameter_transform.blend_shape_parameters.numpy()), 0
         )
 
         # The parameter transform should be smaller (no blend shape parameters)
@@ -429,21 +459,27 @@ class TestBlendShape(unittest.TestCase):
         )
 
         # Verify the baked mesh matches the expected blend shape result
-        expected_mesh_vertices = blend_shape.compute_shape(
-            torch.from_numpy(blend_weights).unsqueeze(0)
-        ).squeeze(0)
-        baked_mesh_vertices = torch.from_numpy(c_baked.mesh.vertices)
+        expected_mesh_vertices = (
+            blend_shape.compute_shape(torch.from_numpy(blend_weights).unsqueeze(0))
+            .squeeze(0)
+            .numpy()
+        )
+        baked_mesh_vertices = c_baked.mesh.vertices
         self.assertTrue(
-            baked_mesh_vertices.allclose(expected_mesh_vertices, rtol=1e-5, atol=1e-6)
+            np.allclose(
+                baked_mesh_vertices, expected_mesh_vertices, rtol=1e-5, atol=1e-6
+            )
         )
 
         # Test with different array types and shapes
         # Test float64 array
         blend_weights_double = blend_weights.astype(np.float64)
         c_baked_double = c_with_blend.bake_blend_shape(blend_weights_double)
-        baked_vertices_double = torch.from_numpy(c_baked_double.mesh.vertices)
+        baked_vertices_double = c_baked_double.mesh.vertices
         self.assertTrue(
-            baked_vertices_double.allclose(expected_mesh_vertices, rtol=1e-5, atol=1e-6)
+            np.allclose(
+                baked_vertices_double, expected_mesh_vertices, rtol=1e-5, atol=1e-6
+            )
         )
 
         # Test error handling - should raise exception for non-1D array
@@ -453,10 +489,12 @@ class TestBlendShape(unittest.TestCase):
         # Test zero blend weights (should result in base shape)
         zero_weights = np.zeros(n_blend_shapes, dtype=np.float32)
         c_baked_zero = c_with_blend.bake_blend_shape(zero_weights)
-        expected_base_vertices = torch.from_numpy(blend_shape.base_shape)
-        baked_base_vertices = torch.from_numpy(c_baked_zero.mesh.vertices)
+        expected_base_vertices = blend_shape.base_shape
+        baked_base_vertices = c_baked_zero.mesh.vertices
         self.assertTrue(
-            baked_base_vertices.allclose(expected_base_vertices, rtol=1e-5, atol=1e-6)
+            np.allclose(
+                baked_base_vertices, expected_base_vertices, rtol=1e-5, atol=1e-6
+            )
         )
 
 

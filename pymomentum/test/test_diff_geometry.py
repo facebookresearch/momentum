@@ -71,10 +71,12 @@ class TestDiffGeometry(unittest.TestCase):
         ).double()
         modelParams.requires_grad = AUTOGRAD_ENABLED
 
-        jp = character.parameter_transform.apply(modelParams)
+        jp = pym_diff_geometry.apply_parameter_transform(character, modelParams)
 
         for i in range(nBatch):
-            jp1 = character.parameter_transform.apply(modelParams.select(0, i))
+            jp1 = pym_diff_geometry.apply_parameter_transform(
+                character, modelParams.select(0, i).unsqueeze(0)
+            ).squeeze(0)
             self.assertTrue(jp1.allclose(jp.select(0, i)))
 
         inputs = [character, modelParams]
@@ -94,7 +96,9 @@ class TestDiffGeometry(unittest.TestCase):
         modelParams = 0.3 * torch.ones(
             nBatch, character.parameter_transform.size, requires_grad=AUTOGRAD_ENABLED
         )
-        jointParams = character.parameter_transform.apply(modelParams)
+        jointParams = pym_diff_geometry.apply_parameter_transform(
+            character, modelParams
+        )
 
         # Validate that inversion works correctly:
         modelParams2 = pym_diff_geometry.apply_inverse_parameter_transform(
@@ -103,6 +107,7 @@ class TestDiffGeometry(unittest.TestCase):
         diff = torch.norm(modelParams2 - modelParams)
         self.assertTrue(diff < 0.001)
 
+        # TODO: Add apply_inverse_parameter_transform to pym_diff_geometry
         # Validate the gradients.
         if AUTOGRAD_ENABLED:
             inputs = [invTransform, jointParams]
@@ -220,9 +225,9 @@ class TestDiffGeometry(unittest.TestCase):
             requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
-        jointParams = character.parameter_transform.apply(modelParams).type(
-            torch.float64
-        )
+        jointParams = pym_diff_geometry.apply_parameter_transform(
+            character, modelParams
+        ).type(torch.float64)
 
         nConstraints = 4 * nJoints
         posConstraint_parents = torch.randint(
@@ -333,8 +338,8 @@ class TestDiffGeometry(unittest.TestCase):
             dtype=torch.float64,
         )
 
-        joint_params1 = character.parameter_transform.apply(model_params).reshape(
-            n_batch, -1, 7
+        joint_params1 = pym_diff_geometry.apply_parameter_transform(
+            character, model_params
         )
 
         local_skel_state1 = pym_diff_geometry.joint_parameters_to_local_skeleton_state(
@@ -346,9 +351,16 @@ class TestDiffGeometry(unittest.TestCase):
             character, local_skel_state1
         )
 
+        # Reshape flat joint parameters to [n_batch, n_joints, 7] for comparison
+        n_joints = character.skeleton.size
+        joint_params1_reshaped = joint_params1.view(n_batch, n_joints, 7)
+        joint_params2_reshaped = joint_params2.view(n_batch, n_joints, 7)
+
         # verify the translations match
         self.assertTrue(
-            torch.allclose(joint_params2[..., 0:3], joint_params1[..., 0:3])
+            torch.allclose(
+                joint_params2_reshaped[..., 0:3], joint_params1_reshaped[..., 0:3]
+            )
         )
 
         local_skel_state2 = pym_diff_geometry.joint_parameters_to_local_skeleton_state(
@@ -380,8 +392,8 @@ class TestDiffGeometry(unittest.TestCase):
             dtype=torch.float64,
         )
 
-        joint_params1 = character.parameter_transform.apply(model_params).reshape(
-            n_batch, -1, 7
+        joint_params1 = pym_diff_geometry.apply_parameter_transform(
+            character, model_params
         )
 
         skel_state1 = pym_diff_geometry.joint_parameters_to_skeleton_state(
@@ -393,9 +405,16 @@ class TestDiffGeometry(unittest.TestCase):
             character, skel_state1
         )
 
+        # Reshape flat joint parameters to [n_batch, n_joints, 7] for comparison
+        n_joints = character.skeleton.size
+        joint_params1_reshaped = joint_params1.view(n_batch, n_joints, 7)
+        joint_params2_reshaped = joint_params2.view(n_batch, n_joints, 7)
+
         # verify the translations match
         self.assertTrue(
-            torch.allclose(joint_params2[..., 0:3], joint_params1[..., 0:3])
+            torch.allclose(
+                joint_params2_reshaped[..., 0:3], joint_params1_reshaped[..., 0:3]
+            )
         )
 
         skel_state2 = pym_diff_geometry.joint_parameters_to_skeleton_state(
@@ -449,7 +468,9 @@ class TestDiffGeometry(unittest.TestCase):
             requires_grad=AUTOGRAD_ENABLED,
             dtype=torch.float64,
         )
-        jointParams = character.parameter_transform.apply(modelParams)
+        jointParams = pym_diff_geometry.apply_parameter_transform(
+            character, modelParams
+        )
         inputs = [character, jointParams]
         if AUTOGRAD_ENABLED:
             torch.autograd.gradcheck(
@@ -490,11 +511,10 @@ class TestDiffGeometry(unittest.TestCase):
 
         torch.manual_seed(0)  # ensure repeatability
         nBatch = 5
-        jp = c.parameter_transform.apply(
-            pym_diff_geometry.uniform_random_to_model_parameters(
-                c2, torch.rand(nBatch, c2.parameter_transform.size)
-            )
+        mp = pym_diff_geometry.uniform_random_to_model_parameters(
+            c2, torch.rand(nBatch, c2.parameter_transform.size)
         )
+        jp = pym_diff_geometry.apply_parameter_transform(c, mp)
 
         jp2 = pym_diff_geometry.map_joint_parameters(jp, c2, c)
         jp3 = pym_diff_geometry.map_joint_parameters(jp2, c, c2)
