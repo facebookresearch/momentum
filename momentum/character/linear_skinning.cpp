@@ -19,19 +19,29 @@
 namespace momentum {
 
 template <typename T>
+std::vector<Eigen::Matrix4<T>> computeSkinningTransforms(
+    typename DeduceSpanType<const JointStateT<T>>::type jointState,
+    const TransformationListT<T>& inverseBindPose) {
+  MT_CHECK(
+      jointState.size() == inverseBindPose.size(),
+      "{} vs {}",
+      jointState.size(),
+      inverseBindPose.size());
+
+  std::vector<Eigen::Matrix4<T>> transforms(inverseBindPose.size());
+  for (size_t i = 0; i < inverseBindPose.size(); i++) {
+    transforms[i].noalias() = (jointState[i].transform * inverseBindPose[i]).matrix();
+  }
+  return transforms;
+}
+
+template <typename T>
 std::vector<Vector3<T>> applySSD(
-    const TransformationListT<T>& inverseBindPose,
     const SkinWeights& skin,
     typename DeduceSpanType<const Vector3<T>>::type points,
-    const SkeletonStateT<T>& state) {
+    typename DeduceSpanType<const Eigen::Matrix4<T>>::type skinningTransforms) {
   MT_PROFILE_FUNCTION();
 
-  // some sanity checks
-  MT_CHECK(
-      state.jointState.size() == inverseBindPose.size(),
-      "{} vs {}",
-      state.jointState.size(),
-      inverseBindPose.size());
   MT_CHECK(
       skin.index.rows() == gsl::narrow<int>(points.size()),
       "{} vs {}",
@@ -45,16 +55,10 @@ std::vector<Vector3<T>> applySSD(
 
   std::vector<Vector3<T>> result(points.size(), Vector3<T>::Zero());
 
-  // first create a list of transformations from bindpose to final output pose
-  std::vector<Matrix4<T>> transformations(state.jointState.size());
-  for (size_t i = 0; i < state.jointState.size(); i++) {
-    transformations[i] = (state.jointState[i].transform * inverseBindPose[i]).matrix();
-  }
-
+  // go over all vertices and perform transformation
   dispenso::ParForOptions options;
   options.minItemsPerChunk = 1024u;
 
-  // go over all vertices and perform transformation
   dispenso::parallel_for(
       dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
       [&](const size_t rangeBegin, const size_t rangeEnd) {
@@ -73,13 +77,13 @@ std::vector<Vector3<T>> applySSD(
             }
 
             MT_CHECK(
-                skin.index(i, j) < transformations.size(),
+                skin.index(i, j) < skinningTransforms.size(),
                 "skin.index({}, {}): {} vs {}",
                 i,
                 j,
                 skin.index(i, j),
-                transformations.size());
-            const auto& transformation = transformations[skin.index(i, j)];
+                skinningTransforms.size());
+            const auto& transformation = skinningTransforms[skin.index(i, j)];
 
             // add up transforms: outputp += (transformation * (pos, 1)) * weight
             Eigen::Vector3<T> temp = transformation.template topRightCorner<3, 1>();
@@ -94,30 +98,70 @@ std::vector<Vector3<T>> applySSD(
 }
 
 template <typename T>
-void applySSD(
+std::vector<Vector3<T>> applySSD(
     const TransformationListT<T>& inverseBindPose,
     const SkinWeights& skin,
-    const MeshT<T>& mesh,
-    const SkeletonStateT<T>& state,
-    MeshT<T>& outputMesh) {
-  return applySSD(inverseBindPose, skin, mesh, state.jointState, outputMesh);
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    typename DeduceSpanType<const JointStateT<T>>::type jointState) {
+  const auto skinningTransforms = computeSkinningTransforms<T>(jointState, inverseBindPose);
+  return applySSD<T>(skin, points, skinningTransforms);
+}
+
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    const SkeletonStateT<T>& state) {
+  return applySSD<T>(inverseBindPose, skin, points, state.jointState);
+}
+
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    const TransformationListT<T>& worldTransforms) {
+  MT_CHECK(
+      worldTransforms.size() == inverseBindPose.size(),
+      "{} vs {}",
+      worldTransforms.size(),
+      inverseBindPose.size());
+
+  std::vector<Eigen::Matrix4<T>> skinningTransforms(inverseBindPose.size());
+  for (size_t i = 0; i < inverseBindPose.size(); i++) {
+    skinningTransforms[i].noalias() = (worldTransforms[i] * inverseBindPose[i]).matrix();
+  }
+  return applySSD<T>(skin, points, skinningTransforms);
+}
+
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    typename DeduceSpanType<const TransformT<T>>::type worldTransforms) {
+  MT_CHECK(
+      worldTransforms.size() == inverseBindPose.size(),
+      "{} vs {}",
+      worldTransforms.size(),
+      inverseBindPose.size());
+
+  std::vector<Eigen::Matrix4<T>> skinningTransforms(inverseBindPose.size());
+  for (size_t i = 0; i < inverseBindPose.size(); i++) {
+    skinningTransforms[i].noalias() = (worldTransforms[i] * inverseBindPose[i]).matrix();
+  }
+  return applySSD<T>(skin, points, skinningTransforms);
 }
 
 template <typename T>
 void applySSD(
-    const TransformationListT<T>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<T>& mesh,
-    const JointStateListT<T>& jointState,
+    typename DeduceSpanType<const Eigen::Matrix4<T>>::type skinningTransforms,
     MeshT<T>& outputMesh) {
   MT_PROFILE_FUNCTION();
 
-  // some sanity checks
-  MT_CHECK(
-      jointState.size() >= inverseBindPose.size(),
-      "{} vs {}",
-      jointState.size(),
-      inverseBindPose.size());
   MT_CHECK(
       skin.index.rows() == gsl::narrow<int>(mesh.vertices.size()),
       "{} vs {}",
@@ -144,16 +188,10 @@ void applySSD(
       outputMesh.faces.size(),
       mesh.faces.size());
 
-  // first create a list of transformations from bindpose to final output pose
-  std::vector<Eigen::Matrix4<T>> transformations(inverseBindPose.size());
-  for (size_t i = 0; i < inverseBindPose.size(); i++) {
-    transformations[i].noalias() = (jointState[i].transform * inverseBindPose[i]).matrix();
-  }
-
+  // go over all vertices and perform transformation
   dispenso::ParForOptions options;
   options.minItemsPerChunk = 1024u;
 
-  // go over all vertices and perform transformation
   dispenso::parallel_for(
       dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
       [&](const size_t rangeBegin, const size_t rangeEnd) {
@@ -175,13 +213,13 @@ void applySSD(
             }
 
             MT_CHECK(
-                skin.index(i, j) < transformations.size(),
+                skin.index(i, j) < skinningTransforms.size(),
                 "skin.index({}, {}): {} vs {}",
                 i,
                 j,
                 skin.index(i, j),
-                transformations.size());
-            const auto& transformation = transformations[skin.index(i, j)];
+                skinningTransforms.size());
+            const auto& transformation = skinningTransforms[skin.index(i, j)];
 
             // add up transforms: outputp += (transformation * (pos, 1)) * weight
             const auto& topLeft = transformation.template topLeftCorner<3, 3>();
@@ -196,6 +234,67 @@ void applySSD(
         }
       },
       options);
+}
+
+template <typename T>
+void applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    typename DeduceSpanType<const JointStateT<T>>::type jointState,
+    MeshT<T>& outputMesh) {
+  const auto skinningTransforms = computeSkinningTransforms(jointState, inverseBindPose);
+  applySSD(skin, mesh, skinningTransforms, outputMesh);
+}
+
+template <typename T>
+void applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    const SkeletonStateT<T>& state,
+    MeshT<T>& outputMesh) {
+  applySSD(inverseBindPose, skin, mesh, state.jointState, outputMesh);
+}
+
+template <typename T>
+void applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    const TransformationListT<T>& worldTransforms,
+    MeshT<T>& outputMesh) {
+  MT_CHECK(
+      worldTransforms.size() == inverseBindPose.size(),
+      "{} vs {}",
+      worldTransforms.size(),
+      inverseBindPose.size());
+
+  std::vector<Eigen::Matrix4<T>> skinningTransforms(inverseBindPose.size());
+  for (size_t i = 0; i < inverseBindPose.size(); i++) {
+    skinningTransforms[i].noalias() = (worldTransforms[i] * inverseBindPose[i]).matrix();
+  }
+  applySSD(skin, mesh, skinningTransforms, outputMesh);
+}
+
+template <typename T>
+void applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    typename DeduceSpanType<const TransformT<T>>::type worldTransforms,
+    MeshT<T>& outputMesh) {
+  MT_CHECK(
+      worldTransforms.size() == inverseBindPose.size(),
+      "{} vs {}",
+      worldTransforms.size(),
+      inverseBindPose.size());
+
+  std::vector<Eigen::Matrix4<T>> skinningTransforms(inverseBindPose.size());
+  for (size_t i = 0; i < inverseBindPose.size(); i++) {
+    skinningTransforms[i].noalias() = (worldTransforms[i] * inverseBindPose[i]).matrix();
+  }
+  applySSD(skin, mesh, skinningTransforms, outputMesh);
 }
 
 Affine3f getInverseSSDTransformation(
@@ -214,13 +313,10 @@ Affine3f getInverseSSDTransformation(
       index,
       skin.index.rows());
 
-  // storage
   Affine3f transform;
   transform.matrix().setZero();
 
-  // loop over the weights
   for (size_t j = 0; j < kMaxSkinJoints; j++) {
-    // get pointer to transformation and weight float
     const auto& weight = skin.weight(index, j);
     if (weight == 0.0f) {
       break;
@@ -237,7 +333,6 @@ Affine3f getInverseSSDTransformation(
     const auto transformation =
         state.jointState[jointIndex].transform * inverseBindPose[jointIndex];
 
-    // add up transforms
     transform.matrix().noalias() += transformation.matrix() * weight;
   }
 
@@ -250,7 +345,6 @@ void applyInverseSSD(
     std::span<const Vector3f> points,
     const SkeletonState& state,
     Mesh& mesh) {
-  // some sanity checks
   MT_CHECK(points.size() == mesh.vertices.size(), "{} vs {}", points.size(), mesh.vertices.size());
 
   mesh.vertices = applyInverseSSD(inverseBindPose, skin, points, state);
@@ -279,24 +373,18 @@ std::vector<Vector3f> applyInverseSSD(
 
   std::vector<Vector3f> res(points.size());
 
-  // first create a list of transformations from bindpose to final output pose
   TransformationList transformations(state.jointState.size());
   for (size_t i = 0; i < state.jointState.size(); i++) {
     transformations[i] = state.jointState[i].transform * inverseBindPose[i];
   }
 
-  // go over all vertices and perform transformation
   for (int i = 0; i != (int)skin.index.rows(); i++) {
-    // grab vertex
     const Vector3f& pos = points[i];
 
-    // storage
     Affine3f transform;
     transform.matrix().setZero();
 
-    // loop over the weights
     for (size_t j = 0; j < kMaxSkinJoints; j++) {
-      // get pointer to transformation and weight float
       const auto& weight = skin.weight(i, j);
       if (weight == 0.0f) {
         break;
@@ -311,52 +399,147 @@ std::vector<Vector3f> applyInverseSSD(
           transformations.size());
       const auto& transformation = transformations[skin.index(i, j)];
 
-      // add up transforms
       transform.matrix().noalias() += transformation.matrix() * weight;
     }
 
-    // store in new mesh
     res[i].noalias() = transform.inverse() * pos;
   }
 
   return res;
 }
 
+// Explicit template instantiations for computeSkinningTransforms
+template std::vector<Eigen::Matrix4f> computeSkinningTransforms<float>(
+    std::span<const JointStateT<float>> jointState,
+    const TransformationListT<float>& inverseBindPose);
+template std::vector<Eigen::Matrix4d> computeSkinningTransforms<double>(
+    std::span<const JointStateT<double>> jointState,
+    const TransformationListT<double>& inverseBindPose);
+
+// Explicit template instantiations for applySSD with skinning transforms (points)
+template std::vector<Vector3f> applySSD<float>(
+    const SkinWeights& skin,
+    std::span<const Vector3f> points,
+    std::span<const Eigen::Matrix4f> skinningTransforms);
+template std::vector<Vector3d> applySSD<double>(
+    const SkinWeights& skin,
+    std::span<const Vector3d> points,
+    std::span<const Eigen::Matrix4d> skinningTransforms);
+
+// Explicit template instantiations for applySSD with joint state span (points)
 template std::vector<Vector3f> applySSD<float>(
     const TransformationListT<float>& inverseBindPose,
     const SkinWeights& skin,
-    typename DeduceSpanType<const Vector3<float>>::type points,
+    std::span<const Vector3f> points,
+    std::span<const JointStateT<float>> jointState);
+template std::vector<Vector3d> applySSD<double>(
+    const TransformationListT<double>& inverseBindPose,
+    const SkinWeights& skin,
+    std::span<const Vector3d> points,
+    std::span<const JointStateT<double>> jointState);
+
+// Explicit template instantiations for applySSD with skeleton state (points)
+template std::vector<Vector3f> applySSD<float>(
+    const TransformationListT<float>& inverseBindPose,
+    const SkinWeights& skin,
+    std::span<const Vector3f> points,
     const SkeletonStateT<float>& state);
 template std::vector<Vector3d> applySSD<double>(
     const TransformationListT<double>& inverseBindPose,
     const SkinWeights& skin,
-    typename DeduceSpanType<const Vector3<double>>::type points,
+    std::span<const Vector3d> points,
     const SkeletonStateT<double>& state);
 
-template void applySSD<float>(
-    const TransformationList& inverseBindPose,
+// Explicit template instantiations for applySSD with world transforms vector (points)
+template std::vector<Vector3f> applySSD<float>(
+    const TransformationListT<float>& inverseBindPose,
     const SkinWeights& skin,
-    const MeshT<float>& mesh,
-    const SkeletonStateT<float>& jointState,
-    MeshT<float>& outputMesh);
-template void applySSD<double>(
+    std::span<const Vector3f> points,
+    const TransformationListT<float>& worldTransforms);
+template std::vector<Vector3d> applySSD<double>(
     const TransformationListT<double>& inverseBindPose,
     const SkinWeights& skin,
+    std::span<const Vector3d> points,
+    const TransformationListT<double>& worldTransforms);
+
+// Explicit template instantiations for applySSD with world transforms span (points)
+template std::vector<Vector3f> applySSD<float>(
+    const TransformationListT<float>& inverseBindPose,
+    const SkinWeights& skin,
+    std::span<const Vector3f> points,
+    std::span<const TransformT<float>> worldTransforms);
+template std::vector<Vector3d> applySSD<double>(
+    const TransformationListT<double>& inverseBindPose,
+    const SkinWeights& skin,
+    std::span<const Vector3d> points,
+    std::span<const TransformT<double>> worldTransforms);
+
+// Explicit template instantiations for applySSD with skinning transforms (mesh)
+template void applySSD<float>(
+    const SkinWeights& skin,
+    const MeshT<float>& mesh,
+    std::span<const Eigen::Matrix4f> skinningTransforms,
+    MeshT<float>& outputMesh);
+template void applySSD<double>(
+    const SkinWeights& skin,
     const MeshT<double>& mesh,
-    const SkeletonStateT<double>& jointState,
+    std::span<const Eigen::Matrix4d> skinningTransforms,
     MeshT<double>& outputMesh);
 
+// Explicit template instantiations for applySSD with joint state span (mesh)
 template void applySSD<float>(
     const TransformationListT<float>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<float>& mesh,
-    const JointStateListT<float>& jointState,
+    std::span<const JointStateT<float>> jointState,
     MeshT<float>& outputMesh);
 template void applySSD<double>(
     const TransformationListT<double>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<double>& mesh,
-    const JointStateListT<double>& jointState,
+    std::span<const JointStateT<double>> jointState,
+    MeshT<double>& outputMesh);
+
+// Explicit template instantiations for applySSD with skeleton state (mesh)
+template void applySSD<float>(
+    const TransformationListT<float>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<float>& mesh,
+    const SkeletonStateT<float>& state,
+    MeshT<float>& outputMesh);
+template void applySSD<double>(
+    const TransformationListT<double>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<double>& mesh,
+    const SkeletonStateT<double>& state,
+    MeshT<double>& outputMesh);
+
+// Explicit template instantiations for applySSD with world transforms vector (mesh)
+template void applySSD<float>(
+    const TransformationListT<float>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<float>& mesh,
+    const TransformationListT<float>& worldTransforms,
+    MeshT<float>& outputMesh);
+template void applySSD<double>(
+    const TransformationListT<double>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<double>& mesh,
+    const TransformationListT<double>& worldTransforms,
+    MeshT<double>& outputMesh);
+
+// Explicit template instantiations for applySSD with world transforms span (mesh)
+template void applySSD<float>(
+    const TransformationListT<float>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<float>& mesh,
+    std::span<const TransformT<float>> worldTransforms,
+    MeshT<float>& outputMesh);
+template void applySSD<double>(
+    const TransformationListT<double>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<double>& mesh,
+    std::span<const TransformT<double>> worldTransforms,
     MeshT<double>& outputMesh);
 
 template <typename T>

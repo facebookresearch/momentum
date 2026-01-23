@@ -13,6 +13,9 @@
 #include <momentum/math/fwd.h>
 #include <momentum/math/types.h>
 
+#include <span>
+#include <vector>
+
 namespace momentum {
 
 /// @file linear_skinning.h
@@ -35,10 +38,55 @@ namespace momentum {
 /// - Forward skinning: Applying joint transformations to deform the mesh
 /// - Inverse skinning: Reversing the deformation to return to bind pose
 
-/// Applies forward SSD (linear blend skinning) to points, returning new points
+/// Computes the skinning transforms from joint states and inverse bind poses
+///
+/// This is a helper function that computes the combined transformation matrices
+/// used for skinning. Each transform is computed as: jointState.transform * inverseBindPose.
+///
+/// @param jointState Span of joint states containing current transformations
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @return Vector of 4x4 transformation matrices for skinning
+template <typename T>
+std::vector<Eigen::Matrix4<T>> computeSkinningTransforms(
+    typename DeduceSpanType<const JointStateT<T>>::type jointState,
+    const TransformationListT<T>& inverseBindPose);
+
+/// Applies forward SSD (linear blend skinning) to points using precomputed skinning transforms
+///
+/// This is the core skinning function that applies precomputed transformation matrices
+/// to transform points from bind pose to animated pose.
+///
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param points Input points to transform
+/// @param skinningTransforms Precomputed skinning transformation matrices
+/// @return Vector of transformed points
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    typename DeduceSpanType<const Eigen::Matrix4<T>>::type skinningTransforms);
+
+/// Applies forward SSD to points using joint states, returning new points
 ///
 /// This overload transforms individual points and returns a new vector of transformed points.
 /// Use this when you need to transform arbitrary points without modifying a mesh.
+///
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param points Input points to transform
+/// @param jointState Span of joint states containing current transformations
+/// @return Vector of transformed points
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    typename DeduceSpanType<const JointStateT<T>>::type jointState);
+
+/// Applies forward SSD to points using skeleton state, returning new points
+///
+/// This overload transforms individual points using the full skeleton state.
+/// Convenience wrapper that extracts joint states from the skeleton state.
 ///
 /// @param inverseBindPose Inverse bind pose transformations for each joint
 /// @param skin Skin weights defining influence of each joint on vertices
@@ -51,6 +99,74 @@ std::vector<Vector3<T>> applySSD(
     const SkinWeights& skin,
     typename DeduceSpanType<const Vector3<T>>::type points,
     const SkeletonStateT<T>& state);
+
+/// Applies forward SSD to points using precomputed world transforms, returning new points
+///
+/// This convenience overload accepts world-space transforms directly instead of joint states.
+/// Useful when you already have computed world transforms from another source.
+///
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param points Input points to transform
+/// @param worldTransforms World-space transforms for each joint
+/// @return Vector of transformed points
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    const TransformationListT<T>& worldTransforms);
+
+/// Applies forward SSD to points using a span of world transforms, returning new points
+///
+/// This overload accepts world-space transforms as a span for greater flexibility.
+/// Useful when you have transforms in a contiguous array that isn't a std::vector.
+///
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param points Input points to transform
+/// @param worldTransforms Span of world-space transforms for each joint
+/// @return Vector of transformed points
+template <typename T>
+std::vector<Vector3<T>> applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    typename DeduceSpanType<const Vector3<T>>::type points,
+    typename DeduceSpanType<const TransformT<T>>::type worldTransforms);
+
+/// Applies forward SSD to a mesh using precomputed skinning transforms
+///
+/// This is the core mesh skinning function that applies precomputed transformation matrices
+/// to transform both vertices and normals from bind pose to animated pose.
+///
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param mesh Input mesh to transform
+/// @param skinningTransforms Precomputed skinning transformation matrices
+/// @param outputMesh Output mesh to store the transformed result
+template <typename T>
+void applySSD(
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    typename DeduceSpanType<const Eigen::Matrix4<T>>::type skinningTransforms,
+    MeshT<T>& outputMesh);
+
+/// Applies forward SSD to a mesh using joint states, modifying output mesh
+///
+/// This overload accepts a span of joint states directly.
+/// Use this when you have joint transformations but not a complete skeleton state.
+///
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param mesh Input mesh to transform
+/// @param jointState Span of joint states containing transformations
+/// @param outputMesh Output mesh to store the transformed result
+template <typename T>
+void applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    typename DeduceSpanType<const JointStateT<T>>::type jointState,
+    MeshT<T>& outputMesh);
 
 /// Applies forward SSD to a mesh using skeleton state, modifying output mesh
 ///
@@ -70,22 +186,40 @@ void applySSD(
     const SkeletonStateT<T>& state,
     MeshT<T>& outputMesh);
 
-/// Applies forward SSD to a mesh using raw joint state list, modifying output mesh
+/// Applies forward SSD to a mesh using precomputed world transforms
 ///
-/// This overload accepts a JointStateList directly instead of a full SkeletonState.
-/// Use this when you have joint transformations but not a complete skeleton state.
+/// This convenience overload accepts world-space transforms directly instead of joint states.
+/// Useful when you already have computed world transforms from another source.
 ///
 /// @param inverseBindPose Inverse bind pose transformations for each joint
 /// @param skin Skin weights defining influence of each joint on vertices
 /// @param mesh Input mesh to transform
-/// @param state List of joint states containing transformations
+/// @param worldTransforms World-space transforms for each joint
 /// @param outputMesh Output mesh to store the transformed result
 template <typename T>
 void applySSD(
     const TransformationListT<T>& inverseBindPose,
     const SkinWeights& skin,
     const MeshT<T>& mesh,
-    const JointStateListT<T>& state,
+    const TransformationListT<T>& worldTransforms,
+    MeshT<T>& outputMesh);
+
+/// Applies forward SSD to a mesh using a span of world transforms
+///
+/// This overload accepts world-space transforms as a span for greater flexibility.
+/// Useful when you have transforms in a contiguous array that isn't a std::vector.
+///
+/// @param inverseBindPose Inverse bind pose transformations for each joint
+/// @param skin Skin weights defining influence of each joint on vertices
+/// @param mesh Input mesh to transform
+/// @param worldTransforms Span of world-space transforms for each joint
+/// @param outputMesh Output mesh to store the transformed result
+template <typename T>
+void applySSD(
+    const TransformationListT<T>& inverseBindPose,
+    const SkinWeights& skin,
+    const MeshT<T>& mesh,
+    typename DeduceSpanType<const TransformT<T>>::type worldTransforms,
     MeshT<T>& outputMesh);
 
 /// Computes the inverse SSD transformation for a specific vertex
