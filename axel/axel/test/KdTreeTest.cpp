@@ -39,7 +39,7 @@ struct CubeMeshParameters {
 };
 
 template <typename T>
-MeshData<T> generateCube(const T edgeLength) {
+MeshData<T> generateCube(const T& edgeLength) {
   MeshData<T> mesh{};
   mesh.positions.resize(8, 3);
   mesh.triangles.resize(12, 3);
