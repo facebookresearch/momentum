@@ -6,6 +6,7 @@
  */
 
 #include "pymomentum/geometry/array_blend_shape.h"
+#include "pymomentum/geometry/array_joint_parameters_to_positions.h"
 #include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/array_skeleton_state.h"
 #include "pymomentum/geometry/array_vertex_normals.h"
@@ -920,7 +921,7 @@ required to call `meth:BlendShape.compute_shape`.
   // modelParametersToPositions(character, modelParameters, parents, offsets)
   m.def(
       "model_parameters_to_positions",
-      &modelParametersToPositions,
+      &modelParametersToPositionsArray,
       R"(Convert model parameters to 3D positions relative to skeleton joints using forward kinematics.  You can use this (for example) to
 supervise a model to produce the correct 3D ground truth.
 
@@ -928,11 +929,10 @@ Working directly from modelParameters is preferable to mapping to jointParameter
 sparsity in the model and therefore can be made somewhat faster.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
-:param model_parameters: Model parameter tensor, with dimension (nBatch x nModelParams).
-:param parents: Joint parents, on for each target position.
-:param offsets: 3-d offset in each joint's local space.
-:return: Tensor of size (nBatch x nParents x 3), representing the world-space position of each point.
+:param model_parameters: Model parameters with shape (..., nModelParams).
+:param parents: Joint parents, one for each target position, shape (nPoints,).
+:param offsets: 3-d offset in each joint's local space, shape (nPoints, 3).
+:return: Array of shape (..., nPoints, 3), representing the world-space position of each point.
 )",
       py::arg("character"),
       py::arg("model_parameters"),
@@ -942,7 +942,7 @@ sparsity in the model and therefore can be made somewhat faster.
   // jointParametersToPositions(character, jointParameters, parents, offsets)
   m.def(
       "joint_parameters_to_positions",
-      &jointParametersToPositions,
+      &jointParametersToPositionsArray,
       R"(Convert joint parameters to 3D positions relative to skeleton joints using forward kinematics.  You can use this (for example) to
 supervise a model to produce the correct 3D ground truth.
 
@@ -950,11 +950,10 @@ You should prefer :meth:`model_parameters_to_positions` when working from modelP
 function is provided as a convenience because motion read from external files generally uses jointParameters.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
-:param joint_parameters: Joint parameter tensor, with dimension (nBatch x (7*nJoints)).
-:param parents: Joint parents, on for each target position.
-:param offsets: 3-d offset in each joint's local space.
-:return: Tensor of size (nBatch x nParents x 3), representing the world-space position of each point.
+:param joint_parameters: Joint parameters with shape (..., nJoints * 7) or (..., nJoints, 7).
+:param parents: Joint parents, one for each target position, shape (nPoints,).
+:param offsets: 3-d offset in each joint's local space, shape (nPoints, 3).
+:return: Array of shape (..., nPoints, 3), representing the world-space position of each point.
 )",
       py::arg("character"),
       py::arg("joint_parameters"),

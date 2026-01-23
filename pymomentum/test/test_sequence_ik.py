@@ -42,7 +42,7 @@ class TestSolver(unittest.TestCase):
 
         pos_cons_parents = torch.arange(0, n_joints, 1)
         pos_cons_offsets = torch.zeros(n_frames, n_joints, 3)
-        pos_cons_targets = pym_geometry.model_parameters_to_positions(
+        pos_cons_targets = pym_diff_geometry.model_parameters_to_positions(
             character, model_params_target, pos_cons_parents, pos_cons_offsets
         ).detach()
 
@@ -60,7 +60,7 @@ class TestSolver(unittest.TestCase):
             pos_cons_parents: torch.Tensor = pos_cons_parents,
             pos_cons_offsets: torch.Tensor = pos_cons_offsets,
         ) -> torch.Tensor:
-            return pym_geometry.model_parameters_to_positions(
+            return pym_diff_geometry.model_parameters_to_positions(
                 character, model_params, pos_cons_parents, pos_cons_offsets
             ).detach()
 

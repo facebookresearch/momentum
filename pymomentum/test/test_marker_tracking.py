@@ -325,7 +325,6 @@ class TestMarkerTracking(unittest.TestCase):
         self.assertEqual(tracked_motion.shape[1], character.parameter_transform.size)
 
         # Test that we can compute skinned marker positions from tracked motion and verify accuracy
-        tracked_motion_tensor = torch.from_numpy(tracked_motion)
 
         # Convert tracked motion to skeleton states
         tracked_skeleton_states = torch.from_numpy(
@@ -447,15 +446,15 @@ class TestMarkerTracking(unittest.TestCase):
             model_params_batch[frame, :] = model_params_cur
 
         # Get locator parent indices and offsets for position computation
-        locator_parents = torch.tensor([loc.parent for loc in character.locators])
-        locator_offsets = torch.stack(
-            [torch.from_numpy(loc.offset) for loc in character.locators]
+        locator_parents = np.array(
+            [loc.parent for loc in character.locators], dtype=np.int32
         )
+        locator_offsets = np.stack([loc.offset for loc in character.locators])
 
         # Compute all locator positions for all frames in one batched call
         all_locator_positions = pym_geometry.model_parameters_to_positions(
             character,
-            model_params_batch,
+            model_params_batch.numpy(),
             locator_parents,
             locator_offsets,
         )  # Shape: [num_frames, num_locators, 3]
@@ -467,7 +466,7 @@ class TestMarkerTracking(unittest.TestCase):
             for loc_idx, locator in enumerate(character.locators):
                 marker = pym_geometry.Marker(
                     locator.name,
-                    all_locator_positions[frame_idx, loc_idx].numpy(),
+                    all_locator_positions[frame_idx, loc_idx],
                     False,  # Not occluded
                 )
                 frame_markers.append(marker)
@@ -500,21 +499,20 @@ class TestMarkerTracking(unittest.TestCase):
 
         # Test that we can compute marker positions from tracked motion and verify accuracy
         # Use batched operations for verification
-        tracked_motion_tensor = torch.from_numpy(tracked_motion)
 
         # Compute all locator positions for all tracked frames in one batched call
         computed_positions_batch = pym_geometry.model_parameters_to_positions(
             character,
-            tracked_motion_tensor,
-            locator_parents.unsqueeze(0).expand(num_frames, -1),
-            locator_offsets.unsqueeze(0).expand(num_frames, -1, -1),
+            tracked_motion,
+            locator_parents,
+            locator_offsets,
         )  # Shape: [num_frames, num_locators, 3]
 
         # Compare with original marker positions
         for loc_idx, locator in enumerate(character.locators):
             for frame_idx in range(num_frames):
                 original_marker_pos = marker_data[frame_idx][loc_idx].pos
-                computed_pos = computed_positions_batch[frame_idx, loc_idx].numpy()
+                computed_pos = computed_positions_batch[frame_idx, loc_idx]
                 position_error = np.linalg.norm(computed_pos - original_marker_pos)
 
                 # The tracking should be reasonably accurate
@@ -661,11 +659,11 @@ class TestMarkerTracking(unittest.TestCase):
             model_params_batch[frame, :] = model_params_cur
 
         # Compute locator positions for the regular locator
-        locator_parents = torch.tensor([test_locator.parent])
-        locator_offsets = torch.from_numpy(test_locator.offset).unsqueeze(0)
+        locator_parents = np.array([test_locator.parent], dtype=np.int32)
+        locator_offsets = test_locator.offset.reshape(1, 3)
         regular_positions = pym_geometry.model_parameters_to_positions(
             character_with_locator,
-            model_params_batch,
+            model_params_batch.numpy(),
             locator_parents,
             locator_offsets,
         )  # Shape: [num_frames, 1, 3]
@@ -680,7 +678,7 @@ class TestMarkerTracking(unittest.TestCase):
         for frame_idx in range(num_frames):
             marker = pym_geometry.Marker(
                 "test_locator",
-                regular_positions[frame_idx, 0].numpy() + marker_offset,
+                regular_positions[frame_idx, 0] + marker_offset,
                 False,
             )
             marker_data.append([marker])

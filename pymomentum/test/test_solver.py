@@ -37,7 +37,7 @@ def solve_one_ik_problem(index: int) -> torch.Tensor:
     pos_cons_parents = torch.arange(0, n_joints)
     pos_cons_offsets = torch.zeros(size=(n_joints, 3), dtype=torch.float64)
 
-    pos_cons_targets = pym_geometry.model_parameters_to_positions(
+    pos_cons_targets = pym_diff_geometry.model_parameters_to_positions(
         character, model_params_target, pos_cons_parents, pos_cons_offsets
     ).detach()
 
@@ -105,7 +105,7 @@ class TestSolver(unittest.TestCase):
         )
         pos_cons_offsets.requires_grad = AUTOGRAD_ENABLED
 
-        pos_cons_targets = pym_geometry.model_parameters_to_positions(
+        pos_cons_targets = pym_diff_geometry.model_parameters_to_positions(
             character, model_params_init, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
@@ -302,7 +302,7 @@ class TestSolver(unittest.TestCase):
         )
         pos_cons_offsets.requires_grad = AUTOGRAD_ENABLED
 
-        pos_cons_targets = pym_geometry.model_parameters_to_positions(
+        pos_cons_targets = pym_diff_geometry.model_parameters_to_positions(
             character, model_params, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64
@@ -396,7 +396,7 @@ class TestSolver(unittest.TestCase):
         )
         pos_cons_offsets.requires_grad = False
 
-        pos_cons_targets = pym_geometry.model_parameters_to_positions(
+        pos_cons_targets = pym_diff_geometry.model_parameters_to_positions(
             character, model_params, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64

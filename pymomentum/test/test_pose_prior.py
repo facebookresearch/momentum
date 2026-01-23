@@ -7,6 +7,7 @@
 import logging
 import unittest
 
+import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
 import pymomentum.solver as pym_solver
 import torch
@@ -47,7 +48,7 @@ class TestPosePrior(unittest.TestCase):
             mean=0, std=4, size=(n_pos_cons, 3), dtype=torch.float64
         )
         pos_cons_offsets.requires_grad = AUTOGRAD_ENABLED
-        pos_cons_targets = pym_geometry.model_parameters_to_positions(
+        pos_cons_targets = pym_diff_geometry.model_parameters_to_positions(
             character, model_params_init, pos_cons_parents, pos_cons_offsets
         ).detach() + torch.normal(
             mean=0, std=1, size=(batch_size, n_pos_cons, 3), dtype=torch.float64

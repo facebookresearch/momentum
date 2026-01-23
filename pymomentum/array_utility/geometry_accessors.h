@@ -298,6 +298,30 @@ class VectorArrayAccessor {
       }
     }
 
+    // Returns {min, max} values across all elements and all components in a single pass.
+    // Useful for validating that all indices (e.g., triangle vertex indices) are within bounds.
+    // Returns std::nullopt for empty arrays.
+    std::optional<std::pair<T, T>> bounds() const {
+      if (nElements_ == 0) {
+        return std::nullopt;
+      }
+      T minVal = data_[0];
+      T maxVal = data_[0];
+      for (py::ssize_t i = 0; i < nElements_; ++i) {
+        const auto offset = i * rowStride_;
+        for (int d = 0; d < Dim; ++d) {
+          T val = data_[offset + d * colStride_];
+          if (val < minVal) {
+            minVal = val;
+          }
+          if (val > maxVal) {
+            maxVal = val;
+          }
+        }
+      }
+      return std::make_pair(minVal, maxVal);
+    }
+
    private:
     T* data_;
     py::ssize_t nElements_;
@@ -435,6 +459,42 @@ class IntVectorArrayAccessor {
 
   // Compute the byte offset into the data for given batch indices.
   [[nodiscard]] py::ssize_t computeByteOffset(const std::vector<py::ssize_t>& batchIndices) const;
+};
+
+// Type-erased integer scalar array accessor.
+// Accepts any integer dtype (int32, int64, uint32, uint64) and converts to int on-the-fly.
+// This is for 1D arrays of scalar integers (e.g., parent joint indices).
+//
+// Usage:
+//   IntScalarArrayAccessor accessor(buffer, nElements);
+//   int val = accessor.get(index);  // Converts from source dtype to int
+//   auto [minVal, maxVal] = accessor.minmax();  // Get bounds for validation
+class IntScalarArrayAccessor {
+ public:
+  // Supported source integer dtypes
+  enum class SourceDtype { Int32, Int64, UInt32, UInt64 };
+
+  // Construct from buffer, auto-detecting the integer dtype.
+  // Throws if the buffer dtype is not a supported integer type.
+  IntScalarArrayAccessor(const py::buffer& buffer, py::ssize_t expectedSize);
+
+  // Get the number of elements
+  [[nodiscard]] py::ssize_t size() const {
+    return size_;
+  }
+
+  // Get value at index, converting to int on-the-fly
+  [[nodiscard]] int get(py::ssize_t index) const;
+
+  // Compute the minimum and maximum values in a single pass.
+  // Returns {min, max}. For empty arrays, returns {INT_MAX, INT_MIN}.
+  [[nodiscard]] std::pair<int, int> minmax() const;
+
+ private:
+  const void* data_;
+  py::ssize_t size_;
+  py::ssize_t byteStride_;
+  SourceDtype dtype_;
 };
 
 } // namespace pymomentum
