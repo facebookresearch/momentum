@@ -261,6 +261,103 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "geometry.local_skeleton_state_to_joint_parameters should match diff_geometry.local_skeleton_state_to_joint_parameters",
         )
 
+    def test_blend_shape_base_compute_shape_matches(self) -> None:
+        """Verify that BlendShapeBase.compute_shape matches diff_geometry.compute_blend_shape."""
+        np.random.seed(42)
+
+        n_pts = 10
+        n_blend = 4
+        nBatch = 2
+
+        # Create BlendShapeBase
+        shape_vectors = np.random.rand(n_blend, n_pts, 3).astype(np.float32)
+        blend_shape = pym_geometry.BlendShapeBase.from_tensors(shape_vectors)
+
+        # Create coefficients
+        n_coeffs = blend_shape.n_shapes
+        coeffs_np = np.random.rand(nBatch, n_coeffs).astype(np.float32)
+
+        # Call geometry version (numpy)
+        result_geometry = blend_shape.compute_shape(coeffs_np)
+
+        # Call diff_geometry version (torch)
+        coeffs_torch = torch.from_numpy(coeffs_np)
+        result_diff_geometry = pym_diff_geometry.compute_blend_shape(
+            blend_shape, coeffs_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(result_geometry, result_diff_geometry.numpy(), atol=1e-6),
+            "BlendShapeBase.compute_shape should match diff_geometry.compute_blend_shape",
+        )
+
+    def test_blend_shape_compute_shape_matches(self) -> None:
+        """Verify that BlendShape.compute_shape matches diff_geometry.compute_blend_shape."""
+        np.random.seed(42)
+
+        n_pts = 10
+        n_blend = 4
+        nBatch = 2
+
+        # Create BlendShape with base shape
+        base_shape = np.random.rand(n_pts, 3).astype(np.float32)
+        shape_vectors = np.random.rand(n_blend, n_pts, 3).astype(np.float32)
+        blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
+
+        # Create coefficients
+        n_coeffs = blend_shape.n_shapes
+        coeffs_np = np.random.rand(nBatch, n_coeffs).astype(np.float32)
+
+        # Call geometry version (numpy)
+        result_geometry = blend_shape.compute_shape(coeffs_np)
+
+        # Call diff_geometry version (torch)
+        coeffs_torch = torch.from_numpy(coeffs_np)
+        result_diff_geometry = pym_diff_geometry.compute_blend_shape(
+            blend_shape, coeffs_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(result_geometry, result_diff_geometry.numpy(), atol=1e-6),
+            "BlendShape.compute_shape should match diff_geometry.compute_blend_shape",
+        )
+
+    def test_blend_shape_with_character_matches(self) -> None:
+        """Verify that BlendShape.compute_shape matches for character-based blend shapes."""
+        np.random.seed(42)
+
+        # Create a test character with blend shape
+        c = pym_geometry.create_test_character()
+        n_pts = c.mesh.n_vertices
+        n_blend = 4
+        nBatch = 2
+
+        # Create BlendShape
+        base_shape = np.random.rand(n_pts, 3).astype(np.float32)
+        shape_vectors = np.random.rand(n_blend, n_pts, 3).astype(np.float32)
+        blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
+
+        # Create coefficients
+        n_coeffs = blend_shape.n_shapes
+        coeffs_np = np.random.rand(nBatch, n_coeffs).astype(np.float32)
+
+        # Call geometry version (numpy)
+        result_geometry = blend_shape.compute_shape(coeffs_np)
+
+        # Call diff_geometry version (torch)
+        coeffs_torch = torch.from_numpy(coeffs_np)
+        result_diff_geometry = pym_diff_geometry.compute_blend_shape(
+            blend_shape, coeffs_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(result_geometry, result_diff_geometry.numpy(), atol=1e-6),
+            "BlendShape.compute_shape with character should match diff_geometry.compute_blend_shape",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
