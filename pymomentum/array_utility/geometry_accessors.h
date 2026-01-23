@@ -206,4 +206,51 @@ class SkeletonStateAccessor {
   [[nodiscard]] py::ssize_t computeOffset(std::span<const py::ssize_t> batchIndices) const;
 };
 
+// Accessor for vertex positions with shape (..., nVertices, 3).
+// Provides access to std::vector<Eigen::Vector3<T>> for mesh vertex operations.
+template <typename T>
+class VertexPositionsAccessor {
+ public:
+  // Construct from buffer info with shape (..., nVertices, 3)
+  VertexPositionsAccessor(
+      const py::buffer_info& bufferInfo,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t nVertices);
+
+  // Convenience constructor that takes a py::buffer and extracts buffer_info.
+  VertexPositionsAccessor(
+      py::buffer& buffer,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t nVertices)
+      : VertexPositionsAccessor(buffer.request(), leadingDims, nVertices) {}
+
+  // Const convenience constructor
+  VertexPositionsAccessor(
+      const py::buffer& buffer,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t nVertices)
+      : VertexPositionsAccessor(buffer.request(), leadingDims, nVertices) {}
+
+  // Get the vertex positions for the given batch indices.
+  // Returns a vector of Vector3<T> (one per vertex).
+  // Handles broadcasting: if a dimension has stride 0, its index is ignored.
+  std::vector<Eigen::Vector3<T>> get(const std::vector<py::ssize_t>& batchIndices) const;
+
+  // Set the vertex positions for the given batch indices.
+  // Writes vertex data to the array using strides.
+  // Handles broadcasting: if a dimension has stride 0, its index is ignored.
+  void set(
+      const std::vector<py::ssize_t>& batchIndices,
+      const std::vector<Eigen::Vector3<T>>& positions);
+
+ private:
+  T* data_;
+  py::ssize_t nVertices_{};
+  std::vector<py::ssize_t> strides_;
+  size_t leadingNDim_{};
+
+  // Compute the flat offset into the data array for given batch indices.
+  [[nodiscard]] py::ssize_t computeOffset(const std::vector<py::ssize_t>& batchIndices) const;
+};
+
 } // namespace pymomentum
