@@ -26,7 +26,9 @@ class TestParameterTransform(unittest.TestCase):
         model_params = uniform_random_to_model_parameters(
             character, torch.rand(1, 10)
         ).squeeze()
-        joint_params_1 = character.parameter_transform.apply(model_params)
+        joint_params_1 = torch.from_numpy(
+            character.parameter_transform.apply(model_params.numpy()[None, :])
+        ).flatten()
         joint_params_2 = torch.matmul(transform, model_params)
         self.assertTrue(torch.allclose(joint_params_1, joint_params_2))
 
@@ -51,8 +53,10 @@ class TestParameterTransform(unittest.TestCase):
         torch.manual_seed(42)
         model_params = uniform_random_to_model_parameters(character, torch.rand(5, 10))
 
-        joint_params_original = original_pt.apply(model_params)
-        joint_params_new = new_pt.apply(model_params)
+        joint_params_original = torch.from_numpy(
+            original_pt.apply(model_params.numpy())
+        )
+        joint_params_new = torch.from_numpy(new_pt.apply(model_params.numpy()))
 
         self.assertTrue(
             torch.allclose(joint_params_original, joint_params_new, atol=1e-6)

@@ -7,6 +7,7 @@
 
 import unittest
 
+import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
 import pymomentum.solver as pym_solver
 import torch
@@ -46,7 +47,7 @@ class TestSolver(unittest.TestCase):
         ).detach()
 
         orient_cons_parents = torch.arange(n_joints)
-        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+        skel_state_init = pym_diff_geometry.model_parameters_to_skeleton_state(
             character, model_params_target
         )
         orient_cons_targets = skel_state_init.index_select(1, orient_cons_parents)[

@@ -7,6 +7,7 @@
 
 #include "pymomentum/geometry/parameter_transform_pybind.h"
 
+#include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 #include "pymomentum/torch_bridge.h"
@@ -15,6 +16,7 @@
 #include <momentum/character/parameter_transform.h>
 
 #include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -148,17 +150,29 @@ The array will be converted to a sparse matrix internally for efficient storage 
           "Size of the model parameter vector.")
       .def(
           "apply",
-          [](const mm::ParameterTransform* paramTransform, at::Tensor modelParams) -> at::Tensor {
-            return applyParamTransform(paramTransform, std::move(modelParams));
+          [](const mm::ParameterTransform& paramTransform,
+             const py::array& modelParams,
+             bool flatten) -> py::array {
+            return applyParameterTransformArray(paramTransform, modelParams, flatten);
           },
-          R"(Apply the parameter transform to a k-dimensional model parameter vector (returns the 7*nJoints joint parameter vector).
+          R"(Apply the parameter transform to model parameters.
+
+Supports arbitrary leading dimensions with broadcasting and both float32/float64 dtypes.
+
+Input shape: [..., numModelParams]
+Output shape: [..., numJoints * 7] if flatten=True, [..., numJoints, 7] if flatten=False
 
 The modelParameters store the reduced set of parameters (typically around 50) that are actually
 optimized in the IK step.
 
-The jointParameters are stored (tx, ty, tz; rx, ry, rz; s) and each represents the transform relative to the parent joint.
-Rotations are in Euler angles.)",
-          py::arg("model_parameters"))
+The jointParameters store (tx, ty, tz, rx, ry, rz, scale) for each joint, relative to the parent
+joint. Rotations are in Euler angles.
+
+:param model_parameters: Numpy array containing model parameters
+:param flatten: If True (default), return shape [..., numJoints * 7]. If False, return shape [..., numJoints, 7].
+:return: Numpy array containing joint parameters)",
+          py::arg("model_parameters"),
+          py::arg("flatten") = true)
       .def_property_readonly(
           "scaling_parameters",
           &getScalingParameters,
@@ -246,13 +260,21 @@ void registerInverseParameterTransformBindings(
   inverseParameterTransformClass
       .def(
           "apply",
-          &applyInverseParamTransform,
-          R"(Apply the inverse parameter transform to a 7*nJoints-dimensional joint parameter vector (returns the k-dimensional model parameter vector).
+          [](const mm::InverseParameterTransform& invParamTransform,
+             const py::array& jointParams) -> py::array_t<float> {
+            return applyInverseParameterTransformArray(invParamTransform, jointParams);
+          },
+          R"(Apply the inverse parameter transform to joint parameters.
+
+Supports arbitrary leading dimensions with broadcasting. Always returns float32.
 
 Because the number of joint parameters is much larger than the number of model parameters, this will in general have a non-zero residual.
 
-:param joint_parameters: Joint parameter tensor with dimensions (nBatch x 7*nJoints).
-:return: A torch.Tensor containing the (nBatch x nModelParameters) model parameters.)",
+Input shape: [..., numJoints, 7]
+Output shape: [..., numModelParams]
+
+:param joint_parameters: Numpy array containing joint parameters with shape (..., numJoints, 7).
+:return: Float32 numpy array containing the (..., nModelParameters) model parameters.)",
           py::arg("joint_parameters"))
       .def("__repr__", [](const mm::InverseParameterTransform& ipt) {
         return fmt::format(
