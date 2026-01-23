@@ -295,4 +295,86 @@ void SkeletonStateAccessor<T>::setTransforms(
 template class SkeletonStateAccessor<float>;
 template class SkeletonStateAccessor<double>;
 
+// ============================================================================
+// VertexPositionsAccessor implementation
+// ============================================================================
+
+template <typename T>
+VertexPositionsAccessor<T>::VertexPositionsAccessor(
+    const py::buffer_info& bufferInfo,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nVertices)
+    : nVertices_(nVertices), leadingNDim_(leadingDims.ndim()) {
+  data_ = static_cast<T*>(bufferInfo.ptr);
+
+  // Extract strides (convert from bytes to elements)
+  const auto totalNDim = bufferInfo.ndim;
+  strides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  }
+}
+
+template <typename T>
+py::ssize_t VertexPositionsAccessor<T>::computeOffset(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  py::ssize_t offset = 0;
+
+  // Apply strides for each dimension
+  // Broadcasting is automatically handled: if stride is 0, the index doesn't matter
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * strides_[i];
+  }
+
+  return offset;
+}
+
+template <typename T>
+std::vector<Eigen::Vector3<T>> VertexPositionsAccessor<T>::get(
+    const std::vector<py::ssize_t>& batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  // Create a vector of Vector3<T> using strides
+  // Vertex positions format: (..., nVertices, 3) where each vertex has [x, y, z]
+  std::vector<Eigen::Vector3<T>> positions(nVertices_);
+
+  const auto rowStride = strides_[leadingNDim_]; // stride for vertex dimension
+  const auto colStride = strides_[leadingNDim_ + 1]; // stride for xyz dimension
+
+  for (py::ssize_t iVert = 0; iVert < nVertices_; ++iVert) {
+    const auto vertOffset = offset + iVert * rowStride;
+    positions[iVert].x() = data_[vertOffset + 0 * colStride];
+    positions[iVert].y() = data_[vertOffset + 1 * colStride];
+    positions[iVert].z() = data_[vertOffset + 2 * colStride];
+  }
+
+  return positions;
+}
+
+template <typename T>
+void VertexPositionsAccessor<T>::set(
+    const std::vector<py::ssize_t>& batchIndices,
+    const std::vector<Eigen::Vector3<T>>& positions) {
+  MT_THROW_IF(
+      static_cast<py::ssize_t>(positions.size()) != nVertices_,
+      "set: expected {} vertices but got {}",
+      nVertices_,
+      positions.size());
+
+  const auto offset = computeOffset(batchIndices);
+  const auto rowStride = strides_[leadingNDim_]; // stride for vertex dimension
+  const auto colStride = strides_[leadingNDim_ + 1]; // stride for xyz dimension
+
+  for (py::ssize_t iVert = 0; iVert < nVertices_; ++iVert) {
+    const auto vertOffset = offset + iVert * rowStride;
+    data_[vertOffset + 0 * colStride] = positions[iVert].x();
+    data_[vertOffset + 1 * colStride] = positions[iVert].y();
+    data_[vertOffset + 2 * colStride] = positions[iVert].z();
+  }
+}
+
+// Explicit template instantiations
+template class VertexPositionsAccessor<float>;
+template class VertexPositionsAccessor<double>;
+
 } // namespace pymomentum
