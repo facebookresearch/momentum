@@ -43,18 +43,16 @@ def _apply_blend_coeffs(
     blend_shape: pym_geometry.BlendShapeBase,
     base_shape: np.ndarray | None,
     shape_vectors: np.ndarray,
-) -> [np.ndarray, np.ndarray, torch.Tensor]:
+) -> [np.ndarray, np.ndarray]:
     n_blend = shape_vectors.shape[0]
     n_pts = shape_vectors.shape[1]
 
     nBatch = 2
     n_coeffs = min(blend_shape.n_shapes, 10)
-    coeffs = torch.rand(
-        nBatch, n_coeffs, dtype=torch.float64, requires_grad=AUTOGRAD_ENABLED
-    )
+    coeffs = np.random.rand(nBatch, n_coeffs).astype(np.float32)
 
-    shape1 = blend_shape.compute_shape(coeffs).select(0, 0)
-    c1 = coeffs.select(0, 0).detach().numpy()
+    shape1 = blend_shape.compute_shape(coeffs)[0]
+    c1 = coeffs[0]
 
     # Compute the shape another way:
     shape2 = np.dot(shape_vectors.reshape(n_blend, n_pts * 3).transpose(), c1).reshape(
@@ -62,11 +60,12 @@ def _apply_blend_coeffs(
     )
     if base_shape is not None:
         shape2 += base_shape
-    return shape1, torch.from_numpy(shape2).float(), coeffs
+    return shape1, shape2.astype(np.float32)
 
 
 class TestBlendShapeBase(unittest.TestCase):
-    def test_diff_apply_blend_coeffs(self) -> None:
+    def test_apply_blend_coeffs(self) -> None:
+        """Test BlendShapeBase.compute_shape with numpy arrays."""
         np.random.seed(0)
 
         n_pts = 10
@@ -75,19 +74,10 @@ class TestBlendShapeBase(unittest.TestCase):
         shape_vectors = np.random.rand(n_blend, n_pts, 3)
         blend_shape = pym_geometry.BlendShapeBase.from_tensors(shape_vectors)
 
-        shape1, shape2, coeffs = _apply_blend_coeffs(blend_shape, None, shape_vectors)
+        shape1, shape2 = _apply_blend_coeffs(blend_shape, None, shape_vectors)
 
-        self.assertTrue(shape1.allclose(shape2))
+        self.assertTrue(np.allclose(shape1, shape2))
         self.assertTrue(len(blend_shape.shape_names) == n_blend)
-
-        if AUTOGRAD_ENABLED:
-            torch.autograd.gradcheck(
-                blend_shape.compute_shape,
-                [coeffs],
-                eps=1e-3,
-                atol=1e-4,
-                raise_exception=True,
-            )
 
     def test_save_and_load(self) -> None:
         torch.manual_seed(0)
@@ -150,9 +140,10 @@ class TestBlendShapeBase(unittest.TestCase):
         gt_blend_coeffs = pym_geometry.model_parameters_to_face_expression_coefficients(
             c, gt_model_params.numpy()
         )
-        gt_blend_coeffs = torch.from_numpy(gt_blend_coeffs)
         rest_shape = torch.from_numpy(c.mesh.vertices)
-        gt_shape = rest_shape + blend_shape.compute_shape(gt_blend_coeffs)
+        gt_shape = rest_shape + torch.from_numpy(
+            blend_shape.compute_shape(gt_blend_coeffs)
+        )
         gt_skel_state = torch.from_numpy(
             pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params)
         )
@@ -184,8 +175,9 @@ class TestBlendShapeBase(unittest.TestCase):
                 c, test_model_params.detach().numpy()
             )
         )
-        test_blend_coeffs = torch.from_numpy(test_blend_coeffs)
-        test_shape = rest_shape + blend_shape.compute_shape(test_blend_coeffs)
+        test_shape = rest_shape + torch.from_numpy(
+            blend_shape.compute_shape(test_blend_coeffs)
+        )
         test_skel_state = torch.from_numpy(
             pym_geometry.joint_parameters_to_skeleton_state(c, test_joint_params)
         )
@@ -204,7 +196,8 @@ class TestBlendShapeBase(unittest.TestCase):
 
 
 class TestBlendShape(unittest.TestCase):
-    def test_diff_apply_blend_coeffs(self) -> None:
+    def test_apply_blend_coeffs(self) -> None:
+        """Test BlendShape.compute_shape with numpy arrays."""
         np.random.seed(0)
 
         n_pts = 10
@@ -214,20 +207,9 @@ class TestBlendShape(unittest.TestCase):
         shape_vectors = np.random.rand(n_blend, n_pts, 3)
         blend_shape = pym_geometry.BlendShape.from_tensors(base_shape, shape_vectors)
 
-        shape1, shape2, coeffs = _apply_blend_coeffs(
-            blend_shape, base_shape, shape_vectors
-        )
+        shape1, shape2 = _apply_blend_coeffs(blend_shape, base_shape, shape_vectors)
 
-        self.assertTrue(shape1.allclose(shape2))
-
-        if AUTOGRAD_ENABLED:
-            torch.autograd.gradcheck(
-                blend_shape.compute_shape,
-                [coeffs],
-                eps=1e-3,
-                atol=1e-4,
-                raise_exception=True,
-            )
+        self.assertTrue(np.allclose(shape1, shape2))
 
     def test_blend_shape_character(self) -> None:
         np.random.seed(0)  # ensure repeatability
@@ -316,7 +298,9 @@ class TestBlendShape(unittest.TestCase):
             c, gt_model_params.numpy()
         )
         gt_blend_coeffs = torch.from_numpy(gt_blend_coeffs)
-        gt_rest_shape = blend_shape.compute_shape(gt_blend_coeffs)
+        gt_rest_shape = torch.from_numpy(
+            blend_shape.compute_shape(gt_blend_coeffs.numpy())
+        )
         gt_skel_state = torch.from_numpy(
             pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params)
         )
@@ -347,7 +331,9 @@ class TestBlendShape(unittest.TestCase):
             c, test_model_params.detach().numpy()
         )
         test_blend_coeffs = torch.from_numpy(test_blend_coeffs)
-        test_rest_shape = blend_shape.compute_shape(test_blend_coeffs)
+        test_rest_shape = torch.from_numpy(
+            blend_shape.compute_shape(test_blend_coeffs.numpy())
+        )
         test_skel_state = torch.from_numpy(
             pym_geometry.joint_parameters_to_skeleton_state(c, test_joint_params)
         )
@@ -402,12 +388,10 @@ class TestBlendShape(unittest.TestCase):
         )
 
         # Verify the baked mesh matches the expected blend shape result
-        expected_mesh_vertices = (
-            blend_shape.compute_shape(torch.from_numpy(blend_weights).unsqueeze(0))
-            .squeeze(0)
-            .numpy()
-        )
-        baked_mesh_vertices = c_baked.mesh.vertices
+        expected_mesh_vertices = torch.from_numpy(
+            blend_shape.compute_shape(np.expand_dims(blend_weights, 0))
+        ).squeeze(0)
+        baked_mesh_vertices = torch.from_numpy(c_baked.mesh.vertices)
         self.assertTrue(
             np.allclose(
                 baked_mesh_vertices, expected_mesh_vertices, rtol=1e-5, atol=1e-6
