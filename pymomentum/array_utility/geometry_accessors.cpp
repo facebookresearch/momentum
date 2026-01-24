@@ -574,4 +574,126 @@ std::pair<int, int> IntVectorArrayAccessor<Dim>::ElementView::minmax() const {
 // Explicit template instantiations for IntVectorArrayAccessor
 template class IntVectorArrayAccessor<3>;
 
+// ============================================================================
+// IntScalarArrayAccessor implementation
+// ============================================================================
+
+IntScalarArrayAccessor::IntScalarArrayAccessor(const py::buffer& buffer, py::ssize_t expectedSize)
+    : size_(expectedSize) {
+  auto bufferInfo = buffer.request();
+  data_ = bufferInfo.ptr;
+
+  MT_THROW_IF(
+      bufferInfo.ndim != 1, "IntScalarArrayAccessor: expected 1D array, got {}D", bufferInfo.ndim);
+  MT_THROW_IF(
+      bufferInfo.shape[0] != expectedSize,
+      "IntScalarArrayAccessor: expected size {}, got {}",
+      expectedSize,
+      bufferInfo.shape[0]);
+
+  byteStride_ = bufferInfo.strides[0];
+
+  // Detect the source dtype based on format code and itemsize.
+  // Format codes 'l' (long) and 'L' (unsigned long) are platform-dependent:
+  // - LP64 (Linux/macOS 64-bit): long is 64-bit
+  // - LLP64 (Windows 64-bit): long is 32-bit
+  // We use itemsize to disambiguate these cases.
+  const auto& fmt = bufferInfo.format;
+  const auto itemsize = bufferInfo.itemsize;
+
+  // Check for signed integer types
+  const bool isSignedInt = fmt == py::format_descriptor<int32_t>::format() ||
+      fmt == py::format_descriptor<int>::format() ||
+      fmt == py::format_descriptor<int64_t>::format() ||
+      fmt == "l"; // C long (size varies by platform)
+
+  // Check for unsigned integer types
+  const bool isUnsignedInt = fmt == py::format_descriptor<uint32_t>::format() ||
+      fmt == py::format_descriptor<uint64_t>::format() ||
+      fmt == "L"; // C unsigned long (size varies by platform)
+
+  if (isSignedInt) {
+    if (itemsize == 4) {
+      dtype_ = SourceDtype::Int32;
+    } else if (itemsize == 8) {
+      dtype_ = SourceDtype::Int64;
+    } else {
+      MT_THROW(
+          "IntScalarArrayAccessor: unexpected itemsize {} for signed integer format '{}'",
+          itemsize,
+          fmt);
+    }
+  } else if (isUnsignedInt) {
+    if (itemsize == 4) {
+      dtype_ = SourceDtype::UInt32;
+    } else if (itemsize == 8) {
+      dtype_ = SourceDtype::UInt64;
+    } else {
+      MT_THROW(
+          "IntScalarArrayAccessor: unexpected itemsize {} for unsigned integer format '{}'",
+          itemsize,
+          fmt);
+    }
+  } else {
+    MT_THROW(
+        "IntScalarArrayAccessor: expected integer dtype (int32, int64, uint32, or uint64), got format '{}'",
+        fmt);
+  }
+}
+
+int IntScalarArrayAccessor::get(py::ssize_t index) const {
+  const auto* bytePtr = static_cast<const char*>(data_) + index * byteStride_;
+
+  switch (dtype_) {
+    case SourceDtype::Int32:
+      return static_cast<int>(*reinterpret_cast<const int32_t*>(bytePtr));
+    case SourceDtype::Int64:
+      return static_cast<int>(*reinterpret_cast<const int64_t*>(bytePtr));
+    case SourceDtype::UInt32:
+      return static_cast<int>(*reinterpret_cast<const uint32_t*>(bytePtr));
+    case SourceDtype::UInt64:
+      return static_cast<int>(*reinterpret_cast<const uint64_t*>(bytePtr));
+  }
+  // Unreachable, but silence compiler warning
+  return 0;
+}
+
+std::pair<int, int> IntScalarArrayAccessor::minmax() const {
+  if (size_ == 0) {
+    return {INT_MAX, INT_MIN};
+  }
+
+  int minVal = INT_MAX;
+  int maxVal = INT_MIN;
+
+  // Helper lambda to compute min/max for a given source type
+  auto computeMinMax = [&]<typename SourceT>() {
+    const auto elemStride = byteStride_ / static_cast<py::ssize_t>(sizeof(SourceT));
+    const auto* ptr = static_cast<const SourceT*>(data_);
+
+    for (py::ssize_t i = 0; i < size_; ++i) {
+      const int val = static_cast<int>(ptr[i * elemStride]);
+      minVal = std::min(minVal, val);
+      maxVal = std::max(maxVal, val);
+    }
+  };
+
+  switch (dtype_) {
+    case SourceDtype::Int32:
+      computeMinMax.template operator()<int32_t>();
+      break;
+    case SourceDtype::Int64:
+      computeMinMax.template operator()<int64_t>();
+      break;
+    case SourceDtype::UInt32:
+      computeMinMax.template operator()<uint32_t>();
+      break;
+    case SourceDtype::UInt64:
+      computeMinMax.template operator()<uint64_t>();
+      break;
+  }
+
+  return {minVal, maxVal};
+}
+
 } // namespace pymomentum

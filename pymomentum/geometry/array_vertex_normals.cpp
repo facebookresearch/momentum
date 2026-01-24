@@ -20,8 +20,7 @@ namespace pymomentum {
 namespace {
 
 // Validate that all triangle indices are within bounds [0, nVertices).
-// This check is performed once before the parallel loop to provide
-// a clear error message rather than undefined behavior.
+// Uses bounds() to efficiently check min/max in a single pass.
 void validateTriangleIndices(
     const IntVectorArrayAccessor<3>::ElementView& triView,
     py::ssize_t nVertices) {

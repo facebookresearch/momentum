@@ -479,6 +479,101 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "Round-trip diff_geometry.map_joint_parameters should match geometry.map_joint_parameters",
         )
 
+    def test_model_parameters_to_positions_matches(self) -> None:
+        """Verify that diff_geometry.model_parameters_to_positions matches geometry.model_parameters_to_positions."""
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        character = pym_geometry.create_test_character()
+        nBatch = 2
+        nJoints = character.skeleton.size
+        nConstraints = 4 * nJoints
+
+        modelParams_np = np.zeros(
+            (nBatch, character.parameter_transform.size), dtype=np.float32
+        )
+        posConstraint_parents_np = np.random.randint(
+            low=0, high=character.skeleton.size, size=[nConstraints], dtype=np.int32
+        )
+        posConstraints_offsets_np = np.random.normal(
+            loc=0, scale=4, size=(nConstraints, 3)
+        ).astype(np.float32)
+
+        # Call geometry version (numpy)
+        positions_geometry = pym_geometry.model_parameters_to_positions(
+            character,
+            modelParams_np,
+            posConstraint_parents_np,
+            posConstraints_offsets_np,
+        )
+
+        # Call diff_geometry version (torch)
+        modelParams_torch = torch.from_numpy(modelParams_np)
+        posConstraint_parents_torch = torch.from_numpy(posConstraint_parents_np)
+        posConstraints_offsets_torch = torch.from_numpy(posConstraints_offsets_np)
+
+        positions_diff_geometry = pym_diff_geometry.model_parameters_to_positions(
+            character,
+            modelParams_torch,
+            posConstraint_parents_torch,
+            posConstraints_offsets_torch,
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(positions_geometry, positions_diff_geometry.numpy(), atol=1e-5),
+            "diff_geometry.model_parameters_to_positions should match geometry.model_parameters_to_positions",
+        )
+
+    def test_joint_parameters_to_positions_matches(self) -> None:
+        """Verify that diff_geometry.joint_parameters_to_positions matches geometry.joint_parameters_to_positions."""
+        torch.manual_seed(0)
+        np.random.seed(0)
+
+        character = pym_geometry.create_test_character()
+        nBatch = 2
+        nJoints = character.skeleton.size
+        nConstraints = 4 * nJoints
+
+        modelParams_np = 0.2 * np.ones(
+            (nBatch, character.parameter_transform.size),
+            dtype=np.float32,
+        )
+        jointParams_np = character.parameter_transform.apply(modelParams_np)
+
+        posConstraint_parents_np = np.random.randint(
+            low=0, high=character.skeleton.size, size=[nConstraints], dtype=np.int32
+        )
+        posConstraints_offsets_np = np.random.normal(
+            loc=0, scale=4, size=(nConstraints, 3)
+        ).astype(np.float32)
+
+        # Call geometry version (numpy)
+        positions_geometry = pym_geometry.joint_parameters_to_positions(
+            character,
+            jointParams_np,
+            posConstraint_parents_np,
+            posConstraints_offsets_np,
+        )
+
+        # Call diff_geometry version (torch)
+        jointParams_torch = torch.from_numpy(jointParams_np)
+        posConstraint_parents_torch = torch.from_numpy(posConstraint_parents_np)
+        posConstraints_offsets_torch = torch.from_numpy(posConstraints_offsets_np)
+
+        positions_diff_geometry = pym_diff_geometry.joint_parameters_to_positions(
+            character,
+            jointParams_torch,
+            posConstraint_parents_torch,
+            posConstraints_offsets_torch,
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(positions_geometry, positions_diff_geometry.numpy(), atol=1e-5),
+            "diff_geometry.joint_parameters_to_positions should match geometry.joint_parameters_to_positions",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

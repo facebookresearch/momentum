@@ -117,6 +117,7 @@ tensor_ik_test_sources = [
 
 geometry_public_headers = [
     "geometry/array_blend_shape.h",
+    "geometry/array_joint_parameters_to_positions.h",
     "geometry/array_parameter_transform.h",
     "geometry/array_skeleton_state.h",
     "geometry/array_vertex_normals.h",
@@ -134,6 +135,7 @@ geometry_public_headers = [
 
 geometry_sources = [
     "geometry/array_blend_shape.cpp",
+    "geometry/array_joint_parameters_to_positions.cpp",
     "geometry/array_parameter_transform.cpp",
     "geometry/array_skeleton_state.cpp",
     "geometry/array_vertex_normals.cpp",
