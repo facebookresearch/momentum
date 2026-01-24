@@ -109,4 +109,38 @@ py::array modelParametersToFaceExpressionCoefficientsArray(
     const momentum::Character& character,
     const py::buffer& modelParameters);
 
+// Map model parameters from one character to another by matching parameter names.
+// Parameters that don't exist in the target character are dropped.
+// Parameters that exist in the target but not source are set to zero.
+//
+// Input shape: [..., numSourceModelParams]
+// Output shape: [..., numTargetModelParams]
+py::array mapModelParametersArray(
+    py::buffer motionData,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter,
+    bool verbose = true);
+
+// Map model parameters using explicit parameter names (source names -> target character).
+// This overload is useful when you have parameter names from a file but not the full character.
+//
+// Input shape: [..., len(sourceParameterNames)]
+// Output shape: [..., numTargetModelParams]
+py::array mapModelParametersNamesArray(
+    py::buffer motionData,
+    const std::vector<std::string>& sourceParameterNames,
+    const momentum::Character& targetCharacter,
+    bool verbose = false);
+
+// Map joint parameters from one character to another by matching joint names.
+// Joints that don't exist in the target character are dropped.
+// Joints that exist in the target but not source are set to zero.
+//
+// Input shape: [..., numSourceJoints * 7] (flat) or [..., numSourceJoints, 7] (structured)
+// Output shape: Same format as input, with target joint count
+py::array mapJointParametersArray(
+    py::buffer motionData,
+    const momentum::Character& srcCharacter,
+    const momentum::Character& tgtCharacter);
+
 } // namespace pymomentum
