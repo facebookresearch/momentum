@@ -8,6 +8,7 @@
 #include <pymomentum/array_utility/array_utility.h>
 
 #include <momentum/character/character.h>
+#include <momentum/math/mesh.h>
 
 #include <fmt/format.h>
 #include <sstream>
@@ -314,6 +315,73 @@ void ArrayChecker::validateModelParameters(
     const momentum::Character& character) {
   const auto nModelParams = static_cast<int>(character.parameterTransform.numAllModelParameters());
   validateBuffer(buffer, bufferName, {nModelParams}, {"numModelParams"});
+}
+
+TransformInputFormat ArrayChecker::validateTransforms(
+    const py::buffer& buffer,
+    const char* bufferName,
+    const momentum::Character& character) {
+  const auto nJoints = static_cast<int>(character.skeleton.joints.size());
+
+  // Get buffer info
+  py::buffer_info bufInfo = buffer.request();
+
+  // Transforms can be passed in two formats:
+  // 1. Skeleton state: (..., nJoints, 8)
+  // 2. Transform matrix: (..., nJoints, 4, 4)
+  //
+  // We determine which format by checking the trailing dimensions
+
+  if (bufInfo.ndim < 2) {
+    MT_THROW(
+        "In {}, buffer argument {} has shape {} but expected either "
+        "(..., {}, 8) for skeleton state or (..., {}, 4, 4) for transform matrices",
+        functionName_,
+        bufferName,
+        formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())),
+        nJoints,
+        nJoints);
+  }
+
+  const auto lastDim = bufInfo.shape[bufInfo.ndim - 1];
+
+  // Check for skeleton state format: (..., nJoints, 8)
+  if (lastDim == 8 && bufInfo.ndim >= 2) {
+    const auto secondLastDim = bufInfo.shape[bufInfo.ndim - 2];
+    if (secondLastDim == nJoints) {
+      validateBuffer(buffer, bufferName, {nJoints, 8}, {"numJoints", "8"});
+      return TransformInputFormat::SkeletonState;
+    }
+  }
+
+  // Check for transform matrix format: (..., nJoints, 4, 4)
+  if (lastDim == 4 && bufInfo.ndim >= 3) {
+    const auto secondLastDim = bufInfo.shape[bufInfo.ndim - 2];
+    const auto thirdLastDim = bufInfo.shape[bufInfo.ndim - 3];
+    if (secondLastDim == 4 && thirdLastDim == nJoints) {
+      validateBuffer(buffer, bufferName, {nJoints, 4, 4}, {"numJoints", "4", "4"});
+      return TransformInputFormat::TransformMatrix;
+    }
+  }
+
+  // Neither format matched
+  MT_THROW(
+      "In {}, buffer argument {} has shape {} but expected either "
+      "(..., {}, 8) for skeleton state or (..., {}, 4, 4) for transform matrices",
+      functionName_,
+      bufferName,
+      formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())),
+      nJoints,
+      nJoints);
+}
+
+void ArrayChecker::validateVertices(
+    const py::buffer& buffer,
+    const char* bufferName,
+    const momentum::Character& character) {
+  MT_THROW_IF(!character.mesh, "In {}, character has no mesh", functionName_);
+  const auto nVertices = static_cast<int>(character.mesh->vertices.size());
+  validateBuffer(buffer, bufferName, {nVertices, 3}, {"numVertices", "3"});
 }
 
 // ============================================================================

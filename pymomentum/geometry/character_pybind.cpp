@@ -7,6 +7,7 @@
 
 #include "pymomentum/geometry/character_pybind.h"
 
+#include "pymomentum/geometry/array_skinning.h"
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
@@ -446,15 +447,19 @@ It can be used to solve for facial expressions.
           py::arg("joint_params"))
       .def(
           "skin_points",
-          &pymomentum::skinPoints,
+          &pymomentum::skinPointsArray,
           R"(Skins the points using the character's linear blend skinning.
 
-:param skel_state: A torch.Tensor containing either a [nBatch x nJoints x 8] skeleton state or a [nBatch x nJoints x 4 x 4] transforms.
-:param rest_vertices: An optional torch.Tensor containing the rest points; if not passed, the ones stored inside the character are used.
-:return: The vertex positions in worldspace.
+:param skel_state: An ndarray containing either:
+
+    - Skeleton state with shape [..., nJoints, 8] where each joint has [tx, ty, tz, rx, ry, rz, rw, scale], OR
+    - Transform matrices with shape [..., nJoints, 4, 4] containing 4x4 transformation matrices.
+
+:param rest_vertices: An optional ndarray containing the rest points with shape [..., nVertices, 3]. If not passed, the ones stored inside the character are used.
+:return: The vertex positions in worldspace with shape [..., nVertices, 3].
           )",
           py::arg("skel_state"),
-          py::arg("rest_vertices") = std::optional<at::Tensor>{})
+          py::arg("rest_vertices") = std::optional<py::buffer>{})
       .def(
           "skin_skinned_locators",
           [](const momentum::Character& character,

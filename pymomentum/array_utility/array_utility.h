@@ -27,6 +27,12 @@ enum class JointParamsShape {
   Flat // (..., nJointParams)
 };
 
+// Enum for skeleton state / transform input format
+enum class TransformInputFormat {
+  SkeletonState, // (..., nJoints, 8) - [tx, ty, tz, rx, ry, rz, rw, scale]
+  TransformMatrix // (..., nJoints, 4, 4) - 4x4 transformation matrices
+};
+
 // Enum to specify expected dtype
 enum class ArrayDtype {
   Float32,
@@ -109,6 +115,22 @@ class ArrayChecker {
 
   // Validate model parameters buffer with shape (..., nModelParams)
   void validateModelParameters(
+      const py::buffer& buffer,
+      const char* bufferName,
+      const momentum::Character& character);
+
+  // Validate transforms buffer
+  // Accepts EITHER:
+  //   - (..., nJoints, 8): skeleton state format [tx, ty, tz, rx, ry, rz, rw, scale]
+  //   - (..., nJoints, 4, 4): transform matrix format
+  // Returns the detected format for use with TransformAccessor
+  TransformInputFormat validateTransforms(
+      const py::buffer& buffer,
+      const char* bufferName,
+      const momentum::Character& character);
+
+  // Validate vertices buffer with shape (..., nVertices, 3)
+  void validateVertices(
       const py::buffer& buffer,
       const char* bufferName,
       const momentum::Character& character);

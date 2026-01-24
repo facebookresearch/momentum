@@ -534,11 +534,11 @@ class TestSolver(unittest.TestCase):
         )
 
         # Compute the final position of the point
-        final_mesh = character.skin_points(skel_state_final)
-        final_point_position = final_mesh[point_index, :3]
+        final_mesh = character.skin_points(skel_state_final.numpy())
+        final_point_position = torch.from_numpy(final_mesh[point_index, :3])
 
         # Compute the target position of the point on the triangle
-        triangle_vertices = final_mesh[triangle_indices, :3]
+        triangle_vertices = torch.from_numpy(final_mesh[triangle_indices, :3])
         final_target_position = (
             triangle_bary_coords[0] * triangle_vertices[0]
             + triangle_bary_coords[1] * triangle_vertices[1]
@@ -609,8 +609,8 @@ class TestSolver(unittest.TestCase):
         )
 
         # Compute the final position of the vertex
-        final_mesh = character.skin_points(skel_state_final)
-        final_vertex_position = final_mesh[vertex_index, :3]
+        final_mesh = character.skin_points(skel_state_final.numpy())
+        final_vertex_position = torch.from_numpy(final_mesh[vertex_index, :3])
 
         # Assert that the final vertex position is close to the target position
         self.assertTrue(
@@ -1333,10 +1333,10 @@ class TestSolver(unittest.TestCase):
         )
 
         # Compute the final mesh
-        final_mesh = character.skin_points(skel_state_final)
+        final_mesh = character.skin_points(skel_state_final.numpy())
 
         # Get the final position of the vertex
-        final_vertex_position = final_mesh[vertex_index, :3].numpy()
+        final_vertex_position = final_mesh[vertex_index, :3]
 
         # Apply the projection matrix to get the projected 2D point
         # First create homogeneous coordinates by adding 1 as the 4th component
@@ -1457,13 +1457,15 @@ class TestSolver(unittest.TestCase):
         )
 
         # Compute final meshes for both frames
-        mesh_frame0 = character.skin_points(skel_state_frame0)
-        mesh_frame1 = character.skin_points(skel_state_frame1)
+        mesh_frame0 = character.skin_points(skel_state_frame0.numpy())
+        mesh_frame1 = character.skin_points(skel_state_frame1.numpy())
 
         # Verify that vertex velocities match target velocities
         for i, vertex_idx in enumerate(vertex_indices):
             # Compute actual velocity (difference between frames)
-            actual_velocity = mesh_frame1[vertex_idx, :3] - mesh_frame0[vertex_idx, :3]
+            actual_velocity = torch.from_numpy(
+                mesh_frame1[vertex_idx, :3] - mesh_frame0[vertex_idx, :3]
+            )
             expected_velocity = target_velocities[i]
 
             # Assert that actual velocity is close to target velocity
@@ -1508,15 +1510,15 @@ class TestSolver(unittest.TestCase):
         )
 
         # Compute meshes
-        mesh_frame0_zero = character.skin_points(skel_state_frame0_zero)
-        mesh_frame1_zero = character.skin_points(skel_state_frame1_zero)
+        mesh_frame0_zero = character.skin_points(skel_state_frame0_zero.numpy())
+        mesh_frame1_zero = character.skin_points(skel_state_frame1_zero.numpy())
 
         # Verify that constrained vertices have minimal motion
         for vertex_idx in [0, 1]:
             actual_velocity = (
                 mesh_frame1_zero[vertex_idx, :3] - mesh_frame0_zero[vertex_idx, :3]
             )
-            velocity_magnitude = torch.norm(actual_velocity).item()
+            velocity_magnitude = np.linalg.norm(actual_velocity)
 
             # Assert that velocity is close to zero
             self.assertLess(
@@ -1885,10 +1887,10 @@ class TestSolver(unittest.TestCase):
                 character, model_params_init.numpy()
             )
         )
-        initial_mesh = character.skin_points(skel_state_init)
+        initial_mesh = character.skin_points(skel_state_init.numpy())
         initial_pos1 = initial_mesh[vertex_index1, :3]
         initial_pos2 = initial_mesh[vertex_index2, :3]
-        initial_distance = torch.norm(initial_pos2 - initial_pos1).item()
+        initial_distance = np.linalg.norm(initial_pos2 - initial_pos1)
 
         # Create VertexVertexDistanceErrorFunction
         vertex_distance_error = pym_solver2.VertexVertexDistanceErrorFunction(character)
@@ -1937,10 +1939,10 @@ class TestSolver(unittest.TestCase):
         )
 
         # Compute final mesh and vertex positions
-        final_mesh = character.skin_points(skel_state_final)
+        final_mesh = character.skin_points(skel_state_final.numpy())
         final_pos1 = final_mesh[vertex_index1, :3]
         final_pos2 = final_mesh[vertex_index2, :3]
-        final_distance = torch.norm(final_pos2 - final_pos1).item()
+        final_distance = np.linalg.norm(final_pos2 - final_pos1)
 
         # Assert that the final distance is close to the target distance
         self.assertAlmostEqual(
@@ -2432,11 +2434,11 @@ class TestSolver(unittest.TestCase):
                 character, model_params_final
             )
         )
-        mesh_vertices = character.skin_points(skel_state)
+        mesh_vertices = character.skin_points(skel_state.numpy())
 
         # Compute height by projecting all vertices onto the up direction
         up_direction = np.array([0.0, 1.0, 0.0])
-        projections = mesh_vertices.numpy() @ up_direction
+        projections = mesh_vertices @ up_direction
         actual_height = projections.max() - projections.min()
 
         # Check that the actual height is close to the target height
@@ -2467,10 +2469,10 @@ class TestSolver(unittest.TestCase):
                 character, model_params_final_2
             )
         )
-        mesh_vertices_2 = character.skin_points(skel_state_2)
+        mesh_vertices_2 = character.skin_points(skel_state_2.numpy())
 
         # Compute height
-        projections_2 = mesh_vertices_2.numpy() @ up_direction
+        projections_2 = mesh_vertices_2 @ up_direction
         actual_height_2 = projections_2.max() - projections_2.min()
 
         # Check that the actual height is close to the second target height

@@ -140,12 +140,10 @@ class TestBlendShapeBase(unittest.TestCase):
         gt_blend_coeffs = pym_geometry.model_parameters_to_face_expression_coefficients(
             c, gt_model_params.numpy()
         )
-        rest_shape = torch.from_numpy(c.mesh.vertices)
-        gt_shape = rest_shape + torch.from_numpy(
-            blend_shape.compute_shape(gt_blend_coeffs)
-        )
-        gt_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params)
+        rest_shape = c.mesh.vertices
+        gt_shape = rest_shape + blend_shape.compute_shape(gt_blend_coeffs)
+        gt_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            c, gt_joint_params
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_shape)
 
@@ -165,7 +163,7 @@ class TestBlendShapeBase(unittest.TestCase):
             active_error_functions=active_error_functions,
             error_function_weights=error_function_weights,
             vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
-            vertex_cons_target_positions=gt_posed_shape,
+            vertex_cons_target_positions=torch.from_numpy(gt_posed_shape),
         )
         test_joint_params = pym_geometry.apply_parameter_transform(
             c, test_model_params.detach().numpy()
@@ -175,24 +173,24 @@ class TestBlendShapeBase(unittest.TestCase):
                 c, test_model_params.detach().numpy()
             )
         )
-        test_shape = rest_shape + torch.from_numpy(
-            blend_shape.compute_shape(test_blend_coeffs)
-        )
-        test_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, test_joint_params)
+        test_shape = rest_shape + blend_shape.compute_shape(test_blend_coeffs)
+        test_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            c, test_joint_params
         )
         test_posed_shape = c.skin_points(test_skel_state, test_shape)
 
         # Debug output for ASAN mode tolerance issues
-        max_abs_diff = torch.max(torch.abs(test_posed_shape - gt_posed_shape)).item()
-        max_rel_diff = torch.max(
-            torch.abs((test_posed_shape - gt_posed_shape) / (gt_posed_shape + 1e-8))
-        ).item()
+        max_abs_diff = np.max(np.abs(test_posed_shape - gt_posed_shape))
+        max_rel_diff = np.max(
+            np.abs((test_posed_shape - gt_posed_shape) / (gt_posed_shape + 1e-8))
+        )
         print(f"Max absolute difference: {max_abs_diff}")
         print(f"Max relative difference: {max_rel_diff}")
 
         # Relaxed tolerances for ASAN mode - ASAN has different numerical behavior
-        self.assertTrue(test_posed_shape.allclose(gt_posed_shape, rtol=5e-3, atol=5e-2))
+        self.assertTrue(
+            np.allclose(test_posed_shape, gt_posed_shape, rtol=5e-3, atol=5e-2)
+        )
 
 
 class TestBlendShape(unittest.TestCase):
@@ -264,17 +262,25 @@ class TestBlendShape(unittest.TestCase):
         model_params = np.random.rand(n_model_params).astype(np.float32) * 5.0 - 2.5
         joint_params = pym_geometry.apply_parameter_transform(c, model_params)
         joint_params_tensor = torch.from_numpy(joint_params)
-        skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, joint_params)
-        )
+        skel_state = pym_geometry.joint_parameters_to_skeleton_state(c, joint_params)
 
-        m1 = torch.from_numpy(c.pose_mesh(joint_params_tensor).vertices)
+        m1 = c.pose_mesh(joint_params_tensor).vertices
         m2 = c.skin_points(skel_state)
-        self.assertTrue(m1.allclose(m2, rtol=1e-5, atol=1e-6))
+        self.assertTrue(np.allclose(m1, m2, rtol=1e-5, atol=1e-6))
 
-        rest_points = torch.from_numpy(c.mesh.vertices)
-        m3 = c.skin_points(pym_skel_state.to_matrix(skel_state), rest_points)
-        self.assertTrue(m1.allclose(m3, rtol=1e-5, atol=1e-6))
+        # Test with explicit rest vertices
+        m3 = c.skin_points(skel_state, c.mesh.vertices)
+        self.assertTrue(np.allclose(m1, m3, rtol=1e-5, atol=1e-6))
+
+        # Test with transform matrices instead of skeleton state
+        skel_state_torch = torch.from_numpy(skel_state)
+        transform_matrices = pym_skel_state.to_matrix(skel_state_torch).numpy()
+        m4 = c.skin_points(transform_matrices)
+        self.assertTrue(np.allclose(m1, m4, rtol=1e-5, atol=1e-6))
+
+        # Test with transform matrices and explicit rest vertices
+        m5 = c.skin_points(transform_matrices, c.mesh.vertices)
+        self.assertTrue(np.allclose(m1, m5, rtol=1e-5, atol=1e-6))
 
     # NOTE: Skinning derivative tests are now in test_diff_geometry.py
     # (test_skinning_check_derivatives) since pymomentum.geometry uses numpy
@@ -297,12 +303,9 @@ class TestBlendShape(unittest.TestCase):
         gt_blend_coeffs = pym_geometry.model_parameters_to_blend_shape_coefficients(
             c, gt_model_params.numpy()
         )
-        gt_blend_coeffs = torch.from_numpy(gt_blend_coeffs)
-        gt_rest_shape = torch.from_numpy(
-            blend_shape.compute_shape(gt_blend_coeffs.numpy())
-        )
-        gt_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, gt_joint_params)
+        gt_rest_shape = blend_shape.compute_shape(gt_blend_coeffs)
+        gt_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            c, gt_joint_params
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_rest_shape)
 
@@ -322,7 +325,7 @@ class TestBlendShape(unittest.TestCase):
             active_error_functions=active_error_functions,
             error_function_weights=error_function_weights,
             vertex_cons_vertices=torch.arange(0, c.mesh.n_vertices),
-            vertex_cons_target_positions=gt_posed_shape,
+            vertex_cons_target_positions=torch.from_numpy(gt_posed_shape),
         )
         test_joint_params = pym_geometry.apply_parameter_transform(
             c, test_model_params.detach().numpy()
@@ -330,25 +333,24 @@ class TestBlendShape(unittest.TestCase):
         test_blend_coeffs = pym_geometry.model_parameters_to_blend_shape_coefficients(
             c, test_model_params.detach().numpy()
         )
-        test_blend_coeffs = torch.from_numpy(test_blend_coeffs)
-        test_rest_shape = torch.from_numpy(
-            blend_shape.compute_shape(test_blend_coeffs.numpy())
-        )
-        test_skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(c, test_joint_params)
+        test_rest_shape = blend_shape.compute_shape(test_blend_coeffs)
+        test_skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            c, test_joint_params
         )
         test_posed_shape = c.skin_points(test_skel_state, test_rest_shape)
 
         # Debug output for ASAN mode tolerance issues
-        max_abs_diff = torch.max(torch.abs(test_posed_shape - gt_posed_shape)).item()
-        max_rel_diff = torch.max(
-            torch.abs((test_posed_shape - gt_posed_shape) / (gt_posed_shape + 1e-8))
-        ).item()
+        max_abs_diff = np.max(np.abs(test_posed_shape - gt_posed_shape))
+        max_rel_diff = np.max(
+            np.abs((test_posed_shape - gt_posed_shape) / (gt_posed_shape + 1e-8))
+        )
         print(f"Max absolute difference: {max_abs_diff}")
         print(f"Max relative difference: {max_rel_diff}")
 
         # Relaxed tolerances for ASAN mode - ASAN has different numerical behavior
-        self.assertTrue(test_posed_shape.allclose(gt_posed_shape, rtol=5e-3, atol=5e-2))
+        self.assertTrue(
+            np.allclose(test_posed_shape, gt_posed_shape, rtol=5e-3, atol=5e-2)
+        )
 
     def test_bake_blend_shape(self) -> None:
         """Test the bake_blend_shape method with numpy arrays."""

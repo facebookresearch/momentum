@@ -25,8 +25,25 @@ VectorAccessor<T, StrongType>::VectorAccessor(
     : vectorSize_(vectorSize), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Extract strides (convert from bytes to elements)
+  // Validate that buffer has enough dimensions
   const auto totalNDim = bufferInfo.ndim;
+  const auto expectedNDim = leadingNDim_ + 1; // leading dims + vector dimension
+
+  MT_THROW_IF(
+      totalNDim != expectedNDim,
+      "VectorAccessor: buffer has {} dimensions but expected {} (leading dims: {}, vector dim: 1)",
+      totalNDim,
+      expectedNDim,
+      leadingNDim_);
+
+  // Validate trailing dimension
+  MT_THROW_IF(
+      bufferInfo.shape[totalNDim - 1] != vectorSize,
+      "VectorAccessor: last dimension must be {}, got {}",
+      vectorSize,
+      bufferInfo.shape[totalNDim - 1]);
+
+  // Extract strides (convert from bytes to elements)
   strides_.resize(totalNDim);
   for (int i = 0; i < totalNDim; ++i) {
     strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
@@ -98,8 +115,48 @@ JointParametersAccessor<T>::JointParametersAccessor(
     : nJoints_(nJoints), shape_(shape), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Extract strides (convert from bytes to elements)
+  // Validate dimensions based on shape
   const auto totalNDim = bufferInfo.ndim;
+  const auto nJointParams = nJoints * 7;
+
+  if (shape == JointParamsShape::Structured) {
+    // Expected: (..., nJoints, 7)
+    const auto expectedNDim = leadingNDim_ + 2;
+    MT_THROW_IF(
+        totalNDim != expectedNDim,
+        "JointParametersAccessor (Structured): buffer has {} dimensions but expected {} (leading dims: {}, nJoints dim: 1, params dim: 1)",
+        totalNDim,
+        expectedNDim,
+        leadingNDim_);
+
+    MT_THROW_IF(
+        bufferInfo.shape[totalNDim - 2] != nJoints,
+        "JointParametersAccessor (Structured): second-to-last dimension must be {}, got {}",
+        nJoints,
+        bufferInfo.shape[totalNDim - 2]);
+
+    MT_THROW_IF(
+        bufferInfo.shape[totalNDim - 1] != 7,
+        "JointParametersAccessor (Structured): last dimension must be 7, got {}",
+        bufferInfo.shape[totalNDim - 1]);
+  } else { // JointParamsShape::Flat
+    // Expected: (..., nJointParams)
+    const auto expectedNDim = leadingNDim_ + 1;
+    MT_THROW_IF(
+        totalNDim != expectedNDim,
+        "JointParametersAccessor (Flat): buffer has {} dimensions but expected {} (leading dims: {}, params dim: 1)",
+        totalNDim,
+        expectedNDim,
+        leadingNDim_);
+
+    MT_THROW_IF(
+        bufferInfo.shape[totalNDim - 1] != nJointParams,
+        "JointParametersAccessor (Flat): last dimension must be {} (nJoints * 7), got {}",
+        nJointParams,
+        bufferInfo.shape[totalNDim - 1]);
+  }
+
+  // Extract strides (convert from bytes to elements)
   strides_.resize(totalNDim);
   for (int i = 0; i < totalNDim; ++i) {
     strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
@@ -199,8 +256,31 @@ SkeletonStateAccessor<T>::SkeletonStateAccessor(
     : nJoints_(nJoints), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Extract strides (convert from bytes to elements)
+  // Validate that buffer has enough dimensions
+  // Expected: (..., nJoints, 8) where 8 = [tx, ty, tz, rx, ry, rz, rw, scale]
   const auto totalNDim = bufferInfo.ndim;
+  const auto expectedNDim = leadingNDim_ + 2;
+
+  MT_THROW_IF(
+      totalNDim != expectedNDim,
+      "SkeletonStateAccessor: buffer has {} dimensions but expected {} (leading dims: {}, nJoints dim: 1, params dim: 1)",
+      totalNDim,
+      expectedNDim,
+      leadingNDim_);
+
+  // Validate trailing dimensions
+  MT_THROW_IF(
+      bufferInfo.shape[totalNDim - 2] != nJoints,
+      "SkeletonStateAccessor: second-to-last dimension must be {}, got {}",
+      nJoints,
+      bufferInfo.shape[totalNDim - 2]);
+
+  MT_THROW_IF(
+      bufferInfo.shape[totalNDim - 1] != 8,
+      "SkeletonStateAccessor: last dimension must be 8 [tx, ty, tz, rx, ry, rz, rw, scale], got {}",
+      bufferInfo.shape[totalNDim - 1]);
+
+  // Extract strides (convert from bytes to elements)
   strides_.resize(totalNDim);
   for (int i = 0; i < totalNDim; ++i) {
     strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
@@ -307,8 +387,31 @@ VectorArrayAccessor<T, Dim>::VectorArrayAccessor(
     : nElements_(nElements), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Extract strides (convert from bytes to elements)
+  // Validate that buffer has enough dimensions
   const auto totalNDim = bufferInfo.ndim;
+  const auto expectedNDim = leadingNDim_ + 2; // leading dims + element dim + vector component dim
+
+  MT_THROW_IF(
+      totalNDim != expectedNDim,
+      "VectorArrayAccessor: buffer has {} dimensions but expected {} (leading dims: {}, element dim: 1, component dim: 1)",
+      totalNDim,
+      expectedNDim,
+      leadingNDim_);
+
+  // Validate trailing dimensions
+  MT_THROW_IF(
+      bufferInfo.shape[totalNDim - 1] != Dim,
+      "VectorArrayAccessor: last dimension must be {}, got {}",
+      Dim,
+      bufferInfo.shape[totalNDim - 1]);
+
+  MT_THROW_IF(
+      bufferInfo.shape[totalNDim - 2] != nElements,
+      "VectorArrayAccessor: second-to-last dimension must be {}, got {}",
+      nElements,
+      bufferInfo.shape[totalNDim - 2]);
+
+  // Extract strides (convert from bytes to elements)
   strides_.resize(totalNDim);
   for (int i = 0; i < totalNDim; ++i) {
     strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
@@ -695,5 +798,233 @@ std::pair<int, int> IntScalarArrayAccessor::minmax() const {
 
   return {minVal, maxVal};
 }
+
+//
+// TransformAccessor implementation
+// ============================================================================
+
+template <typename T>
+TransformAccessor<T>::TransformAccessor(
+    const py::buffer_info& bufferInfo,
+    const LeadingDimensions& leadingDims,
+    py::ssize_t nJoints)
+    : nJoints_(nJoints), leadingNDim_(leadingDims.ndim()) {
+  data_ = static_cast<T*>(bufferInfo.ptr);
+
+  const auto totalNDim = bufferInfo.ndim;
+
+  // Auto-detect format based on trailing dimensions
+  // SkeletonState: (..., nJoints, 8)
+  // TransformMatrix: (..., nJoints, 4, 4)
+  if (totalNDim >= 2 && bufferInfo.shape[totalNDim - 1] == 8 &&
+      bufferInfo.shape[totalNDim - 2] == nJoints) {
+    format_ = TransformInputFormat::SkeletonState;
+
+    const auto expectedNDim = leadingNDim_ + 2;
+    MT_THROW_IF(
+        totalNDim != expectedNDim,
+        "TransformAccessor (SkeletonState): buffer has {} dimensions but expected {} (leading dims: {}, nJoints dim: 1, params dim: 1)",
+        totalNDim,
+        expectedNDim,
+        leadingNDim_);
+  } else if (
+      totalNDim >= 3 && bufferInfo.shape[totalNDim - 1] == 4 &&
+      bufferInfo.shape[totalNDim - 2] == 4 && bufferInfo.shape[totalNDim - 3] == nJoints) {
+    format_ = TransformInputFormat::TransformMatrix;
+
+    const auto expectedNDim = leadingNDim_ + 3;
+    MT_THROW_IF(
+        totalNDim != expectedNDim,
+        "TransformAccessor (TransformMatrix): buffer has {} dimensions but expected {} (leading dims: {}, nJoints dim: 1, matrix dims: 2)",
+        totalNDim,
+        expectedNDim,
+        leadingNDim_);
+  } else {
+    MT_THROW(
+        "TransformAccessor: buffer shape not recognized. Expected either (..., {}, 8) for skeleton state or (..., {}, 4, 4) for transform matrices. Got {} dimensions with last dims: {}",
+        nJoints,
+        nJoints,
+        totalNDim,
+        totalNDim >= 1 ? std::to_string(bufferInfo.shape[totalNDim - 1]) : "none");
+  }
+
+  // Extract strides (convert from bytes to elements)
+  strides_.resize(totalNDim);
+  for (int i = 0; i < totalNDim; ++i) {
+    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  }
+}
+
+template <typename T>
+py::ssize_t TransformAccessor<T>::computeOffset(std::span<const py::ssize_t> batchIndices) const {
+  py::ssize_t offset = 0;
+  for (size_t i = 0; i < batchIndices.size(); ++i) {
+    offset += batchIndices[i] * strides_[i];
+  }
+  return offset;
+}
+
+template <typename T>
+momentum::TransformListT<T> TransformAccessor<T>::getTransforms(
+    std::span<const py::ssize_t> batchIndices) const {
+  if (format_ == TransformInputFormat::SkeletonState) {
+    return getTransformsFromSkeletonState(batchIndices);
+  } else {
+    return getTransformsFromMatrix(batchIndices);
+  }
+}
+
+template <typename T>
+std::vector<Eigen::Matrix4<T>> TransformAccessor<T>::getMatrices(
+    std::span<const py::ssize_t> batchIndices) const {
+  if (format_ == TransformInputFormat::SkeletonState) {
+    return getMatricesFromSkeletonState(batchIndices);
+  } else {
+    return getMatricesFromMatrix(batchIndices);
+  }
+}
+
+template <typename T>
+momentum::TransformListT<T> TransformAccessor<T>::getTransformsFromSkeletonState(
+    std::span<const py::ssize_t> batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  momentum::TransformListT<T> transforms(nJoints_);
+
+  const auto rowStride = strides_[leadingNDim_]; // stride for joint dimension
+  const auto colStride = strides_[leadingNDim_ + 1]; // stride for parameter dimension
+
+  for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+    const auto jointOffset = offset + iJoint * rowStride;
+
+    // Read translation
+    transforms[iJoint].translation.x() = data_[jointOffset + 0 * colStride];
+    transforms[iJoint].translation.y() = data_[jointOffset + 1 * colStride];
+    transforms[iJoint].translation.z() = data_[jointOffset + 2 * colStride];
+
+    // Read rotation (quaternion in x,y,z,w format)
+    const T qx = data_[jointOffset + 3 * colStride];
+    const T qy = data_[jointOffset + 4 * colStride];
+    const T qz = data_[jointOffset + 5 * colStride];
+    const T qw = data_[jointOffset + 6 * colStride];
+    transforms[iJoint].rotation = Eigen::Quaternion<T>(qw, qx, qy, qz);
+
+    // Read scale
+    const T scale = data_[jointOffset + 7 * colStride];
+    transforms[iJoint].scale = scale;
+  }
+
+  return transforms;
+}
+
+template <typename T>
+momentum::TransformListT<T> TransformAccessor<T>::getTransformsFromMatrix(
+    std::span<const py::ssize_t> batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  momentum::TransformListT<T> transforms(nJoints_);
+
+  const auto jointStride = strides_[leadingNDim_]; // stride for joint dimension
+  const auto rowStride = strides_[leadingNDim_ + 1]; // stride for matrix row
+  const auto colStride = strides_[leadingNDim_ + 2]; // stride for matrix column
+
+  for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+    const auto jointOffset = offset + iJoint * jointStride;
+
+    // Read 4x4 matrix
+    Eigen::Matrix4<T> mat;
+    for (int row = 0; row < 4; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        mat(row, col) = data_[jointOffset + row * rowStride + col * colStride];
+      }
+    }
+
+    // Decompose matrix into transform
+    // Extract translation from last column
+    transforms[iJoint].translation = mat.template block<3, 1>(0, 3);
+
+    // Extract rotation from 3x3 upper-left block (assuming orthonormal + uniform scale)
+    Eigen::Matrix3<T> rotMat = mat.template block<3, 3>(0, 0);
+
+    // Extract scale from the norm of the first column
+    transforms[iJoint].scale = rotMat.col(0).norm();
+
+    // Normalize rotation matrix
+    if (transforms[iJoint].scale > T(0)) {
+      rotMat /= transforms[iJoint].scale;
+    }
+
+    transforms[iJoint].rotation = Eigen::Quaternion<T>(rotMat);
+  }
+
+  return transforms;
+}
+
+template <typename T>
+std::vector<Eigen::Matrix4<T>> TransformAccessor<T>::getMatricesFromSkeletonState(
+    std::span<const py::ssize_t> batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  std::vector<Eigen::Matrix4<T>> matrices(nJoints_);
+
+  const auto rowStride = strides_[leadingNDim_]; // stride for joint dimension
+  const auto colStride = strides_[leadingNDim_ + 1]; // stride for parameter dimension
+
+  for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+    const auto jointOffset = offset + iJoint * rowStride;
+
+    // Read translation
+    const T tx = data_[jointOffset + 0 * colStride];
+    const T ty = data_[jointOffset + 1 * colStride];
+    const T tz = data_[jointOffset + 2 * colStride];
+
+    // Read rotation (quaternion in x,y,z,w format)
+    const T qx = data_[jointOffset + 3 * colStride];
+    const T qy = data_[jointOffset + 4 * colStride];
+    const T qz = data_[jointOffset + 5 * colStride];
+    const T qw = data_[jointOffset + 6 * colStride];
+    Eigen::Quaternion<T> rotation(qw, qx, qy, qz);
+
+    // Read scale
+    const T scale = data_[jointOffset + 7 * colStride];
+
+    // Build 4x4 matrix: scale * rotation matrix + translation
+    Eigen::Matrix3<T> rotMat = rotation.toRotationMatrix();
+    matrices[iJoint].setIdentity();
+    matrices[iJoint].template block<3, 3>(0, 0) = scale * rotMat;
+    matrices[iJoint].template block<3, 1>(0, 3) = Eigen::Vector3<T>(tx, ty, tz);
+  }
+
+  return matrices;
+}
+
+template <typename T>
+std::vector<Eigen::Matrix4<T>> TransformAccessor<T>::getMatricesFromMatrix(
+    std::span<const py::ssize_t> batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  std::vector<Eigen::Matrix4<T>> matrices(nJoints_);
+
+  const auto jointStride = strides_[leadingNDim_]; // stride for joint dimension
+  const auto rowStride = strides_[leadingNDim_ + 1]; // stride for matrix row
+  const auto colStride = strides_[leadingNDim_ + 2]; // stride for matrix column
+
+  for (py::ssize_t iJoint = 0; iJoint < nJoints_; ++iJoint) {
+    const auto jointOffset = offset + iJoint * jointStride;
+
+    // Read 4x4 matrix directly
+    for (int row = 0; row < 4; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        matrices[iJoint](row, col) = data_[jointOffset + row * rowStride + col * colStride];
+      }
+    }
+  }
+
+  return matrices;
+}
+
+// Explicit template instantiations for TransformAccessor
+template class TransformAccessor<float>;
+template class TransformAccessor<double>;
 
 } // namespace pymomentum
