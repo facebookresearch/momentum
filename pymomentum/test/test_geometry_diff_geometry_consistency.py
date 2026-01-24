@@ -18,6 +18,7 @@ import unittest
 import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
+import pymomentum.skel_state as pym_skel_state
 import torch
 
 
@@ -358,6 +359,85 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "BlendShape.compute_shape with character should match diff_geometry.compute_blend_shape",
         )
 
+    def test_skin_points_matches(self) -> None:
+        """Verify that Character.skin_points matches diff_geometry.skin_points."""
+        np.random.seed(42)
+
+        # Create a test character with mesh
+        character = pym_geometry.create_test_character()
+        nBatch = 2
+
+        # Debugging checks for skin weights and skeleton consistency
+        nJoints = character.skeleton.size
+
+        # Check that skin weight indices are valid
+        if character.skin_weights is not None:
+            max_skin_index = np.max(character.skin_weights.index)
+            self.assertLess(
+                max_skin_index,
+                nJoints,
+                f"Skin weight indices should be < nJoints. "
+                f"Found max index {max_skin_index} but nJoints={nJoints}",
+            )
+
+        # Create model parameters and convert to skeleton state
+        model_params_np = np.random.rand(
+            nBatch, character.parameter_transform.size
+        ).astype(np.float32)
+        skel_state_np = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_np
+        )
+        skel_state_torch = torch.from_numpy(skel_state_np)
+
+        # Verify skeleton state shape
+        self.assertEqual(
+            skel_state_np.shape,
+            (nBatch, nJoints, 8),
+            f"Skeleton state shape should be ({nBatch}, {nJoints}, 8)",
+        )
+
+        # Test 1: With explicit rest vertices
+        # Note: rest_vertices should have the same batch dimensions as skel_state
+        rest_vertices_base = character.mesh.vertices.astype(np.float32)
+        # Expand to have batch dimension: (nVertices, 3) -> (nBatch, nVertices, 3)
+        rest_vertices_np = np.tile(
+            np.expand_dims(rest_vertices_base, 0), (nBatch, 1, 1)
+        )
+        rest_vertices_torch = torch.from_numpy(rest_vertices_np)
+
+        skinned_geometry = character.skin_points(skel_state_np, rest_vertices_np)
+        skinned_diff_geometry = pym_diff_geometry.skin_points(
+            character, skel_state_torch, rest_vertices_torch
+        )
+
+        self.assertTrue(
+            np.allclose(skinned_geometry, skinned_diff_geometry.numpy(), atol=1e-5),
+            f"Character.skin_points should match diff_geometry.skin_points with explicit rest_vertices. "
+            f"Max difference: {np.max(np.abs(skinned_geometry - skinned_diff_geometry.numpy()))}",
+        )
+
+        # Test 2: Without explicit rest vertices (using default from character.mesh)
+        skinned_geometry_default = character.skin_points(skel_state_np)
+        skinned_diff_geometry_default = pym_diff_geometry.skin_points(
+            character, skel_state_torch
+        )
+
+        self.assertTrue(
+            np.allclose(
+                skinned_geometry_default,
+                skinned_diff_geometry_default.numpy(),
+                atol=1e-5,
+            ),
+            f"Character.skin_points should match diff_geometry.skin_points without rest_vertices. "
+            f"Max difference: {np.max(np.abs(skinned_geometry_default - skinned_diff_geometry_default.numpy()))}",
+        )
+
+        # Test 3: Both approaches should give the same result
+        self.assertTrue(
+            np.allclose(skinned_geometry, skinned_geometry_default, atol=1e-7),
+            "skin_points with explicit rest_vertices should match default rest_vertices from character.mesh",
+        )
+
     def test_compute_vertex_normals_matches(self) -> None:
         """Verify that diff_geometry.compute_vertex_normals matches geometry.compute_vertex_normals."""
         np.random.seed(42)
@@ -572,6 +652,81 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         self.assertTrue(
             np.allclose(positions_geometry, positions_diff_geometry.numpy(), atol=1e-5),
             "diff_geometry.joint_parameters_to_positions should match geometry.joint_parameters_to_positions",
+        )
+
+    def test_skin_points_skeleton_state_vs_matrix(self) -> None:
+        """Verify that Character.skin_points produces same results with skeleton state and matrix formats."""
+        np.random.seed(42)
+
+        # Create a test character with mesh
+        character = pym_geometry.create_test_character()
+
+        nJoints = character.skeleton.size
+        nBatch = 2
+
+        # Create model parameters and convert to skeleton state
+        model_params_np = np.random.rand(
+            nBatch, character.parameter_transform.size
+        ).astype(np.float32)
+        skel_state_np = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_np
+        )
+
+        # Convert skeleton state to transform matrices using pym_skel_state
+        skel_state_torch = torch.from_numpy(skel_state_np)
+        transform_matrices_torch = pym_skel_state.to_matrix(skel_state_torch)
+        transform_matrices_np = transform_matrices_torch.numpy()
+
+        # Verify shapes
+        self.assertEqual(
+            skel_state_np.shape,
+            (nBatch, nJoints, 8),
+            f"Skeleton state shape should be ({nBatch}, {nJoints}, 8)",
+        )
+        self.assertEqual(
+            transform_matrices_np.shape,
+            (nBatch, nJoints, 4, 4),
+            f"Transform matrices shape should be ({nBatch}, {nJoints}, 4, 4)",
+        )
+
+        # Call skin_points with skeleton state format
+        skinned_from_skel_state = character.skin_points(skel_state_np)
+
+        # Call skin_points with transform matrix format
+        skinned_from_matrices = character.skin_points(transform_matrices_np)
+
+        # Compare results - they should be identical
+        max_diff = np.max(np.abs(skinned_from_skel_state - skinned_from_matrices))
+        self.assertTrue(
+            np.allclose(skinned_from_skel_state, skinned_from_matrices, atol=1e-5),
+            f"skin_points with skeleton state should match skin_points with transform matrices. "
+            f"Max difference: {max_diff}",
+        )
+
+        # Also test with explicit rest vertices
+        rest_vertices_np = np.tile(
+            np.expand_dims(character.mesh.vertices.astype(np.float32), 0),
+            (nBatch, 1, 1),
+        )
+
+        skinned_from_skel_state_explicit = character.skin_points(
+            skel_state_np, rest_vertices_np
+        )
+        skinned_from_matrices_explicit = character.skin_points(
+            transform_matrices_np, rest_vertices_np
+        )
+
+        max_diff_explicit = np.max(
+            np.abs(skinned_from_skel_state_explicit - skinned_from_matrices_explicit)
+        )
+        self.assertTrue(
+            np.allclose(
+                skinned_from_skel_state_explicit,
+                skinned_from_matrices_explicit,
+                atol=1e-5,
+            ),
+            f"skin_points with explicit rest_vertices should match between formats. "
+            f"Max difference: {max_diff_explicit}",
         )
 
 

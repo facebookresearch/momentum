@@ -497,4 +497,67 @@ class IntScalarArrayAccessor {
   SourceDtype dtype_;
 };
 
+// Note: TransformInputFormat is defined in array_utility.h
+
+// Unified accessor for transforms that handles both skeleton state and matrix formats.
+// Detects the input format automatically and provides a consistent interface for
+// reading transforms regardless of input format.
+template <typename T>
+class TransformAccessor {
+ public:
+  // Construct from buffer info - auto-detects format based on shape:
+  //   - (..., nJoints, 8) -> SkeletonState format
+  //   - (..., nJoints, 4, 4) -> TransformMatrix format
+  TransformAccessor(
+      const py::buffer_info& bufferInfo,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t nJoints);
+
+  // Convenience constructor that takes a py::buffer and extracts buffer_info.
+  TransformAccessor(py::buffer& buffer, const LeadingDimensions& leadingDims, py::ssize_t nJoints)
+      : TransformAccessor(buffer.request(), leadingDims, nJoints) {}
+
+  // Const convenience constructor
+  TransformAccessor(
+      const py::buffer& buffer,
+      const LeadingDimensions& leadingDims,
+      py::ssize_t nJoints)
+      : TransformAccessor(buffer.request(), leadingDims, nJoints) {}
+
+  // Get the detected input format
+  [[nodiscard]] TransformInputFormat getFormat() const {
+    return format_;
+  }
+
+  // Get the transforms as TransformListT (for use with momentum's skinning functions).
+  // Works for both input formats - skeleton states are converted to transforms,
+  // matrices are decomposed into transforms.
+  momentum::TransformListT<T> getTransforms(std::span<const py::ssize_t> batchIndices) const;
+
+  // Get the transforms as 4x4 matrices (for direct matrix-based skinning).
+  // Works for both input formats - skeleton states are converted to matrices,
+  // matrices are read directly.
+  std::vector<Eigen::Matrix4<T>> getMatrices(std::span<const py::ssize_t> batchIndices) const;
+
+ private:
+  T* data_;
+  py::ssize_t nJoints_{};
+  std::vector<py::ssize_t> strides_;
+  size_t leadingNDim_{};
+  TransformInputFormat format_;
+
+  // Compute the flat offset into the data array for given batch indices.
+  [[nodiscard]] py::ssize_t computeOffset(std::span<const py::ssize_t> batchIndices) const;
+
+  // Internal methods for each format
+  momentum::TransformListT<T> getTransformsFromSkeletonState(
+      std::span<const py::ssize_t> batchIndices) const;
+  momentum::TransformListT<T> getTransformsFromMatrix(
+      std::span<const py::ssize_t> batchIndices) const;
+  std::vector<Eigen::Matrix4<T>> getMatricesFromSkeletonState(
+      std::span<const py::ssize_t> batchIndices) const;
+  std::vector<Eigen::Matrix4<T>> getMatricesFromMatrix(
+      std::span<const py::ssize_t> batchIndices) const;
+};
+
 } // namespace pymomentum

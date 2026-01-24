@@ -386,10 +386,8 @@ class TestMarkerTracking(unittest.TestCase):
 
         # Verify the new function produces the same results as mesh skinning
         # for the same skeleton state (this validates correctness of skin_skinned_locators)
-        rest_vertices = torch.from_numpy(character.mesh.vertices).to(
-            all_skinned_positions.dtype
-        )
-        skinned_mesh = character.skin_points(skeleton_states, rest_vertices)
+        rest_vertices = character.mesh.vertices.astype(np.float32)
+        skinned_mesh = character.skin_points(skeleton_states.numpy(), rest_vertices)
 
         # Extract the positions of our selected vertices from the skinned mesh
         expected_positions = skinned_mesh[
@@ -397,14 +395,15 @@ class TestMarkerTracking(unittest.TestCase):
         ]  # [num_frames, n_locators, 3]
 
         # Compare with our skinned locator results (ensure types match)
-        self.assertEqual(all_skinned_positions.shape, expected_positions.shape)
+        all_skinned_np = all_skinned_positions.numpy()
+        self.assertEqual(all_skinned_np.shape, expected_positions.shape)
         self.assertTrue(
-            torch.allclose(
-                all_skinned_positions.to(expected_positions.dtype),
+            np.allclose(
+                all_skinned_np,
                 expected_positions,
                 atol=1e-5,
             ),
-            f"Skinned locators should match mesh vertices. Max difference: {torch.max(torch.abs(all_skinned_positions.to(expected_positions.dtype) - expected_positions)).item()}",
+            f"Skinned locators should match mesh vertices. Max difference: {np.max(np.abs(all_skinned_np - expected_positions))}",
         )
 
     def test_marker_tracking_basic(self) -> None:
