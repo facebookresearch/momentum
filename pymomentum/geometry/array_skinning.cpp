@@ -123,48 +123,15 @@ py::array skinPointsArray(
       !character.mesh || !character.skinWeights,
       "skin_points: character is missing a mesh or skin weights");
 
-  const auto nVertices = static_cast<py::ssize_t>(character.mesh->vertices.size());
-
-  // Use ArrayChecker to validate transforms and detect format/dtype
+  // Use ArrayChecker to validate inputs and detect format/dtype
   ArrayChecker checker("skin_points");
 
   // Validate transforms (auto-detects skeleton state vs matrix format)
   checker.validateTransforms(skelState, "skel_state", character);
 
-  // Validate rest vertices if provided
-  // Note: rest_vertices can have fewer leading dimensions than skel_state (broadcasting)
-  // So we validate it separately with just shape checks, not updating leadingDims
+  // Validate rest vertices if provided (supports broadcasting with fewer leading dims)
   if (restVertices.has_value()) {
-    py::buffer_info restInfo = restVertices.value().request();
-
-    MT_THROW_IF(
-        restInfo.ndim < 2,
-        "In skin_points, rest_vertices must have at least 2 dimensions, got {}",
-        restInfo.ndim);
-
-    MT_THROW_IF(
-        restInfo.shape[restInfo.ndim - 1] != 3,
-        "In skin_points, rest_vertices last dimension must be 3, got {}",
-        restInfo.shape[restInfo.ndim - 1]);
-
-    MT_THROW_IF(
-        restInfo.shape[restInfo.ndim - 2] != nVertices,
-        "In skin_points, rest_vertices second-to-last dimension must be {} (numVertices), got {}",
-        nVertices,
-        restInfo.shape[restInfo.ndim - 2]);
-
-    // Validate dtype matches skel_state
-    bool isRestFloat64 = (restInfo.format == py::format_descriptor<double>::format());
-    bool isRestFloat32 = (restInfo.format == py::format_descriptor<float>::format());
-    MT_THROW_IF(
-        !isRestFloat64 && !isRestFloat32,
-        "In skin_points, rest_vertices has unsupported dtype {}, expected float32 or float64",
-        restInfo.format);
-    MT_THROW_IF(
-        isRestFloat64 != checker.isFloat64(),
-        "In skin_points, rest_vertices dtype ({}) must match skel_state dtype ({})",
-        isRestFloat64 ? "float64" : "float32",
-        checker.isFloat64() ? "float64" : "float32");
+    checker.validateVertices(restVertices.value(), "rest_vertices", character);
   }
 
   // Get validated arrays for processing
