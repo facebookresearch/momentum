@@ -144,23 +144,20 @@ py::array applyParameterTransformArray(
 py::array applyInverseParameterTransformArray(
     const momentum::InverseParameterTransform& invParamTransform,
     const py::buffer& jointParams) {
+  // Create a dummy character to use validateJointParameters
+  // We only need the skeleton for joint count validation
   const auto nJointParams = static_cast<int>(invParamTransform.numJointParameters());
   const auto nJoints = nJointParams / 7;
 
+  // Create a temporary skeleton with the right number of joints
+  momentum::Skeleton tempSkeleton;
+  tempSkeleton.joints.resize(nJoints);
+  momentum::Character tempCharacter;
+  tempCharacter.skeleton = tempSkeleton;
+
   ArrayChecker checker("InverseParameterTransform.apply");
-  // Accept both structured and flat formats
-  JointParamsShape shape;
-  py::buffer_info bufInfo = jointParams.request();
-  if (bufInfo.ndim >= 2 && bufInfo.shape[bufInfo.ndim - 1] == 7 &&
-      bufInfo.shape[bufInfo.ndim - 2] == nJoints) {
-    // Structured format: (..., nJoints, 7)
-    checker.validateBuffer(jointParams, "joint_parameters", {nJoints, 7}, {"numJoints", "7"});
-    shape = JointParamsShape::Structured;
-  } else {
-    // Flat format: (..., nJointParams)
-    checker.validateBuffer(jointParams, "joint_parameters", {nJointParams}, {"numJointParams"});
-    shape = JointParamsShape::Flat;
-  }
+  JointParamsShape shape =
+      checker.validateJointParameters(jointParams, "joint_parameters", tempCharacter);
 
   return applyInverseParameterTransformImpl(
       invParamTransform, jointParams, checker.getLeadingDimensions(), shape);
@@ -686,24 +683,10 @@ py::array mapJointParametersArray(
   const auto nSrcJoints = static_cast<py::ssize_t>(srcSkeleton.joints.size());
   const auto nTgtJoints = static_cast<py::ssize_t>(tgtSkeleton.joints.size());
 
-  // Detect input format: structured (..., nJoints, 7) or flat (..., nJointParams)
+  // Use ArrayChecker to detect and validate the input format
   ArrayChecker checker("map_joint_parameters");
-  py::buffer_info bufInfo = motionData.request();
-  JointParamsShape inputShape;
-
-  if (bufInfo.ndim >= 2 && bufInfo.shape[bufInfo.ndim - 1] == 7 &&
-      bufInfo.shape[bufInfo.ndim - 2] == nSrcJoints) {
-    // Structured format: (..., nJoints, 7)
-    checker.validateBuffer(
-        motionData, "motion_data", {static_cast<int>(nSrcJoints), 7}, {"numJoints", "7"});
-    inputShape = JointParamsShape::Structured;
-  } else {
-    // Flat format: (..., nJointParams)
-    const auto nSrcJointParams = nSrcJoints * momentum::kParametersPerJoint;
-    checker.validateBuffer(
-        motionData, "motion_data", {static_cast<int>(nSrcJointParams)}, {"numJointParams"});
-    inputShape = JointParamsShape::Flat;
-  }
+  JointParamsShape inputShape =
+      checker.validateJointParameters(motionData, "motion_data", srcCharacter);
 
   const auto& leadingDims = checker.getLeadingDimensions();
 
