@@ -25,15 +25,25 @@ VectorAccessor<T, StrongType>::VectorAccessor(
     : vectorSize_(vectorSize), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Validate that buffer has enough dimensions
+  // Validate that buffer has expected dimensions
   const auto totalNDim = bufferInfo.ndim;
-  const auto expectedNDim = leadingNDim_ + 1; // leading dims + vector dimension
+  const auto numTrailingDims = 1; // vector dimension
+
+  // Buffer can either have:
+  // 1. Full dimensions: leading dims + trailing dims
+  // 2. Just trailing dims (broadcasts along all leading dimensions)
+  const auto expectedFullNDim = leadingNDim_ + numTrailingDims;
+  const auto expectedBroadcastNDim = numTrailingDims;
+  const bool hasLeadingDims = (totalNDim == expectedFullNDim);
+  const bool isBroadcast = (totalNDim == expectedBroadcastNDim);
 
   MT_THROW_IF(
-      totalNDim != expectedNDim,
-      "VectorAccessor: buffer has {} dimensions but expected {} (leading dims: {}, vector dim: 1)",
+      !hasLeadingDims && !isBroadcast,
+      "VectorAccessor: buffer has {} dimensions but expected either {} "
+      "(with leading dims) or {} (broadcast). Leading dims: {}, vector dim: 1",
       totalNDim,
-      expectedNDim,
+      expectedFullNDim,
+      expectedBroadcastNDim,
       leadingNDim_);
 
   // Validate trailing dimension
@@ -44,9 +54,20 @@ VectorAccessor<T, StrongType>::VectorAccessor(
       bufferInfo.shape[totalNDim - 1]);
 
   // Extract strides (convert from bytes to elements)
-  strides_.resize(totalNDim);
-  for (int i = 0; i < totalNDim; ++i) {
-    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  strides_.resize(leadingNDim_ + numTrailingDims);
+
+  if (isBroadcast) {
+    // Buffer has no leading dimensions - set all leading strides to 0 (broadcast)
+    for (size_t i = 0; i < leadingNDim_; ++i) {
+      strides_[i] = 0;
+    }
+    // Trailing stride comes from the buffer
+    strides_[leadingNDim_] = static_cast<py::ssize_t>(bufferInfo.strides[0] / sizeof(T));
+  } else {
+    // Buffer has all dimensions
+    for (int i = 0; i < totalNDim; ++i) {
+      strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+    }
   }
 }
 
@@ -121,12 +142,19 @@ JointParametersAccessor<T>::JointParametersAccessor(
 
   if (shape == JointParamsShape::Structured) {
     // Expected: (..., nJoints, 7)
-    const auto expectedNDim = leadingNDim_ + 2;
+    const auto numTrailingDims = 2;
+    const auto expectedFullNDim = leadingNDim_ + numTrailingDims;
+    const auto expectedBroadcastNDim = numTrailingDims;
+    const bool hasLeadingDims = (totalNDim == expectedFullNDim);
+    const bool isBroadcast = (totalNDim == expectedBroadcastNDim);
+
     MT_THROW_IF(
-        totalNDim != expectedNDim,
-        "JointParametersAccessor (Structured): buffer has {} dimensions but expected {} (leading dims: {}, nJoints dim: 1, params dim: 1)",
+        !hasLeadingDims && !isBroadcast,
+        "JointParametersAccessor (Structured): buffer has {} dimensions but expected either {} "
+        "(with leading dims) or {} (broadcast). Leading dims: {}, nJoints dim: 1, params dim: 1",
         totalNDim,
-        expectedNDim,
+        expectedFullNDim,
+        expectedBroadcastNDim,
         leadingNDim_);
 
     MT_THROW_IF(
@@ -139,14 +167,36 @@ JointParametersAccessor<T>::JointParametersAccessor(
         bufferInfo.shape[totalNDim - 1] != 7,
         "JointParametersAccessor (Structured): last dimension must be 7, got {}",
         bufferInfo.shape[totalNDim - 1]);
+
+    // Extract strides
+    strides_.resize(leadingNDim_ + numTrailingDims);
+    if (isBroadcast) {
+      for (size_t i = 0; i < leadingNDim_; ++i) {
+        strides_[i] = 0;
+      }
+      for (size_t i = 0; i < numTrailingDims; ++i) {
+        strides_[leadingNDim_ + i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+      }
+    } else {
+      for (int i = 0; i < totalNDim; ++i) {
+        strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+      }
+    }
   } else { // JointParamsShape::Flat
     // Expected: (..., nJointParams)
-    const auto expectedNDim = leadingNDim_ + 1;
+    const auto numTrailingDims = 1;
+    const auto expectedFullNDim = leadingNDim_ + numTrailingDims;
+    const auto expectedBroadcastNDim = numTrailingDims;
+    const bool hasLeadingDims = (totalNDim == expectedFullNDim);
+    const bool isBroadcast = (totalNDim == expectedBroadcastNDim);
+
     MT_THROW_IF(
-        totalNDim != expectedNDim,
-        "JointParametersAccessor (Flat): buffer has {} dimensions but expected {} (leading dims: {}, params dim: 1)",
+        !hasLeadingDims && !isBroadcast,
+        "JointParametersAccessor (Flat): buffer has {} dimensions but expected either {} "
+        "(with leading dims) or {} (broadcast). Leading dims: {}, params dim: 1",
         totalNDim,
-        expectedNDim,
+        expectedFullNDim,
+        expectedBroadcastNDim,
         leadingNDim_);
 
     MT_THROW_IF(
@@ -154,12 +204,19 @@ JointParametersAccessor<T>::JointParametersAccessor(
         "JointParametersAccessor (Flat): last dimension must be {} (nJoints * 7), got {}",
         nJointParams,
         bufferInfo.shape[totalNDim - 1]);
-  }
 
-  // Extract strides (convert from bytes to elements)
-  strides_.resize(totalNDim);
-  for (int i = 0; i < totalNDim; ++i) {
-    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+    // Extract strides
+    strides_.resize(leadingNDim_ + numTrailingDims);
+    if (isBroadcast) {
+      for (size_t i = 0; i < leadingNDim_; ++i) {
+        strides_[i] = 0;
+      }
+      strides_[leadingNDim_] = static_cast<py::ssize_t>(bufferInfo.strides[0] / sizeof(T));
+    } else {
+      for (int i = 0; i < totalNDim; ++i) {
+        strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+      }
+    }
   }
 }
 
@@ -256,16 +313,22 @@ SkeletonStateAccessor<T>::SkeletonStateAccessor(
     : nJoints_(nJoints), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Validate that buffer has enough dimensions
+  // Validate that buffer has expected dimensions
   // Expected: (..., nJoints, 8) where 8 = [tx, ty, tz, rx, ry, rz, rw, scale]
   const auto totalNDim = bufferInfo.ndim;
-  const auto expectedNDim = leadingNDim_ + 2;
+  const auto numTrailingDims = 2;
+  const auto expectedFullNDim = leadingNDim_ + numTrailingDims;
+  const auto expectedBroadcastNDim = numTrailingDims;
+  const bool hasLeadingDims = (totalNDim == expectedFullNDim);
+  const bool isBroadcast = (totalNDim == expectedBroadcastNDim);
 
   MT_THROW_IF(
-      totalNDim != expectedNDim,
-      "SkeletonStateAccessor: buffer has {} dimensions but expected {} (leading dims: {}, nJoints dim: 1, params dim: 1)",
+      !hasLeadingDims && !isBroadcast,
+      "SkeletonStateAccessor: buffer has {} dimensions but expected either {} "
+      "(with leading dims) or {} (broadcast). Leading dims: {}, nJoints dim: 1, params dim: 1",
       totalNDim,
-      expectedNDim,
+      expectedFullNDim,
+      expectedBroadcastNDim,
       leadingNDim_);
 
   // Validate trailing dimensions
@@ -281,9 +344,22 @@ SkeletonStateAccessor<T>::SkeletonStateAccessor(
       bufferInfo.shape[totalNDim - 1]);
 
   // Extract strides (convert from bytes to elements)
-  strides_.resize(totalNDim);
-  for (int i = 0; i < totalNDim; ++i) {
-    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  strides_.resize(leadingNDim_ + numTrailingDims);
+
+  if (isBroadcast) {
+    // Buffer has no leading dimensions - set all leading strides to 0 (broadcast)
+    for (size_t i = 0; i < leadingNDim_; ++i) {
+      strides_[i] = 0;
+    }
+    // Trailing strides come from the buffer
+    for (size_t i = 0; i < numTrailingDims; ++i) {
+      strides_[leadingNDim_ + i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+    }
+  } else {
+    // Buffer has all dimensions
+    for (int i = 0; i < totalNDim; ++i) {
+      strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+    }
   }
 }
 
@@ -387,16 +463,27 @@ VectorArrayAccessor<T, Dim>::VectorArrayAccessor(
     : nElements_(nElements), leadingNDim_(leadingDims.ndim()) {
   data_ = static_cast<T*>(bufferInfo.ptr);
 
-  // Validate that buffer has enough dimensions
+  // Validate that buffer has expected dimensions
   const auto totalNDim = bufferInfo.ndim;
-  const auto expectedNDim = leadingNDim_ + 2; // leading dims + element dim + vector component dim
+  const auto numTrailingDims = 2; // element dim + vector component dim
+
+  // Buffer can either have:
+  // 1. Full dimensions: leading dims + trailing dims
+  // 2. Just trailing dims (broadcasts along all leading dimensions)
+  const auto expectedFullNDim = leadingNDim_ + numTrailingDims;
+  const auto expectedBroadcastNDim = numTrailingDims;
+  const bool hasLeadingDims = (totalNDim == expectedFullNDim);
+  const bool isBroadcast = (totalNDim == expectedBroadcastNDim);
 
   MT_THROW_IF(
-      totalNDim != expectedNDim,
-      "VectorArrayAccessor: buffer has {} dimensions but expected {} (leading dims: {}, element dim: 1, component dim: 1)",
+      !hasLeadingDims && !isBroadcast,
+      "VectorArrayAccessor: buffer has {} dimensions but expected either {} "
+      "(with leading dims) or {} (broadcast). Leading dims: {}, trailing dims: {}",
       totalNDim,
-      expectedNDim,
-      leadingNDim_);
+      expectedFullNDim,
+      expectedBroadcastNDim,
+      leadingNDim_,
+      numTrailingDims);
 
   // Validate trailing dimensions
   MT_THROW_IF(
@@ -412,9 +499,22 @@ VectorArrayAccessor<T, Dim>::VectorArrayAccessor(
       bufferInfo.shape[totalNDim - 2]);
 
   // Extract strides (convert from bytes to elements)
-  strides_.resize(totalNDim);
-  for (int i = 0; i < totalNDim; ++i) {
-    strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+  strides_.resize(leadingNDim_ + numTrailingDims);
+
+  if (isBroadcast) {
+    // Buffer has no leading dimensions - set all leading strides to 0 (broadcast)
+    for (size_t i = 0; i < leadingNDim_; ++i) {
+      strides_[i] = 0;
+    }
+    // Trailing strides come from the buffer
+    for (size_t i = 0; i < numTrailingDims; ++i) {
+      strides_[leadingNDim_ + i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+    }
+  } else {
+    // Buffer has all dimensions
+    for (int i = 0; i < totalNDim; ++i) {
+      strides_[i] = static_cast<py::ssize_t>(bufferInfo.strides[i] / sizeof(T));
+    }
   }
 
   // Cache the row and column strides for the trailing dimensions

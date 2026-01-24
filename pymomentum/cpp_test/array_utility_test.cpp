@@ -167,6 +167,19 @@ TEST(ArrayUtility, LeadingDimensions_EmptyLeadingDims) {
   EXPECT_TRUE(result.dims.empty());
   EXPECT_EQ(1, result.totalBatchElements());
   EXPECT_TRUE(result.isScalar());
+
+  // Empty with non-empty should be compatible (broadcasts)
+  ld1.dims = {};
+  ld2.dims = {5, 3};
+  EXPECT_TRUE(ld1.broadcastCompatibleWith(ld2));
+  EXPECT_TRUE(ld2.broadcastCompatibleWith(ld1));
+
+  // Broadcasting empty with non-empty should return non-empty
+  result = ld1.broadcastWith(ld2);
+  EXPECT_EQ((std::vector<py::ssize_t>{5, 3}), result.dims);
+
+  result = ld2.broadcastWith(ld1);
+  EXPECT_EQ((std::vector<py::ssize_t>{5, 3}), result.dims);
 }
 
 TEST(ArrayUtility, LeadingDimensions_ComplexBroadcasting) {
@@ -446,5 +459,170 @@ TEST(ArrayAccessors, SkeletonStateAccessor_BufferInfo_Roundtrip) {
     EXPECT_FLOAT_EQ(originalTransforms[i].rotation.y(), retrieved[i].rotation.y());
     EXPECT_FLOAT_EQ(originalTransforms[i].rotation.z(), retrieved[i].rotation.z());
     EXPECT_FLOAT_EQ(originalTransforms[i].scale, retrieved[i].scale);
+  }
+}
+
+TEST(ArrayAccessors, VectorArrayAccessor_BroadcastFromNoLeadingDims) {
+  const int nVertices = 10;
+  const int dim = 3;
+
+  // Create buffer WITHOUT leading dimensions: shape (nVertices, 3)
+  auto bufferInfo = createTestBuffer<double>({nVertices, dim});
+
+  // But we want to use it with leading dimensions {2, 3}
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {2, 3};
+
+  // Create accessor - it should detect that buffer lacks leading dims and set strides to 0
+  pymomentum::VectorArrayAccessor<double, 3> accessor(bufferInfo, leadingDims, nVertices);
+
+  // Set data at "flat" index {0}  (buffer only has one copy of data)
+  std::vector<Eigen::Vector3d> testData(nVertices);
+  for (int i = 0; i < nVertices; ++i) {
+    testData[i] = Eigen::Vector3d(i * 1.0, i * 2.0, i * 3.0);
+  }
+
+  // Access via empty batch indices to write to the buffer
+  auto view = accessor.view({});
+  for (int i = 0; i < nVertices; ++i) {
+    view.set(i, testData[i]);
+  }
+
+  // Now access via different batch indices - should all see the SAME data (broadcasting)
+  auto retrieved00 = accessor.view({0, 0}).get(0);
+  auto retrieved01 = accessor.view({0, 1}).get(0);
+  auto retrieved10 = accessor.view({1, 0}).get(0);
+  auto retrieved12 = accessor.view({1, 2}).get(0);
+
+  // All should be equal to the original data
+  EXPECT_DOUBLE_EQ(testData[0].x(), retrieved00.x());
+  EXPECT_DOUBLE_EQ(testData[0].y(), retrieved00.y());
+  EXPECT_DOUBLE_EQ(testData[0].z(), retrieved00.z());
+
+  EXPECT_DOUBLE_EQ(testData[0].x(), retrieved01.x());
+  EXPECT_DOUBLE_EQ(testData[0].x(), retrieved10.x());
+  EXPECT_DOUBLE_EQ(testData[0].x(), retrieved12.x());
+}
+
+TEST(ArrayAccessors, VectorAccessor_BroadcastFromNoLeadingDims) {
+  const int vectorSize = 7;
+
+  // Create buffer WITHOUT leading dimensions: shape (vectorSize,)
+  auto bufferInfo = createTestBuffer<float>({vectorSize});
+
+  // But we want to use it with leading dimensions {3, 2}
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {3, 2};
+
+  // Create accessor - it should detect that buffer lacks leading dims and set strides to 0
+  pymomentum::VectorAccessor<float, momentum::ModelParametersT> accessor(
+      bufferInfo, leadingDims, vectorSize);
+
+  // Create test data
+  Eigen::VectorXf testVec(vectorSize);
+  for (int i = 0; i < vectorSize; ++i) {
+    testVec(i) = static_cast<float>(i * 0.5f);
+  }
+  momentum::ModelParametersT<float> testParams(testVec);
+
+  // Set via empty batch indices
+  std::array<py::ssize_t, 0> emptyIndices{};
+  accessor.set(emptyIndices, testParams);
+
+  // Get via different batch indices - should all return the SAME data (broadcasting)
+  std::array<py::ssize_t, 2> idx00{0, 0};
+  std::array<py::ssize_t, 2> idx01{0, 1};
+  std::array<py::ssize_t, 2> idx21{2, 1};
+  auto retrieved00 = accessor.get(idx00);
+  auto retrieved01 = accessor.get(idx01);
+  auto retrieved21 = accessor.get(idx21);
+
+  // All should be equal to the original data
+  for (int i = 0; i < vectorSize; ++i) {
+    EXPECT_FLOAT_EQ(testParams.v(i), retrieved00.v(i));
+    EXPECT_FLOAT_EQ(testParams.v(i), retrieved01.v(i));
+    EXPECT_FLOAT_EQ(testParams.v(i), retrieved21.v(i));
+  }
+}
+
+TEST(ArrayAccessors, JointParametersAccessor_BroadcastFromNoLeadingDims_Structured) {
+  const int nJoints = 3;
+
+  // Create buffer WITHOUT leading dimensions: shape (nJoints, 7)
+  auto bufferInfo = createTestBuffer<double>({nJoints, 7});
+
+  // But we want to use it with leading dimensions {2, 4}
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {2, 4};
+
+  // Create accessor - it should detect that buffer lacks leading dims and set strides to 0
+  pymomentum::JointParametersAccessor<double> accessor(
+      bufferInfo, leadingDims, nJoints, pymomentum::JointParamsShape::Structured);
+
+  // Create test joint parameters
+  Eigen::VectorXd jpVec(nJoints * 7);
+  for (int i = 0; i < nJoints * 7; ++i) {
+    jpVec(i) = static_cast<double>(i * 0.1);
+  }
+  momentum::JointParametersT<double> testParams(jpVec);
+
+  // Set via empty batch indices
+  std::array<py::ssize_t, 0> emptyIndices{};
+  accessor.set(emptyIndices, testParams);
+
+  // Get via different batch indices - should all return the SAME data (broadcasting)
+  std::array<py::ssize_t, 2> idx00{0, 0};
+  std::array<py::ssize_t, 2> idx03{0, 3};
+  std::array<py::ssize_t, 2> idx11{1, 1};
+  auto retrieved00 = accessor.get(idx00);
+  auto retrieved03 = accessor.get(idx03);
+  auto retrieved11 = accessor.get(idx11);
+
+  // All should be equal to the original data
+  for (int i = 0; i < nJoints * 7; ++i) {
+    EXPECT_DOUBLE_EQ(testParams.v(i), retrieved00.v(i));
+    EXPECT_DOUBLE_EQ(testParams.v(i), retrieved03.v(i));
+    EXPECT_DOUBLE_EQ(testParams.v(i), retrieved11.v(i));
+  }
+}
+
+TEST(ArrayAccessors, SkeletonStateAccessor_BroadcastFromNoLeadingDims) {
+  const int nJoints = 2;
+
+  // Create buffer WITHOUT leading dimensions: shape (nJoints, 8)
+  auto bufferInfo = createTestBuffer<float>({nJoints, 8});
+
+  // But we want to use it with leading dimensions {3}
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {3};
+
+  // Create accessor - it should detect that buffer lacks leading dims and set strides to 0
+  pymomentum::SkeletonStateAccessor<float> accessor(bufferInfo, leadingDims, nJoints);
+
+  // Create test transforms
+  momentum::TransformListT<float> testTransforms(nJoints);
+  for (int i = 0; i < nJoints; ++i) {
+    testTransforms[i].translation = Eigen::Vector3f(i * 1.0f, i * 2.0f, i * 3.0f);
+    testTransforms[i].rotation = Eigen::Quaternionf(1.0f, 0.0f, 0.0f, 0.0f);
+    testTransforms[i].scale = 1.0f + i * 0.1f;
+  }
+
+  // Set via empty batch indices
+  std::array<py::ssize_t, 0> emptyIndices{};
+  accessor.setTransforms(emptyIndices, testTransforms);
+
+  // Get via different batch indices - should all return the SAME data (broadcasting)
+  std::array<py::ssize_t, 1> idx0{0};
+  std::array<py::ssize_t, 1> idx1{1};
+  std::array<py::ssize_t, 1> idx2{2};
+  auto retrieved0 = accessor.getTransforms(idx0);
+  auto retrieved1 = accessor.getTransforms(idx1);
+  auto retrieved2 = accessor.getTransforms(idx2);
+
+  // All should be equal to the original data
+  for (int i = 0; i < nJoints; ++i) {
+    EXPECT_FLOAT_EQ(testTransforms[i].translation.x(), retrieved0[i].translation.x());
+    EXPECT_FLOAT_EQ(testTransforms[i].translation.x(), retrieved1[i].translation.x());
+    EXPECT_FLOAT_EQ(testTransforms[i].translation.x(), retrieved2[i].translation.x());
   }
 }

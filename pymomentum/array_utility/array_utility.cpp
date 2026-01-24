@@ -40,6 +40,12 @@ bool LeadingDimensions::isScalar() const {
 }
 
 bool LeadingDimensions::broadcastCompatibleWith(const LeadingDimensions& other) const {
+  // If either has no leading dimensions, they're compatible
+  // (the one without leading dims broadcasts to match the other)
+  if (dims.empty() || other.dims.empty()) {
+    return true;
+  }
+
   // Must have same number of leading dimensions
   if (dims.size() != other.dims.size()) {
     return false;
@@ -55,6 +61,16 @@ bool LeadingDimensions::broadcastCompatibleWith(const LeadingDimensions& other) 
 }
 
 LeadingDimensions LeadingDimensions::broadcastWith(const LeadingDimensions& other) const {
+  // If this has no leading dimensions, return other
+  if (dims.empty()) {
+    return other;
+  }
+
+  // If other has no leading dimensions, return this
+  if (other.dims.empty()) {
+    return *this;
+  }
+
   MT_THROW_IF(
       dims.size() != other.dims.size(),
       "Cannot broadcast leading dimensions of different sizes: {} vs {}",
@@ -143,28 +159,37 @@ void ArrayChecker::validateAndUpdateLeadingDims(
     leadingDimsSet_ = true;
   } else {
     // Subsequent buffers - validate and broadcast
-    MT_THROW_IF(
-        leadingDims_.ndim() != bufLeadingDims.ndim(),
-        "In {}, buffer argument {} has {} leading dimensions but expected {} "
-        "(to match previous buffers). Buffer has shape {}.",
-        functionName_,
-        bufferName,
-        bufLeadingDims.ndim(),
-        leadingDims_.ndim(),
-        formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
+    // Special case: if this buffer has no leading dimensions, it broadcasts to match
+    // If the existing leading dims are empty but this one is not, update to use this one
+    if (bufLeadingDims.dims.empty() || leadingDims_.dims.empty()) {
+      // One or both have no leading dimensions - they're compatible
+      // Update to use the non-empty one (or keep empty if both are empty)
+      leadingDims_ = leadingDims_.broadcastWith(bufLeadingDims);
+    } else {
+      // Both have leading dimensions - they must have the same count
+      MT_THROW_IF(
+          leadingDims_.ndim() != bufLeadingDims.ndim(),
+          "In {}, buffer argument {} has {} leading dimensions but expected {} "
+          "(to match previous buffers). Buffer has shape {}.",
+          functionName_,
+          bufferName,
+          bufLeadingDims.ndim(),
+          leadingDims_.ndim(),
+          formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
 
-    MT_THROW_IF(
-        !leadingDims_.broadcastCompatibleWith(bufLeadingDims),
-        "In {}, buffer argument {} has incompatible leading dimensions. "
-        "Expected dimensions broadcastable with {} but got {}. Buffer has shape {}.",
-        functionName_,
-        bufferName,
-        formatArrayDims(leadingDims_.dims),
-        formatArrayDims(bufLeadingDims.dims),
-        formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
+      MT_THROW_IF(
+          !leadingDims_.broadcastCompatibleWith(bufLeadingDims),
+          "In {}, buffer argument {} has incompatible leading dimensions. "
+          "Expected dimensions broadcastable with {} but got {}. Buffer has shape {}.",
+          functionName_,
+          bufferName,
+          formatArrayDims(leadingDims_.dims),
+          formatArrayDims(bufLeadingDims.dims),
+          formatArrayDims(std::vector<py::ssize_t>(bufInfo.shape.begin(), bufInfo.shape.end())));
 
-    // Update leading dims with broadcasted result
-    leadingDims_ = leadingDims_.broadcastWith(bufLeadingDims);
+      // Update leading dims with broadcasted result
+      leadingDims_ = leadingDims_.broadcastWith(bufLeadingDims);
+    }
   }
 }
 
