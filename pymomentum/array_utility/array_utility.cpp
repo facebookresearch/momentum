@@ -15,6 +15,88 @@
 
 namespace pymomentum {
 
+namespace {
+
+// Detected dtype categories for buffer validation
+enum class DetectedDtype { Float32, Float64, Int32, Int64, UInt32, UInt64, Unknown };
+
+// Detect the dtype of a buffer from its format string and item size.
+// Uses both format code and itemsize for cross-platform safety:
+// On LP64 (Linux/macOS), 'l' is 64-bit; on LLP64 (Windows), 'l' is 32-bit.
+DetectedDtype detectDtype(const py::buffer_info& bufInfo) {
+  const std::string& fmt = bufInfo.format;
+  const auto itemsize = bufInfo.itemsize;
+
+  // Check float types
+  if (fmt == py::format_descriptor<float>::format()) {
+    return DetectedDtype::Float32;
+  }
+  if (fmt == py::format_descriptor<double>::format()) {
+    return DetectedDtype::Float64;
+  }
+
+  // Check for signed integer formats: 'i' (int), 'l' (long), 'q' (long long)
+  const bool isSignedFormat =
+      (fmt == py::format_descriptor<int32_t>::format() ||
+       fmt == py::format_descriptor<int>::format() ||
+       fmt == py::format_descriptor<int64_t>::format() || fmt == "l");
+  if (isSignedFormat) {
+    if (itemsize == 4) {
+      return DetectedDtype::Int32;
+    }
+    if (itemsize == 8) {
+      return DetectedDtype::Int64;
+    }
+  }
+
+  // Check for unsigned integer formats: 'I' (unsigned int), 'L' (unsigned long), 'Q' (unsigned
+  // long long)
+  const bool isUnsignedFormat =
+      (fmt == py::format_descriptor<uint32_t>::format() ||
+       fmt == py::format_descriptor<uint64_t>::format() || fmt == "L");
+  if (isUnsignedFormat) {
+    if (itemsize == 4) {
+      return DetectedDtype::UInt32;
+    }
+    if (itemsize == 8) {
+      return DetectedDtype::UInt64;
+    }
+  }
+
+  return DetectedDtype::Unknown;
+}
+
+const char* getDtypeName(DetectedDtype dtype) {
+  switch (dtype) {
+    case DetectedDtype::Float32:
+      return "float32";
+    case DetectedDtype::Float64:
+      return "float64";
+    case DetectedDtype::Int32:
+      return "int32";
+    case DetectedDtype::Int64:
+      return "int64";
+    case DetectedDtype::UInt32:
+      return "uint32";
+    case DetectedDtype::UInt64:
+      return "uint64";
+    case DetectedDtype::Unknown:
+      return "unknown";
+  }
+  return "unknown";
+}
+
+bool isFloatingPoint(DetectedDtype dtype) {
+  return dtype == DetectedDtype::Float32 || dtype == DetectedDtype::Float64;
+}
+
+bool isInteger(DetectedDtype dtype) {
+  return dtype == DetectedDtype::Int32 || dtype == DetectedDtype::Int64 ||
+      dtype == DetectedDtype::UInt32 || dtype == DetectedDtype::UInt64;
+}
+
+} // namespace
+
 // ============================================================================
 // LeadingDimensions implementation
 // ============================================================================
@@ -101,42 +183,62 @@ ArrayChecker::ArrayChecker(const char* functionName, ArrayDtype expectedDtype)
     : functionName_(functionName), requestedDtype_(expectedDtype) {}
 
 void ArrayChecker::detectAndValidateDtype(const py::buffer_info& bufInfo, const char* bufferName) {
-  bool isFloat32 = (bufInfo.format == py::format_descriptor<float>::format());
-  bool isFloat64 = (bufInfo.format == py::format_descriptor<double>::format());
+  const DetectedDtype dtype = detectDtype(bufInfo);
 
-  if (!isFloat32 && !isFloat64) {
-    MT_THROW(
-        "In {}, buffer argument {} has dtype {} but expected float32 or float64",
-        functionName_,
-        bufferName,
-        bufInfo.format);
-  }
+  MT_THROW_IF(
+      dtype == DetectedDtype::Unknown,
+      "In {}, buffer argument {} has dtype {} but expected float32, float64, or integer "
+      "(int32, int64, uint32, uint64)",
+      functionName_,
+      bufferName,
+      bufInfo.format);
 
-  ArrayDtype bufDtype = isFloat64 ? ArrayDtype::Float64 : ArrayDtype::Float32;
+  const char* dtypeName = getDtypeName(dtype);
+  const bool isFloat = isFloatingPoint(dtype);
+  const bool isInt = isInteger(dtype);
 
-  if (detectedDtype_ == ArrayDtype::Auto) {
-    // First buffer - detect dtype
-    if (requestedDtype_ != ArrayDtype::Auto) {
-      // User requested specific dtype - validate
-      MT_THROW_IF(
-          requestedDtype_ != bufDtype,
-          "In {}, buffer argument {} has dtype {} but {} was requested",
-          functionName_,
-          bufferName,
-          isFloat64 ? "float64" : "float32",
-          requestedDtype_ == ArrayDtype::Float64 ? "float64" : "float32");
-    }
-    detectedDtype_ = bufDtype;
-  } else {
-    // Subsequent buffers - must match first
+  // Validate against requested dtype if specified
+  if (requestedDtype_ == ArrayDtype::FloatingPoint) {
     MT_THROW_IF(
-        detectedDtype_ != bufDtype,
-        "In {}, dtype mismatch: first buffer was {}, but {} is {}",
+        !isFloat,
+        "In {}, buffer argument {} has dtype {} but floating point (float32 or float64) was "
+        "requested",
         functionName_,
-        detectedDtype_ == ArrayDtype::Float64 ? "float64" : "float32",
         bufferName,
-        isFloat64 ? "float64" : "float32");
+        dtypeName);
+  } else if (requestedDtype_ == ArrayDtype::Integer) {
+    MT_THROW_IF(
+        !isInt,
+        "In {}, buffer argument {} has dtype {} but integer (int32, int64, uint32, or uint64) was "
+        "requested",
+        functionName_,
+        bufferName,
+        dtypeName);
   }
+
+  // For floating point types, ensure all match (float32 vs float64)
+  if (isFloat) {
+    FloatType currentFloatType =
+        (dtype == DetectedDtype::Float64) ? FloatType::Float64 : FloatType::Float32;
+
+    if (detectedFloatType_ == FloatType::None) {
+      // First float buffer - record its type
+      detectedFloatType_ = currentFloatType;
+    } else {
+      // Subsequent float buffer - must match first
+      MT_THROW_IF(
+          detectedFloatType_ != currentFloatType,
+          "In {}, floating point dtype mismatch: first floating point buffer was {}, but {} is {}",
+          functionName_,
+          (detectedFloatType_ == FloatType::Float64 ? "float64" : "float32"),
+          bufferName,
+          dtypeName);
+    }
+  }
+
+  // Integer types: int32, int64, uint32, uint64 are all supported
+  // Note: We don't enforce that all integer arrays have the same type,
+  // since our accessors handle on-the-fly conversion to int.
 }
 
 void ArrayChecker::validateAndUpdateLeadingDims(

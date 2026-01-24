@@ -626,3 +626,33 @@ TEST(ArrayAccessors, SkeletonStateAccessor_BroadcastFromNoLeadingDims) {
     EXPECT_FLOAT_EQ(testTransforms[i].translation.x(), retrieved2[i].translation.x());
   }
 }
+
+TEST(ArrayAccessors, VectorArrayAccessor_Int32) {
+  const int nElements = 5;
+  const int dim = 3;
+
+  // Create buffer with int32: shape (2, nElements, 3)
+  auto bufferInfo = createTestBuffer<int32_t>({2, nElements, dim});
+  pymomentum::LeadingDimensions leadingDims;
+  leadingDims.dims = {2};
+
+  // Create accessor
+  pymomentum::VectorArrayAccessor<int32_t, 3> accessor(bufferInfo, leadingDims, nElements);
+
+  // Set test data
+  std::vector<Eigen::Vector3i> testData(nElements);
+  for (int i = 0; i < nElements; ++i) {
+    testData[i] = Eigen::Vector3i(i * 10, i * 20, i * 30);
+  }
+
+  auto view = accessor.view({0});
+  for (int i = 0; i < nElements; ++i) {
+    view.set(i, testData[i]);
+  }
+
+  // Verify roundtrip
+  auto retrieved = accessor.view({0}).get(0);
+  EXPECT_EQ(testData[0].x(), retrieved.x());
+  EXPECT_EQ(testData[0].y(), retrieved.y());
+  EXPECT_EQ(testData[0].z(), retrieved.z());
+}

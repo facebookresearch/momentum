@@ -213,7 +213,7 @@ class SkeletonStateAccessor {
 // Provides both bulk operations (get/set all elements) and element-level access via ElementView.
 //
 // Template parameters:
-//   T   - scalar type (float, double)
+//   T   - scalar type (float, double, int32_t)
 //   Dim - dimension of each vector (e.g., 3 for xyz positions/normals)
 //
 // Usage pattern:
