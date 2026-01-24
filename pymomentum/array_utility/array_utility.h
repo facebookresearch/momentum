@@ -35,8 +35,8 @@ enum class TransformInputFormat {
 
 // Enum to specify expected dtype
 enum class ArrayDtype {
-  Float32,
-  Float64,
+  FloatingPoint, // float32 or float64 (all must match exactly)
+  Integer, // int32, int64, uint32, or uint64
   Auto // Auto-detect from first array
 };
 
@@ -138,14 +138,9 @@ class ArrayChecker {
   // Get bound variable value (for negative indices in trailingDims)
   int64_t getBoundValue(int idx) const;
 
-  // Get the detected dtype (Float32 or Float64)
-  ArrayDtype getDetectedDtype() const {
-    return detectedDtype_;
-  }
-
   // Returns true if dtype is Float64
   bool isFloat64() const {
-    return detectedDtype_ == ArrayDtype::Float64;
+    return detectedFloatType_ == FloatType::Float64;
   }
 
   // Get leading dimensions (for iteration and output array creation)
@@ -159,9 +154,15 @@ class ArrayChecker {
   }
 
  private:
+  enum class FloatType {
+    Float32,
+    Float64,
+    None // No float buffer seen yet
+  };
+
   const char* functionName_;
   ArrayDtype requestedDtype_;
-  ArrayDtype detectedDtype_ = ArrayDtype::Auto;
+  FloatType detectedFloatType_ = FloatType::None; // Track float type to ensure consistency
   LeadingDimensions leadingDims_;
   bool leadingDimsSet_ = false;
   std::unordered_map<int, int64_t> boundVariableSizes_;
