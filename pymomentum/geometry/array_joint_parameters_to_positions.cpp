@@ -26,9 +26,9 @@ namespace {
 template <typename T>
 py::array_t<T> jointParametersToPositionsImpl(
     const momentum::Character& character,
-    const py::array& jointParams,
+    const py::buffer& jointParams,
     const IntScalarArrayAccessor& parentsAcc,
-    const py::array& offsets,
+    const py::buffer& offsets,
     const LeadingDimensions& leadingDims,
     py::ssize_t nPoints,
     JointParamsShape shape) {
@@ -111,45 +111,36 @@ py::array jointParametersToPositionsArray(
   JointParamsShape shape =
       checker.validateJointParameters(jointParameters, "joint_parameters", character);
 
-  // Cast offsets to numpy array for validation
-  py::array offsetsArr = py::array::ensure(offsets);
-
-  // Get parents array info for nPoints
+  // Get nPoints from parents buffer
   py::buffer_info parentsBuf = parents.request();
-  MT_THROW_IF(parentsBuf.ndim != 1, "parents must be a 1D array");
+  MT_THROW_IF(
+      parentsBuf.ndim != 1,
+      "joint_parameters_to_positions: parents must be a 1D array, got {}D",
+      parentsBuf.ndim);
   const auto nPoints = static_cast<py::ssize_t>(parentsBuf.shape[0]);
 
   // Create type-erased accessor for parents (handles int32, int64, uint32, uint64)
+  // This validates the dtype and provides on-the-fly conversion to int
   IntScalarArrayAccessor parentsAcc(parents, nPoints);
 
-  // Validate offsets
-  py::buffer_info offsetsBuf = offsetsArr.request();
-  MT_THROW_IF(offsetsBuf.ndim != 2, "offsets must be a 2D array of shape [nPoints, 3]");
-  MT_THROW_IF(
-      offsetsBuf.shape[0] != nPoints || offsetsBuf.shape[1] != 3,
-      "offsets must have shape [nPoints, 3], got [{}, {}]",
-      offsetsBuf.shape[0],
-      offsetsBuf.shape[1]);
+  // Validate offsets buffer: [nPoints, 3] array of floats (must match nPoints from parents)
+  checker.validateBuffer(offsets, "offsets", {static_cast<int>(nPoints), 3}, {"numPoints", "3"});
 
   if (checker.isFloat64()) {
-    // Convert offsets to float64 if needed
-    py::array_t<double> offsetsF64 = py::array_t<double, py::array::c_style>::ensure(offsetsArr);
     return jointParametersToPositionsImpl<double>(
         character,
         jointParameters,
         parentsAcc,
-        offsetsF64,
+        offsets,
         checker.getLeadingDimensions(),
         nPoints,
         shape);
   } else {
-    // Convert offsets to float32 if needed
-    py::array_t<float> offsetsF32 = py::array_t<float, py::array::c_style>::ensure(offsetsArr);
     return jointParametersToPositionsImpl<float>(
         character,
         jointParameters,
         parentsAcc,
-        offsetsF32,
+        offsets,
         checker.getLeadingDimensions(),
         nPoints,
         shape);
