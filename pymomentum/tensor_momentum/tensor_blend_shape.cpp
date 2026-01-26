@@ -69,9 +69,8 @@ variable_list ApplyBlendShapeCoefficientsFunction::forward(
   const int64_t nCoeffs = checker.getBoundValue(nCoeffs_idx);
   const int64_t nBatch = checker.getBatchSize();
 
-  const momentum::BlendShapeBase* blendShapePtr =
-      py::cast<const momentum::BlendShapeBase*>(blendShape_in);
-  const momentum::BlendShape* blendShape = dynamic_cast<const momentum::BlendShape*>(blendShapePtr);
+  const auto* blendShapePtr = py::cast<const momentum::BlendShapeBase*>(blendShape_in);
+  const auto* blendShape = dynamic_cast<const momentum::BlendShape*>(blendShapePtr);
 
   MT_THROW_IF(
       nCoeffs > blendShapePtr->shapeSize(),
