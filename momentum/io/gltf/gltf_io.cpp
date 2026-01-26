@@ -1427,7 +1427,8 @@ fx::gltf::Document makeCharacterDocument(
     const IdentityParameters& offsets,
     std::span<const std::vector<Marker>> markerSequence,
     bool embedResource,
-    const FileSaveOptions& options) {
+    const FileSaveOptions& options,
+    std::span<const int64_t> timestamps) {
   GltfBuilder fileBuilder;
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
   if (!kCharacterIsEmpty) {
@@ -1436,7 +1437,8 @@ fx::gltf::Document makeCharacterDocument(
   // Add potential motion or offsets, even if the character is empty
   // (it could be a motion database for example)
   if ((!std::get<0>(motion).empty()) || (!std::get<0>(offsets).empty())) {
-    fileBuilder.addMotion(character, fps, motion, offsets, options.extensions);
+    fileBuilder.addMotion(
+        character, fps, motion, offsets, options.extensions, "default", timestamps);
   }
   if (!markerSequence.empty()) {
     fileBuilder.addMarkerSequence(fps, markerSequence);
@@ -1522,10 +1524,11 @@ void saveGltfCharacter(
     const MotionParameters& motion,
     const IdentityParameters& offsets,
     std::span<const std::vector<Marker>> markerSequence,
-    const FileSaveOptions& options) {
+    const FileSaveOptions& options,
+    std::span<const int64_t> timestamps) {
   constexpr auto kEmbedResources = false;
   fx::gltf::Document model = makeCharacterDocument(
-      character, fps, motion, offsets, markerSequence, kEmbedResources, options);
+      character, fps, motion, offsets, markerSequence, kEmbedResources, options, timestamps);
 
   GltfBuilder::save(model, filename, options.gltfFileFormat, kEmbedResources);
 }
@@ -1550,10 +1553,11 @@ std::vector<std::byte> saveCharacterToBytes(
     const MotionParameters& motion,
     const IdentityParameters& offsets,
     std::span<const std::vector<Marker>> markerSequence,
-    const FileSaveOptions& options) {
+    const FileSaveOptions& options,
+    std::span<const int64_t> timestamps) {
   constexpr auto kEmbedResources = false;
   fx::gltf::Document model = makeCharacterDocument(
-      character, fps, motion, offsets, markerSequence, kEmbedResources, options);
+      character, fps, motion, offsets, markerSequence, kEmbedResources, options, timestamps);
 
   std::ostringstream output(std::ios::binary | std::ios::out);
   fx::gltf::Save(model, output, {}, true);

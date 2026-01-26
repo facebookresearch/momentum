@@ -181,6 +181,7 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename);
 /// @param[in] markerSequence Optional marker sequence data to include in the document.
 /// @param[in] embedResource Whether to embed resources in the document (default: true).
 /// @param[in] options Optional file save options for controlling output.
+/// @param[in] timestamps Optional per-frame timestamps. Size should match motion columns.
 /// @return A glTF document containing the character data.
 fx::gltf::Document makeCharacterDocument(
     const Character& character,
@@ -189,7 +190,8 @@ fx::gltf::Document makeCharacterDocument(
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
     bool embedResource = true,
-    const FileSaveOptions& options = FileSaveOptions());
+    const FileSaveOptions& options = FileSaveOptions(),
+    std::span<const int64_t> timestamps = {});
 
 /// Save a character with motion to a glTF file.
 ///
@@ -205,6 +207,7 @@ fx::gltf::Document makeCharacterDocument(
 /// @param[in] markerSequence Optional marker sequence data to save (default: empty).
 /// @param[in] options Optional file save options for controlling output (default:
 /// FileSaveOptions{}).
+/// @param[in] timestamps Optional per-frame timestamps. Size should match motion columns.
 void saveGltfCharacter(
     const filesystem::path& filename,
     const Character& character,
@@ -212,7 +215,8 @@ void saveGltfCharacter(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
-    const FileSaveOptions& options = FileSaveOptions());
+    const FileSaveOptions& options = FileSaveOptions(),
+    std::span<const int64_t> timestamps = {});
 
 /// Save a character with skeleton states to a glTF file.
 ///
@@ -247,6 +251,7 @@ void saveGltfCharacter(
 /// @param[in] markerSequence Optional marker sequence data to save (default: empty).
 /// @param[in] options Optional file save options for controlling output (default:
 /// FileSaveOptions{}).
+/// @param[in] timestamps Optional per-frame timestamps. Size should match motion columns.
 /// @return A byte buffer containing the glTF data.
 std::vector<std::byte> saveCharacterToBytes(
     const Character& character,
@@ -254,6 +259,7 @@ std::vector<std::byte> saveCharacterToBytes(
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
     std::span<const std::vector<Marker>> markerSequence = {},
-    const FileSaveOptions& options = FileSaveOptions());
+    const FileSaveOptions& options = FileSaveOptions(),
+    std::span<const int64_t> timestamps = {});
 
 } // namespace momentum

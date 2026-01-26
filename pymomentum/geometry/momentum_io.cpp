@@ -108,7 +108,13 @@ void saveGLTFCharacterToFile(
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FileSaveOptions>& options) {
+    const std::optional<const momentum::FileSaveOptions>& options,
+    const std::optional<const std::vector<int64_t>>& timestamps) {
+  // Validate timestamps require motion to be present
+  if (timestamps.has_value() && !timestamps->empty() && !motion.has_value()) {
+    MT_THROW("Timestamps were provided but motion was not. Timestamps require motion data.");
+  }
+
   if (motion.has_value()) {
     const auto& [parameters, poses] = motion.value();
     MT_THROW_IF(
@@ -117,6 +123,15 @@ void saveGLTFCharacterToFile(
         parameters.size(),
         poses.rows(),
         poses.cols());
+
+    // Validate timestamps size matches number of frames
+    if (timestamps.has_value() && !timestamps->empty()) {
+      MT_THROW_IF(
+          timestamps->size() != poses.rows(),
+          "Timestamps size {} does not match the number of motion frames {}",
+          timestamps->size(),
+          poses.rows());
+    }
   }
 
   momentum::IdentityParameters identityParams;
@@ -132,7 +147,8 @@ void saveGLTFCharacterToFile(
       transpose(motion.value_or(momentum::MotionParameters{})),
       identityParams,
       markers.value_or(std::vector<std::vector<momentum::Marker>>{}),
-      options.value_or(momentum::FileSaveOptions{}));
+      options.value_or(momentum::FileSaveOptions{}),
+      timestamps.value_or(std::vector<int64_t>{}));
 }
 
 void saveGLTFCharacterToFileFromSkelStates(
