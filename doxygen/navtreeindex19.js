@@ -247,7 +247,7 @@ var NAVTREEINDEX19 =
 "namespacemomentum.html#a38c7101a1d5dc52198c9e8b6226edc07":[1,0,2,1472],
 "namespacemomentum.html#a392518a06997a9f01e08fa2ee824129a":[1,0,2,2144],
 "namespacemomentum.html#a39519e1fdc82ee61ea2e5fbec24d4e9a":[1,0,2,546],
+"namespacemomentum.html#a39a7ab91b9ab395325e1ee5cfb61da4c":[1,0,2,2216],
 "namespacemomentum.html#a39aa8017a215023d50eb178f27d17290":[1,0,2,1565],
-"namespacemomentum.html#a39af97cb7b36a45a498bed4e1936b5b4":[1,0,2,584],
-"namespacemomentum.html#a3a35b0d90a6faa8608b4b27566179f41":[1,0,2,166]
+"namespacemomentum.html#a39af97cb7b36a45a498bed4e1936b5b4":[1,0,2,584]
 };

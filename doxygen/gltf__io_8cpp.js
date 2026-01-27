@@ -14,8 +14,8 @@ var gltf__io_8cpp =
     [ "loadMotionOnCharacter", "gltf__io_8cpp.html#ad685200370fc04b8a3c930fccb45fd74", null ],
     [ "loadMotionOnCharacter", "gltf__io_8cpp.html#a3ea1dde6a08d08f94a8f2814725545e1", null ],
     [ "loadMotionTimestamps", "gltf__io_8cpp.html#af0f697e1c53a7096ceb6382fc2f4697b", null ],
-    [ "makeCharacterDocument", "gltf__io_8cpp.html#af566f891ec9b728d92fa4455fa18a6cf", null ],
-    [ "saveCharacterToBytes", "gltf__io_8cpp.html#a81179d3c887e56081ab6b838a523dd7c", null ],
+    [ "makeCharacterDocument", "gltf__io_8cpp.html#a82bd36ed1d0b08f197f9434567626a16", null ],
+    [ "saveCharacterToBytes", "gltf__io_8cpp.html#a4dacb6246ce79f2602459ca4f599b676", null ],
     [ "saveGltfCharacter", "gltf__io_8cpp.html#a5b67b4aed4cbd9e47a62aeca79db7395", null ],
-    [ "saveGltfCharacter", "gltf__io_8cpp.html#a9570894b19a7adeaec2d2488a0df11cb", null ]
+    [ "saveGltfCharacter", "gltf__io_8cpp.html#a39a7ab91b9ab395325e1ee5cfb61da4c", null ]
 ];

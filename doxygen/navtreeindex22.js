@@ -1,5 +1,7 @@
 var NAVTREEINDEX22 =
 {
+"namespacemomentum.html#a743470dbb940619f6d42ce3923de253d":[1,0,2,1749],
+"namespacemomentum.html#a7451d8275affe0025a0a5dbf8f117580":[1,0,2,1508],
 "namespacemomentum.html#a74a9100a22394a1a7aba02f81ea0ea9e":[1,0,2,2200],
 "namespacemomentum.html#a7512377b84bbe2e92b5c6a4532ac32d1":[1,0,2,298],
 "namespacemomentum.html#a752df48b89380960e2f8fef499000c6e":[1,0,2,1845],
@@ -92,7 +94,6 @@ var NAVTREEINDEX22 =
 "namespacemomentum.html#a80dfdd8968a39a814d44fad399a88d24":[1,0,2,1567],
 "namespacemomentum.html#a80fc2eb087f15d82aa39715882938f6e":[1,0,2,2086],
 "namespacemomentum.html#a80fc6fdaeb4dd52b910a6f8434b94e5c":[1,0,2,726],
-"namespacemomentum.html#a81179d3c887e56081ab6b838a523dd7c":[1,0,2,2209],
 "namespacemomentum.html#a812e3be8a13d50dfe8b8b9be2c03a006":[1,0,2,712],
 "namespacemomentum.html#a8168c1ea937d1ef731c473ab81fc0312":[1,0,2,695],
 "namespacemomentum.html#a81994213be4eb27920b5b66eaaf30ec6":[1,0,2,544],
@@ -104,6 +105,7 @@ var NAVTREEINDEX22 =
 "namespacemomentum.html#a822e2675c8851a03fe3c5cef1d655048":[1,0,2,869],
 "namespacemomentum.html#a8240c28cf5db9080d24e79a992d30d44":[1,0,2,1163],
 "namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e":[1,0,2,2071],
+"namespacemomentum.html#a82bd36ed1d0b08f197f9434567626a16":[1,0,2,2101],
 "namespacemomentum.html#a82d98a5a239cc1d71b7ef9122955ee82":[1,0,2,1071],
 "namespacemomentum.html#a82f8729af9b3aaf3e40e0074e4dafe9f":[1,0,2,786],
 "namespacemomentum.html#a831b6da4d2ab6886fac605d9c83af6d4":[1,0,2,1123],
@@ -247,7 +249,5 @@ var NAVTREEINDEX22 =
 "namespacemomentum.html#a90ba6b8395ac3733b588cc3c554f88bf":[1,0,2,1063],
 "namespacemomentum.html#a90bc657dd117b5fcad613c15d0bcb578":[1,0,2,1119],
 "namespacemomentum.html#a90c6bc5f1184543498419d3944983ebe":[1,0,2,953],
-"namespacemomentum.html#a90cb939cc307dc7f6a51ca07b9ce2f41":[1,0,2,1494],
-"namespacemomentum.html#a90eaeeff65b9ced7f438607562e98f04":[1,0,2,1479],
-"namespacemomentum.html#a90f78fa7289eef455c8a6345cfce7899":[1,0,2,2319]
+"namespacemomentum.html#a90cb939cc307dc7f6a51ca07b9ce2f41":[1,0,2,1494]
 };
