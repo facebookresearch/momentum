@@ -869,6 +869,7 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
 :param offsets: Offset array in [n_joints x n_parameters_per_joint]
 :param markers: Additional marker (3d positions) data in [n_frames][n_markers]
 :param options: FileSaveOptions for controlling output (mesh, locators, collisions, etc.)
+:param timestamps: Per-frame timestamps (usually in microseconds). Size should match the number of motion frames.
       )",
           py::arg("path"),
           py::arg("character"),
@@ -876,7 +877,8 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
           py::arg("motion") = std::nullopt,
           py::arg("offsets") = std::nullopt,
           py::arg("markers") = std::nullopt,
-          py::arg("options") = std::nullopt)
+          py::arg("options") = std::nullopt,
+          py::arg("timestamps") = std::nullopt)
       .def_static(
           "save_gltf_from_skel_states",
           &saveGLTFCharacterToFileFromSkelStates,

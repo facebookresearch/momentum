@@ -43,7 +43,8 @@ void saveGLTFCharacterToFile(
     const std::optional<const momentum::MotionParameters>& motion,
     const std::optional<const std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FileSaveOptions>& options);
+    const std::optional<const momentum::FileSaveOptions>& options,
+    const std::optional<const std::vector<int64_t>>& timestamps);
 
 void saveGLTFCharacterToFileFromSkelStates(
     const std::string& path,
