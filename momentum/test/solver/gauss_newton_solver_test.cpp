@@ -6,6 +6,7 @@
  */
 
 #include "momentum/solver/gauss_newton_solver.h"
+#include "momentum/solver/gauss_newton_solver_sparse.h"
 #include "momentum/solver/solver_function.h"
 
 #include <gtest/gtest.h>
@@ -34,45 +35,36 @@ class MockSolverFunction : public SolverFunctionT<float> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
+    }
     // For a quadratic function, the Jacobian is the identity matrix
     // and the residual is the parameters
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
-    }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = parameters;
-
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
     actualRows = numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJtJR(
-      const VectorX<float>& parameters,
-      MatrixX<float>& hessianApprox,
-      VectorX<float>& JtR) override {
-    // For a quadratic function, the Hessian approximation is the identity matrix
-    // and JtR is the parameters
-    if (hessianApprox.rows() != numParameters_ || hessianApprox.cols() != numParameters_) {
-      hessianApprox.resize(numParameters_, numParameters_);
-    }
-    hessianApprox.setIdentity();
-
-    if (JtR.size() != numParameters_) {
-      JtR.resize(numParameters_);
-    }
-    JtR = parameters;
-
-    return 0.5 * parameters.squaredNorm();
-  }
+  void finalizeJacobianComputation() override {}
 
   double getJtJR_Sparse(
       const VectorX<float>& parameters,
@@ -99,11 +91,12 @@ class MockSolverFunction : public SolverFunctionT<float> {
   }
 
   void setEnabledParameters(const ParameterSet& parameterSet) override {
-    // Count the number of enabled parameters
+    // Find the highest enabled parameter index
+    // actualParameters_ represents "up to this index" (highest index + 1)
     actualParameters_ = 0;
     for (size_t i = 0; i < numParameters_; ++i) {
       if (parameterSet.test(i)) {
-        actualParameters_++;
+        actualParameters_ = i + 1;
       }
     }
   }
@@ -138,8 +131,6 @@ TEST(GaussNewtonSolverTest, Options) {
   EXPECT_FLOAT_EQ(options.regularization, 0.05f);
   EXPECT_FALSE(options.doLineSearch);
   EXPECT_FALSE(options.useBlockJtJ);
-  EXPECT_FALSE(options.directSparseJtJ);
-  EXPECT_EQ(options.sparseMatrixThreshold, 200);
 
   // Create options from base options
   SolverOptions baseOptions;
@@ -160,8 +151,39 @@ TEST(GaussNewtonSolverTest, Options) {
   EXPECT_FLOAT_EQ(derivedOptions.regularization, 0.05f);
   EXPECT_FALSE(derivedOptions.doLineSearch);
   EXPECT_FALSE(derivedOptions.useBlockJtJ);
+}
+
+// Test sparse solver options
+TEST(SparseGaussNewtonSolverTest, Options) {
+  // Create default options
+  SparseGaussNewtonSolverOptions options;
+
+  // Check default values
+  EXPECT_FLOAT_EQ(options.regularization, 0.05f);
+  EXPECT_FALSE(options.doLineSearch);
+  EXPECT_FALSE(options.useBlockJtJ);
+  EXPECT_FALSE(options.directSparseJtJ);
+
+  // Create options from base options
+  SolverOptions baseOptions;
+  baseOptions.maxIterations = 100;
+  baseOptions.minIterations = 10;
+  baseOptions.threshold = 1e-8;
+  baseOptions.verbose = true;
+
+  SparseGaussNewtonSolverOptions derivedOptions(baseOptions);
+
+  // Check that base options were copied
+  EXPECT_EQ(derivedOptions.maxIterations, 100);
+  EXPECT_EQ(derivedOptions.minIterations, 10);
+  EXPECT_FLOAT_EQ(derivedOptions.threshold, 1e-8);
+  EXPECT_TRUE(derivedOptions.verbose);
+
+  // Check that derived options have default values
+  EXPECT_FLOAT_EQ(derivedOptions.regularization, 0.05f);
+  EXPECT_FALSE(derivedOptions.doLineSearch);
+  EXPECT_FALSE(derivedOptions.useBlockJtJ);
   EXPECT_FALSE(derivedOptions.directSparseJtJ);
-  EXPECT_EQ(derivedOptions.sparseMatrixThreshold, 200);
 }
 
 // Test basic solving functionality
@@ -245,19 +267,18 @@ TEST(GaussNewtonSolverTest, BlockJtJ) {
 }
 
 // Test with sparse matrix implementation
-TEST(GaussNewtonSolverTest, SparseMatrix) {
+TEST(SparseGaussNewtonSolverTest, SparseMatrix) {
   // Create a mock solver function with a large number of parameters
-  // to trigger the sparse matrix implementation
   MockSolverFunction mockFunction(250);
 
   // Create a solver with default options
-  SolverOptions options;
+  SparseGaussNewtonSolverOptions options;
   options.maxIterations = 10;
   options.minIterations = 1;
   options.threshold = 1e-6;
   options.verbose = false;
 
-  GaussNewtonSolverT<float> solver(options, &mockFunction);
+  SparseGaussNewtonSolverT<float> solver(options, &mockFunction);
 
   // Create initial parameters
   VectorX<float> parameters = VectorX<float>::Ones(250);
@@ -272,13 +293,12 @@ TEST(GaussNewtonSolverTest, SparseMatrix) {
 }
 
 // Test with direct sparse JtJ enabled
-TEST(GaussNewtonSolverTest, DirectSparseJtJ) {
+TEST(SparseGaussNewtonSolverTest, DirectSparseJtJ) {
   // Create a mock solver function with a large number of parameters
-  // to trigger the sparse matrix implementation
   MockSolverFunction mockFunction(250);
 
   // Create a solver with direct sparse JtJ enabled
-  GaussNewtonSolverOptions options;
+  SparseGaussNewtonSolverOptions options;
   options.maxIterations = 10;
   options.minIterations = 1;
   options.threshold = 1e-6;
@@ -286,7 +306,7 @@ TEST(GaussNewtonSolverTest, DirectSparseJtJ) {
   options.useBlockJtJ = true;
   options.directSparseJtJ = true;
 
-  GaussNewtonSolverT<float> solver(options, &mockFunction);
+  SparseGaussNewtonSolverT<float> solver(options, &mockFunction);
 
   // Create initial parameters
   VectorX<float> parameters = VectorX<float>::Ones(250);
@@ -301,13 +321,12 @@ TEST(GaussNewtonSolverTest, DirectSparseJtJ) {
 }
 
 // Test with sparse JtJ but not direct sparse JtJ
-TEST(GaussNewtonSolverTest, SparseJtJ) {
+TEST(SparseGaussNewtonSolverTest, SparseJtJ) {
   // Create a mock solver function with a large number of parameters
-  // to trigger the sparse matrix implementation
   MockSolverFunction mockFunction(250);
 
   // Create a solver with block JtJ enabled but not direct sparse JtJ
-  GaussNewtonSolverOptions options;
+  SparseGaussNewtonSolverOptions options;
   options.maxIterations = 10;
   options.minIterations = 1;
   options.threshold = 1e-6;
@@ -315,7 +334,7 @@ TEST(GaussNewtonSolverTest, SparseJtJ) {
   options.useBlockJtJ = true;
   options.directSparseJtJ = false;
 
-  GaussNewtonSolverT<float> solver(options, &mockFunction);
+  SparseGaussNewtonSolverT<float> solver(options, &mockFunction);
 
   // Create initial parameters
   VectorX<float> parameters = VectorX<float>::Ones(250);
@@ -347,41 +366,34 @@ class FailingSparseFunction : public SolverFunctionT<float> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
     }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = parameters;
-
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
     actualRows = numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJtJR(
-      const VectorX<float>& parameters,
-      MatrixX<float>& hessianApprox,
-      VectorX<float>& JtR) override {
-    if (hessianApprox.rows() != numParameters_ || hessianApprox.cols() != numParameters_) {
-      hessianApprox.resize(numParameters_, numParameters_);
-    }
-    hessianApprox.setIdentity();
-
-    if (JtR.size() != numParameters_) {
-      JtR.resize(numParameters_);
-    }
-    JtR = parameters;
-
-    return 0.5 * parameters.squaredNorm();
-  }
+  void finalizeJacobianComputation() override {}
 
   double getJtJR_Sparse(
       const VectorX<float>& parameters,
@@ -444,41 +456,34 @@ class FailingLineSearchFunction : public SolverFunctionT<float> {
     return 1.0;
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
     }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = VectorX<float>::Ones(parameters.size());
-
+    jacobianBlock.setIdentity();
+    residualBlock = VectorX<float>::Ones(parameters.size());
     actualRows = numParameters_;
     return 1.0;
   }
 
-  double getJtJR(
-      const VectorX<float>& parameters,
-      MatrixX<float>& hessianApprox,
-      VectorX<float>& JtR) override {
-    if (hessianApprox.rows() != numParameters_ || hessianApprox.cols() != numParameters_) {
-      hessianApprox.resize(numParameters_, numParameters_);
-    }
-    hessianApprox.setIdentity();
-
-    if (JtR.size() != numParameters_) {
-      JtR.resize(numParameters_);
-    }
-    JtR = VectorX<float>::Ones(parameters.size());
-
-    return 1.0;
-  }
+  void finalizeJacobianComputation() override {}
 
   double getJtJR_Sparse(
       const VectorX<float>& parameters,
@@ -515,18 +520,18 @@ class FailingLineSearchFunction : public SolverFunctionT<float> {
 };
 
 // Test with sparse solver failure
-TEST(GaussNewtonSolverTest, SparseSolverFailure) {
+TEST(SparseGaussNewtonSolverTest, SparseSolverFailure) {
   // Create a mock solver function that causes the sparse solver to fail
   FailingSparseFunction mockFunction(250);
 
   // Create a solver with sparse matrix implementation
-  GaussNewtonSolverOptions options;
+  SparseGaussNewtonSolverOptions options;
   options.maxIterations = 10;
   options.minIterations = 1;
   options.threshold = 1e-6;
   options.verbose = false;
 
-  GaussNewtonSolverT<float> solver(options, &mockFunction);
+  SparseGaussNewtonSolverT<float> solver(options, &mockFunction);
 
   // Enable history storage to check solver_err
   solver.setStoreHistory(true);
@@ -651,6 +656,146 @@ TEST(GaussNewtonSolverTest, EnabledParametersSubset) {
   for (size_t i = 5; i < 10; ++i) {
     EXPECT_EQ(parameters(i), originalParameters(i));
   }
+}
+
+// Test that useBlockJtJ produces the same result as blockwise Jacobian
+TEST(GaussNewtonSolverTest, UseBlockJtJEquivalence) {
+  // Create a mock solver function
+  MockSolverFunction mockFunction(10);
+
+  // Solve without useBlockJtJ
+  GaussNewtonSolverOptions optionsWithoutJtJ;
+  optionsWithoutJtJ.maxIterations = 10;
+  optionsWithoutJtJ.minIterations = 1;
+  optionsWithoutJtJ.threshold = 1e-6;
+  optionsWithoutJtJ.verbose = false;
+  optionsWithoutJtJ.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solverWithoutJtJ(optionsWithoutJtJ, &mockFunction);
+  VectorX<float> paramsWithoutJtJ = VectorX<float>::Ones(10);
+  double errorWithoutJtJ = solverWithoutJtJ.solve(paramsWithoutJtJ);
+
+  // Solve with useBlockJtJ
+  GaussNewtonSolverOptions optionsWithJtJ;
+  optionsWithJtJ.maxIterations = 10;
+  optionsWithJtJ.minIterations = 1;
+  optionsWithJtJ.threshold = 1e-6;
+  optionsWithJtJ.verbose = false;
+  optionsWithJtJ.useBlockJtJ = true;
+
+  GaussNewtonSolverT<float> solverWithJtJ(optionsWithJtJ, &mockFunction);
+  VectorX<float> paramsWithJtJ = VectorX<float>::Ones(10);
+  double errorWithJtJ = solverWithJtJ.solve(paramsWithJtJ);
+
+  // Both should converge to the same solution
+  EXPECT_NEAR(errorWithoutJtJ, errorWithJtJ, 1e-6);
+  EXPECT_LE((paramsWithoutJtJ - paramsWithJtJ).norm(), 1e-4);
+}
+
+// Test that useBlockJtJ works correctly with enabled parameters subset
+TEST(GaussNewtonSolverTest, UseBlockJtJWithSubsetEquivalence) {
+  // Create a mock solver function
+  MockSolverFunction mockFunction(10);
+
+  // Enable only the first half of the parameters
+  ParameterSet enabledParams;
+  for (size_t i = 0; i < 5; ++i) {
+    enabledParams.set(i);
+  }
+
+  // Solve without useBlockJtJ
+  GaussNewtonSolverOptions optionsWithoutJtJ;
+  optionsWithoutJtJ.maxIterations = 10;
+  optionsWithoutJtJ.minIterations = 1;
+  optionsWithoutJtJ.threshold = 1e-6;
+  optionsWithoutJtJ.verbose = false;
+  optionsWithoutJtJ.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solverWithoutJtJ(optionsWithoutJtJ, &mockFunction);
+  solverWithoutJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithoutJtJ = VectorX<float>::Ones(10);
+  double errorWithoutJtJ = solverWithoutJtJ.solve(paramsWithoutJtJ);
+
+  // Solve with useBlockJtJ
+  GaussNewtonSolverOptions optionsWithJtJ;
+  optionsWithJtJ.maxIterations = 10;
+  optionsWithJtJ.minIterations = 1;
+  optionsWithJtJ.threshold = 1e-6;
+  optionsWithJtJ.verbose = false;
+  optionsWithJtJ.useBlockJtJ = true;
+
+  GaussNewtonSolverT<float> solverWithJtJ(optionsWithJtJ, &mockFunction);
+  solverWithJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithJtJ = VectorX<float>::Ones(10);
+  double errorWithJtJ = solverWithJtJ.solve(paramsWithJtJ);
+
+  // Both should converge to the same solution
+  EXPECT_NEAR(errorWithoutJtJ, errorWithJtJ, 1e-6);
+  EXPECT_LE((paramsWithoutJtJ - paramsWithJtJ).norm(), 1e-4);
+
+  // Check that the disabled parameters weren't modified
+  for (size_t i = 5; i < 10; ++i) {
+    EXPECT_EQ(paramsWithoutJtJ(i), 1.0f);
+    EXPECT_EQ(paramsWithJtJ(i), 1.0f);
+  }
+}
+
+// Test that useBlockJtJ works with non-contiguous parameters (e.g., [2,3,7,8,9])
+// This catches bugs where the subset extraction incorrectly indexes into the JtJ matrix
+TEST(GaussNewtonSolverTest, UseBlockJtJWithNonContiguousSubset) {
+  // Create a mock solver function
+  MockSolverFunction mockFunction(10);
+
+  // Enable non-contiguous parameters: 2, 3, 7, 8, 9
+  ParameterSet enabledParams;
+  enabledParams.set(2);
+  enabledParams.set(3);
+  enabledParams.set(7);
+  enabledParams.set(8);
+  enabledParams.set(9);
+
+  // Solve without useBlockJtJ
+  GaussNewtonSolverOptions optionsWithoutJtJ;
+  optionsWithoutJtJ.maxIterations = 10;
+  optionsWithoutJtJ.minIterations = 1;
+  optionsWithoutJtJ.threshold = 1e-6;
+  optionsWithoutJtJ.verbose = false;
+  optionsWithoutJtJ.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solverWithoutJtJ(optionsWithoutJtJ, &mockFunction);
+  solverWithoutJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithoutJtJ = VectorX<float>::Ones(10);
+  double errorWithoutJtJ = solverWithoutJtJ.solve(paramsWithoutJtJ);
+
+  // Solve with useBlockJtJ
+  GaussNewtonSolverOptions optionsWithJtJ;
+  optionsWithJtJ.maxIterations = 10;
+  optionsWithJtJ.minIterations = 1;
+  optionsWithJtJ.threshold = 1e-6;
+  optionsWithJtJ.verbose = false;
+  optionsWithJtJ.useBlockJtJ = true;
+
+  GaussNewtonSolverT<float> solverWithJtJ(optionsWithJtJ, &mockFunction);
+  solverWithJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithJtJ = VectorX<float>::Ones(10);
+  double errorWithJtJ = solverWithJtJ.solve(paramsWithJtJ);
+
+  // Both should converge to the same solution
+  EXPECT_NEAR(errorWithoutJtJ, errorWithJtJ, 1e-6);
+  EXPECT_LE((paramsWithoutJtJ - paramsWithJtJ).norm(), 1e-4);
+
+  // Check that the disabled parameters weren't modified
+  EXPECT_EQ(paramsWithoutJtJ(0), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(1), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(4), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(5), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(6), 1.0f);
+
+  EXPECT_EQ(paramsWithJtJ(0), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(1), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(4), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(5), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(6), 1.0f);
 }
 
 } // namespace
