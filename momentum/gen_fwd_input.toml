@@ -129,11 +129,13 @@ subdirectory = "solver"
 structs = [
     "SolverOptions",
     "GaussNewtonSolverOptions",
+    "SparseGaussNewtonSolverOptions",
 ]
 template_classes = [
     "Solver",
     "SolverFunction",
     "GaussNewtonSolver",
+    "SparseGaussNewtonSolver",
     "GradientDescentSolver",
     "SubsetGaussNewtonSolver",
 ]

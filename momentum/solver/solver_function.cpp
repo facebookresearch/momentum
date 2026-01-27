@@ -19,21 +19,114 @@ void SolverFunctionT<T>::getHessian(const VectorX<T>& parameters, MatrixX<T>& he
 }
 
 template <typename T>
-double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj, VectorX<T>& jtr) {
-  // Generic implementation, considering J in one block.
-  // Vastly sub-optimal, but here for compatibility reasons
-  size_t actualRows = 0;
-  MatrixX<T> jacobian;
-  VectorX<T> residual;
+double SolverFunctionT<T>::getJacobian(
+    const VectorX<T>& parameters,
+    MatrixX<T>& jacobian,
+    VectorX<T>& residual,
+    size_t& actualRows) {
+  initializeJacobianComputation(parameters);
 
-  const double error = getJacobian(parameters, jacobian, residual, actualRows);
-  jtj = jacobian.topLeftCorner(actualRows, parameters.size()).transpose() *
-      jacobian.topLeftCorner(actualRows, parameters.size());
+  const size_t numBlocks = getJacobianBlockCount();
 
-  jtr = jacobian.topLeftCorner(actualRows, parameters.size()).transpose() * residual;
+  // Calculate total size
+  size_t totalRows = 0;
+  for (size_t i = 0; i < numBlocks; ++i) {
+    totalRows += getJacobianBlockSize(i);
+  }
+  // Add padding for alignment
+  totalRows += 8 - (totalRows % 8);
 
+  // Resize if needed
+  if (totalRows > static_cast<size_t>(jacobian.rows()) || parameters.size() != jacobian.cols()) {
+    jacobian.resize(totalRows, parameters.size());
+    residual.resize(totalRows);
+  }
+
+  jacobian.setZero();
+  residual.setZero();
+
+  double error = 0.0;
+  size_t position = 0;
+  actualRows = totalRows;
+
+  // Assemble blocks into full Jacobian
+  for (size_t i = 0; i < numBlocks; ++i) {
+    const size_t blockSize = getJacobianBlockSize(i);
+    if (blockSize == 0) {
+      continue;
+    }
+
+    size_t blockActualRows = 0;
+
+    auto jacBlock = jacobian.block(position, 0, blockSize, parameters.size());
+    auto resBlock = residual.segment(position, blockSize);
+
+    error += computeJacobianBlock(parameters, i, jacBlock, resBlock, blockActualRows);
+
+    position += blockSize;
+  }
+
+  finalizeJacobianComputation();
   return error;
-};
+}
+
+template <typename T>
+double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj, VectorX<T>& jtr) {
+  initializeJacobianComputation(parameters);
+
+  const size_t numBlocks = getJacobianBlockCount();
+
+  // Calculate total Jacobian size
+  size_t jacobianSize = 0;
+  for (size_t i = 0; i < numBlocks; ++i) {
+    jacobianSize += getJacobianBlockSize(i);
+  }
+  // Add padding for alignment
+  jacobianSize += 8 - (jacobianSize % 8);
+
+  const size_t numParams = parameters.size();
+
+  // ResizeableMatrix only reallocates if capacity is exceeded, and zeros efficiently
+  tJacobian_.resizeAndSetZero(jacobianSize, numParams);
+  tResidual_.resizeAndSetZero(jacobianSize);
+
+  jtj.setZero(actualParameters_, actualParameters_);
+  jtr.setZero(actualParameters_);
+
+  // Block compute JtJ and JtR on the fly
+  size_t position = 0;
+  double error = 0.0;
+
+  for (size_t i = 0; i < numBlocks; ++i) {
+    const size_t blockSize = getJacobianBlockSize(i);
+    if (blockSize == 0) {
+      continue;
+    }
+
+    size_t blockActualRows = 0;
+
+    auto jacBlock = tJacobian_.mat().block(position, 0, blockSize, numParams);
+    auto resBlock = tResidual_.vec().segment(position, blockSize);
+
+    error += computeJacobianBlock(parameters, i, jacBlock, resBlock, blockActualRows);
+
+    // Update JtJ and JtR
+    if (blockActualRows > 0) {
+      const auto JtBlock =
+          tJacobian_.mat().block(position, 0, blockActualRows, actualParameters_).transpose();
+
+      // Efficiently update JtJ using selfadjointView with rankUpdate
+      jtj.template selfadjointView<Eigen::Lower>().rankUpdate(JtBlock);
+
+      // Update JtR
+      jtr.noalias() += JtBlock * tResidual_.vec().segment(position, blockActualRows);
+    }
+    position += blockSize;
+  }
+
+  finalizeJacobianComputation();
+  return error;
+}
 
 template <typename T>
 double SolverFunctionT<T>::getJtJR_Sparse(
@@ -79,6 +172,11 @@ void SolverFunctionT<T>::storeHistory(
   (void)history;
   (void)iteration;
   (void)maxIterations_;
+}
+
+template <typename T>
+void SolverFunctionT<T>::finalizeJacobianComputation() {
+  // Default implementation does nothing
 }
 
 template class SolverFunctionT<float>;
