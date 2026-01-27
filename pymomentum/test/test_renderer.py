@@ -18,7 +18,7 @@ class TestRendering(unittest.TestCase):
     def test_lighting(self) -> None:
         """Test that directional lighting works."""
 
-        image_width, image_height = 30, 30
+        image_width, image_height = 16, 16
         camera = pym_renderer.Camera(
             pym_renderer.PinholeIntrinsicsModel(
                 image_width=image_width,
@@ -120,6 +120,110 @@ class TestRendering(unittest.TestCase):
         # pyre-fixme[6]: For 2nd argument expected `SupportsDunderLT[_T]` but got
         #  `float`.
         self.assertGreater(torch.mean(right_lighting[:, image_width // 2 :]), 0.1)
+
+    def test_alpha_matte(self) -> None:
+        """Test that alpha matting correctly overlays a rendered sphere onto a background."""
+        image_width, image_height = 30, 30
+        camera = pym_renderer.Camera(
+            pym_renderer.PinholeIntrinsicsModel(
+                image_width=image_width,
+                image_height=image_height,
+            )
+        )
+
+        # Create buffers and rasterize a sphere (similar to test_lighting)
+        z_buffer = pym_renderer.create_z_buffer(camera)
+        rgb_buffer = pym_renderer.create_rgb_buffer(camera)
+
+        pym_renderer.rasterize_spheres(
+            center=torch.as_tensor([[0, 0, 20]], dtype=torch.float32),
+            lights=None,
+            radius=torch.as_tensor([5], dtype=torch.float32),
+            camera=camera,
+            rgb_buffer=rgb_buffer,
+            z_buffer=z_buffer,
+        )
+
+        # Create a solid background image (red)
+        background = np.ones((image_height, image_width, 3), dtype=np.float32)
+        background[:, :, 0] = 1.0  # Red channel
+        background[:, :, 1] = 0.0  # Green channel
+        background[:, :, 2] = 0.0  # Blue channel
+
+        # Make a copy to compare later
+        original_background = background.copy()
+
+        # Apply alpha matte with full alpha
+        pym_renderer.alpha_matte(
+            depth_buffer=z_buffer,
+            rgb_buffer=rgb_buffer,
+            target_image=background,
+            alpha=1.0,
+        )
+
+        # Test 1: The background should have been modified (sphere overlaid)
+        self.assertFalse(np.allclose(background, original_background))
+
+        # Test 2: Areas where the sphere is rendered should differ from original
+        # The center of the image should be affected by the sphere
+        center_y, center_x = image_height // 2, image_width // 2
+        self.assertFalse(
+            np.allclose(
+                background[center_y - 2 : center_y + 2, center_x - 2 : center_x + 2],
+                original_background[
+                    center_y - 2 : center_y + 2, center_x - 2 : center_x + 2
+                ],
+            )
+        )
+
+        # Test 3: Corners (far from the sphere) should remain unchanged (still red)
+        self.assertTrue(np.allclose(background[0, 0], [1.0, 0.0, 0.0], atol=1e-4))
+        self.assertTrue(np.allclose(background[0, -1], [1.0, 0.0, 0.0], atol=1e-4))
+        self.assertTrue(np.allclose(background[-1, 0], [1.0, 0.0, 0.0], atol=1e-4))
+        self.assertTrue(np.allclose(background[-1, -1], [1.0, 0.0, 0.0], atol=1e-4))
+
+        # Test 4: Test with alpha=0
+        # Note: alpha=0 means the depth-based matte has no effect, but the
+        # rgb_buffer is still added to the result. The blending formula is:
+        # blended = rgb_buffer + (1 - alpha) * tgtPixel
+        # So with alpha=0: blended = rgb_buffer + tgtPixel (clamped to [0,1])
+        background_alpha0 = original_background.copy()
+        pym_renderer.alpha_matte(
+            depth_buffer=z_buffer,
+            rgb_buffer=rgb_buffer,
+            target_image=background_alpha0,
+            alpha=0.0,
+        )
+        # With alpha=0, the sphere pixels still contribute their rgb values
+        # but the background is fully preserved (weighted by 1-0=1), so the
+        # result is rgb_buffer + original_background (clamped).
+        # Areas where the sphere is NOT rendered (z=FLT_MAX) have rgb=0,
+        # so those areas should be unchanged.
+        # Corners should still be red since no sphere was rendered there
+        self.assertTrue(
+            np.allclose(background_alpha0[0, 0], [1.0, 0.0, 0.0], atol=1e-4)
+        )
+        self.assertTrue(
+            np.allclose(background_alpha0[0, -1], [1.0, 0.0, 0.0], atol=1e-4)
+        )
+        self.assertTrue(
+            np.allclose(background_alpha0[-1, 0], [1.0, 0.0, 0.0], atol=1e-4)
+        )
+        self.assertTrue(
+            np.allclose(background_alpha0[-1, -1], [1.0, 0.0, 0.0], atol=1e-4)
+        )
+
+        # Test 5: Test with alpha=0.5 (partial transparency)
+        background_alpha05 = original_background.copy()
+        pym_renderer.alpha_matte(
+            depth_buffer=z_buffer,
+            rgb_buffer=rgb_buffer,
+            target_image=background_alpha05,
+            alpha=0.5,
+        )
+        # Center should be different from both original and full alpha version
+        self.assertFalse(np.allclose(background_alpha05, original_background))
+        self.assertFalse(np.allclose(background_alpha05, background))
 
     def test_subdivide_uneven(self) -> None:
         """Check that we can do uneven subdivision where only some edges are split."""
