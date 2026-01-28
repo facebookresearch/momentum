@@ -458,58 +458,186 @@ double SequenceSolverFunctionT<T>::getSequenceErrorFunctionsJacobian(
   return error;
 }
 
+// Block-wise Jacobian interface implementation
+// Each block corresponds to a single frame, containing all per-frame and sequence error functions
 template <typename T>
-double SequenceSolverFunctionT<T>::getJacobian(
-    const Eigen::VectorX<T>& parameters,
-    Eigen::MatrixX<T>& jacobian,
-    Eigen::VectorX<T>& residual,
-    size_t& actualRows) {
-  MT_PROFILE_EVENT("GetMultiposeJacobian");
-  // update states
+void SequenceSolverFunctionT<T>::initializeJacobianComputation(
+    const Eigen::VectorX<T>& parameters) {
+  MT_PROFILE_FUNCTION();
+
   MT_CHECK(parameters.size() == gsl::narrow_cast<Eigen::Index>(this->numParameters_));
   setFrameParametersFromJoinedParameterVector(parameters);
 
-  double error = 0.0;
+  // Pre-allocate temporary Jacobian storage
+  size_t maxBlockSize = 0;
+  for (size_t f = 0; f < getNumFrames(); f++) {
+    maxBlockSize = std::max(maxBlockSize, getJacobianBlockSize(f));
+  }
+  const auto np = parameterTransform_.numAllModelParameters();
+  // For sequence error functions, we may need nFrames * np columns
+  const size_t maxCols = getNumFrames() * np;
+  tempJac_.resizeAndSetZero(maxBlockSize, maxCols);
+}
 
-  // calculate the jacobian size
-  size_t jacobianSize = 0;
-  {
-    MT_PROFILE_EVENT("GetJacobianSize");
-    for (size_t f = 0; f < getNumFrames(); f++) {
-      for (const auto& errf : perFrameErrorFunctions_[f]) {
-        if (errf->getWeight() <= 0.0f) {
-          continue;
-        }
+template <typename T>
+size_t SequenceSolverFunctionT<T>::getJacobianBlockCount() const {
+  return getNumFrames();
+}
 
-        jacobianSize += errf->getJacobianSize();
-      }
+template <typename T>
+size_t SequenceSolverFunctionT<T>::getJacobianBlockSize(size_t blockIndex) const {
+  if (blockIndex >= getNumFrames()) {
+    return 0;
+  }
 
-      for (const auto& errf : sequenceErrorFunctions_[f]) {
-        if (errf->getWeight() <= 0.0f) {
-          continue;
-        }
+  size_t blockSize = 0;
 
-        jacobianSize += errf->getJacobianSize();
-      }
+  // Add per-frame error functions for this frame
+  for (const auto& errf : perFrameErrorFunctions_[blockIndex]) {
+    if (errf->getWeight() > 0.0f) {
+      blockSize += errf->getJacobianSize();
     }
   }
 
-  if (jacobianSize > static_cast<size_t>(jacobian.rows()) ||
-      gsl::narrow_cast<Eigen::Index>(this->numParameters_) != jacobian.cols()) {
-    MT_PROFILE_EVENT("ResizeAndInitializeJacobian");
-    jacobian.resize(jacobianSize, this->numParameters_);
-    residual.resize(jacobianSize);
-    jacobian.setZero();
-    residual.setZero();
+  // Add sequence error functions starting at this frame
+  for (const auto& errf : sequenceErrorFunctions_[blockIndex]) {
+    if (errf->getWeight() > 0.0f) {
+      blockSize += errf->getJacobianSize();
+    }
   }
-  actualRows = jacobianSize;
 
+  return blockSize;
+}
+
+template <typename T>
+double SequenceSolverFunctionT<T>::computeJacobianBlock(
+    const Eigen::VectorX<T>& /* parameters */,
+    size_t blockIndex,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+    Eigen::Ref<Eigen::VectorX<T>> residualBlock,
+    size_t& actualRows) {
+  MT_PROFILE_FUNCTION();
+
+  if (blockIndex >= getNumFrames()) {
+    actualRows = 0;
+    return 0.0;
+  }
+
+  const size_t f = blockIndex;
+  const size_t nFrames = getNumFrames();
+  const size_t np = parameterTransform_.numAllModelParameters();
+  double error = 0.0;
   size_t position = 0;
 
-  error += getPerFrameJacobian(jacobian, residual, position);
-  error += getSequenceErrorFunctionsJacobian(jacobian, residual, position);
+  // Compute skeleton state for this frame
+  SkeletonStateT<T> skelState(parameterTransform_.apply(frameParameters_[f]), character_.skeleton);
 
+  // Compute mesh state if needed
+  MeshStateT<T> meshState;
+  if (needsMeshPerFrame_) {
+    meshState.update(frameParameters_[f], skelState, character_);
+  }
+
+  // Compute per-frame error functions
+  for (const auto& errf : perFrameErrorFunctions_[f]) {
+    if (errf->getWeight() <= 0.0f) {
+      continue;
+    }
+
+    const auto n = errf->getJacobianSize();
+    tempJac_.resizeAndSetZero(n, np);
+
+    int rows = 0;
+    error += errf->getJacobian(
+        frameParameters_[f],
+        skelState,
+        meshState,
+        tempJac_.mat(),
+        residualBlock.segment(position, n),
+        rows);
+
+    // Copy Jacobian into the block using the joined parameter layout
+    // Per-frame parameters for frame f start at column: perFrameParameterIndices_.size() * f
+    for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
+      jacobianBlock.block(position, perFrameParameterIndices_.size() * f + k, rows, 1) =
+          tempJac_.mat().block(0, perFrameParameterIndices_[k], rows, 1);
+    }
+
+    // Universal parameters are at the end: perFrameParameterIndices_.size() * nFrames + k
+    for (size_t k = 0; k < universalParameterIndices_.size(); ++k) {
+      jacobianBlock.block(position, perFrameParameterIndices_.size() * nFrames + k, rows, 1) =
+          tempJac_.mat().block(0, universalParameterIndices_[k], rows, 1);
+    }
+
+    position += rows;
+  }
+
+  // Compute sequence error functions starting at this frame
+  std::vector<SkeletonStateT<T>> skelStates;
+  std::vector<MeshStateT<T>> meshStates;
+
+  for (const auto& errf : sequenceErrorFunctions_[f]) {
+    if (errf->getWeight() <= 0.0f) {
+      continue;
+    }
+
+    // Cap nFramesSubset to avoid writing past the end of the Jacobian
+    const auto nFramesSubset = std::min(errf->numFrames(), nFrames - f);
+    const auto js = errf->getJacobianSize();
+
+    // Compute skeleton/mesh states for this sequence
+    skelStates.resize(nFramesSubset);
+    if (needsMeshSequence_) {
+      meshStates.resize(nFramesSubset);
+    }
+    for (size_t iSubframe = 0; iSubframe < nFramesSubset; ++iSubframe) {
+      const size_t iFrame = f + iSubframe;
+      skelStates[iSubframe] = SkeletonStateT<T>(
+          parameterTransform_.apply(frameParameters_[iFrame]), character_.skeleton);
+      if (needsMeshSequence_) {
+        meshStates[iSubframe].update(frameParameters_[iFrame], skelStates[iSubframe], character_);
+      }
+    }
+
+    const size_t seqCols = nFramesSubset * np;
+    tempJac_.resizeAndSetZero(js, seqCols);
+
+    int rows = 0;
+    error += errf->getJacobian(
+        std::span(frameParameters_).subspan(f, nFramesSubset),
+        std::span(skelStates),
+        std::span(meshStates),
+        tempJac_.mat(),
+        residualBlock.segment(position, js),
+        rows);
+
+    // Scatter the Jacobian into the output block using joined parameter layout
+    for (size_t iSubframe = 0; iSubframe < nFramesSubset; ++iSubframe) {
+      // Per-frame parameters for this subframe
+      for (size_t k = 0; k < perFrameParameterIndices_.size(); ++k) {
+        jacobianBlock.block(
+            position, perFrameParameterIndices_.size() * (f + iSubframe) + k, rows, 1) =
+            tempJac_.mat().block(0, iSubframe * np + perFrameParameterIndices_[k], rows, 1);
+      }
+
+      // Universal parameters (accumulate contributions from all subframes)
+      for (size_t k = 0; k < universalParameterIndices_.size(); ++k) {
+        jacobianBlock.block(position, perFrameParameterIndices_.size() * nFrames + k, rows, 1) +=
+            tempJac_.mat().block(0, iSubframe * np + universalParameterIndices_[k], rows, 1);
+      }
+    }
+
+    position += rows;
+  }
+
+  actualRows = position;
   return error;
+}
+
+template <typename T>
+void SequenceSolverFunctionT<T>::finalizeJacobianComputation() {
+  // Release temporary storage
+  tempJac_.resizeAndSetZero(0, 0);
 }
 
 template <typename T>
