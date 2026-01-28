@@ -239,113 +239,113 @@ double MultiposeSolverFunctionT<T>::getGradient(
   return error;
 }
 
+// Block-wise Jacobian interface implementation
+// Each block corresponds to a single frame
 template <typename T>
-double MultiposeSolverFunctionT<T>::getJacobian(
-    const Eigen::VectorX<T>& parameters,
-    Eigen::MatrixX<T>& jacobian,
-    Eigen::VectorX<T>& residual,
-    size_t& actualRows) {
+void MultiposeSolverFunctionT<T>::initializeJacobianComputation(
+    const Eigen::VectorX<T>& parameters) {
   MT_PROFILE_FUNCTION();
-  // update states
+
   MT_CHECK(
       universal_.size() ==
       gsl::narrow_cast<Eigen::Index>(parameterTransform_->numAllModelParameters()));
   MT_CHECK(parameters.size() == gsl::narrow_cast<Eigen::Index>(this->numParameters_));
   setFrameParametersFromJoinedParameterVector(parameters);
 
-  // update the state according to the transformed parameters
-  {
-    MT_PROFILE_EVENT("UpdateState");
-    for (size_t f = 0; f < getNumFrames(); f++) {
-      states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+  // Update all skeleton states
+  for (size_t f = 0; f < getNumFrames(); f++) {
+    states_[f].set(parameterTransform_->apply(frameParameters_[f]), *skeleton_);
+  }
+
+  // Pre-allocate temporary Jacobian storage
+  size_t maxBlockSize = 0;
+  for (size_t f = 0; f < getNumFrames(); f++) {
+    maxBlockSize = std::max(maxBlockSize, getJacobianBlockSize(f));
+  }
+  const auto parameterSize = parameterTransform_->numAllModelParameters();
+  tempJac_.resize(maxBlockSize, parameterSize);
+}
+
+template <typename T>
+size_t MultiposeSolverFunctionT<T>::getJacobianBlockCount() const {
+  return getNumFrames();
+}
+
+template <typename T>
+size_t MultiposeSolverFunctionT<T>::getJacobianBlockSize(size_t blockIndex) const {
+  if (blockIndex >= getNumFrames()) {
+    return 0;
+  }
+
+  size_t blockSize = 0;
+  for (auto&& solvable : errorFunctions_[blockIndex]) {
+    if (solvable->getWeight() > 0.0f) {
+      blockSize += solvable->getJacobianSize();
     }
   }
 
+  return blockSize;
+}
+
+template <typename T>
+double MultiposeSolverFunctionT<T>::computeJacobianBlock(
+    const Eigen::VectorX<T>& /* parameters */,
+    size_t blockIndex,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+    Eigen::Ref<Eigen::VectorX<T>> residualBlock,
+    size_t& actualRows) {
+  MT_PROFILE_FUNCTION();
+
+  if (blockIndex >= getNumFrames()) {
+    actualRows = 0;
+    return 0.0;
+  }
+
+  const size_t f = blockIndex;
+  const auto parameterSize = parameterTransform_->numAllModelParameters();
   double error = 0.0;
 
-  // calculate the jacobian size
-  size_t jacobianSize = 0;
-  size_t maxFrameJacobianSize = 0;
-  {
-    MT_PROFILE_EVENT("GetJacobianSize");
-    for (size_t f = 0; f < getNumFrames(); f++) {
-      size_t frameJacobianSize = 0;
-      for (auto&& solvable : errorFunctions_[f]) {
-        if (solvable->getWeight() > 0.0f) {
-          const auto js = solvable->getJacobianSize();
-          frameJacobianSize += js;
-          jacobianSize += js;
-        }
-      }
+  const size_t blockSize = getJacobianBlockSize(f);
+  tempJac_.topRows(blockSize).setZero();
 
-      frameJacobianSize += 8 - (frameJacobianSize % 8);
-      maxFrameJacobianSize = std::max(maxFrameJacobianSize, frameJacobianSize);
-    }
-    jacobianSize += 8 - (jacobianSize % 8);
-  }
-
-  if (jacobianSize > static_cast<size_t>(jacobian.rows()) ||
-      gsl::narrow_cast<Eigen::Index>(this->numParameters_) != jacobian.cols()) {
-    MT_PROFILE_EVENT("ResizeAndInitializeJacobian");
-    jacobian.setZero(jacobianSize, this->numParameters_);
-    residual.setZero(jacobianSize);
-  }
-  actualRows = jacobianSize;
-
-  const auto& parameterSize = parameterTransform_->numAllModelParameters();
-  Eigen::MatrixX<T> tempJac(maxFrameJacobianSize, parameterSize);
-
-  // add values to the jacobian
-  size_t position = 0;
+  size_t localPosition = 0;
   int rows = 0;
-  for (size_t f = 0; f < getNumFrames(); f++) {
-    // fill in temporary jacobian
-    size_t localPosition = 0;
-    const size_t startPosition = position;
-    {
-      MT_PROFILE_EVENT("GetFrameJacobian");
-      {
-        MT_PROFILE_EVENT("InitializeTempJacobian");
-        tempJac.setZero();
-      }
-      for (auto&& solvable : errorFunctions_[f]) {
-        if (solvable->getWeight() > 0.0f) {
-          const size_t n = solvable->getJacobianSize();
-          error += solvable->getJacobian(
-              frameParameters_[f],
-              states_[f],
-              meshStates_[f],
-              tempJac.block(localPosition, 0, n, parameterSize),
-              residual.middleRows(position, n),
-              rows);
-          localPosition += n;
-          position += n;
-        }
-      }
-    }
 
-    // move values to correct columns in actual jacobian according to the structure
-    {
-      MT_PROFILE_EVENT("MoveJacobianBlocks");
-      for (Eigen::Index i = 0; i < parameterSize; i++) {
-        if (universal_[i] > 0.0f) {
-          jacobian.block(
-              startPosition,
-              genericParameters_.size() * getNumFrames() + parameterIndexMap_[i],
-              localPosition,
-              1) = tempJac.block(0, i, localPosition, 1);
-        } else {
-          jacobian.block(
-              startPosition,
-              genericParameters_.size() * f + parameterIndexMap_[i],
-              localPosition,
-              1) = tempJac.block(0, i, localPosition, 1);
-        }
-      }
+  for (auto&& solvable : errorFunctions_[f]) {
+    if (solvable->getWeight() > 0.0f) {
+      const size_t n = solvable->getJacobianSize();
+      error += solvable->getJacobian(
+          frameParameters_[f],
+          states_[f],
+          meshStates_[f],
+          tempJac_.block(localPosition, 0, n, parameterSize),
+          residualBlock.segment(localPosition, n),
+          rows);
+      localPosition += rows;
     }
   }
 
+  // Move values to correct columns in actual jacobian according to the structure
+  for (Eigen::Index i = 0; i < parameterSize; i++) {
+    if (universal_[i] > 0.0f) {
+      jacobianBlock.block(
+          0, genericParameters_.size() * getNumFrames() + parameterIndexMap_[i], localPosition, 1) =
+          tempJac_.block(0, i, localPosition, 1);
+    } else {
+      jacobianBlock.block(
+          0, genericParameters_.size() * f + parameterIndexMap_[i], localPosition, 1) =
+          tempJac_.block(0, i, localPosition, 1);
+    }
+  }
+
+  actualRows = localPosition;
   return error;
+}
+
+template <typename T>
+void MultiposeSolverFunctionT<T>::finalizeJacobianComputation() {
+  // Release temporary storage
+  tempJac_.resize(0, 0);
 }
 
 template <typename T>
