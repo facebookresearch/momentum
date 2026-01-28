@@ -106,7 +106,7 @@ class TestBlendShapeBase(unittest.TestCase):
         c2 = c.with_face_expression_blend_shape(blend_shape)
         # Check the right parameters are retrieved
         params = np.random.rand(c2.parameter_transform.size).astype(np.float32)
-        bp1 = params[c2.parameter_transform.face_expression_parameters.numpy()]
+        bp1 = params[c2.parameter_transform.face_expression_parameters]
         bp2 = pym_geometry.model_parameters_to_face_expression_coefficients(c2, params)
         self.assertTrue(np.allclose(bp1, bp2))
 
@@ -120,9 +120,7 @@ class TestBlendShapeBase(unittest.TestCase):
         # Check shape vectors are not initialized when not passed
         c3 = c.with_face_expression_blend_shape(None)
         self.assertTrue(c3.face_expression_blend_shape is None)
-        self.assertTrue(
-            np.sum(c3.parameter_transform.face_expression_parameters.numpy()) == 0
-        )
+        self.assertTrue(np.sum(c3.parameter_transform.face_expression_parameters) == 0)
 
     def test_solve_face_expression_parameters(self) -> None:
         c = pym_geometry.create_test_character()
@@ -131,7 +129,9 @@ class TestBlendShapeBase(unittest.TestCase):
         pt = c.parameter_transform
 
         gt_model_params = torch.rand(c.parameter_transform.size).masked_fill(
-            pt.pose_parameters | pt.scaling_parameters | pt.blend_shape_parameters,
+            torch.from_numpy(pt.pose_parameters)
+            | torch.from_numpy(pt.scaling_parameters)
+            | torch.from_numpy(pt.blend_shape_parameters),
             0,
         )
         gt_joint_params = pym_geometry.apply_parameter_transform(
@@ -147,7 +147,9 @@ class TestBlendShapeBase(unittest.TestCase):
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_shape)
 
-        active_params = c.parameter_transform.face_expression_parameters
+        active_params = torch.from_numpy(
+            c.parameter_transform.face_expression_parameters
+        )
         active_error_functions = [ErrorFunctionType.Limit, ErrorFunctionType.Vertex]
         error_function_weights = torch.ones(
             len(active_error_functions),
@@ -219,7 +221,7 @@ class TestBlendShape(unittest.TestCase):
 
         c2 = c.with_blend_shape(blend_shape)
         params = np.random.rand(c2.parameter_transform.size).astype(np.float32)
-        bp1 = params[c2.parameter_transform.blend_shape_parameters.numpy()]
+        bp1 = params[c2.parameter_transform.blend_shape_parameters]
         bp2 = pym_geometry.model_parameters_to_blend_shape_coefficients(c2, params)
         self.assertTrue(np.allclose(bp1, bp2))
 
@@ -232,9 +234,7 @@ class TestBlendShape(unittest.TestCase):
 
         c3 = c.with_blend_shape(None)
         self.assertTrue(c3.blend_shape is None)
-        self.assertTrue(
-            np.sum(c3.parameter_transform.blend_shape_parameters.numpy()) == 0
-        )
+        self.assertTrue(np.sum(c3.parameter_transform.blend_shape_parameters) == 0)
 
     def test_save_and_load(self) -> None:
         np.random.seed(0)  # ensure repeatability
@@ -294,7 +294,8 @@ class TestBlendShape(unittest.TestCase):
         pt = c.parameter_transform
 
         gt_model_params = torch.rand(c.parameter_transform.size).masked_fill(
-            pt.pose_parameters | pt.scaling_parameters,
+            torch.from_numpy(pt.pose_parameters)
+            | torch.from_numpy(pt.scaling_parameters),
             0,
         )
         gt_joint_params = pym_geometry.apply_parameter_transform(
@@ -309,7 +310,7 @@ class TestBlendShape(unittest.TestCase):
         )
         gt_posed_shape = c.skin_points(gt_skel_state, gt_rest_shape)
 
-        active_params = c.parameter_transform.blend_shape_parameters
+        active_params = torch.from_numpy(c.parameter_transform.blend_shape_parameters)
         active_error_functions = [ErrorFunctionType.Limit, ErrorFunctionType.Vertex]
         error_function_weights = torch.ones(
             len(active_error_functions),
@@ -377,12 +378,10 @@ class TestBlendShape(unittest.TestCase):
         # Verify blend shape parameters are removed from parameter transform
         # Original character should have blend shape parameters
         self.assertGreater(
-            np.sum(c_with_blend.parameter_transform.blend_shape_parameters.numpy()), 0
+            np.sum(c_with_blend.parameter_transform.blend_shape_parameters), 0
         )
         # Baked character should have no blend shape parameters
-        self.assertEqual(
-            np.sum(c_baked.parameter_transform.blend_shape_parameters.numpy()), 0
-        )
+        self.assertEqual(np.sum(c_baked.parameter_transform.blend_shape_parameters), 0)
 
         # The parameter transform should be smaller (no blend shape parameters)
         self.assertLess(
