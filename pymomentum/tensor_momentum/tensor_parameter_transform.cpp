@@ -230,16 +230,16 @@ momentum::ParameterSet tensorToParameterSet(
     DefaultParameterSet defaultParamSet) {
   if (isEmpty(paramSet)) {
     switch (defaultParamSet) {
-      case DefaultParameterSet::ALL_ZEROS: {
+      case DefaultParameterSet::AllZeros: {
         momentum::ParameterSet result;
         return result;
       }
-      case DefaultParameterSet::ALL_ONES: {
+      case DefaultParameterSet::AllOnes: {
         momentum::ParameterSet result;
         result.set();
         return result;
       }
-      case DefaultParameterSet::NO_DEFAULT:
+      case DefaultParameterSet::NoDefault:
       default:
           // fall through to the check below:
           ;
