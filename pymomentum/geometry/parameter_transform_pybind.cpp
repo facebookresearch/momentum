@@ -24,7 +24,6 @@
 
 #include <utility>
 
-namespace py = pybind11;
 namespace mm = momentum;
 
 namespace pymomentum {
