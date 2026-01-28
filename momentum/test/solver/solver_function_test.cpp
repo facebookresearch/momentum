@@ -34,35 +34,49 @@ class MockSolverFunction : public SolverFunctionT<T> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<T>& /* parameters */) override {
+    // Nothing to initialize for this simple mock
+  }
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    // Single block containing all residuals
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    if (blockIndex >= 1) {
+      return 0;
+    }
+    return this->numParameters_;
+  }
+
+  double computeJacobianBlock(
       const VectorX<T>& parameters,
-      MatrixX<T>& jacobian,
-      VectorX<T>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<T>> jacobianBlock,
+      Eigen::Ref<VectorX<T>> residualBlock,
       size_t& actualRows) override {
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
+    }
+
     // For a quadratic function, the Jacobian is the identity matrix
     // and the residual is the parameters
-    if (jacobian.rows() != this->numParameters_ || jacobian.cols() != this->numParameters_) {
-      jacobian.resize(this->numParameters_, this->numParameters_);
-    }
-    jacobian.setIdentity();
-
-    if (residual.size() != this->numParameters_) {
-      residual.resize(this->numParameters_);
-    }
-    residual = parameters;
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
 
     actualRows = this->numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
 
-  void updateParameters(VectorX<T>& parameters, const VectorX<T>& delta) override {
-    parameters -= delta;
+  void finalizeJacobianComputation() override {
+    // Nothing to clean up
   }
 
-  // Override getJtJR to test our implementation
-  double getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj, VectorX<T>& jtr) override {
-    // Call the base class implementation
-    return SolverFunctionT<T>::getJtJR(parameters, jtj, jtr);
+  void updateParameters(VectorX<T>& parameters, const VectorX<T>& delta) override {
+    parameters -= delta;
   }
 
   // Override getJtJR_Sparse to test our implementation
