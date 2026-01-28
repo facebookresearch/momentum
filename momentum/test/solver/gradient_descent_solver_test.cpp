@@ -34,26 +34,31 @@ class MockSolverFunction : public SolverFunctionT<float> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t /* blockIndex */,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
     // For a quadratic function, the Jacobian is the identity matrix
     // and the residual is the parameters
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
-    }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = parameters;
-
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
     actualRows = numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
+
+  void finalizeJacobianComputation() override {}
 
   void updateParameters(VectorX<float>& parameters, const VectorX<float>& delta) override {
     // Update parameters by subtracting delta
@@ -91,26 +96,31 @@ class MockSolverFunctionDouble : public SolverFunctionT<double> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  void initializeJacobianComputation(const VectorX<double>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<double>& parameters,
-      MatrixX<double>& jacobian,
-      VectorX<double>& residual,
+      size_t /* blockIndex */,
+      Eigen::Ref<MatrixX<double>> jacobianBlock,
+      Eigen::Ref<VectorX<double>> residualBlock,
       size_t& actualRows) override {
     // For a quadratic function, the Jacobian is the identity matrix
     // and the residual is the parameters
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
-    }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = parameters;
-
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
     actualRows = numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
+
+  void finalizeJacobianComputation() override {}
 
   void updateParameters(VectorX<double>& parameters, const VectorX<double>& delta) override {
     // Update parameters by subtracting delta
