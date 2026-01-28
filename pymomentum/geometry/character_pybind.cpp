@@ -36,7 +36,6 @@
 
 #include <fmt/format.h>
 
-namespace py = pybind11;
 namespace mm = momentum;
 
 namespace {
