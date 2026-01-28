@@ -97,11 +97,8 @@ class GaussNewtonSolverT : public SolverT<T> {
   /// Dense Cholesky factorization solver
   Eigen::LLT<Eigen::MatrixX<T>> llt_;
 
-  /// Base regularization parameter
+  /// Regularization parameter
   T regularization_;
-
-  /// Current regularization value (may be adjusted during iterations)
-  T alpha_;
 };
 
 } // namespace momentum

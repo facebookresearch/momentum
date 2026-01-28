@@ -45,7 +45,6 @@ void SparseGaussNewtonSolverT<T>::setOptions(const SolverOptions& options) {
 template <typename T>
 void SparseGaussNewtonSolverT<T>::initializeSolver() {
   // This is called from the solver base class .solve()
-  alpha_ = regularization_;
   this->newParameterPattern_ = true;
 }
 
@@ -95,7 +94,7 @@ void SparseGaussNewtonSolverT<T>::doIteration() {
     D_.resize(this->actualParameters_, this->actualParameters_);
     D_.setIdentity();
   }
-  JtJ_ += D_ * alpha_;
+  JtJ_ += D_ * regularization_;
 
   // Symbolic decomposition, only needed if the params pattern changed
   if (this->newParameterPattern_) {
