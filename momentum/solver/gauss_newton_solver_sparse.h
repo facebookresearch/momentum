@@ -101,11 +101,8 @@ class SparseGaussNewtonSolverT : public SolverT<T> {
   /// Residual vector
   Eigen::VectorX<T> residual_;
 
-  /// Base regularization parameter
+  /// Regularization parameter
   T regularization_;
-
-  /// Current regularization value (may be adjusted during iterations)
-  T alpha_;
 };
 
 } // namespace momentum

@@ -45,7 +45,6 @@ void GaussNewtonSolverT<T>::setOptions(const SolverOptions& options) {
 template <typename T>
 void GaussNewtonSolverT<T>::initializeSolver() {
   // This is called from the solver base class .solve()
-  alpha_ = regularization_;
 }
 
 template <typename T>
@@ -82,7 +81,7 @@ void GaussNewtonSolverT<T>::doIteration() {
     // delta = (Jt*J)^-1*Jt*r ...
     // - add some regularization to make sure the system is never unstable and explodes in weird
     // ways.
-    hessianApprox_.diagonal().array() += alpha_;
+    hessianApprox_.diagonal().array() += regularization_;
 
     // - llt solve
     delta.head(this->actualParameters_) = llt_.compute(hessianApprox_).solve(JtR_);
