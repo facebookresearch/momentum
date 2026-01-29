@@ -364,6 +364,14 @@ class VectorArrayAccessor {
   // Set all vectors for the given batch indices (bulk operation).
   void set(const std::vector<py::ssize_t>& batchIndices, const std::vector<VectorType>& values);
 
+  // Convert to Eigen matrix format (nElements x Dim) with appropriate storage.
+  // This is useful for algorithms that expect Eigen::MatrixX3 or similar formats.
+  // Creates a new matrix with copied data, handling arbitrary strides.
+  // Uses RowMajor storage for Dim > 1 to ensure each point's coordinates are contiguous in memory.
+  // Uses ColMajor (default) for Dim == 1 (column vectors) as required by Eigen.
+  Eigen::Matrix<T, Eigen::Dynamic, Dim, (Dim > 1) ? Eigen::RowMajor : Eigen::ColMajor> toMatrix(
+      const std::vector<py::ssize_t>& batchIndices) const;
+
  private:
   T* data_;
   py::ssize_t nElements_{};
