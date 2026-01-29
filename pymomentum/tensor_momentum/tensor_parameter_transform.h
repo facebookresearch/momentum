@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <pymomentum/array_utility/default_parameter_set.h>
+
 #include <momentum/character/character.h>
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/parameter_transform.h>
@@ -64,16 +66,10 @@ at::Tensor applyInverseParamTransform(
 std::unique_ptr<momentum::InverseParameterTransform> createInverseParameterTransform(
     const momentum::ParameterTransform& transform);
 
-// If the user passes an empty tensor for a parameter set, what kind of
-// value to return.  This is different for different cases: sometimes we
-// should include all parameters, sometimes none, and sometimes no reasonable
-// default is possible.
-enum class DefaultParameterSet { ALL_ONES, ALL_ZEROS, NO_DEFAULT };
-
 momentum::ParameterSet tensorToParameterSet(
     const momentum::ParameterTransform& parameterTransform,
     at::Tensor paramSet,
-    DefaultParameterSet defaultParamSet = DefaultParameterSet::NO_DEFAULT);
+    DefaultParameterSet defaultParamSet = DefaultParameterSet::NoDefault);
 
 // Change flattened joint parameter motion tensor with shape: [... x
 // (n_joint_params x 7)] to shape [... x n_joint_params x 7]. Return the same

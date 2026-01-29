@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <pymomentum/array_utility/default_parameter_set.h>
+
 #include <momentum/character/character.h>
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/parameter_transform.h>
@@ -50,6 +52,14 @@ std::unordered_map<std::string, py::array_t<bool>> getParameterSetsArray(
 py::array_t<bool> parameterSetToArray(
     const momentum::ParameterTransform& parameterTransform,
     const momentum::ParameterSet& paramSet);
+
+// Convert a boolean numpy array to a ParameterSet
+// If the array is empty and defaultParamSet is not NO_DEFAULT, return the default set
+// Note: DefaultParameterSet enum is defined in tensor_momentum/tensor_parameter_transform.h
+momentum::ParameterSet arrayToParameterSet(
+    const momentum::ParameterTransform& parameterTransform,
+    const py::array_t<bool>& paramSet,
+    DefaultParameterSet defaultParamSet = DefaultParameterSet::NoDefault);
 
 py::array_t<bool> getScalingParametersArray(const momentum::ParameterTransform& parameterTransform);
 
