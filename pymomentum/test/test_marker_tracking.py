@@ -276,10 +276,8 @@ class TestMarkerTracking(unittest.TestCase):
             model_params_batch[frame, :] = model_params_cur
 
         # Convert model parameters to skeleton states
-        skeleton_states = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_batch
-            )
+        skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_batch
         )
 
         # Compute skinned locator positions for all frames using the new function
@@ -294,7 +292,7 @@ class TestMarkerTracking(unittest.TestCase):
             for loc_idx, skinned_locator in enumerate(character.skinned_locators):
                 marker = pym_geometry.Marker(
                     skinned_locator.name,
-                    all_skinned_positions[frame_idx, loc_idx].numpy(),
+                    all_skinned_positions[frame_idx, loc_idx],
                     False,  # Not occluded
                 )
                 frame_markers.append(marker)
@@ -328,8 +326,8 @@ class TestMarkerTracking(unittest.TestCase):
         # Test that we can compute skinned marker positions from tracked motion and verify accuracy
 
         # Convert tracked motion to skeleton states
-        tracked_skeleton_states = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(character, tracked_motion)
+        tracked_skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
+            character, tracked_motion
         )
 
         # Compute all skinned locator positions for all tracked frames using the new function
@@ -341,9 +339,7 @@ class TestMarkerTracking(unittest.TestCase):
         for loc_idx, skinned_locator in enumerate(character.skinned_locators):
             for frame_idx in range(num_frames):
                 original_marker_pos = marker_data[frame_idx][loc_idx].pos
-                computed_pos = computed_skinned_positions_batch[
-                    frame_idx, loc_idx
-                ].numpy()
+                computed_pos = computed_skinned_positions_batch[frame_idx, loc_idx]
                 position_error = np.linalg.norm(computed_pos - original_marker_pos)
 
                 # The tracking should be reasonably accurate
@@ -379,16 +375,14 @@ class TestMarkerTracking(unittest.TestCase):
 
         # Should match the first frame of the batched result
         self.assertTrue(
-            torch.allclose(
-                single_skinned_positions, all_skinned_positions[0], atol=1e-6
-            ),
+            np.allclose(single_skinned_positions, all_skinned_positions[0], atol=1e-6),
             "Single frame result should match first frame of batched result",
         )
 
         # Verify the new function produces the same results as mesh skinning
         # for the same skeleton state (this validates correctness of skin_skinned_locators)
         rest_vertices = character.mesh.vertices.astype(np.float64)
-        skinned_mesh = character.skin_points(skeleton_states.numpy(), rest_vertices)
+        skinned_mesh = character.skin_points(skeleton_states, rest_vertices)
 
         # Extract the positions of our selected vertices from the skinned mesh
         expected_positions = skinned_mesh[
@@ -396,7 +390,7 @@ class TestMarkerTracking(unittest.TestCase):
         ]  # [num_frames, n_locators, 3]
 
         # Compare with our skinned locator results (ensure types match)
-        all_skinned_np = all_skinned_positions.numpy()
+        all_skinned_np = all_skinned_positions
         self.assertEqual(all_skinned_np.shape, expected_positions.shape)
         self.assertTrue(
             np.allclose(
