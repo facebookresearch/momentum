@@ -16,7 +16,7 @@ from pymomentum.solver import ErrorFunctionType
 logger: logging.Logger = logging.getLogger(__name__)
 
 # Flag to check if autograd is enabled (disabled in arvr build modes)
-AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+AUTOGRAD_ENABLED: bool = pym_diff_geometry.AUTOGRAD_ENABLED
 
 
 class TestPosePrior(unittest.TestCase):
@@ -89,7 +89,7 @@ class TestPosePrior(unittest.TestCase):
         # =============== End building constraints
 
         scaling_params = character.parameter_transform.scaling_parameters
-        active_params = ~scaling_params
+        active_params = torch.from_numpy(~scaling_params)
 
         active_error_functions = [
             ErrorFunctionType.Limit,

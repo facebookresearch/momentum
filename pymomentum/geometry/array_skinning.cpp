@@ -113,6 +113,106 @@ py::array_t<T> skinPointsImpl(
   return result;
 }
 
+template <typename T>
+py::array_t<T> skinSkinnedLocatorsImpl(
+    const momentum::Character& character,
+    const py::array& skelState,
+    const std::optional<py::array>& restPositions,
+    const LeadingDimensions& leadingDims) {
+  MT_THROW_IF(
+      character.skinnedLocators.empty(),
+      "skin_skinned_locators: character has no skinned locators");
+
+  const auto nJoints = static_cast<py::ssize_t>(character.skeleton.joints.size());
+  const auto nLocators = static_cast<py::ssize_t>(character.skinnedLocators.size());
+  const auto nBatch = leadingDims.totalBatchElements();
+
+  // Create output array with shape [..., nLocators, 3]
+  auto result = createOutputArray<T>(leadingDims, {nLocators, static_cast<py::ssize_t>(3)});
+
+  // Create batch indexer
+  BatchIndexer indexer(leadingDims);
+
+  // Get inverse bind pose in the correct type
+  const auto inverseBindPose = momentum::cast<T>(character.inverseBindPose);
+  MT_THROW_IF(inverseBindPose.size() != nJoints, "inverseBindPose has wrong size");
+
+  // Create skeleton state accessor
+  SkeletonStateAccessor<T> skelStateAcc(skelState, leadingDims, nJoints);
+
+  // Get rest positions if provided
+  std::optional<VectorArrayAccessor<T, 3>> restPositionsAcc;
+  std::vector<momentum::Vector3<T>> restPts;
+  if (restPositions.has_value()) {
+    restPositionsAcc.emplace(restPositions.value(), leadingDims, nLocators);
+  } else {
+    // Use positions from skinned locators
+    restPts.reserve(nLocators);
+    for (const auto& locator : character.skinnedLocators) {
+      restPts.push_back(locator.position.template cast<T>());
+    }
+  }
+
+  // Create output accessor
+  VectorArrayAccessor<T, 3> outputAcc(result, leadingDims, nLocators);
+
+  // Release GIL for parallel computation
+  {
+    py::gil_scoped_release release;
+    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+      // Convert flat batch index to multi-dimensional indices
+      auto indices = indexer.decompose(iBatch);
+
+      // Get world-space transforms from skeleton state
+      const momentum::TransformListT<T> transforms = skelStateAcc.getTransforms(indices);
+
+      // Get rest positions for this batch
+      const auto& restPositions =
+          restPositionsAcc.has_value() ? restPositionsAcc->get(indices) : restPts;
+
+      // Compute skinned locator positions
+      std::vector<momentum::Vector3<T>> skinnedPositions;
+      skinnedPositions.reserve(nLocators);
+
+      for (size_t iLoc = 0; iLoc < nLocators; ++iLoc) {
+        const auto& locator = character.skinnedLocators[iLoc];
+        const auto& restPos = restPositions[iLoc];
+
+        momentum::Vector3<T> worldPos = momentum::Vector3<T>::Zero();
+        T weightSum = T(0);
+
+        // Apply linear blend skinning using locator's bone influences
+        for (size_t k = 0; k < locator.skinWeights.size(); ++k) {
+          const auto& weight = locator.skinWeights[k];
+          if (weight == 0.0f) {
+            break; // Weights are sorted, so we can stop here
+          }
+
+          const auto boneIndex = locator.parents[k];
+          const auto& jointTransform = transforms[boneIndex];
+
+          // Transform rest position: world = joint * invBindPose * rest
+          worldPos += static_cast<T>(weight) *
+              (jointTransform * (inverseBindPose[boneIndex] * restPos)).template cast<T>();
+          weightSum += static_cast<T>(weight);
+        }
+
+        // Normalize by total weight
+        if (weightSum > T(0)) {
+          worldPos /= weightSum;
+        }
+
+        skinnedPositions.push_back(worldPos);
+      }
+
+      // Copy results to output array
+      outputAcc.set(indices, skinnedPositions);
+    });
+  }
+
+  return result;
+}
+
 } // namespace
 
 py::array skinPointsArray(
@@ -149,6 +249,51 @@ py::array skinPointsArray(
     return skinPointsImpl<double>(character, skelStateArr, restVerticesArr, leadingDims);
   } else {
     return skinPointsImpl<float>(character, skelStateArr, restVerticesArr, leadingDims);
+  }
+}
+
+py::array skinSkinnedLocatorsArray(
+    const momentum::Character& character,
+    py::buffer skelState,
+    std::optional<py::buffer> restPositions) {
+  // Early return for empty locators
+  if (character.skinnedLocators.empty()) {
+    // Return empty array with shape [0, 3]
+    return py::array_t<float>(std::vector<py::ssize_t>{0, 3});
+  }
+
+  const auto nLocators = static_cast<py::ssize_t>(character.skinnedLocators.size());
+
+  ArrayChecker checker("skin_skinned_locators");
+
+  // Validate skeleton state: shape (..., nJoints, 8)
+  checker.validateSkeletonState(skelState, "skel_state", character);
+
+  // Get leading dimensions from validated skel_state
+  const auto& leadingDims = checker.getLeadingDimensions();
+
+  // Validate rest positions if provided
+  // ArrayChecker will automatically validate that leading dimensions match skel_state
+  if (restPositions.has_value()) {
+    checker.validateBuffer(
+        restPositions.value(),
+        "rest_positions",
+        {static_cast<int>(nLocators), 3},
+        {"nLocators", "xyz"},
+        false /* allowEmpty */);
+  }
+
+  // Get validated arrays for processing
+  py::array skelStateArr = py::array::ensure(skelState);
+  std::optional<py::array> restPositionsArr;
+  if (restPositions.has_value()) {
+    restPositionsArr = py::array::ensure(restPositions.value());
+  }
+
+  if (checker.isFloat64()) {
+    return skinSkinnedLocatorsImpl<double>(character, skelStateArr, restPositionsArr, leadingDims);
+  } else {
+    return skinSkinnedLocatorsImpl<float>(character, skelStateArr, restPositionsArr, leadingDims);
   }
 }
 

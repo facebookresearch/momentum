@@ -140,7 +140,7 @@ class LBSAdapter:
 
         # Parameter transform properties
         self.param_transform: torch.Tensor = torch.tensor(
-            character.parameter_transform.transform.numpy(),
+            character.parameter_transform.transform,
             dtype=self.dtype,
             device=self._device,
         )
@@ -150,14 +150,9 @@ class LBSAdapter:
         )
 
         # Derived parameter counts from the boolean mask for backward compatibility
-        self.nr_position_params: int = int(
-            torch.logical_not(character.parameter_transform.scaling_parameters)
-            .sum()
-            .item()
-        )
-        self.nr_scaling_params: int = int(
-            character.parameter_transform.scaling_parameters.sum().item()
-        )
+        scaling_params = character.parameter_transform.scaling_parameters
+        self.nr_position_params: int = int((~scaling_params).sum())
+        self.nr_scaling_params: int = int(scaling_params.sum())
 
         # Mesh and skinning weights
         assert character.has_mesh

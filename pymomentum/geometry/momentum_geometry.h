@@ -10,7 +10,6 @@
 #include <momentum/character/character.h>
 #include <momentum/math/mppca.h>
 
-#include <ATen/ATen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
@@ -204,6 +203,10 @@ std::tuple<Eigen::VectorXi, RowMatrixf> getLocators(
 
 std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
     const momentum::Character& character);
+
+pybind11::array applyModelParameterLimitsArray(
+    const momentum::Character& character,
+    const pybind11::buffer& modelParams);
 
 using MatrixX7f =
     Eigen::Matrix<float, Eigen::Dynamic, momentum::kParametersPerJoint, Eigen::RowMajor>;
