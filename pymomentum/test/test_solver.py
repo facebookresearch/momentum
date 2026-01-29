@@ -61,7 +61,9 @@ def solve_one_ik_problem(index: int) -> torch.Tensor:
     # Test whether ik works without proj or dist constraints:
     return pym_solver.solve_ik(
         character=character,
-        active_parameters=character.parameter_transform.all_parameters,
+        active_parameters=torch.from_numpy(
+            character.parameter_transform.all_parameters
+        ),
         model_parameters_init=model_params_init,
         active_error_functions=active_error_functions,
         error_function_weights=error_function_weights,
@@ -139,7 +141,9 @@ class TestSolver(unittest.TestCase):
 
         # =============== End building constraints
 
-        scaling_params = character.parameter_transform.scaling_parameters
+        scaling_params = torch.from_numpy(
+            character.parameter_transform.scaling_parameters
+        )
         active_params = ~scaling_params
 
         active_error_functions = [
@@ -265,7 +269,9 @@ class TestSolver(unittest.TestCase):
 
         result = pym_solver.solve_ik(
             character=character,
-            active_parameters=character.parameter_transform.all_parameters,
+            active_parameters=torch.from_numpy(
+                character.parameter_transform.all_parameters
+            ),
             model_parameters_init=model_params_init,
             active_error_functions=[ErrorFunctionType.Position],
             error_function_weights=torch.ones(batch_size, 1, dtype=torch.float64),
@@ -529,7 +535,9 @@ class TestSolver(unittest.TestCase):
         solverOptions.min_iter = 0
         solverOptions.max_iter = 0
 
-        scaling_params = character.parameter_transform.scaling_parameters
+        scaling_params = torch.from_numpy(
+            character.parameter_transform.scaling_parameters
+        )
         active_params = ~scaling_params
 
         model_params_final = pym_solver.solve_ik(
@@ -611,7 +619,9 @@ class TestSolver(unittest.TestCase):
         # prevent solver from thinking it converges
         solverOptions.threshold = 0.0
 
-        scaling_params = character.parameter_transform.scaling_parameters
+        scaling_params = torch.from_numpy(
+            character.parameter_transform.scaling_parameters
+        )
         active_params = ~scaling_params
 
         pym_solver.solve_ik(
@@ -734,7 +744,9 @@ class TestSolver(unittest.TestCase):
 
         # =============== End building constraints
 
-        scaling_params = character.parameter_transform.scaling_parameters
+        scaling_params = torch.from_numpy(
+            character.parameter_transform.scaling_parameters
+        )
         active_params = ~scaling_params
 
         active_error_functions = [

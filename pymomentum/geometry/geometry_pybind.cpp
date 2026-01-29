@@ -7,6 +7,7 @@
 
 #include "pymomentum/geometry/array_blend_shape.h"
 #include "pymomentum/geometry/array_joint_parameters_to_positions.h"
+#include "pymomentum/geometry/array_kd_tree.h"
 #include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/array_skeleton_state.h"
 #include "pymomentum/geometry/array_vertex_normals.h"
@@ -20,13 +21,10 @@
 #include "pymomentum/geometry/parameter_transform_pybind.h"
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
-#include "pymomentum/tensor_momentum/tensor_blend_shape.h"
-#include "pymomentum/tensor_momentum/tensor_joint_parameters_to_positions.h"
+
+// Keep tensor versions for functions without array equivalents yet
 #include "pymomentum/tensor_momentum/tensor_kd_tree.h"
 #include "pymomentum/tensor_momentum/tensor_mppca.h"
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
-#include "pymomentum/tensor_momentum/tensor_skeleton_state.h"
-#include "pymomentum/tensor_momentum/tensor_skinning.h"
 #include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/blend_shape.h>
@@ -1181,30 +1179,29 @@ blend shapes, pose shapes, and other mesh-related data.
   // reduceToSelectedModelParameters(character, activeParameters)
   m.def(
       "reduce_to_selected_model_parameters",
-      [](const momentum::Character& character, at::Tensor activeParameters) {
+      [](const momentum::Character& character, const py::array_t<bool>& activeParameters) {
         return character.simplifyParameterTransform(
-            tensorToParameterSet(character.parameterTransform, activeParameters));
+            arrayToParameterSet(character.parameterTransform, activeParameters));
       },
       R"(Strips out unused parameters from the parameter transform.
 
 :param character: Full-body character.
-:param activeParameters: A boolean tensor marking which parameters should be retained.
+:param activeParameters: A boolean numpy array marking which parameters should be retained.
 :return: A new character whose parameter transform only includes the marked parameters.)",
       py::arg("character"),
       py::arg("active_parameters"));
 
   m.def(
       "find_closest_points",
-      &findClosestPoints,
-      pybind11::call_guard<py::gil_scoped_release>(),
-      R"(For each point in the points_source tensor, find the closest point in the points_target tensor.  This version of find_closest points supports both 2- and 3-dimensional point sets.
+      &findClosestPointsArray,
+      R"(For each point in the points_source array, find the closest point in the points_target array.  This version of find_closest points supports both 2- and 3-dimensional point sets.
 
-:param points_source: [nBatch x nPoints x dim] tensor of source points (dim must be 2 or 3).
-:param points_target: [nBatch x nPoints x dim] tensor of target points (dim must be 2 or 3).
+:param points_source: [..., nSrcPoints, dim] array of source points (dim must be 2 or 3).
+:param points_target: [..., nTgtPoints, dim] array of target points (dim must be 2 or 3).
 :param max_dist: Maximum distance to search, can be used to speed up the method by allowing the search to return early.  Defaults to FLT_MAX.
-:return: A tuple of three tensors.  The first is [nBatch x nPoints x dim] and contains the closest point for each point in the target set.
-         The second is [nBatch x nPoints] and contains the index of each closest point in the target set (or -1 if none).
-         The third is [nBatch x nPoints] and is a boolean tensor indicating whether a valid closest point was found for each source point.
+:return: A tuple of three arrays.  The first is [..., nSrcPoints, dim] and contains the closest point for each point in the target set.
+         The second is [..., nSrcPoints] and contains the index of each closest point in the target set (or -1 if none).
+         The third is [..., nSrcPoints] and is a boolean array indicating whether a valid closest point was found for each source point.
       )",
       py::arg("points_source"),
       py::arg("points_target"),
@@ -1212,20 +1209,19 @@ blend shapes, pose shapes, and other mesh-related data.
 
   m.def(
       "find_closest_points",
-      &findClosestPointsWithNormals,
-      pybind11::call_guard<py::gil_scoped_release>(),
-      R"(For each point in the points_source tensor, find the closest point in the points_target tensor whose normal is compatible (n_source . n_target > max_normal_dot).
+      &findClosestPointsWithNormalsArray,
+      R"(For each point in the points_source array, find the closest point in the points_target array whose normal is compatible (n_source . n_target > max_normal_dot).
 Using the normal is a good way to avoid certain kinds of bad matches, such as matching the front of the body against depth values from the back of the body.
 
-:param points_source: [nBatch x nPoints x 3] tensor of source points.
-:param normals_source: [nBatch x nPoints x 3] tensor of source normals (must be normalized).
-:param points_target: [nBatch x nPoints x 3] tensor of target points.
-:param normals_target: [nBatch x nPoints x 3] tensor of target normals (must be normalized).
+:param points_source: [..., nSrcPoints, 3] array of source points.
+:param normals_source: [..., nSrcPoints, 3] array of source normals (must be normalized).
+:param points_target: [..., nTgtPoints, 3] array of target points.
+:param normals_target: [..., nTgtPoints, 3] array of target normals (must be normalized).
 :param max_dist: Maximum distance to search, can be used to speed up the method by allowing the search to return early.  Defaults to FLT_MAX.
 :param max_normal_dot: Maximum dot product allowed between the source and target normal.  Defaults to 0.
-:return: A tuple of three tensors.  The first is [nBatch x nPoints x dim] and contains the closest point for each point in the target set.
-         The second is [nBatch x nPoints] and contains the index of each closest point in the target set (or -1 if none).
-         The third is [nBatch x nPoints] and is a boolean tensor indicating whether a valid closest point was found for each source point.
+:return: A tuple of three arrays.  The first is [..., nSrcPoints, dim] and contains the closest point for each point in the target set.
+         The second is [..., nSrcPoints] and contains the index of each closest point in the target set (or -1 if none).
+         The third is [..., nSrcPoints] and is a boolean array indicating whether a valid closest point was found for each source point.
       )",
       py::arg("points_source"),
       py::arg("normals_source"),
@@ -1236,17 +1232,16 @@ Using the normal is a good way to avoid certain kinds of bad matches, such as ma
 
   m.def(
       "find_closest_points_on_mesh",
-      &findClosestPointsOnMesh,
-      pybind11::call_guard<py::gil_scoped_release>(),
-      R"(For each point in the points_source tensor, find the closest point in the target mesh.
+      &findClosestPointsOnMeshArray,
+      R"(For each point in the points_source array, find the closest point in the target mesh.
 
-  :param points_source: [nBatch x nPoints x 3] tensor of source points.
-  :param vertices_target: [nBatch x nPoints x 3] tensor of target vertices.
-  :param faces_target: [nBatch x nPoints x 3] tensor of target faces.
-  :return: A tuple of four tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
-           The second is [nBatch x nPoints x 3] and contains the actual closest point (or 0, 0, 0 if invalid).
-           The third is [nBatch x nPoints] and contains the index of the closest face (or -1 if invalid).
-           The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).
+  :param points_source: [..., nSrcPoints, 3] array of source points.
+  :param vertices_target: [..., nVertices, 3] array of target vertices.
+  :param faces_target: [nFaces, 3] array of target faces.
+  :return: A tuple of four arrays, (valid, points, face_index, bary).  The first is [..., nSrcPoints] and specifies if the closest point result is valid.
+           The second is [..., nSrcPoints, 3] and contains the actual closest point (or 0, 0, 0 if invalid).
+           The third is [..., nSrcPoints] and contains the index of the closest face (or -1 if invalid).
+           The fourth is [..., nSrcPoints, 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).
         )",
       py::arg("points_source"),
       py::arg("vertices_target"),

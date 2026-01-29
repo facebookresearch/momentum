@@ -9,8 +9,6 @@
 
 #include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/momentum_geometry.h"
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
-#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/parameter_transform.h>
@@ -174,73 +172,85 @@ joint. Rotations are in Euler angles.
           py::arg("flatten") = true)
       .def_property_readonly(
           "scaling_parameters",
-          &getScalingParameters,
-          "Boolean torch.Tensor indicating which parameters are used to control the character's scale.")
+          &getScalingParametersArray,
+          "Boolean numpy array indicating which parameters are used to control the character's scale.")
       .def_property_readonly(
           "rigid_parameters",
-          &getRigidParameters,
-          "Boolean torch.Tensor indicating which parameters are used to control the character's rigid transform (translation and rotation).")
+          &getRigidParametersArray,
+          "Boolean numpy array indicating which parameters are used to control the character's rigid transform (translation and rotation).")
       .def_property_readonly(
-          "all_parameters", &getAllParameters, "Boolean torch.Tensor with all parameters enabled.")
+          "all_parameters",
+          &getAllParametersArray,
+          "Boolean numpy array with all parameters enabled.")
       .def_property_readonly(
           "blend_shape_parameters",
-          &getBlendShapeParameters,
-          "Boolean torch.Tensor with just the blend shape parameters enabled.")
+          &getBlendShapeParametersArray,
+          "Boolean numpy array with just the blend shape parameters enabled.")
       .def_property_readonly(
           "face_expression_parameters",
-          &getFaceExpressionParameters,
-          "Boolean torch.Tensor with just the face expression parameters enabled.")
+          &getFaceExpressionParametersArray,
+          "Boolean numpy array with just the face expression parameters enabled.")
       .def_property_readonly(
           "pose_parameters",
-          &getPoseParameters,
-          "Boolean torch.Tensor with all the parameters used to pose the body, excluding and scaling, blend shape, or physics parameters.")
+          &getPoseParametersArray,
+          "Boolean numpy array with all the parameters used to pose the body, excluding and scaling, blend shape, or physics parameters.")
       .def_property_readonly(
           "no_parameters",
           [](const momentum::ParameterTransform& parameterTransform) {
-            return parameterSetToTensor(parameterTransform, momentum::ParameterSet());
+            return parameterSetToArray(parameterTransform, momentum::ParameterSet());
           },
-          "Boolean torch.Tensor with no parameters enabled.")
+          "Boolean numpy array with no parameters enabled.")
       .def_property_readonly(
           "parameter_sets",
-          &getParameterSets,
-          R"(A dictionary mapping names to sets of parameters (as a boolean torch.Tensor) that are defined in the .model file.
+          &getParameterSetsArray,
+          R"(A dictionary mapping names to sets of parameters (as a boolean numpy array) that are defined in the .model file.
 This is convenient for turning off certain body features; for example the 'fingers' parameters
 can be used to enable/disable finger motion in the character model.  )")
       .def(
           "add_parameter_set",
-          &addParameterSet,
+          &addParameterSetArray,
           R"(Adds a parameter set.
 
 :param parameter_set_name: The name of the parameter set.
-:param parameter_set: The tensor of parameter set values.)",
+:param parameter_set: The numpy array of parameter set values.)",
           py::arg("parameter_set_name"),
           py::arg("parameter_set"))
       .def(
           "parameters_for_joints",
-          &getParametersForJoints,
-          R"(Gets a boolean torch.Tensor indicating which parameters affect the passed-in joints.
+          [](const mm::ParameterTransform& paramTransform,
+             const std::vector<size_t>& jointIndices) -> py::array_t<bool> {
+            return getParametersForJointsArray(paramTransform, jointIndices);
+          },
+          R"(Gets a boolean numpy array indicating which parameters affect the passed-in joints.
 
-:param jointIndices: List of integers of skeleton joints.)",
+:param joint_indices: List of integers of skeleton joints.
+:return: Boolean numpy array of shape (numModelParams,))",
           py::arg("joint_indices"))
       .def(
           "find_parameters",
-          &findParameters,
-          R"(Return a boolean tensor with the named parameters set to true.
+          [](const mm::ParameterTransform& paramTransform,
+             const std::vector<std::string>& names,
+             bool allowMissing) -> py::array_t<bool> {
+            return findParametersArray(paramTransform, names, allowMissing);
+          },
+          R"(Return a boolean numpy array with the named parameters set to true.
 
-:param parameter_names: Names of the parameters to find.
-:param allow_missng: If false, missing parameters will throw an exception.
-        )",
+:param names: Names of the parameters to find.
+:param allow_missing: If false, missing parameters will throw an exception.
+:return: Boolean numpy array of shape (numModelParams,))",
           py::arg("names"),
           py::arg("allow_missing") = false)
       .def(
           "inverse",
-          &createInverseParameterTransform,
+          [](const mm::ParameterTransform& transform) {
+            return std::make_unique<mm::InverseParameterTransform>(transform);
+          },
           R"(Compute the inverse of the parameter transform (a mapping from joint parameters to model parameters).
 
 :return: The inverse parameter transform.)")
       .def_property_readonly(
           "transform",
-          &getParameterTransformTensor,
+          &getParameterTransformMatrix,
           "Returns the parameter transform matrix which when applied maps model parameters to joint parameters.")
       .def("__repr__", [](const mm::ParameterTransform& pt) {
         return fmt::format(
