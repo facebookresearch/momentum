@@ -7,22 +7,15 @@
 
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
 
-#include "momentum/character/mesh_state.h"
-#include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/profile.h"
-
-#include <gsl/util>
 
 namespace momentum {
 
 template <typename T>
 GaussNewtonSolverQRT<T>::GaussNewtonSolverQRT(
     const SolverOptions& options,
-    SkeletonSolverFunctionT<T>* solverFun)
-    : SolverT<T>(options, solverFun),
-      skeletonState_(std::make_unique<SkeletonStateT<T>>()),
-      meshState_(std::make_unique<MeshStateT<T>>()),
-      qrSolver_(0) {
+    SolverFunctionT<T>* solverFun)
+    : SolverT<T>(options, solverFun), qrSolver_(0) {
   // Set default values from GaussNewtonSolverQROptions
   regularization_ = GaussNewtonSolverQROptions().regularization;
   doLineSearch_ = GaussNewtonSolverQROptions().doLineSearch;
@@ -56,22 +49,13 @@ template <typename T>
 void GaussNewtonSolverQRT<T>::doIteration() {
   MT_PROFILE_FUNCTION();
 
-  const auto sf = static_cast<SkeletonSolverFunctionT<T>*>(this->solverFunction_);
-
-  const auto skeleton = sf->getSkeleton();
-  const auto parameterTransform = sf->getParameterTransform();
-
+  // Initialize Jacobian computation (sets up SkeletonState, MeshState, etc.)
   {
-    MT_PROFILE_EVENT("JtJR - update state");
-    skeletonState_->set(parameterTransform->apply(this->parameters_), *skeleton);
+    MT_PROFILE_EVENT("Initialize Jacobian computation");
+    this->solverFunction_->initializeJacobianComputation(this->parameters_);
   }
 
-  if (sf->needsMeshState()) {
-    MT_PROFILE_EVENT("JtJR - update mesh state");
-    meshState_->update(this->parameters_, *skeletonState_, sf->getCharacter());
-  }
-
-  const auto nFullParams = gsl::narrow<Eigen::Index>(this->parameters_.size());
+  const auto nFullParams = static_cast<Eigen::Index>(this->parameters_.size());
 
   std::vector<Eigen::Index> enabledParameters;
   enabledParameters.reserve(nFullParams);
@@ -81,31 +65,30 @@ void GaussNewtonSolverQRT<T>::doIteration() {
     }
   }
 
-  const auto nSubsetParams = gsl::narrow_cast<int>(enabledParameters.size());
+  const auto nSubsetParams = static_cast<int>(enabledParameters.size());
 
   // momentum solves the problem (J^T*J + lambda*I) x = J^T*r;
   // the QR solver wants the square root of that lambda.
   qrSolver_.reset(nSubsetParams, std::sqrt(regularization_));
 
   double error_orig = 0.0;
-  for (auto errorFunction : sf->getErrorFunctions()) {
-    if (errorFunction->getWeight() <= 0) {
+  const size_t numBlocks = this->solverFunction_->getJacobianBlockCount();
+
+  for (size_t blockIdx = 0; blockIdx < numBlocks; ++blockIdx) {
+    const size_t blockSize = this->solverFunction_->getJacobianBlockSize(blockIdx);
+    if (blockSize == 0) {
       continue;
     }
 
-    const auto rows = gsl::narrow<Eigen::Index>(errorFunction->getJacobianSize());
+    const auto rows = static_cast<Eigen::Index>(blockSize);
 
     jacobian_.resizeAndSetZero(rows, nFullParams);
     residual_.resizeAndSetZero(rows);
 
-    int usedRows = 0;
-    error_orig += errorFunction->getJacobian(
-        this->parameters_,
-        *skeletonState_,
-        *meshState_,
-        jacobian_.mat(),
-        residual_.mat(),
-        usedRows);
+    size_t usedRows = 0;
+    error_orig += this->solverFunction_->computeJacobianBlock(
+        this->parameters_, blockIdx, jacobian_.mat(), residual_.mat(), usedRows);
+
     if (usedRows == 0) {
       continue;
     }
@@ -114,6 +97,12 @@ void GaussNewtonSolverQRT<T>::doIteration() {
         ColumnIndexedMatrix<Eigen::MatrixX<T>>(
             jacobian_.mat().topRows(usedRows), enabledParameters),
         residual_.mat().topRows(usedRows));
+  }
+
+  // Finalize Jacobian computation
+  {
+    MT_PROFILE_EVENT("Finalize Jacobian computation");
+    this->solverFunction_->finalizeJacobianComputation();
   }
 
   this->error_ = error_orig;

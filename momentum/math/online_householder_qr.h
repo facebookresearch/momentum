@@ -114,6 +114,15 @@ class ResizeableMatrix {
     return Eigen::Map<const MatrixType, Eigen::Aligned16>(data_.data(), rows_, cols_);
   }
 
+  // Vector accessor for single-column matrices
+  Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16> vec() {
+    return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16>(data_.data(), rows_);
+  }
+  Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16> vec() const {
+    return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16>(
+        data_.data(), rows_);
+  }
+
  private:
   Eigen::Index rows_ = 0;
   Eigen::Index cols_ = 0;

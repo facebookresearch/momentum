@@ -7,11 +7,10 @@
 
 #pragma once
 
-#include <momentum/character/skeleton_state.h>
 #include <momentum/character_solver/fwd.h>
-#include <momentum/character_solver/skeleton_solver_function.h>
 #include <momentum/math/online_householder_qr.h>
 #include <momentum/solver/gauss_newton_solver.h>
+#include <momentum/solver/solver_function.h>
 
 #include <Eigen/Core>
 
@@ -28,7 +27,7 @@ struct GaussNewtonSolverQROptions : GaussNewtonSolverBaseOptions {
 template <typename T>
 class GaussNewtonSolverQRT : public SolverT<T> {
  public:
-  GaussNewtonSolverQRT(const SolverOptions& options, SkeletonSolverFunctionT<T>* solver);
+  GaussNewtonSolverQRT(const SolverOptions& options, SolverFunctionT<T>* solver);
   ~GaussNewtonSolverQRT() override;
 
   [[nodiscard]] std::string_view getName() const override;
@@ -40,9 +39,6 @@ class GaussNewtonSolverQRT : public SolverT<T> {
   void initializeSolver() final;
 
  private:
-  std::unique_ptr<SkeletonStateT<T>> skeletonState_;
-  std::unique_ptr<MeshStateT<T>> meshState_;
-
   ResizeableMatrix<T> jacobian_;
   ResizeableMatrix<T> residual_;
 
