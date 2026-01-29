@@ -7,10 +7,12 @@
 
 #include "pymomentum/geometry/character_pybind.h"
 
+#include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/array_skinning.h"
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
+
+// Keep tensor skinning for functions that don't have array equivalents yet
 #include "pymomentum/tensor_momentum/tensor_skinning.h"
 #include "pymomentum/torch_bridge.h"
 
@@ -24,11 +26,11 @@
 #include <momentum/io/legacy_json/legacy_json_io.h>
 #include <momentum/io/marker/coordinate_system.h>
 #include <momentum/math/mesh.h>
-
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <Eigen/Core>
+#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 
 #include <algorithm>
 #include <limits>
@@ -526,12 +528,13 @@ If you want to translate/rotate/scale a character, you should preferentially use
       .def(
           "apply_model_param_limits",
           &applyModelParameterLimits,
-          R"(Clamp model parameters by parameter limits stored in Character.
+          R"(Apply parameter limits to model parameters.
 
-Note the function is differentiable.
+Clamps model parameters to their specified min/max bounds. Parameters without
+limits are passed through unchanged.
 
-:param model_params: the (can be batched) body model parameters.
-:return: clampled model parameters. Same tensor shape as the input.)",
+:param model_params: Model parameters array with shape (..., nModelParams).
+:return: Clamped model parameters with same shape and dtype as input.)",
           py::arg("model_params"))
       .def_property_readonly(
           "model_parameter_limits",
@@ -1043,11 +1046,11 @@ for compatibility with existing tools and workflows.
       .def(
           "simplify",
           [](const momentum::Character& character,
-             std::optional<at::Tensor> enabledParamsTensor) -> momentum::Character {
+             std::optional<py::array_t<bool>> enabledParamsArray) -> momentum::Character {
             momentum::ParameterSet enabledParams;
-            if (enabledParamsTensor) {
+            if (enabledParamsArray) {
               enabledParams =
-                  tensorToParameterSet(character.parameterTransform, *enabledParamsTensor);
+                  arrayToParameterSet(character.parameterTransform, *enabledParamsArray);
             } else {
               enabledParams.set();
             }
@@ -1059,7 +1062,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
 :param enabled_parameters: Model parameters to be kept in the simplified model.  Defaults to including all parameters.
 :return: a new :class:`Character` with extraneous joints removed.)",
-          py::arg("enabled_parameters") = std::optional<at::Tensor>{})
+          py::arg("enabled_parameters") = std::optional<py::array_t<bool>>{})
       .def(
           "simplify_skeleton",
           [](const momentum::Character& character,
@@ -1071,26 +1074,26 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
       .def(
           "simplify_parameter_transform",
           [](const momentum::Character& character,
-             at::Tensor enabledParameters) -> momentum::Character {
+             const py::array_t<bool>& enabledParameters) -> momentum::Character {
             return character.simplifyParameterTransform(
-                tensorToParameterSet(character.parameterTransform, enabledParameters));
+                arrayToParameterSet(character.parameterTransform, enabledParameters));
           },
           "Simplifies the character by removing unwanted parameters.",
           py::arg("enabled_parameters"))
       .def(
           "parameters_for_joints",
           [](const momentum::Character& character, const std::vector<int>& jointIndices) {
-            return parameterSetToTensor(
+            return parameterSetToArray(
                 character.parameterTransform,
                 character.activeJointsToParameters(jointListToBitset(character, jointIndices)));
           },
-          "Maps a list of joint indices to a boolean tensor containing the parameters which drive those joints.",
+          "Maps a list of joint indices to a boolean numpy array containing the parameters which drive those joints.",
           py::arg("joint_indices"))
       .def(
           "joints_for_parameters",
-          [](const momentum::Character& character, at::Tensor enabledParamsTensor) {
+          [](const momentum::Character& character, const py::array_t<bool>& enabledParamsArray) {
             return bitsetToJointList(character.parametersToActiveJoints(
-                tensorToParameterSet(character.parameterTransform, enabledParamsTensor)));
+                arrayToParameterSet(character.parameterTransform, enabledParamsArray)));
           },
           "Maps a list of parameter indices to a list of joints driven by those parameters.",
           py::arg("active_parameters"))
