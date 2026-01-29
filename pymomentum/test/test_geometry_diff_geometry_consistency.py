@@ -56,6 +56,37 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "geometry.apply_parameter_transform should match diff_geometry.apply_parameter_transform",
         )
 
+    def test_apply_inverse_parameter_transform_matches(self) -> None:
+        """Verify that ParameterTransform.inverse().apply matches diff_geometry.apply_inverse_parameter_transform."""
+        np.random.seed(42)
+
+        character = pym_geometry.create_test_character()
+        nBatch = 2
+        nJoints = character.skeleton.size
+
+        # Create joint parameters with numpy (flat format)
+        joint_params_np = np.random.rand(nBatch, nJoints * 7).astype(np.float32)
+
+        # Call geometry version (numpy) using inverse parameter transform
+        inv_param_transform = character.parameter_transform.inverse()
+        model_params_geometry = inv_param_transform.apply(joint_params_np)
+
+        # Call diff_geometry version (torch)
+        joint_params_torch = torch.from_numpy(joint_params_np)
+        model_params_diff_geometry = (
+            pym_diff_geometry.apply_inverse_parameter_transform(
+                inv_param_transform, joint_params_torch
+            )
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(
+                model_params_geometry, model_params_diff_geometry.numpy(), atol=1e-6
+            ),
+            "ParameterTransform.inverse().apply should match diff_geometry.apply_inverse_parameter_transform",
+        )
+
     def test_model_parameters_to_skeleton_state_matches(self) -> None:
         """Verify that geometry.model_parameters_to_skeleton_state matches diff_geometry.model_parameters_to_skeleton_state."""
         np.random.seed(42)
@@ -359,6 +390,70 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "BlendShape.compute_shape with character should match diff_geometry.compute_blend_shape",
         )
 
+    def test_model_parameters_to_blend_shape_coefficients_matches(self) -> None:
+        """Verify that geometry.model_parameters_to_blend_shape_coefficients matches diff_geometry version."""
+        np.random.seed(42)
+
+        # Create a test character with blend shapes
+        character = pym_geometry.create_test_character(with_blendshapes=True)
+        nBatch = 2
+
+        # Create model parameters with numpy
+        model_params_np = np.random.rand(
+            nBatch, character.parameter_transform.size
+        ).astype(np.float32)
+
+        # Call geometry version (numpy)
+        coeffs_geometry = pym_geometry.model_parameters_to_blend_shape_coefficients(
+            character, model_params_np
+        )
+
+        # Call diff_geometry version (torch)
+        model_params_torch = torch.from_numpy(model_params_np)
+        coeffs_diff_geometry = (
+            pym_diff_geometry.model_parameters_to_blend_shape_coefficients(
+                character, model_params_torch
+            )
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(coeffs_geometry, coeffs_diff_geometry.numpy(), atol=1e-6),
+            "geometry.model_parameters_to_blend_shape_coefficients should match diff_geometry version",
+        )
+
+    def test_model_parameters_to_face_expression_coefficients_matches(self) -> None:
+        """Verify that geometry.model_parameters_to_face_expression_coefficients matches diff_geometry version."""
+        np.random.seed(42)
+
+        # Create a test character with blend shapes
+        character = pym_geometry.create_test_character(with_blendshapes=True)
+        nBatch = 2
+
+        # Create model parameters with numpy
+        model_params_np = np.random.rand(
+            nBatch, character.parameter_transform.size
+        ).astype(np.float32)
+
+        # Call geometry version (numpy)
+        coeffs_geometry = pym_geometry.model_parameters_to_face_expression_coefficients(
+            character, model_params_np
+        )
+
+        # Call diff_geometry version (torch)
+        model_params_torch = torch.from_numpy(model_params_np)
+        coeffs_diff_geometry = (
+            pym_diff_geometry.model_parameters_to_face_expression_coefficients(
+                character, model_params_torch
+            )
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(coeffs_geometry, coeffs_diff_geometry.numpy(), atol=1e-6),
+            "geometry.model_parameters_to_face_expression_coefficients should match diff_geometry version",
+        )
+
     def test_skin_points_matches(self) -> None:
         """Verify that Character.skin_points matches diff_geometry.skin_points."""
         np.random.seed(42)
@@ -524,6 +619,37 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         self.assertTrue(
             np.allclose(mp3_geometry, mp3_diff_geometry.numpy()),
             "Round-trip diff_geometry.map_model_parameters should match geometry.map_model_parameters",
+        )
+
+    def test_map_model_parameters_with_names_matches(self) -> None:
+        """Verify that diff_geometry.map_model_parameters (with names) matches geometry version."""
+        c = pym_geometry.create_test_character()
+        c2 = pym_geometry.create_test_character()
+
+        np.random.seed(0)
+        nBatch = 5
+        mp_np = pym_geometry.uniform_random_to_model_parameters(
+            c2, np.random.rand(nBatch, c2.parameter_transform.size).astype(np.float32)
+        )
+
+        # Get source parameter names from c2
+        source_parameter_names = c2.parameter_transform.names
+
+        # Call geometry version (numpy) using names overload
+        mp_mapped_geometry = pym_geometry.map_model_parameters(
+            mp_np, source_parameter_names, c, verbose=False
+        )
+
+        # Call diff_geometry version (torch)
+        mp_torch = torch.from_numpy(mp_np)
+        mp_mapped_diff_geometry = pym_diff_geometry.map_model_parameters(
+            mp_torch, source_parameter_names, c, verbose=False
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(mp_mapped_geometry, mp_mapped_diff_geometry.numpy()),
+            "diff_geometry.map_model_parameters (with names) should match geometry version",
         )
 
     def test_map_joint_parameters_matches(self) -> None:
@@ -727,6 +853,252 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             ),
             f"skin_points with explicit rest_vertices should match between formats. "
             f"Max difference: {max_diff_explicit}",
+        )
+
+    def test_apply_model_param_limits_matches(self) -> None:
+        """Verify that Character.apply_model_param_limits matches diff_geometry.apply_model_param_limits."""
+        # The test character has only one parameter limit: min-max type [-0.1, 0.1] for root (joint index 0).
+        character = pym_geometry.create_test_character()
+        n_model_params = character.parameter_transform.size
+        np.random.seed(0)
+        n_batch = 2
+
+        # Create uniform distribution of [-2.5, 2.5)
+        model_params_np = (
+            np.random.rand(n_batch, n_model_params).astype(np.float32) * 5.0 - 2.5
+        )
+
+        # Call geometry version (numpy)
+        clamped_params_geometry = character.apply_model_param_limits(model_params_np)
+
+        # Call diff_geometry version (torch)
+        model_params_torch = torch.from_numpy(model_params_np)
+        clamped_params_diff_geometry = pym_diff_geometry.apply_model_param_limits(
+            character, model_params_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(
+                clamped_params_geometry, clamped_params_diff_geometry.numpy(), atol=1e-6
+            ),
+            "Character.apply_model_param_limits should match diff_geometry.apply_model_param_limits",
+        )
+
+        # Verify limits were applied correctly
+        self.assertTrue((clamped_params_geometry[:, 0] <= 0.1).all())
+        self.assertTrue((clamped_params_geometry[:, 0] >= -0.1).all())
+        # Check no-limit model params are the same
+        self.assertTrue(
+            np.allclose(clamped_params_geometry[:, 1:], model_params_np[:, 1:])
+        )
+
+    def test_find_closest_points_matches(self) -> None:
+        """Verify that geometry.find_closest_points matches diff_geometry.find_closest_points."""
+        np.random.seed(0)
+
+        n_src_pts = 5
+        n_tgt_pts = 20
+        n_batch = 2
+
+        # Test both 2D and 3D
+        for dim in [2, 3]:
+            src_pts_np = np.random.rand(n_batch, n_src_pts, dim).astype(np.float32)
+            tgt_pts_np = np.random.rand(n_batch, n_tgt_pts, dim).astype(np.float32)
+
+            # Call geometry version (numpy)
+            closest_pts_geometry, indices_geometry, valid_geometry = (
+                pym_geometry.find_closest_points(src_pts_np, tgt_pts_np)
+            )
+
+            # Call diff_geometry version (torch)
+            src_pts_torch = torch.from_numpy(src_pts_np)
+            tgt_pts_torch = torch.from_numpy(tgt_pts_np)
+
+            closest_pts_diff_geometry, indices_diff_geometry, valid_diff_geometry = (
+                pym_diff_geometry.find_closest_points(src_pts_torch, tgt_pts_torch)
+            )
+
+            # Compare results
+            self.assertTrue(
+                np.allclose(
+                    closest_pts_geometry, closest_pts_diff_geometry.numpy(), atol=1e-5
+                ),
+                f"geometry.find_closest_points (dim={dim}) closest points should match diff_geometry",
+            )
+            self.assertTrue(
+                np.array_equal(indices_geometry, indices_diff_geometry.numpy()),
+                f"geometry.find_closest_points (dim={dim}) indices should match diff_geometry",
+            )
+            self.assertTrue(
+                np.array_equal(valid_geometry, valid_diff_geometry.numpy()),
+                f"geometry.find_closest_points (dim={dim}) valid should match diff_geometry",
+            )
+
+    def test_find_closest_points_with_normals_matches(self) -> None:
+        """Verify that geometry.find_closest_points (with normals) matches diff_geometry version."""
+        np.random.seed(0)
+
+        n_src_pts = 5
+        n_tgt_pts = 20
+        n_batch = 2
+
+        # Generate random points and normals
+        src_pts_np = np.random.rand(n_batch, n_src_pts, 3).astype(np.float32)
+        tgt_pts_np = np.random.rand(n_batch, n_tgt_pts, 3).astype(np.float32)
+
+        # Generate random normalized normals
+        src_normals_np = np.random.rand(n_batch, n_src_pts, 3).astype(np.float32)
+        src_normals_np = src_normals_np / np.linalg.norm(
+            src_normals_np, axis=2, keepdims=True
+        )
+
+        tgt_normals_np = np.random.rand(n_batch, n_tgt_pts, 3).astype(np.float32)
+        tgt_normals_np = tgt_normals_np / np.linalg.norm(
+            tgt_normals_np, axis=2, keepdims=True
+        )
+
+        # Call geometry version (numpy)
+        (
+            closest_pts_geometry,
+            closest_normals_geometry,
+            indices_geometry,
+            valid_geometry,
+        ) = pym_geometry.find_closest_points(
+            src_pts_np, src_normals_np, tgt_pts_np, tgt_normals_np
+        )
+
+        # Call diff_geometry version (torch)
+        src_pts_torch = torch.from_numpy(src_pts_np)
+        src_normals_torch = torch.from_numpy(src_normals_np)
+        tgt_pts_torch = torch.from_numpy(tgt_pts_np)
+        tgt_normals_torch = torch.from_numpy(tgt_normals_np)
+
+        (
+            closest_pts_diff_geometry,
+            closest_normals_diff_geometry,
+            indices_diff_geometry,
+            valid_diff_geometry,
+        ) = pym_diff_geometry.find_closest_points(
+            src_pts_torch, src_normals_torch, tgt_pts_torch, tgt_normals_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(
+                closest_pts_geometry, closest_pts_diff_geometry.numpy(), atol=1e-5
+            ),
+            "geometry.find_closest_points (with normals) closest points should match diff_geometry",
+        )
+        self.assertTrue(
+            np.allclose(
+                closest_normals_geometry,
+                closest_normals_diff_geometry.numpy(),
+                atol=1e-5,
+            ),
+            "geometry.find_closest_points (with normals) closest normals should match diff_geometry",
+        )
+        self.assertTrue(
+            np.array_equal(indices_geometry, indices_diff_geometry.numpy()),
+            "geometry.find_closest_points (with normals) indices should match diff_geometry",
+        )
+        self.assertTrue(
+            np.array_equal(valid_geometry, valid_diff_geometry.numpy()),
+            "geometry.find_closest_points (with normals) valid should match diff_geometry",
+        )
+
+    def test_find_closest_points_on_mesh_matches(self) -> None:
+        """Verify that geometry.find_closest_points_on_mesh matches diff_geometry version."""
+        # Create a simple mesh
+        vertices_np = np.array(
+            [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], dtype=np.float32
+        )
+        triangles_np = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int32)
+
+        # Create query points
+        query_points_np = np.array(
+            [[0.5, 0.5, 0.5], [0.25, 0.25, -0.5]], dtype=np.float32
+        )
+
+        # Call geometry version (numpy)
+        valid_geometry, closest_pts_geometry, face_indices_geometry, bary_geometry = (
+            pym_geometry.find_closest_points_on_mesh(
+                query_points_np, vertices_np, triangles_np
+            )
+        )
+
+        # Call diff_geometry version (torch)
+        query_points_torch = torch.from_numpy(query_points_np)
+        vertices_torch = torch.from_numpy(vertices_np)
+        triangles_torch = torch.from_numpy(triangles_np)
+
+        (
+            valid_diff_geometry,
+            closest_pts_diff_geometry,
+            face_indices_diff_geometry,
+            bary_diff_geometry,
+        ) = pym_diff_geometry.find_closest_points_on_mesh(
+            query_points_torch, vertices_torch, triangles_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.array_equal(valid_geometry, valid_diff_geometry.numpy()),
+            "geometry.find_closest_points_on_mesh valid should match diff_geometry",
+        )
+        self.assertTrue(
+            np.allclose(
+                closest_pts_geometry, closest_pts_diff_geometry.numpy(), atol=1e-5
+            ),
+            "geometry.find_closest_points_on_mesh closest points should match diff_geometry",
+        )
+        self.assertTrue(
+            np.array_equal(face_indices_geometry, face_indices_diff_geometry.numpy()),
+            "geometry.find_closest_points_on_mesh face indices should match diff_geometry",
+        )
+        self.assertTrue(
+            np.allclose(bary_geometry, bary_diff_geometry.numpy(), atol=1e-5),
+            "geometry.find_closest_points_on_mesh barycentric coords should match diff_geometry",
+        )
+
+    def test_skin_skinned_locators_matches(self) -> None:
+        """Verify that Character.skin_skinned_locators matches diff_geometry.skin_skinned_locators."""
+        character = pym_geometry.create_test_character()
+
+        # Skip test if character has no skinned locators
+        if not character.skinned_locators:
+            self.skipTest("Test character has no skinned locators")
+            return
+
+        nBatch = 2
+
+        # Create random model parameters
+        np.random.seed(0)
+        modelParams_np = (
+            np.random.rand(nBatch, character.parameter_transform.size).astype(
+                np.float32
+            )
+            * 0.1
+        )
+
+        # Convert to skeleton state
+        skelState_np = pym_geometry.model_parameters_to_skeleton_state(
+            character, modelParams_np
+        )
+
+        # Call geometry version (numpy)
+        locators_geometry = character.skin_skinned_locators(skelState_np)
+
+        # Call diff_geometry version (torch)
+        skelState_torch = torch.from_numpy(skelState_np)
+        locators_diff_geometry = pym_diff_geometry.skin_skinned_locators(
+            character, skelState_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(locators_geometry, locators_diff_geometry.numpy(), atol=1e-5),
+            "Character.skin_skinned_locators should match diff_geometry.skin_skinned_locators",
         )
 
 
