@@ -7,6 +7,9 @@
 
 #include "pymomentum/geometry/momentum_geometry.h"
 
+#include "pymomentum/array_utility/array_utility.h"
+#include "pymomentum/array_utility/batch_accessor.h"
+#include "pymomentum/array_utility/geometry_accessors.h"
 #include "pymomentum/python_utility/python_utility.h"
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 #include "pymomentum/tensor_utility/autograd_utility.h"
@@ -32,6 +35,8 @@
 #endif
 #include <momentum/math/constants.h>
 #include <momentum/math/mesh.h>
+
+#include <dispenso/parallel_for.h>
 
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
 #include <torch/csrc/jit/python/python_ivalue.h>
@@ -700,6 +705,61 @@ std::tuple<Eigen::VectorXi, RowMatrixf> getLocators(
   return {parents, offsets};
 }
 
+namespace {
+
+// Template implementation for applying model parameter limits with numpy arrays.
+// Clamps parameters that have MinMax limits to their specified bounds.
+template <typename T>
+py::array_t<T> applyModelParameterLimitsImpl(
+    const momentum::Character& character,
+    const py::array& modelParams,
+    const LeadingDimensions& leadingDims) {
+  const auto nModelParams =
+      static_cast<py::ssize_t>(character.parameterTransform.numAllModelParameters());
+  const auto nBatch = leadingDims.totalBatchElements();
+
+  // Create output array with same shape as input
+  auto result = createOutputArray<T>(leadingDims, {nModelParams});
+
+  // Create batch indexer for converting flat indices to multi-dimensional indices
+  BatchIndexer indexer(leadingDims);
+
+  // Create accessors using geometry accessors
+  ModelParametersAccessor<T> inputAcc(modelParams, leadingDims, nModelParams);
+  ModelParametersAccessor<T> outputAcc(result, leadingDims, nModelParams);
+
+  // Apply limits to each batch element
+  // Release GIL for parallel computation
+  {
+    py::gil_scoped_release release;
+    dispenso::parallel_for(0, static_cast<int64_t>(nBatch), [&](int64_t iBatch) {
+      // Convert flat batch index to multi-dimensional indices
+      auto indices = indexer.decompose(iBatch);
+
+      // Get model parameters
+      auto modelParamsT = inputAcc.get(indices);
+
+      // Apply each parameter limit
+      for (const auto& limit : character.parameterLimits) {
+        if (limit.type == momentum::LimitType::MinMax) {
+          const auto& limitData = limit.data.minMax;
+          const auto paramIdx = limitData.parameterIndex;
+          const T minVal = static_cast<T>(limitData.limits.x());
+          const T maxVal = static_cast<T>(limitData.limits.y());
+          modelParamsT.v(paramIdx) = std::clamp(modelParamsT.v(paramIdx), minVal, maxVal);
+        }
+      }
+
+      // Write back
+      outputAcc.set(indices, modelParamsT);
+    });
+  }
+
+  return result;
+}
+
+} // namespace
+
 std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
     const momentum::Character& character) {
   Eigen::VectorXf minLimits = Eigen::VectorXf::Constant(
@@ -716,6 +776,23 @@ std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
   }
 
   return {minLimits, maxLimits};
+}
+
+py::array applyModelParameterLimitsArray(
+    const momentum::Character& character,
+    const py::buffer& modelParamsBuffer) {
+  const auto nModelParams = static_cast<int>(character.parameterTransform.numAllModelParameters());
+
+  ArrayChecker checker("Character.apply_model_param_limits");
+  checker.validateBuffer(modelParamsBuffer, "model_params", {nModelParams}, {"nModelParams"});
+
+  if (checker.isFloat64()) {
+    return applyModelParameterLimitsImpl<double>(
+        character, modelParamsBuffer, checker.getLeadingDimensions());
+  } else {
+    return applyModelParameterLimitsImpl<float>(
+        character, modelParamsBuffer, checker.getLeadingDimensions());
+  }
 }
 
 std::tuple<MatrixX7f, MatrixX7f> jointParameterLimits(const momentum::Character& character) {
