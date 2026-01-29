@@ -56,6 +56,37 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "geometry.apply_parameter_transform should match diff_geometry.apply_parameter_transform",
         )
 
+    def test_apply_inverse_parameter_transform_matches(self) -> None:
+        """Verify that ParameterTransform.inverse().apply matches diff_geometry.apply_inverse_parameter_transform."""
+        np.random.seed(42)
+
+        character = pym_geometry.create_test_character()
+        nBatch = 2
+        nJoints = character.skeleton.size
+
+        # Create joint parameters with numpy (flat format)
+        joint_params_np = np.random.rand(nBatch, nJoints * 7).astype(np.float32)
+
+        # Call geometry version (numpy) using inverse parameter transform
+        inv_param_transform = character.parameter_transform.inverse()
+        model_params_geometry = inv_param_transform.apply(joint_params_np)
+
+        # Call diff_geometry version (torch)
+        joint_params_torch = torch.from_numpy(joint_params_np)
+        model_params_diff_geometry = (
+            pym_diff_geometry.apply_inverse_parameter_transform(
+                inv_param_transform, joint_params_torch
+            )
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(
+                model_params_geometry, model_params_diff_geometry.numpy(), atol=1e-6
+            ),
+            "ParameterTransform.inverse().apply should match diff_geometry.apply_inverse_parameter_transform",
+        )
+
     def test_model_parameters_to_skeleton_state_matches(self) -> None:
         """Verify that geometry.model_parameters_to_skeleton_state matches diff_geometry.model_parameters_to_skeleton_state."""
         np.random.seed(42)
@@ -359,6 +390,70 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             "BlendShape.compute_shape with character should match diff_geometry.compute_blend_shape",
         )
 
+    def test_model_parameters_to_blend_shape_coefficients_matches(self) -> None:
+        """Verify that geometry.model_parameters_to_blend_shape_coefficients matches diff_geometry version."""
+        np.random.seed(42)
+
+        # Create a test character with blend shapes
+        character = pym_geometry.create_test_character(with_blendshapes=True)
+        nBatch = 2
+
+        # Create model parameters with numpy
+        model_params_np = np.random.rand(
+            nBatch, character.parameter_transform.size
+        ).astype(np.float32)
+
+        # Call geometry version (numpy)
+        coeffs_geometry = pym_geometry.model_parameters_to_blend_shape_coefficients(
+            character, model_params_np
+        )
+
+        # Call diff_geometry version (torch)
+        model_params_torch = torch.from_numpy(model_params_np)
+        coeffs_diff_geometry = (
+            pym_diff_geometry.model_parameters_to_blend_shape_coefficients(
+                character, model_params_torch
+            )
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(coeffs_geometry, coeffs_diff_geometry.numpy(), atol=1e-6),
+            "geometry.model_parameters_to_blend_shape_coefficients should match diff_geometry version",
+        )
+
+    def test_model_parameters_to_face_expression_coefficients_matches(self) -> None:
+        """Verify that geometry.model_parameters_to_face_expression_coefficients matches diff_geometry version."""
+        np.random.seed(42)
+
+        # Create a test character with blend shapes
+        character = pym_geometry.create_test_character(with_blendshapes=True)
+        nBatch = 2
+
+        # Create model parameters with numpy
+        model_params_np = np.random.rand(
+            nBatch, character.parameter_transform.size
+        ).astype(np.float32)
+
+        # Call geometry version (numpy)
+        coeffs_geometry = pym_geometry.model_parameters_to_face_expression_coefficients(
+            character, model_params_np
+        )
+
+        # Call diff_geometry version (torch)
+        model_params_torch = torch.from_numpy(model_params_np)
+        coeffs_diff_geometry = (
+            pym_diff_geometry.model_parameters_to_face_expression_coefficients(
+                character, model_params_torch
+            )
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(coeffs_geometry, coeffs_diff_geometry.numpy(), atol=1e-6),
+            "geometry.model_parameters_to_face_expression_coefficients should match diff_geometry version",
+        )
+
     def test_skin_points_matches(self) -> None:
         """Verify that Character.skin_points matches diff_geometry.skin_points."""
         np.random.seed(42)
@@ -524,6 +619,37 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         self.assertTrue(
             np.allclose(mp3_geometry, mp3_diff_geometry.numpy()),
             "Round-trip diff_geometry.map_model_parameters should match geometry.map_model_parameters",
+        )
+
+    def test_map_model_parameters_with_names_matches(self) -> None:
+        """Verify that diff_geometry.map_model_parameters (with names) matches geometry version."""
+        c = pym_geometry.create_test_character()
+        c2 = pym_geometry.create_test_character()
+
+        np.random.seed(0)
+        nBatch = 5
+        mp_np = pym_geometry.uniform_random_to_model_parameters(
+            c2, np.random.rand(nBatch, c2.parameter_transform.size).astype(np.float32)
+        )
+
+        # Get source parameter names from c2
+        source_parameter_names = c2.parameter_transform.names
+
+        # Call geometry version (numpy) using names overload
+        mp_mapped_geometry = pym_geometry.map_model_parameters(
+            mp_np, source_parameter_names, c, verbose=False
+        )
+
+        # Call diff_geometry version (torch)
+        mp_torch = torch.from_numpy(mp_np)
+        mp_mapped_diff_geometry = pym_diff_geometry.map_model_parameters(
+            mp_torch, source_parameter_names, c, verbose=False
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(mp_mapped_geometry, mp_mapped_diff_geometry.numpy()),
+            "diff_geometry.map_model_parameters (with names) should match geometry version",
         )
 
     def test_map_joint_parameters_matches(self) -> None:
