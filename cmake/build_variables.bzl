@@ -110,6 +110,7 @@ simd_generalized_loss_test_sources = [
 solver_public_headers = [
     "solver/fwd.h",
     "solver/gauss_newton_solver.h",
+    "solver/gauss_newton_solver_sparse.h",
     "solver/solver_function.h",
     "solver/solver.h",
     "solver/subset_gauss_newton_solver.h",
@@ -118,6 +119,7 @@ solver_public_headers = [
 
 solver_sources = [
     "solver/gauss_newton_solver.cpp",
+    "solver/gauss_newton_solver_sparse.cpp",
     "solver/solver_function.cpp",
     "solver/solver.cpp",
     "solver/subset_gauss_newton_solver.cpp",

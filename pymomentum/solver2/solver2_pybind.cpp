@@ -481,16 +481,14 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           "__repr__",
           [](const mm::GaussNewtonSolverOptions& self) {
             return fmt::format(
-                "GaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, use_block_jtj={}, direct_sparse_jtj={}, sparse_matrix_threshold={})",
+                "GaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, use_block_jtj={})",
                 self.minIterations,
                 self.maxIterations,
                 self.threshold,
                 boolToString(self.verbose),
                 self.regularization,
                 boolToString(self.doLineSearch),
-                boolToString(self.useBlockJtJ),
-                boolToString(self.directSparseJtJ),
-                self.sparseMatrixThreshold);
+                boolToString(self.useBlockJtJ));
           })
       .def_readwrite(
           "regularization",
@@ -503,15 +501,7 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       .def_readwrite(
           "use_block_jtj",
           &mm::GaussNewtonSolverOptions::useBlockJtJ,
-          "Uses pre-computed JᵀJ and JᵀR from the solver function")
-      .def_readwrite(
-          "direct_sparse_jtj",
-          &mm::GaussNewtonSolverOptions::directSparseJtJ,
-          "Directly computes sparse JᵀJ without dense intermediate representation")
-      .def_readwrite(
-          "sparse_matrix_threshold",
-          &mm::GaussNewtonSolverOptions::sparseMatrixThreshold,
-          "Parameter count threshold for switching to sparse matrix operations");
+          "Uses pre-computed JᵀJ and JᵀR from the solver function");
 
   py::class_<
       mm::GaussNewtonSolverQROptions,
