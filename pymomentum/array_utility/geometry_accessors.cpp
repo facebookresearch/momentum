@@ -586,7 +586,32 @@ void VectorArrayAccessor<T, Dim>::set(
   }
 }
 
+template <typename T, int Dim>
+Eigen::Matrix<T, Eigen::Dynamic, Dim, (Dim > 1) ? Eigen::RowMajor : Eigen::ColMajor>
+VectorArrayAccessor<T, Dim>::toMatrix(const std::vector<py::ssize_t>& batchIndices) const {
+  const auto offset = computeOffset(batchIndices);
+
+  // Create matrix with nElements rows and Dim columns
+  // Use RowMajor storage for Dim > 1 to ensure each point's coordinates are contiguous in memory
+  // Use ColMajor (default) for Dim == 1 (column vectors) as required by Eigen
+  Eigen::Matrix<T, Eigen::Dynamic, Dim, (Dim > 1) ? Eigen::RowMajor : Eigen::ColMajor> result(
+      nElements_, Dim);
+
+  // Copy data row by row, handling arbitrary strides
+  for (py::ssize_t i = 0; i < nElements_; ++i) {
+    const auto elemOffset = offset + i * rowStride_;
+    for (int d = 0; d < Dim; ++d) {
+      result(i, d) = data_[elemOffset + d * colStride_];
+    }
+  }
+
+  return result;
+}
+
 // Explicit template instantiations for VectorArrayAccessor
+template class VectorArrayAccessor<int32_t, 1>;
+template class VectorArrayAccessor<float, 2>;
+template class VectorArrayAccessor<double, 2>;
 template class VectorArrayAccessor<float, 3>;
 template class VectorArrayAccessor<double, 3>;
 template class VectorArrayAccessor<int, 3>;

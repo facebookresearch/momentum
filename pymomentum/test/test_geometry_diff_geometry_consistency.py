@@ -767,6 +767,214 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             np.allclose(clamped_params_geometry[:, 1:], model_params_np[:, 1:])
         )
 
+    def test_find_closest_points_matches(self) -> None:
+        """Verify that geometry.find_closest_points matches diff_geometry.find_closest_points."""
+        np.random.seed(0)
+
+        n_src_pts = 5
+        n_tgt_pts = 20
+        n_batch = 2
+
+        # Test both 2D and 3D
+        for dim in [2, 3]:
+            src_pts_np = np.random.rand(n_batch, n_src_pts, dim).astype(np.float32)
+            tgt_pts_np = np.random.rand(n_batch, n_tgt_pts, dim).astype(np.float32)
+
+            # Call geometry version (numpy)
+            closest_pts_geometry, indices_geometry, valid_geometry = (
+                pym_geometry.find_closest_points(src_pts_np, tgt_pts_np)
+            )
+
+            # Call diff_geometry version (torch)
+            src_pts_torch = torch.from_numpy(src_pts_np)
+            tgt_pts_torch = torch.from_numpy(tgt_pts_np)
+
+            closest_pts_diff_geometry, indices_diff_geometry, valid_diff_geometry = (
+                pym_diff_geometry.find_closest_points(src_pts_torch, tgt_pts_torch)
+            )
+
+            # Compare results
+            self.assertTrue(
+                np.allclose(
+                    closest_pts_geometry, closest_pts_diff_geometry.numpy(), atol=1e-5
+                ),
+                f"geometry.find_closest_points (dim={dim}) closest points should match diff_geometry",
+            )
+            self.assertTrue(
+                np.array_equal(indices_geometry, indices_diff_geometry.numpy()),
+                f"geometry.find_closest_points (dim={dim}) indices should match diff_geometry",
+            )
+            self.assertTrue(
+                np.array_equal(valid_geometry, valid_diff_geometry.numpy()),
+                f"geometry.find_closest_points (dim={dim}) valid should match diff_geometry",
+            )
+
+    def test_find_closest_points_with_normals_matches(self) -> None:
+        """Verify that geometry.find_closest_points (with normals) matches diff_geometry version."""
+        np.random.seed(0)
+
+        n_src_pts = 5
+        n_tgt_pts = 20
+        n_batch = 2
+
+        # Generate random points and normals
+        src_pts_np = np.random.rand(n_batch, n_src_pts, 3).astype(np.float32)
+        tgt_pts_np = np.random.rand(n_batch, n_tgt_pts, 3).astype(np.float32)
+
+        # Generate random normalized normals
+        src_normals_np = np.random.rand(n_batch, n_src_pts, 3).astype(np.float32)
+        src_normals_np = src_normals_np / np.linalg.norm(
+            src_normals_np, axis=2, keepdims=True
+        )
+
+        tgt_normals_np = np.random.rand(n_batch, n_tgt_pts, 3).astype(np.float32)
+        tgt_normals_np = tgt_normals_np / np.linalg.norm(
+            tgt_normals_np, axis=2, keepdims=True
+        )
+
+        # Call geometry version (numpy)
+        (
+            closest_pts_geometry,
+            closest_normals_geometry,
+            indices_geometry,
+            valid_geometry,
+        ) = pym_geometry.find_closest_points(
+            src_pts_np, src_normals_np, tgt_pts_np, tgt_normals_np
+        )
+
+        # Call diff_geometry version (torch)
+        src_pts_torch = torch.from_numpy(src_pts_np)
+        src_normals_torch = torch.from_numpy(src_normals_np)
+        tgt_pts_torch = torch.from_numpy(tgt_pts_np)
+        tgt_normals_torch = torch.from_numpy(tgt_normals_np)
+
+        (
+            closest_pts_diff_geometry,
+            closest_normals_diff_geometry,
+            indices_diff_geometry,
+            valid_diff_geometry,
+        ) = pym_diff_geometry.find_closest_points(
+            src_pts_torch, src_normals_torch, tgt_pts_torch, tgt_normals_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(
+                closest_pts_geometry, closest_pts_diff_geometry.numpy(), atol=1e-5
+            ),
+            "geometry.find_closest_points (with normals) closest points should match diff_geometry",
+        )
+        self.assertTrue(
+            np.allclose(
+                closest_normals_geometry,
+                closest_normals_diff_geometry.numpy(),
+                atol=1e-5,
+            ),
+            "geometry.find_closest_points (with normals) closest normals should match diff_geometry",
+        )
+        self.assertTrue(
+            np.array_equal(indices_geometry, indices_diff_geometry.numpy()),
+            "geometry.find_closest_points (with normals) indices should match diff_geometry",
+        )
+        self.assertTrue(
+            np.array_equal(valid_geometry, valid_diff_geometry.numpy()),
+            "geometry.find_closest_points (with normals) valid should match diff_geometry",
+        )
+
+    def test_find_closest_points_on_mesh_matches(self) -> None:
+        """Verify that geometry.find_closest_points_on_mesh matches diff_geometry version."""
+        # Create a simple mesh
+        vertices_np = np.array(
+            [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], dtype=np.float32
+        )
+        triangles_np = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int32)
+
+        # Create query points
+        query_points_np = np.array(
+            [[0.5, 0.5, 0.5], [0.25, 0.25, -0.5]], dtype=np.float32
+        )
+
+        # Call geometry version (numpy)
+        valid_geometry, closest_pts_geometry, face_indices_geometry, bary_geometry = (
+            pym_geometry.find_closest_points_on_mesh(
+                query_points_np, vertices_np, triangles_np
+            )
+        )
+
+        # Call diff_geometry version (torch)
+        query_points_torch = torch.from_numpy(query_points_np)
+        vertices_torch = torch.from_numpy(vertices_np)
+        triangles_torch = torch.from_numpy(triangles_np)
+
+        (
+            valid_diff_geometry,
+            closest_pts_diff_geometry,
+            face_indices_diff_geometry,
+            bary_diff_geometry,
+        ) = pym_diff_geometry.find_closest_points_on_mesh(
+            query_points_torch, vertices_torch, triangles_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.array_equal(valid_geometry, valid_diff_geometry.numpy()),
+            "geometry.find_closest_points_on_mesh valid should match diff_geometry",
+        )
+        self.assertTrue(
+            np.allclose(
+                closest_pts_geometry, closest_pts_diff_geometry.numpy(), atol=1e-5
+            ),
+            "geometry.find_closest_points_on_mesh closest points should match diff_geometry",
+        )
+        self.assertTrue(
+            np.array_equal(face_indices_geometry, face_indices_diff_geometry.numpy()),
+            "geometry.find_closest_points_on_mesh face indices should match diff_geometry",
+        )
+        self.assertTrue(
+            np.allclose(bary_geometry, bary_diff_geometry.numpy(), atol=1e-5),
+            "geometry.find_closest_points_on_mesh barycentric coords should match diff_geometry",
+        )
+
+    def test_skin_skinned_locators_matches(self) -> None:
+        """Verify that Character.skin_skinned_locators matches diff_geometry.skin_skinned_locators."""
+        character = pym_geometry.create_test_character()
+
+        # Skip test if character has no skinned locators
+        if not character.skinned_locators:
+            self.skipTest("Test character has no skinned locators")
+            return
+
+        nBatch = 2
+
+        # Create random model parameters
+        np.random.seed(0)
+        modelParams_np = (
+            np.random.rand(nBatch, character.parameter_transform.size).astype(
+                np.float32
+            )
+            * 0.1
+        )
+
+        # Convert to skeleton state
+        skelState_np = pym_geometry.model_parameters_to_skeleton_state(
+            character, modelParams_np
+        )
+
+        # Call geometry version (numpy)
+        locators_geometry = character.skin_skinned_locators(skelState_np)
+
+        # Call diff_geometry version (torch)
+        skelState_torch = torch.from_numpy(skelState_np)
+        locators_diff_geometry = pym_diff_geometry.skin_skinned_locators(
+            character, skelState_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(locators_geometry, locators_diff_geometry.numpy(), atol=1e-5),
+            "Character.skin_skinned_locators should match diff_geometry.skin_skinned_locators",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
