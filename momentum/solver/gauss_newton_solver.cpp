@@ -46,7 +46,6 @@ template <typename T>
 void GaussNewtonSolverT<T>::initializeSolver() {
   // This is called from the solver base class .solve()
   alpha_ = regularization_;
-  this->lastError_ = std::numeric_limits<double>::max();
 }
 
 template <typename T>
