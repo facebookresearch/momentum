@@ -33,6 +33,18 @@ using GaussNewtonSolverOptions_const_p = ::std::shared_ptr<const GaussNewtonSolv
 using GaussNewtonSolverOptions_const_u = ::std::unique_ptr<const GaussNewtonSolverOptions>;
 using GaussNewtonSolverOptions_const_w = ::std::weak_ptr<const GaussNewtonSolverOptions>;
 
+struct SparseGaussNewtonSolverOptions;
+
+using SparseGaussNewtonSolverOptions_p = ::std::shared_ptr<SparseGaussNewtonSolverOptions>;
+using SparseGaussNewtonSolverOptions_u = ::std::unique_ptr<SparseGaussNewtonSolverOptions>;
+using SparseGaussNewtonSolverOptions_w = ::std::weak_ptr<SparseGaussNewtonSolverOptions>;
+using SparseGaussNewtonSolverOptions_const_p =
+    ::std::shared_ptr<const SparseGaussNewtonSolverOptions>;
+using SparseGaussNewtonSolverOptions_const_u =
+    ::std::unique_ptr<const SparseGaussNewtonSolverOptions>;
+using SparseGaussNewtonSolverOptions_const_w =
+    ::std::weak_ptr<const SparseGaussNewtonSolverOptions>;
+
 template <typename T>
 class SolverT;
 using Solver = SolverT<float>;
@@ -89,6 +101,25 @@ using GaussNewtonSolverd_w = ::std::weak_ptr<GaussNewtonSolverd>;
 using GaussNewtonSolverd_const_p = ::std::shared_ptr<const GaussNewtonSolverd>;
 using GaussNewtonSolverd_const_u = ::std::unique_ptr<const GaussNewtonSolverd>;
 using GaussNewtonSolverd_const_w = ::std::weak_ptr<const GaussNewtonSolverd>;
+
+template <typename T>
+class SparseGaussNewtonSolverT;
+using SparseGaussNewtonSolver = SparseGaussNewtonSolverT<float>;
+using SparseGaussNewtonSolverd = SparseGaussNewtonSolverT<double>;
+
+using SparseGaussNewtonSolver_p = ::std::shared_ptr<SparseGaussNewtonSolver>;
+using SparseGaussNewtonSolver_u = ::std::unique_ptr<SparseGaussNewtonSolver>;
+using SparseGaussNewtonSolver_w = ::std::weak_ptr<SparseGaussNewtonSolver>;
+using SparseGaussNewtonSolver_const_p = ::std::shared_ptr<const SparseGaussNewtonSolver>;
+using SparseGaussNewtonSolver_const_u = ::std::unique_ptr<const SparseGaussNewtonSolver>;
+using SparseGaussNewtonSolver_const_w = ::std::weak_ptr<const SparseGaussNewtonSolver>;
+
+using SparseGaussNewtonSolverd_p = ::std::shared_ptr<SparseGaussNewtonSolverd>;
+using SparseGaussNewtonSolverd_u = ::std::unique_ptr<SparseGaussNewtonSolverd>;
+using SparseGaussNewtonSolverd_w = ::std::weak_ptr<SparseGaussNewtonSolverd>;
+using SparseGaussNewtonSolverd_const_p = ::std::shared_ptr<const SparseGaussNewtonSolverd>;
+using SparseGaussNewtonSolverd_const_u = ::std::unique_ptr<const SparseGaussNewtonSolverd>;
+using SparseGaussNewtonSolverd_const_w = ::std::weak_ptr<const SparseGaussNewtonSolverd>;
 
 template <typename T>
 class GradientDescentSolverT;
