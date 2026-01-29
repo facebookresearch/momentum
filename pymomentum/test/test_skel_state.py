@@ -9,6 +9,7 @@ import unittest
 from typing import Tuple
 
 import numpy as np
+import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
@@ -16,7 +17,7 @@ import torch
 from torch.nn import Parameter as P
 
 # Flag to check if autograd is enabled (disabled in arvr build modes)
-AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+AUTOGRAD_ENABLED: bool = pym_diff_geometry.AUTOGRAD_ENABLED
 
 
 def generate_skel_state_components(
