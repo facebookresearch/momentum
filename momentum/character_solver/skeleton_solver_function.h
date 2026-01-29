@@ -30,16 +30,17 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
 
   double getGradient(const Eigen::VectorX<T>& parameters, Eigen::VectorX<T>& gradient) final;
 
-  double getJacobian(
+  // Block-wise Jacobian interface (getJacobian and getJtJR now use these via parent class)
+  void initializeJacobianComputation(const Eigen::VectorX<T>& parameters) override;
+  [[nodiscard]] size_t getJacobianBlockCount() const override;
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override;
+  double computeJacobianBlock(
       const Eigen::VectorX<T>& parameters,
-      Eigen::MatrixX<T>& jacobian,
-      Eigen::VectorX<T>& residual,
-      size_t& actualRows) final;
-
-  double getJtJR(
-      const Eigen::VectorX<T>& parameters,
-      Eigen::MatrixX<T>& jtj,
-      Eigen::VectorX<T>& jtr) override;
+      size_t blockIndex,
+      Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+      Eigen::Ref<Eigen::VectorX<T>> residualBlock,
+      size_t& actualRows) override;
+  void finalizeJacobianComputation() override;
 
   // overriding this to get a mix of JtJs and analytical Hessians from skeleton_ errorFunctions_
   double getSolverDerivatives(
@@ -84,9 +85,6 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
   std::unique_ptr<MeshStateT<T>> meshState_;
   bool needsMeshState_;
   VectorX<bool> activeJointParams_;
-
-  Eigen::MatrixX<T> tJacobian_;
-  Eigen::VectorX<T> tResidual_;
 
   std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions_;
 };
