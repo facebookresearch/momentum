@@ -13,7 +13,7 @@ import pymomentum.solver as pym_solver
 import torch
 from pymomentum.solver import ErrorFunctionType
 
-AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+AUTOGRAD_ENABLED: bool = pym_diff_geometry.AUTOGRAD_ENABLED
 
 
 class TestSolver(unittest.TestCase):
