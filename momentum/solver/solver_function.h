@@ -38,16 +38,18 @@ class SolverFunctionT {
 
   /// Computes the Jacobian matrix for least squares problems
   ///
+  /// Default implementation assembles the full Jacobian from blocks using the
+  /// block-wise interface methods.
   /// @param parameters Current parameter values
   /// @param[out] jacobian Jacobian matrix (m×n for m residuals and n parameters)
   /// @param[out] residual Vector of residual values
   /// @param[out] actualRows Number of active residual rows
   /// @return Objective function value
-  virtual double getJacobian(
+  double getJacobian(
       const VectorX<T>& parameters,
       MatrixX<T>& jacobian,
       VectorX<T>& residual,
-      size_t& actualRows) = 0;
+      size_t& actualRows);
 
   /// Computes the Hessian matrix of second derivatives
   ///
@@ -58,7 +60,9 @@ class SolverFunctionT {
 
   /// Computes JᵀJ and JᵀR for Gauss-Newton optimization
   ///
-  /// Default implementation computes these from the Jacobian
+  /// Default implementation computes these from the Jacobian using the block-wise interface.
+  /// Derived classes that don't support the block-wise Jacobian interface should override
+  /// this method to compute JᵀJ and JᵀR directly.
   /// @param parameters Current parameter values
   /// @param[out] jtj Approximated Hessian matrix (JᵀJ)
   /// @param[out] jtr Gradient vector (JᵀR)
@@ -74,6 +78,50 @@ class SolverFunctionT {
   /// @return Objective function value
   virtual double
   getJtJR_Sparse(const VectorX<T>& parameters, SparseMatrix<T>& jtj, VectorX<T>& jtr);
+
+  /// Initializes Jacobian computation for the given parameters
+  ///
+  /// Handles expensive one-time setup that can be reused across multiple blocks
+  /// (e.g., constructing SkeletonState). Must be called before iterating over blocks.
+  /// @param parameters Current parameter values
+  virtual void initializeJacobianComputation(const VectorX<T>& parameters) = 0;
+
+  /// Returns the number of Jacobian blocks available
+  ///
+  /// Each block corresponds to one error function or constraint group
+  /// @return Number of blocks that can be computed via computeJacobianBlock
+  [[nodiscard]] virtual size_t getJacobianBlockCount() const = 0;
+
+  /// Returns the maximum number of rows for a specific Jacobian block
+  ///
+  /// This is the maximum size; actual rows may be fewer (returned via actualRows)
+  /// @param blockIndex Index of the block (0 to getJacobianBlockCount()-1)
+  /// @return Maximum number of rows for this block
+  [[nodiscard]] virtual size_t getJacobianBlockSize(size_t blockIndex) const = 0;
+
+  /// Computes a specific Jacobian block
+  ///
+  /// Must be called after initializeJacobianComputation. The jacobianBlock and
+  /// residualBlock parameters should be preallocated to the size returned by
+  /// getJacobianBlockSize.
+  /// @param parameters Current parameter values
+  /// @param blockIndex Index of the block to compute (0 to getJacobianBlockCount()-1)
+  /// @param[out] jacobianBlock Jacobian for this block (preallocated)
+  /// @param[out] residualBlock Residual for this block (preallocated)
+  /// @param[out] actualRows Number of active rows in this block
+  /// @return Error contribution from this block
+  virtual double computeJacobianBlock(
+      const VectorX<T>& parameters,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<T>> jacobianBlock,
+      Eigen::Ref<VectorX<T>> residualBlock,
+      size_t& actualRows) = 0;
+
+  /// Optional cleanup after all Jacobian blocks have been computed
+  ///
+  /// Called after all blocks have been processed.
+  /// Default implementation does nothing.
+  virtual void finalizeJacobianComputation();
 
   /// Computes derivatives needed by the solver
   ///
@@ -121,6 +169,12 @@ class SolverFunctionT {
   ///
   /// Always less than or equal to numParameters_
   size_t actualParameters_{};
+
+  /// Pre-allocated temporary storage for block-wise JtJ computation
+  ///
+  /// These are reused across calls to avoid per-block allocation overhead
+  MatrixX<T> tJacobian_;
+  VectorX<T> tResidual_;
 };
 
 } // namespace momentum

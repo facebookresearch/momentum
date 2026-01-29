@@ -60,16 +60,34 @@ class MockSolverFunction : public SolverFunctionT<T> {
     return 0.0;
   }
 
-  double getJacobian(
-      const Eigen::VectorX<T>& parameters,
-      Eigen::MatrixX<T>& jacobian,
-      Eigen::VectorX<T>& residual,
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const Eigen::VectorX<T>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? this->numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
+      const Eigen::VectorX<T>& /* parameters */,
+      size_t blockIndex,
+      Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+      Eigen::Ref<Eigen::VectorX<T>> residualBlock,
       size_t& actualRows) override {
-    jacobian.setZero(parameters.size(), parameters.size());
-    residual.setZero(parameters.size());
-    actualRows = parameters.size();
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
+    }
+    jacobianBlock.setZero();
+    residualBlock.setZero();
+    actualRows = this->numParameters_;
     return 0.0;
   }
+
+  void finalizeJacobianComputation() override {}
 
   void updateParameters(Eigen::VectorX<T>& parameters, const Eigen::VectorX<T>& delta) override {
     parameters -= delta;

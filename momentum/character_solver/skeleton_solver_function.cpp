@@ -110,176 +110,6 @@ double SkeletonSolverFunctionT<T>::getGradient(
   return error;
 }
 
-template <typename T>
-std::pair<size_t, std::vector<size_t>> getDimensions(
-    const std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>>& error_func) {
-  MT_PROFILE_FUNCTION();
-  std::vector<size_t> offset(error_func.size());
-  size_t jacobianSize = 0;
-  for (size_t i = 0; i < error_func.size(); i++) {
-    const auto& solvable = error_func[i];
-
-    // ! offset values are only defined when the cost function is active
-    if (solvable->getWeight() > 0.0f) {
-      const auto jSize = solvable->getJacobianSize();
-      offset[i] = jSize;
-      jacobianSize += jSize;
-    }
-  }
-  jacobianSize += 8 - (jacobianSize % 8);
-  return std::make_pair(jacobianSize, std::move(offset));
-}
-
-template <typename T>
-double SkeletonSolverFunctionT<T>::getJacobian(
-    const Eigen::VectorX<T>& parameters,
-    Eigen::MatrixX<T>& jacobian,
-    Eigen::VectorX<T>& residual,
-    size_t& actualRows) {
-  MT_PROFILE_FUNCTION();
-
-  // update the state according to the transformed parameters
-  {
-    MT_PROFILE_EVENT("Set state");
-    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
-  }
-
-  // Update mesh state if needed
-  if (needsMeshState()) {
-    updateMeshState(parameters, *state_);
-  }
-
-  double error = 0.0;
-
-  // calculate the jacobian size
-  const auto dimensions = getDimensions(errorFunctions_);
-  const auto& jacobianSize = dimensions.first;
-  const auto& offset = dimensions.second;
-
-  if (jacobianSize > static_cast<size_t>(jacobian.rows()) || parameters.size() != jacobian.cols()) {
-    MT_PROFILE_EVENT("ResizeJacobian");
-    jacobian.resize(jacobianSize, parameters.size());
-    residual.resize(jacobianSize);
-  }
-  {
-    MT_PROFILE_EVENT("InitializeJacobian");
-    jacobian.setZero();
-    residual.setZero();
-  }
-  actualRows = jacobianSize;
-
-  // add values to the jacobian
-  size_t position = 0;
-
-  MT_PROFILE_EVENT("Collect all jacobians");
-
-  for (size_t i = 0; i < errorFunctions_.size(); i++) {
-    int rows = 0;
-    const auto& solvable = errorFunctions_[i];
-    if (solvable->getWeight() > 0.0f) {
-      const auto& n = offset[i];
-      error += solvable->getJacobian(
-          parameters,
-          *state_,
-          *meshState_,
-          jacobian.block(position, 0, n, parameters.size()),
-          residual.middleRows(position, n),
-          rows);
-      position += n;
-    }
-  }
-
-  return error;
-}
-
-/* override */
-template <typename T>
-double SkeletonSolverFunctionT<T>::getJtJR(
-    const Eigen::VectorX<T>& parameters,
-    Eigen::MatrixX<T>& JtJ,
-    Eigen::VectorX<T>& JtR) {
-  MT_PROFILE_FUNCTION();
-
-  // update the state according to the transformed parameters
-  {
-    MT_PROFILE_EVENT("JtJR - update state");
-    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
-  }
-
-  // Update mesh state if needed
-  if (needsMeshState()) {
-    updateMeshState(parameters, *state_);
-  }
-
-  // calculate the jacobian size
-  const auto dimensions = getDimensions(errorFunctions_);
-  const auto& jacobianSize = dimensions.first;
-  const auto n_parameters = parameters.size();
-
-  if (dimensions.first > static_cast<size_t>(tJacobian_.rows()) ||
-      parameters.size() != tJacobian_.cols()) {
-    MT_PROFILE_EVENT("ResizetJacobian");
-    tJacobian_.resize(jacobianSize, n_parameters);
-    tResidual_.resize(jacobianSize);
-  }
-
-  if (JtJ.cols() != gsl::narrow_cast<Eigen::Index>(this->actualParameters_)) {
-    JtJ.resize(this->actualParameters_, this->actualParameters_);
-    JtR.resize(this->actualParameters_);
-  }
-
-  {
-    MT_PROFILE_EVENT("JtJR - set to Zero");
-
-    tJacobian_.topRows(jacobianSize).setZero();
-    tResidual_.head(jacobianSize).setZero();
-    JtJ.setZero();
-    JtR.setZero();
-  }
-
-  // block compute JtJ and JtR on the fly
-  size_t position = 0;
-  double error = 0.0;
-  for (size_t i = 0; i < errorFunctions_.size(); i++) {
-    const auto& solvable = errorFunctions_[i];
-
-    if (solvable->getWeight() > 0.0f) {
-      int rows = 0;
-      const auto& n = dimensions.second[i];
-
-      // This is timed through the corresponding solvable call
-      error += solvable->getJacobian(
-          parameters,
-          *state_,
-          *meshState_,
-          tJacobian_.block(position, 0, n, n_parameters),
-          tResidual_.segment(position, n),
-          rows);
-      MT_CHECK(rows <= gsl::narrow_cast<int>(n));
-
-      // Update JtJ
-      if (rows > 0) {
-        MT_PROFILE_EVENT("Partial JtJ JtR");
-
-        // ! In truth, on the the "this->actualParameters_" leftmost block will be used
-        // We take advantage of this here and skip the other computations
-        const auto JtBlock =
-            tJacobian_.block(position, 0, rows, this->actualParameters_).transpose();
-
-        // Efficiently update JtJ (JtJ = J^T * J) using selfadjointView with rankUpdate,
-        // replacing triangularView to leverage symmetry and improve performance
-        JtJ.template selfadjointView<Eigen::Lower>().rankUpdate(JtBlock);
-
-        // Update JtR
-        JtR.noalias() += JtBlock * tResidual_.segment(position, rows);
-      }
-      position += n;
-    }
-  }
-
-  return error;
-}
-
 /* override */
 template <typename T>
 double SkeletonSolverFunctionT<T>::getSolverDerivatives(
@@ -363,6 +193,76 @@ void SkeletonSolverFunctionT<T>::updateMeshState(
   }
 
   meshState_->update(parameters, state, character_);
+}
+
+// Block-wise Jacobian interface implementation
+template <typename T>
+void SkeletonSolverFunctionT<T>::initializeJacobianComputation(
+    const Eigen::VectorX<T>& parameters) {
+  MT_PROFILE_FUNCTION();
+
+  // Update the state according to the transformed parameters
+  {
+    MT_PROFILE_EVENT("Initialize - update state");
+    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+  }
+
+  // Update mesh state if needed
+  if (needsMeshState()) {
+    updateMeshState(parameters, *state_);
+  }
+}
+
+template <typename T>
+size_t SkeletonSolverFunctionT<T>::getJacobianBlockCount() const {
+  return errorFunctions_.size();
+}
+
+template <typename T>
+size_t SkeletonSolverFunctionT<T>::getJacobianBlockSize(size_t blockIndex) const {
+  if (blockIndex >= errorFunctions_.size()) {
+    return 0;
+  }
+  const auto& solvable = errorFunctions_[blockIndex];
+  // Return 0 for disabled error functions so we don't need to process it:
+  if (solvable->getWeight() <= 0.0f) {
+    return 0;
+  }
+  return solvable->getJacobianSize();
+}
+
+template <typename T>
+double SkeletonSolverFunctionT<T>::computeJacobianBlock(
+    const Eigen::VectorX<T>& parameters,
+    size_t blockIndex,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+    Eigen::Ref<Eigen::VectorX<T>> residualBlock,
+    size_t& actualRows) {
+  MT_PROFILE_FUNCTION();
+
+  if (blockIndex >= errorFunctions_.size()) {
+    actualRows = 0;
+    return 0.0;
+  }
+
+  const auto& solvable = errorFunctions_[blockIndex];
+
+  if (solvable->getWeight() <= 0.0f) {
+    actualRows = 0;
+    return 0.0;
+  }
+
+  int rows = 0;
+  const double error =
+      solvable->getJacobian(parameters, *state_, *meshState_, jacobianBlock, residualBlock, rows);
+
+  actualRows = static_cast<size_t>(rows);
+  return error;
+}
+
+template <typename T>
+void SkeletonSolverFunctionT<T>::finalizeJacobianComputation() {
+  // No cleanup needed
 }
 
 template class SkeletonSolverFunctionT<float>;
