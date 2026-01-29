@@ -10,7 +10,6 @@
 #include <momentum/character/character.h>
 #include <momentum/math/mppca.h>
 
-#include <ATen/ATen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 

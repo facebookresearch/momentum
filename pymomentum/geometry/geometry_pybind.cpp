@@ -8,6 +8,7 @@
 #include "pymomentum/geometry/array_blend_shape.h"
 #include "pymomentum/geometry/array_joint_parameters_to_positions.h"
 #include "pymomentum/geometry/array_kd_tree.h"
+#include "pymomentum/geometry/array_mppca.h"
 #include "pymomentum/geometry/array_parameter_transform.h"
 #include "pymomentum/geometry/array_skeleton_state.h"
 #include "pymomentum/geometry/array_vertex_normals.h"
@@ -21,11 +22,6 @@
 #include "pymomentum/geometry/parameter_transform_pybind.h"
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
-
-// Keep tensor versions for functions without array equivalents yet
-#include "pymomentum/tensor_momentum/tensor_kd_tree.h"
-#include "pymomentum/tensor_momentum/tensor_mppca.h"
-#include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
@@ -367,8 +363,8 @@ Each PPCA model is a Gaussian with mean mu and covariance (sigma^2*I + W*W^T).
       .def_readonly("n_dimension", &mm::Mppca::d, R"(The dimension of the parameter space.)")
       .def_readonly("names", &mm::Mppca::names, R"(The names of the parameters.)")
       .def(
-          "to_tensors",
-          &mppcaToTensors,
+          "to_arrays",
+          &mppcaToArrays,
           R"(Return the parameters defining the mixture of probabilistic PCA models.
 
 Each PPCA model a Gaussian N(mu, cov) where the covariance matrix is
@@ -377,16 +373,16 @@ Each PPCA model a Gaussian N(mu, cov) where the covariance matrix is
 Note that mu is a vector of length :meth:`dimension` and W is a matrix of dimension :meth:`dimension` x q
 where q is the dimensionality of the PCA subspace.
 
-The resulting tensors are as follows:
+The resulting arrays are as follows:
 
-* pi: a [n]-dimensional tensor containing the mixture weights.  It sums to 1.
-* mu: a [n x d]-dimensional tensor containing the mean pose for each mixture.
-* weights: a [n x d x q]-dimensional tensor containing the q vectors spanning the PCA space.
-* sigma: a [n]-dimensional tensor containing the uniform part of the covariance matrix.
-* param_idx: a [d]-dimensional tensor containing the indices of the parameters.
+* pi: a [n]-dimensional array containing the mixture weights.  It sums to 1.
+* mu: a [n x d]-dimensional array containing the mean pose for each mixture.
+* weights: a [n x q x d]-dimensional array containing the q vectors spanning the PCA space.
+* sigma: a [n]-dimensional array containing the uniform part of the covariance matrix.
+* param_idx: a [d]-dimensional array containing the indices of the parameters.
 
-:param parameter_transform: An optional parameter transform used to map the parameters; if not present, then the param_idx tensor will be empty.
-:return: an tuple (pi, mean, weights, sigma, param_idx) for the Probabilistic PCA model.)",
+:param parameter_transform: An optional parameter transform used to map the parameters; if not present, then the param_idx array will be empty.
+:return: a tuple (pi, mean, weights, sigma, param_idx) for the Probabilistic PCA model.)",
           py::arg("parameter_transform") = std::optional<const mm::ParameterTransform*>())
       .def("get_mixture", &getMppcaModel, py::arg("i_model"))
       .def_static(
