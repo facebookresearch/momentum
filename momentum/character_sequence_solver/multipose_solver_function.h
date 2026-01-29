@@ -30,11 +30,17 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
 
   double getGradient(const Eigen::VectorX<T>& parameters, Eigen::VectorX<T>& gradient) final;
 
-  double getJacobian(
+  // Block-wise Jacobian interface
+  void initializeJacobianComputation(const Eigen::VectorX<T>& parameters) override;
+  [[nodiscard]] size_t getJacobianBlockCount() const override;
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override;
+  double computeJacobianBlock(
       const Eigen::VectorX<T>& parameters,
-      Eigen::MatrixX<T>& jacobian,
-      Eigen::VectorX<T>& residual,
-      size_t& actualRows) final;
+      size_t blockIndex,
+      Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock,
+      Eigen::Ref<Eigen::VectorX<T>> residualBlock,
+      size_t& actualRows) override;
+  void finalizeJacobianComputation() override;
 
   void updateParameters(Eigen::VectorX<T>& parameters, const Eigen::VectorX<T>& gradient) final;
   void setEnabledParameters(const ParameterSet& parameterSet) final;
@@ -75,6 +81,9 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
   std::vector<size_t> universalParameters_;
 
   std::vector<std::vector<SkeletonErrorFunctionT<T>*>> errorFunctions_;
+
+  /// Pre-allocated temporary storage for block-wise Jacobian computation
+  Eigen::MatrixX<T> tempJac_;
 
   friend class MultiposeSolverT<T>;
 };

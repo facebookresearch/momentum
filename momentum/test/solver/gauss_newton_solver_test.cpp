@@ -34,45 +34,36 @@ class MockSolverFunction : public SolverFunctionT<float> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
+    }
     // For a quadratic function, the Jacobian is the identity matrix
     // and the residual is the parameters
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
-    }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = parameters;
-
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
     actualRows = numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJtJR(
-      const VectorX<float>& parameters,
-      MatrixX<float>& hessianApprox,
-      VectorX<float>& JtR) override {
-    // For a quadratic function, the Hessian approximation is the identity matrix
-    // and JtR is the parameters
-    if (hessianApprox.rows() != numParameters_ || hessianApprox.cols() != numParameters_) {
-      hessianApprox.resize(numParameters_, numParameters_);
-    }
-    hessianApprox.setIdentity();
-
-    if (JtR.size() != numParameters_) {
-      JtR.resize(numParameters_);
-    }
-    JtR = parameters;
-
-    return 0.5 * parameters.squaredNorm();
-  }
+  void finalizeJacobianComputation() override {}
 
   double getJtJR_Sparse(
       const VectorX<float>& parameters,
@@ -347,41 +338,34 @@ class FailingSparseFunction : public SolverFunctionT<float> {
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
     }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = parameters;
-
+    jacobianBlock.setIdentity();
+    residualBlock = parameters;
     actualRows = numParameters_;
     return 0.5 * parameters.squaredNorm();
   }
 
-  double getJtJR(
-      const VectorX<float>& parameters,
-      MatrixX<float>& hessianApprox,
-      VectorX<float>& JtR) override {
-    if (hessianApprox.rows() != numParameters_ || hessianApprox.cols() != numParameters_) {
-      hessianApprox.resize(numParameters_, numParameters_);
-    }
-    hessianApprox.setIdentity();
-
-    if (JtR.size() != numParameters_) {
-      JtR.resize(numParameters_);
-    }
-    JtR = parameters;
-
-    return 0.5 * parameters.squaredNorm();
-  }
+  void finalizeJacobianComputation() override {}
 
   double getJtJR_Sparse(
       const VectorX<float>& parameters,
@@ -444,41 +428,34 @@ class FailingLineSearchFunction : public SolverFunctionT<float> {
     return 1.0;
   }
 
-  double getJacobian(
+  // Block-wise Jacobian interface implementation
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? numParameters_ : 0;
+  }
+
+  double computeJacobianBlock(
       const VectorX<float>& parameters,
-      MatrixX<float>& jacobian,
-      VectorX<float>& residual,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
       size_t& actualRows) override {
-    if (jacobian.rows() != numParameters_ || jacobian.cols() != numParameters_) {
-      jacobian.resize(numParameters_, numParameters_);
+    if (blockIndex >= 1) {
+      actualRows = 0;
+      return 0.0;
     }
-    jacobian.setIdentity();
-
-    if (residual.size() != numParameters_) {
-      residual.resize(numParameters_);
-    }
-    residual = VectorX<float>::Ones(parameters.size());
-
+    jacobianBlock.setIdentity();
+    residualBlock = VectorX<float>::Ones(parameters.size());
     actualRows = numParameters_;
     return 1.0;
   }
 
-  double getJtJR(
-      const VectorX<float>& parameters,
-      MatrixX<float>& hessianApprox,
-      VectorX<float>& JtR) override {
-    if (hessianApprox.rows() != numParameters_ || hessianApprox.cols() != numParameters_) {
-      hessianApprox.resize(numParameters_, numParameters_);
-    }
-    hessianApprox.setIdentity();
-
-    if (JtR.size() != numParameters_) {
-      JtR.resize(numParameters_);
-    }
-    JtR = VectorX<float>::Ones(parameters.size());
-
-    return 1.0;
-  }
+  void finalizeJacobianComputation() override {}
 
   double getJtJR_Sparse(
       const VectorX<float>& parameters,
