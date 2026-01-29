@@ -324,7 +324,7 @@ void loadHierarchyRecursive(
   MT_CHECK(!model.nodes.empty());
   for (auto childId : model.nodes[nodeId].children) {
     MT_THROW_IF(
-        (childId < 0) || (childId > model.nodes.size()),
+        (childId < 0) || (childId >= model.nodes.size()),
         "Invalid node id found in the gltf hierarchy: {}",
         childId);
 
