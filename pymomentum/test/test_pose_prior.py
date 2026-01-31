@@ -89,7 +89,7 @@ class TestPosePrior(unittest.TestCase):
         # =============== End building constraints
 
         scaling_params = character.parameter_transform.scaling_parameters
-        active_params = ~scaling_params
+        active_params = torch.from_numpy(~scaling_params)
 
         active_error_functions = [
             ErrorFunctionType.Limit,

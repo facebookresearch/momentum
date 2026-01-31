@@ -175,6 +175,49 @@ py::array_t<bool> parameterSetToArray(
   return result;
 }
 
+momentum::ParameterSet arrayToParameterSet(
+    const momentum::ParameterTransform& parameterTransform,
+    const py::array_t<bool>& paramSet,
+    DefaultParameterSet defaultParamSet) {
+  // Handle empty array with defaults
+  if (paramSet.size() == 0) {
+    switch (defaultParamSet) {
+      case DefaultParameterSet::AllZeros: {
+        momentum::ParameterSet result;
+        return result;
+      }
+      case DefaultParameterSet::AllOnes: {
+        momentum::ParameterSet result;
+        result.set();
+        return result;
+      }
+      case DefaultParameterSet::NoDefault:
+      default:
+        // Fall through to validation below
+        break;
+    }
+  }
+
+  const auto nParams = parameterTransform.numAllModelParameters();
+
+  MT_THROW_IF(
+      paramSet.size() == 0 || paramSet.ndim() != 1 ||
+          paramSet.shape(0) != static_cast<py::ssize_t>(nParams),
+      "Mismatch between active parameters size ({}) and parameter transform size ({})",
+      paramSet.size() > 0 ? paramSet.shape(0) : 0,
+      nParams);
+
+  momentum::ParameterSet result;
+  auto accessor = paramSet.unchecked<1>();
+  for (size_t i = 0; i < nParams; ++i) {
+    if (accessor(i)) {
+      result.set(i);
+    }
+  }
+
+  return result;
+}
+
 std::unordered_map<std::string, py::array_t<bool>> getParameterSetsArray(
     const momentum::ParameterTransform& parameterTransform) {
   std::unordered_map<std::string, py::array_t<bool>> result;

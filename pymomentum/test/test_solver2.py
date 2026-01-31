@@ -517,13 +517,11 @@ class TestSolver(unittest.TestCase):
             character.parameter_transform.size, dtype=torch.float32
         )
         solver = pym_solver2.GaussNewtonSolverQR(solver_function, solver_options)
-        enabled_params = torch.logical_not(
-            torch.logical_or(
-                character.parameter_transform.scaling_parameters,
-                character.parameter_transform.rigid_parameters,
-            )
+        enabled_params = ~(
+            character.parameter_transform.scaling_parameters
+            | character.parameter_transform.rigid_parameters
         )
-        solver.set_enabled_parameters(enabled_params.numpy())
+        solver.set_enabled_parameters(enabled_params)
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
@@ -596,9 +594,7 @@ class TestSolver(unittest.TestCase):
             character.parameter_transform.size, dtype=torch.float32
         )
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        solver.set_enabled_parameters(
-            character.parameter_transform.rigid_parameters.numpy()
-        )
+        solver.set_enabled_parameters(character.parameter_transform.rigid_parameters)
         model_params_final = solver.solve(model_params_init.numpy())
 
         # Convert final model parameters to skeleton state
