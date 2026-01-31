@@ -527,7 +527,7 @@ If you want to translate/rotate/scale a character, you should preferentially use
           py::arg("names"))
       .def(
           "apply_model_param_limits",
-          &applyModelParameterLimits,
+          &applyModelParameterLimitsArray,
           R"(Apply parameter limits to model parameters.
 
 Clamps model parameters to their specified min/max bounds. Parameters without
