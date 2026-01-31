@@ -16,7 +16,7 @@ from pymomentum.solver import ErrorFunctionType
 logger: logging.Logger = logging.getLogger(__name__)
 
 # Flag to check if autograd is enabled (disabled in arvr build modes)
-AUTOGRAD_ENABLED: bool = pym_geometry.AUTOGRAD_ENABLED
+AUTOGRAD_ENABLED: bool = pym_diff_geometry.AUTOGRAD_ENABLED
 
 
 class TestPosePrior(unittest.TestCase):
