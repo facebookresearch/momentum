@@ -205,6 +205,10 @@ std::tuple<Eigen::VectorXi, RowMatrixf> getLocators(
 std::tuple<Eigen::VectorXf, Eigen::VectorXf> modelParameterLimits(
     const momentum::Character& character);
 
+pybind11::array applyModelParameterLimitsArray(
+    const momentum::Character& character,
+    const pybind11::buffer& modelParams);
+
 using MatrixX7f =
     Eigen::Matrix<float, Eigen::Dynamic, momentum::kParametersPerJoint, Eigen::RowMajor>;
 
