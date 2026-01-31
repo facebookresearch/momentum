@@ -420,9 +420,9 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::forward(
   std::vector<at::Tensor> results = IKFunction<T>::forward(
       characters,
       tensorToParameterSet(
-          characters[0]->parameterTransform, activeParams, DefaultParameterSet::ALL_ONES),
+          characters[0]->parameterTransform, activeParams, DefaultParameterSet::AllOnes),
       tensorToParameterSet(
-          characters[0]->parameterTransform, sharedParams, DefaultParameterSet::ALL_ZEROS),
+          characters[0]->parameterTransform, sharedParams, DefaultParameterSet::AllZeros),
       solverOptions,
       modelParameters_init,
       errorFunctions,
@@ -694,9 +694,9 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
   const auto [grad_modelParams, grad_errorFunctionWeights, grad_inputs] = IKFunction<T>::backward(
       characters,
       tensorToParameterSet(
-          characters[0]->parameterTransform, activeParams, DefaultParameterSet::ALL_ONES),
+          characters[0]->parameterTransform, activeParams, DefaultParameterSet::AllOnes),
       tensorToParameterSet(
-          characters[0]->parameterTransform, sharedParams, DefaultParameterSet::ALL_ZEROS),
+          characters[0]->parameterTransform, sharedParams, DefaultParameterSet::AllZeros),
       modelParameters_init,
       results,
       dLoss_dResults,

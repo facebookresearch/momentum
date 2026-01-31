@@ -34,7 +34,9 @@ class TestSolver(unittest.TestCase):
         model_params_target = torch.rand(n_frames, n_params, dtype=torch.float64)
 
         # Make sure the scaling parameters match up between all the frames:
-        scaling_params = character.parameter_transform.scaling_parameters
+        scaling_params = torch.from_numpy(
+            character.parameter_transform.scaling_parameters
+        )
         avg_parameters = model_params_target.mean(0)
         model_params_target[:, scaling_params] = avg_parameters.unsqueeze(0).expand_as(
             model_params_target
@@ -81,7 +83,9 @@ class TestSolver(unittest.TestCase):
         # Test whether ik works without proj or dist constraints:
         model_params_final = pym_solver.solve_sequence_ik(
             character=character,
-            active_parameters=character.parameter_transform.all_parameters,
+            active_parameters=torch.from_numpy(
+                character.parameter_transform.all_parameters
+            ),
             shared_parameters=scaling_params,
             model_parameters_init=model_params_init,
             active_error_functions=active_error_functions,

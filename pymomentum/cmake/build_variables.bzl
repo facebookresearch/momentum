@@ -31,6 +31,7 @@ tensor_utility_sources = [
 array_utility_public_headers = [
     "array_utility/array_utility.h",
     "array_utility/batch_accessor.h",
+    "array_utility/default_parameter_set.h",
     "array_utility/geometry_accessors.h",
 ]
 

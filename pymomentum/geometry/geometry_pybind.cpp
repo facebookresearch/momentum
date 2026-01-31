@@ -20,13 +20,10 @@
 #include "pymomentum/geometry/parameter_transform_pybind.h"
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
-#include "pymomentum/tensor_momentum/tensor_blend_shape.h"
-#include "pymomentum/tensor_momentum/tensor_joint_parameters_to_positions.h"
+
+// Keep tensor versions for functions without array equivalents yet
 #include "pymomentum/tensor_momentum/tensor_kd_tree.h"
 #include "pymomentum/tensor_momentum/tensor_mppca.h"
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
-#include "pymomentum/tensor_momentum/tensor_skeleton_state.h"
-#include "pymomentum/tensor_momentum/tensor_skinning.h"
 #include "pymomentum/torch_bridge.h"
 
 #include <momentum/character/blend_shape.h>
@@ -1181,14 +1178,14 @@ blend shapes, pose shapes, and other mesh-related data.
   // reduceToSelectedModelParameters(character, activeParameters)
   m.def(
       "reduce_to_selected_model_parameters",
-      [](const momentum::Character& character, at::Tensor activeParameters) {
+      [](const momentum::Character& character, const py::array_t<bool>& activeParameters) {
         return character.simplifyParameterTransform(
-            tensorToParameterSet(character.parameterTransform, activeParameters));
+            arrayToParameterSet(character.parameterTransform, activeParameters));
       },
       R"(Strips out unused parameters from the parameter transform.
 
 :param character: Full-body character.
-:param activeParameters: A boolean tensor marking which parameters should be retained.
+:param activeParameters: A boolean numpy array marking which parameters should be retained.
 :return: A new character whose parameter transform only includes the marked parameters.)",
       py::arg("character"),
       py::arg("active_parameters"));

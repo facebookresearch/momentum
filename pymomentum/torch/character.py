@@ -577,31 +577,32 @@ class ParameterTransform(torch.nn.Module):
 
         self.register_buffer(
             "parameter_transform",
-            character.parameter_transform.transform.to(dtype=dtype)
-            .clone()
-            .detach()
-            .requires_grad_(False),
+            torch.tensor(
+                character.parameter_transform.transform,
+                dtype=dtype,
+                requires_grad=False,
+            ),
         )
 
         self.register_buffer(
             "pose_parameters",
-            character.parameter_transform.pose_parameters.clone()
-            .detach()
-            .requires_grad_(False),
+            torch.tensor(
+                character.parameter_transform.pose_parameters, requires_grad=False
+            ),
         )
 
         self.register_buffer(
             "rigid_parameters",
-            character.parameter_transform.rigid_parameters.clone()
-            .detach()
-            .requires_grad_(False),
+            torch.tensor(
+                character.parameter_transform.rigid_parameters, requires_grad=False
+            ),
         )
 
         self.register_buffer(
             "scaling_parameters",
-            character.parameter_transform.scaling_parameters.clone()
-            .detach()
-            .requires_grad_(False),
+            torch.tensor(
+                character.parameter_transform.scaling_parameters, requires_grad=False
+            ),
         )
 
         self.parameter_names: list[str] = character.parameter_transform.names
