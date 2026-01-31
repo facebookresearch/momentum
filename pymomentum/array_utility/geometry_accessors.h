@@ -364,6 +364,14 @@ class VectorArrayAccessor {
   // Set all vectors for the given batch indices (bulk operation).
   void set(const std::vector<py::ssize_t>& batchIndices, const std::vector<VectorType>& values);
 
+  // Convert to Eigen matrix format (nElements x Dim) with appropriate storage.
+  // This is useful for algorithms that expect Eigen::MatrixX3 or similar formats.
+  // Creates a new matrix with copied data, handling arbitrary strides.
+  // Uses RowMajor storage for Dim > 1 to ensure each point's coordinates are contiguous in memory.
+  // Uses ColMajor (default) for Dim == 1 (column vectors) as required by Eigen.
+  Eigen::Matrix<T, Eigen::Dynamic, Dim, (Dim > 1) ? Eigen::RowMajor : Eigen::ColMajor> toMatrix(
+      const std::vector<py::ssize_t>& batchIndices) const;
+
  private:
   T* data_;
   py::ssize_t nElements_{};
@@ -414,6 +422,50 @@ class IntVectorArrayAccessor {
     // Compute the minimum and maximum values across all elements and components.
     // Returns {min, max}. For empty views, returns {INT_MAX, INT_MIN}.
     [[nodiscard]] std::pair<int, int> minmax() const;
+
+    // Convert to Eigen matrix format with int values.
+    // This performs a single switch on dtype for the entire conversion,
+    // avoiding per-element overhead. Template parameter allows caller to
+    // specify the desired output matrix type (e.g., Eigen::MatrixX3i for
+    // column-major, or Eigen::Matrix<int, Dynamic, 3, RowMajor> for row-major).
+    template <typename MatrixType = Eigen::Matrix<int, Eigen::Dynamic, Dim>>
+    [[nodiscard]] MatrixType toMatrix() const {
+      MatrixType result(nElements_, Dim);
+
+      if (nElements_ == 0) {
+        return result;
+      }
+
+      // Helper lambda to copy data for a given source type
+      auto copyData = [&]<typename SourceT>() {
+        const auto elemStride = rowStride_ / static_cast<py::ssize_t>(sizeof(SourceT));
+        const auto compStride = colStride_ / static_cast<py::ssize_t>(sizeof(SourceT));
+        const auto* ptr = static_cast<const SourceT*>(data_);
+
+        for (py::ssize_t i = 0; i < nElements_; ++i) {
+          for (int d = 0; d < Dim; ++d) {
+            result(i, d) = static_cast<int>(ptr[i * elemStride + d * compStride]);
+          }
+        }
+      };
+
+      switch (dtype_) {
+        case SourceDtype::Int32:
+          copyData.template operator()<int32_t>();
+          break;
+        case SourceDtype::Int64:
+          copyData.template operator()<int64_t>();
+          break;
+        case SourceDtype::UInt32:
+          copyData.template operator()<uint32_t>();
+          break;
+        case SourceDtype::UInt64:
+          copyData.template operator()<uint64_t>();
+          break;
+      }
+
+      return result;
+    }
 
    private:
     friend class IntVectorArrayAccessor;
