@@ -38,4 +38,20 @@ py::array skinPointsArray(
     py::buffer skelState,
     std::optional<py::buffer> restVertices);
 
+/// Apply linear blend skinning to compute world-space positions of skinned locators.
+///
+/// Uses the character's built-in skinned locators and applies linear blend skinning
+/// to compute their world-space positions given a skeleton state.
+///
+/// @param character The character containing skinned locators and inverse bind pose.
+/// @param skelState Skeleton state with shape [..., nJoints, 8] where each joint
+///                  has [tx, ty, tz, rx, ry, rz, rw, scale].
+/// @param restPositions Optional rest pose positions with shape [..., nLocators, 3].
+///                      If not provided, uses positions from character's skinned locators.
+/// @return World-space locator positions with shape [..., nLocators, 3].
+py::array skinSkinnedLocatorsArray(
+    const momentum::Character& character,
+    py::buffer skelState,
+    std::optional<py::buffer> restPositions);
+
 } // namespace pymomentum
