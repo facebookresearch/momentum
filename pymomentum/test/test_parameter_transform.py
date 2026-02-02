@@ -30,7 +30,10 @@ class TestParameterTransform(unittest.TestCase):
         joint_params_1 = torch.from_numpy(
             character.parameter_transform.apply(model_params[None, :])
         ).flatten()
-        joint_params_2 = torch.matmul(transform, torch.from_numpy(model_params))
+        # transform is now a numpy array, so convert to tensor for matmul
+        joint_params_2 = torch.matmul(
+            torch.from_numpy(transform), torch.from_numpy(model_params)
+        )
         self.assertTrue(torch.allclose(joint_params_1, joint_params_2))
 
     def test_parameter_transform_round_trip(self) -> None:
@@ -39,9 +42,8 @@ class TestParameterTransform(unittest.TestCase):
         character: Character = create_test_character()
         original_pt = character.parameter_transform
 
-        # Get the transform as a dense matrix
-        transform_matrix = original_pt.transform
-        transform_numpy = transform_matrix.numpy()
+        # Get the transform as a dense matrix (already a numpy array)
+        transform_numpy = original_pt.transform
 
         # Create a new parameter transform from the dense matrix
         new_pt = ParameterTransform(
