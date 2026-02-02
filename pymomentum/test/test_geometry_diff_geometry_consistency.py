@@ -729,6 +729,44 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
             f"Max difference: {max_diff_explicit}",
         )
 
+    def test_apply_model_param_limits_matches(self) -> None:
+        """Verify that Character.apply_model_param_limits matches diff_geometry.apply_model_param_limits."""
+        # The test character has only one parameter limit: min-max type [-0.1, 0.1] for root (joint index 0).
+        character = pym_geometry.create_test_character()
+        n_model_params = character.parameter_transform.size
+        np.random.seed(0)
+        n_batch = 2
+
+        # Create uniform distribution of [-2.5, 2.5)
+        model_params_np = (
+            np.random.rand(n_batch, n_model_params).astype(np.float32) * 5.0 - 2.5
+        )
+
+        # Call geometry version (numpy)
+        clamped_params_geometry = character.apply_model_param_limits(model_params_np)
+
+        # Call diff_geometry version (torch)
+        model_params_torch = torch.from_numpy(model_params_np)
+        clamped_params_diff_geometry = pym_diff_geometry.apply_model_param_limits(
+            character, model_params_torch
+        )
+
+        # Compare results
+        self.assertTrue(
+            np.allclose(
+                clamped_params_geometry, clamped_params_diff_geometry.numpy(), atol=1e-6
+            ),
+            "Character.apply_model_param_limits should match diff_geometry.apply_model_param_limits",
+        )
+
+        # Verify limits were applied correctly
+        self.assertTrue((clamped_params_geometry[:, 0] <= 0.1).all())
+        self.assertTrue((clamped_params_geometry[:, 0] >= -0.1).all())
+        # Check no-limit model params are the same
+        self.assertTrue(
+            np.allclose(clamped_params_geometry[:, 1:], model_params_np[:, 1:])
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
