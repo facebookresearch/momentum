@@ -74,14 +74,6 @@ PYBIND11_MODULE(geometry, m) {
   m.doc() = "Geometry and forward kinematics for momentum models.  ";
   m.attr("__name__") = "pymomentum.geometry";
 
-#ifdef PYMOMENTUM_LIMITED_TORCH_API
-  m.attr("AUTOGRAD_ENABLED") = false;
-#else
-  m.attr("AUTOGRAD_ENABLED") = true;
-#endif
-
-  pybind11::module_::import("torch"); // @dep=//caffe2:torch
-
   m.attr("PARAMETERS_PER_JOINT") = mm::kParametersPerJoint;
 
   py::enum_<mm::FbxUpVector>(m, "FbxUpVector")

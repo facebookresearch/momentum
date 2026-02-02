@@ -12,10 +12,6 @@
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
 
-// Keep tensor skinning for functions that don't have array equivalents yet
-#include "pymomentum/tensor_momentum/tensor_skinning.h"
-#include "pymomentum/torch_bridge.h"
-
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
 #include <momentum/character/character_utility.h>

@@ -38,19 +38,11 @@
 
 #include <dispenso/parallel_for.h>
 
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
-#include <torch/csrc/jit/python/python_ivalue.h>
-#endif
 #include <Eigen/Core>
 
 #include <cstdint>
 
 namespace py = pybind11;
-
-#ifndef PYMOMENTUM_LIMITED_TORCH_API
-using torch::autograd::AutogradContext;
-using torch::autograd::variable_list;
-#endif
 
 namespace pymomentum {
 
