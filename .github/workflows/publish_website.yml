@@ -56,10 +56,23 @@ jobs:
         yarn run build
 
     # 3) Build Python API docs
+    - name: Free up disk space before pixi
+      run: |
+        # Remove unnecessary large packages to free disk space
+        sudo rm -rf /usr/share/dotnet || true
+        sudo rm -rf /opt/ghc || true
+        sudo rm -rf /usr/local/share/boost || true
+        sudo rm -rf /usr/local/graalvm/ || true
+        sudo rm -rf /usr/local/lib/android || true
+        # Clear GitHub runner caches and logs
+        sudo rm -rf /home/runner/actions-runner/cached/_diag/*.log || true
+        sudo rm -rf /home/runner/.cache/* || true
+        df -h
+
     - name: Set up pixi
-      uses: prefix-dev/setup-pixi@v0.9.3
+      uses: prefix-dev/setup-pixi@v0.9.4
       with:
-        cache: true
+        cache: false
 
     - name: Build Python API Documentation
       run: |
