@@ -99,4 +99,28 @@ using Matrix3xP = drjit::Matrix<PacketType_t<T>, 3>;
 template <typename T>
 using Matrix4xP = drjit::Matrix<PacketType_t<T>, 4>;
 
+// Helper functions for load/store operations that handle both SIMD and scalar modes.
+// In scalar mode (kSimdPacketSize == 1), aligned operations may have stricter
+// alignment requirements that aren't guaranteed by the buffer layout. These helpers
+// use aligned operations for SIMD mode (where buffers are properly padded) and
+// non-aligned operations for scalar mode.
+
+template <typename PacketT>
+inline PacketT loadAligned(const typename PacketT::Value* ptr) {
+  if constexpr (kSimdPacketSize == 1) {
+    return drjit::load<PacketT>(ptr);
+  } else {
+    return drjit::load_aligned<PacketT>(ptr);
+  }
+}
+
+template <typename PacketT>
+inline void storeAligned(typename PacketT::Value* ptr, const PacketT& value) {
+  if constexpr (kSimdPacketSize == 1) {
+    drjit::store<PacketT>(ptr, value);
+  } else {
+    drjit::store_aligned<PacketT>(ptr, value);
+  }
+}
+
 } // namespace momentum::rasterizer
