@@ -42,6 +42,19 @@ simd_test_sources = [
     "test/simd/simd_test.cpp",
 ]
 
+camera_public_headers = [
+    "camera/camera.h",
+    "camera/fwd.h",
+]
+
+camera_sources = [
+    "camera/camera.cpp",
+]
+
+camera_test_sources = [
+    "test/camera/test_camera.cpp",
+]
+
 fmt_eigen_public_headers = [
     "math/fmt_eigen.h",
 ]
@@ -713,7 +726,6 @@ refine_motion_sources = [
 ]
 
 rasterizer_public_headers = [
-    "rasterizer/camera.h",
     "rasterizer/geometry.h",
     "rasterizer/fwd.h",
     "rasterizer/image.h",
@@ -724,7 +736,6 @@ rasterizer_public_headers = [
 ]
 
 rasterizer_sources = [
-    "rasterizer/camera.cpp",
     "rasterizer/geometry.cpp",
     "rasterizer/rasterizer.cpp",
     "rasterizer/image.cpp",
@@ -732,7 +743,6 @@ rasterizer_sources = [
 ]
 
 rasterizer_test_sources = [
-    "test/rasterizer/test_camera.cpp",
     "test/rasterizer/test_geometry.cpp",
     "test/rasterizer/test_software_rasterizer.cpp",
     "test/rasterizer/test_text_rasterizer.cpp",

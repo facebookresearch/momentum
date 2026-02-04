@@ -12,9 +12,9 @@
 #include <pymomentum/tensor_momentum/tensor_skeleton_state.h>
 #include <pymomentum/torch_bridge.h>
 
+#include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton_state.h>
-#include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/rasterizer.h>
 #include <momentum/rasterizer/text_rasterizer.h>
 
@@ -45,25 +45,19 @@ PYBIND11_MODULE(renderer, m) {
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
 
   // Bind IntrinsicsModel and its derived classes
-  py::class_<
-      momentum::rasterizer::IntrinsicsModel,
-      std::shared_ptr<momentum::rasterizer::IntrinsicsModel>>(
+  py::class_<momentum::IntrinsicsModel, std::shared_ptr<momentum::IntrinsicsModel>>(
       m, "IntrinsicsModel", "Base class for camera intrinsics models")
       .def_property_readonly(
-          "image_width",
-          &momentum::rasterizer::IntrinsicsModel::imageWidth,
-          "Width of the image in pixels")
+          "image_width", &momentum::IntrinsicsModel::imageWidth, "Width of the image in pixels")
       .def_property_readonly(
-          "image_height",
-          &momentum::rasterizer::IntrinsicsModel::imageHeight,
-          "Height of the image in pixels")
+          "image_height", &momentum::IntrinsicsModel::imageHeight, "Height of the image in pixels")
       .def_property_readonly(
-          "fx", &momentum::rasterizer::IntrinsicsModel::fx, "Focal length in x direction (pixels)")
+          "fx", &momentum::IntrinsicsModel::fx, "Focal length in x direction (pixels)")
       .def_property_readonly(
-          "fy", &momentum::rasterizer::IntrinsicsModel::fy, "Focal length in y direction (pixels)")
+          "fy", &momentum::IntrinsicsModel::fy, "Focal length in y direction (pixels)")
       .def(
           "__repr__",
-          [](const momentum::rasterizer::IntrinsicsModel& self) {
+          [](const momentum::IntrinsicsModel& self) {
             return fmt::format(
                 "IntrinsicsModel(image_size=({}, {}), focal_length=({:.2f}, {:.2f}))",
                 self.imageWidth(),
@@ -73,7 +67,7 @@ PYBIND11_MODULE(renderer, m) {
           })
       .def(
           "project",
-          [](const momentum::rasterizer::IntrinsicsModel& intrinsics,
+          [](const momentum::IntrinsicsModel& intrinsics,
              const py::array_t<float>& points) -> py::array_t<float> {
             if (points.ndim() != 2 || points.shape(1) != 3) {
               throw std::runtime_error("Expected a 2D array of shape (nPoints, 3)");
@@ -110,7 +104,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("points"))
       .def(
           "upsample",
-          &momentum::rasterizer::IntrinsicsModel::upsample,
+          &momentum::IntrinsicsModel::upsample,
           R"(Create a new intrinsics model upsampled by the given factor.
 
 :param factor: Upsampling factor (e.g., 2.0 doubles the resolution).
@@ -118,7 +112,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("factor"))
       .def(
           "downsample",
-          &momentum::rasterizer::IntrinsicsModel::downsample,
+          &momentum::IntrinsicsModel::downsample,
           R"(Create a new intrinsics model downsampled by the given factor.
 
 :param factor: Downsampling factor (e.g., 2.0 halves the resolution).
@@ -126,7 +120,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("factor"))
       .def(
           "crop",
-          &momentum::rasterizer::IntrinsicsModel::crop,
+          &momentum::IntrinsicsModel::crop,
           R"(Create a new intrinsics model cropped to a sub-region of the image.
 
 :param top: Top offset in pixels.
@@ -140,7 +134,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("height"))
       .def(
           "resize",
-          &momentum::rasterizer::IntrinsicsModel::resize,
+          &momentum::IntrinsicsModel::resize,
           R"(Create a new intrinsics model resized to new image dimensions.
 
 :param image_width: New image width in pixels.
@@ -149,50 +143,30 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("image_width"),
           py::arg("image_height"));
 
-  py::class_<momentum::rasterizer::OpenCVDistortionParameters>(
+  py::class_<momentum::OpenCVDistortionParameters>(
       m, "OpenCVDistortionParameters", "OpenCV distortion parameters")
       .def(py::init<>(), "Initialize with default parameters (no distortion)")
       .def_readwrite(
-          "k1",
-          &momentum::rasterizer::OpenCVDistortionParameters::k1,
-          "Radial distortion coefficient k1")
+          "k1", &momentum::OpenCVDistortionParameters::k1, "Radial distortion coefficient k1")
       .def_readwrite(
-          "k2",
-          &momentum::rasterizer::OpenCVDistortionParameters::k2,
-          "Radial distortion coefficient k2")
+          "k2", &momentum::OpenCVDistortionParameters::k2, "Radial distortion coefficient k2")
       .def_readwrite(
-          "k3",
-          &momentum::rasterizer::OpenCVDistortionParameters::k3,
-          "Radial distortion coefficient k3")
+          "k3", &momentum::OpenCVDistortionParameters::k3, "Radial distortion coefficient k3")
       .def_readwrite(
-          "k4",
-          &momentum::rasterizer::OpenCVDistortionParameters::k4,
-          "Radial distortion coefficient k4")
+          "k4", &momentum::OpenCVDistortionParameters::k4, "Radial distortion coefficient k4")
       .def_readwrite(
-          "k5",
-          &momentum::rasterizer::OpenCVDistortionParameters::k5,
-          "Radial distortion coefficient k5")
+          "k5", &momentum::OpenCVDistortionParameters::k5, "Radial distortion coefficient k5")
       .def_readwrite(
-          "k6",
-          &momentum::rasterizer::OpenCVDistortionParameters::k6,
-          "Radial distortion coefficient k6")
+          "k6", &momentum::OpenCVDistortionParameters::k6, "Radial distortion coefficient k6")
       .def_readwrite(
-          "p1",
-          &momentum::rasterizer::OpenCVDistortionParameters::p1,
-          "Tangential distortion coefficient p1")
+          "p1", &momentum::OpenCVDistortionParameters::p1, "Tangential distortion coefficient p1")
       .def_readwrite(
-          "p2",
-          &momentum::rasterizer::OpenCVDistortionParameters::p2,
-          "Tangential distortion coefficient p2")
+          "p2", &momentum::OpenCVDistortionParameters::p2, "Tangential distortion coefficient p2")
       .def_readwrite(
-          "p3",
-          &momentum::rasterizer::OpenCVDistortionParameters::p3,
-          "Tangential distortion coefficient p3")
+          "p3", &momentum::OpenCVDistortionParameters::p3, "Tangential distortion coefficient p3")
       .def_readwrite(
-          "p4",
-          &momentum::rasterizer::OpenCVDistortionParameters::p4,
-          "Tangential distortion coefficient p4")
-      .def("__repr__", [](const momentum::rasterizer::OpenCVDistortionParameters& self) {
+          "p4", &momentum::OpenCVDistortionParameters::p4, "Tangential distortion coefficient p4")
+      .def("__repr__", [](const momentum::OpenCVDistortionParameters& self) {
         return fmt::format(
             "OpenCVDistortionParameters(k1={:.4f}, k2={:.4f}, k3={:.4f}, k4={:.4f}, k5={:.4f}, k6={:.4f}, p1={:.4f}, p2={:.4f}, p3={:.4f}, p4={:.4f})",
             self.k1,
@@ -214,7 +188,7 @@ PYBIND11_MODULE(renderer, m) {
          std::optional<float> fx,
          std::optional<float> fy,
          std::optional<float> cx,
-         std::optional<float> cy) -> std::shared_ptr<momentum::rasterizer::PinholeIntrinsicsModel> {
+         std::optional<float> cy) -> std::shared_ptr<momentum::PinholeIntrinsicsModel> {
     // Default focal length calculation: "normal" lens is a 50mm lens on
     // a 35mm camera body
     const float focal_length_cm = 5.0f;
@@ -229,7 +203,7 @@ PYBIND11_MODULE(renderer, m) {
       throw std::runtime_error("cx and cy must be both specified or both omitted");
     }
 
-    return std::make_shared<momentum::rasterizer::PinholeIntrinsicsModel>(
+    return std::make_shared<momentum::PinholeIntrinsicsModel>(
         imageWidth,
         imageHeight,
         fx.value_or(default_focal_length_pixels),
@@ -239,9 +213,9 @@ PYBIND11_MODULE(renderer, m) {
   };
 
   py::class_<
-      momentum::rasterizer::PinholeIntrinsicsModel,
-      momentum::rasterizer::IntrinsicsModel,
-      std::shared_ptr<momentum::rasterizer::PinholeIntrinsicsModel>>(
+      momentum::PinholeIntrinsicsModel,
+      momentum::IntrinsicsModel,
+      std::shared_ptr<momentum::PinholeIntrinsicsModel>>(
       m, "PinholeIntrinsicsModel", "Pinhole camera intrinsics model without distortion")
       .def(
           py::init(pinholeFactory),
@@ -261,14 +235,10 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("cx") = std::nullopt,
           py::arg("cy") = std::nullopt)
       .def_property_readonly(
-          "cx",
-          &momentum::rasterizer::PinholeIntrinsicsModel::cx,
-          "Principal point x-coordinate (pixels)")
+          "cx", &momentum::PinholeIntrinsicsModel::cx, "Principal point x-coordinate (pixels)")
       .def_property_readonly(
-          "cy",
-          &momentum::rasterizer::PinholeIntrinsicsModel::cy,
-          "Principal point y-coordinate (pixels)")
-      .def("__repr__", [](const momentum::rasterizer::PinholeIntrinsicsModel& self) {
+          "cy", &momentum::PinholeIntrinsicsModel::cy, "Principal point y-coordinate (pixels)")
+      .def("__repr__", [](const momentum::PinholeIntrinsicsModel& self) {
         return fmt::format(
             "PinholeIntrinsicsModel(image_size=({}, {}), fx={:.2f}, fy={:.2f}, cx={:.2f}, cy={:.2f})",
             self.imageWidth(),
@@ -280,34 +250,33 @@ PYBIND11_MODULE(renderer, m) {
       });
 
   // Factory function for OpenCVIntrinsicsModel to avoid template ambiguity
-  auto opencvFactory =
-      [](int32_t imageWidth,
-         int32_t imageHeight,
-         std::optional<float> fx,
-         std::optional<float> fy,
-         std::optional<float> cx,
-         std::optional<float> cy,
-         std::optional<momentum::rasterizer::OpenCVDistortionParameters> distortionParams)
-      -> std::shared_ptr<momentum::rasterizer::OpenCVIntrinsicsModel> {
+  auto opencvFactory = [](int32_t imageWidth,
+                          int32_t imageHeight,
+                          std::optional<float> fx,
+                          std::optional<float> fy,
+                          std::optional<float> cx,
+                          std::optional<float> cy,
+                          std::optional<momentum::OpenCVDistortionParameters> distortionParams)
+      -> std::shared_ptr<momentum::OpenCVIntrinsicsModel> {
     // Default focal length calculation: "normal" lens is a 50mm
     // lens on a 35mm camera body
     const float focal_length_cm = 5.0f;
     const float film_width_cm = 3.6f;
     const float default_focal_length_pixels = (focal_length_cm / film_width_cm) * (float)imageWidth;
-    return std::make_shared<momentum::rasterizer::OpenCVIntrinsicsModel>(
+    return std::make_shared<momentum::OpenCVIntrinsicsModel>(
         imageWidth,
         imageHeight,
         fx.value_or(default_focal_length_pixels),
         fy.value_or(default_focal_length_pixels),
         cx.value_or(imageWidth / 2.0f),
         cy.value_or(imageHeight / 2.0f),
-        distortionParams.value_or(momentum::rasterizer::OpenCVDistortionParameters{}));
+        distortionParams.value_or(momentum::OpenCVDistortionParameters{}));
   };
 
   py::class_<
-      momentum::rasterizer::OpenCVIntrinsicsModel,
-      momentum::rasterizer::IntrinsicsModel,
-      std::shared_ptr<momentum::rasterizer::OpenCVIntrinsicsModel>>(
+      momentum::OpenCVIntrinsicsModel,
+      momentum::IntrinsicsModel,
+      std::shared_ptr<momentum::OpenCVIntrinsicsModel>>(
       m, "OpenCVIntrinsicsModel", "OpenCV camera intrinsics model with distortion")
       .def(
           py::init(opencvFactory),
@@ -329,14 +298,10 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("cy"),
           py::arg("distortion_params") = std::nullopt)
       .def_property_readonly(
-          "cx",
-          &momentum::rasterizer::OpenCVIntrinsicsModel::cx,
-          "Principal point x-coordinate (pixels)")
+          "cx", &momentum::OpenCVIntrinsicsModel::cx, "Principal point x-coordinate (pixels)")
       .def_property_readonly(
-          "cy",
-          &momentum::rasterizer::OpenCVIntrinsicsModel::cy,
-          "Principal point y-coordinate (pixels)")
-      .def("__repr__", [](const momentum::rasterizer::OpenCVIntrinsicsModel& self) {
+          "cy", &momentum::OpenCVIntrinsicsModel::cy, "Principal point y-coordinate (pixels)")
+      .def("__repr__", [](const momentum::OpenCVIntrinsicsModel& self) {
         return fmt::format(
             "OpenCVIntrinsicsModel(image_size=({}, {}), fx={:.2f}, fy={:.2f}, cx={:.2f}, cy={:.2f})",
             self.imageWidth(),
@@ -349,14 +314,14 @@ PYBIND11_MODULE(renderer, m) {
 
   // Factory function for Camera to avoid template ambiguity
   auto cameraFactory =
-      [](std::shared_ptr<const momentum::rasterizer::IntrinsicsModel> intrinsics,
-         const std::optional<Eigen::Matrix4f>& eye_from_world) -> momentum::rasterizer::Camera {
-    return momentum::rasterizer::Camera(
+      [](std::shared_ptr<const momentum::IntrinsicsModel> intrinsics,
+         const std::optional<Eigen::Matrix4f>& eye_from_world) -> momentum::Camera {
+    return momentum::Camera(
         intrinsics, Eigen::Affine3f(eye_from_world.value_or(Eigen::Matrix4f::Identity())));
   };
 
   // Bind Camera class
-  py::class_<momentum::rasterizer::Camera>(m, "Camera", "Camera for rendering")
+  py::class_<momentum::Camera>(m, "Camera", "Camera for rendering")
       .def(
           py::init(cameraFactory),
           R"(Create a camera with specified intrinsics and pose.
@@ -368,7 +333,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("eye_from_world") = std::nullopt)
       .def(
           "__repr__",
-          [](const momentum::rasterizer::Camera& self) {
+          [](const momentum::Camera& self) {
             Eigen::Vector3f position = self.eyeFromWorld().inverse().translation();
             return fmt::format(
                 "Camera(image_size=({}, {}), focal_length=({:.2f}, {:.2f}), position=({:.2f}, {:.2f}, {:.2f}))",
@@ -381,46 +346,40 @@ PYBIND11_MODULE(renderer, m) {
                 position.z());
           })
       .def_property_readonly(
-          "image_width", &momentum::rasterizer::Camera::imageWidth, "Width of the image in pixels")
+          "image_width", &momentum::Camera::imageWidth, "Width of the image in pixels")
       .def_property_readonly(
-          "image_height",
-          &momentum::rasterizer::Camera::imageHeight,
-          "Height of the image in pixels")
+          "image_height", &momentum::Camera::imageHeight, "Height of the image in pixels")
+      .def_property_readonly("fx", &momentum::Camera::fx, "Focal length in x direction (pixels)")
+      .def_property_readonly("fy", &momentum::Camera::fy, "Focal length in y direction (pixels)")
       .def_property_readonly(
-          "fx", &momentum::rasterizer::Camera::fx, "Focal length in x direction (pixels)")
-      .def_property_readonly(
-          "fy", &momentum::rasterizer::Camera::fy, "Focal length in y direction (pixels)")
-      .def_property_readonly(
-          "intrinsics_model",
-          &momentum::rasterizer::Camera::intrinsicsModel,
-          "The camera's intrinsics model")
+          "intrinsics_model", &momentum::Camera::intrinsicsModel, "The camera's intrinsics model")
       .def_property(
           "T_eye_from_world",
-          [](const momentum::rasterizer::Camera& self) -> Eigen::Matrix4f {
+          [](const momentum::Camera& self) -> Eigen::Matrix4f {
             return self.eyeFromWorld().matrix();
           },
-          [](momentum::rasterizer::Camera& self, const Eigen::Matrix4f& value) {
+          [](momentum::Camera& self, const Eigen::Matrix4f& value) {
             self.setEyeFromWorld(Eigen::Affine3f(value));
           },
           "Transform from world space to camera/eye space")
       .def_property(
           "T_world_from_eye",
-          [](const momentum::rasterizer::Camera& self) -> Eigen::Matrix4f {
+          [](const momentum::Camera& self) -> Eigen::Matrix4f {
             return self.worldFromEye().matrix();
           },
-          [](momentum::rasterizer::Camera& self, const Eigen::Matrix4f& value) {
+          [](momentum::Camera& self, const Eigen::Matrix4f& value) {
             self.setEyeFromWorld(Eigen::Affine3f(value));
           },
           "Transform from world space to camera/eye space")
       .def_property_readonly(
           "center_of_projection",
-          [](const momentum::rasterizer::Camera& self) -> Eigen::Vector3f {
+          [](const momentum::Camera& self) -> Eigen::Vector3f {
             return (self.eyeFromWorld().inverse().translation()).eval();
           },
           "Position of the camera center in world space")
       .def(
           "look_at",
-          [](const momentum::rasterizer::Camera& self,
+          [](const momentum::Camera& self,
              const Eigen::Vector3f& position,
              const std::optional<Eigen::Vector3f>& target,
              const std::optional<Eigen::Vector3f>& up) {
@@ -440,10 +399,10 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("up") = std::nullopt)
       .def(
           "frame",
-          [](const momentum::rasterizer::Camera& self,
+          [](const momentum::Camera& self,
              const py::array_t<float>& points,
              float min_z,
-             float edge_padding) -> momentum::rasterizer::Camera {
+             float edge_padding) -> momentum::Camera {
             if (points.ndim() != 2 || points.shape(1) != 3) {
               throw std::runtime_error("Expected a 2D array of shape (nPoints, 3)");
             }
@@ -470,7 +429,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("edge_padding") = 0.05f)
       .def_property_readonly(
           "world_space_principle_axis",
-          [](const momentum::rasterizer::Camera& self) -> Eigen::Vector3f {
+          [](const momentum::Camera& self) -> Eigen::Vector3f {
             // The principle axis is the direction the camera is looking
             // In camera space, this is the positive Z axis (0, 0, 1)
             Eigen::Vector3f cameraSpacePrincipalAxis = Eigen::Vector3f::UnitZ();
@@ -479,9 +438,8 @@ PYBIND11_MODULE(renderer, m) {
           "Camera world-space principal axis (direction the camera is looking)")
       .def(
           "upsample",
-          [](const momentum::rasterizer::Camera& self, float factor) {
-            return momentum::rasterizer::Camera(
-                self.intrinsicsModel()->upsample(factor), self.eyeFromWorld());
+          [](const momentum::Camera& self, float factor) {
+            return momentum::Camera(self.intrinsicsModel()->upsample(factor), self.eyeFromWorld());
           },
           R"(Create a new camera with upsampled resolution by the given factor.
 
@@ -490,7 +448,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("factor"))
       .def(
           "crop",
-          [](const momentum::rasterizer::Camera& self,
+          [](const momentum::Camera& self,
              int32_t top,
              int32_t left,
              int32_t width,
@@ -508,7 +466,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("height"))
       .def(
           "project",
-          [](const momentum::rasterizer::Camera& self,
+          [](const momentum::Camera& self,
              const py::array_t<float>& world_points) -> py::array_t<float> {
             if (world_points.ndim() != 2 || world_points.shape(1) != 3) {
               throw std::runtime_error("Expected a 2D array of shape (nPoints, 3)");
@@ -538,7 +496,7 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("world_points"))
       .def(
           "unproject",
-          [](const momentum::rasterizer::Camera& self,
+          [](const momentum::Camera& self,
              const py::array_t<float>& image_points) -> py::array_t<float> {
             if (image_points.ndim() != 2 || image_points.shape(1) != 3) {
               throw std::runtime_error(

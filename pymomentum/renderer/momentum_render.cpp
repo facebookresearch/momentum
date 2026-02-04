@@ -10,14 +10,13 @@
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
+#include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 #include <momentum/character/linear_skinning.h>
 #include <momentum/character/parameter_transform.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/math/mesh.h>
-
-#include <momentum/rasterizer/camera.h>
 
 #include <dispenso/parallel_for.h> // @manual
 #include <pybind11/numpy.h>
@@ -37,7 +36,7 @@ namespace pymomentum {
 //   aimCenterWorld.
 // Note: if cameraUpWorld is not orthogonal to cameraLookAtWorld, the function
 // will fix it, as long as cameraUpWorld is not parallel to cameraLookAtWorld.
-momentum::rasterizer::Camera makeOutsideInCamera(
+momentum::Camera makeOutsideInCamera(
     const Eigen::Vector3f& cameraUpWorld,
     const Eigen::Vector3f& cameraLookAtWorld,
     const Eigen::Vector3f& aimCenterWorld,
@@ -75,15 +74,15 @@ momentum::rasterizer::Camera makeOutsideInCamera(
   const float focal_length_pixels = (focal_length_mm / film_width_mm) * (double)imageWidth_pixels;
 
   // Create a PinholeIntrinsicsModel
-  auto intrinsicsModel = std::make_shared<momentum::rasterizer::PinholeIntrinsicsModel>(
+  auto intrinsicsModel = std::make_shared<momentum::PinholeIntrinsicsModel>(
       imageWidth_pixels, imageHeight_pixels, focal_length_pixels, focal_length_pixels);
 
   // Create and return the camera with the intrinsics model and transform
-  return momentum::rasterizer::Camera(intrinsicsModel, worldToEyeXF);
+  return momentum::Camera(intrinsicsModel, worldToEyeXF);
 }
 
-momentum::rasterizer::Camera frameMesh(
-    const momentum::rasterizer::Camera& cam_in,
+momentum::Camera frameMesh(
+    const momentum::Camera& cam_in,
     const momentum::Character& character,
     std::span<const momentum::SkeletonState> skelStates) {
   const float min_z = 5;
@@ -104,7 +103,7 @@ momentum::rasterizer::Camera frameMesh(
   return cam_in.framePoints(positions, min_z, 0.05f);
 }
 
-momentum::rasterizer::Camera makeOutsideInCameraForBody(
+momentum::Camera makeOutsideInCameraForBody(
     const momentum::Character& character,
     std::span<const momentum::SkeletonState> skelStates,
     const int imageHeight_pixels,
@@ -197,7 +196,7 @@ momentum::rasterizer::Camera makeOutsideInCameraForBody(
   return frameMesh(result, character, skelStates);
 }
 
-std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
+std::vector<momentum::Camera> buildCamerasForBody(
     const momentum::Character& character,
     at::Tensor jointParameters,
     int imageHeight,
@@ -229,7 +228,7 @@ std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
       false);
 
   const auto nBatch = checker.getBatchSize();
-  std::vector<momentum::rasterizer::Camera> result(nBatch);
+  std::vector<momentum::Camera> result(nBatch);
 
   for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
     at::Tensor sequence_cur = jointParameters.select(0, iBatch);
@@ -249,7 +248,7 @@ std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
   return result;
 }
 
-momentum::rasterizer::Camera createCameraForBody(
+momentum::Camera createCameraForBody(
     const momentum::Character& character,
     const py::array_t<float>& skeletonStates,
     int imageHeight,
@@ -391,7 +390,7 @@ Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
   return result;
 }
 
-std::vector<momentum::rasterizer::Camera>
+std::vector<momentum::Camera>
 buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWidth) {
   TensorChecker checker("buildCamerasForHand");
   wristTransformation = checker.validateAndFixTensor(
@@ -404,7 +403,7 @@ buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWi
       false);
 
   const auto nBatch = checker.getBatchSize();
-  std::vector<momentum::rasterizer::Camera> result(nBatch);
+  std::vector<momentum::Camera> result(nBatch);
   momentum::SkeletonState skelState;
 
   for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
@@ -437,7 +436,7 @@ buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWi
   return result;
 }
 
-std::vector<momentum::rasterizer::Camera>
+std::vector<momentum::Camera>
 buildCamerasForHandSurface(at::Tensor wristTransformation, int imageHeight, int imageWidth) {
   TensorChecker checker("buildCamerasForHand");
   wristTransformation = checker.validateAndFixTensor(
@@ -450,7 +449,7 @@ buildCamerasForHandSurface(at::Tensor wristTransformation, int imageHeight, int 
       false);
 
   const auto nBatch = checker.getBatchSize();
-  std::vector<momentum::rasterizer::Camera> result(nBatch);
+  std::vector<momentum::Camera> result(nBatch);
   momentum::SkeletonState skelState;
 
   for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
