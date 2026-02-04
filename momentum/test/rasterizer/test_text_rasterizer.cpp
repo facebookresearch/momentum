@@ -5,12 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <momentum/rasterizer/camera.h>
+#include <momentum/camera/camera.h>
 #include <momentum/rasterizer/image.h>
 #include <momentum/rasterizer/text_rasterizer.h>
 
 #include <gtest/gtest.h>
 
+using namespace momentum;
 using namespace momentum::rasterizer;
 
 TEST(TextRasterizer, BasicText3D) {

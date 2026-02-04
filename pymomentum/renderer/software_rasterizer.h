@@ -7,9 +7,8 @@
 
 #pragma once
 
+#include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
-
-#include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/fwd.h>
 #include <momentum/rasterizer/rasterizer.h>
 #include <momentum/rasterizer/text_rasterizer.h>
@@ -29,7 +28,7 @@ void rasterizeMesh(
     at::Tensor positions,
     std::optional<at::Tensor> normals,
     at::Tensor triangles,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -49,7 +48,7 @@ void rasterizeMesh(
 void rasterizeWireframe(
     at::Tensor positions,
     at::Tensor triangles,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     float width,
@@ -62,7 +61,7 @@ void rasterizeWireframe(
 
 void rasterizeSpheres(
     at::Tensor center,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -80,7 +79,7 @@ void rasterizeSpheres(
 void rasterizeCylinders(
     at::Tensor start_position,
     at::Tensor end_position,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -100,7 +99,7 @@ void rasterizeCapsules(
     at::Tensor transformation,
     at::Tensor radius,
     at::Tensor length,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -122,7 +121,7 @@ enum class SkeletonStyle {
 void rasterizeSkeleton(
     const momentum::Character& character,
     at::Tensor skeletonState,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -145,7 +144,7 @@ void rasterizeSkeleton(
 void rasterizeCharacter(
     const momentum::Character& character,
     at::Tensor skeletonState,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -162,7 +161,7 @@ void rasterizeCharacter(
     std::optional<Eigen::Vector3f> wireframeColor);
 
 void rasterizeCheckerboard(
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -180,7 +179,7 @@ void rasterizeCheckerboard(
 
 void rasterizeLines(
     at::Tensor positions,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     float width,
@@ -191,8 +190,8 @@ void rasterizeLines(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeCameraFrustum(
-    const momentum::rasterizer::Camera& frustumCamera,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& frustumCamera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     float lineWidth,
@@ -206,7 +205,7 @@ void rasterizeCameraFrustum(
 
 void rasterizeTransforms(
     at::Tensor transforms,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     std::optional<at::Tensor> surfaceNormalsBuffer,
@@ -222,7 +221,7 @@ void rasterizeTransforms(
 
 void rasterizeCircles(
     at::Tensor positions,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     float lineThickness,
@@ -248,7 +247,7 @@ void rasterizeLines2D(
 void rasterizeText(
     at::Tensor positions,
     const std::vector<std::string>& texts,
-    const momentum::rasterizer::Camera& camera,
+    const momentum::Camera& camera,
     at::Tensor zBuffer,
     std::optional<at::Tensor> rgbBuffer,
     const std::optional<Eigen::Vector3f>& color,
@@ -281,11 +280,9 @@ void rasterizeCircles2D(
     std::optional<at::Tensor> zBuffer,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
-at::Tensor createZBuffer(const momentum::rasterizer::Camera& camera, float far_clip = FLT_MAX);
-at::Tensor createRGBBuffer(
-    const momentum::rasterizer::Camera& camera,
-    std::optional<Eigen::Vector3f> bgColor);
-at::Tensor createIndexBuffer(const momentum::rasterizer::Camera& camera);
+at::Tensor createZBuffer(const momentum::Camera& camera, float far_clip = FLT_MAX);
+at::Tensor createRGBBuffer(const momentum::Camera& camera, std::optional<Eigen::Vector3f> bgColor);
+at::Tensor createIndexBuffer(const momentum::Camera& camera);
 
 momentum::rasterizer::PhongMaterial createPhongMaterial(
     const std::optional<Eigen::Vector3f>& diffuseColor,

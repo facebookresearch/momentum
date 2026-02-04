@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/rasterizer/camera.h>
+#include <momentum/camera/camera.h>
 #include <momentum/rasterizer/fwd.h>
 #include <momentum/rasterizer/rasterizer.h>
 #include <Eigen/Core>

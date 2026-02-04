@@ -7,8 +7,8 @@
 
 #include <axel/math/RayTriangleIntersection.h>
 #include <gtest/gtest.h>
+#include <momentum/camera/camera.h>
 #include <momentum/math/constants.h>
-#include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/image.h>
 #include <momentum/rasterizer/rasterizer.h>
@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <iomanip>
 
+using namespace momentum;
 using namespace momentum::rasterizer;
 
 Eigen::Matrix4d

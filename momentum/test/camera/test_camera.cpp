@@ -6,8 +6,8 @@
  */
 
 #include <gtest/gtest.h>
-#include <momentum/rasterizer/camera.h>
-#include <momentum/rasterizer/fwd.h>
+#include <momentum/camera/camera.h>
+#include <momentum/camera/fwd.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <cmath>
@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-using namespace momentum::rasterizer;
+using namespace momentum;
 
 class CameraTest : public ::testing::Test {
  protected:

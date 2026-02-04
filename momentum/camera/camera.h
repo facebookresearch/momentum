@@ -7,24 +7,27 @@
 
 #pragma once
 
+#include <momentum/camera/fwd.h>
+
 #include <drjit/array.h>
 #include <drjit/fwd.h>
 #include <drjit/matrix.h>
-
-#include <momentum/rasterizer/fwd.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
 #include <memory>
 
-namespace momentum::rasterizer {
+namespace momentum {
 
 /// Base class for camera intrinsics models.
+///
 /// This abstract class defines the interface for different camera models
 /// such as pinhole and OpenCV distortion models.
 template <typename T>
 class IntrinsicsModelT {
  public:
   /// Constructor for intrinsics model.
+  ///
   /// @param imageWidth Width of the image in pixels
   /// @param imageHeight Height of the image in pixels
   IntrinsicsModelT(int32_t imageWidth, int32_t imageHeight)
@@ -32,28 +35,34 @@ class IntrinsicsModelT {
   virtual ~IntrinsicsModelT() = default;
 
   /// Get the focal length in the x direction.
+  ///
   /// @return Focal length fx in pixels
   [[nodiscard]] virtual T fx() const = 0;
 
   /// Get the focal length in the y direction.
+  ///
   /// @return Focal length fy in pixels
   [[nodiscard]] virtual T fy() const = 0;
 
   /// Project 3D points to 2D image coordinates.
+  ///
   /// @param point 3D points in camera coordinate space
   /// @return Pair of projected 2D points and validity mask
   [[nodiscard]] virtual std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> project(
       const Vector3xP<T>& point) const = 0;
 
   /// Project a single 3D point to 2D image coordinates (Eigen version).
+  ///
   /// @param point 3D point in camera coordinate space
   /// @return Pair of projected 2D point and validity flag
   [[nodiscard]] virtual std::pair<Eigen::Vector3<T>, bool> project(
       const Eigen::Vector3<T>& point) const = 0;
 
   /// Compute the Jacobian of the projection function with respect to 3D camera coordinates.
+  ///
   /// @param point 3D point in camera coordinate space
   /// @return Tuple of (projected point, Jacobian matrix, valid flag)
+  ///
   /// The Jacobian is a 3x3 matrix where:
   /// - Row 0: [du/dx, du/dy, du/dz]
   /// - Row 1: [dv/dx, dv/dy, dv/dz]
@@ -62,6 +71,7 @@ class IntrinsicsModelT {
       const Eigen::Vector3<T>& point) const = 0;
 
   /// Unproject 3D image points to 3D camera points using Newton's method.
+  ///
   /// @param imagePoint 3D point in image coordinates (u, v, z) where z is the desired depth
   /// @param maxIterations Maximum number of Newton iterations (default: 10)
   /// @param tolerance Convergence tolerance for the residual (default: 1e-6)
@@ -72,21 +82,25 @@ class IntrinsicsModelT {
       T tolerance = T(1e-6)) const = 0;
 
   /// Resample the intrinsics by a given factor.
+  ///
   /// @param factor Resampling factor (>1 for upsampling, <1 for downsampling)
   /// @return New intrinsics model with resampled parameters
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>> resample(T factor) const;
 
   /// Downsample the intrinsics by a given factor.
+  ///
   /// @param factor Downsampling factor (e.g., 2.0 halves the resolution)
   /// @return New intrinsics model with downsampled parameters
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>> downsample(T factor) const;
 
   /// Upsample the intrinsics by a given factor.
+  ///
   /// @param factor Upsampling factor (e.g., 2.0 doubles the resolution)
   /// @return New intrinsics model with upsampled parameters
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>> upsample(T factor) const;
 
   /// Resize the intrinsics to new image dimensions.
+  ///
   /// @param imageWidth New image width in pixels
   /// @param imageHeight New image height in pixels
   /// @return New intrinsics model with resized parameters
@@ -95,6 +109,7 @@ class IntrinsicsModelT {
       int32_t imageHeight) const = 0;
 
   /// Crop the intrinsics to a sub-region of the image.
+  ///
   /// @param top Top offset in pixels
   /// @param left Left offset in pixels
   /// @param newWidth New width in pixels after cropping
@@ -104,12 +119,14 @@ class IntrinsicsModelT {
   crop(int32_t top, int32_t left, int32_t newWidth, int32_t newHeight) const = 0;
 
   /// Get the image width.
+  ///
   /// @return Image width in pixels
   [[nodiscard]] int32_t imageWidth() const {
     return imageWidth_;
   }
 
   /// Get the image height.
+  ///
   /// @return Image height in pixels
   [[nodiscard]] int32_t imageHeight() const {
     return imageHeight_;
@@ -121,6 +138,7 @@ class IntrinsicsModelT {
 };
 
 /// Camera class that combines intrinsics and extrinsics for 3D rendering.
+///
 /// This class encapsulates both the camera's intrinsic parameters (focal length,
 /// principal point, image dimensions) and extrinsic parameters (position and orientation).
 template <typename T>
@@ -130,6 +148,7 @@ class CameraT {
   CameraT();
 
   /// Constructor with intrinsics model and optional transform.
+  ///
   /// @param intrinsicsModel Shared pointer to the camera's intrinsics model
   /// @param eyeFromWorld Transform from world space to camera/eye space (defaults to identity)
   explicit CameraT(
@@ -138,48 +157,56 @@ class CameraT {
           Eigen::Transform<T, 3, Eigen::Affine>::Identity());
 
   /// Get the image width from the intrinsics model.
+  ///
   /// @return Image width in pixels
   [[nodiscard]] auto imageWidth() const {
     return intrinsicsModel_->imageWidth();
   }
 
   /// Get the image height from the intrinsics model.
+  ///
   /// @return Image height in pixels
   [[nodiscard]] auto imageHeight() const {
     return intrinsicsModel_->imageHeight();
   }
 
   /// Get the focal length in x direction from the intrinsics model.
+  ///
   /// @return Focal length fx in pixels
   [[nodiscard]] auto fx() const {
     return intrinsicsModel_->fx();
   }
 
   /// Get the focal length in y direction from the intrinsics model.
+  ///
   /// @return Focal length fy in pixels
   [[nodiscard]] auto fy() const {
     return intrinsicsModel_->fy();
   }
 
   /// Get the intrinsics model.
+  ///
   /// @return Shared pointer to the intrinsics model
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>> intrinsicsModel() const {
     return intrinsicsModel_;
   }
 
   /// Get the eye-from-world transformation matrix.
+  ///
   /// @return Reference to the transformation from world space to camera space
   [[nodiscard]] const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld() const {
     return eyeFromWorld_;
   }
 
   /// Get the world-from-eye transformation matrix.
+  ///
   /// @return Transformation from camera space to world space
   [[nodiscard]] Eigen::Transform<T, 3, Eigen::Affine> worldFromEye() const {
     return eyeFromWorld_.inverse();
   }
 
   /// Set the eye-from-world transformation matrix.
+  ///
   /// @param eyeFromWorld New transformation from world space to camera space
   void setEyeFromWorld(const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld) {
     eyeFromWorld_ = eyeFromWorld;
@@ -197,6 +224,7 @@ class CameraT {
       const Eigen::Vector3<T>& up = Eigen::Vector3<T>::UnitY()) const;
 
   /// Adjust the camera position to ensure all specified points are in view.
+  ///
   /// This preserves the camera's orientation but adjusts its position.
   ///
   /// @param points The 3D points in world space that should be in view
@@ -209,20 +237,24 @@ class CameraT {
       T edgePadding = T(0.05)) const;
 
   /// Project 3D world points to 2D image coordinates.
+  ///
   /// @param worldPoints 3D points in world coordinate space (wide vector)
   /// @return Pair of projected 2D points and validity mask
   [[nodiscard]] std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> project(
       const Vector3xP<T>& worldPoints) const;
 
   /// Project a single 3D world point to 2D image coordinates (Eigen version).
+  ///
   /// @param worldPoint 3D point in world coordinate space
   /// @return Pair of projected 2D point and validity flag
   [[nodiscard]] std::pair<Eigen::Vector3<T>, bool> project(
       const Eigen::Vector3<T>& worldPoint) const;
 
   /// Compute the Jacobian of the projection function with respect to 3D world coordinates.
+  ///
   /// @param worldPoint 3D point in world coordinate space
   /// @return Tuple of (projected point, Jacobian matrix, valid flag)
+  ///
   /// The Jacobian is a 2x3 matrix where:
   /// - Row 0: [du/dX_world, du/dY_world, du/dZ_world]
   /// - Row 1: [dv/dX_world, dv/dY_world, dv/dZ_world]
@@ -230,8 +262,9 @@ class CameraT {
       const Eigen::Vector3<T>& worldPoint) const;
 
   /// Unproject 3D image points to 3D world points using Newton's method.
-  /// @param imagePoints 3D points in image coordinates (u, v, z) where z is the desired depth (wide
-  /// vector)
+  ///
+  /// @param imagePoints 3D points in image coordinates (u, v, z) where z is the desired depth
+  ///   (wide vector)
   /// @param maxIterations Maximum number of Newton iterations (default: 10)
   /// @param tolerance Convergence tolerance for the residual (default: 1e-6)
   /// @return Pair of 3D points in world coordinates and validity mask
@@ -239,6 +272,7 @@ class CameraT {
   unproject(const Vector3xP<T>& imagePoints, int maxIterations = 10, T tolerance = T(1e-6)) const;
 
   /// Unproject 3D image point to 3D world point using Newton's method (Eigen version).
+  ///
   /// @param imagePoint 3D point in image coordinates (u, v, z) where z is the desired depth
   /// @param maxIterations Maximum number of Newton iterations (default: 10)
   /// @param tolerance Convergence tolerance for the residual (default: 1e-6)
@@ -249,6 +283,7 @@ class CameraT {
       T tolerance = T(1e-6)) const;
 
   /// Create a cropped camera with a sub-region of the original image.
+  ///
   /// @param top Top offset in pixels
   /// @param left Left offset in pixels
   /// @param newWidth New width in pixels after cropping
@@ -260,6 +295,7 @@ class CameraT {
   }
 
   /// Create a resized camera with new image dimensions.
+  ///
   /// @param imageWidth New image width in pixels
   /// @param imageHeight New image height in pixels
   /// @return New camera with resized intrinsics and same pose
@@ -267,17 +303,22 @@ class CameraT {
     return CameraT<T>(intrinsicsModel_->resize(imageWidth, imageHeight), eyeFromWorld_);
   }
 
+  /// Get a reference to the intrinsics model.
+  ///
+  /// @return Const reference to the intrinsics model
   [[nodiscard]] const IntrinsicsModelT<T>& getIntrinsicsModel() const {
     return *intrinsicsModel_;
   }
 
  private:
   /// Transform world points to camera/eye space using SIMD operations.
+  ///
   /// @param worldPoints 3D points in world coordinate space (wide vector)
   /// @return 3D points in camera/eye coordinate space (wide vector)
   [[nodiscard]] Vector3xP<T> transformWorldToEye(const Vector3xP<T>& worldPoints) const;
 
   /// Transform a single world point to camera/eye space.
+  ///
   /// @param worldPoint 3D point in world coordinate space
   /// @return 3D point in camera/eye coordinate space
   [[nodiscard]] Eigen::Vector3<T> transformWorldToEye(const Eigen::Vector3<T>& worldPoint) const;
@@ -289,6 +330,7 @@ class CameraT {
 };
 
 /// OpenCV distortion parameters for camera lens distortion correction.
+///
 /// These parameters follow the OpenCV camera calibration model and include
 /// both radial and tangential distortion coefficients.
 template <typename T>
@@ -307,6 +349,7 @@ struct OpenCVDistortionParametersT {
 };
 
 /// PinholeIntrinsicsModel implements a basic pinhole camera model.
+///
 /// This model uses the following projection formula:
 /// x = fx * X/Z + cx
 /// y = fy * Y/Z + cy
@@ -321,7 +364,22 @@ struct OpenCVDistortionParametersT {
 template <typename T>
 class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
  public:
+  /// Constructor with explicit principal point.
+  ///
+  /// @param imageWidth Width of the image in pixels
+  /// @param imageHeight Height of the image in pixels
+  /// @param fx Focal length in x direction (pixels)
+  /// @param fy Focal length in y direction (pixels)
+  /// @param cx Principal point x-coordinate (pixels)
+  /// @param cy Principal point y-coordinate (pixels)
   PinholeIntrinsicsModelT(int32_t imageWidth, int32_t imageHeight, T fx, T fy, T cx, T cy);
+
+  /// Constructor with principal point at image center.
+  ///
+  /// @param imageWidth Width of the image in pixels
+  /// @param imageHeight Height of the image in pixels
+  /// @param fx Focal length in x direction (pixels)
+  /// @param fy Focal length in y direction (pixels)
   PinholeIntrinsicsModelT(int32_t imageWidth, int32_t imageHeight, T fx, T fy);
 
   [[nodiscard]] T fx() const final {
@@ -332,10 +390,16 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
     return fy_;
   }
 
+  /// Get the principal point x-coordinate.
+  ///
+  /// @return Principal point cx in pixels
   [[nodiscard]] T cx() const {
     return cx_;
   }
 
+  /// Get the principal point y-coordinate.
+  ///
+  /// @return Principal point cy in pixels
   [[nodiscard]] T cy() const {
     return cy_;
   }
@@ -369,6 +433,7 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
 };
 
 /// OpenCVIntrinsicsModel implements the standard OpenCV camera model.
+///
 /// This model uses the following projection formula:
 /// x = fx * X/Z + cx
 /// y = fy * Y/Z + cy
@@ -381,6 +446,15 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
 template <typename T>
 class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
  public:
+  /// Constructor with optional distortion parameters.
+  ///
+  /// @param imageWidth Width of the image in pixels
+  /// @param imageHeight Height of the image in pixels
+  /// @param fx Focal length in x direction (pixels)
+  /// @param fy Focal length in y direction (pixels)
+  /// @param cx Principal point x-coordinate (pixels)
+  /// @param cy Principal point y-coordinate (pixels)
+  /// @param params OpenCV distortion parameters (defaults to no distortion)
   OpenCVIntrinsicsModelT(
       int32_t imageWidth,
       int32_t imageHeight,
@@ -396,14 +470,23 @@ class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
   [[nodiscard]] T fy() const final {
     return fy_;
   }
+
+  /// Get the principal point x-coordinate.
+  ///
+  /// @return Principal point cx in pixels
   [[nodiscard]] T cx() const {
     return cx_;
   }
+
+  /// Get the principal point y-coordinate.
+  ///
+  /// @return Principal point cy in pixels
   [[nodiscard]] T cy() const {
     return cy_;
   }
 
   /// Get the distortion parameters.
+  ///
   /// @return Reference to the OpenCV distortion parameters
   [[nodiscard]] const OpenCVDistortionParametersT<T>& distortionParameters() const {
     return distortionParams_;
@@ -438,16 +521,4 @@ class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
   const OpenCVDistortionParametersT<T> distortionParams_;
 };
 
-// Type aliases for common instantiations
-using IntrinsicsModel = IntrinsicsModelT<float>;
-using IntrinsicsModeld = IntrinsicsModelT<double>;
-using Camera = CameraT<float>;
-using Camerad = CameraT<double>;
-using PinholeIntrinsicsModel = PinholeIntrinsicsModelT<float>;
-using PinholeIntrinsicsModeld = PinholeIntrinsicsModelT<double>;
-using OpenCVIntrinsicsModel = OpenCVIntrinsicsModelT<float>;
-using OpenCVIntrinsicsModeld = OpenCVIntrinsicsModelT<double>;
-using OpenCVDistortionParameters = OpenCVDistortionParametersT<float>;
-using OpenCVDistortionParametersd = OpenCVDistortionParametersT<double>;
-
-} // namespace momentum::rasterizer
+} // namespace momentum

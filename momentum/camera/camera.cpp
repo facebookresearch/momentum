@@ -5,16 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "momentum/camera/camera.h"
+
+#include "momentum/camera/fwd.h"
+
 #include <drjit/array.h>
 #include <drjit/fwd.h>
 #include <drjit/matrix.h>
 
 #include <cfloat>
 
-#include <momentum/rasterizer/camera.h>
-#include <momentum/rasterizer/fwd.h>
-
-namespace momentum::rasterizer {
+namespace momentum {
 
 // Default constructor is VGA res.
 template <typename T>
@@ -26,22 +27,14 @@ CameraT<T>::CameraT()
               (5.0 / 3.6) * 640,
               (5.0 / 3.6) * 640)) {}
 
-/// Constructor implementation for CameraT.
-/// @param intrinsicsModel Shared pointer to the camera's intrinsics model
-/// @param eyeFromWorld Transform from world space to camera/eye space
+// Constructor implementation for CameraT.
 template <typename T>
 CameraT<T>::CameraT(
     std::shared_ptr<const IntrinsicsModelT<T>> intrinsicsModel,
     const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld)
     : eyeFromWorld_(eyeFromWorld), intrinsicsModel_(intrinsicsModel) {}
 
-/// Constructor for PinholeIntrinsicsModelT with explicit principal point.
-/// @param imageWidth Width of the image in pixels
-/// @param imageHeight Height of the image in pixels
-/// @param fx Focal length in x direction (pixels)
-/// @param fy Focal length in y direction (pixels)
-/// @param cx Principal point x-coordinate (pixels)
-/// @param cy Principal point y-coordinate (pixels)
+// Constructor for PinholeIntrinsicsModelT with explicit principal point.
 template <typename T>
 PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
     int32_t imageWidth,
@@ -52,11 +45,7 @@ PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
     T cy)
     : IntrinsicsModelT<T>(imageWidth, imageHeight), fx_(fx), fy_(fy), cx_(cx), cy_(cy) {}
 
-/// Constructor for PinholeIntrinsicsModelT with principal point at image center.
-/// @param imageWidth Width of the image in pixels
-/// @param imageHeight Height of the image in pixels
-/// @param fx Focal length in x direction (pixels)
-/// @param fy Focal length in y direction (pixels)
+// Constructor for PinholeIntrinsicsModelT with principal point at image center.
 template <typename T>
 PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
     int32_t imageWidth,
@@ -69,14 +58,7 @@ PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
       cx_(T(imageWidth) / T(2)),
       cy_(T(imageHeight) / T(2)) {}
 
-/// Constructor for OpenCVIntrinsicsModelT with optional distortion parameters.
-/// @param imageWidth Width of the image in pixels
-/// @param imageHeight Height of the image in pixels
-/// @param fx Focal length in x direction (pixels)
-/// @param fy Focal length in y direction (pixels)
-/// @param cx Principal point x-coordinate (pixels)
-/// @param cy Principal point y-coordinate (pixels)
-/// @param params OpenCV distortion parameters (defaults to no distortion)
+// Constructor for OpenCVIntrinsicsModelT with optional distortion parameters.
 template <typename T>
 OpenCVIntrinsicsModelT<T>::OpenCVIntrinsicsModelT(
     int32_t imageWidth,
@@ -705,7 +687,7 @@ CameraT<T>::unproject(const Vector3xP<T>& imagePoints, int maxIterations, T tole
   Vector3xP<T> worldPoints;
   auto validMask = drjit::full<typename PacketT::MaskType>(true);
 
-  for (int i = 0; i < PacketT::Size; ++i) {
+  for (size_t i = 0; i < PacketT::Size; ++i) {
     // Extract 3D image point for this element (u, v, z)
     Eigen::Vector3<T> imagePoint(imagePoints.x()[i], imagePoints.y()[i], imagePoints.z()[i]);
 
@@ -760,4 +742,4 @@ template class PinholeIntrinsicsModelT<double>;
 template class OpenCVIntrinsicsModelT<float>;
 template class OpenCVIntrinsicsModelT<double>;
 
-} // namespace momentum::rasterizer
+} // namespace momentum

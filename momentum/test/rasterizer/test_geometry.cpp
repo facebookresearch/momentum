@@ -6,8 +6,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <momentum/camera/camera.h>
 #include <momentum/math/constants.h>
-#include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/geometry.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
