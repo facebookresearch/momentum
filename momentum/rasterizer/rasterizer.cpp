@@ -287,7 +287,7 @@ inline void rasterizeOneTriangle(
       const auto baryMask = (bary.x() >= 0 && bary.y() >= 0 && bary.z() >= 0);
 
       const auto blockOffset = y * zBufferRowStride + xOffset;
-      const auto zBufferOrig = loadAligned<FloatP>(zBufferPtr + blockOffset);
+      const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
       const FloatP zOffset = w + depthOffset;
 
       const auto zBufferMask = zOffset < zBufferOrig;
@@ -305,7 +305,7 @@ inline void rasterizeOneTriangle(
       }
 
       const FloatP zBufferFinal = drjit::select(finalMask, zOffset, zBufferOrig);
-      storeAligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
+      drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
 
       if (rgbBufferPtr != nullptr) {
         Vector3fP shaded = toEnokiVec(material.emissiveColor);
@@ -344,7 +344,7 @@ inline void rasterizeOneTriangle(
 
       if (vertexIndexBufferPtr != nullptr) {
         int* vertexIndexBufferOffset = vertexIndexBufferPtr + blockOffset;
-        const IntP vertexValuesOrig = loadAligned<IntP>(vertexIndexBufferOffset);
+        const IntP vertexValuesOrig = drjit::load_aligned<IntP>(vertexIndexBufferOffset);
         // Select the vertex based on the largest barycentric coordinates:
         const IntP vertexValuesNew = drjit::select(
             bary.x() > bary.y() && bary.x() > bary.z(),
@@ -352,16 +352,16 @@ inline void rasterizeOneTriangle(
             drjit::select(bary.y() > bary.z(), IntP(triangle.y()), IntP(triangle.z())));
 
         const IntP vertexValuesFinal = drjit::select(finalMask, vertexValuesNew, vertexValuesOrig);
-        storeAligned<IntP>(vertexIndexBufferOffset, vertexValuesFinal);
+        drjit::store_aligned<IntP>(vertexIndexBufferOffset, vertexValuesFinal);
       }
 
       if (triangleIndexBufferPtr != nullptr) {
         int* triangleIndexBufferOffset = triangleIndexBufferPtr + blockOffset;
-        const IntP triangleValuesOrig = loadAligned<IntP>(triangleIndexBufferOffset);
+        const IntP triangleValuesOrig = drjit::load_aligned<IntP>(triangleIndexBufferOffset);
         const IntP triangleValuesNew(triangleIndex);
         const IntP triangleValuesFinal =
             drjit::select(finalMask, triangleValuesNew, triangleValuesOrig);
-        storeAligned<IntP>(triangleIndexBufferOffset, triangleValuesFinal);
+        drjit::store_aligned<IntP>(triangleIndexBufferOffset, triangleValuesFinal);
       }
 
       if (surfaceNormalsBufferPtr != nullptr) {
@@ -434,7 +434,7 @@ inline void rasterizeOneLine(
       }
 
       const uint32_t blockOffset = y * zBufferWidth + xOffset;
-      const auto zBufferOrig = loadAligned<FloatP>(zBufferPtr + blockOffset);
+      const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
       const FloatP zOffset = w + depthOffset;
 
       const auto zBufferMask = zOffset < zBufferOrig;
@@ -444,7 +444,7 @@ inline void rasterizeOneLine(
       }
 
       const FloatP zBufferFinal = drjit::select(finalMask, zOffset, zBufferOrig);
-      storeAligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
+      drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
 
       if (rgbBufferPtr != nullptr) {
         float* rgbBufferOffset = rgbBufferPtr + 3 * blockOffset;
@@ -506,7 +506,7 @@ inline void rasterizeOneCircle(
       }
 
       const uint32_t blockOffset = y * zBufferWidth + xOffset;
-      const auto zBufferOrig = loadAligned<FloatP>(zBufferPtr + blockOffset);
+      const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
       const float zOffset = z_value + depthOffset;
 
       const auto zBufferMask = zOffset < zBufferOrig;
@@ -517,7 +517,7 @@ inline void rasterizeOneCircle(
       }
 
       const FloatP zBufferFinal = drjit::select(combinedMask, zOffset, zBufferOrig);
-      storeAligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
+      drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
 
       if (rgbBufferPtr != nullptr) {
         float* rgbBufferOffset = rgbBufferPtr + 3 * blockOffset;
@@ -589,9 +589,9 @@ inline void rasterizeOneCircle2D(
       // Write zeros to z-buffer for alpha matting
       if (zBufferPtr != nullptr) {
         const uint32_t blockOffset = y * bufferWidth + xOffset;
-        const auto zBufferOrig = loadAligned<FloatP>(zBufferPtr + blockOffset);
+        const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
         const FloatP zBufferFinal = drjit::select(combinedMask, FloatP(0.0f), zBufferOrig);
-        storeAligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
+        drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
       }
     }
   }
@@ -811,9 +811,7 @@ void rasterizeMeshImp(
   int* triangleIndexBufferPtr =
       triangleIndexBuffer.empty() ? nullptr : triangleIndexBuffer.data_handle();
 
-  for (int64_t iTriangle = 0; iTriangle < nTriangles; ++iTriangle) {
-    IntP triangleIndices = static_cast<int32_t>(iTriangle);
-    IntP::MaskType triangleMask = true;
+  for (auto [triangleIndices, triangleMask] : drjit::range<IntP>(nTriangles)) {
     auto triangles_cur = drjit::gather<Vector3iP>(triangles.data(), triangleIndices, triangleMask);
     std::array<Vector3fP, 3> p_tri_window;
     Matrix3fP p_tri_eye;
@@ -1065,9 +1063,7 @@ void rasterizeLinesImp(
 
   const Vector3f color_drjit = toEnokiVec(color);
 
-  for (int64_t iLine = 0; iLine < nLines; ++iLine) {
-    IntP lineIndices = static_cast<int32_t>(iLine);
-    IntP::MaskType lineMask = true;
+  for (auto [lineIndices, lineMask] : drjit::range<IntP>(nLines)) {
     const auto lineStart_world =
         drjit::gather<Vector3fP>(positions_world.data(), 2 * lineIndices + 0, lineMask);
     const auto lineEnd_world =
@@ -1153,9 +1149,7 @@ void rasterizeCirclesImp(
   const int combinedRadiusPixels =
       std::clamp<int>(static_cast<int>(std::ceil(combinedRadius)), 1, cameraSimd.imageHeight() - 1);
 
-  for (int64_t iCircle = 0; iCircle < nCircles; ++iCircle) {
-    IntP circleIndices = static_cast<int32_t>(iCircle);
-    IntP::MaskType circleMask = true;
+  for (auto [circleIndices, circleMask] : drjit::range<IntP>(nCircles)) {
     const auto center_world =
         drjit::gather<Vector3fP>(positions_world.data(), circleIndices, circleMask);
     const auto [center_window, validProj] = cameraSimd.worldToWindow(center_world);
@@ -1257,9 +1251,7 @@ void rasterizeSplatsImp(
   const std::array<Vector3f, 4> quadTextureCoords = {
       Vector3f(-1, -1, 0), Vector3f(1, -1, 0), Vector3f(1, 1, 0), Vector3f(-1, 1, 0)};
 
-  for (int64_t iSplat = 0; iSplat < nSplats; ++iSplat) {
-    IntP splatIndices = static_cast<int32_t>(iSplat);
-    IntP::MaskType splatMask = true;
+  for (auto [splatIndices, splatMask] : drjit::range<IntP>(nSplats)) {
     auto position_world = drjit::gather<Vector3fP>(positions_world.data(), splatIndices, splatMask);
     auto normal_world = drjit::gather<Vector3fP>(normals_world.data(), splatIndices, splatMask);
 
@@ -1433,9 +1425,7 @@ void rasterizeWireframeImp(
 
   const Vector3f color_drjit = toEnokiVec(color);
 
-  for (int64_t iTriangle = 0; iTriangle < nTriangles; ++iTriangle) {
-    IntP triangleIndices = static_cast<int32_t>(iTriangle);
-    IntP::MaskType triangleMask = true;
+  for (auto [triangleIndices, triangleMask] : drjit::range<IntP>(nTriangles)) {
     auto triangles_cur = drjit::gather<Vector3iP>(triangles.data(), triangleIndices, triangleMask);
     std::array<Vector3fP, 3> p_tri_window;
     IntP::MaskType validTriangles = triangleMask;
@@ -1920,9 +1910,9 @@ inline void rasterizeOneLine2D(
       // Write zeros to z-buffer for alpha matting
       if (zBufferPtr != nullptr) {
         const uint32_t blockOffset = y * bufferWidth + xOffset;
-        const auto zBufferOrig = loadAligned<FloatP>(zBufferPtr + blockOffset);
+        const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
         const FloatP zBufferFinal = drjit::select(finalMask, FloatP(0.0f), zBufferOrig);
-        storeAligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
+        drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
       }
     }
   }
