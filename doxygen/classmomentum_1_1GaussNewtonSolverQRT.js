@@ -1,6 +1,6 @@
 var classmomentum_1_1GaussNewtonSolverQRT =
 [
-    [ "GaussNewtonSolverQRT", "classmomentum_1_1GaussNewtonSolverQRT.html#ad564172a9a077c395b22dffe985abdb9", null ],
+    [ "GaussNewtonSolverQRT", "classmomentum_1_1GaussNewtonSolverQRT.html#a960313df4dedc5653289dfe81d0c5e13", null ],
     [ "~GaussNewtonSolverQRT", "classmomentum_1_1GaussNewtonSolverQRT.html#accb55577ff8b42890ada15088ecfc171", null ],
     [ "doIteration", "classmomentum_1_1GaussNewtonSolverQRT.html#adcb89a5ee279b003a1f34795ce7dc74a", null ],
     [ "getName", "classmomentum_1_1GaussNewtonSolverQRT.html#ad09ab41fdf61762239e24e449fecf0cb", null ],

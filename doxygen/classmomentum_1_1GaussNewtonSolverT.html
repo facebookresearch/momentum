@@ -98,7 +98,7 @@ $(document).ready(function(){initNavTree('classmomentum_1_1GaussNewtonSolverT.ht
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of the Gauss-Newton optimization algorithm.  
+<p>Dense implementation of the Gauss-Newton optimization algorithm.  
  <a href="classmomentum_1_1GaussNewtonSolverT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="gauss__newton__solver_8h_source.html">gauss_newton_solver.h</a>&gt;</code></p>
@@ -125,6 +125,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab99172aa834f6dc7ab174cd7588750cf" id="r_ab99172aa834f6dc7ab174cd7588750cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#ab99172aa834f6dc7ab174cd7588750cf">setOptions</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SolverOptions.html">SolverOptions</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">options</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
 <tr class="memdesc:ab99172aa834f6dc7ab174cd7588750cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates solver configuration, handling both base and Gauss-Newton specific options.  <br /></td></tr>
 <tr class="separator:ab99172aa834f6dc7ab174cd7588750cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3dab533fe08c1c29805d24a98bf23dfd" id="r_a3dab533fe08c1c29805d24a98bf23dfd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#a3dab533fe08c1c29805d24a98bf23dfd">getLastJtJ</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a3dab533fe08c1c29805d24a98bf23dfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28507cf52ff646924cf65b2a1a0a47ea" id="r_a28507cf52ff646924cf65b2a1a0a47ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1GaussNewtonSolverT.html#a28507cf52ff646924cf65b2a1a0a47ea">getLastJtR</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a28507cf52ff646924cf65b2a1a0a47ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmomentum_1_1SolverT"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmomentum_1_1SolverT')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmomentum_1_1SolverT.html">momentum::SolverT&lt; T &gt;</a></td></tr>
 <tr class="memitem:af4f1df2bed49af36593851b752e3b1f1 inherit pub_methods_classmomentum_1_1SolverT" id="r_af4f1df2bed49af36593851b752e3b1f1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverT.html#af4f1df2bed49af36593851b752e3b1f1">SolverT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SolverOptions.html">SolverOptions</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">options</a>, <a class="el" href="classmomentum_1_1SolverFunctionT.html">SolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">solver</a>)</td></tr>
 <tr class="memdesc:af4f1df2bed49af36593851b752e3b1f1 inherit pub_methods_classmomentum_1_1SolverT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor with solver options and function to optimize.  <br /></td></tr>
@@ -215,10 +219,10 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::GaussNewtonSolverT&lt; T &gt;</div><p>Implementation of the Gauss-Newton optimization algorithm. </p>
-<p>Minimizes non-linear least squares problems by iteratively approximating the objective function with a quadratic model based on first derivatives. Supports both dense and sparse matrix operations depending on problem size. </p>
+class momentum::GaussNewtonSolverT&lt; T &gt;</div><p>Dense implementation of the Gauss-Newton optimization algorithm. </p>
+<p>Minimizes non-linear least squares problems by iteratively approximating the objective function with a quadratic model based on first derivatives. Uses dense matrix operations for small to medium-sized parameter spaces. </p>
 
-<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8h_source.html#l00065">65</a> of file <a class="el" href="gauss__newton__solver_8h_source.html">gauss_newton_solver.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8h_source.html#l00067">67</a> of file <a class="el" href="gauss__newton__solver_8h_source.html">gauss_newton_solver.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a14d31f46c3ff8b072b965d2474d54319" name="a14d31f46c3ff8b072b965d2474d54319"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a14d31f46c3ff8b072b965d2474d54319">&#9670;&#160;</a></span>GaussNewtonSolverT()</h2>
@@ -252,7 +256,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8cpp_source.html#l00018">18</a> of file <a class="el" href="gauss__newton__solver_8cpp_source.html">gauss_newton_solver.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gauss__newton__solver_8h_source.html#l00024">momentum::GaussNewtonSolverBaseOptions::doLineSearch</a>, <a class="el" href="gauss__newton__solver_8h_source.html#l00021">momentum::GaussNewtonSolverBaseOptions::regularization</a>, and <a class="el" href="gauss__newton__solver_8cpp_source.html#l00036">momentum::GaussNewtonSolverT&lt; T &gt;::setOptions()</a>.</p>
+<p class="reference">References <a class="el" href="gauss__newton__solver_8h_source.html#l00025">momentum::GaussNewtonSolverBaseOptions::doLineSearch</a>, <a class="el" href="gauss__newton__solver_8h_source.html#l00022">momentum::GaussNewtonSolverBaseOptions::regularization</a>, <a class="el" href="gauss__newton__solver_8cpp_source.html#l00036">momentum::GaussNewtonSolverT&lt; T &gt;::setOptions()</a>, <a class="el" href="gauss__newton__solver_8h_source.html#l00051">momentum::GaussNewtonSolverOptions::targetRowsPerChunk</a>, and <a class="el" href="gauss__newton__solver_8h_source.html#l00040">momentum::GaussNewtonSolverOptions::useBlockJtJ</a>.</p>
 
 </div>
 </div>
@@ -283,13 +287,70 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Performs one iteration of the Gauss-Newton algorithm. </p>
-<p>Delegates to either doIterationDense or doIterationSparse based on problem size </p>
 
 <p>Implements <a class="el" href="classmomentum_1_1SolverT.html#a32a0ad18ba9f9d3685c46d8d7817484c">momentum::SolverT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8cpp_source.html#l00059">59</a> of file <a class="el" href="gauss__newton__solver_8cpp_source.html">gauss_newton_solver.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8cpp_source.html#l00210">210</a> of file <a class="el" href="gauss__newton__solver_8cpp_source.html">gauss_newton_solver.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
+<p class="reference">References <a class="el" href="profile_8h_source.html#l00067">MT_PROFILE_EVENT</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
+
+</div>
+</div>
+<a id="a3dab533fe08c1c29805d24a98bf23dfd" name="a3dab533fe08c1c29805d24a98bf23dfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3dab533fe08c1c29805d24a98bf23dfd">&#9670;&#160;</a></span>getLastJtJ()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp; <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html">momentum::GaussNewtonSolverT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getLastJtJ </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8h_source.html#l00079">79</a> of file <a class="el" href="gauss__newton__solver_8h_source.html">gauss_newton_solver.h</a>.</p>
+
+</div>
+</div>
+<a id="a28507cf52ff646924cf65b2a1a0a47ea" name="a28507cf52ff646924cf65b2a1a0a47ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28507cf52ff646924cf65b2a1a0a47ea">&#9670;&#160;</a></span>getLastJtR()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp; <a class="el" href="classmomentum_1_1GaussNewtonSolverT.html">momentum::GaussNewtonSolverT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getLastJtR </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8h_source.html#l00082">82</a> of file <a class="el" href="gauss__newton__solver_8h_source.html">gauss_newton_solver.h</a>.</p>
 
 </div>
 </div>
@@ -355,7 +416,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Implements <a class="el" href="classmomentum_1_1SolverT.html#aca3cea8b7d3df7da0ae68e7aeae55cfa">momentum::SolverT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8cpp_source.html#l00049">49</a> of file <a class="el" href="gauss__newton__solver_8cpp_source.html">gauss_newton_solver.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gauss__newton__solver_8cpp_source.html#l00048">48</a> of file <a class="el" href="gauss__newton__solver_8cpp_source.html">gauss_newton_solver.cpp</a>.</p>
 
 </div>
 </div>
@@ -408,7 +469,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1GaussNewtonSolverT.html">GaussNewtonSolverT</a></li>
-    <li class="footer">Generated on Wed Jan 28 2026 22:08:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Feb 4 2026 17:51:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

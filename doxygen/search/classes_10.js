@@ -31,9 +31,11 @@ var searchData=
   ['solveroptions_28',['SolverOptions',['../structmomentum_1_1SolverOptions.html',1,'momentum']]],
   ['solvert_29',['SolverT',['../classmomentum_1_1SolverT.html',1,'momentum']]],
   ['spanstreambuf_30',['spanstreambuf',['../structmomentum_1_1spanstreambuf.html',1,'momentum']]],
-  ['stateerrorfunctiont_31',['StateErrorFunctionT',['../classmomentum_1_1StateErrorFunctionT.html',1,'momentum']]],
-  ['statesequenceerrorfunctiont_32',['StateSequenceErrorFunctionT',['../classmomentum_1_1StateSequenceErrorFunctionT.html',1,'momentum']]],
-  ['statesimilarity_33',['StateSimilarity',['../structmomentum_1_1StateSimilarity.html',1,'momentum']]],
-  ['subsetgaussnewtonsolveroptions_34',['SubsetGaussNewtonSolverOptions',['../structmomentum_1_1SubsetGaussNewtonSolverOptions.html',1,'momentum']]],
-  ['subsetgaussnewtonsolvert_35',['SubsetGaussNewtonSolverT',['../classmomentum_1_1SubsetGaussNewtonSolverT.html',1,'momentum']]]
+  ['sparsegaussnewtonsolveroptions_31',['SparseGaussNewtonSolverOptions',['../structmomentum_1_1SparseGaussNewtonSolverOptions.html',1,'momentum']]],
+  ['sparsegaussnewtonsolvert_32',['SparseGaussNewtonSolverT',['../classmomentum_1_1SparseGaussNewtonSolverT.html',1,'momentum']]],
+  ['stateerrorfunctiont_33',['StateErrorFunctionT',['../classmomentum_1_1StateErrorFunctionT.html',1,'momentum']]],
+  ['statesequenceerrorfunctiont_34',['StateSequenceErrorFunctionT',['../classmomentum_1_1StateSequenceErrorFunctionT.html',1,'momentum']]],
+  ['statesimilarity_35',['StateSimilarity',['../structmomentum_1_1StateSimilarity.html',1,'momentum']]],
+  ['subsetgaussnewtonsolveroptions_36',['SubsetGaussNewtonSolverOptions',['../structmomentum_1_1SubsetGaussNewtonSolverOptions.html',1,'momentum']]],
+  ['subsetgaussnewtonsolvert_37',['SubsetGaussNewtonSolverT',['../classmomentum_1_1SubsetGaussNewtonSolverT.html',1,'momentum']]]
 ];

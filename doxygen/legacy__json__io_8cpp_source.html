@@ -128,13 +128,13 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">namespace </span>{</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">eigenToJsonArray</a>(<span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>) {</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">return</span> nlohmann::json::array({<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>.x(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>.y(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>.z()});</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">eigenToJsonArray</a>(<span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; vec) {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">return</span> nlohmann::json::array({vec.x(), vec.y(), vec.z()});</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">eigenToJsonArray</a>(<span class="keyword">const</span> Eigen::Vector2&lt;T&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>) {</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keywordflow">return</span> nlohmann::json::array({<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>.x(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>.y()});</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">eigenToJsonArray</a>(<span class="keyword">const</span> Eigen::Vector2&lt;T&gt;&amp; vec) {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keywordflow">return</span> nlohmann::json::array({vec.x(), vec.y()});</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>}</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -758,7 +758,7 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_2bf28622ec42ff0c0285c7a4d596986b.html">legacy_json</a></li><li class="navelem"><a class="el" href="legacy__json__io_8cpp.html">legacy_json_io.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 28 2026 22:08:06 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Feb 4 2026 17:51:41 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

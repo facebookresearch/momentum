@@ -257,7 +257,7 @@ var searchData=
   ['profile_2eh_254',['profile.h',['../profile_8h.html',1,'']]],
   ['progress_5fbar_2ecpp_255',['progress_bar.cpp',['../progress__bar_8cpp.html',1,'']]],
   ['progress_5fbar_2eh_256',['progress_bar.h',['../progress__bar_8h.html',1,'']]],
-  ['progressbar_257',['progressbar',['../classmomentum_1_1ProgressBar.html',1,'momentum::ProgressBar'],['../structmomentum_1_1SequenceSolverOptions.html#a685decc627e5c7dfde260510641fb0fc',1,'momentum::SequenceSolverOptions::progressBar'],['../classmomentum_1_1ProgressBar.html#aa34174b4d3ee19b04ac846441bcc8035',1,'momentum::ProgressBar::ProgressBar()']]],
+  ['progressbar_257',['progressbar',['../classmomentum_1_1ProgressBar.html',1,'momentum::ProgressBar'],['../classmomentum_1_1ProgressBar.html#aa34174b4d3ee19b04ac846441bcc8035',1,'momentum::ProgressBar::ProgressBar()'],['../structmomentum_1_1SequenceSolverOptions.html#a685decc627e5c7dfde260510641fb0fc',1,'momentum::SequenceSolverOptions::progressBar']]],
   ['progressbar_5fconst_5fp_258',['ProgressBar_const_p',['../namespacemomentum.html#ac4992207f7c3c939bd9f9e0932776e50',1,'momentum']]],
   ['progressbar_5fconst_5fu_259',['ProgressBar_const_u',['../namespacemomentum.html#af2f4a7efb5d5ee526e68ab1fb4eea847',1,'momentum']]],
   ['progressbar_5fconst_5fw_260',['ProgressBar_const_w',['../namespacemomentum.html#a118d26cb9a60c5bf9d4789862f845a0a',1,'momentum']]],

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pymomentum.geometry &mdash; PyMomentum  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -361,7 +361,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.n_mixtures"><code class="docutils literal notranslate"><span class="pre">Mppca.n_mixtures</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.names"><code class="docutils literal notranslate"><span class="pre">Mppca.names</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.save"><code class="docutils literal notranslate"><span class="pre">Mppca.save()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.to_tensors"><code class="docutils literal notranslate"><span class="pre">Mppca.to_tensors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Mppca.to_arrays"><code class="docutils literal notranslate"><span class="pre">Mppca.to_arrays()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.ParameterLimit"><code class="docutils literal notranslate"><span class="pre">ParameterLimit</span></code></a><ul>
@@ -722,15 +722,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.apply_model_param_limits">
-<span class="sig-name descname"><span class="pre">apply_model_param_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.apply_model_param_limits" title="Link to this definition"></a></dt>
-<dd><p>Clamp model parameters by parameter limits stored in Character.</p>
-<p>Note the function is differentiable.</p>
+<span class="sig-name descname"><span class="pre">apply_model_param_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.apply_model_param_limits" title="Link to this definition"></a></dt>
+<dd><p>Apply parameter limits to model parameters.</p>
+<p>Clamps model parameters to their specified min/max bounds. Parameters without
+limits are passed through unchanged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>model_params</strong> – the (can be batched) body model parameters.</p>
+<dd class="field-odd"><p><strong>model_params</strong> – Model parameters array with shape (…, nModelParams).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>clampled model parameters. Same tensor shape as the input.</p>
+<dd class="field-even"><p>Clamped model parameters with same shape and dtype as input.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -826,7 +827,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.joints_for_parameters">
-<span class="sig-name descname"><span class="pre">joints_for_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.joints_for_parameters" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">joints_for_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.joints_for_parameters" title="Link to this definition"></a></dt>
 <dd><p>Maps a list of parameter indices to a list of joints driven by those parameters.</p>
 </dd></dl>
 
@@ -1246,8 +1247,8 @@ this is a legacy format that has historically been used in previous Python libra
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.parameters_for_joints">
-<span class="sig-name descname"><span class="pre">parameters_for_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.parameters_for_joints" title="Link to this definition"></a></dt>
-<dd><p>Maps a list of joint indices to a boolean tensor containing the parameters which drive those joints.</p>
+<span class="sig-name descname"><span class="pre">parameters_for_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.parameters_for_joints" title="Link to this definition"></a></dt>
+<dd><p>Maps a list of joint indices to a boolean numpy array containing the parameters which drive those joints.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1431,7 +1432,7 @@ simply want to apply an identity-specific scale to the character, you should use
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.simplify">
-<span class="sig-name descname"><span class="pre">simplify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.simplify" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">simplify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.simplify" title="Link to this definition"></a></dt>
 <dd><p>Simplifies the character by removing extra joints; this can help to speed up IK, but passing in a set of
 parameters rather than joints.  Does not modify the parameter transform.  This is the equivalent of calling
 <code class="docutils literal notranslate"><span class="pre">`character.simplify_skeleton(character.joints_from_parameters(enabled_params))`</span></code>.</p>
@@ -1447,7 +1448,7 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.simplify_parameter_transform">
-<span class="sig-name descname"><span class="pre">simplify_parameter_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.simplify_parameter_transform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">simplify_parameter_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.simplify_parameter_transform" title="Link to this definition"></a></dt>
 <dd><p>Simplifies the character by removing unwanted parameters.</p>
 </dd></dl>
 
@@ -1487,19 +1488,19 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.skin_skinned_locators">
-<span class="sig-name descname"><span class="pre">skin_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.skin_skinned_locators" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">skin_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.skin_skinned_locators" title="Link to this definition"></a></dt>
 <dd><p>Apply linear blend skinning to compute the world-space positions of the character’s skinned locators.</p>
 <p>This function uses the character’s built-in skinned locators and applies linear blend skinning
 to compute their world-space positions given a skeleton state.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>skel_state</strong> – Skeleton state tensor with shape [nJoints x 8] or [nBatch x nJoints x 8].</p></li>
-<li><p><strong>rest_positions</strong> – Optional rest positions tensor with shape [nLocators x 3] or [nBatch x nLocators x 3]. If not provided, uses the position stored in each SkinnedLocator.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array with shape […, nJoints, 8].</p></li>
+<li><p><strong>rest_positions</strong> – Optional rest positions array with shape […, nLocators, 3]. If not provided, uses the position stored in each SkinnedLocator.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tensor of shape [nLocators x 3] or [nBatch x nLocators x 3] containing the world-space positions of the skinned locators.</p>
+<dd class="field-even"><p>Array of shape […, nLocators, 3] containing the world-space positions of the skinned locators.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2881,27 +2882,27 @@ Currently contains a mixture of probabilistic PCA models.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymomentum.geometry.Mppca.to_tensors">
-<span class="sig-name descname"><span class="pre">to_tensors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Mppca" title="pymomentum.geometry.Mppca"><span class="pre">pymomentum.geometry.Mppca</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Mppca.to_tensors" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="pymomentum.geometry.Mppca.to_arrays">
+<span class="sig-name descname"><span class="pre">to_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Mppca" title="pymomentum.geometry.Mppca"><span class="pre">pymomentum.geometry.Mppca</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Mppca.to_arrays" title="Link to this definition"></a></dt>
 <dd><p>Return the parameters defining the mixture of probabilistic PCA models.</p>
 <p>Each PPCA model a Gaussian N(mu, cov) where the covariance matrix is
 (sigma*sigma*I + W * W^T).  pi is the mixture weight for this particular Gaussian.</p>
 <p>Note that mu is a vector of length <code class="xref py py-meth docutils literal notranslate"><span class="pre">dimension()</span></code> and W is a matrix of dimension <code class="xref py py-meth docutils literal notranslate"><span class="pre">dimension()</span></code> x q
 where q is the dimensionality of the PCA subspace.</p>
-<p>The resulting tensors are as follows:</p>
+<p>The resulting arrays are as follows:</p>
 <ul class="simple">
-<li><p>pi: a [n]-dimensional tensor containing the mixture weights.  It sums to 1.</p></li>
-<li><p>mu: a [n x d]-dimensional tensor containing the mean pose for each mixture.</p></li>
-<li><p>weights: a [n x d x q]-dimensional tensor containing the q vectors spanning the PCA space.</p></li>
-<li><p>sigma: a [n]-dimensional tensor containing the uniform part of the covariance matrix.</p></li>
-<li><p>param_idx: a [d]-dimensional tensor containing the indices of the parameters.</p></li>
+<li><p>pi: a [n]-dimensional array containing the mixture weights.  It sums to 1.</p></li>
+<li><p>mu: a [n x d]-dimensional array containing the mean pose for each mixture.</p></li>
+<li><p>weights: a [n x q x d]-dimensional array containing the q vectors spanning the PCA space.</p></li>
+<li><p>sigma: a [n]-dimensional array containing the uniform part of the covariance matrix.</p></li>
+<li><p>param_idx: a [d]-dimensional array containing the indices of the parameters.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameter_transform</strong> – An optional parameter transform used to map the parameters; if not present, then the param_idx tensor will be empty.</p>
+<dd class="field-odd"><p><strong>parameter_transform</strong> – An optional parameter transform used to map the parameters; if not present, then the param_idx array will be empty.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an tuple (pi, mean, weights, sigma, param_idx) for the Probabilistic PCA model.</p>
+<dd class="field-even"><p>a tuple (pi, mean, weights, sigma, param_idx) for the Probabilistic PCA model.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3084,13 +3085,13 @@ where q is the dimensionality of the PCA subspace.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.add_parameter_set">
-<span class="sig-name descname"><span class="pre">add_parameter_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_set_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.add_parameter_set" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_parameter_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_set_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.add_parameter_set" title="Link to this definition"></a></dt>
 <dd><p>Adds a parameter set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameter_set_name</strong> – The name of the parameter set.</p></li>
-<li><p><strong>parameter_set</strong> – The tensor of parameter set values.</p></li>
+<li><p><strong>parameter_set</strong> – The numpy array of parameter set values.</p></li>
 </ul>
 </dd>
 </dl>
@@ -3099,7 +3100,7 @@ where q is the dimensionality of the PCA subspace.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.all_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.all_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor with all parameters enabled.</p>
+<dd><p>Boolean numpy array with all parameters enabled.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3129,25 +3130,28 @@ joint. Rotations are in Euler angles.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.blend_shape_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">blend_shape_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.blend_shape_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor with just the blend shape parameters enabled.</p>
+<dd><p>Boolean numpy array with just the blend shape parameters enabled.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.face_expression_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">face_expression_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.face_expression_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor with just the face expression parameters enabled.</p>
+<dd><p>Boolean numpy array with just the face expression parameters enabled.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.find_parameters">
-<span class="sig-name descname"><span class="pre">find_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.find_parameters" title="Link to this definition"></a></dt>
-<dd><p>Return a boolean tensor with the named parameters set to true.</p>
+<span class="sig-name descname"><span class="pre">find_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.find_parameters" title="Link to this definition"></a></dt>
+<dd><p>Return a boolean numpy array with the named parameters set to true.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parameter_names</strong> – Names of the parameters to find.</p></li>
-<li><p><strong>allow_missng</strong> – If false, missing parameters will throw an exception.</p></li>
+<li><p><strong>names</strong> – Names of the parameters to find.</p></li>
+<li><p><strong>allow_missing</strong> – If false, missing parameters will throw an exception.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Boolean numpy array of shape (numModelParams,)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3172,24 +3176,27 @@ joint. Rotations are in Euler angles.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.no_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">no_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.no_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor with no parameters enabled.</p>
+<dd><p>Boolean numpy array with no parameters enabled.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.parameter_sets">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_sets</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.parameter_sets" title="Link to this definition"></a></dt>
-<dd><p>A dictionary mapping names to sets of parameters (as a boolean torch.Tensor) that are defined in the .model file.
+<dd><p>A dictionary mapping names to sets of parameters (as a boolean numpy array) that are defined in the .model file.
 This is convenient for turning off certain body features; for example the ‘fingers’ parameters
 can be used to enable/disable finger motion in the character model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.parameters_for_joints">
-<span class="sig-name descname"><span class="pre">parameters_for_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.parameters_for_joints" title="Link to this definition"></a></dt>
-<dd><p>Gets a boolean torch.Tensor indicating which parameters affect the passed-in joints.</p>
+<span class="sig-name descname"><span class="pre">parameters_for_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><span class="pre">pymomentum.geometry.ParameterTransform</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.parameters_for_joints" title="Link to this definition"></a></dt>
+<dd><p>Gets a boolean numpy array indicating which parameters affect the passed-in joints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>jointIndices</strong> – List of integers of skeleton joints.</p>
+<dd class="field-odd"><p><strong>joint_indices</strong> – List of integers of skeleton joints.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Boolean numpy array of shape (numModelParams,)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3197,19 +3204,19 @@ can be used to enable/disable finger motion in the character model.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.pose_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pose_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.pose_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor with all the parameters used to pose the body, excluding and scaling, blend shape, or physics parameters.</p>
+<dd><p>Boolean numpy array with all the parameters used to pose the body, excluding and scaling, blend shape, or physics parameters.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.rigid_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rigid_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.rigid_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor indicating which parameters are used to control the character’s rigid transform (translation and rotation).</p>
+<dd><p>Boolean numpy array indicating which parameters are used to control the character’s rigid transform (translation and rotation).</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.scaling_parameters">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scaling_parameters</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.scaling_parameters" title="Link to this definition"></a></dt>
-<dd><p>Boolean torch.Tensor indicating which parameters are used to control the character’s scale.</p>
+<dd><p>Boolean numpy array indicating which parameters are used to control the character’s scale.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -3647,67 +3654,67 @@ The character has only one parameter limit: min-max type [-0.1, 0.1] for root.</
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">find_closest_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.find_closest_points" title="Link to this definition"></a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>find_closest_points(points_source: torch.Tensor, points_target: torch.Tensor, max_dist: float = 3.4028234663852886e+38) -&gt; tuple[torch.Tensor, torch.Tensor, torch.Tensor]</p></li>
+<li><p>find_closest_points(points_source: Buffer, points_target: Buffer, max_dist: float = 3.4028234663852886e+38) -&gt; tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]</p></li>
 </ol>
-<p>For each point in the points_source tensor, find the closest point in the points_target tensor.  This version of find_closest points supports both 2- and 3-dimensional point sets.</p>
+<p>For each point in the points_source array, find the closest point in the points_target array.  This version of find_closest points supports both 2- and 3-dimensional point sets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>points_source</strong> – [nBatch x nPoints x dim] tensor of source points (dim must be 2 or 3).</p></li>
-<li><p><strong>points_target</strong> – [nBatch x nPoints x dim] tensor of target points (dim must be 2 or 3).</p></li>
+<li><p><strong>points_source</strong> – […, nSrcPoints, dim] array of source points (dim must be 2 or 3).</p></li>
+<li><p><strong>points_target</strong> – […, nTgtPoints, dim] array of target points (dim must be 2 or 3).</p></li>
 <li><p><strong>max_dist</strong> – Maximum distance to search, can be used to speed up the method by allowing the search to return early.  Defaults to FLT_MAX.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple of three tensors.  The first is [nBatch x nPoints x dim] and contains the closest point for each point in the target set.
-The second is [nBatch x nPoints] and contains the index of each closest point in the target set (or -1 if none).
-The third is [nBatch x nPoints] and is a boolean tensor indicating whether a valid closest point was found for each source point.</p>
+<dd class="field-even"><p>A tuple of three arrays.  The first is […, nSrcPoints, dim] and contains the closest point for each point in the target set.
+The second is […, nSrcPoints] and contains the index of each closest point in the target set (or -1 if none).
+The third is […, nSrcPoints] and is a boolean array indicating whether a valid closest point was found for each source point.</p>
 </dd>
 </dl>
 <ol class="arabic simple" start="2">
-<li><p>find_closest_points(points_source: torch.Tensor, normals_source: torch.Tensor, points_target: torch.Tensor, normals_target: torch.Tensor, max_dist: float = 3.4028234663852886e+38, max_normal_dot: float = 0.0) -&gt; tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]</p></li>
+<li><p>find_closest_points(points_source: Buffer, normals_source: Buffer, points_target: Buffer, normals_target: Buffer, max_dist: float = 3.4028234663852886e+38, max_normal_dot: float = 0.0) -&gt; tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]</p></li>
 </ol>
-<p>For each point in the points_source tensor, find the closest point in the points_target tensor whose normal is compatible (n_source . n_target &gt; max_normal_dot).
+<p>For each point in the points_source array, find the closest point in the points_target array whose normal is compatible (n_source . n_target &gt; max_normal_dot).
 Using the normal is a good way to avoid certain kinds of bad matches, such as matching the front of the body against depth values from the back of the body.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>points_source</strong> – [nBatch x nPoints x 3] tensor of source points.</p></li>
-<li><p><strong>normals_source</strong> – [nBatch x nPoints x 3] tensor of source normals (must be normalized).</p></li>
-<li><p><strong>points_target</strong> – [nBatch x nPoints x 3] tensor of target points.</p></li>
-<li><p><strong>normals_target</strong> – [nBatch x nPoints x 3] tensor of target normals (must be normalized).</p></li>
+<li><p><strong>points_source</strong> – […, nSrcPoints, 3] array of source points.</p></li>
+<li><p><strong>normals_source</strong> – […, nSrcPoints, 3] array of source normals (must be normalized).</p></li>
+<li><p><strong>points_target</strong> – […, nTgtPoints, 3] array of target points.</p></li>
+<li><p><strong>normals_target</strong> – […, nTgtPoints, 3] array of target normals (must be normalized).</p></li>
 <li><p><strong>max_dist</strong> – Maximum distance to search, can be used to speed up the method by allowing the search to return early.  Defaults to FLT_MAX.</p></li>
 <li><p><strong>max_normal_dot</strong> – Maximum dot product allowed between the source and target normal.  Defaults to 0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple of three tensors.  The first is [nBatch x nPoints x dim] and contains the closest point for each point in the target set.
-The second is [nBatch x nPoints] and contains the index of each closest point in the target set (or -1 if none).
-The third is [nBatch x nPoints] and is a boolean tensor indicating whether a valid closest point was found for each source point.</p>
+<dd class="field-even"><p>A tuple of three arrays.  The first is […, nSrcPoints, dim] and contains the closest point for each point in the target set.
+The second is […, nSrcPoints] and contains the index of each closest point in the target set (or -1 if none).
+The third is […, nSrcPoints] and is a boolean array indicating whether a valid closest point was found for each source point.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.find_closest_points_on_mesh">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">find_closest_points_on_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.find_closest_points_on_mesh" title="Link to this definition"></a></dt>
-<dd><p>For each point in the points_source tensor, find the closest point in the target mesh.</p>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">find_closest_points_on_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.find_closest_points_on_mesh" title="Link to this definition"></a></dt>
+<dd><p>For each point in the points_source array, find the closest point in the target mesh.</p>
 <blockquote>
 <div><dl class="field-list simple">
 <dt class="field-odd">param points_source<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[nBatch x nPoints x 3] tensor of source points.</p>
+<dd class="field-odd"><p>[…, nSrcPoints, 3] array of source points.</p>
 </dd>
 <dt class="field-even">param vertices_target<span class="colon">:</span></dt>
-<dd class="field-even"><p>[nBatch x nPoints x 3] tensor of target vertices.</p>
+<dd class="field-even"><p>[…, nVertices, 3] array of target vertices.</p>
 </dd>
 <dt class="field-odd">param faces_target<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[nBatch x nPoints x 3] tensor of target faces.</p>
+<dd class="field-odd"><p>[nFaces, 3] array of target faces.</p>
 </dd>
 <dt class="field-even">return<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple of four tensors, (valid, points, face_index, bary).  The first is [nBatch x nPoints] and specifies if the closest point result is valid.
-The second is [nBatch x nPoints x 3] and contains the actual closest point (or 0, 0, 0 if invalid).
-The third is [nBatch x nPoints] and contains the index of the closest face (or -1 if invalid).
-The fourth is [nBatch x nPoints x 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).</p>
+<dd class="field-even"><p>A tuple of four arrays, (valid, points, face_index, bary).  The first is […, nSrcPoints] and specifies if the closest point result is valid.
+The second is […, nSrcPoints, 3] and contains the actual closest point (or 0, 0, 0 if invalid).
+The third is […, nSrcPoints] and contains the index of the closest face (or -1 if invalid).
+The fourth is […, nSrcPoints, 3] and contains the barycentric coordinates of the closest point on the face (or 0, 0, 0 if invalid).</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -4061,13 +4068,13 @@ blend shapes, pose shapes, and other mesh-related data.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.reduce_to_selected_model_parameters">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_to_selected_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.reduce_to_selected_model_parameters" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_to_selected_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.reduce_to_selected_model_parameters" title="Link to this definition"></a></dt>
 <dd><p>Strips out unused parameters from the parameter transform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – Full-body character.</p></li>
-<li><p><strong>activeParameters</strong> – A boolean tensor marking which parameters should be retained.</p></li>
+<li><p><strong>activeParameters</strong> – A boolean numpy array marking which parameters should be retained.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

@@ -151,6 +151,8 @@ var annotated_dup =
       [ "SolverOptions", "structmomentum_1_1SolverOptions.html", "structmomentum_1_1SolverOptions" ],
       [ "SolverT", "classmomentum_1_1SolverT.html", "classmomentum_1_1SolverT" ],
       [ "spanstreambuf", "structmomentum_1_1spanstreambuf.html", "structmomentum_1_1spanstreambuf" ],
+      [ "SparseGaussNewtonSolverOptions", "structmomentum_1_1SparseGaussNewtonSolverOptions.html", "structmomentum_1_1SparseGaussNewtonSolverOptions" ],
+      [ "SparseGaussNewtonSolverT", "classmomentum_1_1SparseGaussNewtonSolverT.html", "classmomentum_1_1SparseGaussNewtonSolverT" ],
       [ "StateErrorFunctionT", "classmomentum_1_1StateErrorFunctionT.html", "classmomentum_1_1StateErrorFunctionT" ],
       [ "StateSequenceErrorFunctionT", "classmomentum_1_1StateSequenceErrorFunctionT.html", "classmomentum_1_1StateSequenceErrorFunctionT" ],
       [ "StateSimilarity", "structmomentum_1_1StateSimilarity.html", "structmomentum_1_1StateSimilarity" ],

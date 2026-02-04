@@ -7,5 +7,7 @@ var classmomentum_1_1ResizeableMatrix =
     [ "mat", "classmomentum_1_1ResizeableMatrix.html#ae81dda86841f5f0ded1f11a8e370f2e7", null ],
     [ "mat", "classmomentum_1_1ResizeableMatrix.html#a9dc3373d03aba7be6c68d95385de9165", null ],
     [ "resizeAndSetZero", "classmomentum_1_1ResizeableMatrix.html#a6fb0c1d54e0e78bd4c72b7dc3102123d", null ],
-    [ "rows", "classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0", null ]
+    [ "rows", "classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0", null ],
+    [ "vec", "classmomentum_1_1ResizeableMatrix.html#a55b78655e60cf3ac0365e1683a6a9aee", null ],
+    [ "vec", "classmomentum_1_1ResizeableMatrix.html#a0c05b08845cce29afb3cf458dc83a0eb", null ]
 ];

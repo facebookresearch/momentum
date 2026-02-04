@@ -500,7 +500,7 @@ $(document).ready(function(){initNavTree('fully__differentiable__position__error
 <div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">JetType</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constrWeight</a>,</div>
 <div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    <span class="keyword">const</span> Eigen::Vector3&lt;JetType&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constr_offset</a>,</div>
 <div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    <span class="keyword">const</span> Eigen::Vector3&lt;JetType&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constr_target</a>,</div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    Eigen::Ref&lt;<span class="keyword">const</span> Eigen::VectorX&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    Eigen::Ref&lt;<span class="keyword">const</span> Eigen::VectorX&lt;T&gt;&gt; vec)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">JetType</a> result;</div>
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span> </div>
 <div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>  <span class="keyword">const</span> Eigen::Vector3&lt;JetType&gt; pos =</div>
@@ -527,14 +527,14 @@ $(document).ready(function(){initNavTree('fully__differentiable__position__error
 <div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">diff</a>.dot(jointState.getTranslationDerivative(d)) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">wgt</a>,</div>
 <div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">paramIndex</a> + d,</div>
 <div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_,</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>);</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>            vec);</div>
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>      }</div>
 <div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>      <span class="keywordflow">if</span> (this-&gt;activeJointParams_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">paramIndex</a> + 3 + d]) {</div>
 <div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>        result += <a class="code hl_function" href="namespacemomentum.html#a53436820624e74aeace11c89c25ccb0d">times_parameterTransform_times_v</a>(</div>
 <div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">diff</a>.dot(<a class="code hl_function" href="namespacemomentum.html#aa773db3b8cef4329d680981e7d164d23">getRotationDerivative</a>(jointState, d, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posd</a>)) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">wgt</a>,</div>
 <div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">paramIndex</a> + 3 + d,</div>
 <div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>            this-&gt;parameterTransform_,</div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>            <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>);</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>            vec);</div>
 <div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>      }</div>
 <div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>    }</div>
 <div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>    <span class="keywordflow">if</span> (this-&gt;activeJointParams_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">paramIndex</a> + 6]) {</div>
@@ -542,7 +542,7 @@ $(document).ready(function(){initNavTree('fully__differentiable__position__error
 <div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>          <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">diff</a>.dot(<a class="code hl_function" href="namespacemomentum.html#a6b2cf2e81d6187d373c20619af80742d">getScaleDerivative</a>(jointState, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">posd</a>)) * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">wgt</a>,</div>
 <div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>          <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">paramIndex</a> + 6,</div>
 <div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>          this-&gt;parameterTransform_,</div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>          <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>);</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>          vec);</div>
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>    }</div>
 <div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span> </div>
 <div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>    <span class="comment">// go to the next joint</span></div>
@@ -662,7 +662,7 @@ $(document).ready(function(){initNavTree('fully__differentiable__position__error
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b3db77866d5b1957f38c851a81267fa1.html">diff_ik</a></li><li class="navelem"><a class="el" href="fully__differentiable__position__error__function_8cpp.html">fully_differentiable_position_error_function.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 28 2026 22:08:06 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Feb 4 2026 17:51:41 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

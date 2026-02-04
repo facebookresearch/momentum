@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pymomentum.solver2 &mdash; PyMomentum  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -153,10 +153,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.__init__"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.direct_sparse_jtj"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.direct_sparse_jtj</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.do_line_search"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.do_line_search</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.regularization"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.regularization</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.sparse_matrix_threshold"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.sparse_matrix_threshold</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.GaussNewtonSolverOptions.use_block_jtj"><code class="docutils literal notranslate"><span class="pre">GaussNewtonSolverOptions.use_block_jtj</span></code></a></li>
 </ul>
 </li>
@@ -1383,12 +1381,6 @@ joint-local space) and a global axis using element-wise differences.</p>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverOptions.direct_sparse_jtj">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">direct_sparse_jtj</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverOptions.direct_sparse_jtj" title="Link to this definition"></a></dt>
-<dd><p>Directly computes sparse JᵀJ without dense intermediate representation</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverOptions.do_line_search">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_line_search</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverOptions.do_line_search" title="Link to this definition"></a></dt>
 <dd><p>Enables backtracking line search to ensure error reduction at each step</p>
@@ -1398,12 +1390,6 @@ joint-local space) and a global axis using element-wise differences.</p>
 <dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverOptions.regularization">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regularization</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverOptions.regularization" title="Link to this definition"></a></dt>
 <dd><p>Damping parameter added to Hessian diagonal for numerical stability</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.GaussNewtonSolverOptions.sparse_matrix_threshold">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sparse_matrix_threshold</span></span><a class="headerlink" href="#pymomentum.solver2.GaussNewtonSolverOptions.sparse_matrix_threshold" title="Link to this definition"></a></dt>
-<dd><p>Parameter count threshold for switching to sparse matrix operations</p>
 </dd></dl>
 
 <dl class="py property">

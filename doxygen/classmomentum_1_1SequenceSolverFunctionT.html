@@ -121,8 +121,19 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afb27eaba2c667bc772c3846e686ee1ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d9dbf51d53638b1d8fb5f7dea174770" id="r_a1d9dbf51d53638b1d8fb5f7dea174770"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#a1d9dbf51d53638b1d8fb5f7dea174770">getGradient</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
 <tr class="separator:a1d9dbf51d53638b1d8fb5f7dea174770"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acccc5a87d82e0cff3e1834afb8f9de06" id="r_acccc5a87d82e0cff3e1834afb8f9de06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#acccc5a87d82e0cff3e1834afb8f9de06">getJacobian</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;jacobian, Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;residual, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">actualRows</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
-<tr class="separator:acccc5a87d82e0cff3e1834afb8f9de06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb30acd3561017a1c4001ee9f4fe25db" id="r_aeb30acd3561017a1c4001ee9f4fe25db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#aeb30acd3561017a1c4001ee9f4fe25db">initializeJacobianComputation</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:aeb30acd3561017a1c4001ee9f4fe25db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60676fb7b1bcd3d6b936025f26df4047" id="r_a60676fb7b1bcd3d6b936025f26df4047"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#a60676fb7b1bcd3d6b936025f26df4047">getJacobianBlockCount</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="memdesc:a60676fb7b1bcd3d6b936025f26df4047"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of Jacobian blocks available.  <br /></td></tr>
+<tr class="separator:a60676fb7b1bcd3d6b936025f26df4047"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9033b744e60368a7382982ec72104d6" id="r_ab9033b744e60368a7382982ec72104d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#ab9033b744e60368a7382982ec72104d6">getJacobianBlockSize</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockIndex</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="memdesc:ab9033b744e60368a7382982ec72104d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the maximum number of rows for a specific Jacobian block.  <br /></td></tr>
+<tr class="separator:ab9033b744e60368a7382982ec72104d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0af898ee6f9459da46134f4198202f17" id="r_a0af898ee6f9459da46134f4198202f17"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#a0af898ee6f9459da46134f4198202f17">computeJacobianBlock</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockIndex</a>, Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jacobianBlock</a>, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">residualBlock</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">actualRows</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a0af898ee6f9459da46134f4198202f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54f79b9b4f8d6ed8529f1b1f761ef59d" id="r_a54f79b9b4f8d6ed8529f1b1f761ef59d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#a54f79b9b4f8d6ed8529f1b1f761ef59d">finalizeJacobianComputation</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="memdesc:a54f79b9b4f8d6ed8529f1b1f761ef59d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional cleanup after all Jacobian blocks have been computed.  <br /></td></tr>
+<tr class="separator:a54f79b9b4f8d6ed8529f1b1f761ef59d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3e65cf4a1cf3d756c0888c40ebf8e06" id="r_af3e65cf4a1cf3d756c0888c40ebf8e06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#af3e65cf4a1cf3d756c0888c40ebf8e06">updateParameters</a> (Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
 <tr class="separator:af3e65cf4a1cf3d756c0888c40ebf8e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a949d1314dd090f79d17b53dc128c1883" id="r_a949d1314dd090f79d17b53dc128c1883"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#a949d1314dd090f79d17b53dc128c1883">setEnabledParameters</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parameterSet</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
@@ -174,9 +185,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac9ff32de405e3ce00de6cb4918fb2e2b inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_ac9ff32de405e3ce00de6cb4918fb2e2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#ac9ff32de405e3ce00de6cb4918fb2e2b">getGradient</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>)=0</td></tr>
 <tr class="memdesc:ac9ff32de405e3ce00de6cb4918fb2e2b inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the gradient of the objective function.  <br /></td></tr>
 <tr class="separator:ac9ff32de405e3ce00de6cb4918fb2e2b inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58c32bcb43f97e36469bd8439dc59bde inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a58c32bcb43f97e36469bd8439dc59bde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a58c32bcb43f97e36469bd8439dc59bde">getJacobian</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;jacobian, <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;residual, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">actualRows</a>)=0</td></tr>
-<tr class="memdesc:a58c32bcb43f97e36469bd8439dc59bde inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the Jacobian matrix for least squares problems.  <br /></td></tr>
-<tr class="separator:a58c32bcb43f97e36469bd8439dc59bde inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a023dd00a23fb656848e2f54184da3d6b inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a023dd00a23fb656848e2f54184da3d6b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a023dd00a23fb656848e2f54184da3d6b">getJacobian</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;jacobian, <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;residual, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">actualRows</a>)</td></tr>
+<tr class="memdesc:a023dd00a23fb656848e2f54184da3d6b inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the Jacobian matrix for least squares problems.  <br /></td></tr>
+<tr class="separator:a023dd00a23fb656848e2f54184da3d6b inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88a34c8bcfff71390b5a8b5ded7d69ab inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a88a34c8bcfff71390b5a8b5ded7d69ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a88a34c8bcfff71390b5a8b5ded7d69ab">getHessian</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">hessian</a>)</td></tr>
 <tr class="memdesc:a88a34c8bcfff71390b5a8b5ded7d69ab inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the Hessian matrix of second derivatives.  <br /></td></tr>
 <tr class="separator:a88a34c8bcfff71390b5a8b5ded7d69ab inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,6 +197,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6d18304514ab87c57ebfdd4612260e69 inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a6d18304514ab87c57ebfdd4612260e69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a6d18304514ab87c57ebfdd4612260e69">getJtJR_Sparse</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a9db57bde26c54afec8b7154a2e02babc">SparseMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jtj</a>, <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jtr</a>)</td></tr>
 <tr class="memdesc:a6d18304514ab87c57ebfdd4612260e69 inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes sparse JᵀJ and JᵀR for large-scale problems.  <br /></td></tr>
 <tr class="separator:a6d18304514ab87c57ebfdd4612260e69 inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84aa68fadfbcaa68d9c2603fbd45ae98 inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a84aa68fadfbcaa68d9c2603fbd45ae98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a84aa68fadfbcaa68d9c2603fbd45ae98">initializeJacobianComputation</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters)=0</td></tr>
+<tr class="memdesc:a84aa68fadfbcaa68d9c2603fbd45ae98 inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes Jacobian computation for the given parameters.  <br /></td></tr>
+<tr class="separator:a84aa68fadfbcaa68d9c2603fbd45ae98 inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5095f8478207ef1b92de69e22c583141 inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a5095f8478207ef1b92de69e22c583141"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a5095f8478207ef1b92de69e22c583141">computeJacobianBlock</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockIndex</a>, Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jacobianBlock</a>, Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">residualBlock</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">actualRows</a>)=0</td></tr>
+<tr class="memdesc:a5095f8478207ef1b92de69e22c583141 inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes a specific Jacobian block.  <br /></td></tr>
+<tr class="separator:a5095f8478207ef1b92de69e22c583141 inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62c9d9349ad3e7de202ac2d4a40cb05f inherit pub_methods_classmomentum_1_1SolverFunctionT" id="r_a62c9d9349ad3e7de202ac2d4a40cb05f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">virtual</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a62c9d9349ad3e7de202ac2d4a40cb05f">getSolverDerivatives</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;parameters, <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">hess</a>, <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">grad</a>)</td></tr>
 <tr class="memdesc:a62c9d9349ad3e7de202ac2d4a40cb05f inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes derivatives needed by the solver.  <br /></td></tr>
 <tr class="separator:a62c9d9349ad3e7de202ac2d4a40cb05f inherit pub_methods_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -216,11 +233,16 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a6dce4ef63d088f4eabd17b11d57d01be inherit pro_attribs_classmomentum_1_1SolverFunctionT" id="r_a6dce4ef63d088f4eabd17b11d57d01be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a6dce4ef63d088f4eabd17b11d57d01be">actualParameters_</a> {}</td></tr>
 <tr class="memdesc:a6dce4ef63d088f4eabd17b11d57d01be inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of parameters currently enabled for optimization.  <br /></td></tr>
 <tr class="separator:a6dce4ef63d088f4eabd17b11d57d01be inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcdb81b8ab3d755f35220ff9c297fc73 inherit pro_attribs_classmomentum_1_1SolverFunctionT" id="r_adcdb81b8ab3d755f35220ff9c297fc73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1ResizeableMatrix.html">ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#adcdb81b8ab3d755f35220ff9c297fc73">tJacobian_</a></td></tr>
+<tr class="memdesc:adcdb81b8ab3d755f35220ff9c297fc73 inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-allocated temporary storage for block-wise JtJ computation.  <br /></td></tr>
+<tr class="separator:adcdb81b8ab3d755f35220ff9c297fc73 inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70a7bf51c96f716a40b916c6eae59b52 inherit pro_attribs_classmomentum_1_1SolverFunctionT" id="r_a70a7bf51c96f716a40b916c6eae59b52"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1ResizeableMatrix.html">ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SolverFunctionT.html#a70a7bf51c96f716a40b916c6eae59b52">tResidual_</a></td></tr>
+<tr class="separator:a70a7bf51c96f716a40b916c6eae59b52 inherit pro_attribs_classmomentum_1_1SolverFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 class momentum::SequenceSolverFunctionT&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00030">30</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00031">31</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aea08748fc765f8e0318d348847487f67" name="aea08748fc765f8e0318d348847487f67"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aea08748fc765f8e0318d348847487f67">&#9670;&#160;</a></span>SequenceSolverFunctionT()</h2>
@@ -324,9 +346,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00530">530</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00658">658</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="sequence__solver__function_8h_source.html#l00027">momentum::kAllFrames</a>, and <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+<p class="reference">References <a class="el" href="sequence__solver__function_8h_source.html#l00028">momentum::kAllFrames</a>, and <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -358,9 +380,103 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00548">548</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00676">676</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="sequence__solver__function_8h_source.html#l00027">momentum::kAllFrames</a>, and <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+<p class="reference">References <a class="el" href="sequence__solver__function_8h_source.html#l00028">momentum::kAllFrames</a>, and <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+
+</div>
+</div>
+<a id="a0af898ee6f9459da46134f4198202f17" name="a0af898ee6f9459da46134f4198202f17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0af898ee6f9459da46134f4198202f17">&#9670;&#160;</a></span>computeJacobianBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">momentum::SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::computeJacobianBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>parameters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td>
+          <td class="paramname"><em>blockIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>jacobianBlock</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td>
+          <td class="paramname"><em>residualBlock</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>actualRows</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00513">513</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>, and <a class="el" href="mesh__state_8cpp_source.html#l00053">momentum::MeshStateT&lt; T &gt;::update()</a>.</p>
+
+</div>
+</div>
+<a id="a54f79b9b4f8d6ed8529f1b1f761ef59d" name="a54f79b9b4f8d6ed8529f1b1f761ef59d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54f79b9b4f8d6ed8529f1b1f761ef59d">&#9670;&#160;</a></span>finalizeJacobianComputation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">momentum::SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::finalizeJacobianComputation </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Optional cleanup after all Jacobian blocks have been computed. </p>
+<p>Called after all blocks have been processed. Default implementation does nothing. </p>
+
+<p>Reimplemented from <a class="el" href="classmomentum_1_1SolverFunctionT.html#ad3b474cefb6d83d4643c75bf4baae344">momentum::SolverFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00638">638</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -443,7 +559,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00105">105</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00112">112</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -473,7 +589,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00079">79</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00086">86</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -519,8 +635,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
-<a id="acccc5a87d82e0cff3e1834afb8f9de06" name="acccc5a87d82e0cff3e1834afb8f9de06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acccc5a87d82e0cff3e1834afb8f9de06">&#9670;&#160;</a></span>getJacobian()</h2>
+<a id="a60676fb7b1bcd3d6b936025f26df4047" name="a60676fb7b1bcd3d6b936025f26df4047"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60676fb7b1bcd3d6b936025f26df4047">&#9670;&#160;</a></span>getJacobianBlockCount()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -531,45 +647,66 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">momentum::SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobian </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">momentum::SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobianBlockCount </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>parameters</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>jacobian</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>residual</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &amp;&#160;</td>
-          <td class="paramname"><em>actualRows</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">final</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00462">462</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+<p>Returns the number of Jacobian blocks available. </p>
+<p>Each block corresponds to one error function or constraint group </p><dl class="section return"><dt>Returns</dt><dd>Number of blocks that can be computed via computeJacobianBlock </dd></dl>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00067">MT_PROFILE_EVENT</a>.</p>
+<p>Implements <a class="el" href="classmomentum_1_1SolverFunctionT.html#ab0560e343c466e6a740765f5d57a87fd">momentum::SolverFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00483">483</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab9033b744e60368a7382982ec72104d6" name="ab9033b744e60368a7382982ec72104d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9033b744e60368a7382982ec72104d6">&#9670;&#160;</a></span>getJacobianBlockSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">momentum::SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobianBlockSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td>
+          <td class="paramname"><em>blockIndex</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the maximum number of rows for a specific Jacobian block. </p>
+<p>This is the maximum size; actual rows may be fewer (returned via actualRows) </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blockIndex</td><td>Index of the block (0 to <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html#a60676fb7b1bcd3d6b936025f26df4047" title="Returns the number of Jacobian blocks available.">getJacobianBlockCount()</a>-1) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Maximum number of rows for this block </dd></dl>
+
+<p>Implements <a class="el" href="classmomentum_1_1SolverFunctionT.html#afe80061c521fec526def775c3481fd9b">momentum::SolverFunctionT&lt; T &gt;</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00488">488</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -652,7 +789,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00075">75</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00082">82</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -681,7 +818,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00101">101</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00108">108</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -711,7 +848,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00109">109</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00116">116</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -784,7 +921,39 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00052">52</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00059">59</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+
+</div>
+</div>
+<a id="aeb30acd3561017a1c4001ee9f4fe25db" name="aeb30acd3561017a1c4001ee9f4fe25db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb30acd3561017a1c4001ee9f4fe25db">&#9670;&#160;</a></span>initializeJacobianComputation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">momentum::SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::initializeJacobianComputation </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>parameters</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00464">464</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
 
 </div>
 </div>
@@ -815,7 +984,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns whether the per-frame error functions need the mesh. </p>
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00057">57</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00064">64</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -846,7 +1015,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns whether the sequence error functions need the mesh. </p>
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00062">62</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00069">69</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -982,7 +1151,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00516">516</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8cpp_source.html#l00644">644</a> of file <a class="el" href="sequence__solver__function_8cpp_source.html">sequence_solver_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
 
@@ -1011,7 +1180,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00153">153</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sequence__solver__function_8h_source.html#l00163">163</a> of file <a class="el" href="sequence__solver__function_8h_source.html">sequence_solver_function.h</a>.</p>
 
 </div>
 </div>
@@ -1026,7 +1195,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">SequenceSolverFunctionT</a></li>
-    <li class="footer">Generated on Wed Jan 28 2026 22:08:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Feb 4 2026 17:51:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

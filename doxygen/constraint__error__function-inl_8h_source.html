@@ -185,7 +185,7 @@ $(document).ready(function(){initNavTree('constraint__error__function-inl_8h_sou
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> error;</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  }</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">zeroDeriv</a> =</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      !std::any_of(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>.begin(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>.end(), [](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vec</a>) { return !vec.isZero(); });</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      !std::any_of(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>.begin(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdv</a>.end(), [](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; vec) { return !vec.isZero(); });</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">zeroDeriv</a>) {</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">return</span> error;</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  }</div>
@@ -468,7 +468,7 @@ $(document).ready(function(){initNavTree('constraint__error__function-inl_8h_sou
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="constraint__error__function-inl_8h.html">constraint_error_function-inl.h</a></li>
-    <li class="footer">Generated on Wed Jan 28 2026 22:08:06 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Feb 4 2026 17:51:41 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

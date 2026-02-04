@@ -218,6 +218,7 @@ var hierarchy =
       [ "momentum::GradientDescentSolverOptions", "structmomentum_1_1GradientDescentSolverOptions.html", null ],
       [ "momentum::MultiposeSolverOptions", "structmomentum_1_1MultiposeSolverOptions.html", null ],
       [ "momentum::SequenceSolverOptions", "structmomentum_1_1SequenceSolverOptions.html", null ],
+      [ "momentum::SparseGaussNewtonSolverOptions", "structmomentum_1_1SparseGaussNewtonSolverOptions.html", null ],
       [ "momentum::TrustRegionQROptions", "structmomentum_1_1TrustRegionQROptions.html", null ]
     ] ],
     [ "momentum::SolverT< T >", "classmomentum_1_1SolverT.html", [
@@ -226,6 +227,7 @@ var hierarchy =
       [ "momentum::GradientDescentSolverT< T >", "classmomentum_1_1GradientDescentSolverT.html", null ],
       [ "momentum::MultiposeSolverT< T >", "classmomentum_1_1MultiposeSolverT.html", null ],
       [ "momentum::SequenceSolverT< T >", "classmomentum_1_1SequenceSolverT.html", null ],
+      [ "momentum::SparseGaussNewtonSolverT< T >", "classmomentum_1_1SparseGaussNewtonSolverT.html", null ],
       [ "momentum::SubsetGaussNewtonSolverT< T >", "classmomentum_1_1SubsetGaussNewtonSolverT.html", null ],
       [ "momentum::TrustRegionQRT< T >", "classmomentum_1_1TrustRegionQRT.html", null ]
     ] ],

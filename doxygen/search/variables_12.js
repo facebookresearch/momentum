@@ -17,8 +17,7 @@ var searchData=
   ['solverfunction_5f_14',['solverFunction_',['../classmomentum_1_1SolverT.html#aee49a4cfe460ce8b148c3f52e90caef2',1,'momentum::SolverT']]],
   ['sourcejoint_15',['sourceJoint',['../structmomentum_1_1JointToJointPositionDataT.html#a42e31dff2462efec629fdc7c08193554',1,'momentum::JointToJointPositionDataT']]],
   ['sourceoffset_16',['sourceOffset',['../structmomentum_1_1JointToJointPositionDataT.html#afb5f286ccf9398aa9819563f08a32da8',1,'momentum::JointToJointPositionDataT']]],
-  ['sparsematrixthreshold_17',['sparseMatrixThreshold',['../structmomentum_1_1GaussNewtonSolverOptions.html#a141ef7753b9aa007a1b7be3ea6f4a75d',1,'momentum::GaussNewtonSolverOptions']]],
-  ['srcvertexindex_18',['srcVertexIndex',['../structmomentum_1_1PointTriangleVertexConstraintT.html#aba0935cdb83bee28cbd5b55a753a2513',1,'momentum::PointTriangleVertexConstraintT']]],
-  ['startline_19',['startLine',['../structmomentum_1_1io__detail_1_1SectionSegment.html#adb15936efeb1ab6382b1c62a60c3d454',1,'momentum::io_detail::SectionSegment']]],
-  ['storehistory_20',['storeHistory',['../classmomentum_1_1SolverT.html#aab663158e18cceccff07c2f5a4218cd2',1,'momentum::SolverT']]]
+  ['srcvertexindex_17',['srcVertexIndex',['../structmomentum_1_1PointTriangleVertexConstraintT.html#aba0935cdb83bee28cbd5b55a753a2513',1,'momentum::PointTriangleVertexConstraintT']]],
+  ['startline_18',['startLine',['../structmomentum_1_1io__detail_1_1SectionSegment.html#adb15936efeb1ab6382b1c62a60c3d454',1,'momentum::io_detail::SectionSegment']]],
+  ['storehistory_19',['storeHistory',['../classmomentum_1_1SolverT.html#aab663158e18cceccff07c2f5a4218cd2',1,'momentum::SolverT']]]
 ];
