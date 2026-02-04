@@ -42,7 +42,22 @@ Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const at::Ten
     throw std::runtime_error("Scalar type incorrect in mdspan conversion.");
   }
 
-  if (t.dim() != R) {
+  // Handle tensors with a leading batch dimension of size 1
+  at::Tensor tensor = t;
+  if (t.dim() == R + 1) {
+    if (t.size(0) != 1) {
+      throw std::runtime_error(
+          fmt::format(
+              "Tensor has a batch dimension with size {} (shape={}). "
+              "Batch rendering is not supported - batch size must be 1. "
+              "Please ensure batch_size=1 before calling renderer functions.",
+              t.size(0),
+              formatTensorSizes(t)));
+    }
+    tensor = t.squeeze(0);
+  }
+
+  if (tensor.dim() != R) {
     throw std::runtime_error(
         fmt::format(
             "Incorrect dimension in mdspan conversion; expected ndim={} but got {}",
@@ -50,16 +65,16 @@ Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const at::Ten
             formatTensorSizes(t)));
   }
 
-  if (!t.device().is_cpu()) {
+  if (!tensor.device().is_cpu()) {
     throw std::runtime_error("Expected CPU tensor in mdspan conversion");
   }
 
   std::array<std::ptrdiff_t, R> extents{};
-  for (int64_t i = 0; i < t.dim(); ++i) {
-    extents[i] = t.size(i);
+  for (int64_t i = 0; i < tensor.dim(); ++i) {
+    extents[i] = tensor.size(i);
   }
 
-  return Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>>(t.data_ptr<T>(), extents);
+  return Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>>(tensor.data_ptr<T>(), extents);
 }
 
 template <typename T, size_t R>
@@ -341,38 +356,31 @@ void rasterizeMesh(
 
   const auto lights_eye = convertLightsToEyeSpace(std::move(lights_world), camera);
 
-  // We don't expect batched to be the common case, so don't try to process
-  // the batches in parallel.
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    Eigen::VectorXf emptyTextureCoords;
-    Eigen::VectorXf emptyNormals;
-    Eigen::VectorXi emptyTextureTriangles;
-    Eigen::VectorXf emptyPerVertexDiffuseColor;
-    momentum::rasterizer::rasterizeMesh(
-        toEigenMap<float>(positions.select(0, iBatch)),
-        normals.has_value() ? toEigenMap<float>(normals->select(0, iBatch)) : emptyNormals,
-        toEigenMap<int>(triangles.select(0, iBatch)),
-        textureCoordinates.has_value() ? toEigenMap<float>(textureCoordinates->select(0, iBatch))
-                                       : emptyTextureCoords,
-        textureTriangles.has_value() ? toEigenMap<int32_t>(textureTriangles->select(0, iBatch))
-                                     : emptyTextureTriangles,
-        perVertexDiffuseColor.has_value()
-            ? toEigenMap<float>(perVertexDiffuseColor->select(0, iBatch))
-            : emptyPerVertexDiffuseColor,
-        camera,
-        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-        nearClip,
-        material.value_or(momentum::rasterizer::PhongMaterial{}),
-        make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-        make_mdspan<int, 2>(maybeSelect(vertexIndexBuffer, iBatch)),
-        make_mdspan<int, 2>(maybeSelect(triangleIndexBuffer, iBatch)),
-        lights_eye,
-        backfaceCulling,
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  Eigen::VectorXf emptyTextureCoords;
+  Eigen::VectorXf emptyNormals;
+  Eigen::VectorXi emptyTextureTriangles;
+  Eigen::VectorXf emptyPerVertexDiffuseColor;
+  momentum::rasterizer::rasterizeMesh(
+      toEigenMap<float>(positions),
+      normals.has_value() ? toEigenMap<float>(*normals) : emptyNormals,
+      toEigenMap<int>(triangles),
+      textureCoordinates.has_value() ? toEigenMap<float>(*textureCoordinates) : emptyTextureCoords,
+      textureTriangles.has_value() ? toEigenMap<int32_t>(*textureTriangles) : emptyTextureTriangles,
+      perVertexDiffuseColor.has_value() ? toEigenMap<float>(*perVertexDiffuseColor)
+                                        : emptyPerVertexDiffuseColor,
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+      nearClip,
+      material.value_or(momentum::rasterizer::PhongMaterial{}),
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      make_mdspan<float, 3>(surfaceNormalsBuffer),
+      make_mdspan<int, 2>(vertexIndexBuffer),
+      make_mdspan<int, 2>(triangleIndexBuffer),
+      lights_eye,
+      backfaceCulling,
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeWireframe(
@@ -410,23 +418,21 @@ void rasterizeWireframe(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel.
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    Eigen::VectorXf emptyTextureCoords;
-    Eigen::VectorXi emptyTextureTriangles;
-    momentum::rasterizer::rasterizeWireframe(
-        toEigenMap<float>(positions.select(0, iBatch)),
-        toEigenMap<int>(triangles.select(0, iBatch)),
-        camera,
-        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-        nearClip,
-        color.value_or(Eigen::Vector3f{1, 1, 1}),
-        thickness,
-        make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-        backfaceCulling,
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  Eigen::VectorXf emptyTextureCoords;
+  Eigen::VectorXi emptyTextureTriangles;
+  momentum::rasterizer::rasterizeWireframe(
+      toEigenMap<float>(positions),
+      toEigenMap<int>(triangles),
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+      nearClip,
+      color.value_or(Eigen::Vector3f{1, 1, 1}),
+      thickness,
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      backfaceCulling,
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeSpheres(
@@ -481,40 +487,33 @@ void rasterizeSpheres(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
-    auto centerCur = center.select(0, iBatch);
-    auto radiiCur = maybeSelect(radius, iBatch);
-    auto colorsCur = maybeSelect(color, iBatch);
 
-    for (int i = 0; i < nSpheres; ++i) {
-      const float radiusVal = radiiCur ? toEigenMap<float>(*radiiCur)(i) : 1.0f;
-      auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-      if (colorsCur) {
-        materialCur.diffuseColor = toEigenMap<float>(*colorsCur).segment<3>(3 * i);
-      }
-
-      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-      transform.translate(toEigenMap<float>(centerCur).segment<3>(3 * i));
-      transform.scale(radiusVal);
-
-      momentum::rasterizer::rasterizeMesh(
-          sphereMesh,
-          camera,
-          modelMatrix * transform.matrix(),
-          nearClip,
-          materialCur,
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-          {},
-          {},
-          lights_eye,
-          backfaceCulling,
-          depthOffset,
-          imageOffset.value_or(Eigen::Vector2f::Zero()));
+  for (int i = 0; i < nSpheres; ++i) {
+    const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
+    auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
+    if (color) {
+      materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
     }
+
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    transform.translate(toEigenMap<float>(center).segment<3>(3 * i));
+    transform.scale(radiusVal);
+
+    momentum::rasterizer::rasterizeMesh(
+        sphereMesh,
+        camera,
+        modelMatrix * transform.matrix(),
+        nearClip,
+        materialCur,
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        {},
+        {},
+        lights_eye,
+        backfaceCulling,
+        depthOffset,
+        imageOffset.value_or(Eigen::Vector2f::Zero()));
   }
 }
 
@@ -588,47 +587,39 @@ void rasterizeCylinders(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
-    auto startPosCur = start_position.select(0, iBatch);
-    auto endPosCur = end_position.select(0, iBatch);
-    auto radiusCur = maybeSelect(radius, iBatch);
-    auto colorCur = maybeSelect(color, iBatch);
 
-    for (int i = 0; i < nCylinders; ++i) {
-      const Eigen::Vector3f startPos = toEigenMap<float>(startPosCur).segment<3>(3 * i);
-      const Eigen::Vector3f endPos = toEigenMap<float>(endPosCur).segment<3>(3 * i);
-      const float radiusVal = radiusCur ? toEigenMap<float>(*radiusCur)(i) : 1.0f;
-      auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-      if (colorCur) {
-        materialCur.diffuseColor = toEigenMap<float>(*colorCur).segment<3>(3 * i);
-      }
-
-      const float length = (endPos - startPos).norm();
-      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-      transform.translate(startPos);
-      transform.rotate(
-          Eigen::Quaternionf::FromTwoVectors(
-              Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
-      transform.scale(Eigen::Vector3f(length, radiusVal, radiusVal));
-
-      momentum::rasterizer::rasterizeMesh(
-          cylinderMesh,
-          camera,
-          modelMatrix * transform.matrix(),
-          nearClip,
-          materialCur,
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-          {},
-          {},
-          lights_eye,
-          backfaceCulling,
-          depthOffset,
-          imageOffset.value_or(Eigen::Vector2f::Zero()));
+  for (int i = 0; i < nCylinders; ++i) {
+    const Eigen::Vector3f startPos = toEigenMap<float>(start_position).segment<3>(3 * i);
+    const Eigen::Vector3f endPos = toEigenMap<float>(end_position).segment<3>(3 * i);
+    const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
+    auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
+    if (color) {
+      materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
     }
+
+    const float length = (endPos - startPos).norm();
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    transform.translate(startPos);
+    transform.rotate(
+        Eigen::Quaternionf::FromTwoVectors(
+            Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
+    transform.scale(Eigen::Vector3f(length, radiusVal, radiusVal));
+
+    momentum::rasterizer::rasterizeMesh(
+        cylinderMesh,
+        camera,
+        modelMatrix * transform.matrix(),
+        nearClip,
+        materialCur,
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        {},
+        {},
+        lights_eye,
+        backfaceCulling,
+        depthOffset,
+        imageOffset.value_or(Eigen::Vector2f::Zero()));
   }
 }
 
@@ -693,43 +684,36 @@ void rasterizeCapsules(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
-    auto transformationCur = transformation.select(0, iBatch);
-    auto radiusCur = radius.select(0, iBatch);
-    auto lengthCur = length.select(0, iBatch);
 
-    for (int i = 0; i < nCapsules; ++i) {
-      const Eigen::Matrix4f transform =
-          toEigenMap<float>(transformationCur).segment<16>(16 * i).reshaped(4, 4).transpose();
+  for (int i = 0; i < nCapsules; ++i) {
+    const Eigen::Matrix4f transform =
+        toEigenMap<float>(transformation).segment<16>(16 * i).reshaped(4, 4).transpose();
 
-      const Eigen::Vector2f radiusVal = toEigenMap<float>(radiusCur).segment<2>(2 * i);
-      const float lengthVal = toEigenMap<float>(lengthCur)(i);
+    const Eigen::Vector2f radiusVal = toEigenMap<float>(radius).segment<2>(2 * i);
+    const float lengthVal = toEigenMap<float>(length)(i);
 
-      auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
+    auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
 
-      momentum::rasterizer::rasterizeMesh(
-          momentum::rasterizer::makeCapsule(
-              cylinderRadiusSubdivisions,
-              cylinderLengthSubdivisions,
-              radiusVal[0],
-              radiusVal[1],
-              lengthVal),
-          camera,
-          modelMatrix * transform.matrix(),
-          nearClip,
-          materialCur,
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-          {},
-          {},
-          lights_eye,
-          backfaceCulling,
-          depthOffset,
-          imageOffset.value_or(Eigen::Vector2f::Zero()));
-    }
+    momentum::rasterizer::rasterizeMesh(
+        momentum::rasterizer::makeCapsule(
+            cylinderRadiusSubdivisions,
+            cylinderLengthSubdivisions,
+            radiusVal[0],
+            radiusVal[1],
+            lengthVal),
+        camera,
+        modelMatrix * transform.matrix(),
+        nearClip,
+        materialCur,
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        {},
+        {},
+        lights_eye,
+        backfaceCulling,
+        depthOffset,
+        imageOffset.value_or(Eigen::Vector2f::Zero()));
   }
 }
 
@@ -768,23 +752,18 @@ void rasterizeLines(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
-    auto positionsCur = positions.select(0, iBatch);
 
-    momentum::rasterizer::rasterizeLines(
-        toEigenMap<float>(positionsCur),
-        camera,
-        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-        nearClip,
-        color.value_or(Eigen::Vector3f::Ones()),
-        width,
-        make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  momentum::rasterizer::rasterizeLines(
+      toEigenMap<float>(positions),
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+      nearClip,
+      color.value_or(Eigen::Vector3f::Ones()),
+      width,
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeCircles(
@@ -823,23 +802,20 @@ void rasterizeCircles(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto positionsCur = positions.select(0, iBatch);
 
-    momentum::rasterizer::rasterizeCircles(
-        toEigenMap<float>(positionsCur),
-        camera,
-        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-        nearClip,
-        lineColor,
-        fillColor,
-        lineThickness,
-        radius,
-        make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  momentum::rasterizer::rasterizeCircles(
+      toEigenMap<float>(positions),
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+      nearClip,
+      lineColor,
+      fillColor,
+      lineThickness,
+      radius,
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeSkeleton(
@@ -958,128 +934,123 @@ void rasterizeSkeleton(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
-    auto skelStateCur = skeletonState.select(0, iBatch);
 
-    for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
-      if (!activeJoints[jJoint]) {
-        continue;
-      }
-
-      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-      transform.translate(toEigenMap<float>(skelStateCur).segment<3>(8 * jJoint));
-      transform.scale(sphereRadius);
-
-      if (!jointCircles.empty()) {
-        momentum::rasterizer::rasterizeCircles(
-            jointCircles,
-            camera,
-            modelMatrix * transform.matrix(),
-            nearClip,
-            lineColor,
-            circleColor,
-            0.5f * lineThickness,
-            circleRadius,
-            make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-            depthOffset,
-            imageOffset.value_or(Eigen::Vector2f::Zero()));
-      }
-
-      if (!sphereMesh.vertices.empty()) {
-        momentum::rasterizer::rasterizeMesh(
-            sphereMesh,
-            camera,
-            modelMatrix * transform.matrix(),
-            nearClip,
-            jointMaterial.value_or(momentum::rasterizer::PhongMaterial{}),
-            make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-            {},
-            {},
-            lights_eye,
-            backfaceCulling,
-            depthOffset,
-            imageOffset.value_or(Eigen::Vector2f::Zero()));
-      }
+  for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
+    if (!activeJoints[jJoint]) {
+      continue;
     }
 
-    const auto skelStateMap = toEigenMap<float>(skelStateCur);
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    transform.translate(toEigenMap<float>(skeletonState).segment<3>(8 * jJoint));
+    transform.scale(sphereRadius);
 
-    for (const auto& [childJoint, parentJoint] : jointConnections) {
-      const auto parentXF = momentum::Transform(
-          skelStateMap.segment<3>(8 * parentJoint),
-          Eigen::Quaternionf(skelStateMap.segment<4>(8 * parentJoint + 3)),
-          skelStateMap(8 * parentJoint + 7));
+    if (!jointCircles.empty()) {
+      momentum::rasterizer::rasterizeCircles(
+          jointCircles,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          lineColor,
+          circleColor,
+          0.5f * lineThickness,
+          circleRadius,
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
+    }
 
-      const auto childXF = momentum::Transform(
-          skelStateMap.segment<3>(8 * childJoint),
-          Eigen::Quaternionf(skelStateMap.segment<4>(8 * childJoint + 3)),
-          skelStateMap(8 * childJoint + 7));
+    if (!sphereMesh.vertices.empty()) {
+      momentum::rasterizer::rasterizeMesh(
+          sphereMesh,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          jointMaterial.value_or(momentum::rasterizer::PhongMaterial{}),
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          make_mdspan<float, 3>(surfaceNormalsBuffer),
+          {},
+          {},
+          lights_eye,
+          backfaceCulling,
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
+    }
+  }
 
-      const Eigen::Vector3f diff = childXF.translation - parentXF.translation;
-      const float length = diff.norm();
-      if (length < 1e-6) {
-        continue;
-      }
+  const auto skelStateMap = toEigenMap<float>(skeletonState);
 
-      // x always points to the next joint, y and z axes are aligned
-      // to the local y and z axes of the parent joint where possible:
-      const Eigen::Vector3f xVec = diff.normalized();
-      Eigen::Vector3f yVec = (parentXF.toLinear() * Eigen::Vector3f::UnitY()).normalized();
-      Eigen::Vector3f zVec = (parentXF.toLinear() * Eigen::Vector3f::UnitZ()).normalized();
-      yVec = xVec.cross(zVec).normalized();
-      zVec = xVec.cross(yVec).normalized();
+  for (const auto& [childJoint, parentJoint] : jointConnections) {
+    const auto parentXF = momentum::Transform(
+        skelStateMap.segment<3>(8 * parentJoint),
+        Eigen::Quaternionf(skelStateMap.segment<4>(8 * parentJoint + 3)),
+        skelStateMap(8 * parentJoint + 7));
 
-      Eigen::Matrix3f rotMat = Eigen::Matrix3f::Identity();
-      rotMat.col(0) = xVec;
-      rotMat.col(1) = yVec;
-      rotMat.col(2) = zVec;
+    const auto childXF = momentum::Transform(
+        skelStateMap.segment<3>(8 * childJoint),
+        Eigen::Quaternionf(skelStateMap.segment<4>(8 * childJoint + 3)),
+        skelStateMap(8 * childJoint + 7));
 
-      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-      transform.translate(parentXF.translation);
-      transform.linear() = rotMat;
+    const Eigen::Vector3f diff = childXF.translation - parentXF.translation;
+    const float length = diff.norm();
+    if (length < 1e-6) {
+      continue;
+    }
 
-      if (style == SkeletonStyle::Octahedrons) {
-        transform.scale(Eigen::Vector3f::Constant(length));
-      } else {
-        transform.scale(Eigen::Vector3f(length, cylinderRadius, cylinderRadius));
-      }
+    // x always points to the next joint, y and z axes are aligned
+    // to the local y and z axes of the parent joint where possible:
+    const Eigen::Vector3f xVec = diff.normalized();
+    Eigen::Vector3f yVec = (parentXF.toLinear() * Eigen::Vector3f::UnitY()).normalized();
+    Eigen::Vector3f zVec = (parentXF.toLinear() * Eigen::Vector3f::UnitZ()).normalized();
+    yVec = xVec.cross(zVec).normalized();
+    zVec = xVec.cross(yVec).normalized();
 
-      if (!jointMesh.vertices.empty()) {
-        momentum::rasterizer::rasterizeMesh(
-            jointMesh,
-            camera,
-            modelMatrix * transform.matrix(),
-            nearClip,
-            cylinderMaterial.value_or(momentum::rasterizer::PhongMaterial{}),
-            make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-            {},
-            {},
-            lights_eye,
-            backfaceCulling,
-            depthOffset,
-            imageOffset.value_or(Eigen::Vector2f::Zero()));
-      }
+    Eigen::Matrix3f rotMat = Eigen::Matrix3f::Identity();
+    rotMat.col(0) = xVec;
+    rotMat.col(1) = yVec;
+    rotMat.col(2) = zVec;
 
-      if (!jointLines.empty()) {
-        momentum::rasterizer::rasterizeLines(
-            jointLines,
-            camera,
-            modelMatrix * transform.matrix(),
-            nearClip,
-            lineColor,
-            lineThickness,
-            make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-            depthOffset - 0.001f,
-            imageOffset.value_or(Eigen::Vector2f::Zero()));
-      }
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    transform.translate(parentXF.translation);
+    transform.linear() = rotMat;
+
+    if (style == SkeletonStyle::Octahedrons) {
+      transform.scale(Eigen::Vector3f::Constant(length));
+    } else {
+      transform.scale(Eigen::Vector3f(length, cylinderRadius, cylinderRadius));
+    }
+
+    if (!jointMesh.vertices.empty()) {
+      momentum::rasterizer::rasterizeMesh(
+          jointMesh,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          cylinderMaterial.value_or(momentum::rasterizer::PhongMaterial{}),
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          make_mdspan<float, 3>(surfaceNormalsBuffer),
+          {},
+          {},
+          lights_eye,
+          backfaceCulling,
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
+    }
+
+    if (!jointLines.empty()) {
+      momentum::rasterizer::rasterizeLines(
+          jointLines,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          lineColor,
+          lineThickness,
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          depthOffset - 0.001f,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
     }
   }
 }
@@ -1153,68 +1124,62 @@ void rasterizeCharacter(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
-    auto skelStateCur = skeletonState.select(0, iBatch);
 
-    std::vector<momentum::JointState> jointStates(character.skeleton.joints.size());
-    const auto skelStateMap = toEigenMap<float>(skelStateCur);
-    for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
-      const auto tf = momentum::Transform(
-          skelStateMap.segment<3>(8 * jJoint),
-          Eigen::Quaternionf(skelStateMap.segment<4>(8 * jJoint + 3)),
-          skelStateMap(8 * jJoint + 7));
+  std::vector<momentum::JointState> jointStates(character.skeleton.joints.size());
+  const auto skelStateMap = toEigenMap<float>(skeletonState);
+  for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
+    const auto tf = momentum::Transform(
+        skelStateMap.segment<3>(8 * jJoint),
+        Eigen::Quaternionf(skelStateMap.segment<4>(8 * jJoint + 3)),
+        skelStateMap(8 * jJoint + 7));
 
-      auto& js = jointStates.at(jJoint);
-      js.transform = tf;
-    }
+    auto& js = jointStates.at(jJoint);
+    js.transform = tf;
+  }
 
-    momentum::Mesh posedMesh = *character.mesh;
-    momentum::applySSD(
-        character.inverseBindPose, *character.skinWeights, *character.mesh, jointStates, posedMesh);
+  momentum::Mesh posedMesh = *character.mesh;
+  momentum::applySSD(
+      character.inverseBindPose, *character.skinWeights, *character.mesh, jointStates, posedMesh);
 
-    // Don't trust the skinned normals:
-    posedMesh.updateNormals();
+  // Don't trust the skinned normals:
+  posedMesh.updateNormals();
 
-    momentum::rasterizer::rasterizeMesh(
+  momentum::rasterizer::rasterizeMesh(
+      posedMesh.vertices,
+      posedMesh.normals,
+      posedMesh.faces,
+      posedMesh.texcoords,
+      posedMesh.texcoord_faces,
+      perVertexDiffuseColor.has_value() ? toEigenMap<float>(*perVertexDiffuseColor)
+                                        : Eigen::VectorXf{},
+      camera,
+      modelMatrix,
+      nearClip,
+      material.value_or(momentum::rasterizer::PhongMaterial{}),
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      make_mdspan<float, 3>(surfaceNormalsBuffer),
+      make_mdspan<int, 2>(vertexIndexBuffer),
+      make_mdspan<int, 2>(triangleIndexBuffer),
+      lights_eye,
+      backfaceCulling,
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
+
+  if (wireframeColor.has_value()) {
+    momentum::rasterizer::rasterizeWireframe(
         posedMesh.vertices,
-        posedMesh.normals,
         posedMesh.faces,
-        posedMesh.texcoords,
-        posedMesh.texcoord_faces,
-        perVertexDiffuseColor.has_value()
-            ? toEigenMap<float>(perVertexDiffuseColor->select(0, iBatch))
-            : Eigen::VectorXf{},
         camera,
         modelMatrix,
         nearClip,
-        material.value_or(momentum::rasterizer::PhongMaterial{}),
-        make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-        make_mdspan<int, 2>(maybeSelect(vertexIndexBuffer, iBatch)),
-        make_mdspan<int, 2>(maybeSelect(triangleIndexBuffer, iBatch)),
-        lights_eye,
+        *wireframeColor,
+        1.0f,
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
         backfaceCulling,
-        depthOffset,
+        depthOffset - 0.001,
         imageOffset.value_or(Eigen::Vector2f::Zero()));
-
-    if (wireframeColor.has_value()) {
-      momentum::rasterizer::rasterizeWireframe(
-          posedMesh.vertices,
-          posedMesh.faces,
-          camera,
-          modelMatrix,
-          nearClip,
-          *wireframeColor,
-          1.0f,
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-          backfaceCulling,
-          depthOffset - 0.001,
-          imageOffset.value_or(Eigen::Vector2f::Zero()));
-    }
   }
 }
 
@@ -1271,24 +1236,22 @@ void rasterizeCheckerboard(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    for (int k = 0; k < 2; ++k) {
-      momentum::rasterizer::rasterizeMesh(
-          meshes[k],
-          camera,
-          modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-          nearClip,
-          materials[k],
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-          make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-          {},
-          {},
-          lights_eye,
-          backfaceCulling,
-          depthOffset,
-          imageOffset.value_or(Eigen::Vector2f::Zero()));
-    }
+  for (int k = 0; k < 2; ++k) {
+    momentum::rasterizer::rasterizeMesh(
+        meshes[k],
+        camera,
+        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+        nearClip,
+        materials[k],
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        {},
+        {},
+        lights_eye,
+        backfaceCulling,
+        depthOffset,
+        imageOffset.value_or(Eigen::Vector2f::Zero()));
   }
 }
 
@@ -1362,23 +1325,21 @@ void alphaMatte(
       at::kFloat,
       true,
       false);
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    const auto tgtRgbImage_info = tgtRgbImage.request();
-    if (tgtRgbImage_info.format == py::format_descriptor<float>::format()) {
-      momentum::rasterizer::alphaMatte(
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(rgbBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(tgtRgbImage_info),
-          alpha);
-    } else if (tgtRgbImage_info.format == py::format_descriptor<uint8_t>::format()) {
-      momentum::rasterizer::alphaMatte(
-          make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-          make_mdspan<float, 3>(rgbBuffer.select(0, iBatch)),
-          make_mdspan<uint8_t, 3>(tgtRgbImage_info),
-          alpha);
-    } else {
-      throw std::runtime_error("tgt_rgb_image must be a uint8 or float32 RGB array.");
-    }
+  const auto tgtRgbImage_info = tgtRgbImage.request();
+  if (tgtRgbImage_info.format == py::format_descriptor<float>::format()) {
+    momentum::rasterizer::alphaMatte(
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<float, 3>(tgtRgbImage_info),
+        alpha);
+  } else if (tgtRgbImage_info.format == py::format_descriptor<uint8_t>::format()) {
+    momentum::rasterizer::alphaMatte(
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<uint8_t, 3>(tgtRgbImage_info),
+        alpha);
+  } else {
+    throw std::runtime_error("tgt_rgb_image must be a uint8 or float32 RGB array.");
   }
 }
 
@@ -1424,19 +1385,17 @@ void rasterizeCameraFrustum(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (int64_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    momentum::rasterizer::rasterizeLines(
-        frustumLinesEye,
-        camera,
-        modelMatrix.value_or(Eigen::Matrix4f::Identity()) * frustumCamera.worldFromEye().matrix(),
-        nearClip,
-        color.value_or(Eigen::Vector3f::Ones()),
-        lineWidth,
-        make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-        make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  momentum::rasterizer::rasterizeLines(
+      frustumLinesEye,
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()) * frustumCamera.worldFromEye().matrix(),
+      nearClip,
+      color.value_or(Eigen::Vector3f::Ones()),
+      lineWidth,
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeLines2D(
@@ -1485,20 +1444,15 @@ void rasterizeLines2D(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto rgbBufferCur = rgbBuffer.select(0, iBatch);
-    auto positionsCur = positions.select(0, iBatch);
-    auto zBufferCur =
-        zBuffer.has_value() ? maybeSelect(zBuffer, iBatch) : std::optional<at::Tensor>{};
+  zBuffer.has_value() ? zBuffer : std::optional<at::Tensor>{};
 
-    momentum::rasterizer::rasterizeLines2D(
-        toEigenMap<float>(positionsCur),
-        color.value_or(Eigen::Vector3f::Ones()),
-        thickness,
-        make_mdspan<float, 3>(rgbBufferCur),
-        make_mdspan<float, 2>(zBufferCur),
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  momentum::rasterizer::rasterizeLines2D(
+      toEigenMap<float>(positions),
+      color.value_or(Eigen::Vector3f::Ones()),
+      thickness,
+      make_mdspan<float, 3>(rgbBuffer),
+      make_mdspan<float, 2>(zBuffer),
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeText(
@@ -1553,34 +1507,29 @@ void rasterizeText(
             "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
   }
 
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto positionsCur = positions.select(0, iBatch);
-    auto rgbBufferCur =
-        rgbBuffer.has_value() ? maybeSelect(rgbBuffer, iBatch) : std::optional<at::Tensor>{};
+  rgbBuffer.has_value() ? rgbBuffer : std::optional<at::Tensor>{};
 
-    const Eigen::Ref<const Eigen::VectorXf> positionsFlat = toEigenMap<float>(positionsCur);
-    std::vector<Eigen::Vector3f> positionsVec;
-    positionsVec.reserve(numTexts);
-    for (int i = 0; i < numTexts; ++i) {
-      positionsVec.emplace_back(positionsFlat.segment<3>(3 * i));
-    }
-
-    momentum::rasterizer::rasterizeText(
-        positionsVec,
-        texts,
-        camera,
-        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-        nearClip,
-        color.value_or(Eigen::Vector3f::Ones()),
-        textScale,
-        make_mdspan<float, 2>(zBufferCur),
-        make_mdspan<float, 3>(rgbBufferCur),
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()),
-        horizontalAlignment,
-        verticalAlignment);
+  const Eigen::Ref<const Eigen::VectorXf> positionsFlat = toEigenMap<float>(positions);
+  std::vector<Eigen::Vector3f> positionsVec;
+  positionsVec.reserve(numTexts);
+  for (int i = 0; i < numTexts; ++i) {
+    positionsVec.emplace_back(positionsFlat.segment<3>(3 * i));
   }
+
+  momentum::rasterizer::rasterizeText(
+      positionsVec,
+      texts,
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+      nearClip,
+      color.value_or(Eigen::Vector3f::Ones()),
+      textScale,
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()),
+      horizontalAlignment,
+      verticalAlignment);
 }
 
 void rasterizeText2D(
@@ -1631,30 +1580,25 @@ void rasterizeText2D(
             "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
   }
 
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto rgbBufferCur = rgbBuffer.select(0, iBatch);
-    auto positionsCur = positions.select(0, iBatch);
-    auto zBufferCur =
-        zBuffer.has_value() ? maybeSelect(zBuffer, iBatch) : std::optional<at::Tensor>{};
+  zBuffer.has_value() ? zBuffer : std::optional<at::Tensor>{};
 
-    const Eigen::Ref<const Eigen::MatrixXf> positionsMat = toEigenMap<float>(positionsCur);
-    std::vector<Eigen::Vector2f> positionsVec;
-    positionsVec.reserve(positionsMat.rows());
-    for (int i = 0; i < positionsMat.rows(); ++i) {
-      positionsVec.emplace_back(positionsMat.row(i));
-    }
-
-    momentum::rasterizer::rasterizeText2D(
-        positionsVec,
-        texts,
-        color.value_or(Eigen::Vector3f::Ones()),
-        textScale,
-        make_mdspan<float, 3>(rgbBufferCur),
-        make_mdspan<float, 2>(zBufferCur),
-        imageOffset.value_or(Eigen::Vector2f::Zero()),
-        horizontalAlignment,
-        verticalAlignment);
+  const Eigen::Ref<const Eigen::MatrixXf> positionsMat = toEigenMap<float>(positions);
+  std::vector<Eigen::Vector2f> positionsVec;
+  positionsVec.reserve(positionsMat.rows());
+  for (int i = 0; i < positionsMat.rows(); ++i) {
+    positionsVec.emplace_back(positionsMat.row(i));
   }
+
+  momentum::rasterizer::rasterizeText2D(
+      positionsVec,
+      texts,
+      color.value_or(Eigen::Vector3f::Ones()),
+      textScale,
+      make_mdspan<float, 3>(rgbBuffer),
+      make_mdspan<float, 2>(zBuffer),
+      imageOffset.value_or(Eigen::Vector2f::Zero()),
+      horizontalAlignment,
+      verticalAlignment);
 }
 
 void rasterizeCircles2D(
@@ -1704,22 +1648,17 @@ void rasterizeCircles2D(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (size_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto rgbBufferCur = rgbBuffer.select(0, iBatch);
-    auto positionsCur = positions.select(0, iBatch);
-    auto zBufferCur =
-        zBuffer.has_value() ? maybeSelect(zBuffer, iBatch) : std::optional<at::Tensor>{};
+  zBuffer.has_value() ? zBuffer : std::optional<at::Tensor>{};
 
-    momentum::rasterizer::rasterizeCircles2D(
-        toEigenMap<float>(positionsCur),
-        lineColor,
-        fillColor,
-        lineThickness,
-        radius,
-        make_mdspan<float, 3>(rgbBufferCur),
-        make_mdspan<float, 2>(zBufferCur),
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  momentum::rasterizer::rasterizeCircles2D(
+      toEigenMap<float>(positions),
+      lineColor,
+      fillColor,
+      lineThickness,
+      radius,
+      make_mdspan<float, 3>(rgbBuffer),
+      make_mdspan<float, 2>(zBuffer),
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
 void rasterizeTransforms(
@@ -1780,46 +1719,41 @@ void rasterizeTransforms(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
-  for (int64_t iBatch = 0; iBatch < checker.getBatchSize(); ++iBatch) {
-    auto zBufferCur = zBuffer.select(0, iBatch);
-    auto rgbBufferCur = maybeSelect(rgbBuffer, iBatch);
 
-    auto transformsCur = transforms.select(0, iBatch);
-    auto a = transformsCur.accessor<float, 3>();
+  auto a = transforms.accessor<float, 3>();
 
-    for (int i = 0; i < nTransforms; ++i) {
-      const Eigen::Vector3f origin(a[i][0][3], a[i][1][3], a[i][2][3]);
-      for (int j = 0; j < 3; ++j) {
-        const Eigen::Vector3f col_j(a[i][0][j], a[i][1][j], a[i][2][j]);
-        const float length = col_j.norm();
-        if (length == 0) {
-          continue;
-        }
-
-        const auto& materialCur = materials[j];
-
-        Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-        transform.translate(origin);
-        transform.rotate(
-            Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), col_j.normalized()));
-        transform.scale(scale * Eigen::Vector3f(length, length, length));
-
-        momentum::rasterizer::rasterizeMesh(
-            arrowMesh,
-            camera,
-            modelMatrix * transform.matrix(),
-            nearClip,
-            materialCur,
-            make_mdspan<float, 2>(zBuffer.select(0, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(rgbBuffer, iBatch)),
-            make_mdspan<float, 3>(maybeSelect(surfaceNormalsBuffer, iBatch)),
-            {},
-            {},
-            lights_eye,
-            backfaceCulling,
-            depthOffset,
-            imageOffset.value_or(Eigen::Vector2f::Zero()));
+  for (int i = 0; i < nTransforms; ++i) {
+    const Eigen::Vector3f origin(a[i][0][3], a[i][1][3], a[i][2][3]);
+    for (int j = 0; j < 3; ++j) {
+      const Eigen::Vector3f col_j(a[i][0][j], a[i][1][j], a[i][2][j]);
+      const float length = col_j.norm();
+      if (length == 0) {
+        continue;
       }
+
+      const auto& materialCur = materials[j];
+
+      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+      transform.translate(origin);
+      transform.rotate(
+          Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), col_j.normalized()));
+      transform.scale(scale * Eigen::Vector3f(length, length, length));
+
+      momentum::rasterizer::rasterizeMesh(
+          arrowMesh,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          materialCur,
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          make_mdspan<float, 3>(surfaceNormalsBuffer),
+          {},
+          {},
+          lights_eye,
+          backfaceCulling,
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
     }
   }
 }
