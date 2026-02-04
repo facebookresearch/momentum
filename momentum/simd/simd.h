@@ -12,6 +12,7 @@
 
 #include <drjit/array.h>
 #include <drjit/array_router.h>
+#include <drjit/matrix.h>
 #include <drjit/packet.h>
 #include <drjit/util.h>
 #include <Eigen/Core>
@@ -55,6 +56,37 @@ using Vector3fP = Vector3P<float>;
 
 using Vector2dP = Vector2P<double>;
 using Vector3dP = Vector3P<double>;
+
+/// Additional packet types for byte and unsigned integer data.
+using ByteP = Packet<uint8_t>;
+using UintP = Packet<uint32_t>;
+
+/// Integer and byte vector types.
+using Vector2iP = drjit::Array<IntP, 2>;
+using Vector3iP = drjit::Array<IntP, 3>;
+using Vector3bP = drjit::Array<ByteP, 3>;
+
+/// 4D vector types.
+template <typename T>
+using Vector4P = VectorP<T, 4>;
+
+using Vector4fP = Vector4P<float>;
+using Vector4dP = Vector4P<double>;
+
+/// Matrix types for SIMD packets.
+template <typename T, int Dim>
+using MatrixP = drjit::Matrix<Packet<T>, Dim>;
+
+template <typename T>
+using Matrix3P = MatrixP<T, 3>;
+
+template <typename T>
+using Matrix4P = MatrixP<T, 4>;
+
+using Matrix3fP = Matrix3P<float>;
+using Matrix3dP = Matrix3P<double>;
+using Matrix4fP = Matrix4P<float>;
+using Matrix4dP = Matrix4P<double>;
 
 /// Computes the offset required for the matrix data to meet the alignment requirement.
 template <size_t Alignment>

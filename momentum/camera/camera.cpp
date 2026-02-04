@@ -76,17 +76,17 @@ OpenCVIntrinsicsModelT<T>::OpenCVIntrinsicsModelT(
       distortionParams_(params) {}
 
 template <typename T>
-std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> PinholeIntrinsicsModelT<T>::project(
-    const Vector3xP<T>& point) const {
+std::pair<Vector3P<T>, typename Packet<T>::MaskType> PinholeIntrinsicsModelT<T>::project(
+    const Vector3P<T>& point) const {
   // Normalize the point by dividing by z
-  PacketType_t<T> x = point.x() / point.z();
-  PacketType_t<T> y = point.y() / point.z();
+  Packet<T> x = point.x() / point.z();
+  Packet<T> y = point.y() / point.z();
 
   // Apply camera matrix to get pixel coordinates
-  PacketType_t<T> u = fx_ * x + this->cx();
-  PacketType_t<T> v = fy_ * y + this->cy();
+  Packet<T> u = fx_ * x + this->cx();
+  Packet<T> v = fy_ * y + this->cy();
 
-  return {Vector3xP<T>(u, v, point.z()), point.z() > T(0)};
+  return {Vector3P<T>(u, v, point.z()), point.z() > T(0)};
 }
 
 template <typename T>
@@ -230,31 +230,31 @@ std::shared_ptr<const IntrinsicsModelT<T>> IntrinsicsModelT<T>::upsample(T facto
 
 // OpenCVIntrinsicsModelT implementation
 template <typename T>
-std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> OpenCVIntrinsicsModelT<T>::project(
-    const Vector3xP<T>& point) const {
+std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVIntrinsicsModelT<T>::project(
+    const Vector3P<T>& point) const {
   // Normalize the point by dividing by z
-  PacketType_t<T> invZ = T(1) / point.z();
-  PacketType_t<T> xp = point.x() * invZ;
-  PacketType_t<T> yp = point.y() * invZ;
+  Packet<T> invZ = T(1) / point.z();
+  Packet<T> xp = point.x() * invZ;
+  Packet<T> yp = point.y() * invZ;
 
-  PacketType_t<T> rsqr = drjit::square(xp) + drjit::square(yp);
+  Packet<T> rsqr = drjit::square(xp) + drjit::square(yp);
 
   const auto& dp = distortionParams_;
 
-  PacketType_t<T> radialDistortion = T(1) +
+  Packet<T> radialDistortion = T(1) +
       (rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3))) /
           (T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6)));
 
-  PacketType_t<T> xpp =
+  Packet<T> xpp =
       xp * radialDistortion + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * drjit::square(xp));
-  PacketType_t<T> ypp =
+  Packet<T> ypp =
       yp * radialDistortion + dp.p1 * (rsqr + T(2) * drjit::square(yp)) + T(2) * dp.p2 * xp * yp;
 
   // Apply camera matrix to get pixel coordinates
-  PacketType_t<T> u = fx_ * xpp + cx_;
-  PacketType_t<T> v = fy_ * ypp + cy_;
+  Packet<T> u = fx_ * xpp + cx_;
+  Packet<T> v = fy_ * ypp + cy_;
 
-  return {Vector3xP<T>(u, v, point.z()), point.z() > T(0)};
+  return {Vector3P<T>(u, v, point.z()), point.z() > T(0)};
 }
 
 template <typename T>
@@ -608,13 +608,13 @@ CameraT<T>::framePoints(const std::vector<Eigen::Vector3<T>>& points, T minZ, T 
 }
 
 template <typename T>
-Vector3xP<T> CameraT<T>::transformWorldToEye(const Vector3xP<T>& worldPoints) const {
+Vector3P<T> CameraT<T>::transformWorldToEye(const Vector3P<T>& worldPoints) const {
   // Transform all world points to camera space using SIMD operations
   const auto& R = eyeFromWorld_.linear();
   const auto& t = eyeFromWorld_.translation();
 
   // Apply rotation matrix: R * worldPoints
-  Vector3xP<T> eyePoints;
+  Vector3P<T> eyePoints;
   eyePoints.x() = R(0, 0) * worldPoints.x() + R(0, 1) * worldPoints.y() + R(0, 2) * worldPoints.z();
   eyePoints.y() = R(1, 0) * worldPoints.x() + R(1, 1) * worldPoints.y() + R(1, 2) * worldPoints.z();
   eyePoints.z() = R(2, 0) * worldPoints.x() + R(2, 1) * worldPoints.y() + R(2, 2) * worldPoints.z();
@@ -634,10 +634,10 @@ Eigen::Vector3<T> CameraT<T>::transformWorldToEye(const Eigen::Vector3<T>& world
 }
 
 template <typename T>
-std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> CameraT<T>::project(
-    const Vector3xP<T>& worldPoints) const {
+std::pair<Vector3P<T>, typename Packet<T>::MaskType> CameraT<T>::project(
+    const Vector3P<T>& worldPoints) const {
   // Transform all world points to camera space using SIMD operations
-  const Vector3xP<T> eyePoints = transformWorldToEye(worldPoints);
+  const Vector3P<T> eyePoints = transformWorldToEye(worldPoints);
 
   // Use the intrinsics model's SIMD project method directly
   return intrinsicsModel_->project(eyePoints);
@@ -679,12 +679,12 @@ std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 2, 3>, bool> CameraT<T>::projectJ
 }
 
 template <typename T>
-std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType>
-CameraT<T>::unproject(const Vector3xP<T>& imagePoints, int maxIterations, T tolerance) const {
-  using PacketT = PacketType_t<T>;
+std::pair<Vector3P<T>, typename Packet<T>::MaskType>
+CameraT<T>::unproject(const Vector3P<T>& imagePoints, int maxIterations, T tolerance) const {
+  using PacketT = Packet<T>;
 
   // Process each point in the packet individually using the intrinsics model's unproject method
-  Vector3xP<T> worldPoints;
+  Vector3P<T> worldPoints;
   auto validMask = drjit::full<typename PacketT::MaskType>(true);
 
   for (size_t i = 0; i < PacketT::Size; ++i) {

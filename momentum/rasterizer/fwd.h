@@ -51,25 +51,18 @@ using Matrix4d = drjit::Matrix<double, 4>;
 // Re-export SIMD packet types from momentum namespace
 using momentum::Matrix3dP;
 using momentum::Matrix3fP;
-using momentum::Matrix3xP;
-using momentum::Matrix4xP;
 
 using momentum::Vector2dP;
 using momentum::Vector2fP;
 using momentum::Vector2iP;
-using momentum::Vector2xP;
 
 using momentum::Vector3bP;
 using momentum::Vector3dP;
 using momentum::Vector3fP;
 using momentum::Vector3iP;
-using momentum::Vector3xP;
 
 using momentum::Vector4dP;
 using momentum::Vector4fP;
-using momentum::Vector4xP;
-
-using momentum::PacketType_t;
 
 // Additional type alias for backward compatibility
 using Uint8P = momentum::Packet<uint8_t>;

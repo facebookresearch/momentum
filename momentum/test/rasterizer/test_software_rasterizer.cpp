@@ -199,7 +199,7 @@ TEST(SoftwareRasterizer, OneQuad) {
   const int height = 10;
 
   // Create OpenCV intrinsics with no distortion
-  OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
+  momentum::OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -241,7 +241,7 @@ TEST(SoftwareRasterizer, EyeZIsZero) {
   const int height = 10;
 
   // Create OpenCV intrinsics with no distortion
-  OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
+  momentum::OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -328,7 +328,7 @@ TEST(SoftwareRasterizer, Splats) {
   const int height = 40;
 
   // Create OpenCV intrinsics with no distortion
-  OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
+  momentum::OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -411,7 +411,7 @@ TEST(SoftwareRasterizer, AlphaMatte) {
     const int height = 40;
 
     // Create OpenCV intrinsics with no distortion
-    OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
+    momentum::OpenCVDistortionParametersT<float> distortionParams; // All zeros by default
     auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
         width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -530,7 +530,7 @@ TEST(SoftwareRasterizer, LinesWithPaddedBuffer) {
   const int width = 23; // Deliberately not a multiple of kSimdPacketSize (8)
   const int height = 30;
 
-  OpenCVDistortionParametersT<float> distortionParams;
+  momentum::OpenCVDistortionParametersT<float> distortionParams;
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 

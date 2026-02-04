@@ -18,7 +18,7 @@ TEST(TextRasterizer, BasicText3D) {
   const int width = 200;
   const int height = 100;
 
-  OpenCVDistortionParametersT<float> distortionParams;
+  momentum::OpenCVDistortionParametersT<float> distortionParams;
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -61,7 +61,7 @@ TEST(TextRasterizer, BasicText2D) {
   const int width = 200;
   const int height = 100;
 
-  OpenCVDistortionParametersT<float> distortionParams;
+  momentum::OpenCVDistortionParametersT<float> distortionParams;
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -96,7 +96,7 @@ TEST(TextRasterizer, TextScaling) {
   const int width = 400;
   const int height = 200;
 
-  OpenCVDistortionParametersT<float> distortionParams;
+  momentum::OpenCVDistortionParametersT<float> distortionParams;
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 
@@ -139,7 +139,7 @@ TEST(TextRasterizer, MultipleTexts) {
   const int width = 400;
   const int height = 200;
 
-  OpenCVDistortionParametersT<float> distortionParams;
+  momentum::OpenCVDistortionParametersT<float> distortionParams;
   auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
       width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
 

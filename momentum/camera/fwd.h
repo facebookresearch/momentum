@@ -9,12 +9,9 @@
 
 #include <momentum/simd/simd.h>
 
-#include <drjit/fwd.h>
-#include <drjit/matrix.h>
-
 namespace momentum {
 
-// Forward declarations
+// Forward declarations for camera types
 template <typename T>
 class CameraT;
 
@@ -40,66 +37,5 @@ using OpenCVIntrinsicsModel = OpenCVIntrinsicsModelT<float>;
 using OpenCVIntrinsicsModeld = OpenCVIntrinsicsModelT<double>;
 using OpenCVDistortionParameters = OpenCVDistortionParametersT<float>;
 using OpenCVDistortionParametersd = OpenCVDistortionParametersT<double>;
-
-// Additional SIMD types used by camera that are not in simd/simd.h
-using ByteP = Packet<uint8_t>;
-using UintP = Packet<uint32_t>;
-
-using Vector2iP = drjit::Array<IntP, 2>;
-using Vector3bP = drjit::Array<ByteP, 3>;
-using Vector3iP = drjit::Array<IntP, 3>;
-using Vector4fP = drjit::Array<FloatP, 4>;
-using Vector4dP = drjit::Array<DoubleP, 4>;
-using Matrix3fP = drjit::Matrix<FloatP, 3>;
-using Matrix3dP = drjit::Matrix<DoubleP, 3>;
-
-/// Template metafunction to map scalar types to their packet equivalents.
-template <typename T>
-struct PacketType;
-
-template <>
-struct PacketType<float> {
-  using type = FloatP;
-};
-
-template <>
-struct PacketType<double> {
-  using type = DoubleP;
-};
-
-template <>
-struct PacketType<int32_t> {
-  using type = IntP;
-};
-
-template <>
-struct PacketType<uint32_t> {
-  using type = UintP;
-};
-
-template <>
-struct PacketType<uint8_t> {
-  using type = ByteP;
-};
-
-template <typename T>
-using PacketType_t = typename PacketType<T>::type;
-
-/// Templatized SIMD vector types.
-template <typename T>
-using Vector2xP = drjit::Array<PacketType_t<T>, 2>;
-
-template <typename T>
-using Vector3xP = drjit::Array<PacketType_t<T>, 3>;
-
-template <typename T>
-using Vector4xP = drjit::Array<PacketType_t<T>, 4>;
-
-/// Templatized SIMD matrix types.
-template <typename T>
-using Matrix3xP = drjit::Matrix<PacketType_t<T>, 3>;
-
-template <typename T>
-using Matrix4xP = drjit::Matrix<PacketType_t<T>, 4>;
 
 } // namespace momentum
