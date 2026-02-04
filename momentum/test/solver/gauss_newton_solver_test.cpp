@@ -91,11 +91,12 @@ class MockSolverFunction : public SolverFunctionT<float> {
   }
 
   void setEnabledParameters(const ParameterSet& parameterSet) override {
-    // Count the number of enabled parameters
+    // Find the highest enabled parameter index
+    // actualParameters_ represents "up to this index" (highest index + 1)
     actualParameters_ = 0;
     for (size_t i = 0; i < numParameters_; ++i) {
       if (parameterSet.test(i)) {
-        actualParameters_++;
+        actualParameters_ = i + 1;
       }
     }
   }
@@ -655,6 +656,146 @@ TEST(GaussNewtonSolverTest, EnabledParametersSubset) {
   for (size_t i = 5; i < 10; ++i) {
     EXPECT_EQ(parameters(i), originalParameters(i));
   }
+}
+
+// Test that useBlockJtJ produces the same result as blockwise Jacobian
+TEST(GaussNewtonSolverTest, UseBlockJtJEquivalence) {
+  // Create a mock solver function
+  MockSolverFunction mockFunction(10);
+
+  // Solve without useBlockJtJ
+  GaussNewtonSolverOptions optionsWithoutJtJ;
+  optionsWithoutJtJ.maxIterations = 10;
+  optionsWithoutJtJ.minIterations = 1;
+  optionsWithoutJtJ.threshold = 1e-6;
+  optionsWithoutJtJ.verbose = false;
+  optionsWithoutJtJ.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solverWithoutJtJ(optionsWithoutJtJ, &mockFunction);
+  VectorX<float> paramsWithoutJtJ = VectorX<float>::Ones(10);
+  double errorWithoutJtJ = solverWithoutJtJ.solve(paramsWithoutJtJ);
+
+  // Solve with useBlockJtJ
+  GaussNewtonSolverOptions optionsWithJtJ;
+  optionsWithJtJ.maxIterations = 10;
+  optionsWithJtJ.minIterations = 1;
+  optionsWithJtJ.threshold = 1e-6;
+  optionsWithJtJ.verbose = false;
+  optionsWithJtJ.useBlockJtJ = true;
+
+  GaussNewtonSolverT<float> solverWithJtJ(optionsWithJtJ, &mockFunction);
+  VectorX<float> paramsWithJtJ = VectorX<float>::Ones(10);
+  double errorWithJtJ = solverWithJtJ.solve(paramsWithJtJ);
+
+  // Both should converge to the same solution
+  EXPECT_NEAR(errorWithoutJtJ, errorWithJtJ, 1e-6);
+  EXPECT_LE((paramsWithoutJtJ - paramsWithJtJ).norm(), 1e-4);
+}
+
+// Test that useBlockJtJ works correctly with enabled parameters subset
+TEST(GaussNewtonSolverTest, UseBlockJtJWithSubsetEquivalence) {
+  // Create a mock solver function
+  MockSolverFunction mockFunction(10);
+
+  // Enable only the first half of the parameters
+  ParameterSet enabledParams;
+  for (size_t i = 0; i < 5; ++i) {
+    enabledParams.set(i);
+  }
+
+  // Solve without useBlockJtJ
+  GaussNewtonSolverOptions optionsWithoutJtJ;
+  optionsWithoutJtJ.maxIterations = 10;
+  optionsWithoutJtJ.minIterations = 1;
+  optionsWithoutJtJ.threshold = 1e-6;
+  optionsWithoutJtJ.verbose = false;
+  optionsWithoutJtJ.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solverWithoutJtJ(optionsWithoutJtJ, &mockFunction);
+  solverWithoutJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithoutJtJ = VectorX<float>::Ones(10);
+  double errorWithoutJtJ = solverWithoutJtJ.solve(paramsWithoutJtJ);
+
+  // Solve with useBlockJtJ
+  GaussNewtonSolverOptions optionsWithJtJ;
+  optionsWithJtJ.maxIterations = 10;
+  optionsWithJtJ.minIterations = 1;
+  optionsWithJtJ.threshold = 1e-6;
+  optionsWithJtJ.verbose = false;
+  optionsWithJtJ.useBlockJtJ = true;
+
+  GaussNewtonSolverT<float> solverWithJtJ(optionsWithJtJ, &mockFunction);
+  solverWithJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithJtJ = VectorX<float>::Ones(10);
+  double errorWithJtJ = solverWithJtJ.solve(paramsWithJtJ);
+
+  // Both should converge to the same solution
+  EXPECT_NEAR(errorWithoutJtJ, errorWithJtJ, 1e-6);
+  EXPECT_LE((paramsWithoutJtJ - paramsWithJtJ).norm(), 1e-4);
+
+  // Check that the disabled parameters weren't modified
+  for (size_t i = 5; i < 10; ++i) {
+    EXPECT_EQ(paramsWithoutJtJ(i), 1.0f);
+    EXPECT_EQ(paramsWithJtJ(i), 1.0f);
+  }
+}
+
+// Test that useBlockJtJ works with non-contiguous parameters (e.g., [2,3,7,8,9])
+// This catches bugs where the subset extraction incorrectly indexes into the JtJ matrix
+TEST(GaussNewtonSolverTest, UseBlockJtJWithNonContiguousSubset) {
+  // Create a mock solver function
+  MockSolverFunction mockFunction(10);
+
+  // Enable non-contiguous parameters: 2, 3, 7, 8, 9
+  ParameterSet enabledParams;
+  enabledParams.set(2);
+  enabledParams.set(3);
+  enabledParams.set(7);
+  enabledParams.set(8);
+  enabledParams.set(9);
+
+  // Solve without useBlockJtJ
+  GaussNewtonSolverOptions optionsWithoutJtJ;
+  optionsWithoutJtJ.maxIterations = 10;
+  optionsWithoutJtJ.minIterations = 1;
+  optionsWithoutJtJ.threshold = 1e-6;
+  optionsWithoutJtJ.verbose = false;
+  optionsWithoutJtJ.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solverWithoutJtJ(optionsWithoutJtJ, &mockFunction);
+  solverWithoutJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithoutJtJ = VectorX<float>::Ones(10);
+  double errorWithoutJtJ = solverWithoutJtJ.solve(paramsWithoutJtJ);
+
+  // Solve with useBlockJtJ
+  GaussNewtonSolverOptions optionsWithJtJ;
+  optionsWithJtJ.maxIterations = 10;
+  optionsWithJtJ.minIterations = 1;
+  optionsWithJtJ.threshold = 1e-6;
+  optionsWithJtJ.verbose = false;
+  optionsWithJtJ.useBlockJtJ = true;
+
+  GaussNewtonSolverT<float> solverWithJtJ(optionsWithJtJ, &mockFunction);
+  solverWithJtJ.setEnabledParameters(enabledParams);
+  VectorX<float> paramsWithJtJ = VectorX<float>::Ones(10);
+  double errorWithJtJ = solverWithJtJ.solve(paramsWithJtJ);
+
+  // Both should converge to the same solution
+  EXPECT_NEAR(errorWithoutJtJ, errorWithJtJ, 1e-6);
+  EXPECT_LE((paramsWithoutJtJ - paramsWithJtJ).norm(), 1e-4);
+
+  // Check that the disabled parameters weren't modified
+  EXPECT_EQ(paramsWithoutJtJ(0), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(1), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(4), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(5), 1.0f);
+  EXPECT_EQ(paramsWithoutJtJ(6), 1.0f);
+
+  EXPECT_EQ(paramsWithJtJ(0), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(1), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(4), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(5), 1.0f);
+  EXPECT_EQ(paramsWithJtJ(6), 1.0f);
 }
 
 } // namespace

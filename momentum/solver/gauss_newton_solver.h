@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/math/online_householder_qr.h>
 #include <momentum/solver/fwd.h>
 #include <momentum/solver/solver.h>
 
@@ -38,6 +39,17 @@ struct GaussNewtonSolverOptions : GaussNewtonSolverBaseOptions {
   /// Can improve performance for problems with specialized structure
   bool useBlockJtJ = false;
 
+  /// Target number of Jacobian rows to accumulate before computing JᵀJ
+  ///
+  /// Controls the trade-off between memory usage and computational efficiency:
+  /// - SIZE_MAX (default): Build full Jacobian, single JᵀJ multiplication (fastest, most memory)
+  /// - 0: Process each error function block separately (slowest, minimum memory)
+  /// - Other values: Group blocks via bin-packing up to this row count
+  ///
+  /// Note: The effective minimum is the largest single block size, since we can't
+  /// split individual error function blocks.
+  size_t targetRowsPerChunk = SIZE_MAX;
+
   /// Default constructor
   GaussNewtonSolverOptions() = default;
 
@@ -63,6 +75,14 @@ class GaussNewtonSolverT : public SolverT<T> {
   /// Updates solver configuration, handling both base and Gauss-Newton specific options
   void setOptions(const SolverOptions& options) final;
 
+  // Testing/debug accessors
+  const Eigen::MatrixX<T>& getLastJtJ() const {
+    return hessianApprox_;
+  }
+  const Eigen::VectorX<T>& getLastJtR() const {
+    return JtR_;
+  }
+
  protected:
   /// Performs one iteration of the Gauss-Newton algorithm
   void doIteration() final;
@@ -76,14 +96,29 @@ class GaussNewtonSolverT : public SolverT<T> {
   /// Optionally performs line search if enabled
   void updateParameters(Eigen::VectorX<T>& delta);
 
+  /// Builds enabled parameters mapping from activeParameters_ bitset
+  void updateEnabledParameters();
+
+  /// Computes JtJ and JtR using pre-computed JtJ from solver function
+  void computeJtJFromBlockJtJ();
+
+  /// Computes JtJ and JtR from Jacobian blocks
+  void computeJtJFromJacobianBlocks();
+
   /// Whether to use pre-computed JᵀJ and JᵀR from solver function
   bool useBlockJtJ_{};
 
   /// Whether to perform line search during parameter updates
   bool doLineSearch_;
 
-  /// Jacobian matrix for dense operations
-  Eigen::MatrixX<T> jacobian_;
+  /// Jacobian matrix storage (uses ResizeableMatrix to avoid reallocations)
+  ResizeableMatrix<T> jacobian_;
+
+  /// Residual vector storage (uses ResizeableMatrix to avoid reallocations)
+  ResizeableMatrix<T> residual_;
+
+  /// Target rows per chunk for Jacobian processing
+  size_t targetRowsPerChunk_;
 
   /// Dense approximation of Hessian matrix (JᵀJ)
   Eigen::MatrixX<T> hessianApprox_;
@@ -91,14 +126,14 @@ class GaussNewtonSolverT : public SolverT<T> {
   /// Gradient vector (JᵀR)
   Eigen::VectorX<T> JtR_;
 
-  /// Residual vector
-  Eigen::VectorX<T> residual_;
-
   /// Dense Cholesky factorization solver
   Eigen::LLT<Eigen::MatrixX<T>> llt_;
 
   /// Regularization parameter
   T regularization_;
+
+  /// Mapping from subset parameter indices to full parameter indices
+  std::vector<int> enabledParameters_;
 };
 
 } // namespace momentum
