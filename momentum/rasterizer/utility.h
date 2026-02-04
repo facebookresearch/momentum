@@ -246,7 +246,7 @@ class SimdCamera {
  private:
   const Eigen::Matrix4f _modelMatrix;
   const Eigen::Vector2f _imageOffset;
-  std::shared_ptr<const IntrinsicsModelT<float>> _intrinsics;
+  std::shared_ptr<const momentum::IntrinsicsModelT<float>> _intrinsics;
 
   const Matrix3f _modelToWorld_rotation;
   const Vector3f _modelToWorld_translation;

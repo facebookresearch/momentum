@@ -584,12 +584,25 @@ mt_library(
 
 if(MOMENTUM_BUILD_RENDERER)
   mt_library(
+    NAME camera
+    HEADERS_VARS
+      camera_public_headers
+    SOURCES_VARS
+      camera_sources
+    PUBLIC_LINK_LIBRARIES
+      simd
+      drjit
+      Eigen3::Eigen
+  )
+
+  mt_library(
     NAME rasterizer
     HEADERS_VARS
       rasterizer_public_headers
     SOURCES_VARS
       rasterizer_sources
     PUBLIC_LINK_LIBRARIES
+      camera
       common
       drjit
       Eigen3::Eigen
@@ -858,6 +871,13 @@ if(MOMENTUM_BUILD_TESTING)
         "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
     )
   endif()
+
+  mt_test(
+    NAME camera_test
+    SOURCES_VARS camera_test_sources
+    LINK_LIBRARIES
+      camera
+  )
 
   mt_test(
     NAME rasterizer_test

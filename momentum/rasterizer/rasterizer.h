@@ -9,8 +9,8 @@
 
 #include <drjit/fwd.h>
 #include <mdspan/mdspan.hpp>
+#include <momentum/camera/camera.h>
 #include <momentum/common/aligned.h>
-#include <momentum/rasterizer/camera.h>
 #include <momentum/rasterizer/fwd.h>
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/tensor.h>

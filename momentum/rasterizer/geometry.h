@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include <momentum/camera/camera.h>
 #include <momentum/math/mesh.h>
-#include <momentum/rasterizer/camera.h>
 #include <Eigen/Core>
 #include <utility>
 

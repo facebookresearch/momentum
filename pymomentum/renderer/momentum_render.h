@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
-#include <momentum/rasterizer/camera.h>
 
 #include <ATen/ATen.h>
 #include <pybind11/numpy.h>
@@ -20,7 +20,7 @@
 namespace pymomentum {
 
 // Returned camera is in cm unit.
-std::vector<momentum::rasterizer::Camera> buildCamerasForBodyJoints(
+std::vector<momentum::Camera> buildCamerasForBodyJoints(
     at::Tensor jointLocalToWorldTransforms,
     int spineJointIndexToOrientCamera,
     int imageHeight,
@@ -32,7 +32,7 @@ std::vector<momentum::rasterizer::Camera> buildCamerasForBodyJoints(
 // is in cm unit.
 // cameraAngle: control from what angle the camera looks at the body. Default:
 // 0, looking at the front. Pi/2: looking at the body left side.
-std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
+std::vector<momentum::Camera> buildCamerasForBody(
     const momentum::Character& character,
     at::Tensor jointParameters,
     int imageHeight,
@@ -41,7 +41,7 @@ std::vector<momentum::rasterizer::Camera> buildCamerasForBody(
     bool horizontal,
     float cameraAngle = 0.0f);
 
-momentum::rasterizer::Camera createCameraForBody(
+momentum::Camera createCameraForBody(
     const momentum::Character& character,
     const pybind11::array_t<float>& skeletonStates,
     int imageHeight,
@@ -54,10 +54,10 @@ Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
     const Eigen::VectorXi& faceIndices,
     const Eigen::VectorXi& faceOffsets);
 
-std::vector<momentum::rasterizer::Camera>
+std::vector<momentum::Camera>
 buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWidth);
 
-std::vector<momentum::rasterizer::Camera>
+std::vector<momentum::Camera>
 buildCamerasForHandSurface(at::Tensor wristTransformation, int imageHeight, int imageWidth);
 
 } // namespace pymomentum
