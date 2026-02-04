@@ -814,9 +814,8 @@ void testIntrinsicsJacobianComprehensive(
       Eigen::Matrix<T, 2, 3> finiteDiffJacobian;
 
       // Create wide vector for the base point
-      using PacketT = PacketType_t<T>;
-      Vector3xP<T> basePoint(
-          PacketT(testPoint.x()), PacketT(testPoint.y()), PacketT(testPoint.z()));
+      using PacketT = Packet<T>;
+      Vector3P<T> basePoint(PacketT(testPoint.x()), PacketT(testPoint.y()), PacketT(testPoint.z()));
       auto [baseProjection, baseMask] = intrinsics->project(basePoint);
       EXPECT_TRUE(baseMask[0]) << modelName << " base point should be valid for finite difference";
 
@@ -857,8 +856,8 @@ void testIntrinsicsJacobianComprehensive(
     // Test 2: Consistency between project() and projectJacobian() projected points
     {
       // Get projection from original project() method
-      using PacketT = PacketType_t<T>;
-      Vector3xP<T> testPointWide(
+      using PacketT = Packet<T>;
+      Vector3P<T> testPointWide(
           PacketT(testPoint.x()), PacketT(testPoint.y()), PacketT(testPoint.z()));
       auto [projectedPoint, projectMask] = intrinsics->project(testPointWide);
 

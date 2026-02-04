@@ -48,8 +48,8 @@ class IntrinsicsModelT {
   ///
   /// @param point 3D points in camera coordinate space
   /// @return Pair of projected 2D points and validity mask
-  [[nodiscard]] virtual std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> project(
-      const Vector3xP<T>& point) const = 0;
+  [[nodiscard]] virtual std::pair<Vector3P<T>, typename Packet<T>::MaskType> project(
+      const Vector3P<T>& point) const = 0;
 
   /// Project a single 3D point to 2D image coordinates (Eigen version).
   ///
@@ -240,8 +240,8 @@ class CameraT {
   ///
   /// @param worldPoints 3D points in world coordinate space (wide vector)
   /// @return Pair of projected 2D points and validity mask
-  [[nodiscard]] std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> project(
-      const Vector3xP<T>& worldPoints) const;
+  [[nodiscard]] std::pair<Vector3P<T>, typename Packet<T>::MaskType> project(
+      const Vector3P<T>& worldPoints) const;
 
   /// Project a single 3D world point to 2D image coordinates (Eigen version).
   ///
@@ -268,8 +268,8 @@ class CameraT {
   /// @param maxIterations Maximum number of Newton iterations (default: 10)
   /// @param tolerance Convergence tolerance for the residual (default: 1e-6)
   /// @return Pair of 3D points in world coordinates and validity mask
-  [[nodiscard]] std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType>
-  unproject(const Vector3xP<T>& imagePoints, int maxIterations = 10, T tolerance = T(1e-6)) const;
+  [[nodiscard]] std::pair<Vector3P<T>, typename Packet<T>::MaskType>
+  unproject(const Vector3P<T>& imagePoints, int maxIterations = 10, T tolerance = T(1e-6)) const;
 
   /// Unproject 3D image point to 3D world point using Newton's method (Eigen version).
   ///
@@ -315,7 +315,7 @@ class CameraT {
   ///
   /// @param worldPoints 3D points in world coordinate space (wide vector)
   /// @return 3D points in camera/eye coordinate space (wide vector)
-  [[nodiscard]] Vector3xP<T> transformWorldToEye(const Vector3xP<T>& worldPoints) const;
+  [[nodiscard]] Vector3P<T> transformWorldToEye(const Vector3P<T>& worldPoints) const;
 
   /// Transform a single world point to camera/eye space.
   ///
@@ -404,8 +404,8 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
     return cy_;
   }
 
-  [[nodiscard]] std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> project(
-      const Vector3xP<T>& point) const final;
+  [[nodiscard]] std::pair<Vector3P<T>, typename Packet<T>::MaskType> project(
+      const Vector3P<T>& point) const final;
 
   [[nodiscard]] std::pair<Eigen::Vector3<T>, bool> project(
       const Eigen::Vector3<T>& point) const final;
@@ -492,8 +492,8 @@ class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
     return distortionParams_;
   }
 
-  [[nodiscard]] std::pair<Vector3xP<T>, typename PacketType_t<T>::MaskType> project(
-      const Vector3xP<T>& point) const final;
+  [[nodiscard]] std::pair<Vector3P<T>, typename Packet<T>::MaskType> project(
+      const Vector3P<T>& point) const final;
 
   [[nodiscard]] std::pair<Eigen::Vector3<T>, bool> project(
       const Eigen::Vector3<T>& point) const final;
