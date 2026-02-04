@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <momentum/math/online_householder_qr.h>
 #include <momentum/math/types.h>
 #include <momentum/solver/fwd.h>
 
@@ -173,9 +172,9 @@ class SolverFunctionT {
 
   /// Pre-allocated temporary storage for block-wise JtJ computation
   ///
-  /// Uses ResizeableMatrix to avoid reallocations when size fluctuates
-  ResizeableMatrix<T> tJacobian_;
-  ResizeableMatrix<T> tResidual_;
+  /// These are reused across calls to avoid per-block allocation overhead
+  MatrixX<T> tJacobian_;
+  VectorX<T> tResidual_;
 };
 
 } // namespace momentum
