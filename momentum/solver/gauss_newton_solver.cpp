@@ -183,7 +183,7 @@ void GaussNewtonSolverT<T>::computeJtJFromJacobianBlocks() {
       rowPos += blockSize;
     }
 
-    // Remap columns to subset parameter space (in-place, similar to SubsetGaussNewtonSolver)
+    // Remap columns to subset parameter space (in-place).
     // Move the enabled columns of the Jacobian into place.
     // Doing this in-place minimizes total work.
     // For the common case where all "dropped" parameters are at the end,

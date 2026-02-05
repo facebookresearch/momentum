@@ -140,23 +140,4 @@ using GradientDescentSolverd_const_p = ::std::shared_ptr<const GradientDescentSo
 using GradientDescentSolverd_const_u = ::std::unique_ptr<const GradientDescentSolverd>;
 using GradientDescentSolverd_const_w = ::std::weak_ptr<const GradientDescentSolverd>;
 
-template <typename T>
-class SubsetGaussNewtonSolverT;
-using SubsetGaussNewtonSolver = SubsetGaussNewtonSolverT<float>;
-using SubsetGaussNewtonSolverd = SubsetGaussNewtonSolverT<double>;
-
-using SubsetGaussNewtonSolver_p = ::std::shared_ptr<SubsetGaussNewtonSolver>;
-using SubsetGaussNewtonSolver_u = ::std::unique_ptr<SubsetGaussNewtonSolver>;
-using SubsetGaussNewtonSolver_w = ::std::weak_ptr<SubsetGaussNewtonSolver>;
-using SubsetGaussNewtonSolver_const_p = ::std::shared_ptr<const SubsetGaussNewtonSolver>;
-using SubsetGaussNewtonSolver_const_u = ::std::unique_ptr<const SubsetGaussNewtonSolver>;
-using SubsetGaussNewtonSolver_const_w = ::std::weak_ptr<const SubsetGaussNewtonSolver>;
-
-using SubsetGaussNewtonSolverd_p = ::std::shared_ptr<SubsetGaussNewtonSolverd>;
-using SubsetGaussNewtonSolverd_u = ::std::unique_ptr<SubsetGaussNewtonSolverd>;
-using SubsetGaussNewtonSolverd_w = ::std::weak_ptr<SubsetGaussNewtonSolverd>;
-using SubsetGaussNewtonSolverd_const_p = ::std::shared_ptr<const SubsetGaussNewtonSolverd>;
-using SubsetGaussNewtonSolverd_const_u = ::std::unique_ptr<const SubsetGaussNewtonSolverd>;
-using SubsetGaussNewtonSolverd_const_w = ::std::weak_ptr<const SubsetGaussNewtonSolverd>;
-
 } // namespace momentum
