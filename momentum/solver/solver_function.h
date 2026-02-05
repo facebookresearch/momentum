@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/math/online_householder_qr.h>
+#include <momentum/math/resizeable_matrix.h>
 #include <momentum/math/types.h>
 #include <momentum/solver/fwd.h>
 
