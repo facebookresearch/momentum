@@ -1,5 +1,7 @@
 var NAVTREEINDEX34 =
 {
+"structmomentum_1_1SimdPositionConstraints.html#a775c067c1b7e4eb2ce1fdbc787614e99":[1,0,2,128,9],
+"structmomentum_1_1SimdPositionConstraints.html#a798e59c874e9f0283da2a36805f6c3d1":[1,0,2,128,10],
 "structmomentum_1_1SimdPositionConstraints.html#a798e59c874e9f0283da2a36805f6c3d1":[2,0,0,128,10],
 "structmomentum_1_1SimdPositionConstraints.html#a811ad0be625986206d016bbf0e71cec8":[1,0,2,128,14],
 "structmomentum_1_1SimdPositionConstraints.html#a811ad0be625986206d016bbf0e71cec8":[2,0,0,128,14],
@@ -247,7 +249,5 @@ var NAVTREEINDEX34 =
 "structmomentum_1_1TrustRegionQROptions.html#ae071c7bc96ed6e437322002c3535a1b8":[2,0,0,155,0],
 "structmomentum_1_1VertexConstraintT.html":[1,0,2,159],
 "structmomentum_1_1VertexConstraintT.html":[2,0,0,159],
-"structmomentum_1_1VertexConstraintT.html#a98221fe8e2f7feb3b6739b947534a7d6":[1,0,2,159,1],
-"structmomentum_1_1VertexConstraintT.html#a98221fe8e2f7feb3b6739b947534a7d6":[2,0,0,159,1],
-"structmomentum_1_1VertexConstraintT.html#aa1c44f54c358e107d88b6b84040fb651":[1,0,2,159,2]
+"structmomentum_1_1VertexConstraintT.html#a98221fe8e2f7feb3b6739b947534a7d6":[1,0,2,159,1]
 };

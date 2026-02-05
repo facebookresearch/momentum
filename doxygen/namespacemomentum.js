@@ -2346,6 +2346,7 @@ var namespacemomentum =
     [ "setAccessorType< const Vector3b >", "namespacemomentum.html#ad02d4f2624b70ae932a5d8f45c22e6b3", null ],
     [ "setAccessorType< const Vector3f >", "namespacemomentum.html#ae911662999cf4c87d040189979072da1", null ],
     [ "setAccessorType< const Vector3i >", "namespacemomentum.html#a3ec1e4ab4791dad808fd35ae00296e26", null ],
+    [ "setAccessorType< const Vector4b >", "namespacemomentum.html#a0e01d2e1e0e60926c07e86dfc5bb903d", null ],
     [ "setAccessorType< const Vector4f >", "namespacemomentum.html#a3c157eab7069685db80589f21fb2f907", null ],
     [ "setAccessorType< const Vector4s >", "namespacemomentum.html#ac17adaf54fd78dfb412647a5675f0e12", null ],
     [ "setLogLevel", "namespacemomentum.html#a3be3c935268b7b2d3f1fcb448289a757", null ],
