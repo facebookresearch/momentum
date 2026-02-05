@@ -251,6 +251,12 @@ inline void setAccessorType<const Vector4s>(fx::gltf::Accessor& accessor) {
 }
 
 template <>
+inline void setAccessorType<const Vector4b>(fx::gltf::Accessor& accessor) {
+  accessor.componentType = fx::gltf::Accessor::ComponentType::UnsignedByte;
+  accessor.type = fx::gltf::Accessor::Type::Vec4;
+}
+
+template <>
 inline void setAccessorType<const Matrix4f>(fx::gltf::Accessor& accessor) {
   accessor.componentType = fx::gltf::Accessor::ComponentType::Float;
   accessor.type = fx::gltf::Accessor::Type::Mat4;
