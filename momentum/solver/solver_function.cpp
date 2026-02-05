@@ -86,10 +86,16 @@ double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj
 
   const size_t numParams = parameters.size();
 
-  // ResizeableMatrix only reallocates if capacity is exceeded, and zeros efficiently
-  tJacobian_.resizeAndSetZero(jacobianSize, numParams);
-  tResidual_.resizeAndSetZero(jacobianSize);
+  // Pre-allocate temporary storage once (resize only if needed)
+  if (jacobianSize > static_cast<size_t>(tJacobian_.rows()) ||
+      numParams != static_cast<size_t>(tJacobian_.cols())) {
+    tJacobian_.resize(jacobianSize, numParams);
+    tResidual_.resize(jacobianSize);
+  }
 
+  // Zero out once at the start
+  tJacobian_.topRows(jacobianSize).setZero();
+  tResidual_.head(jacobianSize).setZero();
   jtj.setZero(actualParameters_, actualParameters_);
   jtr.setZero(actualParameters_);
 
@@ -105,21 +111,21 @@ double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj
 
     size_t blockActualRows = 0;
 
-    auto jacBlock = tJacobian_.mat().block(position, 0, blockSize, numParams);
-    auto resBlock = tResidual_.vec().segment(position, blockSize);
+    auto jacBlock = tJacobian_.block(position, 0, blockSize, numParams);
+    auto resBlock = tResidual_.segment(position, blockSize);
 
     error += computeJacobianBlock(parameters, i, jacBlock, resBlock, blockActualRows);
 
     // Update JtJ and JtR
     if (blockActualRows > 0) {
       const auto JtBlock =
-          tJacobian_.mat().block(position, 0, blockActualRows, actualParameters_).transpose();
+          tJacobian_.block(position, 0, blockActualRows, actualParameters_).transpose();
 
       // Efficiently update JtJ using selfadjointView with rankUpdate
       jtj.template selfadjointView<Eigen::Lower>().rankUpdate(JtBlock);
 
       // Update JtR
-      jtr.noalias() += JtBlock * tResidual_.vec().segment(position, blockActualRows);
+      jtr.noalias() += JtBlock * tResidual_.segment(position, blockActualRows);
     }
     position += blockSize;
   }
