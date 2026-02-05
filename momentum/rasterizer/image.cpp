@@ -68,17 +68,12 @@ Vector3bP toRGBPacket<uint8_t, float>(const Vector3fP& rgb) {
 }
 
 template <typename T>
-void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, const Span<T, 3>& tgtImage, float alpha) {
+void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, Span<T, 3> tgtImage, float alpha) {
   using Vector3TP = drjit::Array<drjit::Packet<T, kSimdPacketSize>, 3>;
 
-  // Validate buffer layout using isValidBuffer for rasterization buffers only
-  // Target image can have arbitrary strides - handled by contiguity check below
-  if (!isValidBuffer(zBuffer)) {
-    throw std::runtime_error("Z buffer has invalid layout or alignment for SIMD operations.");
-  }
-  if (!isValidBuffer(rgbBuffer)) {
-    throw std::runtime_error("RGB buffer has invalid layout or alignment for SIMD operations.");
-  }
+  // Validate buffer layout and alignment for rasterization buffers
+  validateRasterizerBuffer(zBuffer, "Z buffer");
+  validateRasterizerBuffer(rgbBuffer, "RGB buffer");
 
   const auto imageHeightSupersampled = static_cast<int32_t>(zBuffer.extent(0));
   const auto paddedWidthSupersampled = static_cast<int32_t>(zBuffer.extent(1));
@@ -204,8 +199,7 @@ void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, const Span<T, 3>& tgtImage, fl
           for (int64_t l = 0; l < 3; ++l) {
             float blended =
                 invAlphaCur * toRGBValue<float, T>(tgtImage(iTgtRow, jTgtCol, l)) + rgba[l][k];
-            const_cast<Kokkos::mdspan<T, Kokkos::dextents<index_t, 3>>&>(tgtImage)(
-                iTgtRow, jTgtCol, l) = toRGBValue<T, float>(blended);
+            tgtImage(iTgtRow, jTgtCol, l) = toRGBValue<T, float>(blended);
           }
         }
       }
@@ -214,16 +208,10 @@ void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, const Span<T, 3>& tgtImage, fl
 }
 
 // Explicit template instantiations
-template void alphaMatte<float>(
-    Span2f zBuffer,
-    Span3f rgbBuffer,
-    const Kokkos::mdspan<float, Kokkos::dextents<index_t, 3>>& tgtImage,
-    float alpha);
+template void
+alphaMatte<float>(Span2f zBuffer, Span3f rgbBuffer, Span<float, 3> tgtImage, float alpha);
 
-template void alphaMatte<uint8_t>(
-    Span2f zBuffer,
-    Span3f rgbBuffer,
-    const Kokkos::mdspan<uint8_t, Kokkos::dextents<index_t, 3>>& tgtImage,
-    float alpha);
+template void
+alphaMatte<uint8_t>(Span2f zBuffer, Span3f rgbBuffer, Span<uint8_t, 3> tgtImage, float alpha);
 
 } // namespace momentum::rasterizer

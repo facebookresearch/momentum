@@ -13,6 +13,6 @@
 namespace momentum::rasterizer {
 
 template <typename T>
-void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, const Span<T, 3>& tgtImage, float alpha = 1.0f);
+void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, Span<T, 3> tgtImage, float alpha = 1.0f);
 
 } // namespace momentum::rasterizer

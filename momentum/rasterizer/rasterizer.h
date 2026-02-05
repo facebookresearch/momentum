@@ -23,8 +23,9 @@ namespace momentum::rasterizer {
 using index_t = std::ptrdiff_t;
 
 /// mdspan type aliases for cleaner signatures
+/// Using layout_stride to support strided buffers (e.g., with SIMD padding)
 template <typename T, size_t Rank>
-using Span = Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>>;
+using Span = Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>, Kokkos::layout_stride>;
 
 /// Constant variant of Span for read-only access
 template <typename T, size_t Rank>

@@ -392,7 +392,7 @@ inline void rasterizeOneLine(
     const Vector3f& color,
     float halfThickness,
     float nearClip,
-    index_t zBufferWidth,
+    index_t rowStride,
     float depthOffset,
     float* zBufferPtr,
     float* rgbBufferPtr) {
@@ -433,7 +433,7 @@ inline void rasterizeOneLine(
         continue;
       }
 
-      const uint32_t blockOffset = y * zBufferWidth + xOffset;
+      const auto blockOffset = y * rowStride + xOffset;
       const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
       const FloatP zOffset = w + depthOffset;
 
@@ -469,7 +469,7 @@ inline void rasterizeOneCircle(
     float halfLineThickness,
     float radius,
     float nearClip,
-    index_t zBufferWidth,
+    index_t rowStride,
     float depthOffset,
     float* zBufferPtr,
     float* rgbBufferPtr) {
@@ -505,7 +505,7 @@ inline void rasterizeOneCircle(
         continue;
       }
 
-      const uint32_t blockOffset = y * zBufferWidth + xOffset;
+      const auto blockOffset = y * rowStride + xOffset;
       const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
       const float zOffset = z_value + depthOffset;
 
@@ -545,7 +545,7 @@ inline void rasterizeOneCircle2D(
     bool filled,
     float halfLineThickness,
     float radius,
-    index_t bufferWidth,
+    index_t rowStride,
     float* rgbBufferPtr,
     float* zBufferPtr = nullptr) {
   const int startX_block = startX / kSimdPacketSize;
@@ -575,7 +575,7 @@ inline void rasterizeOneCircle2D(
       }
 
       if (rgbBufferPtr != nullptr) {
-        float* rgbBufferOffset = rgbBufferPtr + 3 * (y * bufferWidth + xOffset);
+        float* rgbBufferOffset = rgbBufferPtr + 3 * (y * rowStride + xOffset);
         const auto scatterIndices = drjit::arange<UintP>();
         const auto rgbValuesOrig = drjit::gather<Vector3fP>(rgbBufferOffset, scatterIndices);
         Vector3fP rgbValuesFinal = drjit::select(lineMask, Vector3fP(lineColor), rgbValuesOrig);
@@ -588,7 +588,7 @@ inline void rasterizeOneCircle2D(
 
       // Write zeros to z-buffer for alpha matting
       if (zBufferPtr != nullptr) {
-        const uint32_t blockOffset = y * bufferWidth + xOffset;
+        const auto blockOffset = y * rowStride + xOffset;
         const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
         const FloatP zBufferFinal = drjit::select(combinedMask, FloatP(0.0f), zBufferOrig);
         drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
@@ -597,7 +597,36 @@ inline void rasterizeOneCircle2D(
   }
 }
 
-void checkBuffers(
+/// Validates buffer layout and alignment for all rasterizer buffers.
+/// All non-empty buffers must be properly aligned and have valid strides for SIMD operations.
+void validateBufferLayouts(
+    Span2f zBuffer,
+    Span3f rgbBuffer,
+    Span3f surfaceNormalsBuffer,
+    Span2i vertexIndexBuffer,
+    Span2i triangleIndexBuffer) {
+  validateRasterizerBuffer(zBuffer, "Z buffer");
+
+  if (!rgbBuffer.empty()) {
+    validateRasterizerBuffer(rgbBuffer, "RGB buffer");
+  }
+
+  if (!surfaceNormalsBuffer.empty()) {
+    validateRasterizerBuffer(surfaceNormalsBuffer, "Surface normals buffer");
+  }
+
+  if (!vertexIndexBuffer.empty()) {
+    validateRasterizerBuffer(vertexIndexBuffer, "Vertex index buffer");
+  }
+
+  if (!triangleIndexBuffer.empty()) {
+    validateRasterizerBuffer(triangleIndexBuffer, "Triangle index buffer");
+  }
+}
+
+/// Validates that buffer dimensions match the camera and each other.
+/// Z buffer dimensions must match camera image size, and all other buffers must match Z buffer.
+void validateBufferDimensions(
     const SimdCamera& camera,
     Span2f zBuffer,
     Span3f rgbBuffer,
@@ -651,42 +680,70 @@ void checkBuffers(
         "Invalid triangle index buffer " + formatTensorSizes(triangleIndexBuffer.extents()) +
         "; expected " + formatTensorSizes(Extents<2>{zBuffer.extent(0), zBuffer.extent(1)}));
   }
+}
 
-  // Validate buffer layout and alignment using isValidBuffer function
-  if (!isValidBuffer(zBuffer)) {
-    throw std::runtime_error(
-        "Z buffer has invalid layout or alignment. All dimensions except the first must be "
-        "contiguous, and the first dimension stride must be a multiple of " +
-        std::to_string(kSimdPacketSize) + " for SIMD operations.");
+/// Validates that all non-empty buffers have matching row strides.
+/// This is required because the rasterizer uses a single stride value for all buffer accesses.
+void validateBufferStrides(
+    Span2f zBuffer,
+    Span3f rgbBuffer,
+    Span3f surfaceNormalsBuffer,
+    Span2i vertexIndexBuffer,
+    Span2i triangleIndexBuffer) {
+  const index_t zBufferRowStride = getRowStride(zBuffer);
+
+  if (!rgbBuffer.empty()) {
+    // For 3D buffers, the row stride in elements accounts for all channels
+    // So rgbBuffer.stride(0) should equal zBufferRowStride * 3
+    const index_t rgbBufferRowStride = rgbBuffer.stride(0) / 3;
+    if (rgbBufferRowStride != zBufferRowStride) {
+      throw std::runtime_error(
+          "RGB buffer row stride (" + std::to_string(rgbBufferRowStride) +
+          ") does not match Z buffer row stride (" + std::to_string(zBufferRowStride) + ")");
+    }
   }
 
-  if (!rgbBuffer.empty() && !isValidBuffer(rgbBuffer)) {
-    throw std::runtime_error(
-        "RGB buffer has invalid layout or alignment. All dimensions except the first must be "
-        "contiguous, and the first dimension stride must be a multiple of " +
-        std::to_string(kSimdPacketSize) + " for SIMD operations.");
+  if (!surfaceNormalsBuffer.empty()) {
+    const index_t normalsBufferRowStride = surfaceNormalsBuffer.stride(0) / 3;
+    if (normalsBufferRowStride != zBufferRowStride) {
+      throw std::runtime_error(
+          "Surface normals buffer row stride (" + std::to_string(normalsBufferRowStride) +
+          ") does not match Z buffer row stride (" + std::to_string(zBufferRowStride) + ")");
+    }
   }
 
-  if (!surfaceNormalsBuffer.empty() && !isValidBuffer(surfaceNormalsBuffer)) {
-    throw std::runtime_error(
-        "Surface normals buffer has invalid layout or alignment. All dimensions except the first must be "
-        "contiguous, and the first dimension stride must be a multiple of " +
-        std::to_string(kSimdPacketSize) + " for SIMD operations.");
+  if (!vertexIndexBuffer.empty()) {
+    const index_t vertexIndexBufferRowStride = getRowStride(vertexIndexBuffer);
+    if (vertexIndexBufferRowStride != zBufferRowStride) {
+      throw std::runtime_error(
+          "Vertex index buffer row stride (" + std::to_string(vertexIndexBufferRowStride) +
+          ") does not match Z buffer row stride (" + std::to_string(zBufferRowStride) + ")");
+    }
   }
 
-  if (!vertexIndexBuffer.empty() && !isValidBuffer(vertexIndexBuffer)) {
-    throw std::runtime_error(
-        "Vertex index buffer has invalid layout or alignment. All dimensions except the first must be "
-        "contiguous, and the first dimension stride must be a multiple of " +
-        std::to_string(kSimdPacketSize) + " for SIMD operations.");
+  if (!triangleIndexBuffer.empty()) {
+    const index_t triangleIndexBufferRowStride = getRowStride(triangleIndexBuffer);
+    if (triangleIndexBufferRowStride != zBufferRowStride) {
+      throw std::runtime_error(
+          "Triangle index buffer row stride (" + std::to_string(triangleIndexBufferRowStride) +
+          ") does not match Z buffer row stride (" + std::to_string(zBufferRowStride) + ")");
+    }
   }
+}
 
-  if (!triangleIndexBuffer.empty() && !isValidBuffer(triangleIndexBuffer)) {
-    throw std::runtime_error(
-        "Triangle index buffer has invalid layout or alignment. All dimensions except the first must be "
-        "contiguous, and the first dimension stride must be a multiple of " +
-        std::to_string(kSimdPacketSize) + " for SIMD operations.");
-  }
+void checkBuffers(
+    const SimdCamera& camera,
+    Span2f zBuffer,
+    Span3f rgbBuffer,
+    Span3f surfaceNormalsBuffer,
+    Span2i vertexIndexBuffer,
+    Span2i triangleIndexBuffer) {
+  validateBufferLayouts(
+      zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
+  validateBufferDimensions(
+      camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
+  validateBufferStrides(
+      zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
 }
 
 template <typename TriangleT>
@@ -960,7 +1017,7 @@ void rasterizeOneLineP(
     float nearClip,
     const Vector3f& color,
     float thickness,
-    index_t zBufferWidth,
+    index_t rowStride,
     float* zBufferPtr,
     float* rgbBufferPtr,
     float depthOffset) {
@@ -1018,7 +1075,7 @@ void rasterizeOneLineP(
         color,
         halfThickness,
         nearClip,
-        zBufferWidth,
+        rowStride,
         depthOffset,
         zBufferPtr,
         rgbBufferPtr);
@@ -1866,7 +1923,7 @@ inline void rasterizeOneLine2D(
     int32_t endY,
     const Vector3f& color,
     float halfThickness,
-    index_t bufferWidth,
+    index_t rowStride,
     float* rgbBufferPtr,
     float* zBufferPtr = nullptr) {
   const int startX_block = startX / kSimdPacketSize;
@@ -1900,7 +1957,7 @@ inline void rasterizeOneLine2D(
       }
 
       if (rgbBufferPtr != nullptr) {
-        float* rgbBufferOffset = rgbBufferPtr + 3 * (y * bufferWidth + xOffset);
+        float* rgbBufferOffset = rgbBufferPtr + 3 * (y * rowStride + xOffset);
         const auto scatterIndices = drjit::arange<UintP>();
         const auto rgbValuesOrig = drjit::gather<Vector3fP>(rgbBufferOffset, scatterIndices);
         const Vector3fP rgbValuesFinal = drjit::select(finalMask, Vector3fP(color), rgbValuesOrig);
@@ -1909,7 +1966,7 @@ inline void rasterizeOneLine2D(
 
       // Write zeros to z-buffer for alpha matting
       if (zBufferPtr != nullptr) {
-        const uint32_t blockOffset = y * bufferWidth + xOffset;
+        const auto blockOffset = y * rowStride + xOffset;
         const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
         const FloatP zBufferFinal = drjit::select(finalMask, FloatP(0.0f), zBufferOrig);
         drjit::store_aligned<FloatP>(zBufferPtr + blockOffset, zBufferFinal);
@@ -2006,7 +2063,7 @@ void rasterizeLines2DImp(
         endY,
         color_drjit,
         halfThickness,
-        getRowStride(rgbBuffer),
+        getPixelRowStride(rgbBuffer),
         rgbBufferPtr,
         zBufferPtr);
   }
@@ -2087,7 +2144,7 @@ void rasterizeCircles2DImp(
         filled,
         halfLineThickness,
         radius,
-        getRowStride(rgbBuffer),
+        getPixelRowStride(rgbBuffer),
         rgbBufferPtr,
         zBufferPtr);
   }

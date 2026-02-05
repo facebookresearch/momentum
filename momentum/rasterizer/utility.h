@@ -11,6 +11,7 @@
 #include <drjit/fwd.h>
 #include <drjit/matrix.h>
 #include <mdspan/mdspan.hpp>
+#include <momentum/common/exception.h>
 #include <momentum/rasterizer/fwd.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -60,13 +61,13 @@ std::string formatTensorSizes(const Kokkos::extents<IndexType, Extents...>& exte
 // 1. Data pointer is properly aligned for SIMD operations
 // 2. All dimensions except the first are contiguous (rows are packed tightly)
 // 3. The stride for the first dimension is a multiple of kSimdPacketSize
-template <typename T, typename Extents>
-bool isValidBuffer(const Kokkos::mdspan<T, Extents>& buffer) {
+template <typename T, typename Extents, typename Layout, typename Accessor>
+bool isValidBuffer(const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer) {
   if (buffer.empty()) {
     return true; // Empty buffers are always valid
   }
 
-  constexpr auto rank = Kokkos::mdspan<T, Extents>::rank();
+  constexpr auto rank = Kokkos::mdspan<T, Extents, Layout, Accessor>::rank();
 
   // Check alignment of data pointer
   if (reinterpret_cast<uintptr_t>(buffer.data_handle()) % kSimdAlignment != 0) {
@@ -96,22 +97,45 @@ bool isValidBuffer(const Kokkos::mdspan<T, Extents>& buffer) {
 
 // Helper function to get the row stride for accessing buffer rows properly
 // This ensures we use the actual mdspan stride instead of assuming contiguity
-template <typename T, typename Extents>
-index_t getRowStride(const Kokkos::mdspan<T, Extents>& buffer) {
+template <typename T, typename Extents, typename Layout, typename Accessor>
+index_t getRowStride(const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer) {
   static_assert(
-      Kokkos::mdspan<T, Extents>::rank() >= 2, "getRowStride requires at least 2D buffer");
+      Kokkos::mdspan<T, Extents, Layout, Accessor>::rank() >= 2,
+      "getRowStride requires at least 2D buffer");
   return buffer.stride(0);
+}
+
+// Helper function to get the pixel row stride (number of pixels per row including padding)
+// For 2D buffers (height x width): returns stride(0) which is the width
+// For 3D buffers (height x width x channels): returns stride(0) / extent(2)
+// This is useful when you need to compute pixel offsets that work for both buffer types
+template <typename T, typename Extents, typename Layout, typename Accessor>
+index_t getPixelRowStride(const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer) {
+  static_assert(
+      Kokkos::mdspan<T, Extents, Layout, Accessor>::rank() >= 2,
+      "getPixelRowStride requires at least 2D buffer");
+  constexpr auto rank = Kokkos::mdspan<T, Extents, Layout, Accessor>::rank();
+  if constexpr (rank == 2) {
+    return buffer.stride(0);
+  } else {
+    // For 3D+ buffers, divide by the product of all dimensions after the first two
+    index_t divisor = 1;
+    for (size_t i = 2; i < rank; ++i) {
+      divisor *= buffer.extent(i);
+    }
+    return buffer.stride(0) / divisor;
+  }
 }
 
 // Checks if an mdspan has a standard row-major contiguous layout
 // This is useful for optimization decisions where contiguous access patterns can be used
-template <typename T, typename Extents>
-bool isContiguous(const Kokkos::mdspan<T, Extents>& buffer) {
+template <typename T, typename Extents, typename Layout, typename Accessor>
+bool isContiguous(const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer) {
   if (buffer.empty()) {
     return true; // Empty buffers are trivially contiguous
   }
 
-  constexpr auto rank = Kokkos::mdspan<T, Extents>::rank();
+  constexpr auto rank = Kokkos::mdspan<T, Extents, Layout, Accessor>::rank();
 
   // Check contiguity from the rightmost dimension working backwards
   index_t expected_stride = 1;
@@ -124,6 +148,67 @@ bool isContiguous(const Kokkos::mdspan<T, Extents>& buffer) {
   }
 
   return true;
+}
+
+// Validates that an mdspan buffer is suitable for rasterization operations.
+// Throws std::runtime_error with descriptive message on failure.
+// This function checks:
+// 1. Data pointer is properly aligned for SIMD operations
+// 2. All dimensions except the first are contiguous (pixels are packed tightly)
+// 3. The stride for the first dimension is a multiple of kSimdPacketSize
+template <typename T, typename Extents, typename Layout, typename Accessor>
+void validateRasterizerBuffer(
+    const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer,
+    const char* bufferName) {
+  if (buffer.empty()) {
+    return; // Empty buffers are always valid
+  }
+
+  constexpr auto rank = Kokkos::mdspan<T, Extents, Layout, Accessor>::rank();
+
+  // Check data pointer alignment
+  MT_THROW_IF(
+      reinterpret_cast<uintptr_t>(buffer.data_handle()) % kSimdAlignment != 0,
+      "{} data pointer (0x{:x}) is not aligned to {} bytes.",
+      bufferName,
+      reinterpret_cast<uintptr_t>(buffer.data_handle()),
+      kSimdAlignment);
+
+  // For 1D buffers, just check that the stride is compatible with SIMD
+  if (rank == 1) {
+    MT_THROW_IF(
+        buffer.stride(0) % kSimdPacketSize != 0,
+        "{} stride ({}) is not a multiple of {}.",
+        bufferName,
+        buffer.stride(0),
+        kSimdPacketSize);
+    return;
+  }
+
+  // For multi-dimensional buffers, check contiguity of all dimensions except the first
+  // Start from the rightmost dimension and work backwards
+  index_t expected_stride = 1;
+  for (size_t dim = rank; dim > 1; --dim) {
+    size_t i = dim - 1;
+    MT_THROW_IF(
+        buffer.stride(i) != expected_stride,
+        "{} has non-contiguous inner dimensions. Dimension {} has stride {} but expected {}. "
+        "Pixels/channels must be packed tightly within rows.",
+        bufferName,
+        i,
+        buffer.stride(i),
+        expected_stride);
+    expected_stride *= buffer.extent(i);
+  }
+
+  // Check that the first dimension stride is a multiple of kSimdPacketSize
+  // This ensures proper SIMD alignment for accessing rows
+  MT_THROW_IF(
+      buffer.stride(0) % kSimdPacketSize != 0,
+      "{} row stride ({}) is not a multiple of {}. Row strides must be SIMD-aligned.",
+      bufferName,
+      buffer.stride(0),
+      kSimdPacketSize);
 }
 
 inline Vector3f toEnokiVec(const Eigen::Vector3f& v) {
