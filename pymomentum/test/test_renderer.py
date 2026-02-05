@@ -8,6 +8,7 @@
 import unittest
 
 import numpy as np
+import pymomentum.camera as pym_camera
 import pymomentum.geometry as pym_geometry
 import pymomentum.renderer as pym_renderer
 import torch
@@ -19,8 +20,8 @@ class TestRendering(unittest.TestCase):
         """Test that directional lighting works."""
 
         image_width, image_height = 30, 30
-        camera = pym_renderer.Camera(
-            pym_renderer.PinholeIntrinsicsModel(
+        camera = pym_camera.Camera(
+            pym_camera.PinholeIntrinsicsModel(
                 image_width=image_width,
                 image_height=image_height,
             )
@@ -28,7 +29,7 @@ class TestRendering(unittest.TestCase):
 
         def rasterize_spheres_with_lights(
             lights: list[pym_renderer.Light] | None,
-            camera_param: pym_renderer.Camera = camera,
+            camera_param: pym_camera.Camera = camera,
         ) -> torch.Tensor:
             z_buffer = pym_renderer.create_z_buffer(camera_param)
             rgb_buffer = pym_renderer.create_rgb_buffer(camera_param)
@@ -368,7 +369,7 @@ class TestRendering(unittest.TestCase):
         self._compare_cameras(cameras_old[0], camera_new)
 
     def _compare_cameras(
-        self, camera_old: pym_renderer.Camera, camera_new: pym_renderer.Camera
+        self, camera_old: pym_camera.Camera, camera_new: pym_camera.Camera
     ) -> None:
         """Compare two cameras to ensure they have matching properties."""
         # Compare basic properties
