@@ -609,6 +609,34 @@ size_t addBlendShapes(
   return numNewTargets;
 }
 
+std::vector<Vector4f> loadWeightsFromAccessor(
+    const fx::gltf::Document& model,
+    int32_t accessorIdx) {
+  std::vector<Vector4f> weightsData = copyAlignedAccessorBuffer<Vector4f>(model, accessorIdx);
+  if (weightsData.empty()) {
+    // Try fallback with normalized unsigned short weights (per glTF 2.0 spec, WEIGHTS_n can be
+    // FLOAT, UNSIGNED_BYTE normalized, or UNSIGNED_SHORT normalized).
+    auto weightsShort = copyAccessorBuffer<Vector4s>(model, accessorIdx);
+    if (!weightsShort.empty()) {
+      weightsData.reserve(weightsShort.size());
+      for (const auto& value : weightsShort) {
+        weightsData.emplace_back(value.cast<float>() / 65535.0f);
+      }
+    }
+  }
+  if (weightsData.empty()) {
+    // Try fallback with normalized unsigned byte weights.
+    auto weightsByte = copyAccessorBuffer<Vector4b>(model, accessorIdx);
+    if (!weightsByte.empty()) {
+      weightsData.reserve(weightsByte.size());
+      for (const auto& value : weightsByte) {
+        weightsData.emplace_back(value.cast<float>() / 255.0f);
+      }
+    }
+  }
+  return weightsData;
+}
+
 void addSkinWeights(
     const fx::gltf::Document& model,
     const fx::gltf::Skin& skin,
@@ -642,13 +670,13 @@ void addSkinWeights(
     auto weightsAttribute = primitive.attributes.find(std::string("WEIGHTS_") + std::to_string(i));
     std::vector<Vector4f> weightsData;
     if (weightsAttribute != primitive.attributes.end()) {
-      weightsData = copyAlignedAccessorBuffer<Vector4f>(model, weightsAttribute->second);
+      weightsData = loadWeightsFromAccessor(model, weightsAttribute->second);
       if (weightsData.empty()) {
         MT_LOGW("No skinning weights read");
         return;
       }
     } else {
-      MT_LOGW("No skinning weights stored on primitive");
+      MT_LOGW_IF(i == 0, "No skinning weights stored on primitive");
       return;
     }
 
