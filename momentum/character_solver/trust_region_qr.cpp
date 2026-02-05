@@ -11,6 +11,7 @@
 #include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/log.h"
 #include "momentum/common/profile.h"
+#include "momentum/solver/solver_function.h"
 
 #include <cfloat>
 
@@ -91,7 +92,7 @@ void TrustRegionQRT<T>::doIteration() {
       continue;
     }
 
-    auto rows = errorFunction->getJacobianSize();
+    const auto rows = padToSimdAlignment(errorFunction->getJacobianSize());
 
     jacobian_.resizeAndSetZero(rows, nFullParams);
     residual_.resizeAndSetZero(rows);
