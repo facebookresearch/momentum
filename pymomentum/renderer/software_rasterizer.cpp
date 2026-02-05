@@ -36,8 +36,15 @@ namespace pymomentum {
 
 namespace {
 
+using momentum::rasterizer::index_t;
 template <typename T, size_t R>
-Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const at::Tensor& t) {
+using Span = momentum::rasterizer::Span<T, R>;
+
+template <typename T, size_t R>
+Span<T, R> make_mdspan(const at::Tensor& t) {
+  using ExtentsType = Kokkos::dextents<index_t, R>;
+  using MappingType = Kokkos::layout_stride::mapping<ExtentsType>;
+
   if (t.scalar_type() != toScalarType<T>()) {
     throw std::runtime_error("Scalar type incorrect in mdspan conversion.");
   }
@@ -69,25 +76,30 @@ Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const at::Ten
     throw std::runtime_error("Expected CPU tensor in mdspan conversion");
   }
 
-  std::array<std::ptrdiff_t, R> extents{};
+  std::array<index_t, R> extents{};
+  std::array<index_t, R> strides{};
   for (int64_t i = 0; i < tensor.dim(); ++i) {
     extents[i] = tensor.size(i);
+    strides[i] = tensor.stride(i);
   }
 
-  return Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>>(tensor.data_ptr<T>(), extents);
+  return Span<T, R>(tensor.data_ptr<T>(), MappingType(ExtentsType(extents), strides));
 }
 
 template <typename T, size_t R>
-Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(std::optional<at::Tensor> t) {
+Span<T, R> make_mdspan(std::optional<at::Tensor> t) {
   if (!t.has_value()) {
-    return Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>>();
+    return Span<T, R>();
   }
 
   return make_mdspan<T, R>(t.value());
 }
 
 template <typename T, size_t R>
-Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const py::buffer_info& info) {
+Span<T, R> make_mdspan(const py::buffer_info& info) {
+  using ExtentsType = Kokkos::dextents<index_t, R>;
+  using MappingType = Kokkos::layout_stride::mapping<ExtentsType>;
+
   if (info.format != py::format_descriptor<T>::format()) {
     throw std::runtime_error("Incorrect scalar format in Numpy array.");
   }
@@ -100,12 +112,15 @@ Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>> make_mdspan(const py::buf
             formatTensorSizes(info.shape)));
   }
 
-  std::array<std::ptrdiff_t, R> extents{};
-  for (int64_t i = 0; i < R; ++i) {
+  std::array<index_t, R> extents{};
+  std::array<index_t, R> strides{};
+  for (size_t i = 0; i < R; ++i) {
     extents.at(i) = info.shape.at(i);
+    // Convert byte strides to element strides
+    strides.at(i) = info.strides.at(i) / sizeof(T);
   }
 
-  return Kokkos::mdspan<T, Kokkos::dextents<std::ptrdiff_t, R>>(static_cast<T*>(info.ptr), extents);
+  return Span<T, R>(static_cast<T*>(info.ptr), MappingType(ExtentsType(extents), strides));
 }
 
 std::tuple<

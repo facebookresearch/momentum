@@ -19,6 +19,19 @@ namespace momentum::rasterizer {
 
 using index_t = std::ptrdiff_t;
 
+// Helper to compute contiguous strides for row-major layout
+template <size_t Rank>
+inline std::array<index_t, Rank> computeContiguousStrides(
+    const std::array<index_t, Rank>& extents) {
+  std::array<index_t, Rank> strides{};
+  index_t stride = 1;
+  for (size_t i = Rank; i > 0; --i) {
+    strides[i - 1] = stride;
+    stride *= extents[i - 1];
+  }
+  return strides;
+}
+
 // Simplified Tensor class local to Rasterizer
 // Uses std::vector with aligned allocator and provides conversion to std::mdspan
 template <typename T, size_t Rank>
@@ -27,8 +40,13 @@ class Tensor {
   using extents_t = std::array<index_t, Rank>;
   using allocator_t = momentum::AlignedAllocator<T, kSimdAlignment>;
   using storage_t = std::vector<T, allocator_t>;
+  using strides_t = std::array<index_t, Rank>;
+  using span_t = Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>, Kokkos::layout_stride>;
+  using const_span_t =
+      Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>, Kokkos::layout_stride>;
 
   extents_t _extents = {};
+  strides_t _strides = {};
   storage_t _data;
 
  public:
@@ -37,7 +55,8 @@ class Tensor {
 
   Tensor() = default;
 
-  explicit Tensor(const extents_t& extents, const T& defaultValue = T{}) : _extents(extents) {
+  explicit Tensor(const extents_t& extents, const T& defaultValue = T{})
+      : _extents(extents), _strides(computeContiguousStrides(extents)) {
     auto size = calculateSize(extents);
     if (size > 0) {
       _data.resize(size, defaultValue);
@@ -50,31 +69,30 @@ class Tensor {
   // Copy constructor, move constructor, copy assignment, and move assignment
   // are automatically generated and work correctly with std::vector
 
-  // Conversion to mdspan
-  explicit operator Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>>() {
-    return Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>>(
-        _data.data(), Kokkos::dextents<index_t, Rank>(_extents));
+  // Conversion to mdspan (layout_stride for compatibility with Span types)
+  explicit operator span_t() {
+    return view();
   }
 
-  explicit operator Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>>() const {
-    return Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>>(
-        _data.data(), Kokkos::dextents<index_t, Rank>(_extents));
+  explicit operator const_span_t() const {
+    return view();
   }
 
-  // View method for compatibility
-  Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>> view() {
-    return Kokkos::mdspan<T, Kokkos::dextents<index_t, Rank>>(
-        _data.data(), Kokkos::dextents<index_t, Rank>(_extents));
+  // View method for compatibility - returns layout_stride mdspan
+  span_t view() {
+    using ExtentsType = Kokkos::dextents<index_t, Rank>;
+    using MappingType = Kokkos::layout_stride::mapping<ExtentsType>;
+    return span_t(_data.data(), MappingType(ExtentsType(_extents), _strides));
   }
 
-  [[nodiscard]] Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>> view() const {
-    return Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>>(
-        _data.data(), Kokkos::dextents<index_t, Rank>(_extents));
+  [[nodiscard]] const_span_t view() const {
+    using ExtentsType = Kokkos::dextents<index_t, Rank>;
+    using MappingType = Kokkos::layout_stride::mapping<ExtentsType>;
+    return const_span_t(_data.data(), MappingType(ExtentsType(_extents), _strides));
   }
 
-  [[nodiscard]] Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>> const_view() const {
-    return Kokkos::mdspan<const T, Kokkos::dextents<index_t, Rank>>(
-        _data.data(), Kokkos::dextents<index_t, Rank>(_extents));
+  [[nodiscard]] const_span_t const_view() const {
+    return view();
   }
 
   // Multi-dimensional indexing operator() inspired by ASpan
@@ -104,6 +122,9 @@ class Tensor {
   [[nodiscard]] constexpr extents_t extents() const {
     return _extents;
   }
+  [[nodiscard]] constexpr strides_t strides() const {
+    return _strides;
+  }
 
   [[nodiscard]] index_t size() const {
     return static_cast<index_t>(_data.size());
@@ -116,6 +137,7 @@ class Tensor {
     auto new_size = calculateSize(new_extents);
     _data.resize(new_size);
     _extents = new_extents;
+    _strides = computeContiguousStrides(new_extents);
   }
 
   template <typename... SizeTypes>
