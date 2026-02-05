@@ -63,9 +63,12 @@ class MockSolverFunction : public SolverFunctionT<T> {
     }
 
     // For a quadratic function, the Jacobian is the identity matrix
-    // and the residual is the parameters
-    jacobianBlock.setIdentity();
-    residualBlock = parameters;
+    // and the residual is the parameters.
+    // Note: The passed block may be larger than numParameters_ due to SIMD padding,
+    // so we only write to the first numParameters_ rows.
+    const auto n = static_cast<Eigen::Index>(this->numParameters_);
+    jacobianBlock.topRows(n).setIdentity();
+    residualBlock.head(n) = parameters;
 
     actualRows = this->numParameters_;
     return 0.5 * parameters.squaredNorm();
