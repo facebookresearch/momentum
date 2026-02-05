@@ -11,6 +11,16 @@
 
 namespace momentum {
 
+namespace {
+
+/// Pads a row count to be a multiple of 8 for SIMD alignment
+constexpr size_t padJacobianRows(size_t size) {
+  constexpr size_t kAlignment = 8;
+  return (size + kAlignment - 1) & ~(kAlignment - 1);
+}
+
+} // namespace
+
 template <typename T>
 void SolverFunctionT<T>::getHessian(const VectorX<T>& parameters, MatrixX<T>& hessian) {
   (void)parameters;
@@ -34,7 +44,7 @@ double SolverFunctionT<T>::getJacobian(
     totalRows += getJacobianBlockSize(i);
   }
   // Add padding for alignment
-  totalRows += 8 - (totalRows % 8);
+  totalRows = padJacobianRows(totalRows);
 
   // Resize if needed
   if (totalRows > static_cast<size_t>(jacobian.rows()) || parameters.size() != jacobian.cols()) {
@@ -77,57 +87,43 @@ double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj
   const size_t numBlocks = getJacobianBlockCount();
 
   // Calculate total Jacobian size
-  size_t jacobianSize = 0;
-  for (size_t i = 0; i < numBlocks; ++i) {
-    jacobianSize += getJacobianBlockSize(i);
-  }
-  // Add padding for alignment
-  jacobianSize += 8 - (jacobianSize % 8);
-
   const size_t numParams = parameters.size();
 
-  // Pre-allocate temporary storage once (resize only if needed)
-  if (jacobianSize > static_cast<size_t>(tJacobian_.rows()) ||
-      numParams != static_cast<size_t>(tJacobian_.cols())) {
-    tJacobian_.resize(jacobianSize, numParams);
-    tResidual_.resize(jacobianSize);
-  }
-
-  // Zero out once at the start
-  tJacobian_.topRows(jacobianSize).setZero();
-  tResidual_.head(jacobianSize).setZero();
   jtj.setZero(actualParameters_, actualParameters_);
   jtr.setZero(actualParameters_);
 
   // Block compute JtJ and JtR on the fly
-  size_t position = 0;
   double error = 0.0;
 
   for (size_t i = 0; i < numBlocks; ++i) {
-    const size_t blockSize = getJacobianBlockSize(i);
+    const size_t blockSize = padJacobianRows(getJacobianBlockSize(i));
     if (blockSize == 0) {
       continue;
     }
 
     size_t blockActualRows = 0;
 
-    auto jacBlock = tJacobian_.block(position, 0, blockSize, numParams);
-    auto resBlock = tResidual_.segment(position, blockSize);
+    tJacobian_.resizeAndSetZero(blockSize, numParams);
+    tResidual_.resizeAndSetZero(blockSize);
+
+    auto jacBlock = tJacobian_.mat().block(0, 0, blockSize, numParams);
+    auto resBlock = tResidual_.vec().segment(0, blockSize);
 
     error += computeJacobianBlock(parameters, i, jacBlock, resBlock, blockActualRows);
 
     // Update JtJ and JtR
-    if (blockActualRows > 0) {
-      const auto JtBlock =
-          tJacobian_.block(position, 0, blockActualRows, actualParameters_).transpose();
-
-      // Efficiently update JtJ using selfadjointView with rankUpdate
-      jtj.template selfadjointView<Eigen::Lower>().rankUpdate(JtBlock);
-
-      // Update JtR
-      jtr.noalias() += JtBlock * tResidual_.segment(position, blockActualRows);
+    if (blockActualRows == 0) {
+      continue;
     }
-    position += blockSize;
+
+    const auto JtBlock =
+        tJacobian_.mat().block(0, 0, blockActualRows, actualParameters_).transpose();
+
+    // Efficiently update JtJ using selfadjointView with rankUpdate
+    jtj.template selfadjointView<Eigen::Lower>().rankUpdate(JtBlock);
+
+    // Update JtR
+    jtr.noalias() += JtBlock * tResidual_.vec().segment(0, blockActualRows);
   }
 
   finalizeJacobianComputation();
