@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/common/aligned.h>
 #include <momentum/common/checks.h>
 
 #include <Eigen/Core>
@@ -84,6 +85,9 @@ class ColumnIndexedMatrix {
 template <typename T>
 class ResizeableMatrix {
  public:
+  /// Alignment in bytes for SIMD and cache efficiency
+  static constexpr std::size_t kAlignment = 128;
+
   using MatrixType = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
   ResizeableMatrix() = default;
@@ -96,8 +100,8 @@ class ResizeableMatrix {
     cols_ = cols;
 
     // This will not reallocate unless needed.
+    data_.clear();
     data_.resize(rows * cols);
-    std::fill(std::begin(data_), std::end(data_), T(0));
   }
 
   [[nodiscard]] Eigen::Index rows() const {
@@ -107,26 +111,26 @@ class ResizeableMatrix {
     return cols_;
   }
 
-  Eigen::Map<MatrixType, Eigen::Aligned16> mat() {
-    return Eigen::Map<MatrixType, Eigen::Aligned16>(data_.data(), rows_, cols_);
+  Eigen::Map<MatrixType, Eigen::Aligned128> mat() {
+    return Eigen::Map<MatrixType, Eigen::Aligned128>(data_.data(), rows_, cols_);
   }
-  Eigen::Map<const MatrixType, Eigen::Aligned16> mat() const {
-    return Eigen::Map<const MatrixType, Eigen::Aligned16>(data_.data(), rows_, cols_);
+  Eigen::Map<const MatrixType, Eigen::Aligned128> mat() const {
+    return Eigen::Map<const MatrixType, Eigen::Aligned128>(data_.data(), rows_, cols_);
   }
 
   // Vector accessor for single-column matrices
-  Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16> vec() {
-    return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16>(data_.data(), rows_);
+  Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned128> vec() {
+    return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned128>(data_.data(), rows_);
   }
-  Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16> vec() const {
-    return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned16>(
+  Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned128> vec() const {
+    return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>, Eigen::Aligned128>(
         data_.data(), rows_);
   }
 
  private:
   Eigen::Index rows_ = 0;
   Eigen::Index cols_ = 0;
-  std::vector<T> data_;
+  std::vector<T, AlignedAllocator<T, kAlignment>> data_;
 };
 
 // This class is designed to solve least squares problems of the form:
