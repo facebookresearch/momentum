@@ -8,6 +8,7 @@
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
 
 #include "momentum/common/profile.h"
+#include "momentum/solver/solver_function.h"
 
 namespace momentum {
 
@@ -80,7 +81,8 @@ void GaussNewtonSolverQRT<T>::doIteration() {
       continue;
     }
 
-    const auto rows = static_cast<Eigen::Index>(blockSize);
+    const auto paddedBlockSize = padToSimdAlignment(blockSize);
+    const auto rows = static_cast<Eigen::Index>(paddedBlockSize);
 
     jacobian_.resizeAndSetZero(rows, nFullParams);
     residual_.resizeAndSetZero(rows);

@@ -11,16 +11,6 @@
 
 namespace momentum {
 
-namespace {
-
-/// Pads a row count to be a multiple of 8 for SIMD alignment
-constexpr size_t padJacobianRows(size_t size) {
-  constexpr size_t kAlignment = 8;
-  return (size + kAlignment - 1) & ~(kAlignment - 1);
-}
-
-} // namespace
-
 template <typename T>
 void SolverFunctionT<T>::getHessian(const VectorX<T>& parameters, MatrixX<T>& hessian) {
   (void)parameters;
@@ -44,7 +34,7 @@ double SolverFunctionT<T>::getJacobian(
     totalRows += getJacobianBlockSize(i);
   }
   // Add padding for alignment
-  totalRows = padJacobianRows(totalRows);
+  totalRows = padToSimdAlignment(totalRows);
 
   // Resize if needed
   if (totalRows > static_cast<size_t>(jacobian.rows()) || parameters.size() != jacobian.cols()) {
@@ -96,7 +86,7 @@ double SolverFunctionT<T>::getJtJR(const VectorX<T>& parameters, MatrixX<T>& jtj
   double error = 0.0;
 
   for (size_t i = 0; i < numBlocks; ++i) {
-    const size_t blockSize = padJacobianRows(getJacobianBlockSize(i));
+    const size_t blockSize = padToSimdAlignment(getJacobianBlockSize(i));
     if (blockSize == 0) {
       continue;
     }
