@@ -61,6 +61,7 @@ fmt_eigen_public_headers = [
 
 online_qr_public_headers = [
     "math/online_householder_qr.h",
+    "math/resizeable_matrix.h",
 ]
 
 online_qr_sources = [
