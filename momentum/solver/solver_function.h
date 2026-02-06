@@ -15,6 +15,19 @@
 
 namespace momentum {
 
+/// Alignment for SIMD operations on Jacobian rows (8 floats = 32 bytes for AVX).
+inline constexpr size_t kJacobianRowAlignment = 8;
+
+/// Pads a row count to be a multiple of kJacobianRowAlignment for SIMD alignment.
+///
+/// This is used when allocating Jacobian matrices to ensure proper alignment
+/// for SIMD operations.
+/// @param[in] size The original row count.
+/// @return The padded row count, rounded up to the nearest multiple of 8.
+[[nodiscard]] constexpr size_t padToSimdAlignment(size_t size) {
+  return (size + kJacobianRowAlignment - 1) & ~(kJacobianRowAlignment - 1);
+}
+
 /// Abstract base class for optimization objective functions
 ///
 /// Provides the interface for computing objective function values, gradients,

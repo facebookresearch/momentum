@@ -18,6 +18,7 @@
 #include "momentum/common/profile.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/math/online_householder_qr.h"
+#include "momentum/solver/solver_function.h"
 
 #include <dispenso/parallel_for.h>
 
@@ -74,11 +75,6 @@ void SequenceSolverT<T>::initializeSolver() {
 
 namespace {
 
-template <typename IntType>
-IntType padForSSE(IntType value) {
-  return value + 8 - (value % 8);
-}
-
 template <typename ErrorFunctionType>
 size_t computeJacobianSize(std::vector<std::shared_ptr<ErrorFunctionType>>& functions) {
   size_t result = 0;
@@ -111,7 +107,8 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computePerFram
   }
 
   const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
-  const auto jacobianSize = padForSSE(computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
+  const auto jacobianSize =
+      padToSimdAlignment(computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(jacobianSize, nFullParameters);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
 
@@ -159,7 +156,8 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computeSequenc
   MT_CHECK(meshStates.size() >= bandwidth_cur);
 
   const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
-  const size_t jacobianSize = padForSSE(computeJacobianSize(fn->sequenceErrorFunctions_[iFrame]));
+  const size_t jacobianSize =
+      padToSimdAlignment(computeJacobianSize(fn->sequenceErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian =
       Eigen::MatrixX<T>::Zero(jacobianSize, bandwidth_cur * nFullParameters);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);

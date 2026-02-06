@@ -13,6 +13,7 @@
 #include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/online_householder_qr.h"
+#include "momentum/solver/solver_function.h"
 
 namespace momentum {
 
@@ -81,7 +82,7 @@ void MultiposeSolverT<T>::doIteration() {
       }
 
       const size_t n = solvable->getJacobianSize();
-      const size_t jacobianSize = n + 8 - (n % 8);
+      const size_t jacobianSize = padToSimdAlignment(n);
 
       jacobianBlock_.resize(jacobianSize, nFullParameters);
       jacobianBlock_.setZero();

@@ -15,7 +15,7 @@
 #include "momentum/character_solver/skeleton_error_function.h"
 #include "momentum/common/log.h"
 #include "momentum/math/fmt_eigen.h"
-#include "momentum/simd/simd.h"
+#include "momentum/solver/solver_function.h"
 
 namespace momentum {
 
@@ -53,7 +53,7 @@ void testGradientAndJacobian(
   const SkeletonStateT<T> referenceState(state);
   Eigen::VectorX<T> anaGradient = Eigen::VectorX<T>::Zero(transform.numAllModelParameters());
   const size_t jacobianSize = errorFunction->getJacobianSize();
-  const size_t paddedJacobianSize = jacobianSize + 8 - (jacobianSize % 8);
+  const size_t paddedJacobianSize = padToSimdAlignment(jacobianSize);
   Eigen::MatrixX<T> jacobian =
       Eigen::MatrixX<T>::Zero(paddedJacobianSize, transform.numAllModelParameters());
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(paddedJacobianSize);
@@ -283,7 +283,7 @@ void validateIdentical(
     const auto n = transform.numAllModelParameters();
     const size_t m1 = err1.getJacobianSize();
     const size_t m2 = err2.getJacobianSize();
-    EXPECT_LE(m1, m2); // SIMD pads out to a multiple of kSimdPacketSize.
+    EXPECT_LE(m1, m2); // SIMD pads out to a multiple of 8 for alignment.
 
     Eigen::MatrixX<T> j1 = Eigen::MatrixX<T>::Zero(m1, n);
     Eigen::MatrixX<T> j2 = Eigen::MatrixX<T>::Zero(m2, n);
@@ -326,8 +326,7 @@ void timeJacobian(
     const ModelParameters& modelParams,
     const char* type) {
   const size_t jacobianSize = errorFunction.getJacobianSize();
-  const size_t paddedJacobianSize =
-      jacobianSize + kSimdPacketSize - (jacobianSize % kSimdPacketSize);
+  const size_t paddedJacobianSize = padToSimdAlignment(jacobianSize);
   Eigen::MatrixXf jacobian = Eigen::MatrixXf::Zero(
       paddedJacobianSize, character.parameterTransform.numAllModelParameters());
   Eigen::VectorXf residual = Eigen::VectorXf::Zero(paddedJacobianSize);
