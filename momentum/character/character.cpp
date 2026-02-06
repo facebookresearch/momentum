@@ -360,8 +360,23 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   if (collision != nullptr) {
     result.collision = std::make_unique<CollisionGeometry>(*collision);
     for (auto&& c : *result.collision) {
+      MT_THROW_IF(
+          c.parent >= result.jointMap.size(),
+          "Collision parent {} out of bounds for jointMap size {}",
+          c.parent,
+          result.jointMap.size());
       const auto oldParent = c.parent;
       c.parent = result.jointMap[c.parent];
+      MT_THROW_IF(
+          c.parent >= targetBindState.jointState.size(),
+          "Remapped parent {} out of bounds for targetBindState size {}",
+          c.parent,
+          targetBindState.jointState.size());
+      MT_THROW_IF(
+          oldParent >= sourceBindState.jointState.size(),
+          "Old parent {} out of bounds for sourceBindState size {}",
+          oldParent,
+          sourceBindState.jointState.size());
       c.transformation =
           (targetBindState.jointState[c.parent].transform.inverse() *
            sourceBindState.jointState[oldParent].transform * c.transformation);

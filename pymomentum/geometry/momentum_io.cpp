@@ -25,6 +25,8 @@ momentum::Character loadGLTFCharacterFromFile(const std::string& path) {
 }
 
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
+  // The bytes parameter is kept alive by pybind11's reference counting for the
+  // duration of this function call, so we can safely use a span without copying
   pybind11::buffer_info info(pybind11::buffer(bytes).request());
   const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
   const auto length = static_cast<size_t>(info.size);
@@ -302,7 +304,32 @@ loadGLTFCharacterWithMotionModelParameterScalesFromBytes(const pybind11::bytes& 
 pybind11::array_t<float> skelStatesToTensor(
     std::span<const momentum::SkeletonState> states,
     const momentum::Character& character) {
-  pybind11::array_t<float> result({(int)states.size(), (int)character.skeleton.joints.size(), 8});
+  // Validate sizes to prevent integer overflow
+  MT_THROW_IF(
+      states.size() > static_cast<size_t>(std::numeric_limits<pybind11::ssize_t>::max()),
+      "States size {} exceeds maximum array dimension",
+      states.size());
+  MT_THROW_IF(
+      character.skeleton.joints.size() >
+          static_cast<size_t>(std::numeric_limits<pybind11::ssize_t>::max()),
+      "Joints size {} exceeds maximum array dimension",
+      character.skeleton.joints.size());
+
+  // Check that total element count (states * joints * 8) won't overflow
+  // We check before multiplication to avoid undefined behavior
+  constexpr size_t kElementsPerJoint = 8;
+  const size_t jointsCount = character.skeleton.joints.size();
+  MT_THROW_IF(
+      jointsCount > 0 &&
+          states.size() > std::numeric_limits<size_t>::max() / (jointsCount * kElementsPerJoint),
+      "Total array size would overflow: {} states * {} joints * 8",
+      states.size(),
+      jointsCount);
+
+  pybind11::array_t<float> result(
+      {static_cast<pybind11::ssize_t>(states.size()),
+       static_cast<pybind11::ssize_t>(character.skeleton.joints.size()),
+       static_cast<pybind11::ssize_t>(8)});
 
   auto r = result.mutable_unchecked<3>();
 

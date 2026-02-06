@@ -24,7 +24,9 @@ toCharacterList(PyObject* obj, int64_t nBatch, const char* context, bool forceBa
   if (PyList_Check(obj)) {
     std::vector<const momentum::Character*> result;
     for (Py_ssize_t i = 0; i < PyList_Size(obj); ++i) {
-      result.push_back(py::cast<const momentum::Character*>(PyList_GetItem(obj, i)));
+      PyObject* item = PyList_GetItem(obj, i);
+      MT_THROW_IF(item == nullptr, "Failed to get item at index {} from list in {}", i, context);
+      result.push_back(py::cast<const momentum::Character*>(item));
     }
 
     MT_THROW_IF(
@@ -110,8 +112,8 @@ pybind11::bytes to_msgpack(const nlohmann::json& j) {
   return pybytes;
 }
 
-PyBytesStreamBuffer::PyBytesStreamBuffer(const pybind11::bytes& bytes) {
-  py::buffer_info info(py::buffer(bytes).request());
+PyBytesStreamBuffer::PyBytesStreamBuffer(const pybind11::bytes& bytes) : bytes_(bytes) {
+  py::buffer_info info(py::buffer(bytes_).request());
 
   // C++ does not distinguish between const and non-const streambufs, but we
   // promise to only use this with std::istreams.

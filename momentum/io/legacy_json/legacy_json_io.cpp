@@ -117,6 +117,59 @@ nlohmann::json::const_iterator findFieldNames(
   return json.end();
 }
 
+/// Helper function to triangulate a single face and optionally texture indices
+void triangulateFace(
+    const nlohmann::json& indices,
+    const nlohmann::json* texIndicesPtr,
+    size_t start,
+    size_t end,
+    Mesh& mesh) {
+  const size_t faceSize = end - start;
+  MT_THROW_IF(faceSize < 3, "Face must have at least 3 vertices");
+
+  int v0 = indices[start].get<int>();
+  for (size_t i = 1; i < faceSize - 1; ++i) {
+    int v1 = indices[start + i].get<int>();
+    int v2 = indices[start + i + 1].get<int>();
+    mesh.faces.emplace_back(v0, v1, v2);
+  }
+
+  if (texIndicesPtr != nullptr && texIndicesPtr->is_array()) {
+    int t0 = (*texIndicesPtr)[start].get<int>();
+    for (size_t i = 1; i < faceSize - 1; ++i) {
+      int t1 = (*texIndicesPtr)[start + i].get<int>();
+      int t2 = (*texIndicesPtr)[start + i + 1].get<int>();
+      mesh.texcoord_faces.emplace_back(t0, t1, t2);
+    }
+  }
+}
+
+/// Helper function to parse skinning weights from legacy format
+void parseSkinningWeights(
+    const nlohmann::json& skinningWeights,
+    const nlohmann::json& skinningOffsets,
+    SkinWeights& skinWeights) {
+  if (!skinningWeights.is_array() || !skinningOffsets.is_array() || skinningOffsets.empty()) {
+    return;
+  }
+
+  const size_t numVertices = skinningOffsets.size() - 1;
+  skinWeights.index = IndexMatrix::Zero(numVertices, kMaxSkinJoints);
+  skinWeights.weight = WeightMatrix::Zero(numVertices, kMaxSkinJoints);
+
+  for (size_t i = 0; i < numVertices; ++i) {
+    size_t start = skinningOffsets[i].get<size_t>();
+    size_t end = skinningOffsets[i + 1].get<size_t>();
+    size_t numInfluences = std::min(end - start, static_cast<size_t>(kMaxSkinJoints));
+
+    for (size_t j = 0; j < numInfluences; ++j) {
+      const auto& pair = skinningWeights[start + j];
+      skinWeights.index(i, j) = pair[0].get<uint32_t>();
+      skinWeights.weight(i, j) = pair[1].get<float>();
+    }
+  }
+}
+
 Skeleton legacySkeletonToMomentum(const nlohmann::json& legacySkeleton) {
   MT_THROW_IF(!legacySkeleton.contains("Bones"), "Legacy skeleton JSON missing 'Bones' field");
 
@@ -226,33 +279,14 @@ std::pair<Mesh, SkinWeights> legacySkinnedModelToMomentum(
     const auto* texIndicesPtr =
         facesObj.contains("TextureIndices") ? &facesObj["TextureIndices"] : nullptr;
 
+    MT_THROW_IF(offsets.empty(), "Offsets array is empty");
     size_t numFaces = offsets.size() - 1;
     mesh.faces.reserve(numFaces * 2); // Conservative estimate for triangulation
 
     for (size_t faceIdx = 0; faceIdx < numFaces; ++faceIdx) {
       size_t start = offsets[faceIdx].get<size_t>();
       size_t end = offsets[faceIdx + 1].get<size_t>();
-      size_t faceSize = end - start;
-
-      // Triangulate face (ngon) using fan triangulation
-      if (faceSize < 3) {
-        MT_THROW_IF(true, "Face must have at least 3 vertices");
-      } else {
-        int v0 = indices[start].get<int>();
-        for (size_t i = 1; i < faceSize - 1; ++i) {
-          int v1 = indices[start + i].get<int>();
-          int v2 = indices[start + i + 1].get<int>();
-          mesh.faces.emplace_back(v0, v1, v2);
-        }
-        if (texIndicesPtr && texIndicesPtr->is_array()) {
-          int t0 = (*texIndicesPtr)[start].get<int>();
-          for (size_t i = 1; i < faceSize - 1; ++i) {
-            int t1 = (*texIndicesPtr)[start + i].get<int>();
-            int t2 = (*texIndicesPtr)[start + i + 1].get<int>();
-            mesh.texcoord_faces.emplace_back(t0, t1, t2);
-          }
-        }
-      }
+      triangulateFace(indices, texIndicesPtr, start, end, mesh);
     }
 
     // Shrink to actual size after triangulation
@@ -276,27 +310,7 @@ std::pair<Mesh, SkinWeights> legacySkinnedModelToMomentum(
 
   if (skinningWeightsItr != legacySkinnedModel.end() &&
       skinningOffsetsItr != legacySkinnedModel.end()) {
-    const auto& skinningWeights = *skinningWeightsItr;
-    const auto& skinningOffsets = *skinningOffsetsItr;
-
-    if (skinningWeights.is_array() && skinningOffsets.is_array()) {
-      const size_t numVertices = skinningOffsets.size() - 1;
-      skinWeights.index = IndexMatrix::Zero(numVertices, kMaxSkinJoints);
-      skinWeights.weight = WeightMatrix::Zero(numVertices, kMaxSkinJoints);
-
-      for (size_t i = 0; i < numVertices; ++i) {
-        size_t start = skinningOffsets[i].get<size_t>();
-        size_t end = skinningOffsets[i + 1].get<size_t>();
-        size_t numInfluences = std::min(end - start, static_cast<size_t>(kMaxSkinJoints));
-
-        for (size_t j = 0; j < numInfluences; ++j) {
-          const auto& pair = skinningWeights[start + j];
-          // Each pair is [joint index, skinning weight]
-          skinWeights.index(i, j) = pair[0].get<uint32_t>();
-          skinWeights.weight(i, j) = pair[1].get<float>();
-        }
-      }
-    }
+    parseSkinningWeights(*skinningWeightsItr, *skinningOffsetsItr, skinWeights);
   }
 
   return std::make_pair(std::move(mesh), std::move(skinWeights));
