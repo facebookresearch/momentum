@@ -18,23 +18,41 @@ PyMomentum is available through multiple package managers. Pre-built binaries ar
 
 ### Quick Installation
 
-Choose your preferred installation method based on your workflow:
+Choose your preferred installation method based on your workflow. **We recommend using Conda or Pixi** for the most stable experience.
 
-#### PyPI (pip, uv)
+#### Pixi (Recommended)
 
-**Best for:** Standard Python projects, virtual environments, pip-based workflows.
+**Best for:** Development, reproducible environments, managing C++ dependencies alongside Python.
 
 ```bash
-# Using uv (preferred over pip)
-uv add pymomentum-cpu   # CPU version
-uv add pymomentum-gpu   # GPU version (requires CUDA)
+# Auto-detects GPU/CPU based on system
+pixi add pymomentum
 
-# Alternative: Using pip
-pip install pymomentum-cpu
-pip install pymomentum-gpu
+# Explicit backend selection
+pixi add pymomentum-cpu  # CPU-only
+pixi add pymomentum-gpu  # GPU (CUDA) support
 ```
 
-**Browse packages:** [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
+**Browse packages:** [prefix.dev/channels/conda-forge/packages/momentum](https://prefix.dev/channels/conda-forge/packages/momentum)
+
+#### Conda (Recommended)
+
+**Best for:** Existing conda workflows, scientific Python environments.
+
+```bash
+# Auto-detects GPU/CPU based on system
+conda install -c conda-forge pymomentum
+
+# Explicit backend selection
+conda install -c conda-forge pymomentum-cpu  # CPU-only
+conda install -c conda-forge pymomentum-gpu  # GPU (CUDA) support
+```
+
+**Browse packages:** [anaconda.org/conda-forge/momentum](https://anaconda.org/conda-forge/momentum)
+
+#### PyPI (Experimental ⚠️)
+
+**Best for:** Standard Python projects, virtual environments, pip-based workflows.
 
 :::caution Experimental PyPI Support
 
@@ -50,35 +68,17 @@ For the most stable and well-tested installation experience, we recommend using 
 
 :::
 
-#### Pixi
-
-**Best for:** Development, reproducible environments, managing C++ dependencies alongside Python.
-
 ```bash
-# Auto-detects GPU/CPU based on system
-pixi add pymomentum
+# Using uv (preferred over pip)
+uv add pymomentum-cpu   # CPU version
+uv add pymomentum-gpu   # GPU version (requires CUDA)
 
-# Explicit backend selection
-pixi add pymomentum-cpu  # CPU-only
-pixi add pymomentum-gpu  # GPU (CUDA) support
+# Alternative: Using pip
+pip install pymomentum-cpu
+pip install pymomentum-gpu
 ```
 
-**Browse packages:** [prefix.dev/channels/conda-forge/packages/momentum](https://prefix.dev/channels/conda-forge/packages/momentum)
-
-#### Conda
-
-**Best for:** Existing conda workflows, scientific Python environments.
-
-```bash
-# Auto-detects GPU/CPU based on system
-conda install -c conda-forge pymomentum
-
-# Explicit backend selection
-conda install -c conda-forge pymomentum-cpu  # CPU-only
-conda install -c conda-forge pymomentum-gpu  # GPU (CUDA) support
-```
-
-**Browse packages:** [anaconda.org/conda-forge/momentum](https://anaconda.org/conda-forge/momentum)
+**Browse packages:** [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
 
 ### Checking Available Versions
 
