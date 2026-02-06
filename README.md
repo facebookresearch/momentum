@@ -33,28 +33,28 @@ numerical optimization solvers to apply human motion in various applications.
 Pre-built binaries are available for Windows, macOS, and Linux:
 
 ```bash
-# Python (PyPI) - uv preferred over pip
-uv add pymomentum-cpu           # CPU version
-uv add pymomentum-gpu           # GPU version with CUDA
-pip install pymomentum-cpu      # Alternative: using pip
-pip install pymomentum-gpu
-
-# Python (Conda/Pixi)
+# Python (Conda/Pixi) - Recommended
 pixi add pymomentum             # Auto-detects GPU/CPU
 conda install -c conda-forge pymomentum
 
-# C++ (Conda/Pixi only)
+# C++ (Conda/Pixi)
 pixi add momentum-cpp
 conda install -c conda-forge momentum-cpp
+
+# Python (PyPI) - Experimental ⚠️
+pip install pymomentum-cpu      # CPU version
+pip install pymomentum-gpu      # GPU version with CUDA
 ```
 
-**📦 Browse packages:** [PyPI](https://pypi.org/search/?q=pymomentum) • [conda-forge](https://anaconda.org/conda-forge/momentum) • [prefix.dev](https://prefix.dev/channels/conda-forge/packages/momentum)
+> ⚠️ **PyPI support is experimental.** For the most stable experience, we recommend using Conda or Pixi.
+
+**📦 Browse packages:** [conda-forge](https://anaconda.org/conda-forge/momentum) • [prefix.dev](https://prefix.dev/channels/conda-forge/packages/momentum) • [PyPI](https://pypi.org/search/?q=pymomentum)
 
 ### Quick Example
 
 ```bash
 # Install and run
-pip install pymomentum-cpu
+conda install -c conda-forge pymomentum
 python -c "import pymomentum.geometry as geom; print(dir(geom))"
 ```
 
