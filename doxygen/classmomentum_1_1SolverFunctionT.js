@@ -20,6 +20,6 @@ var classmomentum_1_1SolverFunctionT =
     [ "updateParameters", "classmomentum_1_1SolverFunctionT.html#a7c9e49f0d0ab7a922621afd5e96c60ed", null ],
     [ "actualParameters_", "classmomentum_1_1SolverFunctionT.html#a6dce4ef63d088f4eabd17b11d57d01be", null ],
     [ "numParameters_", "classmomentum_1_1SolverFunctionT.html#a94714d7b39cd57846cfe7f9cc19c7625", null ],
-    [ "tJacobian_", "classmomentum_1_1SolverFunctionT.html#a5253eeaff5ce2f87e5798d45261ce54a", null ],
-    [ "tResidual_", "classmomentum_1_1SolverFunctionT.html#afc9f6cd785bf08c7d5a565e67e2bfe93", null ]
+    [ "tJacobian_", "classmomentum_1_1SolverFunctionT.html#adcdb81b8ab3d755f35220ff9c297fc73", null ],
+    [ "tResidual_", "classmomentum_1_1SolverFunctionT.html#a70a7bf51c96f716a40b916c6eae59b52", null ]
 ];

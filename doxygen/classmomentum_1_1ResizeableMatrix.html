@@ -93,12 +93,16 @@ $(document).ready(function(){initNavTree('classmomentum_1_1ResizeableMatrix.html
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="classmomentum_1_1ResizeableMatrix-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">momentum::ResizeableMatrix&lt; T &gt; Class Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>&gt;</code></p>
+<p>A matrix class that can be resized without reallocating memory when shrinking.  
+ <a href="classmomentum_1_1ResizeableMatrix.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -117,19 +121,28 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ad1afeb4b46ce6ee8acba07bdc8d567e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae049a055618eb21b47312f436e5b5c4" id="r_aae049a055618eb21b47312f436e5b5c4"><td class="memItemLeft" align="right" valign="top">Eigen::Index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:aae049a055618eb21b47312f436e5b5c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae81dda86841f5f0ded1f11a8e370f2e7" id="r_ae81dda86841f5f0ded1f11a8e370f2e7"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned16 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ae81dda86841f5f0ded1f11a8e370f2e7">mat</a> ()</td></tr>
-<tr class="separator:ae81dda86841f5f0ded1f11a8e370f2e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9dc3373d03aba7be6c68d95385de9165" id="r_a9dc3373d03aba7be6c68d95385de9165"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned16 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9dc3373d03aba7be6c68d95385de9165">mat</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="separator:a9dc3373d03aba7be6c68d95385de9165"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55b78655e60cf3ac0365e1683a6a9aee" id="r_a55b78655e60cf3ac0365e1683a6a9aee"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned16 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a55b78655e60cf3ac0365e1683a6a9aee">vec</a> ()</td></tr>
-<tr class="separator:a55b78655e60cf3ac0365e1683a6a9aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c05b08845cce29afb3cf458dc83a0eb" id="r_a0c05b08845cce29afb3cf458dc83a0eb"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned16 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a0c05b08845cce29afb3cf458dc83a0eb">vec</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="separator:a0c05b08845cce29afb3cf458dc83a0eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3320671c1daf30f3319110cc1c6b286d" id="r_a3320671c1daf30f3319110cc1c6b286d"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a3320671c1daf30f3319110cc1c6b286d">mat</a> ()</td></tr>
+<tr class="separator:a3320671c1daf30f3319110cc1c6b286d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81edd3d293a1a1886f38b81296dc2b37" id="r_a81edd3d293a1a1886f38b81296dc2b37"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a81edd3d293a1a1886f38b81296dc2b37">mat</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a81edd3d293a1a1886f38b81296dc2b37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa917558dd8eff272e5d9dc15a8077c21" id="r_aa917558dd8eff272e5d9dc15a8077c21"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21">vec</a> ()</td></tr>
+<tr class="memdesc:aa917558dd8eff272e5d9dc15a8077c21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vector accessor for single-column matrices.  <br /></td></tr>
+<tr class="separator:aa917558dd8eff272e5d9dc15a8077c21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01eb4ee04d7ec36a4979242ac6272126" id="r_a01eb4ee04d7ec36a4979242ac6272126"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a01eb4ee04d7ec36a4979242ac6272126">vec</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a01eb4ee04d7ec36a4979242ac6272126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:ababf2c1c21f4f645f06e974b19d003cc" id="r_ababf2c1c21f4f645f06e974b19d003cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">static</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ababf2c1c21f4f645f06e974b19d003cc">kAlignment</a> = 128</td></tr>
+<tr class="memdesc:ababf2c1c21f4f645f06e974b19d003cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alignment in bytes for SIMD and cache efficiency.  <br /></td></tr>
+<tr class="separator:ababf2c1c21f4f645f06e974b19d003cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::ResizeableMatrix&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00085">85</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+class momentum::ResizeableMatrix&lt; T &gt;</div><p>A matrix class that can be resized without reallocating memory when shrinking. </p>
+<p>The native <a class="el" href="namespaceEigen.html">Eigen</a> matrix type reallocates the matrix every time you call either <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">resize()</a> or <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a>, which means there is no way to have a matrix that reuses memory. This is inconvenient, because there are definitely cases where we want to be able to reuse the same memory over and over for slightly different matrix sizes (for example, if we are computing our Jacobian blockwise). </p>
+
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00027">27</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a9e48c22eaec41a470b6b6a439f796254" name="a9e48c22eaec41a470b6b6a439f796254"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9e48c22eaec41a470b6b6a439f796254">&#9670;&#160;</a></span>MatrixType</h2>
@@ -145,7 +158,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00087">87</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00032">32</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -213,9 +226,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00090">90</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00035">35</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00106">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, <a class="el" href="online__householder__qr_8h_source.html#l00094">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00103">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
+<p class="reference">References <a class="el" href="resizeable__matrix_8h_source.html#l00051">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, <a class="el" href="resizeable__matrix_8h_source.html#l00039">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00048">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
 
 </div>
 </div>
@@ -245,14 +258,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00106">106</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00051">51</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00090">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00094">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00035">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00039">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
 
 </div>
 </div>
-<a id="ae81dda86841f5f0ded1f11a8e370f2e7" name="ae81dda86841f5f0ded1f11a8e370f2e7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae81dda86841f5f0ded1f11a8e370f2e7">&#9670;&#160;</a></span>mat() <span class="overload">[1/2]</span></h2>
+<a id="a3320671c1daf30f3319110cc1c6b286d" name="a3320671c1daf30f3319110cc1c6b286d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3320671c1daf30f3319110cc1c6b286d">&#9670;&#160;</a></span>mat() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -263,7 +276,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Map&lt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned16 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::mat </td>
+          <td class="memname">Eigen::Map&lt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned128 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::mat </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -276,12 +289,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00110">110</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00055">55</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
-<a id="a9dc3373d03aba7be6c68d95385de9165" name="a9dc3373d03aba7be6c68d95385de9165"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9dc3373d03aba7be6c68d95385de9165">&#9670;&#160;</a></span>mat() <span class="overload">[2/2]</span></h2>
+<a id="a81edd3d293a1a1886f38b81296dc2b37" name="a81edd3d293a1a1886f38b81296dc2b37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81edd3d293a1a1886f38b81296dc2b37">&#9670;&#160;</a></span>mat() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -292,7 +305,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned16 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::mat </td>
+          <td class="memname">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned128 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::mat </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -305,7 +318,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00113">113</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00058">58</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -345,11 +358,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00094">94</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00039">39</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00106">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00103">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
+<p class="reference">References <a class="el" href="resizeable__matrix_8h_source.html#l00051">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00048">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00090">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00035">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>.</p>
 
 </div>
 </div>
@@ -378,14 +391,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00103">103</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00048">48</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00090">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00094">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00035">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00039">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
 
 </div>
 </div>
-<a id="a55b78655e60cf3ac0365e1683a6a9aee" name="a55b78655e60cf3ac0365e1683a6a9aee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55b78655e60cf3ac0365e1683a6a9aee">&#9670;&#160;</a></span>vec() <span class="overload">[1/2]</span></h2>
+<a id="aa917558dd8eff272e5d9dc15a8077c21" name="aa917558dd8eff272e5d9dc15a8077c21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa917558dd8eff272e5d9dc15a8077c21">&#9670;&#160;</a></span>vec() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -396,7 +409,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Map&lt; Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned16 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::vec </td>
+          <td class="memname">Eigen::Map&lt; Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned128 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::vec </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -409,12 +422,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00118">118</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>Vector accessor for single-column matrices. </p>
+
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00063">63</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
-<a id="a0c05b08845cce29afb3cf458dc83a0eb" name="a0c05b08845cce29afb3cf458dc83a0eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c05b08845cce29afb3cf458dc83a0eb">&#9670;&#160;</a></span>vec() <span class="overload">[2/2]</span></h2>
+<a id="a01eb4ee04d7ec36a4979242ac6272126" name="a01eb4ee04d7ec36a4979242ac6272126"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01eb4ee04d7ec36a4979242ac6272126">&#9670;&#160;</a></span>vec() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -425,7 +440,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned16 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::vec </td>
+          <td class="memname">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned128 &gt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::vec </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -438,12 +453,41 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00121">121</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00066">66</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ababf2c1c21f4f645f06e974b19d003cc" name="ababf2c1c21f4f645f06e974b19d003cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ababf2c1c21f4f645f06e974b19d003cc">&#9670;&#160;</a></span>kAlignment</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> std::size_t <a class="el" href="classmomentum_1_1ResizeableMatrix.html">momentum::ResizeableMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::kAlignment = 128</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Alignment in bytes for SIMD and cache efficiency. </p>
+
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00030">30</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>math/<a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a></li>
+<li>math/<a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -451,7 +495,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ResizeableMatrix.html">ResizeableMatrix</a></li>
-    <li class="footer">Generated on Thu Feb 5 2026 20:48:42 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Feb 6 2026 16:41:44 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

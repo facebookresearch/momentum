@@ -1,7 +1,6 @@
 var online__householder__qr_8h =
 [
     [ "momentum::ColumnIndexedMatrix< MatrixType >", "classmomentum_1_1ColumnIndexedMatrix.html", "classmomentum_1_1ColumnIndexedMatrix" ],
-    [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", "classmomentum_1_1ResizeableMatrix" ],
     [ "momentum::OnlineHouseholderQR< T >", "classmomentum_1_1OnlineHouseholderQR.html", "classmomentum_1_1OnlineHouseholderQR" ],
     [ "momentum::OnlineBlockHouseholderQR< T >", "classmomentum_1_1OnlineBlockHouseholderQR.html", "classmomentum_1_1OnlineBlockHouseholderQR" ],
     [ "momentum::OnlineBandedHouseholderQR< T >", "classmomentum_1_1OnlineBandedHouseholderQR.html", "classmomentum_1_1OnlineBandedHouseholderQR" ],

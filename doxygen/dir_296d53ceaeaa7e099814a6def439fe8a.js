@@ -17,6 +17,7 @@ var dir_296d53ceaeaa7e099814a6def439fe8a =
     [ "online_householder_qr.h", "online__householder__qr_8h.html", "online__householder__qr_8h" ],
     [ "random-inl.h", "random-inl_8h.html", "random-inl_8h" ],
     [ "random.h", "random_8h.html", "random_8h" ],
+    [ "resizeable_matrix.h", "resizeable__matrix_8h.html", "resizeable__matrix_8h" ],
     [ "simd_generalized_loss.cpp", "simd__generalized__loss_8cpp.html", null ],
     [ "simd_generalized_loss.h", "simd__generalized__loss_8h.html", "simd__generalized__loss_8h" ],
     [ "transform.cpp", "transform_8cpp.html", "transform_8cpp" ],

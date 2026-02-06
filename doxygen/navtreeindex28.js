@@ -1,5 +1,7 @@
 var NAVTREEINDEX28 =
 {
+"position__error__function_8cpp_source.html":[3,0,2,36],
+"position__error__function_8h.html":[3,0,2,37],
 "position__error__function_8h_source.html":[3,0,2,37],
 "process__markers_8cpp.html":[3,0,7,4],
 "process__markers_8cpp.html#a300df18d7318af4d7ee4620800381487":[3,0,7,4,0],
@@ -83,6 +85,8 @@ var NAVTREEINDEX28 =
 "rerun__compat_8h.html#aab46147e3c66762d1bc4aa29d526fb3f":[3,0,5,0,5,2],
 "rerun__compat_8h.html#ab8ef65432a07d48d30b436f68bbce068":[3,0,5,0,5,4],
 "rerun__compat_8h_source.html":[3,0,5,0,5],
+"resizeable__matrix_8h.html":[3,0,8,17],
+"resizeable__matrix_8h_source.html":[3,0,8,17],
 "sequence__error__function_8h.html":[3,0,1,13],
 "sequence__error__function_8h_source.html":[3,0,1,13],
 "sequence__solver_8cpp.html":[3,0,1,14],
@@ -145,10 +149,10 @@ var NAVTREEINDEX28 =
 "simd__collision__error__function_8cpp_source.html":[3,0,2,40],
 "simd__collision__error__function_8h.html":[3,0,2,41],
 "simd__collision__error__function_8h_source.html":[3,0,2,41],
-"simd__generalized__loss_8cpp.html":[3,0,8,17],
-"simd__generalized__loss_8cpp_source.html":[3,0,8,17],
-"simd__generalized__loss_8h.html":[3,0,8,18],
-"simd__generalized__loss_8h_source.html":[3,0,8,18],
+"simd__generalized__loss_8cpp.html":[3,0,8,18],
+"simd__generalized__loss_8cpp_source.html":[3,0,8,18],
+"simd__generalized__loss_8h.html":[3,0,8,19],
+"simd__generalized__loss_8h_source.html":[3,0,8,19],
 "simd__normal__error__function_8cpp.html":[3,0,2,42],
 "simd__normal__error__function_8cpp.html#a5b98c60e3928b97ccf8d965d64d7aeba":[3,0,2,42,1],
 "simd__normal__error__function_8cpp.html#aa088132c2b7a83450a38272743634159":[3,0,2,42,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX28 =
 "solver_2fwd_8h.html#a08da40d0920be721fc1b8539b57b4d30":[3,0,10,0,21],
 "solver_2fwd_8h.html#a0b2b989697780d7020013a1320f088ee":[3,0,10,0,88],
 "solver_2fwd_8h.html#a0b694052a5b566a72242a379518e6737":[3,0,10,0,15],
-"solver_2fwd_8h.html#a0e2f59b1c62f850028b43354ced34843":[3,0,10,0,95],
-"solver_2fwd_8h.html#a109e018cd1cb5d45c3d5b918d980dfc0":[3,0,10,0,89],
-"solver_2fwd_8h.html#a159966c15b15c641d0118f8a726d3aa8":[3,0,10,0,61],
-"solver_2fwd_8h.html#a16b7db86306904437bccae112f0732fb":[3,0,10,0,70],
-"solver_2fwd_8h.html#a1b35fd15e0ba3173fec151d3e4cd5a48":[3,0,10,0,56]
+"solver_2fwd_8h.html#a0e2f59b1c62f850028b43354ced34843":[3,0,10,0,95]
 };

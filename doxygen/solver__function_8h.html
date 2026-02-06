@@ -92,11 +92,14 @@ $(document).ready(function(){initNavTree('solver__function_8h.html',''); initRes
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">solver_function.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="resizeable__matrix_8h_source.html">momentum/math/resizeable_matrix.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="solver_2fwd_8h_source.html">momentum/solver/fwd.h</a>&gt;</code><br />
 <code>#include &lt;unordered_map&gt;</code><br />
 </div>
@@ -112,6 +115,18 @@ Classes</h2></td></tr>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a379a9f29239952580ea7d8f72fb6ad06" id="r_a379a9f29239952580ea7d8f72fb6ad06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a379a9f29239952580ea7d8f72fb6ad06">momentum::padToSimdAlignment</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> size)</td></tr>
+<tr class="memdesc:a379a9f29239952580ea7d8f72fb6ad06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pads a row count to be a multiple of kJacobianRowAlignment for SIMD alignment.  <br /></td></tr>
+<tr class="separator:a379a9f29239952580ea7d8f72fb6ad06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a42392d2c0ea98b2266ed3c4262e713d3" id="r_a42392d2c0ea98b2266ed3c4262e713d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a42392d2c0ea98b2266ed3c4262e713d3">momentum::kJacobianRowAlignment</a> = 8</td></tr>
+<tr class="memdesc:a42392d2c0ea98b2266ed3c4262e713d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alignment for SIMD operations on Jacobian rows (8 floats = 32 bytes for AVX).  <br /></td></tr>
+<tr class="separator:a42392d2c0ea98b2266ed3c4262e713d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -119,7 +134,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_3d09adf0dd1004472234d9d9738f22d7.html">solver</a></li><li class="navelem"><a class="el" href="solver__function_8h.html">solver_function.h</a></li>
-    <li class="footer">Generated on Thu Feb 5 2026 20:48:41 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Feb 6 2026 16:41:44 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

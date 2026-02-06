@@ -5,7 +5,7 @@ var searchData=
   ['validatecolumnindices_2',['validateColumnIndices',['../namespacemomentum.html#a90f78fa7289eef455c8a6345cfce7899',1,'momentum']]],
   ['value_3',['value',['../classmomentum_1_1SimdGeneralizedLossT.html#a657f29f85153da2898f894f2c0437a3c',1,'momentum::SimdGeneralizedLossT::value()'],['../classmomentum_1_1GeneralizedLossT.html#a28df165318ba09277880704efd016929',1,'momentum::GeneralizedLossT::value()']]],
   ['value_5ftype_4',['value_type',['../classmomentum_1_1AlignedAllocator.html#ae1501f6ef686a19fd7b7c0ec932dd2a3',1,'momentum::AlignedAllocator']]],
-  ['vec_5',['vec',['../classmomentum_1_1ResizeableMatrix.html#a0c05b08845cce29afb3cf458dc83a0eb',1,'momentum::ResizeableMatrix::vec() const'],['../classmomentum_1_1ResizeableMatrix.html#a55b78655e60cf3ac0365e1683a6a9aee',1,'momentum::ResizeableMatrix::vec()']]],
+  ['vec_5',['vec',['../classmomentum_1_1ResizeableMatrix.html#a01eb4ee04d7ec36a4979242ac6272126',1,'momentum::ResizeableMatrix::vec() const'],['../classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21',1,'momentum::ResizeableMatrix::vec()']]],
   ['vector_6',['Vector',['../namespacemomentum.html#a4135bf580199cdb17665b7f4bad7eda3',1,'momentum']]],
   ['vector0_7',['Vector0',['../namespacemomentum.html#a948bb45234c6e9aa43a4f71b270aa59c',1,'momentum']]],
   ['vector0b_8',['Vector0b',['../namespacemomentum.html#ac4252fb2fafa27758baf03875016dbb4',1,'momentum']]],
