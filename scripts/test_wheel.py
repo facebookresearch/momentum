@@ -3,27 +3,116 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Test wheel imports in a manylinux_2_28 compatible environment using podman."""
+"""Test wheel imports using uv for fast, reliable testing across platforms.
+
+Supports:
+- Linux: Tests in manylinux_2_28 container via docker or podman (auto-detected)
+- macOS/Windows: Tests locally using uv virtual environments
+- Multiple Python versions via uv's Python management
+"""
 
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
-def test_in_container(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
-    """Test wheel in a manylinux_2_28 container using podman."""
-    print(f"Testing wheel in manylinux_2_28 container: {wheel_file.name}")
-
-    # Torch index URL based on wheel type
+def get_torch_index(wheel_type: str) -> str:
+    """Get the appropriate PyTorch index URL for the wheel type."""
     if wheel_type == "gpu":
-        torch_index = "https://download.pytorch.org/whl/cu128"
-    else:
-        torch_index = "https://download.pytorch.org/whl/cpu"
+        return "https://download.pytorch.org/whl/cu128"
+    return "https://download.pytorch.org/whl/cpu"
 
-    # Container command to test the wheel
-    # py_ver is like "cp312" or "cp313", so py_ver[2:] gives "312" or "313"
+
+def run_import_tests(python_exe: str) -> int:
+    """Run import and parallel operation tests using the specified Python."""
+    test_script = """
+import sys
+
+print("Testing imports...")
+try:
+    import pymomentum.geometry as geom
+    import pymomentum.solver as solver
+    import pymomentum.solver2 as solver2
+    import pymomentum.marker_tracking as marker_tracking
+    import pymomentum.axel as axel
+    print("✓ All imports successful")
+except Exception as e:
+    print(f"✗ Import failed: {e}", file=sys.stderr)
+    sys.exit(1)
+
+print("Testing parallel operations (MHR issue #44 regression test)...")
+try:
+    import numpy as np
+    import pymomentum.geometry as geom
+
+    # Create a simple triangle mesh for testing
+    vertices = np.array([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+    ], dtype=np.float32)
+    triangles = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.int32)
+
+    # compute_vertex_normals uses dispenso::parallel_for internally;
+    # this would segfault if libgomp is not bundled correctly
+    print("  Computing vertex normals...")
+    normals = geom.compute_vertex_normals(vertices, triangles)
+    assert normals.shape[-1] == 3, f"Expected 3D normals, got shape {normals.shape}"
+    assert np.all(np.isfinite(normals)), "Normals contain non-finite values"
+    print(f"  Normals shape: {normals.shape}")
+
+    # find_closest_points also uses dispenso::parallel_for;
+    # test with batched points to stress the parallel codepath
+    source = np.random.rand(100, 3).astype(np.float32)
+    target = np.random.rand(50, 3).astype(np.float32)
+    print("  Finding closest points...")
+    result = geom.find_closest_points(source, target)
+    print("  Closest points computation completed")
+
+    print("✓ Parallel operations test passed")
+except Exception as e:
+    print(f"✗ Parallel operations test failed: {e}", file=sys.stderr)
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+
+print("✓ All tests passed!")
+"""
+    result = subprocess.run([python_exe, "-c", test_script], capture_output=False)
+    return result.returncode
+
+
+def find_container_runtime() -> str | None:
+    """Find an available container runtime, preferring docker over podman."""
+    for runtime in ("docker", "podman"):
+        if shutil.which(runtime):
+            return runtime
+    return None
+
+
+def test_in_container(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
+    """Test wheel in a manylinux_2_28 container using docker or podman."""
+    container_runtime = find_container_runtime()
+    if container_runtime is None:
+        print(
+            "✗ No container runtime found (tried docker, podman). "
+            "Falling back to local uv-based testing.",
+            file=sys.stderr,
+        )
+        return test_locally_with_uv(wheel_file, wheel_type, py_ver)
+
+    print(
+        f"Testing wheel in manylinux_2_28 container ({container_runtime}): "
+        f"{wheel_file.name}"
+    )
+
+    torch_index = get_torch_index(wheel_type)
     py_tag = py_ver[2:]  # e.g., "312" or "313"
+
     container_script = f"""
 set -e
 PYTHON=/opt/python/cp{py_tag}-cp{py_tag}/bin/python
@@ -54,12 +143,51 @@ except Exception as e:
     print(f'✗ Import failed: {{e}}', file=sys.stderr)
     sys.exit(1)
 "
+
+echo "Testing parallel operations (MHR issue #44 regression test)..."
+/tmp/test_venv/bin/python -c "
+import sys
+import numpy as np
+try:
+    import pymomentum.geometry as geom
+
+    # Create a simple triangle mesh for testing
+    vertices = np.array([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+    ], dtype=np.float32)
+    triangles = np.array([[0, 1, 2], [1, 3, 2]], dtype=np.int32)
+
+    # compute_vertex_normals uses dispenso::parallel_for internally;
+    # this would segfault if libgomp is not bundled correctly
+    print('  Computing vertex normals...')
+    normals = geom.compute_vertex_normals(vertices, triangles)
+    assert normals.shape[-1] == 3, f'Expected 3D normals, got shape {{normals.shape}}'
+    assert np.all(np.isfinite(normals)), 'Normals contain non-finite values'
+    print(f'  Normals shape: {{normals.shape}}')
+
+    # find_closest_points also uses dispenso::parallel_for;
+    # test with batched points to stress the parallel codepath
+    source = np.random.rand(100, 3).astype(np.float32)
+    target = np.random.rand(50, 3).astype(np.float32)
+    print('  Finding closest points...')
+    result = geom.find_closest_points(source, target)
+    print('  Closest points computation completed')
+
+    print('✓ Parallel operations test passed')
+except Exception as e:
+    print(f'✗ Parallel operations test failed: {{e}}', file=sys.stderr)
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"
 """
 
-    # Run the test in a manylinux_2_28 container
     result = subprocess.run(
         [
-            "podman",
+            container_runtime,
             "run",
             "--rm",
             "-v",
@@ -75,14 +203,92 @@ except Exception as e:
     return result.returncode
 
 
+def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
+    """Test wheel locally using uv for fast virtual environment creation."""
+    print(f"Testing wheel locally with uv: {wheel_file.name}")
+
+    # Check if uv is available
+    uv_path = shutil.which("uv")
+    if not uv_path:
+        print("Installing uv...")
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "--quiet", "uv"], check=True
+        )
+        uv_path = shutil.which("uv") or "uv"
+
+    torch_index = get_torch_index(wheel_type)
+    py_version = f"{py_ver[2]}.{py_ver[3:]}"  # "cp312" -> "3.12"
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        venv_path = Path(tmpdir) / "test_venv"
+
+        # Determine python executable path based on platform
+        if sys.platform == "win32":
+            python_exe = str(venv_path / "Scripts" / "python.exe")
+        else:
+            python_exe = str(venv_path / "bin" / "python")
+
+        print(f"Creating virtual environment with Python {py_version}...")
+        result = subprocess.run(
+            [uv_path, "venv", "--python", py_version, str(venv_path)],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(f"✗ Failed to create venv: {result.stderr}", file=sys.stderr)
+            return result.returncode
+
+        print(f"Installing torch from {torch_index}...")
+        result = subprocess.run(
+            [
+                uv_path,
+                "pip",
+                "install",
+                "--python",
+                python_exe,
+                "torch>=2.8.0,<2.9",
+                "--index-url",
+                torch_index,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(f"✗ Failed to install torch: {result.stderr}", file=sys.stderr)
+            return result.returncode
+
+        print(f"Installing wheel {wheel_file.name}...")
+        result = subprocess.run(
+            [uv_path, "pip", "install", "--python", python_exe, str(wheel_file)],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(f"✗ Failed to install wheel: {result.stderr}", file=sys.stderr)
+            return result.returncode
+
+        return run_import_tests(python_exe)
+
+
 def main():
-    # Determine Python version and wheel type
-    py_ver = f"cp{sys.version_info.major}{sys.version_info.minor}"
+    # Allow override via environment variables for CI flexibility
+    py_ver = os.environ.get("WHEEL_TEST_PYTHON_VERSION")
+    if not py_ver:
+        py_ver = f"cp{sys.version_info.major}{sys.version_info.minor}"
+
     env_name = os.environ.get("PIXI_ENVIRONMENT_NAME", "")
-    wheel_type = "gpu" if "cuda" in env_name else "cpu"
+    wheel_type = os.environ.get("WHEEL_TEST_TYPE")
+    if not wheel_type:
+        wheel_type = "gpu" if "cuda" in env_name or "gpu" in env_name else "cpu"
+
+    print(f"Testing {wheel_type} wheel for Python {py_ver}")
 
     # Find the wheel file
     dist_dir = Path("dist")
+    if not dist_dir.exists():
+        print("✗ dist/ directory not found", file=sys.stderr)
+        sys.exit(1)
+
     wheel_files = [
         f
         for f in dist_dir.iterdir()
@@ -92,20 +298,29 @@ def main():
     ]
 
     if not wheel_files:
+        # Try finding any wheel for this Python version (for platforms that don't include type in name)
+        wheel_files = [
+            f
+            for f in dist_dir.iterdir()
+            if py_ver in f.name and f.name.endswith(".whl")
+        ]
+
+    if not wheel_files:
         print(f"✗ No wheel found for {wheel_type} {py_ver}", file=sys.stderr)
+        print(f"  Available wheels: {list(dist_dir.glob('*.whl'))}", file=sys.stderr)
         sys.exit(1)
 
-    wheel_file = wheel_files[0]
+    # Pick the most recently modified wheel to avoid stale wheels from prior steps
+    wheel_file = max(wheel_files, key=lambda f: f.stat().st_mtime)
+    print(f"Found wheel: {wheel_file.name}")
 
-    # Test in container for Linux manylinux wheels
+    # Choose test method based on platform and wheel type
     if sys.platform == "linux" and "manylinux" in wheel_file.name:
+        # Test in container for manylinux wheels to ensure compatibility
         returncode = test_in_container(wheel_file, wheel_type, py_ver)
     else:
-        # For non-manylinux wheels (macOS, Windows), test locally
-        print(f"Testing wheel locally: {wheel_file.name}")
-        # TODO: Implement local testing for non-Linux platforms
-        print("Local testing not yet implemented for this platform")
-        returncode = 0
+        # For macOS/Windows or non-manylinux wheels, test locally with uv
+        returncode = test_locally_with_uv(wheel_file, wheel_type, py_ver)
 
     sys.exit(returncode)
 
