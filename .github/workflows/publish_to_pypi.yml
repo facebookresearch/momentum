@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-14]
+        os: [macos-14, windows-latest]
         python-version: ['3.12', '3.13']
         include:
           - python-version: '3.12'
@@ -93,11 +93,8 @@ jobs:
             pixi-environment: py313
           - os: macos-14
             os-short: mac-arm64
-    env:
-      # Enable compiler caching (ccache on Linux/macOS)
-      CMAKE_C_COMPILER_LAUNCHER: ccache
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
-
+          - os: windows-latest
+            os-short: win64
     steps:
       # Skip Python 3.13 builds on regular commits to reduce CI cost
       # Python 3.13 builds will still run when publishing (tags or manual workflow_dispatch with publish=true)
@@ -123,11 +120,17 @@ jobs:
           fetch-depth: 0  # Fetch full history for setuptools_scm version detection
           fetch-tags: true  # Ensure all tags are fetched
 
-      - name: Set up ccache
-        if: steps.should_run.outputs.run == 'true'
+      # ccache for macOS
+      - name: Set up ccache (macOS)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'macOS'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}
+
+      # sccache for Windows
+      - name: Set up sccache (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
@@ -149,10 +152,24 @@ jobs:
       - name: Build CPU wheel
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
+        env:
+          # Enable compiler caching: ccache on macOS, sccache on Windows
+          CMAKE_C_COMPILER_LAUNCHER: ${{ runner.os == 'Windows' && 'sccache' || 'ccache' }}
+          CMAKE_CXX_COMPILER_LAUNCHER: ${{ runner.os == 'Windows' && 'sccache' || 'ccache' }}
+          SCCACHE_GHA_ENABLED: ${{ runner.os == 'Windows' && 'true' || '' }}
 
-      - name: Print ccache stats
-        if: steps.should_run.outputs.run == 'true'
+      # Repair wheel on Windows using delvewheel (bundles DLLs)
+      - name: Repair wheel (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_repair
+
+      - name: Print ccache stats (macOS)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'macOS'
         run: ccache -s
+
+      - name: Print sccache stats (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        run: sccache --show-stats
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
@@ -356,6 +373,22 @@ jobs:
             pixi-environment: py313
             artifact-pattern: wheels-cpu-macos-14-py3.13
             wheel-type: cpu
+          # Windows - always test py3.12
+          - os: windows-latest
+            os-short: win64
+            variant: cpu
+            python-version: '3.12'
+            pixi-environment: py312
+            artifact-pattern: wheels-cpu-windows-latest-py3.12
+            wheel-type: cpu
+          # Windows - py3.13 only on tags/releases
+          - os: windows-latest
+            os-short: win64
+            variant: cpu
+            python-version: '3.13'
+            pixi-environment: py313
+            artifact-pattern: wheels-cpu-windows-latest-py3.13
+            wheel-type: cpu
           # Linux GPU - always test py3.12 (import-only, no GPU required)
           - os: ubuntu-latest
             os-short: linux
@@ -415,13 +448,21 @@ jobs:
       - name: List downloaded wheels
         if: steps.should_run.outputs.run == 'true'
         run: ls -lh dist/
+        shell: bash
 
       - name: Test wheel with uv (pixi wheel_test)
-        if: steps.should_run.outputs.run == 'true'
+        if: steps.should_run.outputs.run == 'true' && runner.os != 'Windows'
         env:
           WHEEL_TEST_PYTHON_VERSION: cp${{ matrix.python-version == '3.12' && '312' || '313' }}
           WHEEL_TEST_TYPE: ${{ matrix.wheel-type }}
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_test
+
+      - name: Test wheel with uv (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        env:
+          WHEEL_TEST_PYTHON_VERSION: cp${{ matrix.python-version == '3.12' && '312' || '313' }}
+          WHEEL_TEST_TYPE: ${{ matrix.wheel-type }}
+        run: pixi run -e ${{ matrix.pixi-environment }} python scripts/test_wheel.py
 
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
