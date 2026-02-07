@@ -168,7 +168,7 @@ jobs:
     strategy:
       fail-fast: true
       # Run GPU builds sequentially to avoid disk space exhaustion
-      # Each PyTorch+CUDA install needs ~3GB and Docker overlay shares host disk
+      # Each PyTorch+CUDA install needs ~3GB and container overlay shares host disk
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
@@ -184,8 +184,6 @@ jobs:
             os-short: ubuntu
     env:
       FULL_CUDA_VERSION: ${{ matrix.cuda-version }}
-      # Use docker for CI builds (default for cibuildwheel on GitHub Actions)
-      CIBW_CONTAINER_ENGINE: docker
       # Enable compiler caching (ccache on Linux)
       CMAKE_C_COMPILER_LAUNCHER: ccache
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
@@ -218,11 +216,11 @@ jobs:
           dotnet: true
           haskell: true
           large-packages: true
-          docker-images: false  # Keep Docker for cibuildwheel
+          docker-images: false  # Keep container images for cibuildwheel
           swap-storage: true
 
       - name: Maximize build space (Ubuntu only)
-        # DISABLED: This action restructures the filesystem and breaks Docker functionality
+        # DISABLED: This action restructures the filesystem and breaks container engine functionality
         # The "Free disk space" step above provides enough space for the build
         if: false && steps.should_run.outputs.run == 'true' && matrix.os == 'ubuntu-latest'
         uses: easimon/maximize-build-space@master
@@ -233,7 +231,7 @@ jobs:
           remove-android: true
           remove-haskell: true
           remove-codeql: true
-          remove-docker-images: false  # Keep Docker for cibuildwheel
+          remove-docker-images: false  # Keep container images for cibuildwheel
 
       - uses: actions/checkout@v6
         if: steps.should_run.outputs.run == 'true'
@@ -265,7 +263,7 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
 
-      - name: Determine version for Docker builds
+      - name: Determine version for container builds
         if: steps.should_run.outputs.run == 'true'
         id: get_version
         run: |
@@ -284,18 +282,18 @@ jobs:
         if: steps.should_run.outputs.run == 'true'
         timeout-minutes: 60
         env:
-          # Pass version to cibuildwheel so Docker containers can use it
-          # Without this, setuptools_scm inside Docker would generate 0.0.post1
+          # Pass version to cibuildwheel so containers can use it
+          # Without this, setuptools_scm inside the container would generate 0.0.post1
           CIBW_ENVIRONMENT_PASS_LINUX: SETUPTOOLS_SCM_PRETEND_VERSION
           SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.get_version.outputs.version }}
         run: |
           echo "=== Starting GPU wheel build ==="
           echo "Environment: ${{ matrix.pixi-environment }}"
           echo "Version: $SETUPTOOLS_SCM_PRETEND_VERSION"
-          echo "Docker version:"
-          docker --version || echo "Docker not available"
-          echo "=== Checking Docker status ==="
-          docker info || echo "Docker info failed"
+          echo "=== Detecting container engine ==="
+          source scripts/detect_container_engine.sh
+          $CIBW_CONTAINER_ENGINE --version || echo "Container engine not available"
+          $CIBW_CONTAINER_ENGINE info || echo "Container engine info failed"
           echo "=== Running wheel_build ==="
           pixi run -e ${{ matrix.pixi-environment }} wheel_build
           echo "=== Build completed ==="
@@ -316,9 +314,118 @@ jobs:
           path: dist/*.whl
           retention-days: 7
 
+  # Regression test: Verify pip wheels work correctly (import test, parallel operations)
+  # Tests all build variants with same skip logic as builds (py3.13 only on tags/releases)
+  test_pip_wheels:
+    name: Test pip wheel - ${{ matrix.variant }}-py${{ matrix.python-version }}-${{ matrix.os-short }}
+    needs: [build_cpu_wheels_linux, build_cpu_wheels, build_gpu_wheels]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux CPU - always test py3.12
+          - os: ubuntu-latest
+            os-short: linux
+            variant: cpu
+            python-version: '3.12'
+            pixi-environment: py312
+            artifact-pattern: wheels-cpu-linux
+            wheel-type: cpu
+          # Linux CPU - py3.13 only on tags/releases
+          - os: ubuntu-latest
+            os-short: linux
+            variant: cpu
+            python-version: '3.13'
+            pixi-environment: py313
+            artifact-pattern: wheels-cpu-linux
+            wheel-type: cpu
+          # macOS - always test py3.12
+          - os: macos-14
+            os-short: mac-arm64
+            variant: cpu
+            python-version: '3.12'
+            pixi-environment: py312
+            artifact-pattern: wheels-cpu-macos-14-py3.12
+            wheel-type: cpu
+          # macOS - py3.13 only on tags/releases
+          - os: macos-14
+            os-short: mac-arm64
+            variant: cpu
+            python-version: '3.13'
+            pixi-environment: py313
+            artifact-pattern: wheels-cpu-macos-14-py3.13
+            wheel-type: cpu
+          # Linux GPU - always test py3.12 (import-only, no GPU required)
+          - os: ubuntu-latest
+            os-short: linux
+            variant: gpu
+            python-version: '3.12'
+            pixi-environment: py312
+            artifact-pattern: wheels-gpu-ubuntu-latest-py3.12
+            wheel-type: gpu
+          # Linux GPU - py3.13 only on tags/releases
+          - os: ubuntu-latest
+            os-short: linux
+            variant: gpu
+            python-version: '3.13'
+            pixi-environment: py313
+            artifact-pattern: wheels-gpu-ubuntu-latest-py3.13
+            wheel-type: gpu
+
+    steps:
+      # Skip py3.13 tests on regular commits (same logic as builds)
+      - name: Check if should run
+        id: should_run
+        run: |
+          if [[ "${{ matrix.python-version }}" == "3.13" ]]; then
+            if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]] || \
+               [[ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' }}" == "true" ]]; then
+              echo "run=true" >> $GITHUB_OUTPUT
+            else
+              echo "run=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "run=true" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - uses: actions/checkout@v6
+        if: steps.should_run.outputs.run == 'true'
+        with:
+          submodules: recursive
+
+      - name: Set up pixi
+        if: steps.should_run.outputs.run == 'true'
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          pixi-version: latest
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          environments: ${{ matrix.pixi-environment }}
+
+      - name: Download wheel artifacts
+        if: steps.should_run.outputs.run == 'true'
+        uses: actions/download-artifact@v7
+        with:
+          path: dist
+          pattern: ${{ matrix.artifact-pattern }}
+          merge-multiple: true
+
+      - name: List downloaded wheels
+        if: steps.should_run.outputs.run == 'true'
+        run: ls -lh dist/
+
+      - name: Test wheel with uv (pixi wheel_test)
+        if: steps.should_run.outputs.run == 'true'
+        env:
+          WHEEL_TEST_PYTHON_VERSION: cp${{ matrix.python-version == '3.12' && '312' || '313' }}
+          WHEEL_TEST_TYPE: ${{ matrix.wheel-type }}
+        run: pixi run -e ${{ matrix.pixi-environment }} wheel_test
+
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
-    needs: [build_cpu_wheels_linux, build_cpu_wheels]
+    needs: [build_cpu_wheels_linux, build_cpu_wheels, test_pip_wheels]
     runs-on: ubuntu-latest
     environment:
       name: pypi-cpu
@@ -356,7 +463,7 @@ jobs:
 
   publish_gpu:
     name: Publish pymomentum-gpu to PyPI
-    needs: [build_gpu_wheels]
+    needs: [build_gpu_wheels, test_pip_wheels]
     runs-on: ubuntu-latest
     environment:
       name: pypi-gpu

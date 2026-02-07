@@ -615,7 +615,7 @@ gpu = ["py312-cuda129", "rerun-latest"]
 gpu-wheel-build-py312 = ["gpu-wheel-build", "gpu-wheel-build-py312"]
 gpu-wheel-build-py313 = ["gpu-wheel-build", "gpu-wheel-build-py313"]
 
-# Minimal build environment (for GPU wheel builds with limited disk space in Docker containers)
+# Minimal build environment (for GPU wheel builds with limited disk space in containers)
 minimal-build = ["minimal-build", "rerun-latest"]
 
 # Legacy dependencies environments (for internal BUCK build compatibility testing)
