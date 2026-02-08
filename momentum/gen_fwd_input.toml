@@ -137,7 +137,6 @@ template_classes = [
     "GaussNewtonSolver",
     "SparseGaussNewtonSolver",
     "GradientDescentSolver",
-    "SubsetGaussNewtonSolver",
 ]
 
 [[fwd]]

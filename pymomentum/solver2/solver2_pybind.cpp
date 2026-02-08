@@ -16,7 +16,6 @@
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/skeleton_solver_function.h>
 #include <momentum/solver/gauss_newton_solver.h>
-#include <momentum/solver/subset_gauss_newton_solver.h>
 
 #include <dispenso/parallel_for.h> // @manual
 #include <fmt/format.h>
@@ -521,23 +520,6 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       });
 
   py::class_<
-      mm::SubsetGaussNewtonSolverOptions,
-      mm::GaussNewtonSolverBaseOptions,
-      std::shared_ptr<mm::SubsetGaussNewtonSolverOptions>>(
-      m, "SubsetGaussNewtonSolverOptions", "Options specific to the Subset Gauss-Newton solver")
-      .def(py::init<>())
-      .def("__repr__", [](const mm::SubsetGaussNewtonSolverOptions& self) {
-        return fmt::format(
-            "SubsetGaussNewtonSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={})",
-            self.minIterations,
-            self.maxIterations,
-            self.threshold,
-            boolToString(self.verbose),
-            self.regularization,
-            boolToString(self.doLineSearch));
-      });
-
-  py::class_<
       mm::SequenceSolverOptions,
       mm::SolverOptions,
       std::shared_ptr<mm::SequenceSolverOptions>>(
@@ -624,20 +606,6 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           py::keep_alive<1, 2>(),
           py::arg("solver_function"),
           py::arg("options") = std::optional<mm::GaussNewtonSolverQROptions>{});
-
-  py::class_<mm::SubsetGaussNewtonSolver, mm::Solver, std::shared_ptr<mm::SubsetGaussNewtonSolver>>(
-      m,
-      "SubsetGaussNewtonSolver",
-      "Gauss-Newton solver that optimizes only a selected subset of parameters")
-      .def(
-          py::init<>([](mm::SolverFunction* solverFunction,
-                        const std::optional<mm::SubsetGaussNewtonSolverOptions>& options) {
-            return std::make_shared<mm::SubsetGaussNewtonSolver>(
-                options.value_or(mm::SubsetGaussNewtonSolverOptions{}), solverFunction);
-          }),
-          py::keep_alive<1, 2>(),
-          py::arg("solver_function"),
-          py::arg("options") = std::optional<mm::SubsetGaussNewtonSolverOptions>{});
 
   m.def(
       "solve_sequence",
