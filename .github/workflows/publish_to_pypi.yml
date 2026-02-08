@@ -283,7 +283,42 @@ jobs:
 
       # Note: No separate CUDA toolkit install needed for Windows.
       # conda-forge's cuda-toolkit (via pixi) provides nvcc and CUDA headers/libs.
-      # We use Ninja generator to avoid MSBuild CUDA .targets PATH issues.
+      # We use Ninja generator (set in pyproject-pypi.toml.j2) to avoid MSBuild CUDA
+      # .targets PATH issues. CMAKE_CUDA_HOST_COMPILER points nvcc to cl.exe directly.
+
+      - name: Find MSVC cl.exe path (Windows GPU)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        id: msvc
+        shell: bash
+        run: |
+          # Find vswhere.exe (installed by default on GitHub-hosted Windows runners)
+          VSWHERE="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
+          if [ ! -f "$VSWHERE" ]; then
+            echo "::error::vswhere.exe not found"
+            exit 1
+          fi
+
+          # Get the Visual Studio installation path
+          VS_PATH=$("$VSWHERE" -latest -property installationPath)
+          echo "Visual Studio path: $VS_PATH"
+
+          # Find cl.exe for the host architecture (x64)
+          CL_PATH=$(find "$VS_PATH/VC/Tools/MSVC" -name "cl.exe" -path "*/Hostx64/x64/*" | head -1)
+          if [ -z "$CL_PATH" ]; then
+            echo "::error::cl.exe not found in Visual Studio installation"
+            exit 1
+          fi
+          echo "cl.exe found: $CL_PATH"
+
+          # Convert to Windows path format for CMake
+          CL_PATH_WIN=$(cygpath -w "$CL_PATH")
+          echo "cl.exe (Windows path): $CL_PATH_WIN"
+          echo "cl_path=$CL_PATH_WIN" >> $GITHUB_OUTPUT
+
+          # Also export the directory containing cl.exe for PATH
+          CL_DIR=$(dirname "$CL_PATH")
+          CL_DIR_WIN=$(cygpath -w "$CL_DIR")
+          echo "cl_dir=$CL_DIR_WIN" >> $GITHUB_OUTPUT
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
@@ -344,7 +379,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: sccache
           CMAKE_CXX_COMPILER_LAUNCHER: sccache
           SCCACHE_GHA_ENABLED: "true"
-          CMAKE_GENERATOR: Ninja
+          CMAKE_CUDA_HOST_COMPILER: ${{ steps.msvc.outputs.cl_path }}
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Repair GPU wheel (Linux)
