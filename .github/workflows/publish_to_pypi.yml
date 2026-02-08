@@ -502,15 +502,11 @@ jobs:
         run: ls -lh dist/
         shell: bash
 
-      - name: Test wheel with uv (pixi wheel_test)
-        if: steps.should_run.outputs.run == 'true' && runner.os != 'Windows'
-        env:
-          WHEEL_TEST_PYTHON_VERSION: cp${{ matrix.python-version == '3.12' && '312' || '313' }}
-          WHEEL_TEST_TYPE: ${{ matrix.wheel-type }}
-        run: pixi run -e ${{ matrix.pixi-environment }} wheel_test
-
-      - name: Test wheel with uv (Windows)
-        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+      # Run test_wheel.py directly to test pre-built wheel artifacts
+      # We don't use `pixi run wheel_test` because it has a depends-on: wheel_build
+      # which would rebuild the wheel instead of testing the downloaded artifact
+      - name: Test wheel with uv
+        if: steps.should_run.outputs.run == 'true'
         env:
           WHEEL_TEST_PYTHON_VERSION: cp${{ matrix.python-version == '3.12' && '312' || '313' }}
           WHEEL_TEST_TYPE: ${{ matrix.wheel-type }}
