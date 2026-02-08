@@ -37,7 +37,7 @@ Pymomentum rasterizer is a fully-featured rasterizer.
 
 #### Cameras
 
-The first thing you need is a camera. Pymomentum's rasterizer uses the `pymomentum.renderer.Camera` class. You can construct one in a few ways:
+The first thing you need is a camera. Pymomentum's rasterizer uses the `pymomentum.camera.Camera` class. You can construct one in a few ways:
 
 1. You can construct a camera with an intrinsics model and optional extrinsics matrix.
 2. If you have a pymomentum body model, you can use `pymomentum.renderer.build_cameras_for_body()` to create a camera that looks at the body and frames it in view.
@@ -47,13 +47,14 @@ The first thing you need is a camera. Pymomentum's rasterizer uses the `pymoment
 Note that the camera determines the image resolution, you can always use `camera.upsample()` to scale up the image as needed for better quality.
 
 ```python
+import pymomentum.camera as pym_camera
 import pymomentum.renderer as pym_renderer
 import numpy as np
 
 image_height, image_width = 800, 1000
 
 # Create a pinhole intrinsics model
-intrinsics = pym_renderer.PinholeIntrinsicsModel(
+intrinsics = pym_camera.PinholeIntrinsicsModel(
     image_width=image_width,
     image_height=image_height,
     fx=800.0,  # focal length in pixels
@@ -63,7 +64,7 @@ intrinsics = pym_renderer.PinholeIntrinsicsModel(
 )
 
 # Create a camera with the intrinsics
-camera = pym_renderer.Camera(intrinsics)
+camera = pym_camera.Camera(intrinsics)
 
 # Move the camera along -z and look at the origin
 camera = camera.look_at(
