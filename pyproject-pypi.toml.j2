@@ -51,6 +51,8 @@
 {#- Using Ninja avoids the Visual Studio CUDA .targets integration which spawns -#}
 {#- nvcc in subprocesses where pixi's conda-modified PATH lacks cl.exe. -#}
 {#- CMAKE_CUDA_HOST_COMPILER must be set to the full cl.exe path via env var. -#}
+{#- --use-local-env tells nvcc to use current INCLUDE/LIB/PATH instead of -#}
+{#- trying to call vcvars64.bat (which fails inside pixi/conda env). -#}
 {%- macro cmake_windows_gpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
     "-G Ninja",
@@ -61,6 +63,7 @@
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    "-DCMAKE_CUDA_FLAGS=--use-local-env",
 {%- endmacro %}
 
 {#- Common cibuildwheel before-all script for Linux (CPU builds) -#}
