@@ -50,7 +50,7 @@
 {#- Windows GPU-specific args (Ninja generator to avoid MSBuild/CUDA PATH issues) -#}
 {#- Using Ninja avoids the Visual Studio CUDA .targets integration which spawns -#}
 {#- nvcc in subprocesses where pixi's conda-modified PATH lacks cl.exe. -#}
-{#- CMAKE_CUDA_HOST_COMPILER must be set to the full cl.exe path via env var. -#}
+{#- setup_msvc_env.py injects MSVC tools into PATH before building, and -#}
 {#- --use-local-env tells nvcc to use current INCLUDE/LIB/PATH instead of -#}
 {#- trying to call vcvars64.bat (which fails inside pixi/conda env). -#}
 {%- macro cmake_windows_gpu_args() %}
@@ -260,7 +260,6 @@ cmake.args = [
 {{ cmake_windows_gpu_args() }}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
-cmake.define.CMAKE_CUDA_HOST_COMPILER = {env = "CMAKE_CUDA_HOST_COMPILER", default = "cl.exe"}
 {% endif %}
 
 [tool.setuptools_scm]

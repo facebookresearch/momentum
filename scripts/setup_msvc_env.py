@@ -199,11 +199,6 @@ def main():
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("WARNING: ninja not found on PATH", file=sys.stderr)
 
-    # Print CMAKE_CUDA_HOST_COMPILER if set
-    cuda_host = os.environ.get("CMAKE_CUDA_HOST_COMPILER", "")
-    if cuda_host:
-        print(f"CMAKE_CUDA_HOST_COMPILER={cuda_host}")
-
     print("=== MSVC environment ready ===")
     print(f"Executing: {' '.join(sys.argv[1:])}")
     sys.stdout.flush()

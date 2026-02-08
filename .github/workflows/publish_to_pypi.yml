@@ -284,37 +284,7 @@ jobs:
       # Note: No separate CUDA toolkit install needed for Windows.
       # conda-forge's cuda-toolkit (via pixi) provides nvcc and CUDA headers/libs.
       # We use Ninja generator (set in pyproject-pypi.toml.j2) to avoid MSBuild CUDA
-      # .targets PATH issues. CMAKE_CUDA_HOST_COMPILER points nvcc to cl.exe directly.
-
-      - name: Find MSVC cl.exe path (Windows GPU)
-        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
-        id: msvc
-        shell: bash
-        run: |
-          # Find vswhere.exe (installed by default on GitHub-hosted Windows runners)
-          VSWHERE="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
-          if [ ! -f "$VSWHERE" ]; then
-            echo "::error::vswhere.exe not found"
-            exit 1
-          fi
-
-          # Get the Visual Studio installation path
-          VS_PATH=$("$VSWHERE" -latest -property installationPath)
-          echo "Visual Studio path: $VS_PATH"
-
-          # Find cl.exe for the host architecture (x64)
-          CL_PATH=$(find "$VS_PATH/VC/Tools/MSVC" -name "cl.exe" -path "*/Hostx64/x64/*" | head -1)
-          if [ -z "$CL_PATH" ]; then
-            echo "::error::cl.exe not found in Visual Studio installation"
-            exit 1
-          fi
-          echo "cl.exe found: $CL_PATH"
-
-          # Use forward slashes for CMake compatibility (avoids TOML backslash escaping issues)
-          # scikit-build-core's cmake.define passes values through TOML which strips backslashes
-          CL_PATH_FWD=$(echo "$CL_PATH" | sed 's|\\|/|g')
-          echo "cl.exe (forward slash): $CL_PATH_FWD"
-          echo "cl_path=$CL_PATH_FWD" >> $GITHUB_OUTPUT
+      # .targets PATH issues. setup_msvc_env.py injects MSVC into PATH for nvcc.
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
@@ -375,7 +345,6 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: sccache
           CMAKE_CXX_COMPILER_LAUNCHER: sccache
           SCCACHE_GHA_ENABLED: "true"
-          CMAKE_CUDA_HOST_COMPILER: ${{ steps.msvc.outputs.cl_path }}
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Repair GPU wheel (Linux)
