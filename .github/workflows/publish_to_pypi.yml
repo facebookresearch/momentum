@@ -310,15 +310,11 @@ jobs:
           fi
           echo "cl.exe found: $CL_PATH"
 
-          # Convert to Windows path format for CMake
-          CL_PATH_WIN=$(cygpath -w "$CL_PATH")
-          echo "cl.exe (Windows path): $CL_PATH_WIN"
-          echo "cl_path=$CL_PATH_WIN" >> $GITHUB_OUTPUT
-
-          # Also export the directory containing cl.exe for PATH
-          CL_DIR=$(dirname "$CL_PATH")
-          CL_DIR_WIN=$(cygpath -w "$CL_DIR")
-          echo "cl_dir=$CL_DIR_WIN" >> $GITHUB_OUTPUT
+          # Use forward slashes for CMake compatibility (avoids TOML backslash escaping issues)
+          # scikit-build-core's cmake.define passes values through TOML which strips backslashes
+          CL_PATH_FWD=$(echo "$CL_PATH" | sed 's|\\|/|g')
+          echo "cl.exe (forward slash): $CL_PATH_FWD"
+          echo "cl_path=$CL_PATH_FWD" >> $GITHUB_OUTPUT
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
