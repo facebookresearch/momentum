@@ -33,8 +33,8 @@
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 {%- endmacro %}
 
-{#- Windows-specific args (maintains original order with -G after SHARED_LIBS) -#}
-{%- macro cmake_windows_args() %}
+{#- Windows CPU-specific args (Visual Studio generator for CPU builds) -#}
+{%- macro cmake_windows_cpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
     "-G Visual Studio 17 2022",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
@@ -44,9 +44,27 @@
     "-DMOMENTUM_ENABLE_SIMD=OFF",
     "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
-{% if variant == "cpu" %}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-{% endif %}
+{%- endmacro %}
+
+{#- Windows GPU-specific args (Ninja generator to avoid MSBuild/CUDA PATH issues) -#}
+{#- Using Ninja avoids the Visual Studio CUDA .targets integration which spawns -#}
+{#- nvcc in subprocesses where pixi's conda-modified PATH lacks cl.exe. -#}
+{#- setup_msvc_env.py injects MSVC tools into PATH before building, and -#}
+{#- --use-local-env tells nvcc to use current INCLUDE/LIB/PATH instead of -#}
+{#- trying to call vcvars64.bat (which fails inside pixi/conda env). -#}
+{%- macro cmake_windows_gpu_args() %}
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-G Ninja",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+    "-DCMAKE_CUDA_FLAGS=--use-local-env",
 {%- endmacro %}
 
 {#- Common cibuildwheel before-all script for Linux (CPU builds) -#}
@@ -136,6 +154,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 {% if variant == "gpu" %}
     "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
 {% else %}
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -226,12 +245,23 @@ cmake.args = [
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 {% endif %}
 
+{% if variant == "cpu" %}
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
 cmake.args = [
-{{ cmake_windows_args() }}
+{{ cmake_windows_cpu_args() }}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
+{% endif %}
+
+{% if variant == "gpu" %}
+[[tool.scikit-build.overrides]]
+if.platform-system = "^win32"
+cmake.args = [
+{{ cmake_windows_gpu_args() }}
+]
+cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
+{% endif %}
 
 [tool.setuptools_scm]
 # Automatically determine version from git tags

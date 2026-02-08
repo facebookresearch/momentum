@@ -464,6 +464,20 @@ test_py = { cmd = "pytest pymomentum/test/*.py -k 'not ((TestFBXIO and (test_sav
     "build_py", "install",
 ] }
 
+# Windows CPU wheel build using pip wheel + delvewheel
+# Note: Windows doesn't use cibuildwheel because conda-forge provides all dependencies
+wheel_build = { cmd = """
+    python scripts/generate_pyproject.py && \
+    python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
+    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
+    python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
+""", description = "Build CPU wheel for Windows (uses pip wheel + delvewheel)" }
+
+# Repair wheel using delvewheel (bundles DLLs for standalone distribution)
+wheel_repair = { cmd = """
+    python -c "import glob; wheels = glob.glob('dist/pymomentum_cpu-*.whl'); print(f'Found wheels: {wheels}'); exit(0 if wheels else 1)" && \
+    python -m delvewheel repair --wheel-dir dist dist/pymomentum_cpu-*.whl
+""", description = "Repair Windows wheel using delvewheel to bundle DLLs" }
 
 #==============
 # Feature: CPU
@@ -556,6 +570,46 @@ cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 pip = ">=25.2,<26"
 
+#==============
+# Feature: GPU Wheel Build for Windows (CUDA from conda-forge)
+# Windows doesn't use cibuildwheel; builds directly with pip wheel + delvewheel
+#==============
+
+[feature.gpu-wheel-build-win]
+platforms = ["win-64"]
+system-requirements = { cuda = "12" }
+
+[feature.gpu-wheel-build-win.dependencies]
+cuda-toolkit = ">=12.9.0,<13"
+cuda-version = "12.9.*"
+jinja2 = ">=3.1.0,<4"
+pip = ">=25.2,<26"
+delvewheel = ">=1.10.0,<2"
+pytorch-gpu = ">=2.8.0,<3"
+
+[feature.gpu-wheel-build-win.target.win-64.tasks]
+# Windows GPU wheel build using pip wheel + delvewheel
+# Uses Ninja generator with CUDA from conda-forge
+# setup_msvc_env.py injects MSVC environment (cl.exe, INCLUDE, LIB) into the pixi env
+# so that nvcc can find cl.exe for host compilation
+wheel_build = { cmd = """
+    echo "=== Windows GPU wheel build ===" && \
+    echo "CUDA_PATH=$CUDA_PATH" && \
+    where nvcc 2>nul || echo "nvcc not found on PATH" && \
+    python scripts/generate_pyproject.py && \
+    python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
+    echo "=== pyproject.toml for build ===" && \
+    python -c "f=open('pyproject.toml');[print(l,end='') for l in f if 'cmake' in l.lower() or 'ninja' in l.lower() or 'generator' in l.lower() or 'cuda' in l.lower()]" && \
+    echo "=== Starting pip wheel ===" && \
+    python scripts/setup_msvc_env.py pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
+    python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
+""", env = { MOMENTUM_ENABLE_CUDA = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" }, description = "Build GPU wheel for Windows (uses pip wheel + delvewheel + CUDA from conda-forge)" }
+
+wheel_repair = { cmd = """
+    python -c "import glob; wheels = glob.glob('dist/pymomentum_gpu-*.whl'); print(f'Found wheels: {wheels}'); exit(0 if wheels else 1)" && \
+    python -m delvewheel repair --wheel-dir dist dist/pymomentum_gpu-*.whl
+""", description = "Repair Windows GPU wheel using delvewheel to bundle DLLs" }
+
 [feature.gpu-wheel-build-py312]
 platforms = ["linux-64"]
 dependencies = { python = "3.12.*" }
@@ -614,6 +668,10 @@ gpu = ["py312-cuda129", "rerun-latest"]
 # Auto-detects container engine: docker (CI) or podman (local)
 gpu-wheel-build-py312 = ["gpu-wheel-build", "gpu-wheel-build-py312"]
 gpu-wheel-build-py313 = ["gpu-wheel-build", "gpu-wheel-build-py313"]
+
+# GPU wheel build environments for Windows (CUDA from conda-forge)
+gpu-wheel-build-win-py312 = ["gpu-wheel-build-win", "py312", "rerun-latest"]
+gpu-wheel-build-win-py313 = ["gpu-wheel-build-win", "py313", "rerun-latest"]
 
 # Minimal build environment (for GPU wheel builds with limited disk space in containers)
 minimal-build = ["minimal-build", "rerun-latest"]
