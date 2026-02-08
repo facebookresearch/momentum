@@ -281,13 +281,9 @@ jobs:
         if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
         uses: mozilla-actions/sccache-action@v0.0.9
 
-      - name: Install CUDA Toolkit (Windows)
-        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
-        uses: Jimver/cuda-toolkit@v0.2.23
-        id: cuda-toolkit
-        with:
-          cuda: '12.8.1'
-          method: 'network'
+      # Note: No separate CUDA toolkit install needed for Windows.
+      # conda-forge's cuda-toolkit (via pixi) provides nvcc and CUDA headers/libs.
+      # We use Ninja generator to avoid MSBuild CUDA .targets PATH issues.
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
@@ -348,8 +344,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: sccache
           CMAKE_CXX_COMPILER_LAUNCHER: sccache
           SCCACHE_GHA_ENABLED: "true"
-          CUDA_PATH: ${{ steps.cuda-toolkit.outputs.CUDA_PATH }}
-          CUDAToolkit_ROOT: ${{ steps.cuda-toolkit.outputs.CUDA_PATH }}
+          CMAKE_GENERATOR: Ninja
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
 
       - name: Repair GPU wheel (Linux)
