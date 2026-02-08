@@ -277,6 +277,55 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SimdCollisionErrorFunctionIsSame) {
   MT_LOGI("done.");
 }
 
+// Test that the SIMD collision error function handles zero-distance collisions correctly.
+// This tests the division-by-zero fix in simd_collision_error_function.cpp.
+TYPED_TEST(Momentum_ErrorFunctionsTest, SimdCollisionErrorFunctionZeroDistance) {
+  using T = typename TestFixture::Type;
+
+  const size_t nJoints = 6;
+
+  // Create skeleton and reference values
+  const Character character = createTestCharacter(nJoints);
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+#ifdef MOMENTUM_ENABLE_SIMD
+  SimdCollisionErrorFunctionT<T> errf_simd(character);
+#endif
+  CollisionErrorFunctionT<T> errf_base(character);
+
+  // Create a pose where collision geometry is at the exact same position (zero distance).
+  // This is achieved by setting rotation parameters that cause complete self-intersection.
+  auto mp = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  // Apply extreme bend to create overlapping collision geometry
+  for (auto jParam = 0; jParam < transform.numAllModelParameters(); ++jParam) {
+    auto name = transform.name[jParam];
+    if (name.find("root") == std::string::npos && name.find("_rx") != std::string::npos) {
+      mp[jParam] = pi<T>(); // Full 180-degree bend causes maximum overlap
+    }
+  }
+
+  const JointParametersT<T> jp = transform.apply(mp);
+  const SkeletonStateT<T> skelState(jp, skeleton);
+
+  // Both functions should return finite, non-NaN error values even at extreme overlaps
+  const double err_base = errf_base.getError(mp, skelState, MeshStateT<T>());
+#ifdef MOMENTUM_ENABLE_SIMD
+  const double err_simd = errf_simd.getError(mp, skelState, MeshStateT<T>());
+#endif
+
+  // Verify that the error is finite (not NaN or Inf due to division by zero)
+  EXPECT_TRUE(std::isfinite(err_base))
+      << "Base collision error should be finite, got: " << err_base;
+#ifdef MOMENTUM_ENABLE_SIMD
+  EXPECT_TRUE(std::isfinite(err_simd))
+      << "SIMD collision error should be finite, got: " << err_simd;
+  ASSERT_NEAR(err_base, err_simd, 0.0001 * std::max(1.0, err_base));
+#endif
+
+  MT_LOGI("Zero-distance collision test passed with error: {}", err_base);
+}
+
 // Verify that the SIMD version of the collision error function is at least as fast as the
 // multithreaded versions. Disabled by default because it's too slow to run in CI.
 TEST(Momentum_ErrorFunctions, DISABLED_SimdCollisionErrorFunctionIsFaster) {

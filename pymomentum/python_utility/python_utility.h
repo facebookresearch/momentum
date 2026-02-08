@@ -39,6 +39,10 @@ pybind11::bytes to_msgpack(const nlohmann::json& j);
 class PyBytesStreamBuffer : public std::streambuf {
  public:
   explicit PyBytesStreamBuffer(const pybind11::bytes& bytes);
+
+ private:
+  // Store a copy of the bytes object to keep it alive for the lifetime of the streambuf
+  pybind11::bytes bytes_;
 };
 
 } // namespace pymomentum

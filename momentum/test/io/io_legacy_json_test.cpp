@@ -281,3 +281,79 @@ TEST_F(LegacyJsonIOTest, LegacyLocatorFormat) {
   EXPECT_FLOAT_EQ(loadedLocator.offset.y(), 2.0f);
   EXPECT_FLOAT_EQ(loadedLocator.offset.z(), 3.0f);
 }
+
+// Test that empty offsets array throws an appropriate error.
+// This tests the size_t underflow fix in legacy_json_io.cpp.
+TEST_F(LegacyJsonIOTest, EmptyOffsetsArrayHandling) {
+  // Create JSON with empty offsets array (would cause size_t underflow without fix)
+  nlohmann::json jsonWithEmptyOffsets;
+  jsonWithEmptyOffsets["skeleton"]["Bones"] = nlohmann::json::array();
+
+  // Add a simple bone
+  nlohmann::json bone;
+  bone["Name"] = "root";
+  bone["Parent"] = SIZE_MAX;
+  bone["PreRotation"] = nlohmann::json::array({1.0, 0.0, 0.0, 0.0});
+  bone["TranslationOffset"] = nlohmann::json::array({0.0, 0.0, 0.0});
+  bone["RestState"] = nlohmann::json{
+      {"Rot", nlohmann::json::array({0.0, 0.0, 0.0})},
+      {"Trans", nlohmann::json::array({0.0, 0.0, 0.0})},
+      {"Scale", 0.0}};
+  bone["JointType"] = "Root";
+  bone["RotationOrder"] = "XYZ";
+  jsonWithEmptyOffsets["skeleton"]["Bones"].push_back(bone);
+
+  // Add SkinnedModel with empty offsets arrays (the edge case we fixed)
+  jsonWithEmptyOffsets["SkinnedModel"] = nlohmann::json{};
+  jsonWithEmptyOffsets["SkinnedModel"]["vertices"] = nlohmann::json::array();
+  jsonWithEmptyOffsets["SkinnedModel"]["indices"] = nlohmann::json::array();
+  jsonWithEmptyOffsets["SkinnedModel"]["skinningWeights"] = nlohmann::json::array();
+  jsonWithEmptyOffsets["SkinnedModel"]["skinningOffsets"] =
+      nlohmann::json::array(); // Empty offsets
+
+  // This should either throw or handle gracefully (not crash with underflow)
+  // With our fix, empty skinningOffsets is handled gracefully
+  EXPECT_NO_THROW({
+    Character character = loadCharacterFromLegacyJsonString(jsonWithEmptyOffsets.dump());
+    // Verify the character was loaded (skeleton is present)
+    EXPECT_EQ(character.skeleton.joints.size(), 1);
+  });
+}
+
+// Test that JSON with valid single-element offsets works correctly.
+// This verifies the boundary case is handled properly.
+TEST_F(LegacyJsonIOTest, SingleElementOffsetsArrayHandling) {
+  nlohmann::json jsonWithSingleOffset;
+  jsonWithSingleOffset["skeleton"]["Bones"] = nlohmann::json::array();
+
+  // Add a simple bone
+  nlohmann::json bone;
+  bone["Name"] = "root";
+  bone["Parent"] = SIZE_MAX;
+  bone["PreRotation"] = nlohmann::json::array({1.0, 0.0, 0.0, 0.0});
+  bone["TranslationOffset"] = nlohmann::json::array({0.0, 0.0, 0.0});
+  bone["RestState"] = nlohmann::json{
+      {"Rot", nlohmann::json::array({0.0, 0.0, 0.0})},
+      {"Trans", nlohmann::json::array({0.0, 0.0, 0.0})},
+      {"Scale", 0.0}};
+  bone["JointType"] = "Root";
+  bone["RotationOrder"] = "XYZ";
+  jsonWithSingleOffset["skeleton"]["Bones"].push_back(bone);
+
+  // Add SkinnedModel with single-element offsets (another edge case)
+  // Note: vertices must be an array of [x,y,z] arrays, not a flat array
+  jsonWithSingleOffset["SkinnedModel"] = nlohmann::json{};
+  jsonWithSingleOffset["SkinnedModel"]["vertices"] =
+      nlohmann::json::array({nlohmann::json::array({0.0, 0.0, 0.0})}); // One vertex as [x,y,z]
+  jsonWithSingleOffset["SkinnedModel"]["indices"] = nlohmann::json::array({0, 0, 0}); // One face
+  jsonWithSingleOffset["SkinnedModel"]["skinningWeights"] = nlohmann::json::array(
+      {nlohmann::json::array({0, 1.0})}); // One weight entry as [bone_idx, weight]
+  jsonWithSingleOffset["SkinnedModel"]["skinningOffsets"] =
+      nlohmann::json::array({0, 1}); // Offsets: vertex 0 starts at 0, ends at 1
+
+  // This should handle gracefully
+  EXPECT_NO_THROW({
+    Character character = loadCharacterFromLegacyJsonString(jsonWithSingleOffset.dump());
+    EXPECT_EQ(character.skeleton.joints.size(), 1);
+  });
+}
