@@ -593,8 +593,15 @@ pytorch-gpu = ">=2.8.0,<3"
 # setup_msvc_env.py injects MSVC environment (cl.exe, INCLUDE, LIB) into the pixi env
 # so that nvcc can find cl.exe for host compilation
 wheel_build = { cmd = """
+    echo "=== Windows GPU wheel build ===" && \
+    echo "CMAKE_CUDA_HOST_COMPILER=$CMAKE_CUDA_HOST_COMPILER" && \
+    echo "CUDA_PATH=$CUDA_PATH" && \
+    where nvcc 2>nul || echo "nvcc not found on PATH" && \
     python scripts/generate_pyproject.py && \
     python -c "import os, shutil; os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy('pyproject-pypi-gpu.toml', 'pyproject.toml')" && \
+    echo "=== pyproject.toml for build ===" && \
+    python -c "f=open('pyproject.toml');[print(l,end='') for l in f if 'cmake' in l.lower() or 'ninja' in l.lower() or 'generator' in l.lower() or 'cuda' in l.lower()]" && \
+    echo "=== Starting pip wheel ===" && \
     python scripts/setup_msvc_env.py pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, env = { MOMENTUM_ENABLE_CUDA = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" }, description = "Build GPU wheel for Windows (uses pip wheel + delvewheel + CUDA from conda-forge)" }
