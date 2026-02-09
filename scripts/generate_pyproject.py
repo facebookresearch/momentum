@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Generate pyproject-pypi-{cpu,gpu}.toml from template.
+"""Generate pyproject-pypi-cpu-py{VER}.toml from template.
 
 PyTorch version defaults can be customized via command-line arguments.
 For Python 3.14+, add new arguments following the pattern:
@@ -98,22 +98,6 @@ def main():
         print(
             f"Generated pyproject-pypi-cpu-py{py_ver}.toml (requires-python: >={py_ver_min},<{py_ver_max})"
         )
-
-    # Generate GPU config (supports Python 3.12+)
-    gpu_config = template.render(
-        variant="gpu",
-        description_suffix="GPU-accelerated version with CUDA support",
-        python_version_min="3.12",
-        python_version_max="3.14",
-        torch_min_py312=args.torch_min_py312,
-        torch_max_py312=args.torch_max_py312,
-        torch_min_py313=args.torch_min_py313,
-        torch_max_py313=args.torch_max_py313,
-    )
-    (output_dir / "pyproject-pypi-gpu.toml").write_text(gpu_config)
-    print(
-        f"Generated pyproject-pypi-gpu.toml (requires-python: >=3.12,<3.14; Py3.12: >={args.torch_min_py312},<{args.torch_max_py312}; Py3.13: >={args.torch_min_py313},<{args.torch_max_py313})"
-    )
 
 
 if __name__ == "__main__":

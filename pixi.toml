@@ -464,6 +464,20 @@ test_py = { cmd = "pytest pymomentum/test/*.py -k 'not ((TestFBXIO and (test_sav
     "build_py", "install",
 ] }
 
+# Windows CPU wheel build using pip wheel + delvewheel
+# Note: Windows doesn't use cibuildwheel because conda-forge provides all dependencies
+wheel_build = { cmd = """
+    python scripts/generate_pyproject.py && \
+    python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
+    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
+    python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
+""", description = "Build CPU wheel for Windows (uses pip wheel + delvewheel)" }
+
+# Repair wheel using delvewheel (bundles DLLs for standalone distribution)
+wheel_repair = { cmd = """
+    python -c "import glob; wheels = glob.glob('dist/pymomentum_cpu-*.whl'); print(f'Found wheels: {wheels}'); exit(0 if wheels else 1)" && \
+    python -m delvewheel repair --wheel-dir dist dist/pymomentum_cpu-*.whl
+""", description = "Repair Windows wheel using delvewheel to bundle DLLs" }
 
 #==============
 # Feature: CPU
@@ -555,6 +569,7 @@ jinja2 = ">=3.1.0,<4"
 cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 pip = ">=25.2,<26"
+
 
 [feature.gpu-wheel-build-py312]
 platforms = ["linux-64"]

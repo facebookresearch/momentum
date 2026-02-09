@@ -30,17 +30,30 @@ def run_import_tests(python_exe: str) -> int:
     """Run import and parallel operation tests using the specified Python."""
     test_script = """
 import sys
+import os
+
+# Force UTF-8 output on Windows to avoid 'charmap' codec errors with Unicode characters
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 print("Testing imports...")
 try:
+    # IMPORTANT: Import torch first to set up library paths (LD_LIBRARY_PATH)
+    # This ensures libtorch.so is findable when loading pymomentum native extensions.
+    # Note: pymomentum's __init__.py should also do this, but we import torch
+    # explicitly here as a backup measure.
+    import torch
     import pymomentum.geometry as geom
     import pymomentum.solver as solver
     import pymomentum.solver2 as solver2
     import pymomentum.marker_tracking as marker_tracking
     import pymomentum.axel as axel
-    print("✓ All imports successful")
+    print("[PASS] All imports successful")
 except Exception as e:
-    print(f"✗ Import failed: {e}", file=sys.stderr)
+    print(f"[FAIL] Import failed: {e}", file=sys.stderr)
     sys.exit(1)
 
 print("Testing parallel operations (MHR issue #44 regression test)...")
@@ -73,16 +86,20 @@ try:
     result = geom.find_closest_points(source, target)
     print("  Closest points computation completed")
 
-    print("✓ Parallel operations test passed")
+    print("[PASS] Parallel operations test passed")
 except Exception as e:
-    print(f"✗ Parallel operations test failed: {e}", file=sys.stderr)
+    print(f"[FAIL] Parallel operations test failed: {e}", file=sys.stderr)
     import traceback
     traceback.print_exc()
     sys.exit(1)
 
-print("✓ All tests passed!")
+print("[PASS] All tests passed!")
 """
-    result = subprocess.run([python_exe, "-c", test_script], capture_output=False)
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    result = subprocess.run(
+        [python_exe, "-c", test_script], capture_output=False, env=env
+    )
     return result.returncode
 
 
@@ -99,7 +116,7 @@ def test_in_container(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
     container_runtime = find_container_runtime()
     if container_runtime is None:
         print(
-            "✗ No container runtime found (tried docker, podman). "
+            "[FAIL] No container runtime found (tried docker, podman). "
             "Falling back to local uv-based testing.",
             file=sys.stderr,
         )
@@ -133,14 +150,19 @@ echo "Testing imports..."
 /tmp/test_venv/bin/python -c "
 import sys
 try:
+    # IMPORTANT: Import torch first to set up library paths (LD_LIBRARY_PATH)
+    # This ensures libtorch.so is findable when loading pymomentum native extensions.
+    # Note: pymomentum's __init__.py should also do this, but we import torch
+    # explicitly here as a backup measure.
+    import torch
     import pymomentum.geometry as geom
     import pymomentum.solver as solver
     import pymomentum.solver2 as solver2
     import pymomentum.marker_tracking as marker_tracking
     import pymomentum.axel as axel
-    print('✓ All imports successful')
+    print('[PASS] All imports successful')
 except Exception as e:
-    print(f'✗ Import failed: {{e}}', file=sys.stderr)
+    print(f'[FAIL] Import failed: {{e}}', file=sys.stderr)
     sys.exit(1)
 "
 
@@ -149,6 +171,8 @@ echo "Testing parallel operations (MHR issue #44 regression test)..."
 import sys
 import numpy as np
 try:
+    # IMPORTANT: Import torch first to set up library paths (LD_LIBRARY_PATH)
+    import torch
     import pymomentum.geometry as geom
 
     # Create a simple triangle mesh for testing
@@ -176,9 +200,9 @@ try:
     result = geom.find_closest_points(source, target)
     print('  Closest points computation completed')
 
-    print('✓ Parallel operations test passed')
+    print('[PASS] Parallel operations test passed')
 except Exception as e:
-    print(f'✗ Parallel operations test failed: {{e}}', file=sys.stderr)
+    print(f'[FAIL] Parallel operations test failed: {{e}}', file=sys.stderr)
     import traceback
     traceback.print_exc()
     sys.exit(1)
@@ -235,7 +259,7 @@ def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             text=True,
         )
         if result.returncode != 0:
-            print(f"✗ Failed to create venv: {result.stderr}", file=sys.stderr)
+            print(f"[FAIL] Failed to create venv: {result.stderr}", file=sys.stderr)
             return result.returncode
 
         print(f"Installing torch from {torch_index}...")
@@ -254,7 +278,7 @@ def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             text=True,
         )
         if result.returncode != 0:
-            print(f"✗ Failed to install torch: {result.stderr}", file=sys.stderr)
+            print(f"[FAIL] Failed to install torch: {result.stderr}", file=sys.stderr)
             return result.returncode
 
         print(f"Installing wheel {wheel_file.name}...")
@@ -264,7 +288,7 @@ def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             text=True,
         )
         if result.returncode != 0:
-            print(f"✗ Failed to install wheel: {result.stderr}", file=sys.stderr)
+            print(f"[FAIL] Failed to install wheel: {result.stderr}", file=sys.stderr)
             return result.returncode
 
         return run_import_tests(python_exe)
@@ -286,7 +310,7 @@ def main():
     # Find the wheel file
     dist_dir = Path("dist")
     if not dist_dir.exists():
-        print("✗ dist/ directory not found", file=sys.stderr)
+        print("[FAIL] dist/ directory not found", file=sys.stderr)
         sys.exit(1)
 
     wheel_files = [
@@ -306,7 +330,7 @@ def main():
         ]
 
     if not wheel_files:
-        print(f"✗ No wheel found for {wheel_type} {py_ver}", file=sys.stderr)
+        print(f"[FAIL] No wheel found for {wheel_type} {py_ver}", file=sys.stderr)
         print(f"  Available wheels: {list(dist_dir.glob('*.whl'))}", file=sys.stderr)
         sys.exit(1)
 
