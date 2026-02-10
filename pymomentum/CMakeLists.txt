@@ -352,6 +352,11 @@ mt_python_library(
 )
 
 mt_python_library(
+  NAME quaternion_np
+  PYMOMENTUM_SOURCES_VARS quaternion_np_sources
+)
+
+mt_python_library(
   NAME skel_state
   PYMOMENTUM_SOURCES_VARS skel_state_sources
 )
