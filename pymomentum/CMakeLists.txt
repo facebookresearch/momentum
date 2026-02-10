@@ -314,6 +314,16 @@ mt_python_binding(
 
 if(MOMENTUM_BUILD_RENDERER)
   mt_python_binding(
+    NAME pymomentum_camera
+    MODULE_NAME camera
+    PYMOMENTUM_HEADERS_VARS camera_public_headers
+    PYMOMENTUM_SOURCES_VARS camera_sources
+    LINK_LIBRARIES
+      camera
+      rasterizer
+  )
+
+  mt_python_binding(
     NAME renderer
     PYMOMENTUM_HEADERS_VARS renderer_public_headers
     PYMOMENTUM_SOURCES_VARS renderer_sources
