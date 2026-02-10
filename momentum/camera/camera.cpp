@@ -14,6 +14,7 @@
 #include <drjit/matrix.h>
 
 #include <cfloat>
+#include <cmath>
 
 namespace momentum {
 
@@ -741,6 +742,457 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
   return {projectedPoint, jacobian, true};
 }
 
+// OpenCVFisheyeIntrinsicsModelT implementation
+
+template <typename T>
+OpenCVFisheyeIntrinsicsModelT<T>::OpenCVFisheyeIntrinsicsModelT(
+    int32_t imageWidth,
+    int32_t imageHeight,
+    T fx,
+    T fy,
+    T cx,
+    T cy,
+    const OpenCVFisheyeDistortionParametersT<T>& params)
+    : IntrinsicsModelT<T>(imageWidth, imageHeight),
+      fx_(fx),
+      fy_(fy),
+      cx_(cx),
+      cy_(cy),
+      distortionParams_(params) {}
+
+template <typename T>
+std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVFisheyeIntrinsicsModelT<T>::project(
+    const Vector3P<T>& point) const {
+  // Process each element in the packet individually since drjit::atan is not available
+  Vector3P<T> result;
+
+  for (size_t i = 0; i < Packet<T>::Size; ++i) {
+    const T x = point.x()[i];
+    const T y = point.y()[i];
+    const T z = point.z()[i];
+
+    if (z <= T(0)) {
+      result.x()[i] = T(0);
+      result.y()[i] = T(0);
+      result.z()[i] = z;
+      continue;
+    }
+
+    // Normalize the point by dividing by z
+    const T invZ = T(1) / z;
+    const T a = x * invZ;
+    const T b = y * invZ;
+
+    // Compute radius and angle
+    const T rsqr = a * a + b * b;
+    const T r = std::sqrt(rsqr);
+    const T theta = std::atan(r);
+
+    const auto& dp = distortionParams_;
+
+    // Apply distortion
+    const T theta2 = theta * theta;
+    const T theta4 = theta2 * theta2;
+    const T theta6 = theta4 * theta2;
+    const T theta8 = theta4 * theta4;
+    const T thetaD =
+        theta * (T(1) + dp.k1 * theta2 + dp.k2 * theta4 + dp.k3 * theta6 + dp.k4 * theta8);
+
+    // Compute scale factor
+    const T scale = (r > T(1e-8)) ? thetaD / r : T(1);
+
+    // Apply scale
+    const T xpp = scale * a;
+    const T ypp = scale * b;
+
+    // Apply camera matrix to get pixel coordinates
+    result.x()[i] = fx_ * xpp + cx_;
+    result.y()[i] = fy_ * ypp + cy_;
+    result.z()[i] = z;
+  }
+
+  return {result, point.z() > T(0)};
+}
+
+template <typename T>
+std::pair<Eigen::Vector3<T>, bool> OpenCVFisheyeIntrinsicsModelT<T>::project(
+    const Eigen::Vector3<T>& point) const {
+  const T z = point.z();
+
+  if (z <= T(0)) {
+    return {Eigen::Vector3<T>::Zero(), false};
+  }
+
+  // Normalize the point by dividing by z
+  T invZ = T(1) / z;
+  T a = point.x() * invZ;
+  T b = point.y() * invZ;
+
+  // Compute radius and angle
+  T rsqr = a * a + b * b;
+  T r = std::sqrt(rsqr);
+  T theta = std::atan(r);
+
+  const auto& dp = distortionParams_;
+
+  // Apply distortion: theta_d = theta * (1 + k1*theta^2 + k2*theta^4 + k3*theta^6 + k4*theta^8)
+  T theta2 = theta * theta;
+  T theta4 = theta2 * theta2;
+  T theta6 = theta4 * theta2;
+  T theta8 = theta4 * theta4;
+  T thetaD = theta * (T(1) + dp.k1 * theta2 + dp.k2 * theta4 + dp.k3 * theta6 + dp.k4 * theta8);
+
+  // Compute scale factor: theta_d / r, handle r->0 singularity
+  T scale = (r > T(1e-8)) ? thetaD / r : T(1);
+
+  // Apply scale
+  T xpp = scale * a;
+  T ypp = scale * b;
+
+  // Apply camera matrix to get pixel coordinates
+  T u = fx_ * xpp + cx_;
+  T v = fy_ * ypp + cy_;
+
+  return {Eigen::Vector3<T>(u, v, z), true};
+}
+
+template <typename T>
+std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, 3>, bool>
+OpenCVFisheyeIntrinsicsModelT<T>::projectJacobian(const Eigen::Vector3<T>& point) const {
+  const T x = point(0);
+  const T y = point(1);
+  const T z = point(2);
+
+  if (z <= T(0)) {
+    return {Eigen::Vector3<T>::Zero(), Eigen::Matrix<T, 3, 3>::Zero(), false};
+  }
+
+  const T z_inv = T(1) / z;
+  const T z_inv_sq = z_inv * z_inv;
+
+  // Normalized coordinates
+  const T a = x * z_inv;
+  const T b = y * z_inv;
+  const T rsqr = a * a + b * b;
+  const T r = std::sqrt(rsqr);
+  const T theta = std::atan(r);
+
+  const auto& dp = distortionParams_;
+
+  // Distortion polynomial coefficients
+  const T theta2 = theta * theta;
+  const T theta4 = theta2 * theta2;
+  const T theta6 = theta4 * theta2;
+  const T theta8 = theta4 * theta4;
+  const T poly = T(1) + dp.k1 * theta2 + dp.k2 * theta4 + dp.k3 * theta6 + dp.k4 * theta8;
+  const T thetaD = theta * poly;
+
+  // Handle r->0 singularity
+  const bool nearCenter = r < T(1e-8);
+  const T scale = nearCenter ? T(1) : thetaD / r;
+
+  // Distorted normalized coordinates
+  const T xpp = scale * a;
+  const T ypp = scale * b;
+
+  // Project the point
+  const T u = fx_ * xpp + cx_;
+  const T v = fy_ * ypp + cy_;
+  Eigen::Vector3<T> projectedPoint(u, v, z);
+
+  // Compute Jacobian matrix (3x3)
+  Eigen::Matrix<T, 3, 3> jacobian = Eigen::Matrix<T, 3, 3>::Zero();
+
+  if (nearCenter) {
+    // Near optical axis: Jacobian simplifies to pinhole-like behavior
+    jacobian(0, 0) = fx_ * z_inv;
+    jacobian(0, 2) = -fx_ * x * z_inv_sq;
+    jacobian(1, 1) = fy_ * z_inv;
+    jacobian(1, 2) = -fy_ * y * z_inv_sq;
+    jacobian(2, 2) = T(1);
+    return {projectedPoint, jacobian, true};
+  }
+
+  // Derivative of poly with respect to theta
+  const T dpoly_dtheta = T(2) * dp.k1 * theta + T(4) * dp.k2 * theta * theta2 +
+      T(6) * dp.k3 * theta * theta4 + T(8) * dp.k4 * theta * theta6;
+  const T dthetaD_dtheta = poly + theta * dpoly_dtheta;
+
+  // Derivative of theta with respect to r: d(atan(r))/dr = 1/(1+r^2)
+  const T dtheta_dr = T(1) / (T(1) + rsqr);
+
+  // Derivative of scale with respect to r
+  // scale = thetaD / r
+  // d(scale)/dr = (d(thetaD)/dr * r - thetaD) / r^2
+  //             = (dthetaD_dtheta * dtheta_dr * r - thetaD) / r^2
+  const T r_inv = T(1) / r;
+  const T dscale_dr = (dthetaD_dtheta * dtheta_dr * r - thetaD) * r_inv * r_inv;
+
+  // Derivatives of r with respect to a, b
+  // r = sqrt(a^2 + b^2)
+  const T dr_da = a * r_inv;
+  const T dr_db = b * r_inv;
+
+  // Derivatives of xpp, ypp with respect to a, b
+  // xpp = scale * a
+  // dxpp/da = d(scale)/da * a + scale = dscale_dr * dr_da * a + scale
+  // dxpp/db = d(scale)/db * a = dscale_dr * dr_db * a
+  const T dxpp_da = dscale_dr * dr_da * a + scale;
+  const T dxpp_db = dscale_dr * dr_db * a;
+  const T dypp_da = dscale_dr * dr_da * b;
+  const T dypp_db = dscale_dr * dr_db * b + scale;
+
+  // Derivatives of a, b with respect to x, y, z
+  // a = x/z, b = y/z
+  // da/dx = 1/z, da/dy = 0, da/dz = -x/z^2
+  // db/dx = 0, db/dy = 1/z, db/dz = -y/z^2
+
+  // Chain rule: du/dx = fx * dxpp/dx = fx * (dxpp/da * da/dx + dxpp/db * db/dx)
+  jacobian(0, 0) = fx_ * dxpp_da * z_inv;
+  jacobian(0, 1) = fx_ * dxpp_db * z_inv;
+  jacobian(0, 2) = fx_ * (dxpp_da * (-x * z_inv_sq) + dxpp_db * (-y * z_inv_sq));
+
+  jacobian(1, 0) = fy_ * dypp_da * z_inv;
+  jacobian(1, 1) = fy_ * dypp_db * z_inv;
+  jacobian(1, 2) = fy_ * (dypp_da * (-x * z_inv_sq) + dypp_db * (-y * z_inv_sq));
+
+  jacobian(2, 2) = T(1);
+
+  return {projectedPoint, jacobian, true};
+}
+
+template <typename T>
+std::shared_ptr<const IntrinsicsModelT<T>> OpenCVFisheyeIntrinsicsModelT<T>::resize(
+    int32_t imageWidth,
+    int32_t imageHeight) const {
+  T scaleX = T(imageWidth) / T(this->imageWidth());
+  T scaleY = T(imageHeight) / T(this->imageHeight());
+
+  // Apply the correct formula for camera center
+  T new_cx = (cx_ + T(0.5)) * scaleX - T(0.5);
+  T new_cy = (cy_ + T(0.5)) * scaleY - T(0.5);
+
+  return std::make_shared<OpenCVFisheyeIntrinsicsModelT<T>>(
+      imageWidth, imageHeight, fx_ * scaleX, fy_ * scaleY, new_cx, new_cy, distortionParams_);
+}
+
+template <typename T>
+std::shared_ptr<const IntrinsicsModelT<T>> OpenCVFisheyeIntrinsicsModelT<T>::crop(
+    int32_t top,
+    int32_t left,
+    int32_t newWidth,
+    int32_t newHeight) const {
+  // Ensure the crop doesn't exceed the original image dimensions
+  int32_t width = newWidth;
+  if (left + width > this->imageWidth()) {
+    width = this->imageWidth() - left;
+  }
+
+  int32_t height = newHeight;
+  if (top + height > this->imageHeight()) {
+    height = this->imageHeight() - top;
+  }
+
+  // Adjust the principal point by subtracting the crop offset
+  T cameraCenter_cropped_cx = cx_ - T(left);
+  T cameraCenter_cropped_cy = cy_ - T(top);
+
+  return std::make_shared<OpenCVFisheyeIntrinsicsModelT<T>>(
+      width, height, fx_, fy_, cameraCenter_cropped_cx, cameraCenter_cropped_cy, distortionParams_);
+}
+
+template <typename T>
+std::pair<Eigen::Vector3<T>, bool> OpenCVFisheyeIntrinsicsModelT<T>::unproject(
+    const Eigen::Vector3<T>& imagePoint,
+    int maxIterations,
+    T tolerance) const {
+  const T u = imagePoint(0);
+  const T v = imagePoint(1);
+  const T depth = imagePoint(2);
+
+  if (depth <= T(0)) {
+    return {Eigen::Vector3<T>::Zero(), false};
+  }
+
+  // Convert to normalized distorted coordinates
+  const T xpp = (u - cx_) / fx_;
+  const T ypp = (v - cy_) / fy_;
+
+  // Compute distorted radius (thetaD)
+  const T rDistorted = std::sqrt(xpp * xpp + ypp * ypp);
+
+  // Handle center case
+  if (rDistorted < T(1e-8)) {
+    return {Eigen::Vector3<T>(T(0), T(0), depth), true};
+  }
+
+  // Newton's method to solve: thetaD = theta * poly(theta)
+  // f(theta) = theta * (1 + k1*theta^2 + k2*theta^4 + k3*theta^6 + k4*theta^8) - thetaD = 0
+  const auto& dp = distortionParams_;
+  T theta = rDistorted; // Initial guess
+
+  for (int iter = 0; iter < maxIterations; ++iter) {
+    const T theta2 = theta * theta;
+    const T theta4 = theta2 * theta2;
+    const T theta6 = theta4 * theta2;
+    const T theta8 = theta4 * theta4;
+
+    const T poly = T(1) + dp.k1 * theta2 + dp.k2 * theta4 + dp.k3 * theta6 + dp.k4 * theta8;
+    const T f = theta * poly - rDistorted;
+
+    if (std::abs(f) < tolerance) {
+      break;
+    }
+
+    // f'(theta) = poly + theta * dpoly/dtheta
+    const T dpoly_dtheta = T(2) * dp.k1 * theta + T(4) * dp.k2 * theta * theta2 +
+        T(6) * dp.k3 * theta * theta4 + T(8) * dp.k4 * theta * theta6;
+    const T df = poly + theta * dpoly_dtheta;
+
+    if (std::abs(df) < T(1e-12)) {
+      break;
+    }
+
+    theta = theta - f / df;
+  }
+
+  // Compute undistorted radius: r = tan(theta)
+  const T r = std::tan(theta);
+
+  // Scale factor from distorted to undistorted
+  // distorted = scale * undistorted, where scale = thetaD / r
+  // So undistorted = distorted * r / thetaD
+  const T unscale = (rDistorted > T(1e-8)) ? r / rDistorted : T(1);
+
+  // Undistorted normalized coordinates
+  const T a = xpp * unscale;
+  const T b = ypp * unscale;
+
+  // Convert to 3D point
+  return {Eigen::Vector3<T>(a * depth, b * depth, depth), true};
+}
+
+template <typename T>
+Eigen::Index OpenCVFisheyeIntrinsicsModelT<T>::numIntrinsicParameters() const {
+  return 8; // fx, fy, cx, cy, k1, k2, k3, k4
+}
+
+template <typename T>
+Eigen::VectorX<T> OpenCVFisheyeIntrinsicsModelT<T>::getIntrinsicParameters() const {
+  Eigen::VectorX<T> params(8);
+  params << fx_, fy_, cx_, cy_, distortionParams_.k1, distortionParams_.k2, distortionParams_.k3,
+      distortionParams_.k4;
+  return params;
+}
+
+template <typename T>
+void OpenCVFisheyeIntrinsicsModelT<T>::setIntrinsicParameters(
+    const Eigen::Ref<const Eigen::VectorX<T>>& params) {
+  fx_ = params(0);
+  fy_ = params(1);
+  cx_ = params(2);
+  cy_ = params(3);
+  distortionParams_.k1 = params(4);
+  distortionParams_.k2 = params(5);
+  distortionParams_.k3 = params(6);
+  distortionParams_.k4 = params(7);
+}
+
+template <typename T>
+std::shared_ptr<IntrinsicsModelT<T>> OpenCVFisheyeIntrinsicsModelT<T>::clone() const {
+  return std::make_shared<OpenCVFisheyeIntrinsicsModelT<T>>(
+      this->imageWidth(), this->imageHeight(), fx_, fy_, cx_, cy_, distortionParams_);
+}
+
+template <typename T>
+std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+OpenCVFisheyeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const {
+  const T x = point(0);
+  const T y = point(1);
+  const T z = point(2);
+
+  if (z <= T(0)) {
+    Eigen::Matrix<T, 3, Eigen::Dynamic> zeroJacobian(3, 8);
+    zeroJacobian.setZero();
+    return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
+  }
+
+  const T z_inv = T(1) / z;
+
+  // Normalized coordinates
+  const T a = x * z_inv;
+  const T b = y * z_inv;
+  const T rsqr = a * a + b * b;
+  const T r = std::sqrt(rsqr);
+  const T theta = std::atan(r);
+
+  const auto& dp = distortionParams_;
+
+  // Distortion polynomial
+  const T theta2 = theta * theta;
+  const T theta4 = theta2 * theta2;
+  const T theta6 = theta4 * theta2;
+  const T theta8 = theta4 * theta4;
+  const T poly = T(1) + dp.k1 * theta2 + dp.k2 * theta4 + dp.k3 * theta6 + dp.k4 * theta8;
+  const T thetaD = theta * poly;
+
+  // Handle r->0 singularity
+  const bool nearCenter = r < T(1e-8);
+  const T scale = nearCenter ? T(1) : thetaD / r;
+
+  // Distorted normalized coordinates
+  const T xpp = scale * a;
+  const T ypp = scale * b;
+
+  // Project the point
+  const T u = fx_ * xpp + cx_;
+  const T v = fy_ * ypp + cy_;
+  Eigen::Vector3<T> projectedPoint(u, v, z);
+
+  // Compute Jacobian matrix (3x8) with respect to [fx, fy, cx, cy, k1, k2, k3, k4]
+  Eigen::Matrix<T, 3, Eigen::Dynamic> jacobian(3, 8);
+  jacobian.setZero();
+
+  // Derivatives with respect to fx, fy, cx, cy
+  jacobian(0, 0) = xpp; // du/dfx
+  jacobian(0, 2) = T(1); // du/dcx
+  jacobian(1, 1) = ypp; // dv/dfy
+  jacobian(1, 3) = T(1); // dv/dcy
+
+  if (!nearCenter) {
+    // Derivatives with respect to distortion parameters k1, k2, k3, k4
+    // thetaD = theta * (1 + k1*theta^2 + k2*theta^4 + k3*theta^6 + k4*theta^8)
+    // d(thetaD)/dk1 = theta * theta^2 = theta^3
+    // d(thetaD)/dk2 = theta * theta^4 = theta^5
+    // d(thetaD)/dk3 = theta * theta^6 = theta^7
+    // d(thetaD)/dk4 = theta * theta^8 = theta^9
+
+    // scale = thetaD / r
+    // d(scale)/dk_i = d(thetaD)/dk_i / r
+
+    const T r_inv = T(1) / r;
+    const T dscale_dk1 = theta * theta2 * r_inv;
+    const T dscale_dk2 = theta * theta4 * r_inv;
+    const T dscale_dk3 = theta * theta6 * r_inv;
+    const T dscale_dk4 = theta * theta8 * r_inv;
+
+    // xpp = scale * a, ypp = scale * b
+    // d(xpp)/dk_i = d(scale)/dk_i * a
+    // d(ypp)/dk_i = d(scale)/dk_i * b
+
+    jacobian(0, 4) = fx_ * dscale_dk1 * a; // du/dk1
+    jacobian(1, 4) = fy_ * dscale_dk1 * b; // dv/dk1
+    jacobian(0, 5) = fx_ * dscale_dk2 * a; // du/dk2
+    jacobian(1, 5) = fy_ * dscale_dk2 * b; // dv/dk2
+    jacobian(0, 6) = fx_ * dscale_dk3 * a; // du/dk3
+    jacobian(1, 6) = fy_ * dscale_dk3 * b; // dv/dk3
+    jacobian(0, 7) = fx_ * dscale_dk4 * a; // du/dk4
+    jacobian(1, 7) = fy_ * dscale_dk4 * b; // dv/dk4
+  }
+
+  return {projectedPoint, jacobian, true};
+}
+
 template <typename T>
 CameraT<T> CameraT<T>::lookAt(
     const Eigen::Vector3<T>& position,
@@ -977,5 +1429,7 @@ template class PinholeIntrinsicsModelT<float>;
 template class PinholeIntrinsicsModelT<double>;
 template class OpenCVIntrinsicsModelT<float>;
 template class OpenCVIntrinsicsModelT<double>;
+template class OpenCVFisheyeIntrinsicsModelT<float>;
+template class OpenCVFisheyeIntrinsicsModelT<double>;
 
 } // namespace momentum

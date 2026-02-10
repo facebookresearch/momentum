@@ -1548,3 +1548,419 @@ TEST_F(CameraTest, ProjectIntrinsicsJacobianBehindCamera) {
     EXPECT_EQ(jacobian.cols(), 14);
   }
 }
+
+// ===== OpenCV Fisheye Intrinsics Model Tests =====
+
+class OpenCVFisheyeCameraTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    // Create test fisheye intrinsics models with distortion
+    OpenCVFisheyeDistortionParametersT<float> distortionParams;
+    distortionParams.k1 = 0.02f;
+    distortionParams.k2 = -0.01f;
+    distortionParams.k3 = 0.005f;
+    distortionParams.k4 = -0.002f;
+
+    fisheyeIntrinsics = std::make_shared<OpenCVFisheyeIntrinsicsModel>(
+        640, 480, 500.0f, 500.0f, 320.0f, 240.0f, distortionParams);
+
+    // Double precision version for Jacobian tests
+    OpenCVFisheyeDistortionParametersT<double> distortionParamsDouble;
+    distortionParamsDouble.k1 = 0.02;
+    distortionParamsDouble.k2 = -0.01;
+    distortionParamsDouble.k3 = 0.005;
+    distortionParamsDouble.k4 = -0.002;
+
+    fisheyeIntrinsicsDouble = std::make_shared<OpenCVFisheyeIntrinsicsModeld>(
+        640, 480, 500.0, 500.0, 320.0, 240.0, distortionParamsDouble);
+
+    // Zero distortion version
+    OpenCVFisheyeDistortionParametersT<float> zeroDistortion;
+    fisheyeIntrinsicsZeroDistortion = std::make_shared<OpenCVFisheyeIntrinsicsModel>(
+        640, 480, 500.0f, 500.0f, 320.0f, 240.0f, zeroDistortion);
+  }
+
+  std::shared_ptr<OpenCVFisheyeIntrinsicsModel> fisheyeIntrinsics;
+  std::shared_ptr<OpenCVFisheyeIntrinsicsModeld> fisheyeIntrinsicsDouble;
+  std::shared_ptr<OpenCVFisheyeIntrinsicsModel> fisheyeIntrinsicsZeroDistortion;
+};
+
+// Test setIntrinsicParameters round-trip
+TEST_F(OpenCVFisheyeCameraTest, FisheyeSetIntrinsicParametersRoundTrip) {
+  auto cloned = fisheyeIntrinsics->clone();
+
+  Eigen::VectorXf newParams(8);
+  newParams << 600.0f, 550.0f, 350.0f, 260.0f, 0.05f, -0.02f, 0.01f, -0.005f;
+  cloned->setIntrinsicParameters(newParams);
+
+  auto retrievedParams = cloned->getIntrinsicParameters();
+  for (int i = 0; i < 8; ++i) {
+    EXPECT_FLOAT_EQ(retrievedParams(i), newParams(i)) << "Parameter mismatch at index " << i;
+  }
+
+  // Verify original is unchanged
+  auto originalParams = fisheyeIntrinsics->getIntrinsicParameters();
+  EXPECT_FLOAT_EQ(originalParams(0), 500.0f);
+}
+
+// Test clone() creates independent copy
+TEST_F(OpenCVFisheyeCameraTest, FisheyeCloneCreatesIndependentCopy) {
+  auto cloned = fisheyeIntrinsics->clone();
+
+  // Verify initial values match
+  EXPECT_EQ(cloned->imageWidth(), fisheyeIntrinsics->imageWidth());
+  EXPECT_EQ(cloned->imageHeight(), fisheyeIntrinsics->imageHeight());
+  EXPECT_FLOAT_EQ(cloned->fx(), fisheyeIntrinsics->fx());
+  EXPECT_FLOAT_EQ(cloned->fy(), fisheyeIntrinsics->fy());
+
+  // Modify the clone
+  Eigen::VectorXf newParams(8);
+  newParams << 700.0f, 750.0f, 400.0f, 300.0f, 0.1f, 0.0f, 0.0f, 0.0f;
+  cloned->setIntrinsicParameters(newParams);
+
+  // Verify the original is unchanged
+  EXPECT_FLOAT_EQ(fisheyeIntrinsics->fx(), 500.0f);
+  EXPECT_FLOAT_EQ(fisheyeIntrinsics->fy(), 500.0f);
+
+  // Verify the clone was modified
+  EXPECT_FLOAT_EQ(cloned->fx(), 700.0f);
+  EXPECT_FLOAT_EQ(cloned->fy(), 750.0f);
+}
+
+// Test project for optical axis (r=0 singularity)
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectOpticalAxis) {
+  // Point on optical axis should project to principal point
+  Eigen::Vector3f opticalAxisPoint(0.0f, 0.0f, 1.0f);
+  auto [projected, valid] = fisheyeIntrinsics->project(opticalAxisPoint);
+
+  EXPECT_TRUE(valid);
+  EXPECT_NEAR(projected.x(), 320.0f, 1e-5f);
+  EXPECT_NEAR(projected.y(), 240.0f, 1e-5f);
+  EXPECT_FLOAT_EQ(projected.z(), 1.0f);
+}
+
+// Test project matches pinhole for zero distortion at optical axis
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectMatchesPinholeZeroDistortion) {
+  // For zero distortion and small angles, fisheye should be similar to pinhole
+  auto pinhole = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f, 320.0f, 240.0f);
+
+  // Test point on optical axis
+  Eigen::Vector3f centerPoint(0.0f, 0.0f, 5.0f);
+  auto [fisheyeProjected, fisheyeValid] = fisheyeIntrinsicsZeroDistortion->project(centerPoint);
+  auto [pinholeProjected, pinholeValid] = pinhole->project(centerPoint);
+
+  EXPECT_TRUE(fisheyeValid);
+  EXPECT_TRUE(pinholeValid);
+  EXPECT_NEAR(fisheyeProjected.x(), pinholeProjected.x(), 1e-4f);
+  EXPECT_NEAR(fisheyeProjected.y(), pinholeProjected.y(), 1e-4f);
+}
+
+// Test project/unproject round trip
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectUnprojectRoundTrip) {
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 1.0f), // Center point
+      Eigen::Vector3f(0.2f, 0.1f, 2.0f), // Small off-center
+      Eigen::Vector3f(-0.3f, -0.2f, 3.0f), // Negative coordinates
+      Eigen::Vector3f(0.4f, 0.3f, 4.0f), // Moderate coordinates
+  };
+
+  const float tolerance = 1e-4f;
+
+  for (const auto& originalPoint : testPoints) {
+    auto [projectedPoint, projectValid] = fisheyeIntrinsics->project(originalPoint);
+    ASSERT_TRUE(projectValid) << "Projection should be valid for point (" << originalPoint.x()
+                              << ", " << originalPoint.y() << ", " << originalPoint.z() << ")";
+
+    Eigen::Vector3f imagePoint(projectedPoint.x(), projectedPoint.y(), originalPoint.z());
+    auto [unprojectedPoint, unprojectValid] = fisheyeIntrinsics->unproject(imagePoint);
+
+    ASSERT_TRUE(unprojectValid) << "Unprojection should be valid for point (" << originalPoint.x()
+                                << ", " << originalPoint.y() << ", " << originalPoint.z() << ")";
+
+    EXPECT_NEAR(unprojectedPoint.x(), originalPoint.x(), tolerance)
+        << "X coordinate mismatch for point (" << originalPoint.x() << ", " << originalPoint.y()
+        << ", " << originalPoint.z() << ")";
+    EXPECT_NEAR(unprojectedPoint.y(), originalPoint.y(), tolerance)
+        << "Y coordinate mismatch for point (" << originalPoint.x() << ", " << originalPoint.y()
+        << ", " << originalPoint.z() << ")";
+    EXPECT_NEAR(unprojectedPoint.z(), originalPoint.z(), tolerance)
+        << "Z coordinate mismatch for point (" << originalPoint.x() << ", " << originalPoint.y()
+        << ", " << originalPoint.z() << ")";
+  }
+}
+
+// Test project with point behind camera
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectBehindCamera) {
+  Eigen::Vector3f behindPoint(1.0f, 2.0f, -5.0f);
+  auto [projected, valid] = fisheyeIntrinsics->project(behindPoint);
+  EXPECT_FALSE(valid);
+}
+
+// Test resize preserves projection consistency
+TEST_F(OpenCVFisheyeCameraTest, FisheyeResizePreservesProjection) {
+  auto resized = fisheyeIntrinsics->resize(1280, 960);
+
+  // Verify the resized model returns the correct type
+  auto fisheyeResized = std::dynamic_pointer_cast<const OpenCVFisheyeIntrinsicsModel>(resized);
+  ASSERT_NE(fisheyeResized, nullptr);
+
+  // Project/unproject roundtrip through the resized model should still work
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 1.0f),
+      Eigen::Vector3f(0.2f, 0.1f, 2.0f),
+      Eigen::Vector3f(-0.3f, -0.2f, 3.0f),
+  };
+
+  const float tolerance = 1e-4f;
+  for (const auto& point : testPoints) {
+    auto [projected, projectValid] = resized->project(point);
+    ASSERT_TRUE(projectValid);
+
+    Eigen::Vector3f imagePoint(projected.x(), projected.y(), point.z());
+    auto [unprojected, unprojectValid] = resized->unproject(imagePoint);
+    ASSERT_TRUE(unprojectValid);
+
+    EXPECT_NEAR(unprojected.x(), point.x(), tolerance);
+    EXPECT_NEAR(unprojected.y(), point.y(), tolerance);
+    EXPECT_NEAR(unprojected.z(), point.z(), tolerance);
+  }
+}
+
+// Test crop preserves projection consistency
+TEST_F(OpenCVFisheyeCameraTest, FisheyeCropPreservesProjection) {
+  const int top = 100, left = 50;
+  auto cropped = fisheyeIntrinsics->crop(top, left, 320, 240);
+
+  // Verify the cropped model returns the correct type
+  auto fisheyeCropped = std::dynamic_pointer_cast<const OpenCVFisheyeIntrinsicsModel>(cropped);
+  ASSERT_NE(fisheyeCropped, nullptr);
+
+  // Projecting the same 3D point through original and cropped models should
+  // differ by exactly the crop offset
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 2.0f),
+      Eigen::Vector3f(0.1f, 0.05f, 3.0f),
+  };
+
+  const float tolerance = 1e-5f;
+  for (const auto& point : testPoints) {
+    auto [origProjected, origValid] = fisheyeIntrinsics->project(point);
+    auto [cropProjected, cropValid] = cropped->project(point);
+    ASSERT_TRUE(origValid);
+    ASSERT_TRUE(cropValid);
+
+    EXPECT_NEAR(cropProjected.x(), origProjected.x() - left, tolerance);
+    EXPECT_NEAR(cropProjected.y(), origProjected.y() - top, tolerance);
+    EXPECT_NEAR(cropProjected.z(), origProjected.z(), tolerance);
+  }
+}
+
+// Test upsample/downsample roundtrip preserves projection
+TEST_F(OpenCVFisheyeCameraTest, FisheyeUpsampleDownsampleRoundTrip) {
+  auto roundtripped = fisheyeIntrinsics->upsample(2.0f)->downsample(2.0f);
+
+  // Project the same 3D point through the original and roundtripped models;
+  // the results should match
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 1.0f),
+      Eigen::Vector3f(0.2f, 0.1f, 2.0f),
+      Eigen::Vector3f(-0.3f, -0.2f, 3.0f),
+  };
+
+  const float tolerance = 1e-4f;
+  for (const auto& point : testPoints) {
+    auto [origProjected, origValid] = fisheyeIntrinsics->project(point);
+    auto [rtProjected, rtValid] = roundtripped->project(point);
+    ASSERT_TRUE(origValid);
+    ASSERT_TRUE(rtValid);
+
+    EXPECT_NEAR(rtProjected.x(), origProjected.x(), tolerance);
+    EXPECT_NEAR(rtProjected.y(), origProjected.y(), tolerance);
+    EXPECT_NEAR(rtProjected.z(), origProjected.z(), tolerance);
+  }
+}
+
+// Test Eigen and SIMD project consistency
+TEST_F(OpenCVFisheyeCameraTest, FisheyeEigenSimdConsistency) {
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 1.0f),
+      Eigen::Vector3f(1.0f, 0.5f, 2.0f),
+      Eigen::Vector3f(-0.5f, 0.8f, 3.0f),
+      Eigen::Vector3f(0.3f, -0.6f, 4.0f),
+  };
+
+  const float tolerance = 1e-5f;
+
+  for (const auto& point : testPoints) {
+    // Eigen version
+    auto [eigenProjected, eigenValid] = fisheyeIntrinsics->project(point);
+
+    // SIMD version
+    Vector3fP simdPoint(FloatP(point.x()), FloatP(point.y()), FloatP(point.z()));
+    auto [simdProjected, simdMask] = fisheyeIntrinsics->project(simdPoint);
+
+    EXPECT_EQ(eigenValid, simdMask[0]);
+    if (eigenValid && simdMask[0]) {
+      EXPECT_NEAR(eigenProjected.x(), simdProjected.x()[0], tolerance);
+      EXPECT_NEAR(eigenProjected.y(), simdProjected.y()[0], tolerance);
+      EXPECT_NEAR(eigenProjected.z(), simdProjected.z()[0], tolerance);
+    }
+  }
+}
+
+// Test projectJacobian consistency with project
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectJacobianConsistency) {
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 1.0f),
+      Eigen::Vector3f(0.5f, 0.3f, 2.0f),
+      Eigen::Vector3f(-0.3f, 0.4f, 3.0f),
+  };
+
+  const float tolerance = 1e-5f;
+
+  for (const auto& point : testPoints) {
+    auto [jacobianProjected, jacobian, jacobianValid] = fisheyeIntrinsics->projectJacobian(point);
+    auto [projected, projectValid] = fisheyeIntrinsics->project(point);
+
+    EXPECT_EQ(jacobianValid, projectValid);
+    if (jacobianValid && projectValid) {
+      EXPECT_NEAR(jacobianProjected.x(), projected.x(), tolerance);
+      EXPECT_NEAR(jacobianProjected.y(), projected.y(), tolerance);
+      EXPECT_NEAR(jacobianProjected.z(), projected.z(), tolerance);
+    }
+  }
+}
+
+// Test projectJacobian returns invalid for points behind camera
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectJacobianBehindCamera) {
+  Eigen::Vector3f behindPoint(1.0f, 2.0f, -5.0f);
+  auto [projected, jacobian, valid] = fisheyeIntrinsics->projectJacobian(behindPoint);
+  EXPECT_FALSE(valid);
+  EXPECT_EQ(jacobian.rows(), 3);
+  EXPECT_EQ(jacobian.cols(), 3);
+}
+
+// Test projectJacobian with finite difference verification (double precision)
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectJacobianFiniteDifference) {
+  std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.0, 0.0, 1.0),
+      Eigen::Vector3d(0.3, 0.2, 2.0),
+      Eigen::Vector3d(-0.4, -0.3, 3.0),
+  };
+
+  const double epsilon = 1e-8;
+  const double tolerance = 1e-4;
+
+  for (const auto& point : testPoints) {
+    auto [projectedPoint, analyticalJacobian, isValid] =
+        fisheyeIntrinsicsDouble->projectJacobian(point);
+
+    ASSERT_TRUE(isValid);
+
+    // Compute finite difference Jacobian
+    Eigen::Matrix<double, 2, 3> finiteDiffJacobian;
+    auto [baseProjected, baseValid] = fisheyeIntrinsicsDouble->project(point);
+    ASSERT_TRUE(baseValid);
+
+    for (int i = 0; i < 3; ++i) {
+      Eigen::Vector3d perturbedPoint = point;
+      perturbedPoint[i] += epsilon;
+      auto [perturbedProjected, perturbedValid] = fisheyeIntrinsicsDouble->project(perturbedPoint);
+      ASSERT_TRUE(perturbedValid);
+
+      finiteDiffJacobian(0, i) = (perturbedProjected.x() - baseProjected.x()) / epsilon;
+      finiteDiffJacobian(1, i) = (perturbedProjected.y() - baseProjected.y()) / epsilon;
+    }
+
+    for (int row = 0; row < 2; ++row) {
+      for (int col = 0; col < 3; ++col) {
+        EXPECT_NEAR(analyticalJacobian(row, col), finiteDiffJacobian(row, col), tolerance)
+            << "Jacobian mismatch at (" << row << "," << col << ") for point (" << point.x() << ","
+            << point.y() << "," << point.z() << ")";
+      }
+    }
+  }
+}
+
+// Test projectIntrinsicsJacobian consistency with project
+TEST_F(OpenCVFisheyeCameraTest, FisheyeIntrinsicsJacobianConsistency) {
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.0f, 0.0f, 1.0f),
+      Eigen::Vector3f(0.5f, 0.3f, 2.0f),
+  };
+
+  const float tolerance = 1e-5f;
+
+  for (const auto& point : testPoints) {
+    auto [jacobianProjected, jacobian, jacobianValid] =
+        fisheyeIntrinsics->projectIntrinsicsJacobian(point);
+    auto [projected, projectValid] = fisheyeIntrinsics->project(point);
+
+    EXPECT_EQ(jacobianValid, projectValid);
+    if (jacobianValid && projectValid) {
+      EXPECT_NEAR(jacobianProjected.x(), projected.x(), tolerance);
+      EXPECT_NEAR(jacobianProjected.y(), projected.y(), tolerance);
+      EXPECT_NEAR(jacobianProjected.z(), projected.z(), tolerance);
+    }
+
+    // Check Jacobian shape
+    if (jacobianValid) {
+      EXPECT_EQ(jacobian.rows(), 3);
+      EXPECT_EQ(jacobian.cols(), 8);
+    }
+  }
+}
+
+// Test projectIntrinsicsJacobian with finite difference verification
+TEST_F(OpenCVFisheyeCameraTest, FisheyeIntrinsicsJacobianFiniteDifference) {
+  std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.0, 0.0, 1.0),
+      Eigen::Vector3d(0.3, 0.2, 2.0),
+      Eigen::Vector3d(-0.2, 0.4, 3.0),
+  };
+
+  const double epsilon = 1e-8;
+  const double tolerance = 1e-4;
+
+  for (const auto& point : testPoints) {
+    auto [projectedPoint, analyticalJacobian, isValid] =
+        fisheyeIntrinsicsDouble->projectIntrinsicsJacobian(point);
+
+    ASSERT_TRUE(isValid);
+
+    auto baseParams = fisheyeIntrinsicsDouble->getIntrinsicParameters();
+    auto [baseProjected, baseValid] = fisheyeIntrinsicsDouble->project(point);
+    ASSERT_TRUE(baseValid);
+
+    // Compute finite difference Jacobian
+    Eigen::MatrixXd finiteDiffJacobian(3, 8);
+    for (int i = 0; i < 8; ++i) {
+      auto cloned = fisheyeIntrinsicsDouble->clone();
+      Eigen::VectorXd perturbedParams = baseParams;
+      perturbedParams(i) += epsilon;
+      cloned->setIntrinsicParameters(perturbedParams);
+
+      auto [perturbedProjected, perturbedValid] = cloned->project(point);
+      ASSERT_TRUE(perturbedValid);
+
+      finiteDiffJacobian.col(i) = (perturbedProjected - baseProjected) / epsilon;
+    }
+
+    for (int row = 0; row < 2; ++row) {
+      for (int col = 0; col < 8; ++col) {
+        EXPECT_NEAR(analyticalJacobian(row, col), finiteDiffJacobian(row, col), tolerance)
+            << "Intrinsics Jacobian mismatch at (" << row << "," << col << ") for point ("
+            << point.x() << "," << point.y() << "," << point.z() << ")";
+      }
+    }
+  }
+}
+
+// Test projectIntrinsicsJacobian returns invalid for points behind camera
+TEST_F(OpenCVFisheyeCameraTest, FisheyeIntrinsicsJacobianBehindCamera) {
+  Eigen::Vector3f behindPoint(1.0f, 2.0f, -5.0f);
+  auto [projected, jacobian, valid] = fisheyeIntrinsics->projectIntrinsicsJacobian(behindPoint);
+  EXPECT_FALSE(valid);
+  EXPECT_EQ(jacobian.rows(), 3);
+  EXPECT_EQ(jacobian.cols(), 8);
+}

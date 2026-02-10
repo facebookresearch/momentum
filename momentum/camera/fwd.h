@@ -27,6 +27,12 @@ class OpenCVIntrinsicsModelT;
 template <typename T>
 struct OpenCVDistortionParametersT;
 
+template <typename T>
+struct OpenCVFisheyeDistortionParametersT;
+
+template <typename T>
+class OpenCVFisheyeIntrinsicsModelT;
+
 using Camera = CameraT<float>;
 using Camerad = CameraT<double>;
 using IntrinsicsModel = IntrinsicsModelT<float>;
@@ -37,5 +43,9 @@ using OpenCVIntrinsicsModel = OpenCVIntrinsicsModelT<float>;
 using OpenCVIntrinsicsModeld = OpenCVIntrinsicsModelT<double>;
 using OpenCVDistortionParameters = OpenCVDistortionParametersT<float>;
 using OpenCVDistortionParametersd = OpenCVDistortionParametersT<double>;
+using OpenCVFisheyeDistortionParameters = OpenCVFisheyeDistortionParametersT<float>;
+using OpenCVFisheyeDistortionParametersd = OpenCVFisheyeDistortionParametersT<double>;
+using OpenCVFisheyeIntrinsicsModel = OpenCVFisheyeIntrinsicsModelT<float>;
+using OpenCVFisheyeIntrinsicsModeld = OpenCVFisheyeIntrinsicsModelT<double>;
 
 } // namespace momentum

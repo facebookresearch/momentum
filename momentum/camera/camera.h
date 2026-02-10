@@ -382,6 +382,117 @@ struct OpenCVDistortionParametersT {
   T p4 = T(0); ///< Fourth tangential distortion coefficient (for thin prism)
 };
 
+/// OpenCV fisheye distortion parameters for equidistant camera model.
+///
+/// These parameters follow the OpenCV fisheye camera calibration model which uses
+/// equidistant projection. Only radial distortion coefficients are used.
+template <typename T>
+struct OpenCVFisheyeDistortionParametersT {
+  T k1 = T(0); ///< First radial distortion coefficient
+  T k2 = T(0); ///< Second radial distortion coefficient
+  T k3 = T(0); ///< Third radial distortion coefficient
+  T k4 = T(0); ///< Fourth radial distortion coefficient
+};
+
+/// OpenCVFisheyeIntrinsicsModel implements the OpenCV fisheye (equidistant) camera model.
+///
+/// This model uses equidistant projection with the following formula:
+/// 1. Normalize: a = x/z, b = y/z
+/// 2. Compute angle: r = sqrt(a² + b²), θ = atan(r)
+/// 3. Apply distortion: θ_d = θ(1 + k1·θ² + k2·θ⁴ + k3·θ⁶ + k4·θ⁸)
+/// 4. Scale: x' = (θ_d/r)·a, y' = (θ_d/r)·b (handle r→0 singularity)
+/// 5. Apply intrinsics: u = fx·x' + cx, v = fy·y' + cy
+template <typename T>
+class OpenCVFisheyeIntrinsicsModelT : public IntrinsicsModelT<T> {
+ public:
+  /// Constructor with optional distortion parameters.
+  ///
+  /// @param imageWidth Width of the image in pixels
+  /// @param imageHeight Height of the image in pixels
+  /// @param fx Focal length in x direction (pixels)
+  /// @param fy Focal length in y direction (pixels)
+  /// @param cx Principal point x-coordinate (pixels)
+  /// @param cy Principal point y-coordinate (pixels)
+  /// @param params OpenCV fisheye distortion parameters (defaults to no distortion)
+  OpenCVFisheyeIntrinsicsModelT(
+      int32_t imageWidth,
+      int32_t imageHeight,
+      T fx,
+      T fy,
+      T cx,
+      T cy,
+      const OpenCVFisheyeDistortionParametersT<T>& params =
+          OpenCVFisheyeDistortionParametersT<T>{});
+
+  [[nodiscard]] T fx() const final {
+    return fx_;
+  }
+
+  [[nodiscard]] T fy() const final {
+    return fy_;
+  }
+
+  /// Get the principal point x-coordinate.
+  ///
+  /// @return Principal point cx in pixels
+  [[nodiscard]] T cx() const {
+    return cx_;
+  }
+
+  /// Get the principal point y-coordinate.
+  ///
+  /// @return Principal point cy in pixels
+  [[nodiscard]] T cy() const {
+    return cy_;
+  }
+
+  /// Get the distortion parameters.
+  ///
+  /// @return Reference to the OpenCV fisheye distortion parameters
+  [[nodiscard]] const OpenCVFisheyeDistortionParametersT<T>& distortionParameters() const {
+    return distortionParams_;
+  }
+
+  [[nodiscard]] std::pair<Vector3P<T>, typename Packet<T>::MaskType> project(
+      const Vector3P<T>& point) const final;
+
+  [[nodiscard]] std::pair<Eigen::Vector3<T>, bool> project(
+      const Eigen::Vector3<T>& point) const final;
+
+  [[nodiscard]] std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, 3>, bool> projectJacobian(
+      const Eigen::Vector3<T>& point) const final;
+
+  [[nodiscard]] std::pair<Eigen::Vector3<T>, bool> unproject(
+      const Eigen::Vector3<T>& imagePoint,
+      int maxIterations = 10,
+      T tolerance = T(1e-6)) const final;
+
+  [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>> resize(
+      int32_t imageWidth,
+      int32_t imageHeight) const final;
+
+  [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>>
+  crop(int32_t top, int32_t left, int32_t newWidth, int32_t newHeight) const final;
+
+  [[nodiscard]] Eigen::Index numIntrinsicParameters() const final;
+
+  [[nodiscard]] Eigen::VectorX<T> getIntrinsicParameters() const final;
+
+  void setIntrinsicParameters(const Eigen::Ref<const Eigen::VectorX<T>>& params) final;
+
+  [[nodiscard]] std::shared_ptr<IntrinsicsModelT<T>> clone() const final;
+
+  [[nodiscard]] std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+  projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const final;
+
+ private:
+  T fx_;
+  T fy_;
+  T cx_;
+  T cy_;
+  OpenCVFisheyeDistortionParametersT<T> distortionParams_;
+};
+
 /// PinholeIntrinsicsModel implements a basic pinhole camera model.
 ///
 /// This model uses the following projection formula:
