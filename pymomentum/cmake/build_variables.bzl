@@ -254,3 +254,9 @@ axel_sources = [
     "axel/axel_utility.cpp",
     "axel/tri_bvh_pybind.cpp",
 ]
+
+camera_public_headers = []
+
+camera_sources = [
+    "camera/camera_pybind.cpp",
+]
