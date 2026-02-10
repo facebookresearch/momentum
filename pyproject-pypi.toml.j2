@@ -249,8 +249,10 @@ else
 fi
 
 # Verify torch is installed correctly
+# Temporarily clear LD_LIBRARY_PATH to avoid loading pixi env's libtorch_python.so
+# (built for a different Python version) instead of the pip-installed one
 echo "Verifying PyTorch installation..."
-python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
+LD_LIBRARY_PATH="" python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
