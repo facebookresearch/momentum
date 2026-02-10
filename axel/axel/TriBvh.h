@@ -103,6 +103,7 @@ extern template class TriBvh<double>;
 extern template class TriBvh<float, kNativeLaneWidth<float>>;
 extern template class TriBvh<double, kNativeLaneWidth<double>>;
 
+// NOLINTBEGIN(facebook-hte-MissingStdForward)
 template <typename Derived, typename F>
 void closestSurfacePoints(
     const TriBvh<typename Derived::Scalar>& bvh,
@@ -119,6 +120,7 @@ void closestSurfacePoints(
       });
 #endif
 }
+// NOLINTEND(facebook-hte-MissingStdForward)
 
 template <typename Derived1, typename Derived2, typename Derived3, typename Derived4>
 void closestSurfacePoints(
