@@ -47,6 +47,20 @@
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {%- endmacro %}
 
+{#- Windows GPU-specific args (same as CPU; GPU only changes the PyTorch variant linked) -#}
+{%- macro cmake_windows_gpu_args() %}
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-G Visual Studio 17 2022",
+    "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_EXAMPLES=OFF",
+    "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RENDERER=OFF",
+    "-DMOMENTUM_ENABLE_SIMD=OFF",
+    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+{%- endmacro %}
+
 
 {#- Common cibuildwheel before-all script for Linux (CPU builds) -#}
 {%- macro cibw_linux_before_all() %}
@@ -187,7 +201,11 @@ cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
 cmake.args = [
+{% if variant == "gpu" %}
+{{ cmake_windows_gpu_args() }}
+{% else %}
 {{ cmake_windows_cpu_args() }}
+{% endif %}
 ]
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 
