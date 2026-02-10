@@ -63,7 +63,7 @@ Note:
     batched operations for efficient processing of multiple quaternions.
 """
 
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import torch
 
@@ -610,7 +610,7 @@ def normalize_backprop(q: torch.Tensor, grad: torch.Tensor) -> torch.Tensor:
 
 def rotate_vector_backprop(
     q: torch.Tensor, v: torch.Tensor, grad: torch.Tensor
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Custom backpropagation for quaternion vector rotation.
 
@@ -638,7 +638,7 @@ def rotate_vector_backprop(
 
 def rotate_vector_backprop_assume_normalized(
     q: torch.Tensor, v: torch.Tensor, grad: torch.Tensor
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Custom backpropagation for quaternion vector rotation assuming unit quaternions.
 
@@ -683,7 +683,7 @@ def rotate_vector_backprop_assume_normalized(
 
 def multiply_backprop(
     q1: torch.Tensor, q2: torch.Tensor, grad_q: torch.Tensor
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Custom backpropagation for quaternion multiplication.
 
@@ -713,7 +713,7 @@ def multiply_backprop(
 
 def multiply_backprop_assume_normalized(
     q1: torch.Tensor, q2: torch.Tensor, grad_q: torch.Tensor
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Custom backpropagation for quaternion multiplication assuming unit quaternions.
 

@@ -199,6 +199,10 @@ quaternion_sources = [
     "quaternion.py",
 ]
 
+quaternion_np_sources = [
+    "quaternion_np.py",
+]
+
 skel_state_sources = [
     "skel_state.py",
 ]
