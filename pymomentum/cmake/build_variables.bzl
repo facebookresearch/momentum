@@ -207,6 +207,10 @@ skel_state_sources = [
     "skel_state.py",
 ]
 
+skel_state_np_sources = [
+    "skel_state_np.py",
+]
+
 trs_sources = [
     "trs.py",
 ]
