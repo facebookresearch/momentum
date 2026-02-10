@@ -34,6 +34,50 @@ PYBIND11_MODULE(camera, m) {
           "fx", &momentum::IntrinsicsModel::fx, "Focal length in x direction (pixels)")
       .def_property_readonly(
           "fy", &momentum::IntrinsicsModel::fy, "Focal length in y direction (pixels)")
+      .def_property_readonly(
+          "num_intrinsic_parameters",
+          &momentum::IntrinsicsModel::numIntrinsicParameters,
+          "Number of intrinsic parameters for this model")
+      .def(
+          "get_intrinsic_parameters",
+          &momentum::IntrinsicsModel::getIntrinsicParameters,
+          R"(Get all intrinsic parameters as a vector.
+
+Parameter order is model-specific:
+- PinholeIntrinsicsModel: [fx, fy, cx, cy] (4 parameters)
+- OpenCVIntrinsicsModel: [fx, fy, cx, cy, k1, k2, k3, k4, k5, k6, p1, p2, p3, p4] (14 parameters)
+
+:return: Vector of intrinsic parameters.)")
+      .def(
+          "set_intrinsic_parameters",
+          &momentum::IntrinsicsModel::setIntrinsicParameters,
+          R"(Set all intrinsic parameters from a vector.
+
+Parameter order must match get_intrinsic_parameters().
+
+:param params: Vector of parameters (must match num_intrinsic_parameters).)",
+          py::arg("params"))
+      .def(
+          "clone",
+          &momentum::IntrinsicsModel::clone,
+          R"(Create a deep copy of this intrinsics model.
+
+The returned model is mutable and can be modified for optimization purposes.
+
+:return: A new IntrinsicsModel instance that is an independent copy.)")
+      .def(
+          "project_intrinsics_jacobian",
+          [](const momentum::IntrinsicsModel& intrinsics,
+             const Eigen::Vector3f& point) -> std::tuple<Eigen::Vector3f, Eigen::MatrixXf, bool> {
+            auto [projectedPoint, jacobian, valid] = intrinsics.projectIntrinsicsJacobian(point);
+            return {projectedPoint, jacobian, valid};
+          },
+          R"(Compute the Jacobian of projection with respect to intrinsic parameters.
+
+:param point: 3D point in camera coordinate space.
+:return: Tuple of (projected point, Jacobian matrix [3 x num_params], valid flag).
+         The Jacobian rows are [du/d*, dv/d*, 0] where * represents each intrinsic parameter.)",
+          py::arg("point"))
       .def(
           "__repr__",
           [](const momentum::IntrinsicsModel& self) {

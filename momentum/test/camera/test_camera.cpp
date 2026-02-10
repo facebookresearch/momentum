@@ -1267,3 +1267,284 @@ TEST_F(CameraTest, TransformWorldToEyeSimdConsistencyVariousTransforms) {
     }
   }
 }
+
+// Test numIntrinsicParameters() for both models
+TEST_F(CameraTest, NumIntrinsicParameters) {
+  EXPECT_EQ(pinholeIntrinsics->numIntrinsicParameters(), 4);
+  EXPECT_EQ(opencvIntrinsics->numIntrinsicParameters(), 14);
+  EXPECT_EQ(pinholeIntrinsicsDouble->numIntrinsicParameters(), 4);
+  EXPECT_EQ(opencvIntrinsicsDouble->numIntrinsicParameters(), 14);
+}
+
+// Test getIntrinsicParameters() returns correct values
+TEST_F(CameraTest, GetIntrinsicParametersPinhole) {
+  auto params = pinholeIntrinsics->getIntrinsicParameters();
+  EXPECT_EQ(params.size(), 4);
+  EXPECT_FLOAT_EQ(params(0), 500.0f); // fx
+  EXPECT_FLOAT_EQ(params(1), 500.0f); // fy
+  EXPECT_FLOAT_EQ(params(2), 320.0f); // cx
+  EXPECT_FLOAT_EQ(params(3), 240.0f); // cy
+}
+
+TEST_F(CameraTest, GetIntrinsicParametersOpenCV) {
+  auto params = opencvIntrinsics->getIntrinsicParameters();
+  EXPECT_EQ(params.size(), 14);
+  EXPECT_FLOAT_EQ(params(0), 500.0f); // fx
+  EXPECT_FLOAT_EQ(params(1), 500.0f); // fy
+  EXPECT_FLOAT_EQ(params(2), 320.0f); // cx
+  EXPECT_FLOAT_EQ(params(3), 240.0f); // cy
+  EXPECT_FLOAT_EQ(params(4), 0.1f); // k1
+  EXPECT_FLOAT_EQ(params(5), -0.05f); // k2
+  EXPECT_FLOAT_EQ(params(6), 0.0f); // k3
+  EXPECT_FLOAT_EQ(params(7), 0.0f); // k4
+  EXPECT_FLOAT_EQ(params(8), 0.0f); // k5
+  EXPECT_FLOAT_EQ(params(9), 0.0f); // k6
+  EXPECT_FLOAT_EQ(params(10), 0.01f); // p1
+  EXPECT_FLOAT_EQ(params(11), 0.02f); // p2
+  EXPECT_FLOAT_EQ(params(12), 0.0f); // p3
+  EXPECT_FLOAT_EQ(params(13), 0.0f); // p4
+}
+
+// Test get/setIntrinsicParameters round-trip
+TEST_F(CameraTest, SetIntrinsicParametersPinholeRoundTrip) {
+  // Clone to get a mutable model
+  auto cloned = pinholeIntrinsics->clone();
+
+  // Modify parameters
+  Eigen::VectorXf newParams(4);
+  newParams << 600.0f, 550.0f, 350.0f, 260.0f;
+  cloned->setIntrinsicParameters(newParams);
+
+  // Verify parameters were set correctly
+  auto retrievedParams = cloned->getIntrinsicParameters();
+  EXPECT_FLOAT_EQ(retrievedParams(0), 600.0f);
+  EXPECT_FLOAT_EQ(retrievedParams(1), 550.0f);
+  EXPECT_FLOAT_EQ(retrievedParams(2), 350.0f);
+  EXPECT_FLOAT_EQ(retrievedParams(3), 260.0f);
+
+  // Verify the original was not modified
+  auto originalParams = pinholeIntrinsics->getIntrinsicParameters();
+  EXPECT_FLOAT_EQ(originalParams(0), 500.0f);
+  EXPECT_FLOAT_EQ(originalParams(1), 500.0f);
+}
+
+TEST_F(CameraTest, SetIntrinsicParametersOpenCVRoundTrip) {
+  // Clone to get a mutable model
+  auto cloned = opencvIntrinsics->clone();
+
+  // Modify parameters
+  Eigen::VectorXf newParams(14);
+  newParams << 600.0f, 550.0f, 350.0f, 260.0f, 0.2f, -0.1f, 0.05f, 0.01f, 0.02f, 0.03f, 0.04f,
+      0.05f, 0.06f, 0.07f;
+  cloned->setIntrinsicParameters(newParams);
+
+  // Verify parameters were set correctly
+  auto retrievedParams = cloned->getIntrinsicParameters();
+  for (int i = 0; i < 14; ++i) {
+    EXPECT_FLOAT_EQ(retrievedParams(i), newParams(i)) << "Parameter mismatch at index " << i;
+  }
+}
+
+// Test clone() creates independent copy
+TEST_F(CameraTest, ClonePinholeCreatesIndependentCopy) {
+  auto cloned = pinholeIntrinsics->clone();
+
+  // Verify initial values match
+  EXPECT_EQ(cloned->imageWidth(), pinholeIntrinsics->imageWidth());
+  EXPECT_EQ(cloned->imageHeight(), pinholeIntrinsics->imageHeight());
+  EXPECT_FLOAT_EQ(cloned->fx(), pinholeIntrinsics->fx());
+  EXPECT_FLOAT_EQ(cloned->fy(), pinholeIntrinsics->fy());
+
+  // Modify the clone
+  Eigen::VectorXf newParams(4);
+  newParams << 700.0f, 750.0f, 400.0f, 300.0f;
+  cloned->setIntrinsicParameters(newParams);
+
+  // Verify the original is unchanged
+  EXPECT_FLOAT_EQ(pinholeIntrinsics->fx(), 500.0f);
+  EXPECT_FLOAT_EQ(pinholeIntrinsics->fy(), 500.0f);
+
+  // Verify the clone was modified
+  EXPECT_FLOAT_EQ(cloned->fx(), 700.0f);
+  EXPECT_FLOAT_EQ(cloned->fy(), 750.0f);
+}
+
+TEST_F(CameraTest, CloneOpenCVCreatesIndependentCopy) {
+  auto cloned = opencvIntrinsics->clone();
+
+  // Verify initial values match
+  EXPECT_EQ(cloned->imageWidth(), opencvIntrinsics->imageWidth());
+  EXPECT_EQ(cloned->imageHeight(), opencvIntrinsics->imageHeight());
+  EXPECT_FLOAT_EQ(cloned->fx(), opencvIntrinsics->fx());
+  EXPECT_FLOAT_EQ(cloned->fy(), opencvIntrinsics->fy());
+
+  // Modify the clone
+  Eigen::VectorXf newParams(14);
+  newParams << 700.0f, 750.0f, 400.0f, 300.0f, 0.5f, -0.3f, 0.1f, 0.0f, 0.0f, 0.0f, 0.02f, 0.03f,
+      0.0f, 0.0f;
+  cloned->setIntrinsicParameters(newParams);
+
+  // Verify the original is unchanged
+  EXPECT_FLOAT_EQ(opencvIntrinsics->fx(), 500.0f);
+  EXPECT_FLOAT_EQ(opencvIntrinsics->fy(), 500.0f);
+
+  // Verify the clone was modified
+  EXPECT_FLOAT_EQ(cloned->fx(), 700.0f);
+  EXPECT_FLOAT_EQ(cloned->fy(), 750.0f);
+}
+
+// Test projectIntrinsicsJacobian() with numerical finite-difference verification
+TEST_F(CameraTest, PinholeIntrinsicsJacobianValidationDouble) {
+  std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.0, 0.0, 1.0), // Center point
+      Eigen::Vector3d(1.0, 0.5, 2.0), // Off-center point
+      Eigen::Vector3d(-0.8, -1.2, 3.0), // Negative coordinates
+      Eigen::Vector3d(2.5, 1.8, 5.0) // Larger coordinates
+  };
+
+  const double epsilon = 1e-8;
+  const double tolerance = 1e-4;
+
+  for (const auto& point : testPoints) {
+    // Get analytical Jacobian
+    auto [projectedPoint, analyticalJacobian, isValid] =
+        pinholeIntrinsicsDouble->projectIntrinsicsJacobian(point);
+
+    ASSERT_TRUE(isValid) << "Point should be valid for Jacobian computation";
+
+    // Compute finite difference Jacobian
+    Eigen::MatrixXd finiteDiffJacobian(3, 4);
+
+    auto baseParams = pinholeIntrinsicsDouble->getIntrinsicParameters();
+    auto [baseProjected, baseValid] = pinholeIntrinsicsDouble->project(point);
+    ASSERT_TRUE(baseValid);
+
+    for (int i = 0; i < 4; ++i) {
+      auto cloned = pinholeIntrinsicsDouble->clone();
+      Eigen::VectorXd perturbedParams = baseParams;
+      perturbedParams(i) += epsilon;
+      cloned->setIntrinsicParameters(perturbedParams);
+
+      auto [perturbedProjected, perturbedValid] = cloned->project(point);
+      ASSERT_TRUE(perturbedValid);
+
+      finiteDiffJacobian.col(i) = (perturbedProjected - baseProjected) / epsilon;
+    }
+
+    // Compare analytical and finite difference Jacobians
+    for (int row = 0; row < 2; ++row) { // Only check u and v rows
+      for (int col = 0; col < 4; ++col) {
+        EXPECT_NEAR(analyticalJacobian(row, col), finiteDiffJacobian(row, col), tolerance)
+            << "Pinhole intrinsics Jacobian mismatch at (" << row << "," << col << ") for point ("
+            << point.x() << "," << point.y() << "," << point.z() << ")";
+      }
+    }
+  }
+}
+
+TEST_F(CameraTest, OpenCVIntrinsicsJacobianValidationDouble) {
+  std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.0, 0.0, 1.0), // Center point
+      Eigen::Vector3d(0.5, 0.3, 2.0), // Small off-center point
+      Eigen::Vector3d(-0.4, -0.6, 3.0) // Negative coordinates
+  };
+
+  const double epsilon = 1e-8;
+  const double tolerance = 1e-4;
+
+  for (const auto& point : testPoints) {
+    // Get analytical Jacobian
+    auto [projectedPoint, analyticalJacobian, isValid] =
+        opencvIntrinsicsDouble->projectIntrinsicsJacobian(point);
+
+    ASSERT_TRUE(isValid) << "Point should be valid for Jacobian computation";
+
+    // Compute finite difference Jacobian
+    Eigen::MatrixXd finiteDiffJacobian(3, 14);
+
+    auto baseParams = opencvIntrinsicsDouble->getIntrinsicParameters();
+    auto [baseProjected, baseValid] = opencvIntrinsicsDouble->project(point);
+    ASSERT_TRUE(baseValid);
+
+    for (int i = 0; i < 14; ++i) {
+      auto cloned = opencvIntrinsicsDouble->clone();
+      Eigen::VectorXd perturbedParams = baseParams;
+      perturbedParams(i) += epsilon;
+      cloned->setIntrinsicParameters(perturbedParams);
+
+      auto [perturbedProjected, perturbedValid] = cloned->project(point);
+      ASSERT_TRUE(perturbedValid);
+
+      finiteDiffJacobian.col(i) = (perturbedProjected - baseProjected) / epsilon;
+    }
+
+    // Compare analytical and finite difference Jacobians
+    for (int row = 0; row < 2; ++row) { // Only check u and v rows
+      for (int col = 0; col < 14; ++col) {
+        EXPECT_NEAR(analyticalJacobian(row, col), finiteDiffJacobian(row, col), tolerance)
+            << "OpenCV intrinsics Jacobian mismatch at (" << row << "," << col << ") for point ("
+            << point.x() << "," << point.y() << "," << point.z() << ")";
+      }
+    }
+  }
+}
+
+// Test projectIntrinsicsJacobian() consistency with project()
+TEST_F(CameraTest, ProjectIntrinsicsJacobianConsistency) {
+  std::vector<Eigen::Vector3f> testPoints = {
+      Eigen::Vector3f(0.5f, 0.3f, 2.0f),
+      Eigen::Vector3f(-0.8f, 1.2f, 3.0f),
+      Eigen::Vector3f(1.5f, -0.7f, 1.5f)};
+
+  // Use looser tolerance for single precision (OpenCV distortion can accumulate small errors)
+  const float tolerance = 1e-4f;
+
+  for (const auto& point : testPoints) {
+    // Test pinhole model
+    {
+      auto [jacobianProjected, jacobian, jacobianValid] =
+          pinholeIntrinsics->projectIntrinsicsJacobian(point);
+      auto [projected, projectValid] = pinholeIntrinsics->project(point);
+
+      EXPECT_EQ(jacobianValid, projectValid);
+      if (jacobianValid && projectValid) {
+        EXPECT_NEAR(jacobianProjected.x(), projected.x(), tolerance);
+        EXPECT_NEAR(jacobianProjected.y(), projected.y(), tolerance);
+        EXPECT_NEAR(jacobianProjected.z(), projected.z(), tolerance);
+      }
+    }
+
+    // Test OpenCV model
+    {
+      auto [jacobianProjected, jacobian, jacobianValid] =
+          opencvIntrinsics->projectIntrinsicsJacobian(point);
+      auto [projected, projectValid] = opencvIntrinsics->project(point);
+
+      EXPECT_EQ(jacobianValid, projectValid);
+      if (jacobianValid && projectValid) {
+        EXPECT_NEAR(jacobianProjected.x(), projected.x(), tolerance);
+        EXPECT_NEAR(jacobianProjected.y(), projected.y(), tolerance);
+        EXPECT_NEAR(jacobianProjected.z(), projected.z(), tolerance);
+      }
+    }
+  }
+}
+
+// Test projectIntrinsicsJacobian() returns invalid for points behind camera
+TEST_F(CameraTest, ProjectIntrinsicsJacobianBehindCamera) {
+  Eigen::Vector3f behindPoint(1.0f, 2.0f, -5.0f);
+
+  {
+    auto [projected, jacobian, valid] = pinholeIntrinsics->projectIntrinsicsJacobian(behindPoint);
+    EXPECT_FALSE(valid);
+    EXPECT_EQ(jacobian.rows(), 3);
+    EXPECT_EQ(jacobian.cols(), 4);
+  }
+
+  {
+    auto [projected, jacobian, valid] = opencvIntrinsics->projectIntrinsicsJacobian(behindPoint);
+    EXPECT_FALSE(valid);
+    EXPECT_EQ(jacobian.rows(), 3);
+    EXPECT_EQ(jacobian.cols(), 14);
+  }
+}

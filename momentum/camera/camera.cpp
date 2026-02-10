@@ -206,6 +206,85 @@ std::pair<Eigen::Vector3<T>, bool> PinholeIntrinsicsModelT<T>::unproject(
   return {Eigen::Vector3<T>(x * depth, y * depth, depth), depth > T(0)};
 }
 
+template <typename T>
+Eigen::Index PinholeIntrinsicsModelT<T>::numIntrinsicParameters() const {
+  return 4; // fx, fy, cx, cy
+}
+
+template <typename T>
+Eigen::VectorX<T> PinholeIntrinsicsModelT<T>::getIntrinsicParameters() const {
+  Eigen::VectorX<T> params(4);
+  params << fx_, fy_, cx_, cy_;
+  return params;
+}
+
+template <typename T>
+void PinholeIntrinsicsModelT<T>::setIntrinsicParameters(
+    const Eigen::Ref<const Eigen::VectorX<T>>& params) {
+  fx_ = params(0);
+  fy_ = params(1);
+  cx_ = params(2);
+  cy_ = params(3);
+}
+
+template <typename T>
+std::shared_ptr<IntrinsicsModelT<T>> PinholeIntrinsicsModelT<T>::clone() const {
+  return std::make_shared<PinholeIntrinsicsModelT<T>>(
+      this->imageWidth(), this->imageHeight(), fx_, fy_, cx_, cy_);
+}
+
+template <typename T>
+std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+PinholeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const {
+  const T x = point(0);
+  const T y = point(1);
+  const T z = point(2);
+
+  // Check if point is in front of camera
+  if (z <= T(0)) {
+    Eigen::Matrix<T, 3, Eigen::Dynamic> zeroJacobian(3, 4);
+    zeroJacobian.setZero();
+    return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
+  }
+
+  const T z_inv = T(1) / z;
+  const T xn = x * z_inv; // x/z (normalized coordinate)
+  const T yn = y * z_inv; // y/z (normalized coordinate)
+
+  // Project the point: u = fx * x/z + cx, v = fy * y/z + cy
+  const T u = fx_ * xn + cx_;
+  const T v = fy_ * yn + cy_;
+  Eigen::Vector3<T> projectedPoint(u, v, z);
+
+  // Compute Jacobian matrix (3x4) with respect to [fx, fy, cx, cy]
+  // u = fx * (x/z) + cx
+  // v = fy * (y/z) + cy
+  // depth = z (unchanged)
+  //
+  // du/dfx = x/z,  du/dfy = 0,    du/dcx = 1,  du/dcy = 0
+  // dv/dfx = 0,    dv/dfy = y/z,  dv/dcx = 0,  dv/dcy = 1
+  // dz/d*  = 0     (depth is unchanged by intrinsics)
+  Eigen::Matrix<T, 3, Eigen::Dynamic> jacobian(3, 4);
+  jacobian.setZero();
+
+  // Row 0: du/d[fx, fy, cx, cy]
+  jacobian(0, 0) = xn; // du/dfx = x/z
+  jacobian(0, 1) = T(0); // du/dfy = 0
+  jacobian(0, 2) = T(1); // du/dcx = 1
+  jacobian(0, 3) = T(0); // du/dcy = 0
+
+  // Row 1: dv/d[fx, fy, cx, cy]
+  jacobian(1, 0) = T(0); // dv/dfx = 0
+  jacobian(1, 1) = yn; // dv/dfy = y/z
+  jacobian(1, 2) = T(0); // dv/dcx = 0
+  jacobian(1, 3) = T(1); // dv/dcy = 1
+
+  // Row 2: dz/d[fx, fy, cx, cy] = 0 (depth unchanged)
+  // Already set to zero above
+
+  return {projectedPoint, jacobian, true};
+}
+
 // Base class implementations for IntrinsicsModelT
 template <typename T>
 std::shared_ptr<const IntrinsicsModelT<T>> IntrinsicsModelT<T>::resample(T factor) const {
@@ -503,6 +582,163 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
 
   // If we reach here, Newton's method didn't converge
   return {p_init, false};
+}
+
+template <typename T>
+Eigen::Index OpenCVIntrinsicsModelT<T>::numIntrinsicParameters() const {
+  return 14; // fx, fy, cx, cy, k1-k6, p1-p4
+}
+
+template <typename T>
+Eigen::VectorX<T> OpenCVIntrinsicsModelT<T>::getIntrinsicParameters() const {
+  Eigen::VectorX<T> params(14);
+  params << fx_, fy_, cx_, cy_, distortionParams_.k1, distortionParams_.k2, distortionParams_.k3,
+      distortionParams_.k4, distortionParams_.k5, distortionParams_.k6, distortionParams_.p1,
+      distortionParams_.p2, distortionParams_.p3, distortionParams_.p4;
+  return params;
+}
+
+template <typename T>
+void OpenCVIntrinsicsModelT<T>::setIntrinsicParameters(
+    const Eigen::Ref<const Eigen::VectorX<T>>& params) {
+  fx_ = params(0);
+  fy_ = params(1);
+  cx_ = params(2);
+  cy_ = params(3);
+  distortionParams_.k1 = params(4);
+  distortionParams_.k2 = params(5);
+  distortionParams_.k3 = params(6);
+  distortionParams_.k4 = params(7);
+  distortionParams_.k5 = params(8);
+  distortionParams_.k6 = params(9);
+  distortionParams_.p1 = params(10);
+  distortionParams_.p2 = params(11);
+  distortionParams_.p3 = params(12);
+  distortionParams_.p4 = params(13);
+}
+
+template <typename T>
+std::shared_ptr<IntrinsicsModelT<T>> OpenCVIntrinsicsModelT<T>::clone() const {
+  return std::make_shared<OpenCVIntrinsicsModelT<T>>(
+      this->imageWidth(), this->imageHeight(), fx_, fy_, cx_, cy_, distortionParams_);
+}
+
+template <typename T>
+std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const {
+  const T x = point(0);
+  const T y = point(1);
+  const T z = point(2);
+
+  // Check if point is in front of camera
+  if (z <= T(0)) {
+    Eigen::Matrix<T, 3, Eigen::Dynamic> zeroJacobian(3, 14);
+    zeroJacobian.setZero();
+    return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
+  }
+
+  const T z_inv = T(1) / z;
+
+  // Normalized coordinates
+  const T xp = x * z_inv;
+  const T yp = y * z_inv;
+  const T rsqr = xp * xp + yp * yp;
+
+  const auto& dp = distortionParams_;
+
+  // Radial distortion components
+  // Note: the formula is radialDistortion = 1 + A/B where:
+  //   A = rsqr * (k1 + rsqr * (k2 + rsqr * k3))
+  //   B = 1 + rsqr * (k4 + rsqr * (k5 + rsqr * k6))
+  const T A = rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3));
+  const T B = T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6));
+  const T radial_factor = T(1) + A / B;
+
+  // Tangential distortion
+  const T xpp = xp * radial_factor + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * xp * xp);
+  const T ypp = yp * radial_factor + dp.p1 * (rsqr + T(2) * yp * yp) + T(2) * dp.p2 * xp * yp;
+
+  // Project the point
+  const T u = fx_ * xpp + cx_;
+  const T v = fy_ * ypp + cy_;
+  Eigen::Vector3<T> projectedPoint(u, v, z);
+
+  // Compute Jacobian matrix (3x14) with respect to
+  // [fx, fy, cx, cy, k1, k2, k3, k4, k5, k6, p1, p2, p3, p4]
+  Eigen::Matrix<T, 3, Eigen::Dynamic> jacobian(3, 14);
+  jacobian.setZero();
+
+  // Derivatives with respect to fx, fy, cx, cy (basic intrinsics)
+  // u = fx * xpp + cx
+  // v = fy * ypp + cy
+  jacobian(0, 0) = xpp; // du/dfx
+  jacobian(0, 2) = T(1); // du/dcx
+  jacobian(1, 1) = ypp; // dv/dfy
+  jacobian(1, 3) = T(1); // dv/dcy
+
+  // Derivatives with respect to distortion parameters
+  // radial_factor = 1 + A/B
+  // d(radial_factor)/dk_i = d(A/B)/dk_i
+
+  const T B_sq = B * B;
+
+  // For numerator coefficients k1, k2, k3:
+  // dA/dk1 = rsqr, dA/dk2 = rsqr^2, dA/dk3 = rsqr^3
+  // d(A/B)/dk_i = (dA/dk_i) / B
+  const T rsqr2 = rsqr * rsqr;
+  const T rsqr3 = rsqr2 * rsqr;
+  const T drf_dk1 = rsqr / B;
+  const T drf_dk2 = rsqr2 / B;
+  const T drf_dk3 = rsqr3 / B;
+
+  // For denominator coefficients k4, k5, k6:
+  // dB/dk4 = rsqr, dB/dk5 = rsqr^2, dB/dk6 = rsqr^3
+  // d(A/B)/dk_i = -A * (dB/dk_i) / B^2
+  const T drf_dk4 = -A * rsqr / B_sq;
+  const T drf_dk5 = -A * rsqr2 / B_sq;
+  const T drf_dk6 = -A * rsqr3 / B_sq;
+
+  // d(xpp)/dk_i = xp * d(radial_factor)/dk_i
+  // d(ypp)/dk_i = yp * d(radial_factor)/dk_i
+  jacobian(0, 4) = fx_ * xp * drf_dk1; // du/dk1
+  jacobian(1, 4) = fy_ * yp * drf_dk1; // dv/dk1
+  jacobian(0, 5) = fx_ * xp * drf_dk2; // du/dk2
+  jacobian(1, 5) = fy_ * yp * drf_dk2; // dv/dk2
+  jacobian(0, 6) = fx_ * xp * drf_dk3; // du/dk3
+  jacobian(1, 6) = fy_ * yp * drf_dk3; // dv/dk3
+  jacobian(0, 7) = fx_ * xp * drf_dk4; // du/dk4
+  jacobian(1, 7) = fy_ * yp * drf_dk4; // dv/dk4
+  jacobian(0, 8) = fx_ * xp * drf_dk5; // du/dk5
+  jacobian(1, 8) = fy_ * yp * drf_dk5; // dv/dk5
+  jacobian(0, 9) = fx_ * xp * drf_dk6; // du/dk6
+  jacobian(1, 9) = fy_ * yp * drf_dk6; // dv/dk6
+
+  // Derivatives with respect to tangential distortion p1, p2
+  // xpp = xp * radial_factor + 2*p1*xp*yp + p2*(rsqr + 2*xp^2)
+  // ypp = yp * radial_factor + p1*(rsqr + 2*yp^2) + 2*p2*xp*yp
+
+  // d(xpp)/dp1 = 2*xp*yp
+  // d(ypp)/dp1 = rsqr + 2*yp^2
+  jacobian(0, 10) = fx_ * T(2) * xp * yp; // du/dp1
+  jacobian(1, 10) = fy_ * (rsqr + T(2) * yp * yp); // dv/dp1
+
+  // d(xpp)/dp2 = rsqr + 2*xp^2
+  // d(ypp)/dp2 = 2*xp*yp
+  jacobian(0, 11) = fx_ * (rsqr + T(2) * xp * xp); // du/dp2
+  jacobian(1, 11) = fy_ * T(2) * xp * yp; // dv/dp2
+
+  // Derivatives with respect to p3, p4 (thin prism coefficients)
+  // Note: The projection formula doesn't include p3 and p4 in the current implementation
+  // so their derivatives are zero
+  jacobian(0, 12) = T(0); // du/dp3
+  jacobian(1, 12) = T(0); // dv/dp3
+  jacobian(0, 13) = T(0); // du/dp4
+  jacobian(1, 13) = T(0); // dv/dp4
+
+  // Row 2: dz/d[all params] = 0 (depth unchanged)
+  // Already set to zero
+
+  return {projectedPoint, jacobian, true};
 }
 
 template <typename T>
