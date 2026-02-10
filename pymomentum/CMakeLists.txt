@@ -362,6 +362,11 @@ mt_python_library(
 )
 
 mt_python_library(
+  NAME skel_state_np
+  PYMOMENTUM_SOURCES_VARS skel_state_np_sources
+)
+
+mt_python_library(
   NAME trs
   PYMOMENTUM_SOURCES_VARS trs_sources
 )
