@@ -132,6 +132,40 @@ class IntrinsicsModelT {
     return imageHeight_;
   }
 
+  /// Get the number of intrinsic parameters for this model.
+  ///
+  /// @return Number of parameters (e.g., 4 for pinhole, 14 for OpenCV)
+  [[nodiscard]] virtual Eigen::Index numIntrinsicParameters() const = 0;
+
+  /// Get all intrinsic parameters as a vector.
+  ///
+  /// Parameter order is model-specific but consistent with setIntrinsicParameters().
+  ///
+  /// @return Vector of intrinsic parameters
+  [[nodiscard]] virtual Eigen::VectorX<T> getIntrinsicParameters() const = 0;
+
+  /// Set all intrinsic parameters from a vector.
+  ///
+  /// @param params Vector of parameters (must match numIntrinsicParameters())
+  virtual void setIntrinsicParameters(const Eigen::Ref<const Eigen::VectorX<T>>& params) = 0;
+
+  /// Create a deep copy of this intrinsics model.
+  ///
+  /// @return New shared pointer to a mutable copy of this model
+  [[nodiscard]] virtual std::shared_ptr<IntrinsicsModelT<T>> clone() const = 0;
+
+  /// Compute the Jacobian of projection w.r.t. intrinsic parameters.
+  ///
+  /// @param point 3D point in camera coordinate space
+  /// @return Tuple of (projected point, Jacobian matrix [3 x numParams], valid flag)
+  ///
+  /// The Jacobian is a 3xN matrix where N is the number of intrinsic parameters:
+  /// - Row 0: [du/d(param_i)] for each parameter
+  /// - Row 1: [dv/d(param_i)] for each parameter
+  /// - Row 2: [0, ...] (depth is unchanged by intrinsics)
+  [[nodiscard]] virtual std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+  projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const = 0;
+
  private:
   int32_t imageWidth_ = 640;
   int32_t imageHeight_ = 480;
@@ -425,6 +459,17 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>>
   crop(int32_t top, int32_t left, int32_t newWidth, int32_t newHeight) const final;
 
+  [[nodiscard]] Eigen::Index numIntrinsicParameters() const final;
+
+  [[nodiscard]] Eigen::VectorX<T> getIntrinsicParameters() const final;
+
+  void setIntrinsicParameters(const Eigen::Ref<const Eigen::VectorX<T>>& params) final;
+
+  [[nodiscard]] std::shared_ptr<IntrinsicsModelT<T>> clone() const final;
+
+  [[nodiscard]] std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+  projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const final;
+
  private:
   T fx_;
   T fy_;
@@ -513,12 +558,23 @@ class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>>
   crop(int32_t top, int32_t left, int32_t newWidth, int32_t newHeight) const final;
 
+  [[nodiscard]] Eigen::Index numIntrinsicParameters() const final;
+
+  [[nodiscard]] Eigen::VectorX<T> getIntrinsicParameters() const final;
+
+  void setIntrinsicParameters(const Eigen::Ref<const Eigen::VectorX<T>>& params) final;
+
+  [[nodiscard]] std::shared_ptr<IntrinsicsModelT<T>> clone() const final;
+
+  [[nodiscard]] std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
+  projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const final;
+
  private:
   T fx_;
   T fy_;
   T cx_;
   T cy_;
-  const OpenCVDistortionParametersT<T> distortionParams_;
+  OpenCVDistortionParametersT<T> distortionParams_;
 };
 
 } // namespace momentum
