@@ -46,6 +46,7 @@ PYBIND11_MODULE(camera, m) {
 Parameter order is model-specific:
 - PinholeIntrinsicsModel: [fx, fy, cx, cy] (4 parameters)
 - OpenCVIntrinsicsModel: [fx, fy, cx, cy, k1, k2, k3, k4, k5, k6, p1, p2, p3, p4] (14 parameters)
+- OpenCVFisheyeIntrinsicsModel: [fx, fy, cx, cy, k1, k2, k3, k4] (8 parameters)
 
 :return: Vector of intrinsic parameters.)")
       .def(
@@ -332,6 +333,133 @@ The returned model is mutable and can be modified for optimization purposes.
       .def("__repr__", [](const momentum::OpenCVIntrinsicsModel& self) {
         return fmt::format(
             "OpenCVIntrinsicsModel(image_size=({}, {}), fx={:.2f}, fy={:.2f}, cx={:.2f}, cy={:.2f})",
+            self.imageWidth(),
+            self.imageHeight(),
+            self.fx(),
+            self.fy(),
+            self.cx(),
+            self.cy());
+      });
+
+  py::class_<momentum::OpenCVFisheyeDistortionParameters>(
+      m,
+      "OpenCVFisheyeDistortionParameters",
+      R"(Distortion parameters for the OpenCV fisheye (equidistant) camera model.
+
+This struct holds four radial distortion coefficients (k1-k4) used by the
+equidistant fisheye projection model.  Unlike the standard OpenCV model,
+there are no tangential distortion terms.
+
+See :class:`OpenCVFisheyeIntrinsicsModel` for the projection equations.)")
+      .def(py::init<>(), "Initialize with default parameters (no distortion)")
+      .def_readwrite(
+          "k1",
+          &momentum::OpenCVFisheyeDistortionParameters::k1,
+          "First radial distortion coefficient")
+      .def_readwrite(
+          "k2",
+          &momentum::OpenCVFisheyeDistortionParameters::k2,
+          "Second radial distortion coefficient")
+      .def_readwrite(
+          "k3",
+          &momentum::OpenCVFisheyeDistortionParameters::k3,
+          "Third radial distortion coefficient")
+      .def_readwrite(
+          "k4",
+          &momentum::OpenCVFisheyeDistortionParameters::k4,
+          "Fourth radial distortion coefficient")
+      .def("__repr__", [](const momentum::OpenCVFisheyeDistortionParameters& self) {
+        return fmt::format(
+            "OpenCVFisheyeDistortionParameters(k1={:.4f}, k2={:.4f}, k3={:.4f}, k4={:.4f})",
+            self.k1,
+            self.k2,
+            self.k3,
+            self.k4);
+      });
+
+  // Factory function for OpenCVFisheyeIntrinsicsModel to avoid template ambiguity
+  auto fisheyeFactory =
+      [](int32_t imageWidth,
+         int32_t imageHeight,
+         std::optional<float> fx,
+         std::optional<float> fy,
+         std::optional<float> cx,
+         std::optional<float> cy,
+         std::optional<momentum::OpenCVFisheyeDistortionParameters> distortionParams)
+      -> std::shared_ptr<momentum::OpenCVFisheyeIntrinsicsModel> {
+    // Default focal length calculation: "normal" lens is a 50mm
+    // lens on a 35mm camera body
+    const float focal_length_cm = 5.0f;
+    const float film_width_cm = 3.6f;
+    const float default_focal_length_pixels =
+        (focal_length_cm / film_width_cm) * static_cast<float>(imageWidth);
+
+    if (fx.has_value() != fy.has_value()) {
+      throw std::runtime_error("fx and fy must be both specified or both omitted");
+    }
+
+    if (cx.has_value() != cy.has_value()) {
+      throw std::runtime_error("cx and cy must be both specified or both omitted");
+    }
+
+    return std::make_shared<momentum::OpenCVFisheyeIntrinsicsModel>(
+        imageWidth,
+        imageHeight,
+        fx.value_or(default_focal_length_pixels),
+        fy.value_or(default_focal_length_pixels),
+        cx.value_or(imageWidth / 2.0f),
+        cy.value_or(imageHeight / 2.0f),
+        distortionParams.value_or(momentum::OpenCVFisheyeDistortionParameters{}));
+  };
+
+  py::class_<
+      momentum::OpenCVFisheyeIntrinsicsModel,
+      momentum::IntrinsicsModel,
+      std::shared_ptr<momentum::OpenCVFisheyeIntrinsicsModel>>(
+      m,
+      "OpenCVFisheyeIntrinsicsModel",
+      R"(OpenCV fisheye (equidistant) camera intrinsics model with radial distortion.
+
+This model implements the equidistant fisheye projection used by OpenCV's
+``cv::fisheye`` module.  The projection equations are:
+
+1. Normalize: ``a = x/z``, ``b = y/z``
+2. ``r = sqrt(a² + b²)``, ``theta = atan(r)``
+3. ``theta_d = theta * (1 + k1*θ² + k2*θ⁴ + k3*θ⁶ + k4*θ⁸)``
+4. ``x' = (theta_d / r) * a``, ``y' = (theta_d / r) * b``
+5. ``u = fx * x' + cx``, ``v = fy * y' + cy``
+
+See :class:`OpenCVFisheyeDistortionParameters` for the distortion coefficients.)")
+      .def(
+          py::init(fisheyeFactory),
+          R"(Create an OpenCV fisheye camera model with specified parameters and optional distortion.
+
+:param image_width: Width of the image in pixels.
+:param image_height: Height of the image in pixels.
+:param fx: Focal length in x direction (pixels). Defaults to computed value based on 50mm equivalent lens.
+:param fy: Focal length in y direction (pixels). Defaults to computed value based on 50mm equivalent lens.
+:param cx: Principal point x-coordinate (pixels). Defaults to image center if not provided.
+:param cy: Principal point y-coordinate (pixels). Defaults to image center if not provided.
+:param distortion_params: Optional :class:`OpenCVFisheyeDistortionParameters`. Defaults to no distortion if not provided.
+:return: A new OpenCVFisheyeIntrinsicsModel instance.)",
+          py::arg("image_width"),
+          py::arg("image_height"),
+          py::arg("fx") = std::nullopt,
+          py::arg("fy") = std::nullopt,
+          py::arg("cx") = std::nullopt,
+          py::arg("cy") = std::nullopt,
+          py::arg("distortion_params") = std::nullopt)
+      .def_property_readonly(
+          "cx",
+          &momentum::OpenCVFisheyeIntrinsicsModel::cx,
+          "Principal point x-coordinate (pixels)")
+      .def_property_readonly(
+          "cy",
+          &momentum::OpenCVFisheyeIntrinsicsModel::cy,
+          "Principal point y-coordinate (pixels)")
+      .def("__repr__", [](const momentum::OpenCVFisheyeIntrinsicsModel& self) {
+        return fmt::format(
+            "OpenCVFisheyeIntrinsicsModel(image_size=({}, {}), fx={:.2f}, fy={:.2f}, cx={:.2f}, cy={:.2f})",
             self.imageWidth(),
             self.imageHeight(),
             self.fx(),

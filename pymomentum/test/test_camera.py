@@ -394,6 +394,145 @@ class TestCamera(unittest.TestCase):
         self.assertFalse(valid)
         self.assertEqual(jacobian.shape, (3, 4))
 
+    def test_fisheye_project_unproject_roundtrip(self) -> None:
+        """Project 3D points through a fisheye camera and unproject back."""
+        distortion = pym_camera.OpenCVFisheyeDistortionParameters()
+        distortion.k1 = 0.02
+        distortion.k2 = -0.01
+        distortion.k3 = 0.005
+        distortion.k4 = -0.002
+
+        intrinsics = pym_camera.OpenCVFisheyeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+            cx=320.0,
+            cy=240.0,
+            distortion_params=distortion,
+        )
+        camera = pym_camera.Camera(intrinsics)
+
+        world_points = np.asarray(
+            [[0, 0, 5], [1, 0, 5], [0, 1, 5], [-1, -1, 10]], dtype=np.float32
+        )
+
+        image_points = camera.project(world_points)
+        recovered = camera.unproject(image_points)
+        np.testing.assert_allclose(recovered, world_points, atol=1e-4)
+
+    def test_fisheye_matches_numpy_reference(self) -> None:
+        """Verify fisheye projection matches a pure-numpy equidistant model."""
+        k1, k2, k3, k4 = 0.02, -0.01, 0.005, -0.002
+        fx_val, fy_val, cx_val, cy_val = 500.0, 500.0, 320.0, 240.0
+
+        distortion = pym_camera.OpenCVFisheyeDistortionParameters()
+        distortion.k1 = k1
+        distortion.k2 = k2
+        distortion.k3 = k3
+        distortion.k4 = k4
+
+        intrinsics = pym_camera.OpenCVFisheyeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=fx_val,
+            fy=fy_val,
+            cx=cx_val,
+            cy=cy_val,
+            distortion_params=distortion,
+        )
+
+        points_3d = np.asarray(
+            [[0.5, 0.3, 4.0], [-1.0, 0.5, 6.0], [0.0, 0.0, 3.0], [2.0, -1.0, 8.0]],
+            dtype=np.float32,
+        )
+
+        # Numpy reference implementation of equidistant fisheye projection
+        a = points_3d[:, 0] / points_3d[:, 2]
+        b = points_3d[:, 1] / points_3d[:, 2]
+        r = np.sqrt(a * a + b * b)
+        theta = np.arctan(r)
+        theta2 = theta * theta
+        theta_d = theta * (
+            1.0 + k1 * theta2 + k2 * theta2**2 + k3 * theta2**3 + k4 * theta2**4
+        )
+        scale = np.where(r > 1e-8, theta_d / r, 1.0)
+        u_ref = fx_val * scale * a + cx_val
+        v_ref = fy_val * scale * b + cy_val
+
+        projected = intrinsics.project(points_3d)
+
+        np.testing.assert_allclose(projected[:, 0], u_ref, atol=1e-4)
+        np.testing.assert_allclose(projected[:, 1], v_ref, atol=1e-4)
+
+    def test_fisheye_zero_distortion_matches_pinhole_small_angles(self) -> None:
+        """With zero distortion and small angles, fisheye should match pinhole.
+
+        At small angles atan(r) ≈ r, so the equidistant model converges to
+        the pinhole model.  At large angles the models diverge, so we only
+        test with points near the optical axis.
+        """
+        fx_val, fy_val, cx_val, cy_val = 500.0, 500.0, 320.0, 240.0
+
+        fisheye = pym_camera.OpenCVFisheyeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=fx_val,
+            fy=fy_val,
+            cx=cx_val,
+            cy=cy_val,
+        )
+        pinhole = pym_camera.PinholeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=fx_val,
+            fy=fy_val,
+            cx=cx_val,
+            cy=cy_val,
+        )
+
+        # Small-angle points (x/z and y/z are small)
+        points = np.asarray(
+            [[0.1, 0.05, 5.0], [-0.05, 0.1, 8.0], [0.0, 0.0, 3.0]],
+            dtype=np.float32,
+        )
+
+        fisheye_proj = fisheye.project(points)
+        pinhole_proj = pinhole.project(points)
+        np.testing.assert_allclose(fisheye_proj, pinhole_proj, atol=5e-3)
+
+    def test_fisheye_crop_preserves_projection(self) -> None:
+        """Cropping a fisheye camera should shift pixel coordinates by the crop
+        offset but produce the same depth values."""
+        distortion = pym_camera.OpenCVFisheyeDistortionParameters()
+        distortion.k1 = 0.01
+        distortion.k2 = -0.005
+
+        intrinsics = pym_camera.OpenCVFisheyeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+            cx=320.0,
+            cy=240.0,
+            distortion_params=distortion,
+        )
+        camera = pym_camera.Camera(intrinsics)
+
+        world_points = np.asarray([[0, 0, 5], [1, -1, 8]], dtype=np.float32)
+
+        top, left = 50, 100
+        cropped_camera = camera.crop(top=top, left=left, width=320, height=240)
+
+        orig_proj = camera.project(world_points)
+        crop_proj = cropped_camera.project(world_points)
+
+        # Pixel coordinates should be offset by (left, top)
+        np.testing.assert_allclose(crop_proj[:, 0], orig_proj[:, 0] - left, atol=1e-5)
+        np.testing.assert_allclose(crop_proj[:, 1], orig_proj[:, 1] - top, atol=1e-5)
+        # Depth should be unchanged
+        np.testing.assert_allclose(crop_proj[:, 2], orig_proj[:, 2], atol=1e-5)
+
 
 if __name__ == "__main__":
     unittest.main()
