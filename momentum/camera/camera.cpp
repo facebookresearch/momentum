@@ -243,8 +243,7 @@ PinholeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& p
 
   // Check if point is in front of camera
   if (z <= T(0)) {
-    Eigen::Matrix<T, 3, Eigen::Dynamic> zeroJacobian(3, 4);
-    zeroJacobian.setZero();
+    Eigen::Matrix<T, 3, 4> zeroJacobian = Eigen::Matrix<T, 3, 4>::Zero();
     return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
   }
 
@@ -265,8 +264,7 @@ PinholeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& p
   // du/dfx = x/z,  du/dfy = 0,    du/dcx = 1,  du/dcy = 0
   // dv/dfx = 0,    dv/dfy = y/z,  dv/dcx = 0,  dv/dcy = 1
   // dz/d*  = 0     (depth is unchanged by intrinsics)
-  Eigen::Matrix<T, 3, Eigen::Dynamic> jacobian(3, 4);
-  jacobian.setZero();
+  Eigen::Matrix<T, 3, 4> jacobian = Eigen::Matrix<T, 3, 4>::Zero();
 
   // Row 0: du/d[fx, fy, cx, cy]
   jacobian(0, 0) = xn; // du/dfx = x/z
@@ -633,8 +631,7 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
 
   // Check if point is in front of camera
   if (z <= T(0)) {
-    Eigen::Matrix<T, 3, Eigen::Dynamic> zeroJacobian(3, 14);
-    zeroJacobian.setZero();
+    Eigen::Matrix<T, 3, 14> zeroJacobian = Eigen::Matrix<T, 3, 14>::Zero();
     return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
   }
 
@@ -666,8 +663,7 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
 
   // Compute Jacobian matrix (3x14) with respect to
   // [fx, fy, cx, cy, k1, k2, k3, k4, k5, k6, p1, p2, p3, p4]
-  Eigen::Matrix<T, 3, Eigen::Dynamic> jacobian(3, 14);
-  jacobian.setZero();
+  Eigen::Matrix<T, 3, 14> jacobian = Eigen::Matrix<T, 3, 14>::Zero();
 
   // Derivatives with respect to fx, fy, cx, cy (basic intrinsics)
   // u = fx * xpp + cx
@@ -758,13 +754,23 @@ OpenCVFisheyeIntrinsicsModelT<T>::OpenCVFisheyeIntrinsicsModelT(
       fy_(fy),
       cx_(cx),
       cy_(cy),
-      distortionParams_(params) {}
+      distortionParams_(params),
+      maxRSquared_(std::numeric_limits<T>::max()) {
+  // Compute default max valid angle from image bounds
+  computeMaxValidAngleFromImageBounds();
+}
 
 template <typename T>
 std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVFisheyeIntrinsicsModelT<T>::project(
     const Vector3P<T>& point) const {
   // Process each element in the packet individually since drjit::atan is not available
   Vector3P<T> result;
+
+  // Track validity per element (z > 0 and rsqr <= maxRSquared_)
+  typename Packet<T>::MaskType validMask;
+  for (size_t i = 0; i < Packet<T>::Size; ++i) {
+    validMask[i] = true;
+  }
 
   for (size_t i = 0; i < Packet<T>::Size; ++i) {
     const T x = point.x()[i];
@@ -775,6 +781,7 @@ std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVFisheyeIntrinsicsMode
       result.x()[i] = T(0);
       result.y()[i] = T(0);
       result.z()[i] = z;
+      validMask[i] = false;
       continue;
     }
 
@@ -785,6 +792,16 @@ std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVFisheyeIntrinsicsMode
 
     // Compute radius and angle
     const T rsqr = a * a + b * b;
+
+    // Check FOV validity
+    if (rsqr > maxRSquared_) {
+      result.x()[i] = T(0);
+      result.y()[i] = T(0);
+      result.z()[i] = z;
+      validMask[i] = false;
+      continue;
+    }
+
     const T r = std::sqrt(rsqr);
     const T theta = std::atan(r);
 
@@ -811,7 +828,7 @@ std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVFisheyeIntrinsicsMode
     result.z()[i] = z;
   }
 
-  return {result, point.z() > T(0)};
+  return {result, validMask};
 }
 
 template <typename T>
@@ -830,6 +847,12 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVFisheyeIntrinsicsModelT<T>::project(
 
   // Compute radius and angle
   T rsqr = a * a + b * b;
+
+  // Check FOV validity
+  if (rsqr > maxRSquared_) {
+    return {Eigen::Vector3<T>::Zero(), false};
+  }
+
   T r = std::sqrt(rsqr);
   T theta = std::atan(r);
 
@@ -874,6 +897,12 @@ OpenCVFisheyeIntrinsicsModelT<T>::projectJacobian(const Eigen::Vector3<T>& point
   const T a = x * z_inv;
   const T b = y * z_inv;
   const T rsqr = a * a + b * b;
+
+  // Check FOV validity
+  if (rsqr > maxRSquared_) {
+    return {Eigen::Vector3<T>::Zero(), Eigen::Matrix<T, 3, 3>::Zero(), false};
+  }
+
   const T r = std::sqrt(rsqr);
   const T theta = std::atan(r);
 
@@ -1096,6 +1125,8 @@ void OpenCVFisheyeIntrinsicsModelT<T>::setIntrinsicParameters(
   distortionParams_.k2 = params(5);
   distortionParams_.k3 = params(6);
   distortionParams_.k4 = params(7);
+  // Recompute max valid angle since distortion parameters changed
+  computeMaxValidAngleFromImageBounds();
 }
 
 template <typename T>
@@ -1112,8 +1143,7 @@ OpenCVFisheyeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3
   const T z = point(2);
 
   if (z <= T(0)) {
-    Eigen::Matrix<T, 3, Eigen::Dynamic> zeroJacobian(3, 8);
-    zeroJacobian.setZero();
+    Eigen::Matrix<T, 3, 8> zeroJacobian = Eigen::Matrix<T, 3, 8>::Zero();
     return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
   }
 
@@ -1123,6 +1153,13 @@ OpenCVFisheyeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3
   const T a = x * z_inv;
   const T b = y * z_inv;
   const T rsqr = a * a + b * b;
+
+  // Check FOV validity
+  if (rsqr > maxRSquared_) {
+    Eigen::Matrix<T, 3, 8> zeroJacobian = Eigen::Matrix<T, 3, 8>::Zero();
+    return {Eigen::Vector3<T>::Zero(), zeroJacobian, false};
+  }
+
   const T r = std::sqrt(rsqr);
   const T theta = std::atan(r);
 
@@ -1150,8 +1187,7 @@ OpenCVFisheyeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3
   Eigen::Vector3<T> projectedPoint(u, v, z);
 
   // Compute Jacobian matrix (3x8) with respect to [fx, fy, cx, cy, k1, k2, k3, k4]
-  Eigen::Matrix<T, 3, Eigen::Dynamic> jacobian(3, 8);
-  jacobian.setZero();
+  Eigen::Matrix<T, 3, 8> jacobian = Eigen::Matrix<T, 3, 8>::Zero();
 
   // Derivatives with respect to fx, fy, cx, cy
   jacobian(0, 0) = xpp; // du/dfx
@@ -1191,6 +1227,101 @@ OpenCVFisheyeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3
   }
 
   return {projectedPoint, jacobian, true};
+}
+
+template <typename T>
+T OpenCVFisheyeIntrinsicsModelT<T>::maxValidAngle() const {
+  return std::atan(std::sqrt(maxRSquared_));
+}
+
+template <typename T>
+void OpenCVFisheyeIntrinsicsModelT<T>::setMaxValidAngle(T angle) {
+  const T tanAngle = std::tan(angle);
+  maxRSquared_ = tanAngle * tanAngle;
+}
+
+template <typename T>
+T OpenCVFisheyeIntrinsicsModelT<T>::maxRSquared() const {
+  return maxRSquared_;
+}
+
+template <typename T>
+void OpenCVFisheyeIntrinsicsModelT<T>::setMaxRSquared(T rsqr) {
+  maxRSquared_ = rsqr;
+}
+
+template <typename T>
+void OpenCVFisheyeIntrinsicsModelT<T>::computeMaxValidAngleFromImageBounds() {
+  // Find the farthest image corner from the principal point
+  const T corners[4][2] = {
+      {T(0), T(0)},
+      {T(this->imageWidth()), T(0)},
+      {T(0), T(this->imageHeight())},
+      {T(this->imageWidth()), T(this->imageHeight())}};
+
+  T maxDistSqr = T(0);
+  for (int i = 0; i < 4; ++i) {
+    const T dx = corners[i][0] - cx_;
+    const T dy = corners[i][1] - cy_;
+    const T distSqr = dx * dx + dy * dy;
+    maxDistSqr = std::max(maxDistSqr, distSqr);
+  }
+  const T maxDist = std::sqrt(maxDistSqr);
+
+  // The max distance in normalized image coordinates
+  // Using an average focal length for simplicity
+  const T avgF = (fx_ + fy_) / T(2);
+  if (avgF <= T(0)) {
+    maxRSquared_ = std::numeric_limits<T>::max();
+    return;
+  }
+  const T targetThetaD = maxDist / avgF;
+
+  // Use Newton iteration to find theta such that
+  // theta_d(theta) = targetThetaD
+  // where theta_d = theta * (1 + k1*theta^2 + k2*theta^4 + k3*theta^6 + k4*theta^8)
+
+  const auto& dp = distortionParams_;
+  T theta = targetThetaD; // Initial guess (assumes small distortion)
+
+  constexpr int maxIter = 20;
+  constexpr T tol = T(1e-10);
+
+  for (int iter = 0; iter < maxIter; ++iter) {
+    const T theta2 = theta * theta;
+    const T theta4 = theta2 * theta2;
+    const T theta6 = theta4 * theta2;
+    const T theta8 = theta4 * theta4;
+
+    const T poly = T(1) + dp.k1 * theta2 + dp.k2 * theta4 + dp.k3 * theta6 + dp.k4 * theta8;
+    const T thetaD = theta * poly;
+
+    // Derivative of theta_d with respect to theta:
+    // d(theta_d)/d(theta) = poly + theta * d(poly)/d(theta)
+    // d(poly)/d(theta) = 2*k1*theta + 4*k2*theta^3 + 6*k3*theta^5 + 8*k4*theta^7
+    const T dPolyDTheta = T(2) * dp.k1 * theta + T(4) * dp.k2 * theta2 * theta +
+        T(6) * dp.k3 * theta4 * theta + T(8) * dp.k4 * theta6 * theta;
+    const T dThetaDDTheta = poly + theta * dPolyDTheta;
+
+    if (std::abs(dThetaDDTheta) < T(1e-12)) {
+      break;
+    }
+
+    const T error = thetaD - targetThetaD;
+    const T delta = error / dThetaDDTheta;
+    theta -= delta;
+
+    if (std::abs(delta) < tol) {
+      break;
+    }
+  }
+
+  // Clamp theta to a reasonable range (0 to nearly 180 degrees)
+  theta = std::max(T(0), std::min(theta, T(3.1)));
+
+  // maxRSquared = tan^2(theta)
+  const T tanTheta = std::tan(theta);
+  maxRSquared_ = tanTheta * tanTheta;
 }
 
 template <typename T>

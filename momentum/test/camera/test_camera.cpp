@@ -8,8 +8,10 @@
 #include <gtest/gtest.h>
 #include <momentum/camera/camera.h>
 #include <momentum/camera/fwd.h>
+#include <momentum/math/constants.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -1963,4 +1965,134 @@ TEST_F(OpenCVFisheyeCameraTest, FisheyeIntrinsicsJacobianBehindCamera) {
   EXPECT_FALSE(valid);
   EXPECT_EQ(jacobian.rows(), 3);
   EXPECT_EQ(jacobian.cols(), 8);
+}
+
+// Test maxValidAngle is computed from image bounds
+TEST_F(OpenCVFisheyeCameraTest, FisheyeMaxValidAngleComputed) {
+  // The max valid angle should be positive and less than 180 degrees
+  float maxAngle = fisheyeIntrinsics->maxValidAngle();
+  EXPECT_GT(maxAngle, 0.0f);
+  EXPECT_LT(maxAngle, pi<float>());
+
+  // Check that maxRSquared is consistent with maxValidAngle
+  float expectedRSquared = std::tan(maxAngle) * std::tan(maxAngle);
+  EXPECT_NEAR(fisheyeIntrinsics->maxRSquared(), expectedRSquared, 1e-6f);
+}
+
+// Test setMaxValidAngle updates maxRSquared correctly
+TEST_F(OpenCVFisheyeCameraTest, FisheyeSetMaxValidAngle) {
+  auto clone =
+      std::dynamic_pointer_cast<momentum::OpenCVFisheyeIntrinsicsModel>(fisheyeIntrinsics->clone());
+  ASSERT_NE(clone, nullptr);
+
+  // Set a specific max angle
+  float newAngle = 1.2f; // About 69 degrees
+  clone->setMaxValidAngle(newAngle);
+
+  EXPECT_NEAR(clone->maxValidAngle(), newAngle, 1e-6f);
+
+  // Verify maxRSquared is consistent
+  float expectedRSquared = std::tan(newAngle) * std::tan(newAngle);
+  EXPECT_NEAR(clone->maxRSquared(), expectedRSquared, 1e-6f);
+}
+
+// Test setMaxRSquared updates value correctly
+TEST_F(OpenCVFisheyeCameraTest, FisheyeSetMaxRSquared) {
+  auto clone =
+      std::dynamic_pointer_cast<momentum::OpenCVFisheyeIntrinsicsModel>(fisheyeIntrinsics->clone());
+  ASSERT_NE(clone, nullptr);
+
+  // Set a specific max r squared
+  float newRSquared = 4.0f;
+  clone->setMaxRSquared(newRSquared);
+
+  EXPECT_NEAR(clone->maxRSquared(), newRSquared, 1e-6f);
+
+  // Verify maxValidAngle is consistent
+  float expectedAngle = std::atan(std::sqrt(newRSquared));
+  EXPECT_NEAR(clone->maxValidAngle(), expectedAngle, 1e-6f);
+}
+
+// Test that points outside max valid angle are marked as invalid
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectOutsideFOV) {
+  auto clone =
+      std::dynamic_pointer_cast<momentum::OpenCVFisheyeIntrinsicsModel>(fisheyeIntrinsics->clone());
+  ASSERT_NE(clone, nullptr);
+
+  // Set a restrictive max angle (about 45 degrees)
+  float restrictiveAngle = pi<float>() / 4.0f;
+  clone->setMaxValidAngle(restrictiveAngle);
+
+  // A point at 45 degrees should be just barely valid
+  // tan(45°) = 1, so x/z = 1 means x = z
+  Eigen::Vector3f onEdge(1.0f, 0.0f, 1.0f);
+  auto [projectedEdge, validEdge] = clone->project(onEdge);
+  // This is right at the boundary, might be valid or invalid depending on floating point
+  // So we don't make a strict assertion here
+  (void)projectedEdge;
+  (void)validEdge;
+
+  // A point well inside should be valid
+  Eigen::Vector3f inside(0.5f, 0.0f, 1.0f); // tan(angle) = 0.5, angle ≈ 26.6°
+  auto [projectedInside, validInside] = clone->project(inside);
+  EXPECT_TRUE(validInside);
+
+  // A point well outside should be invalid
+  Eigen::Vector3f outside(2.0f, 0.0f, 1.0f); // tan(angle) = 2, angle ≈ 63.4°
+  auto [projectedOutside, validOutside] = clone->project(outside);
+  EXPECT_FALSE(validOutside);
+}
+
+// Test that projectJacobian respects maxValidAngle
+TEST_F(OpenCVFisheyeCameraTest, FisheyeProjectJacobianOutsideFOV) {
+  auto clone =
+      std::dynamic_pointer_cast<momentum::OpenCVFisheyeIntrinsicsModel>(fisheyeIntrinsics->clone());
+  ASSERT_NE(clone, nullptr);
+
+  // Set a restrictive max angle
+  clone->setMaxValidAngle(pi<float>() / 4.0f);
+
+  // A point well outside should be invalid
+  Eigen::Vector3f outside(2.0f, 0.0f, 1.0f);
+  auto [projected, jacobian, valid] = clone->projectJacobian(outside);
+  EXPECT_FALSE(valid);
+}
+
+// Test that projectIntrinsicsJacobian respects maxValidAngle
+TEST_F(OpenCVFisheyeCameraTest, FisheyeIntrinsicsJacobianOutsideFOV) {
+  auto clone =
+      std::dynamic_pointer_cast<momentum::OpenCVFisheyeIntrinsicsModel>(fisheyeIntrinsics->clone());
+  ASSERT_NE(clone, nullptr);
+
+  // Set a restrictive max angle
+  clone->setMaxValidAngle(pi<float>() / 4.0f);
+
+  // A point well outside should be invalid
+  Eigen::Vector3f outside(2.0f, 0.0f, 1.0f);
+  auto [projected, jacobian, valid] = clone->projectIntrinsicsJacobian(outside);
+  EXPECT_FALSE(valid);
+}
+
+// Test that SIMD projection respects maxValidAngle
+TEST_F(OpenCVFisheyeCameraTest, FisheyeSimdProjectOutsideFOV) {
+  auto clone =
+      std::dynamic_pointer_cast<momentum::OpenCVFisheyeIntrinsicsModel>(fisheyeIntrinsics->clone());
+  ASSERT_NE(clone, nullptr);
+
+  // Set a restrictive max angle (about 45 degrees)
+  clone->setMaxValidAngle(pi<float>() / 4.0f);
+
+  // Test with individual points converted to SIMD
+  // Point inside FOV (r = 0.5, angle ≈ 26.6°)
+  Eigen::Vector3f insidePoint(0.5f, 0.0f, 1.0f);
+  Vector3fP simdInside(FloatP(insidePoint.x()), FloatP(insidePoint.y()), FloatP(insidePoint.z()));
+  auto [projectedInside, validMaskInside] = clone->project(simdInside);
+  EXPECT_TRUE(validMaskInside[0]) << "Point inside FOV should be valid";
+
+  // Point outside FOV (r = 2.0, angle ≈ 63.4°)
+  Eigen::Vector3f outsidePoint(2.0f, 0.0f, 1.0f);
+  Vector3fP simdOutside(
+      FloatP(outsidePoint.x()), FloatP(outsidePoint.y()), FloatP(outsidePoint.z()));
+  auto [projectedOutside, validMaskOutside] = clone->project(simdOutside);
+  EXPECT_FALSE(validMaskOutside[0]) << "Point outside FOV should be invalid";
 }
