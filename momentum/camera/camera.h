@@ -485,12 +485,49 @@ class OpenCVFisheyeIntrinsicsModelT : public IntrinsicsModelT<T> {
   [[nodiscard]] std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
   projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const final;
 
+  /// Get the maximum valid angle for projection in radians.
+  ///
+  /// Points with angle from optical axis greater than this are marked invalid.
+  /// The default value is computed from the image bounds to reject points
+  /// that project outside the calibrated region.
+  ///
+  /// @return Maximum valid angle in radians (θ where tan(θ) = r)
+  [[nodiscard]] T maxValidAngle() const;
+
+  /// Set the maximum valid angle for projection in radians.
+  ///
+  /// Use this to manually override the default FOV limit, e.g. when the
+  /// calibrated region doesn't extend to the image edges.
+  ///
+  /// @param angle Maximum valid angle in radians
+  void setMaxValidAngle(T angle);
+
+  /// Get the maximum valid r² value (tan²(θ_max)).
+  ///
+  /// This is the internal representation used for efficient validity checking
+  /// during projection. r² = (x/z)² + (y/z)².
+  ///
+  /// @return Maximum valid r² value
+  [[nodiscard]] T maxRSquared() const;
+
+  /// Set the maximum valid r² value directly.
+  ///
+  /// @param rsqr Maximum valid r² value (must be positive)
+  void setMaxRSquared(T rsqr);
+
  private:
+  /// Compute the maximum valid angle from image bounds using Newton iteration.
+  ///
+  /// Finds the θ such that the distorted projection lands at the farthest
+  /// image corner from the principal point.
+  void computeMaxValidAngleFromImageBounds();
+
   T fx_;
   T fy_;
   T cx_;
   T cy_;
   OpenCVFisheyeDistortionParametersT<T> distortionParams_;
+  T maxRSquared_; ///< Maximum valid r² = tan²(θ_max) for FOV validation
 };
 
 /// PinholeIntrinsicsModel implements a basic pinhole camera model.
