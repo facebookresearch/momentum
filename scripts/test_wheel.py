@@ -22,7 +22,7 @@ from pathlib import Path
 def get_torch_index(wheel_type: str) -> str:
     """Get the appropriate PyTorch index URL for the wheel type."""
     if wheel_type == "gpu":
-        return "https://download.pytorch.org/whl/cu128"
+        return "https://download.pytorch.org/whl/cu129"
     return "https://download.pytorch.org/whl/cpu"
 
 

@@ -76,6 +76,18 @@ def main():
     )
     template = env.get_template("pyproject-pypi.toml.j2")
 
+    # Common template variables
+    common_vars = dict(
+        torch_min_py312=args.torch_min_py312,
+        torch_max_py312=args.torch_max_py312,
+        torch_min_py313=args.torch_min_py313,
+        torch_max_py313=args.torch_max_py313,
+        torch_min_py312_macos=args.torch_min_py312_macos,
+        torch_max_py312_macos=args.torch_max_py312_macos,
+        torch_min_py313_macos=args.torch_min_py313_macos,
+        torch_max_py313_macos=args.torch_max_py313_macos,
+    )
+
     # Generate CPU configs for each Python version
     for py_ver in ["312", "313"]:
         py_ver_min = f"3.{py_ver[1:]}"
@@ -85,18 +97,27 @@ def main():
             description_suffix="CPU-only version for Linux, macOS Intel, and macOS ARM",
             python_version_min=py_ver_min,
             python_version_max=py_ver_max,
-            torch_min_py312=args.torch_min_py312,
-            torch_max_py312=args.torch_max_py312,
-            torch_min_py313=args.torch_min_py313,
-            torch_max_py313=args.torch_max_py313,
-            torch_min_py312_macos=args.torch_min_py312_macos,
-            torch_max_py312_macos=args.torch_max_py312_macos,
-            torch_min_py313_macos=args.torch_min_py313_macos,
-            torch_max_py313_macos=args.torch_max_py313_macos,
+            **common_vars,
         )
         (output_dir / f"pyproject-pypi-cpu-py{py_ver}.toml").write_text(cpu_config)
         print(
             f"Generated pyproject-pypi-cpu-py{py_ver}.toml (requires-python: >={py_ver_min},<{py_ver_max})"
+        )
+
+    # Generate GPU configs for each Python version
+    for py_ver in ["312", "313"]:
+        py_ver_min = f"3.{py_ver[1:]}"
+        py_ver_max = f"3.{int(py_ver[1:]) + 1}"
+        gpu_config = template.render(
+            variant="gpu",
+            description_suffix="GPU (CUDA) version for Linux and Windows",
+            python_version_min=py_ver_min,
+            python_version_max=py_ver_max,
+            **common_vars,
+        )
+        (output_dir / f"pyproject-pypi-gpu-py{py_ver}.toml").write_text(gpu_config)
+        print(
+            f"Generated pyproject-pypi-gpu-py{py_ver}.toml (requires-python: >={py_ver_min},<{py_ver_max})"
         )
 
 
