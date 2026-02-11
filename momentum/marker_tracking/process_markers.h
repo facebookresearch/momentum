@@ -15,6 +15,31 @@
 
 namespace momentum {
 
+/// Calibrates a character model using marker data without running full tracking.
+///
+/// This function performs only the calibration step (scaling, locator offsets, and optionally shape
+/// parameters) without running per-frame tracking on all frames. This is useful when you want to
+/// calibrate on a ROM (range of motion) sequence but don't need the tracked motion for that
+/// sequence.
+///
+/// @param[in,out] character The input character definition with locators. It also holds the output
+/// locators if locators are to be calibrated from the calibrationConfig.
+/// @param[in,out] identity The input identity used for calibration. It also holds the solved
+/// identity if identity is to be calibrated from the calibrationConfig.
+/// @param[in] markerData The per-frame position targets used for calibration.
+/// @param[in] calibrationConfig The config for running calibration.
+/// @param[in] firstFrame The first frame to start calibration. We pass in the first frame instead
+/// of trimming markerData to avoid data copy.
+/// @param[in] maxFrames The maximum number of frames to use for calibration starting from
+/// firstFrame.
+void calibrateMarkers(
+    momentum::Character& character,
+    momentum::ModelParameters& identity,
+    std::span<const std::vector<momentum::Marker>> markerData,
+    const CalibrationConfig& calibrationConfig,
+    size_t firstFrame = 0,
+    size_t maxFrames = 0);
+
 /// Processes marker data for a character model.
 ///
 /// It can calibrate the model and locators based on the calibrationConfig, and track the motion of

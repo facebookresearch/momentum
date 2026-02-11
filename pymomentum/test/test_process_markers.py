@@ -12,6 +12,7 @@ import unittest
 import numpy as np
 import pymomentum.geometry as pym_geometry
 from pymomentum.marker_tracking import (
+    calibrate_markers,
     CalibrationConfig,
     ModelOptions,
     process_markers,
@@ -161,6 +162,48 @@ class TestMarkerTracker(unittest.TestCase):
             # check that save_motion returns correct motion matrix
             self.assertEqual(ref_motion.shape[0], num_frames)
             self.assertEqual(ref_motion.shape[1], character.parameter_transform.size)
+
+    def test_calibrate_markers(self) -> None:
+        """Test that calibrate_markers returns valid identity parameters."""
+        character = pym_geometry.create_test_character()
+        calibration_config = CalibrationConfig(calib_frames=10)
+        identity = np.zeros(0, dtype=np.float32)
+
+        # Create marker data for calibration
+        marker_data = []
+        num_frames = 30
+        for frame_i in range(num_frames):
+            markers = []
+            for loc in character.locators:
+                markers.append(
+                    pym_geometry.Marker(
+                        loc.name, np.array([frame_i, 0.0, 0.0] + loc.offset), False
+                    )
+                )
+            marker_data.append(markers)
+
+        # Run calibration only (no tracking)
+        calibrated_identity = calibrate_markers(
+            character, identity, marker_data, calibration_config
+        )
+
+        # Check that calibrate_markers returns the correct identity vector size
+        self.assertEqual(
+            calibrated_identity.shape[0], character.parameter_transform.size
+        )
+
+        # Verify we can use the calibrated identity with process_markers
+        tracking_config = TrackingConfig()
+        motion = process_markers(
+            character,
+            calibrated_identity,
+            marker_data,
+            tracking_config,
+            calibration_config,
+            calibrate=False,
+        )
+        self.assertEqual(motion.shape[0], num_frames)
+        self.assertEqual(motion.shape[1], character.parameter_transform.size)
 
 
 if __name__ == "__main__":
