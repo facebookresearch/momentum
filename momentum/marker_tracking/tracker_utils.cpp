@@ -152,13 +152,35 @@ struct ClosestPointOnMeshResult {
 
 } // namespace
 
+/// Check if two joints are related (same joint, parent-child, or child-parent relationship).
+/// @param skeleton The skeleton containing the joint hierarchy
+/// @param jointA First joint index
+/// @param jointB Second joint index
+/// @return True if the joints are related (same, or one is the parent of the other)
+bool isRelatedJoint(const momentum::Skeleton& skeleton, uint32_t jointA, uint32_t jointB) {
+  if (jointA == jointB) {
+    return true;
+  }
+  // Check if jointB is the parent of jointA
+  if (jointA < skeleton.joints.size() && skeleton.joints[jointA].parent == jointB) {
+    return true;
+  }
+  // Check if jointA is the parent of jointB
+  if (jointB < skeleton.joints.size() && skeleton.joints[jointB].parent == jointA) {
+    return true;
+  }
+  return false;
+}
+
 ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
     const momentum::Mesh& mesh,
     const momentum::SkinWeights& skin,
+    const momentum::Skeleton& skeleton,
     const Eigen::Vector3f& p_world,
     uint32_t parentIdx,
     float cutoffWeight = 0.02) {
   ClosestPointOnMeshResult result;
+
   for (size_t iTri = 0; iTri < mesh.faces.size(); ++iTri) {
     const auto& f = mesh.faces[iTri];
 
@@ -174,10 +196,12 @@ ClosestPointOnMeshResult closestPointOnMeshMatchingParent(
         f(2),
         mesh.vertices.size());
 
+    // Sum skin weights across the joint, its parent, and its children
     float skinWeight = 0;
     for (int kTriVert = 0; kTriVert < 3; ++kTriVert) {
       for (int kSkinWeight = 0; kSkinWeight < skin.index.cols(); ++kSkinWeight) {
-        if (skin.index(f(kTriVert), kSkinWeight) == parentIdx) {
+        const uint32_t skinJointIdx = skin.index(f(kTriVert), kSkinWeight);
+        if (isRelatedJoint(skeleton, skinJointIdx, parentIdx)) {
           skinWeight += skin.weight(f(kTriVert), kSkinWeight);
         }
       }
@@ -242,6 +266,7 @@ momentum::Character locatorsToSkinnedLocators(
     const auto closestPointResult = closestPointOnMeshMatchingParent(
         *sourceCharacter.mesh,
         *sourceCharacter.skinWeights,
+        sourceCharacter.skeleton,
         p_world,
         gsl::narrow_cast<uint32_t>(parent),
         minSkinWeight);
@@ -389,7 +414,12 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
 
     // Find the closest point on the mesh to the locator.
     const auto closestPointResult = closestPointOnMeshMatchingParent(
-        *character.mesh, *character.skinWeights, p_world, locator.parents[0], targetDepth);
+        *character.mesh,
+        *character.skinWeights,
+        character.skeleton,
+        p_world,
+        locator.parents[0],
+        targetDepth);
     if (!closestPointResult.valid) {
       continue;
     }
