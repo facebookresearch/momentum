@@ -385,6 +385,73 @@ PYBIND11_MODULE(marker_tracking, m) {
       py::arg("max_frames") = 0);
 
   m.def(
+      "calibrate_markers",
+      [](momentum::Character& character,
+         const Eigen::VectorXf& identity,
+         const std::vector<std::vector<momentum::Marker>>& markerData,
+         const momentum::CalibrationConfig& calibrationConfig,
+         size_t firstFrame = 0,
+         size_t maxFrames = 0) {
+        momentum::ModelParameters params(identity);
+
+        if (params.size() == 0) { // If no identity is passed in, use default
+          params = momentum::ModelParameters::Zero(character.parameterTransform.name.size());
+        }
+
+        momentum::calibrateMarkers(
+            character, params, markerData, calibrationConfig, firstFrame, maxFrames);
+
+        // Return the identity parameters (scaling params only)
+        // Use .v to get the underlying Eigen::VectorXf from ModelParameters
+        return params.v;
+      },
+      R"(Calibrate a character model using marker data without running full tracking.
+
+This function performs only the calibration step (scaling, locator offsets, and optionally
+shape parameters) without running per-frame tracking on all frames. This is useful when you
+want to calibrate on a ROM (range of motion) sequence but don't need the tracked motion for
+that sequence.
+
+The calibration modifies the character in-place (updating locators if configured) and returns
+the calibrated identity parameters. These can then be used with :func:`process_markers` or
+:func:`track_poses` for tracking other sequences.
+
+Example workflow::
+
+    # Calibrate on ROM sequence (fast - only processes calib_frames)
+    identity = calibrate_markers(
+        character=character,
+        identity=np.zeros(0),
+        marker_data=rom_markers,
+        calibration_config=calib_config,
+    )
+
+    # Track actual sequence (no redundant calibration)
+    motion = process_markers(
+        character=character,
+        identity=identity,
+        marker_data=sequence_markers,
+        tracking_config=tracking_config,
+        calibration_config=calib_config,
+        calibrate=False,
+    )
+
+:param character: Character to be calibrated. Will be modified in-place if locator
+    calibration is enabled.
+:param identity: Identity parameters, pass in empty array for default identity
+:param marker_data: A list of marker data for each frame (from ROM/calibration sequence)
+:param calibration_config: Calibration config specifying number of frames, iterations, etc.
+:param first_frame: First frame to be used for calibration
+:param max_frames: Max number of frames to be used for calibration (0 for all)
+:return: Calibrated identity parameters (scaling parameters))",
+      py::arg("character"),
+      py::arg("identity"),
+      py::arg("marker_data"),
+      py::arg("calibration_config"),
+      py::arg("first_frame") = 0,
+      py::arg("max_frames") = 0);
+
+  m.def(
       "process_markers",
       [](momentum::Character& character,
          const Eigen::VectorXf& identity,

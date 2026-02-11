@@ -20,6 +20,37 @@
 
 namespace momentum {
 
+void calibrateMarkers(
+    momentum::Character& character,
+    momentum::ModelParameters& identity,
+    std::span<const std::vector<momentum::Marker>> markerData,
+    const CalibrationConfig& calibrationConfig,
+    size_t firstFrame,
+    size_t maxFrames) {
+  MT_THROW_IF(
+      firstFrame > markerData.size(),
+      "First frame {} can't exceed total frames {}",
+      firstFrame,
+      markerData.size());
+  const size_t lastFrame =
+      maxFrames > 0 ? std::min(firstFrame + maxFrames, markerData.size()) : markerData.size();
+  const std::span<const std::vector<momentum::Marker>> inputData(
+      markerData.data() + firstFrame, lastFrame - firstFrame);
+
+  MT_CHECK(
+      !(calibrationConfig.globalScaleOnly & calibrationConfig.locatorsOnly),
+      "globalScaleOnly and locatorsOnly are exclusive; they cannot both be true.");
+
+  if (calibrationConfig.locatorsOnly) {
+    // The output locators will be written to character.
+    calibrateLocators(inputData, calibrationConfig, identity, character);
+  } else {
+    // The output locators will be written to character. The output identity will be saved in the
+    // identity variable.
+    calibrateModel(inputData, calibrationConfig, character, identity);
+  }
+}
+
 Eigen::MatrixXf processMarkers(
     momentum::Character& character,
     momentum::ModelParameters& identity,
