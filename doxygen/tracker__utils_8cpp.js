@@ -1,7 +1,7 @@
 var tracker__utils_8cpp =
 [
     [ "averageTriangleSkinWeights", "tracker__utils_8cpp.html#af85295e4d6c4b77e997d914cc4d510bf", null ],
-    [ "closestPointOnMeshMatchingParent", "tracker__utils_8cpp.html#a14a99416728785e1fc347fb3a3825fd4", null ],
+    [ "closestPointOnMeshMatchingParent", "tracker__utils_8cpp.html#aad3c3744faf3dc4012b91cefd337fb07", null ],
     [ "createConstraintData", "tracker__utils_8cpp.html#aa8153829bea96beb9011e5024d47f5da", null ],
     [ "createLocatorCharacter", "tracker__utils_8cpp.html#a8672dec18fb662d392c5f2f6f749cf04", null ],
     [ "createSkinnedConstraintData", "tracker__utils_8cpp.html#a726e0d65cd7fc1b57c8c9a63dc721afc", null ],
@@ -13,6 +13,7 @@ var tracker__utils_8cpp =
     [ "extractParameters", "tracker__utils_8cpp.html#aab70645310a06eab39456dcb9b084e98", null ],
     [ "extractSkinnedLocatorsFromCharacter", "tracker__utils_8cpp.html#a6e2946f9870ec29b4d47807fa01372ca", null ],
     [ "fillIdentity", "tracker__utils_8cpp.html#a73e44695fb092ba7863259c1affa8283", null ],
+    [ "isRelatedJoint", "tracker__utils_8cpp.html#a1b0d7e52bce5d1353e0585d3f85cf5c4", null ],
     [ "jointIdentityToModelIdentity", "tracker__utils_8cpp.html#a9ea114b0a31b9c28d6780db87accc6cc", null ],
     [ "locatorsToSkinnedLocators", "tracker__utils_8cpp.html#a4fc4d4d23fe9cbeb703b299f86dcd750", null ],
     [ "removeIdentity", "tracker__utils_8cpp.html#a8babd568c031639522dc41c963d46f0a", null ],
