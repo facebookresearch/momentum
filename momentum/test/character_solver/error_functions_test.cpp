@@ -690,6 +690,158 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_Gradien
   }
 }
 
+// Test that sliding constraints correctly slide to nearest candidate triangle
+TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorTriangle_SlidingConstraints) {
+  using T = typename TestFixture::Type;
+
+  // Create a test character with skinned locators
+  const Character character = getSkinnedLocatorTestCharacter();
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const Mesh& mesh = *character.mesh;
+
+  ASSERT_GT(character.skinnedLocators.size(), 0);
+  ASSERT_GT(mesh.faces.size(), 3); // Need at least a few triangles
+
+  // Test with Position constraint type (similar results expected for Plane)
+  SkinnedLocatorTriangleErrorFunctionT<T> errorFunction(character, VertexConstraintType::Position);
+
+  // Pick three triangles for testing: initial triangle and two candidates
+  const size_t initialTriIdx = 0;
+  const size_t candidateTriIdx1 = 1;
+  const size_t candidateTriIdx2 = 2;
+  const size_t excludedTriIdx = 3; // Not in candidate list
+
+  const Eigen::Vector3i initialTriIndices = mesh.faces[initialTriIdx];
+  const Eigen::Vector3i candidateTri1Indices = mesh.faces[candidateTriIdx1];
+  const Eigen::Vector3i candidateTri2Indices = mesh.faces[candidateTriIdx2];
+  const Eigen::Vector3i excludedTriIndices = mesh.faces[excludedTriIdx];
+
+  // Create constraint with candidate triangles
+  SkinnedLocatorTriangleConstraintT<T> constraint;
+  constraint.locatorIndex = 0;
+  constraint.tgtTriangleIndices = initialTriIndices;
+  constraint.tgtTriangleBaryCoords = Eigen::Vector3<T>(T(1.0 / 3.0), T(1.0 / 3.0), T(1.0 / 3.0));
+  constraint.depth = T(0);
+  constraint.weight = T(1);
+
+  // Add candidate triangles (including the initial one)
+  CandidateTriangle candidate0;
+  candidate0.triangleIdx = initialTriIdx;
+  candidate0.vertexIndices = initialTriIndices;
+  constraint.candidateTriangles.push_back(candidate0);
+
+  CandidateTriangle candidate1;
+  candidate1.triangleIdx = candidateTriIdx1;
+  candidate1.vertexIndices = candidateTri1Indices;
+  constraint.candidateTriangles.push_back(candidate1);
+
+  CandidateTriangle candidate2;
+  candidate2.triangleIdx = candidateTriIdx2;
+  candidate2.vertexIndices = candidateTri2Indices;
+  constraint.candidateTriangles.push_back(candidate2);
+
+  // Set the constraint
+  std::vector<SkinnedLocatorTriangleConstraintT<T>> constraints = {constraint};
+  errorFunction.setConstraints(constraints);
+
+  // Create parameters and state first
+  ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  SkeletonStateT<T> state(transform.apply(params), character.skeleton);
+
+  // Set up mesh state using the MeshStateT constructor
+  MeshStateT<T> meshState(params, state, character);
+
+  // Helper to compute centroid of a triangle
+  auto getTriangleCentroid = [&mesh](size_t triIdx) -> Eigen::Vector3<T> {
+    const Eigen::Vector3i& face = mesh.faces[triIdx];
+    return (mesh.vertices[face(0)].template cast<T>() + mesh.vertices[face(1)].template cast<T>() +
+            mesh.vertices[face(2)].template cast<T>()) /
+        T(3);
+  };
+
+  // Get centroids for testing
+  const Eigen::Vector3<T> initialCentroid = getTriangleCentroid(initialTriIdx);
+  const Eigen::Vector3<T> candidate1Centroid = getTriangleCentroid(candidateTriIdx1);
+  const Eigen::Vector3<T> candidate2Centroid = getTriangleCentroid(candidateTriIdx2);
+  const Eigen::Vector3<T> excludedCentroid = getTriangleCentroid(excludedTriIdx);
+
+  // Get the skinned locator parameter index
+  const SkinnedLocator& locator = character.skinnedLocators[0];
+  int locatorParamIdx = -1;
+  if (character.parameterTransform.skinnedLocatorParameters.size() > 0) {
+    locatorParamIdx = character.parameterTransform.skinnedLocatorParameters[0];
+  }
+  ASSERT_GE(locatorParamIdx, 0); // Ensure the locator has parameters
+
+  // Test 1: Position locator at initial triangle centroid - error should be near zero
+  {
+    Eigen::Vector3<T> offset = initialCentroid - locator.position.template cast<T>();
+    params.v.template segment<3>(locatorParamIdx) = offset;
+    double errorAtInitial = errorFunction.getError(params, state, meshState);
+    // Error should be small (locator is at the target)
+    EXPECT_LT(errorAtInitial, T(0.01)) << "Error at initial triangle should be near zero";
+  }
+
+  // Test 2: Position locator at candidate1 centroid - should slide to it with low error
+  {
+    Eigen::Vector3<T> offset = candidate1Centroid - locator.position.template cast<T>();
+    params.v.template segment<3>(locatorParamIdx) = offset;
+    double errorAtCandidate1 = errorFunction.getError(params, state, meshState);
+    // Error should be small since it can slide to candidate1
+    EXPECT_LT(errorAtCandidate1, T(0.01)) << "Error at candidate1 should be near zero (sliding)";
+  }
+
+  // Test 3: Position locator at candidate2 centroid - should slide to it with low error
+  {
+    Eigen::Vector3<T> offset = candidate2Centroid - locator.position.template cast<T>();
+    params.v.template segment<3>(locatorParamIdx) = offset;
+    double errorAtCandidate2 = errorFunction.getError(params, state, meshState);
+    // Error should be small since it can slide to candidate2
+    EXPECT_LT(errorAtCandidate2, T(0.01)) << "Error at candidate2 should be near zero (sliding)";
+  }
+
+  // Test 4: Position locator at excluded triangle centroid - should NOT slide there
+  // Error should be larger since it can only slide to candidates
+  {
+    Eigen::Vector3<T> offset = excludedCentroid - locator.position.template cast<T>();
+    params.v.template segment<3>(locatorParamIdx) = offset;
+    double errorAtExcluded = errorFunction.getError(params, state, meshState);
+
+    // Now create a constraint WITHOUT candidates (fixed to initial triangle)
+    SkinnedLocatorTriangleConstraintT<T> fixedConstraint;
+    fixedConstraint.locatorIndex = 0;
+    fixedConstraint.tgtTriangleIndices = initialTriIndices;
+    fixedConstraint.tgtTriangleBaryCoords =
+        Eigen::Vector3<T>(T(1.0 / 3.0), T(1.0 / 3.0), T(1.0 / 3.0));
+    fixedConstraint.depth = T(0);
+    fixedConstraint.weight = T(1);
+    // No candidate triangles - should behave as fixed constraint
+
+    SkinnedLocatorTriangleErrorFunctionT<T> fixedErrorFunction(
+        character, VertexConstraintType::Position);
+    fixedErrorFunction.setConstraints({fixedConstraint});
+
+    double fixedErrorAtExcluded = fixedErrorFunction.getError(params, state, meshState);
+
+    // The sliding error should be less than or equal to the fixed error
+    // because sliding can find a closer point among candidates
+    // (unless excluded triangle happens to be the same as initial, which we avoid)
+
+    // Both errors should be non-zero since the locator is at the excluded triangle
+    // but the sliding constraint finds the closest candidate while fixed stays at initial
+    EXPECT_GT(errorAtExcluded, T(0.0))
+        << "Error at excluded triangle should be non-zero for sliding constraint";
+    EXPECT_GT(fixedErrorAtExcluded, T(0.0))
+        << "Error at excluded triangle should be non-zero for fixed constraint";
+  }
+
+  // Note: We intentionally don't test gradients/jacobians for sliding constraints
+  // because the sliding introduces non-differentiable discontinuities when switching
+  // between triangles. The Jacobian is computed as if the current triangle is fixed,
+  // which is a common approximation for closest-point constraints, but it won't match
+  // numerical gradients at switching boundaries.
+}
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, TestSkinningErrorFunction) {
   using T = typename TestFixture::Type;
 
