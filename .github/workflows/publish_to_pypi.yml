@@ -33,6 +33,11 @@ on:
         required: false
         type: boolean
         default: false
+      force_all_builds:
+        description: 'Force all builds including py3.13 (simulates tag push behavior)'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -107,7 +112,7 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" == "3.13" ]]; then
             if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]] || \
-               [[ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' }}" == "true" ]]; then
+               [[ "${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true') }}" == "true" ]]; then
               echo "run=true" >> $GITHUB_OUTPUT
             else
               echo "run=false" >> $GITHUB_OUTPUT
@@ -196,10 +201,8 @@ jobs:
         include:
           - python-version: '3.12'
             pixi-environment: py312
-            py-ver: '312'
           - python-version: '3.13'
             pixi-environment: py313
-            py-ver: '313'
           - os: windows-latest
             os-short: win64
     steps:
@@ -209,7 +212,7 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" == "3.13" ]]; then
             if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]] || \
-               [[ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' }}" == "true" ]]; then
+               [[ "${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true') }}" == "true" ]]; then
               echo "run=true" >> $GITHUB_OUTPUT
             else
               echo "run=false" >> $GITHUB_OUTPUT
@@ -239,42 +242,50 @@ jobs:
           cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           environments: ${{ matrix.pixi-environment }}
 
-      - name: Generate pyproject configs
-        if: steps.should_run.outputs.run == 'true'
-        run: pixi run -e ${{ matrix.pixi-environment }} generate_pyproject
-
       # Override CPU PyTorch with CUDA-enabled PyTorch for GPU builds
       - name: Install CUDA PyTorch
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} python -m pip install "torch>=2.8.0,<2.9" --index-url https://download.pytorch.org/whl/cu129 --force-reinstall
         shell: bash
 
-      # Swap in GPU pyproject for the build
-      - name: Set GPU pyproject.toml
-        if: steps.should_run.outputs.run == 'true'
-        run: |
-          PY_VER="${{ matrix.py-ver }}"
-          cp pyproject-pypi-gpu-py${PY_VER}.toml pyproject.toml
-          echo "Using GPU pyproject for Python ${PY_VER}"
-          head -20 pyproject.toml
-        shell: bash
-
       - name: Clean distribution artifacts
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_clean
 
+      # Build GPU wheel using variant-aware pixi task (PYMOMENTUM_VARIANT=gpu)
       - name: Build GPU wheel
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_build
         env:
+          PYMOMENTUM_VARIANT: gpu
           CMAKE_C_COMPILER_LAUNCHER: sccache
           CMAKE_CXX_COMPILER_LAUNCHER: sccache
           SCCACHE_GHA_ENABLED: "true"
 
-      # Repair wheel on Windows using delvewheel (bundles DLLs)
+      # Repair GPU wheel on Windows using variant-aware pixi task
       - name: Repair wheel (Windows)
         if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
         run: pixi run -e ${{ matrix.pixi-environment }} wheel_repair
+        env:
+          PYMOMENTUM_VARIANT: gpu
+
+      - name: Verify GPU wheel name
+        if: steps.should_run.outputs.run == 'true'
+        run: |
+          echo "Built wheels:"
+          ls -lh dist/*.whl
+          if ls dist/pymomentum_gpu-*.whl 1>/dev/null 2>&1; then
+            echo "✓ GPU wheel found with correct package name"
+          else
+            echo "✗ ERROR: No pymomentum_gpu wheel found! Check PYMOMENTUM_VARIANT and pyproject.toml."
+            ls -la dist/
+            exit 1
+          fi
+          if ls dist/pymomentum_cpu-*.whl 1>/dev/null 2>&1; then
+            echo "✗ ERROR: CPU wheel found in GPU build! The build used wrong pyproject.toml."
+            exit 1
+          fi
+        shell: bash
 
       - name: Print sccache stats (Windows)
         if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
@@ -370,7 +381,7 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" == "3.13" ]]; then
             if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]] || \
-               [[ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' }}" == "true" ]]; then
+               [[ "${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true') }}" == "true" ]]; then
               echo "run=true" >> $GITHUB_OUTPUT
             else
               echo "run=false" >> $GITHUB_OUTPUT

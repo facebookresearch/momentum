@@ -173,16 +173,16 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 # ==================
 # PyPI Publishing
 # ==================
-# CPU environments (py312, py313) build CPU wheels
-# GPU environments (py312-cuda129, py313-cuda129) build GPU wheels
+# All wheel tasks are variant-aware via PYMOMENTUM_VARIANT env var (defaults to "cpu").
 # Usage:
 #   CPU: pixi run -e py312 wheel_build
-#   GPU: pixi run -e py312-cuda129 wheel_build
+#   GPU: PYMOMENTUM_VARIANT=gpu pixi run -e py312 wheel_build
+#   GPU (Linux cibuildwheel): pixi run -e gpu-wheel-build-py312 wheel_build
 
-# Generate pyproject-pypi-{cpu,gpu}.toml from template
+# Generate pyproject-pypi-{cpu,gpu}-py{ver}.toml from template
 # This task is mainly for CI. For local use, run directly:
 #   python scripts/generate_pyproject.py --torch-min-py312 X.X --torch-max-py312 X.X --torch-min-py313 Y.Y --torch-max-py313 Y.Y
-generate_pyproject = { cmd = "python scripts/generate_pyproject.py", description = "Generate pyproject-pypi-{cpu,gpu}.toml from template (uses defaults from script)" }
+generate_pyproject = { cmd = "python scripts/generate_pyproject.py", description = "Generate pyproject-pypi-{cpu,gpu}-py{ver}.toml from template (uses defaults from script)" }
 
 # Clean wheel build artifacts
 wheel_clean = { cmd = """
@@ -190,8 +190,11 @@ wheel_clean = { cmd = """
     find build -maxdepth 1 -type f \\( -name '*.whl' -o -name '*.tar.gz' \\) -delete 2>/dev/null || true
 """, description = "Clean wheel build artifacts for a fresh start" }
 
-# Check wheel files with twine
-wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+# Check wheel files with twine (variant-aware)
+wheel_check = { cmd = """
+    python -c "import os; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); print(f'Checking {variant} wheels...')" && \
+    twine check dist/pymomentum_*.whl
+""", depends-on = [
     "wheel_build",
 ], description = "Check wheel files with twine" }
 
@@ -200,28 +203,30 @@ wheel_test = { cmd = "python scripts/test_wheel.py", depends-on = [
     "wheel_build",
 ], description = "Test wheel imports in a clean virtual environment using uv" }
 
-# Publish to TestPyPI for testing
+# Publish to TestPyPI for testing (variant-aware)
 wheel_publish_testpypi = { cmd = "twine upload --repository testpypi --skip-existing dist/pymomentum_*.whl", depends-on = [
     "wheel_check",
     "wheel_test",
 ], description = "Publish to TestPyPI for testing" }
 
-# CPU-specific PyPI tasks - build CPU wheels (default)
-# CPU environments (py312, py313) use these tasks
+# Variant-aware wheel build (PYMOMENTUM_VARIANT defaults to "cpu")
 wheel_build = { cmd = """
-    python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
+    python -c "import sys, os, shutil; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); src = f'pyproject-pypi-{variant}-py{py_ver}.toml'; print(f'Using {src} for {variant} build'); shutil.copy(src, 'pyproject.toml')" && \
     pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
 """, depends-on = [
     "generate_pyproject",
-], description = "Build CPU wheel for current Python version" }
+], description = "Build wheel for current Python version (set PYMOMENTUM_VARIANT=gpu for GPU)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair is handled by platform-specific tasks'", description = "Repair wheel (platform-specific, see target.*.tasks)" }
 
-wheel_publish = { cmd = "twine upload --repository pymomentum-cpu dist/pymomentum_cpu-*.whl", depends-on = [
+# Variant-aware publish (PYMOMENTUM_VARIANT defaults to "cpu")
+wheel_publish = { cmd = """
+    python -c "import os, subprocess, sys; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); repo = f'pymomentum-{variant}'; glob = f'dist/pymomentum_{variant}-*.whl'; print(f'Publishing {glob} to {repo}'); sys.exit(subprocess.call(['twine', 'upload', '--repository', repo] + __import__('glob').glob(glob)))"
+""", depends-on = [
     "wheel_check",
     "wheel_test",
-], description = "Publish CPU wheels to PyPI" }
+], description = "Publish wheels to PyPI (set PYMOMENTUM_VARIANT=gpu for GPU)" }
 
 #===========
 # linux-64
@@ -235,9 +240,10 @@ auditwheel = ">=6.4.2,<7"
 podman = ">=5.0.0,<6"
 
 [target.linux-64.tasks]
-# Linux CPU wheel build uses cibuildwheel to produce manylinux_2_28 wheels
+# Linux variant-aware wheel build uses cibuildwheel to produce manylinux_2_28 wheels
 # Auto-detects container engine: respects CIBW_CONTAINER_ENGINE if set, otherwise detects docker/podman
-wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-cpu-py$(python -c \"import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))\").toml pyproject.toml && CIBW_BUILD=\"cp$(python -c \"import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))\")-manylinux_x86_64\" cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", description = "Build CPU wheel using cibuildwheel (auto-detects docker/podman)" }
+# Set PYMOMENTUM_VARIANT=gpu for GPU builds (defaults to "cpu")
+wheel_build = { cmd = '''bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-cpu} && PY_VER=$(python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))") && echo "Building $VARIANT wheel for Python $PY_VER" && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && CIBW_BUILD="cp${PY_VER}-manylinux_x86_64" cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo "Wheels created:" && ls -la dist/' ''', description = "Build wheel using cibuildwheel (set PYMOMENTUM_VARIANT=gpu for GPU)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op on Linux)" }
 
@@ -464,20 +470,21 @@ test_py = { cmd = "pytest pymomentum/test/*.py -k 'not ((TestFBXIO and (test_sav
     "build_py", "install",
 ] }
 
-# Windows CPU wheel build using pip wheel + delvewheel
+# Windows variant-aware wheel build using pip wheel + delvewheel
 # Note: Windows doesn't use cibuildwheel because conda-forge provides all dependencies
+# Set PYMOMENTUM_VARIANT=gpu for GPU builds (defaults to "cpu")
 wheel_build = { cmd = """
     python scripts/generate_pyproject.py && \
-    python -c "import sys, os, shutil; py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); shutil.copy(f'pyproject-pypi-cpu-py{py_ver}.toml', 'pyproject.toml')" && \
+    python -c "import sys, os, shutil; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); src = f'pyproject-pypi-{variant}-py{py_ver}.toml'; print(f'Using {src} for {variant} build'); shutil.copy(src, 'pyproject.toml')" && \
     pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
     python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
-""", description = "Build CPU wheel for Windows (uses pip wheel + delvewheel)" }
+""", description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=gpu for GPU)" }
 
-# Repair wheel using delvewheel (bundles DLLs for standalone distribution)
+# Repair wheel using delvewheel - variant-aware (bundles DLLs for standalone distribution)
 wheel_repair = { cmd = """
-    python -c "import glob; wheels = glob.glob('dist/pymomentum_cpu-*.whl'); print(f'Found wheels: {wheels}'); exit(0 if wheels else 1)" && \
-    python -m delvewheel repair --wheel-dir dist dist/pymomentum_cpu-*.whl
-""", description = "Repair Windows wheel using delvewheel to bundle DLLs" }
+    python -c "import glob, os; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); wheels = glob.glob(f'dist/pymomentum_{variant}-*.whl'); print(f'Found {variant} wheels: {wheels}'); exit(0 if wheels else 1)" && \
+    python -c "import glob, os, subprocess, sys; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); wheels = glob.glob(f'dist/pymomentum_{variant}-*.whl'); sys.exit(subprocess.call(['python', '-m', 'delvewheel', 'repair', '--wheel-dir', 'dist'] + wheels))"
+""", description = "Repair Windows wheel using delvewheel (set PYMOMENTUM_VARIANT=gpu for GPU)" }
 
 #==============
 # Feature: CPU
@@ -576,9 +583,8 @@ platforms = ["linux-64"]
 dependencies = { python = "3.12.*" }
 
 [feature.gpu-wheel-build-py312.tasks]
-# GPU wheel build using cibuildwheel in manylinux_2_28 container
-# Auto-detects container engine: respects CIBW_CONTAINER_ENGINE if set, otherwise detects docker/podman
-wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { CIBW_BUILD = "cp312-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (auto-detects docker/podman)" }
+# GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu
+wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-gpu} && PY_VER=312 && echo Building $VARIANT wheel for Python $PY_VER && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { PYMOMENTUM_VARIANT = "gpu", CIBW_BUILD = "cp312-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (auto-detects docker/podman)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
@@ -595,9 +601,8 @@ platforms = ["linux-64"]
 dependencies = { python = "3.13.*" }
 
 [feature.gpu-wheel-build-py313.tasks]
-# GPU wheel build using cibuildwheel in manylinux_2_28 container
-# Auto-detects container engine: respects CIBW_CONTAINER_ENGINE if set, otherwise detects docker/podman
-wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-gpu.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { CIBW_BUILD = "cp313-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (auto-detects docker/podman)" }
+# GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu
+wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-gpu} && PY_VER=313 && echo Building $VARIANT wheel for Python $PY_VER && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { PYMOMENTUM_VARIANT = "gpu", CIBW_BUILD = "cp313-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (auto-detects docker/podman)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
