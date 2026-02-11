@@ -14,24 +14,43 @@
 #include <momentum/character_solver/vertex_error_function.h>
 #include <momentum/math/fwd.h>
 
+#include <vector>
+
 namespace momentum {
+
+/// Represents a candidate triangle for sliding constraints.
+///
+/// When a skinned locator is allowed to slide along the mesh surface, this struct
+/// stores information about a triangle that the locator can project onto.
+struct CandidateTriangle {
+  size_t triangleIdx = 0; ///< Index into mesh.faces
+  Eigen::Vector3i vertexIndices; ///< The 3 vertex indices (cached from mesh.faces)
+};
 
 template <typename T>
 struct SkinnedLocatorTriangleConstraintT {
   int locatorIndex = -1;
-  Eigen::Vector3i tgtTriangleIndices;
-  Eigen::Vector3<T> tgtTriangleBaryCoords;
+  Eigen::Vector3i tgtTriangleIndices; ///< Initial/reference triangle vertex indices
+  Eigen::Vector3<T> tgtTriangleBaryCoords; ///< Initial barycentric coordinates
   T depth = 0;
   T weight = 1;
 
+  /// List of candidate triangles for sliding.
+  ///
+  /// When non-empty, the constraint will reproject onto the closest candidate triangle
+  /// during error evaluation, allowing the locator to "slide" along the mesh surface.
+  std::vector<CandidateTriangle> candidateTriangles;
+
   template <typename T2>
   SkinnedLocatorTriangleConstraintT<T2> cast() const {
-    return {
-        this->locatorIndex,
-        this->tgtTriangleIndices,
-        this->tgtTriangleBaryCoords.template cast<T2>(),
-        static_cast<T2>(this->depth),
-        static_cast<T2>(this->weight)};
+    SkinnedLocatorTriangleConstraintT<T2> result;
+    result.locatorIndex = this->locatorIndex;
+    result.tgtTriangleIndices = this->tgtTriangleIndices;
+    result.tgtTriangleBaryCoords = this->tgtTriangleBaryCoords.template cast<T2>();
+    result.depth = static_cast<T2>(this->depth);
+    result.weight = static_cast<T2>(this->weight);
+    result.candidateTriangles = this->candidateTriangles;
+    return result;
   }
 };
 
