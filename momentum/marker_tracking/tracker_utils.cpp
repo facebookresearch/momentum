@@ -15,6 +15,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/skinned_locator_error_function.h"
+#include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/utility.h"
 
@@ -22,6 +23,12 @@
 #include "momentum/common/log.h"
 
 #include "axel/math/PointTriangleProjectionDefinitions.h"
+
+#include <algorithm>
+#include <queue>
+#include <span>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace momentum;
 
@@ -388,10 +395,156 @@ momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceC
       {}};
 }
 
+std::vector<std::vector<size_t>> buildTriangleAdjacency(const Mesh& mesh) {
+  std::vector<std::vector<size_t>> adjacency(mesh.faces.size());
+
+  if (mesh.faces.empty()) {
+    return adjacency;
+  }
+
+  // Build edge-to-triangles map
+  // Edge is represented as pair of sorted vertex indices
+  struct PairHash {
+    size_t operator()(const std::pair<int, int>& p) const {
+      return std::hash<int64_t>{}(
+          (static_cast<int64_t>(p.first) << 32) | static_cast<uint32_t>(p.second));
+    }
+  };
+  std::unordered_map<std::pair<int, int>, std::vector<size_t>, PairHash> edgeToTriangles;
+
+  for (size_t iTri = 0; iTri < mesh.faces.size(); ++iTri) {
+    const Eigen::Vector3i& face = mesh.faces[iTri];
+    for (int i = 0; i < 3; ++i) {
+      int v0 = face(i);
+      int v1 = face((i + 1) % 3);
+      // Sort to create canonical edge representation
+      if (v0 > v1) {
+        std::swap(v0, v1);
+      }
+      edgeToTriangles[{v0, v1}].push_back(iTri);
+    }
+  }
+
+  // Build adjacency from edge-to-triangles map
+  for (const auto& [edge, triangles] : edgeToTriangles) {
+    // For each pair of triangles sharing this edge, mark them as adjacent
+    for (size_t i = 0; i < triangles.size(); ++i) {
+      for (size_t j = i + 1; j < triangles.size(); ++j) {
+        adjacency[triangles[i]].push_back(triangles[j]);
+        adjacency[triangles[j]].push_back(triangles[i]);
+      }
+    }
+  }
+
+  // Remove duplicates from adjacency lists
+  for (auto& neighbors : adjacency) {
+    std::sort(neighbors.begin(), neighbors.end());
+    neighbors.erase(std::unique(neighbors.begin(), neighbors.end()), neighbors.end());
+  }
+
+  return adjacency;
+}
+
+std::vector<CandidateTriangle> findCandidateTrianglesDfs(
+    const Mesh& mesh,
+    const SkinWeights& skin,
+    const Skeleton& skeleton,
+    std::span<const std::vector<size_t>> adjacency,
+    size_t startTriangleIdx,
+    const Eigen::Vector3f& initialPoint,
+    const Eigen::Vector3f& referenceNormal,
+    uint32_t parentJointIdx,
+    float maxSearchDistance,
+    float maxNormalAngleDeg) {
+  std::vector<CandidateTriangle> candidates;
+
+  if (startTriangleIdx >= mesh.faces.size()) {
+    return candidates;
+  }
+
+  const float cosMaxAngle = std::cos(maxNormalAngleDeg * pi<float>() / 180.0f);
+  const float cutoffWeight = 0.02f;
+
+  std::unordered_set<size_t> visited;
+  std::queue<size_t> toVisit;
+
+  toVisit.push(startTriangleIdx);
+  visited.insert(startTriangleIdx);
+
+  while (!toVisit.empty()) {
+    size_t triIdx = toVisit.front();
+    toVisit.pop();
+
+    MT_CHECK(triIdx < mesh.faces.size());
+
+    const Eigen::Vector3i& face = mesh.faces[triIdx];
+    const Eigen::Vector3f& v0 = mesh.vertices[face(0)];
+    const Eigen::Vector3f& v1 = mesh.vertices[face(1)];
+    const Eigen::Vector3f& v2 = mesh.vertices[face(2)];
+
+    // Compute centroid
+    const Eigen::Vector3f centroid = (v0 + v1 + v2) / 3.0f;
+
+    // Distance check - if too far, don't add and don't continue DFS from here
+    const float dist = (centroid - initialPoint).norm();
+    if (dist > maxSearchDistance) {
+      continue;
+    }
+
+    // Compute triangle normal
+    Eigen::Vector3f normal = (v1 - v0).cross(v2 - v0);
+    const float normalNorm = normal.norm();
+    if (normalNorm < 1e-8f) {
+      continue; // Degenerate triangle
+    }
+    normal /= normalNorm;
+
+    // Normal angle check
+    if (normal.dot(referenceNormal) < cosMaxAngle) {
+      continue;
+    }
+
+    // Skin weight check - sum skin weights across the joint and related joints
+    float skinWeight = 0;
+    for (int kTriVert = 0; kTriVert < 3; ++kTriVert) {
+      for (int kSkinWeight = 0; kSkinWeight < skin.index.cols(); ++kSkinWeight) {
+        const uint32_t skinJointIdx = skin.index(face(kTriVert), kSkinWeight);
+        if (isRelatedJoint(skeleton, skinJointIdx, parentJointIdx)) {
+          skinWeight += skin.weight(face(kTriVert), kSkinWeight);
+        }
+      }
+    }
+    skinWeight /= 3.0f;
+
+    if (skinWeight < cutoffWeight) {
+      continue;
+    }
+
+    // All checks passed - add to candidates
+    CandidateTriangle candidate;
+    candidate.triangleIdx = triIdx;
+    candidate.vertexIndices = face;
+    candidates.push_back(candidate);
+
+    // Continue DFS to adjacent triangles
+    if (triIdx < adjacency.size()) {
+      for (size_t neighborIdx : adjacency[triIdx]) {
+        if (visited.insert(neighborIdx).second) {
+          toVisit.push(neighborIdx);
+        }
+      }
+    }
+  }
+
+  return candidates;
+}
+
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
     const ModelParameters& modelParams,
-    float targetDepth) {
+    float targetDepth,
+    float maxSearchDistance,
+    float maxNormalAngleDeg) {
   if (!character.mesh || !character.skinWeights) {
     return {};
   }
@@ -404,6 +557,12 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
   auto mesh = *character.mesh;
   if (modelParams.size() > 0) {
     mesh = extractBlendShapeFromParams(modelParams, character);
+  }
+
+  // Build triangle adjacency if we need to find candidate triangles
+  std::vector<std::vector<size_t>> adjacency;
+  if (maxSearchDistance > 0.0f) {
+    adjacency = buildTriangleAdjacency(mesh);
   }
 
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> result;
@@ -429,6 +588,34 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     constr.tgtTriangleIndices = mesh.faces[closestPointResult.triangleIdx];
     constr.tgtTriangleBaryCoords = closestPointResult.baryCoords;
     constr.depth = targetDepth;
+
+    // Populate candidate triangles if sliding is enabled
+    if (maxSearchDistance > 0.0f) {
+      // Compute reference normal from the initial triangle
+      const Eigen::Vector3f& v0 = mesh.vertices[constr.tgtTriangleIndices[0]];
+      const Eigen::Vector3f& v1 = mesh.vertices[constr.tgtTriangleIndices[1]];
+      const Eigen::Vector3f& v2 = mesh.vertices[constr.tgtTriangleIndices[2]];
+      Eigen::Vector3f referenceNormal = (v1 - v0).cross(v2 - v0);
+      const float normalNorm = referenceNormal.norm();
+      if (normalNorm > 1e-8f) {
+        referenceNormal /= normalNorm;
+      } else {
+        referenceNormal = Eigen::Vector3f::UnitZ();
+      }
+
+      constr.candidateTriangles = findCandidateTrianglesDfs(
+          mesh,
+          *character.skinWeights,
+          character.skeleton,
+          adjacency,
+          closestPointResult.triangleIdx,
+          p_world,
+          referenceNormal,
+          locator.parents[0],
+          maxSearchDistance,
+          maxNormalAngleDeg);
+    }
+
     result.push_back(constr);
   }
 
