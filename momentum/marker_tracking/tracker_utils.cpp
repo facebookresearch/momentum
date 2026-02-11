@@ -541,7 +541,6 @@ std::vector<CandidateTriangle> findCandidateTrianglesDfs(
 
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
-    const ModelParameters& modelParams,
     float targetDepth,
     float maxSearchDistance,
     float maxNormalAngleDeg) {
@@ -554,10 +553,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     return {};
   }
 
-  auto mesh = *character.mesh;
-  if (modelParams.size() > 0) {
-    mesh = extractBlendShapeFromParams(modelParams, character);
-  }
+  const Mesh& mesh = *character.mesh;
 
   // Build triangle adjacency if we need to find candidate triangles
   std::vector<std::vector<size_t>> adjacency;
