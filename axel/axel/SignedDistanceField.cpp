@@ -274,6 +274,47 @@ void SignedDistanceField<ScalarType>::clear() {
 }
 
 template <typename ScalarType>
+SignedDistanceField<ScalarType> SignedDistanceField<ScalarType>::createSphere(
+    Scalar radius,
+    const Eigen::Vector3<Index>& resolution,
+    Scalar padding) {
+  // Validate inputs
+  assert(radius > Scalar{0});
+  assert(resolution.x() > 0 && resolution.y() > 0 && resolution.z() > 0);
+  assert(padding >= Scalar{0});
+
+  // Create a bounding box centered at origin with padding
+  const Scalar extent = radius * (Scalar{1} + padding);
+  const Vector3 minCorner(-extent, -extent, -extent);
+  const Vector3 maxCorner(extent, extent, extent);
+  const BoundingBoxType bounds(minCorner, maxCorner);
+
+  // Create the SDF with the specified resolution
+  SignedDistanceField sdf(bounds, resolution);
+
+  // Fill the SDF with sphere distances
+  for (Index k = 0; k < resolution.z(); ++k) {
+    for (Index j = 0; j < resolution.y(); ++j) {
+      for (Index i = 0; i < resolution.x(); ++i) {
+        // Convert grid coordinates to world position
+        const Vector3 gridPos(
+            static_cast<Scalar>(i), static_cast<Scalar>(j), static_cast<Scalar>(k));
+        const Vector3 worldPos = sdf.gridToWorld(gridPos);
+
+        // Calculate distance to sphere surface
+        const Scalar distanceToCenter = worldPos.norm();
+        const Scalar signedDistance = distanceToCenter - radius;
+
+        // Set the distance value
+        sdf.set(i, j, k, signedDistance);
+      }
+    }
+  }
+
+  return sdf;
+}
+
+template <typename ScalarType>
 Size SignedDistanceField<ScalarType>::linearIndex(Index i, Index j, Index k) const {
   return static_cast<Size>(k) * resolution_.x() * resolution_.y() +
       static_cast<Size>(j) * resolution_.x() + static_cast<Size>(i);

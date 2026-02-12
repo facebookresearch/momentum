@@ -92,6 +92,7 @@ template_classes = [
     "PoseTransformSolver",
     "PositionErrorFunction",
     "ProjectionErrorFunction",
+    "SDFCollisionErrorFunction",
     "SimdCollisionErrorFunction",
     "SkeletonErrorFunction",
     "SkeletonSolverFunction",
