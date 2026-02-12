@@ -19,6 +19,8 @@
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
 
+#include <axel/math/PointTriangleProjectionDefinitions.h>
+
 #include <memory>
 
 namespace momentum {
@@ -60,7 +62,7 @@ void SkinnedLocatorTriangleErrorFunctionT<T>::addConstraint(
   MT_CHECK(locatorIndex >= 0 && ((size_t)locatorIndex) < character_.skinnedLocators.size());
   constraints_.push_back(
       SkinnedLocatorTriangleConstraintT<T>{
-          locatorIndex, triangleIndices, triangleBaryCoords, depth, weight});
+          locatorIndex, triangleIndices, triangleBaryCoords, depth, weight, {}});
 }
 
 template <typename T>
@@ -87,6 +89,84 @@ Eigen::Vector3<T> computeTargetPosition(
     const SkinnedLocatorTriangleConstraintT<T>& c) {
   return computeTargetBaryPosition(mesh, c) + c.depth * computeTargetTriangleNormal(mesh, c);
 }
+
+namespace {
+
+// Helper struct for reprojection result
+template <typename T>
+struct ReprojectionResult {
+  Eigen::Vector3i triangleIndices;
+  Eigen::Vector3<T> baryCoords;
+  Eigen::Vector3<T> closestPoint;
+};
+
+// Find the closest candidate triangle and compute reprojection
+template <typename T>
+ReprojectionResult<T> findClosestCandidateTriangle(
+    const MeshT<T>& mesh,
+    const Eigen::Vector3<T>& locatorPos,
+    const std::vector<CandidateTriangle>& candidates,
+    T depth) {
+  ReprojectionResult<T> result;
+  T minDistSq = std::numeric_limits<T>::max();
+
+  for (const auto& candidate : candidates) {
+    const Eigen::Vector3<T>& v0 = mesh.vertices[candidate.vertexIndices[0]];
+    const Eigen::Vector3<T>& v1 = mesh.vertices[candidate.vertexIndices[1]];
+    const Eigen::Vector3<T>& v2 = mesh.vertices[candidate.vertexIndices[2]];
+
+    Eigen::Vector3<T> projPoint;
+    Eigen::Vector3<T> bary;
+    axel::projectOnTriangle(locatorPos, v0, v1, v2, projPoint, &bary);
+
+    // Compute normal and apply depth offset
+    Eigen::Vector3<T> normal = (v1 - v0).cross(v2 - v0);
+    const T normalNorm = normal.norm();
+    if (normalNorm > T(1e-8)) {
+      normal /= normalNorm;
+    } else {
+      normal.setZero();
+    }
+    const Eigen::Vector3<T> targetPoint = projPoint + depth * normal;
+
+    const T distSq = (locatorPos - targetPoint).squaredNorm();
+    if (distSq < minDistSq) {
+      minDistSq = distSq;
+      result.triangleIndices = candidate.vertexIndices;
+      result.baryCoords = bary;
+      result.closestPoint = targetPoint;
+    }
+  }
+
+  return result;
+}
+
+// Helper to get effective constraint after potential reprojection
+template <typename T>
+SkinnedLocatorTriangleConstraintT<T> getEffectiveConstraint(
+    const MeshT<T>& mesh,
+    const SkinnedLocatorTriangleConstraintT<T>& constr,
+    const Eigen::Vector3<T>& locatorPos) {
+  if (constr.candidateTriangles.empty()) {
+    return constr;
+  }
+
+  // Find closest candidate triangle
+  ReprojectionResult<T> reproj =
+      findClosestCandidateTriangle(mesh, locatorPos, constr.candidateTriangles, constr.depth);
+
+  // Create effective constraint with reprojected triangle
+  SkinnedLocatorTriangleConstraintT<T> effective;
+  effective.locatorIndex = constr.locatorIndex;
+  effective.tgtTriangleIndices = reproj.triangleIndices;
+  effective.tgtTriangleBaryCoords = reproj.baryCoords;
+  effective.depth = constr.depth;
+  effective.weight = constr.weight;
+  // Don't copy candidateTriangles - effective constraint is for single evaluation
+  return effective;
+}
+
+} // namespace
 
 template <typename T>
 Eigen::Vector3<T> SkinnedLocatorTriangleErrorFunctionT<T>::getLocatorRestPosition(
@@ -173,8 +253,13 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getError(
       const Eigen::Vector3<T> locatorRestPos =
           getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
+      // Get effective constraint (potentially reprojected onto closest candidate triangle)
+      const SkinnedLocatorTriangleConstraintT<T> effectiveConstr =
+          getEffectiveConstraint(*meshState.restMesh_, constr, locatorRestPos);
+
       // Get the target position on the triangle
-      const Eigen::Vector3<T> tgtPoint = computeTargetPosition(*meshState.restMesh_, constr);
+      const Eigen::Vector3<T> tgtPoint =
+          computeTargetPosition(*meshState.restMesh_, effectiveConstr);
 
       // Calculate position error
       const Eigen::Vector3<T> diff = locatorRestPos - tgtPoint;
@@ -187,11 +272,16 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getError(
       const Eigen::Vector3<T> locatorRestPos =
           getLocatorRestPosition(modelParameters, constr.locatorIndex);
 
+      // Get effective constraint (potentially reprojected onto closest candidate triangle)
+      const SkinnedLocatorTriangleConstraintT<T> effectiveConstr =
+          getEffectiveConstraint(*meshState.restMesh_, constr, locatorRestPos);
+
       // Get the target position and normal
       const Eigen::Vector3<T> targetNormal =
-          computeTargetTriangleNormal(*meshState.restMesh_, constr);
+          computeTargetTriangleNormal(*meshState.restMesh_, effectiveConstr);
       const Eigen::Vector3<T> tgtPoint =
-          computeTargetBaryPosition(*meshState.restMesh_, constr) + constr.depth * targetNormal;
+          computeTargetBaryPosition(*meshState.restMesh_, effectiveConstr) +
+          effectiveConstr.depth * targetNormal;
       // Calculate plane error (projection onto normal)
       const T dist = targetNormal.dot(locatorRestPos - tgtPoint);
       error += constr.weight * dist * dist;
@@ -469,12 +559,26 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getGradient(
 
   if (constraintType_ == VertexConstraintType::Position) {
     for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
-      error += calculatePositionGradient(modelParameters, meshState, constraints_[iCons], gradient);
+      const SkinnedLocatorTriangleConstraintT<T>& constr = constraints_[iCons];
+      // Get locator position for reprojection
+      const Eigen::Vector3<T> locatorRestPos =
+          getLocatorRestPosition(modelParameters, constr.locatorIndex);
+      // Get effective constraint (potentially reprojected)
+      const SkinnedLocatorTriangleConstraintT<T> effectiveConstr =
+          getEffectiveConstraint(*meshState.restMesh_, constr, locatorRestPos);
+      error += calculatePositionGradient(modelParameters, meshState, effectiveConstr, gradient);
     }
   } else {
     MT_CHECK(constraintType_ == VertexConstraintType::Plane);
     for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
-      error += calculatePlaneGradient(modelParameters, meshState, constraints_[iCons], gradient);
+      const SkinnedLocatorTriangleConstraintT<T>& constr = constraints_[iCons];
+      // Get locator position for reprojection
+      const Eigen::Vector3<T> locatorRestPos =
+          getLocatorRestPosition(modelParameters, constr.locatorIndex);
+      // Get effective constraint (potentially reprojected)
+      const SkinnedLocatorTriangleConstraintT<T> effectiveConstr =
+          getEffectiveConstraint(*meshState.restMesh_, constr, locatorRestPos);
+      error += calculatePlaneGradient(modelParameters, meshState, effectiveConstr, gradient);
     }
   }
 
@@ -501,10 +605,17 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getJacobian(
 
   if (constraintType_ == VertexConstraintType::Position) {
     for (size_t i = 0; i < constraints_.size(); ++i) {
+      const SkinnedLocatorTriangleConstraintT<T>& constr = constraints_[i];
+      // Get locator position for reprojection
+      const Eigen::Vector3<T> locatorRestPos =
+          getLocatorRestPosition(modelParameters, constr.locatorIndex);
+      // Get effective constraint (potentially reprojected)
+      const SkinnedLocatorTriangleConstraintT<T> effectiveConstr =
+          getEffectiveConstraint(*meshState.restMesh_, constr, locatorRestPos);
       error += calculatePositionJacobian(
           modelParameters,
           meshState,
-          constraints_[i],
+          effectiveConstr,
           jacobian.block(3 * i, 0, 3, modelParameters.size()),
           residual.middleRows(3 * i, 3));
     }
@@ -512,11 +623,18 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getJacobian(
   } else {
     MT_CHECK(constraintType_ == VertexConstraintType::Plane);
     for (size_t i = 0; i < constraints_.size(); ++i) {
+      const SkinnedLocatorTriangleConstraintT<T>& constr = constraints_[i];
+      // Get locator position for reprojection
+      const Eigen::Vector3<T> locatorRestPos =
+          getLocatorRestPosition(modelParameters, constr.locatorIndex);
+      // Get effective constraint (potentially reprojected)
+      const SkinnedLocatorTriangleConstraintT<T> effectiveConstr =
+          getEffectiveConstraint(*meshState.restMesh_, constr, locatorRestPos);
       T residualValue;
       error += calculatePlaneJacobian(
           modelParameters,
           meshState,
-          constraints_[i],
+          effectiveConstr,
           jacobian.block(i, 0, 1, modelParameters.size()),
           residualValue);
       residual(i) = residualValue;
