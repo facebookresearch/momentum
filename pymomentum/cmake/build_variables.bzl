@@ -133,6 +133,7 @@ geometry_public_headers = [
     "geometry/momentum_geometry.h",
     "geometry/momentum_io.h",
     "geometry/parameter_transform_pybind.h",
+    "geometry/sdf_collider_pybind.h",
     "geometry/skeleton_pybind.h",
     "geometry/skin_weights_pybind.h",
 ]
@@ -155,6 +156,7 @@ geometry_sources = [
     "geometry/momentum_geometry.cpp",
     "geometry/momentum_io.cpp",
     "geometry/parameter_transform_pybind.cpp",
+    "geometry/sdf_collider_pybind.cpp",
     "geometry/skeleton_pybind.cpp",
     "geometry/skin_weights_pybind.cpp",
 ]
