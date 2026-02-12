@@ -108,6 +108,7 @@ $(document).ready(function(){initNavTree('skinned__locator__triangle__error__fun
 <code>#include &quot;<a class="el" href="checks_8h_source.html">momentum/common/checks.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="profile_8h_source.html">momentum/common/profile.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&quot;</code><br />
+<code>#include &lt;axel/math/PointTriangleProjectionDefinitions.h&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 </div>
 <p><a href="skinned__locator__triangle__error__function_8cpp_source.html">Go to the source code of this file.</a></p>
@@ -135,13 +136,64 @@ Functions</h2></td></tr>
 <tr class="memitem:a4e78fc688a3c9a0de143583f83de6062"><td class="memTemplItemLeft" align="right" valign="top">std::array&lt; Eigen::Matrix3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;, 3 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a4e78fc688a3c9a0de143583f83de6062">momentum::compute_d_targetPos_d_vertexPos</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkinnedLocatorTriangleConstraintT.html">SkinnedLocatorTriangleConstraintT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">cons</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshT.html">MeshT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;mesh)</td></tr>
 <tr class="separator:a4e78fc688a3c9a0de143583f83de6062"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="ab01cb39171c69eca744a3ed11ad9a3ad" name="ab01cb39171c69eca744a3ed11ad9a3ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab01cb39171c69eca744a3ed11ad9a3ad">&#9670;&#160;</a></span>baryCoords</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3&lt;T&gt; baryCoords</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00099">99</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a683192909b33b65580d9951b5c28abd8" name="a683192909b33b65580d9951b5c28abd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a683192909b33b65580d9951b5c28abd8">&#9670;&#160;</a></span>closestPoint</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3&lt;T&gt; closestPoint</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00100">100</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a591b3139bac97e118b2f37750e33e766" name="a591b3139bac97e118b2f37750e33e766"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a591b3139bac97e118b2f37750e33e766">&#9670;&#160;</a></span>triangleIndices</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3i triangleIndices</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00098">98</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00056">momentum::SkinnedLocatorTriangleErrorFunctionT&lt; T &gt;::addConstraint()</a>, and <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00059">momentum::PointTriangleVertexErrorFunctionT&lt; T &gt;::addConstraint()</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skinned__locator__triangle__error__function_8cpp.html">skinned_locator_triangle_error_function.cpp</a></li>
-    <li class="footer">Generated on Wed Feb 11 2026 19:45:46 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Feb 12 2026 16:43:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

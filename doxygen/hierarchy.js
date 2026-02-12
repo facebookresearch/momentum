@@ -12,6 +12,7 @@ var hierarchy =
       [ "momentum::BlendShape", "structmomentum_1_1BlendShape.html", null ]
     ] ],
     [ "momentum::BoneWeightT< T >", "structmomentum_1_1BoneWeightT.html", null ],
+    [ "momentum::CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", null ],
     [ "momentum::GltfBuilder::Impl::CharacterData", "structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html", null ],
     [ "momentum::CharacterParametersT< T >", "structmomentum_1_1CharacterParametersT.html", null ],
     [ "momentum::CharacterParametersT< float >", "structmomentum_1_1CharacterParametersT.html", null ],

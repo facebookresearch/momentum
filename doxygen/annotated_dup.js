@@ -20,6 +20,7 @@ var annotated_dup =
       [ "BlendWeightsT", "structmomentum_1_1BlendWeightsT.html", "structmomentum_1_1BlendWeightsT" ],
       [ "BoneWeightT", "structmomentum_1_1BoneWeightT.html", "structmomentum_1_1BoneWeightT" ],
       [ "CalibrationConfig", "structmomentum_1_1CalibrationConfig.html", "structmomentum_1_1CalibrationConfig" ],
+      [ "CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", "structmomentum_1_1CandidateTriangle" ],
       [ "CharacterParametersT", "structmomentum_1_1CharacterParametersT.html", "structmomentum_1_1CharacterParametersT" ],
       [ "CharacterStateT", "structmomentum_1_1CharacterStateT.html", "structmomentum_1_1CharacterStateT" ],
       [ "CharacterT", "structmomentum_1_1CharacterT.html", "structmomentum_1_1CharacterT" ],

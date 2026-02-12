@@ -135,7 +135,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1022ec12af55091e9343a1e3f684722d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a3e5aff26a83148a61cf838960d6cd2" id="r_a9a3e5aff26a83148a61cf838960d6cd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html#a9a3e5aff26a83148a61cf838960d6cd2">getJacobianSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">final</a></td></tr>
 <tr class="separator:a9a3e5aff26a83148a61cf838960d6cd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ee6cee8f39ec91feaaff7111cf8a1cc" id="r_a9ee6cee8f39ec91feaaff7111cf8a1cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html#a9ee6cee8f39ec91feaaff7111cf8a1cc">addConstraint</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> locatorIndex, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Vector3i &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">triangleIndices</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">triangleBaryCoords</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> depth=0, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> weight=1)</td></tr>
+<tr class="memitem:a9ee6cee8f39ec91feaaff7111cf8a1cc" id="r_a9ee6cee8f39ec91feaaff7111cf8a1cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html#a9ee6cee8f39ec91feaaff7111cf8a1cc">addConstraint</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> locatorIndex, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Vector3i &amp;<a class="el" href="skinned__locator__triangle__error__function_8cpp.html#a591b3139bac97e118b2f37750e33e766">triangleIndices</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">triangleBaryCoords</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> depth=0, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> weight=1)</td></tr>
 <tr class="separator:a9ee6cee8f39ec91feaaff7111cf8a1cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a680c2411d6d692e6ab02d36d2f204a67" id="r_a680c2411d6d692e6ab02d36d2f204a67"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html#a680c2411d6d692e6ab02d36d2f204a67">clearConstraints</a> ()</td></tr>
 <tr class="separator:a680c2411d6d692e6ab02d36d2f204a67"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -192,7 +192,7 @@ Additional Inherited Members</h2></td></tr>
 class momentum::SkinnedLocatorTriangleErrorFunctionT&lt; T &gt;</div><p>Support constraining a skinned locator to a location on the mesh defined by a target triangle and its normal. </p>
 <p>The target point is specified as sum_i (bary_i * target_triangle_vertex_i) + depth * target_triangle_normal. This constraint applies "forces" both to the skinned locator and every vertex in the mesh target triangle, so it will actually try to pull both toward each other. </p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00044">44</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00063">63</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad46584b4b549bbc87e05c8aa70695778" name="ad46584b4b549bbc87e05c8aa70695778"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad46584b4b549bbc87e05c8aa70695778">&#9670;&#160;</a></span>SkinnedLocatorTriangleErrorFunctionT() <span class="overload">[1/3]</span></h2>
@@ -230,7 +230,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00027">27</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00029">29</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="exception_8h_source.html#l00050">MT_THROW_IF</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a0d3adee051531c15b3509b4d4d75ce7b">momentum::Plane</a>, and <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>.</p>
 
@@ -366,9 +366,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00054">54</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00056">56</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>.</p>
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00098">triangleIndices</a>.</p>
 
 </div>
 </div>
@@ -389,7 +389,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00043">43</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00045">45</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -423,7 +423,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#abf4f884ae8291616d1e8f141fa46ab13">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00091">91</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00110">110</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -452,7 +452,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00087">87</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00106">106</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -500,7 +500,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a9004873fbd8970a3c7026c425f7585f7">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00160">160</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00240">240</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00072">momentum::computeTargetBaryPosition()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00090">momentum::computeTargetPosition()</a>, <a class="el" href="point__triangle__vertex__error__function_8cpp_source.html#l00081">momentum::computeTargetTriangleNormal()</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="checks_8h_source.html#l00025">MT_CHECK_NOTNULL</a>, <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a0d3adee051531c15b3509b4d4d75ce7b">momentum::Plane</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>, and <a class="el" href="mesh__state_8h_source.html#l00029">momentum::MeshStateT&lt; T &gt;::restMesh_</a>.</p>
 
@@ -556,7 +556,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a8edd68fc2cc8b2d67048c5b3fe69541a">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00461">461</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00551">551</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="checks_8h_source.html#l00025">MT_CHECK_NOTNULL</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a0d3adee051531c15b3509b4d4d75ce7b">momentum::Plane</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>, and <a class="el" href="mesh__state_8h_source.html#l00029">momentum::MeshStateT&lt; T &gt;::restMesh_</a>.</p>
 
@@ -624,7 +624,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a68eb5c4782e23bc8e92ec7701947d6cf">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00485">485</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00589">589</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a0d3adee051531c15b3509b4d4d75ce7b">momentum::Plane</a>, <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>, and <a class="el" href="mesh__state_8h_source.html#l00029">momentum::MeshStateT&lt; T &gt;::restMesh_</a>.</p>
 
@@ -657,7 +657,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#acdf427ac8dd801d2a4591a8d95ab905c">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00531">531</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00649">649</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a0d3adee051531c15b3509b4d4d75ce7b">momentum::Plane</a>, and <a class="el" href="namespacemomentum.html#af5403533c7c0442dcd5af35800c619e6a52f5e0bc3859bc5f5e25130b6c7e8881">momentum::Position</a>.</p>
 
@@ -692,7 +692,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#aec7acd2180c714506cca74b033ad8b35">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00096">96</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8h_source.html#l00115">115</a> of file <a class="el" href="skinned__locator__triangle__error__function_8h_source.html">skinned_locator_triangle_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -770,7 +770,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00048">48</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html#l00050">50</a> of file <a class="el" href="skinned__locator__triangle__error__function_8cpp_source.html">skinned_locator_triangle_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -785,7 +785,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html">SkinnedLocatorTriangleErrorFunctionT</a></li>
-    <li class="footer">Generated on Wed Feb 11 2026 19:45:46 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Feb 12 2026 16:43:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
