@@ -212,6 +212,20 @@ class SignedDistanceField {
    */
   void clear();
 
+  /**
+   * Create a sphere SDF with the specified radius and resolution.
+   * The sphere is centered at the origin in SDF local space.
+   *
+   * @param radius Radius of the sphere
+   * @param resolution Grid resolution in each dimension (nx, ny, nz)
+   * @param padding Extra space around the sphere as a factor of radius (default: 0.2)
+   * @return A new SignedDistanceField containing a sphere
+   */
+  static SignedDistanceField createSphere(
+      Scalar radius,
+      const Eigen::Vector3<Index>& resolution,
+      Scalar padding = Scalar(0.2));
+
  private:
   /**
    * Convert 3D grid indices to a linear array index.
