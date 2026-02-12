@@ -229,18 +229,21 @@ manylinux-x86_64-image = "manylinux_2_28"
 build-frontend = { name = "pip", args = ["--no-build-isolation"] }
 
 # Common
+# PYMOMENTUM_VARIANT env var controls the build variant (cpu or gpu).
+# Set via [tool.cibuildwheel.linux.environment] or CI workflow env.
 before-build = """
 set -e  # Exit on error
 
 VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
-echo "Building for Python $VER"
+VARIANT="${PYMOMENTUM_VARIANT:-cpu}"
+echo "Building for Python $VER, variant=$VARIANT"
 
-# Copy the Python-version-specific pyproject.toml
-if [ -f "pyproject-pypi-cpu-py${VER}.toml" ]; then
-  cp pyproject-pypi-cpu-py${VER}.toml pyproject.toml
-  echo "Copied pyproject-pypi-cpu-py${VER}.toml"
+# Copy the Python-version-specific pyproject.toml for the correct variant
+if [ -f "pyproject-pypi-${VARIANT}-py${VER}.toml" ]; then
+  cp pyproject-pypi-${VARIANT}-py${VER}.toml pyproject.toml
+  echo "Copied pyproject-pypi-${VARIANT}-py${VER}.toml"
 else
-  echo "ERROR: pyproject-pypi-cpu-py${VER}.toml not found!"
+  echo "ERROR: pyproject-pypi-${VARIANT}-py${VER}.toml not found!"
   ls -la pyproject*.toml
   exit 1
 fi
@@ -255,12 +258,17 @@ echo "Installing build dependencies..."
 python -m pip install scikit-build-core pybind11 setuptools-scm
 
 # Install PyTorch (needed at build time to link against libtorch)
-# PyTorch is a runtime dependency but also needed at build time for linking
-echo "Installing PyTorch for build..."
+# CPU builds use the cpu index; GPU builds use the CUDA 12.9 index
+if [ "$VARIANT" = "gpu" ]; then
+  TORCH_INDEX="https://download.pytorch.org/whl/cu129"
+else
+  TORCH_INDEX="https://download.pytorch.org/whl/cpu"
+fi
+echo "Installing PyTorch for build (variant=$VARIANT, index=$TORCH_INDEX)..."
 if [ "$VER" = "312" ]; then
-  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url "$TORCH_INDEX"
 elif [ "$VER" = "313" ]; then
-  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url "$TORCH_INDEX"
 else
   echo "Unsupported Python version: $VER"
   exit 1
@@ -275,11 +283,17 @@ LD_LIBRARY_PATH="" python -c "import torch; print(f'PyTorch {torch.__version__} 
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
 before-test = """
+VARIANT="${PYMOMENTUM_VARIANT:-cpu}"
+if [ "$VARIANT" = "gpu" ]; then
+  TORCH_INDEX="https://download.pytorch.org/whl/cu129"
+else
+  TORCH_INDEX="https://download.pytorch.org/whl/cpu"
+fi
 VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
 if [ "$VER" = "312" ]; then
-  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url https://download.pytorch.org/whl/cpu
+  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url "$TORCH_INDEX"
 elif [ "$VER" = "313" ]; then
-  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url https://download.pytorch.org/whl/cpu
+  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url "$TORCH_INDEX"
 fi
 """
 
@@ -291,8 +305,14 @@ before-all = """
 # Pixi provides dependencies (headers/libs) but we use the container's compiler
 # LD_LIBRARY_PATH is required for auditwheel to find transitive dependencies (libdeflate, libtiff, etc.)
 environment = { PATH = "$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_env/.pixi/envs/default", CONDA_PREFIX = "/tmp/build_env/.pixi/envs/default", MOMENTUM_BUILD_WITH_FBXSDK = "OFF", LD_LIBRARY_PATH = "/tmp/build_env/.pixi/envs/default/lib" }
+# Forward PYMOMENTUM_VARIANT from host env into the manylinux container
+# so variant-aware hooks (before-build, repair-wheel-command, before-test) work correctly.
+# Do NOT also set PYMOMENTUM_VARIANT in the environment table above — that would
+# override the passed-through value (the shell expansion happens before injection).
+environment-pass = ["PYMOMENTUM_VARIANT"]
 repair-wheel-command = """
-# Manual wheel repair for CPU Linux builds (no auditwheel).
+# Manual wheel repair for Linux builds (no auditwheel).
+# Supports both CPU and GPU variants via PYMOMENTUM_VARIANT env var.
 #
 # auditwheel cannot be used here because:
 # - manylinux_2_28 policy rejects our libs (too-recent GLIBCXX symbols)
@@ -311,8 +331,9 @@ echo '=== Unpacking wheel ==='
 cd $WORK
 unzip -q {wheel}
 
-# Find or create the .libs directory
-LIBS_DIR="pymomentum_cpu.libs"
+# Find or create the .libs directory (variant-aware)
+VARIANT="${PYMOMENTUM_VARIANT:-cpu}"
+LIBS_DIR="pymomentum_${VARIANT}.libs"
 mkdir -p "$LIBS_DIR"
 
 # Recursively collect and bundle shared library dependencies
