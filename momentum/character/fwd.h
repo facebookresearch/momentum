@@ -259,4 +259,23 @@ using TaperedCapsuled_const_p = ::std::shared_ptr<const TaperedCapsuled>;
 using TaperedCapsuled_const_u = ::std::unique_ptr<const TaperedCapsuled>;
 using TaperedCapsuled_const_w = ::std::weak_ptr<const TaperedCapsuled>;
 
+template <typename T>
+struct SDFColliderT;
+using SDFCollider = SDFColliderT<float>;
+using SDFColliderd = SDFColliderT<double>;
+
+using SDFCollider_p = ::std::shared_ptr<SDFCollider>;
+using SDFCollider_u = ::std::unique_ptr<SDFCollider>;
+using SDFCollider_w = ::std::weak_ptr<SDFCollider>;
+using SDFCollider_const_p = ::std::shared_ptr<const SDFCollider>;
+using SDFCollider_const_u = ::std::unique_ptr<const SDFCollider>;
+using SDFCollider_const_w = ::std::weak_ptr<const SDFCollider>;
+
+using SDFColliderd_p = ::std::shared_ptr<SDFColliderd>;
+using SDFColliderd_u = ::std::unique_ptr<SDFColliderd>;
+using SDFColliderd_w = ::std::weak_ptr<SDFColliderd>;
+using SDFColliderd_const_p = ::std::shared_ptr<const SDFColliderd>;
+using SDFColliderd_const_u = ::std::unique_ptr<const SDFColliderd>;
+using SDFColliderd_const_w = ::std::weak_ptr<const SDFColliderd>;
+
 } // namespace momentum

@@ -37,7 +37,8 @@ template_structs = [
     "Skeleton",
     "SkeletonState",
     "MeshState",
-    "TaperedCapsule"
+    "TaperedCapsule",
+    "SDFCollider",
 ]
 
 [[fwd]]
