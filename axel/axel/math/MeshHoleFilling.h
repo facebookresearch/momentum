@@ -20,6 +20,18 @@
 namespace axel {
 
 /**
+ * Method for filling mesh holes.
+ */
+enum class HoleFillingMethod {
+  /// Add a centroid vertex and create fan triangles (default, best for SDF generation)
+  Centroid,
+  /// Use ear clipping without adding new vertices
+  EarClipping,
+  /// Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger)
+  Auto
+};
+
+/**
  * Represents a hole boundary in the mesh.
  */
 struct HoleBoundary {
@@ -68,32 +80,36 @@ std::vector<HoleBoundary> detectMeshHoles(
     std::span<const Eigen::Vector3i> triangles);
 
 /**
- * Fill holes in a triangle mesh using advancing front method.
+ * Fill holes in a triangle mesh.
  *
  * This function identifies holes in the mesh and fills them with new triangles
  * to create a watertight surface suitable for SDF generation.
  *
  * @param vertices Original mesh vertices
  * @param triangles Original mesh triangles
+ * @param method Hole filling method (default: Centroid for best triangle quality)
  * @return Result containing new vertices and triangles, or failure info
  */
 template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    std::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3i> triangles,
+    HoleFillingMethod method = HoleFillingMethod::Centroid);
 
 /**
  * Convenience function that fills holes and returns complete mesh.
  *
  * @param vertices Original mesh vertices
  * @param triangles Original mesh triangles
+ * @param method Hole filling method (default: Centroid for best triangle quality)
  * @return Pair of (all_vertices, all_triangles) with holes filled
  */
 template <typename ScalarType>
 std::pair<std::vector<Eigen::Vector3<ScalarType>>, std::vector<Eigen::Vector3i>>
 fillMeshHolesComplete(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    std::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3i> triangles,
+    HoleFillingMethod method = HoleFillingMethod::Centroid);
 
 /**
  * Apply Laplacian smoothing to mesh vertices with optional masking.

@@ -126,6 +126,22 @@ PYBIND11_MODULE(axel, m) {
   m.attr("AUTOGRAD_ENABLED") = true;
 #endif
 
+  // Bind HoleFillingMethod enum
+  py::enum_<axel::HoleFillingMethod>(m, "HoleFillingMethod", R"(Method for filling mesh holes.
+
+Available methods:
+- Centroid: Add a centroid vertex and create fan triangles (default, best for SDF generation)
+- EarClipping: Use ear clipping without adding new vertices
+- Auto: Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger))")
+      .value(
+          "Centroid",
+          axel::HoleFillingMethod::Centroid,
+          "Add centroid vertex, create fan triangles")
+      .value(
+          "EarClipping", axel::HoleFillingMethod::EarClipping, "Use ear clipping, no new vertices")
+      .value("Auto", axel::HoleFillingMethod::Auto, "Auto-select based on hole size")
+      .export_values();
+
   // Bind BoundingBox
   py::class_<axel::BoundingBox<float>>(m, "BoundingBox")
       .def(
@@ -573,7 +589,9 @@ Example usage::
   // Bind fill_holes function
   m.def(
       "fill_holes",
-      [](const py::array_t<float>& vertices, const py::array_t<int>& triangles) {
+      [](const py::array_t<float>& vertices,
+         const py::array_t<int>& triangles,
+         axel::HoleFillingMethod method) {
         // Validate input arrays
         validatePositionArray(vertices, "vertices");
         validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
@@ -597,10 +615,11 @@ Example usage::
               trianglesData(i, 0), trianglesData(i, 1), trianglesData(i, 2));
         }
 
-        // Call the fillMeshHolesComplete function
+        // Call the fillMeshHolesComplete function with the specified method
         const auto [filledVertices, filledTriangles] = axel::fillMeshHolesComplete<float>(
             std::span<const Eigen::Vector3f>(vertexVector),
-            std::span<const Eigen::Vector3i>(triangleVector));
+            std::span<const Eigen::Vector3i>(triangleVector),
+            method);
 
         // Convert results back to numpy arrays
         // Convert vertices
@@ -628,17 +647,17 @@ Example usage::
       },
       R"(Fill holes in a triangle mesh to create a watertight surface.
 
-This function identifies holes in the mesh and fills them with new triangles using
-an advancing front method. The result is a complete mesh suitable for operations
-that require watertight surfaces, such as SDF generation.
-
-For small holes (≤6 vertices), a centroid-based fan triangulation is used.
-For larger holes, an ear clipping algorithm is applied.
+This function identifies holes in the mesh and fills them with new triangles.
+The result is a complete mesh suitable for operations that require watertight
+surfaces, such as SDF generation.
 
 :param vertices: Vertex positions as 2D array of shape (N, 3) where N is number of vertices.
 :param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
                   Indices must be valid within the vertices array.
-:param config: Configuration parameters as :class:`MeshHoleFillingConfig` (optional).
+:param method: Hole filling method (default: Centroid). Options are:
+               - HoleFillingMethod.Centroid: Add centroid vertex, create fan triangles (best quality)
+               - HoleFillingMethod.EarClipping: Use ear clipping, no new vertices
+               - HoleFillingMethod.Auto: Auto-select based on hole size
 :return: Tuple of (filled_vertices, filled_triangles) where:
          - filled_vertices: 2D array of shape (N', 3) with original + new vertices
          - filled_triangles: 2D array of shape (M', 3) with original + new triangles
@@ -664,16 +683,14 @@ Example usage::
         [1, 5, 6], [1, 6, 2]   # right face
     ], dtype=np.int32)
 
-    config = axel.MeshHoleFillingConfig()
-    config.max_edge_length_ratio = 2.0
-    config.smoothing_iterations = 3
-
-    filled_vertices, filled_triangles = axel.fill_holes(vertices, triangles, config)
+    # Use centroid method (default) for best triangle quality
+    filled_vertices, filled_triangles = axel.fill_holes(vertices, triangles)
 
     print(f"Original mesh: {len(vertices)} vertices, {len(triangles)} triangles")
     print(f"Filled mesh: {len(filled_vertices)} vertices, {len(filled_triangles)} triangles"))",
       py::arg("vertices"),
-      py::arg("triangles"));
+      py::arg("triangles"),
+      py::arg("method") = axel::HoleFillingMethod::Centroid);
 
   // Bind dual_contouring function (always returns quads)
   m.def(
