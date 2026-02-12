@@ -2640,3 +2640,55 @@ class TestSolver(unittest.TestCase):
             np.isclose(measured_speed, target_speed, rtol=1e-3, atol=1e-3),
             f"Root joint: measured speed {measured_speed} does not match target {target_speed}",
         )
+
+    def test_sequence_error_function_get_error(self) -> None:
+        """Test SequenceErrorFunction.get_error() for sequence error functions."""
+
+        character = pym_geometry.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+
+        # Test with ModelParametersSequenceErrorFunction (2-frame window)
+        seq_error = pym_solver2.ModelParametersSequenceErrorFunction(
+            character, weight=1.0
+        )
+
+        # Same parameters on both frames should give zero error
+        model_params_same = np.zeros((2, n_params), dtype=np.float32)
+        error = seq_error.get_error(model_params_same)
+        self.assertAlmostEqual(error, 0.0, places=6)
+
+        # Different parameters on consecutive frames should give non-zero error
+        np.random.seed(0)
+        model_params_diff = np.random.rand(2, n_params).astype(np.float32)
+        error = seq_error.get_error(model_params_diff)
+        self.assertGreater(error, 0.0)
+
+        # Manually compute expected error for ModelParametersSequenceErrorFunction:
+        # error = sum((params[1][i] - params[0][i])^2) * weight * kMotionWeight
+        # where targetWeights = all 1s, weight = 1.0, kMotionWeight = 1e-1
+        diff = model_params_diff[1] - model_params_diff[0]
+        expected_error = float(np.sum(diff**2)) * 0.1
+        self.assertAlmostEqual(error, expected_error, places=4)
+
+        # Test with StateSequenceErrorFunction (2-frame window)
+        state_seq_error = pym_solver2.StateSequenceErrorFunction(character, weight=1.0)
+
+        # Same parameters should give zero error
+        error = state_seq_error.get_error(model_params_same)
+        self.assertAlmostEqual(error, 0.0, places=6)
+
+        # Different parameters should give non-zero error
+        error = state_seq_error.get_error(model_params_diff)
+        self.assertGreater(error, 0.0)
+
+        # Test error handling: wrong number of dimensions
+        with self.assertRaises(RuntimeError):
+            seq_error.get_error(np.zeros(n_params, dtype=np.float32))
+
+        # Test error handling: wrong number of frames
+        with self.assertRaises(RuntimeError):
+            seq_error.get_error(np.zeros((3, n_params), dtype=np.float32))
+
+        # Test error handling: wrong number of parameters
+        with self.assertRaises(RuntimeError):
+            seq_error.get_error(np.zeros((2, n_params + 1), dtype=np.float32))
