@@ -729,6 +729,25 @@ using ProjectionErrorFunctiond_const_u = ::std::unique_ptr<const ProjectionError
 using ProjectionErrorFunctiond_const_w = ::std::weak_ptr<const ProjectionErrorFunctiond>;
 
 template <typename T>
+class SDFCollisionErrorFunctionT;
+using SDFCollisionErrorFunction = SDFCollisionErrorFunctionT<float>;
+using SDFCollisionErrorFunctiond = SDFCollisionErrorFunctionT<double>;
+
+using SDFCollisionErrorFunction_p = ::std::shared_ptr<SDFCollisionErrorFunction>;
+using SDFCollisionErrorFunction_u = ::std::unique_ptr<SDFCollisionErrorFunction>;
+using SDFCollisionErrorFunction_w = ::std::weak_ptr<SDFCollisionErrorFunction>;
+using SDFCollisionErrorFunction_const_p = ::std::shared_ptr<const SDFCollisionErrorFunction>;
+using SDFCollisionErrorFunction_const_u = ::std::unique_ptr<const SDFCollisionErrorFunction>;
+using SDFCollisionErrorFunction_const_w = ::std::weak_ptr<const SDFCollisionErrorFunction>;
+
+using SDFCollisionErrorFunctiond_p = ::std::shared_ptr<SDFCollisionErrorFunctiond>;
+using SDFCollisionErrorFunctiond_u = ::std::unique_ptr<SDFCollisionErrorFunctiond>;
+using SDFCollisionErrorFunctiond_w = ::std::weak_ptr<SDFCollisionErrorFunctiond>;
+using SDFCollisionErrorFunctiond_const_p = ::std::shared_ptr<const SDFCollisionErrorFunctiond>;
+using SDFCollisionErrorFunctiond_const_u = ::std::unique_ptr<const SDFCollisionErrorFunctiond>;
+using SDFCollisionErrorFunctiond_const_w = ::std::weak_ptr<const SDFCollisionErrorFunctiond>;
+
+template <typename T>
 class SimdCollisionErrorFunctionT;
 using SimdCollisionErrorFunction = SimdCollisionErrorFunctionT<float>;
 using SimdCollisionErrorFunctiond = SimdCollisionErrorFunctionT<double>;
