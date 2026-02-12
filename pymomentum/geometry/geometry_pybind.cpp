@@ -20,6 +20,7 @@
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
 #include "pymomentum/geometry/parameter_transform_pybind.h"
+#include "pymomentum/geometry/sdf_collider_pybind.h"
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
 
@@ -30,6 +31,7 @@
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/joint.h>
 #include <momentum/character/locator.h>
+#include <momentum/character/sdf_collision_geometry.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
@@ -169,6 +171,12 @@ PYBIND11_MODULE(geometry, m) {
       "TaperedCapsule",
       "A tapered capsule primitive used for collision detection and physics simulation. "
       "Represents a capsule with potentially different radii at each end, attached to a skeleton joint.");
+  py::class_<mm::SDFColliderT<float>> sdfColliderClass = py::class_<mm::SDFColliderT<float>>(
+      m,
+      "SDFCollider",
+      "An SDF collider attached to a skeleton joint for collision detection. "
+      "Contains a signed distance field volume positioned relative to a parent joint, "
+      "used for mesh-to-SDF collision detection during character solving.");
   auto markerClass = py::class_<mm::Marker>(
       m,
       "Marker",
@@ -1315,6 +1323,8 @@ When USD is available, you can load and save USD files (.usd, .usda, .usdc, .usd
   registerInverseParameterTransformBindings(inverseParameterTransformClass);
 
   registerLimits(m, parameterLimitClass);
+
+  registerSDFColliderBindings(sdfColliderClass);
 
   registerCharacterBindings(characterClass);
 
