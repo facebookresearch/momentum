@@ -68,6 +68,27 @@ void copyOutputFrameParameters(
   }
 }
 
+// Helper function to build model parameters and skeleton states from a 2D numpy array
+void buildModelParametersAndSkeletonStates(
+    const py::detail::unchecked_reference<float, 2>& modelParams_acc,
+    const mm::ParameterTransform& pt,
+    const mm::Skeleton& skeleton,
+    size_t nFrames,
+    py::ssize_t nParams,
+    std::vector<momentum::ModelParameters>& params,
+    std::vector<momentum::SkeletonState>& skelStates) {
+  params.resize(nFrames);
+  skelStates.clear();
+  skelStates.reserve(nFrames);
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    params[iFrame] = momentum::ModelParameters(nParams);
+    for (py::ssize_t k = 0; k < nParams; ++k) {
+      params[iFrame](k) = modelParams_acc(iFrame, k);
+    }
+    skelStates.emplace_back(pt.apply(params[iFrame]), skeleton);
+  }
+}
+
 // Helper function to format error functions list for __repr__
 std::string formatErrorFunctionsList(
     const std::vector<std::shared_ptr<mm::SkeletonErrorFunction>>& errorFunctions) {
@@ -190,7 +211,55 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
   addErrorFunctions(m);
 
   py::class_<mm::SequenceErrorFunction, std::shared_ptr<mm::SequenceErrorFunction>>(
-      m, "SequenceErrorFunction");
+      m, "SequenceErrorFunction")
+      .def(
+          "get_error",
+          [](mm::SequenceErrorFunction& self, const py::array_t<float>& modelParameters) -> double {
+            MT_THROW_IF(
+                modelParameters.ndim() != 2,
+                "Expected model_parameters to be a 2D array of shape (n_frames, n_params)");
+
+            const auto& pt = self.getParameterTransform();
+            const auto nFrames = static_cast<size_t>(modelParameters.shape(0));
+            const auto nParams = modelParameters.shape(1);
+
+            MT_THROW_IF(
+                nFrames != self.numFrames(),
+                "Expected {} frames but got {}",
+                self.numFrames(),
+                nFrames);
+
+            MT_THROW_IF(
+                static_cast<size_t>(nParams) != pt.numAllModelParameters(),
+                "Expected {} parameters but got {}",
+                pt.numAllModelParameters(),
+                nParams);
+
+            MT_THROW_IF(
+                self.needsMesh(),
+                "get_error is not supported for sequence error functions that require mesh state. ");
+
+            // Build model parameters and skeleton states for each frame
+            std::vector<momentum::ModelParameters> params;
+            std::vector<momentum::SkeletonState> skelStates;
+            std::vector<momentum::MeshState> meshStates(nFrames);
+
+            buildModelParametersAndSkeletonStates(
+                modelParameters.unchecked<2>(),
+                pt,
+                self.getSkeleton(),
+                nFrames,
+                nParams,
+                params,
+                skelStates);
+
+            return self.getError(params, skelStates, meshStates);
+          },
+          R"(Compute the error for a given set of model parameters.
+
+:param model_parameters: A 2D numpy array of shape (n_frames, n_params) containing the model parameters for each frame, where n_frames matches the number of frames required by this error function.
+:return: The error value.)",
+          py::arg("model_parameters"));
 
   addSequenceErrorFunctions(m);
 
