@@ -59,7 +59,44 @@ momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceC
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
     const ModelParameters& modelParams,
-    float targetDepth = 1.0f);
+    float targetDepth = 1.0f,
+    float maxSearchDistance = 0.0f,
+    float maxNormalAngleDeg = 30.0f);
+
+/// Build triangle adjacency: for each triangle, find triangles that share an edge.
+///
+/// @param mesh The mesh to build adjacency for
+/// @return Vector where result[i] contains indices of triangles adjacent to triangle i
+std::vector<std::vector<size_t>> buildTriangleAdjacency(const momentum::Mesh& mesh);
+
+/// Find candidate triangles by walking along the mesh surface using DFS.
+///
+/// Starting from a triangle, performs a depth-first search along the mesh surface,
+/// collecting triangles that are within the search distance, have compatible normals,
+/// and have sufficient skin weight for the specified parent joint.
+///
+/// @param mesh The mesh to search
+/// @param skin The skin weights
+/// @param skeleton The skeleton for joint hierarchy
+/// @param adjacency Pre-computed triangle adjacency (from buildTriangleAdjacency)
+/// @param startTriangleIdx Index of the starting triangle
+/// @param initialPoint The initial locator position (for distance calculations)
+/// @param referenceNormal The normal of the starting triangle (for angle filtering)
+/// @param parentJointIdx The parent joint index for skin weight filtering
+/// @param maxSearchDistance Maximum distance from initialPoint to include triangles
+/// @param maxNormalAngleDeg Maximum angle (in degrees) between triangle normal and reference normal
+/// @return Vector of candidate triangles that pass all filters
+std::vector<momentum::CandidateTriangle> findCandidateTrianglesDfs(
+    const momentum::Mesh& mesh,
+    const momentum::SkinWeights& skin,
+    const momentum::Skeleton& skeleton,
+    std::span<const std::vector<size_t>> adjacency,
+    size_t startTriangleIdx,
+    const Eigen::Vector3f& initialPoint,
+    const Eigen::Vector3f& referenceNormal,
+    uint32_t parentJointIdx,
+    float maxSearchDistance,
+    float maxNormalAngleDeg = 30.0f);
 
 // Extract locator offsets from a LocatorCharacter for a normal Character given input calibrated
 // parameters
