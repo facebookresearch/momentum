@@ -185,6 +185,7 @@ character_public_headers = [
     "character/marker.h",
     "character/mesh_state.h",
     "character/pose_shape.h",
+    "character/sdf_collision_geometry.h",
     "character/skinned_locator.h",
     "character/skin_weights.h",
 ]
