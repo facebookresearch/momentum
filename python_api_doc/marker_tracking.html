@@ -95,6 +95,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.smoothing_weights"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.smoothing_weights</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.calibrate_markers"><code class="docutils literal notranslate"><span class="pre">calibrate_markers()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators"><code class="docutils literal notranslate"><span class="pre">convert_locators_to_skinned_locators()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_skinned_locators_to_locators"><code class="docutils literal notranslate"><span class="pre">convert_skinned_locators_to_locators()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.get_locator_error"><code class="docutils literal notranslate"><span class="pre">get_locator_error()</span></code></a></li>
@@ -484,6 +485,55 @@
 equal to number of model parameters and this overrides the value specific in smoothing</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.calibrate_markers">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">calibrate_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig" title="pymomentum.marker_tracking.CalibrationConfig"><span class="pre">pymomentum.marker_tracking.CalibrationConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.calibrate_markers" title="Link to this definition"></a></dt>
+<dd><p>Calibrate a character model using marker data without running full tracking.</p>
+<p>This function performs only the calibration step (scaling, locator offsets, and optionally
+shape parameters) without running per-frame tracking on all frames. This is useful when you
+want to calibrate on a ROM (range of motion) sequence but don’t need the tracked motion for
+that sequence.</p>
+<p>The calibration modifies the character in-place (updating locators if configured) and returns
+the calibrated identity parameters. These can then be used with <a class="reference internal" href="#pymomentum.marker_tracking.process_markers" title="pymomentum.marker_tracking.process_markers"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_markers()</span></code></a> or
+<code class="xref py py-func docutils literal notranslate"><span class="pre">track_poses()</span></code> for tracking other sequences.</p>
+<p>Example workflow:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calibrate on ROM sequence (fast - only processes calib_frames)</span>
+<span class="n">identity</span> <span class="o">=</span> <span class="n">calibrate_markers</span><span class="p">(</span>
+    <span class="n">character</span><span class="o">=</span><span class="n">character</span><span class="p">,</span>
+    <span class="n">identity</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">marker_data</span><span class="o">=</span><span class="n">rom_markers</span><span class="p">,</span>
+    <span class="n">calibration_config</span><span class="o">=</span><span class="n">calib_config</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Track actual sequence (no redundant calibration)</span>
+<span class="n">motion</span> <span class="o">=</span> <span class="n">process_markers</span><span class="p">(</span>
+    <span class="n">character</span><span class="o">=</span><span class="n">character</span><span class="p">,</span>
+    <span class="n">identity</span><span class="o">=</span><span class="n">identity</span><span class="p">,</span>
+    <span class="n">marker_data</span><span class="o">=</span><span class="n">sequence_markers</span><span class="p">,</span>
+    <span class="n">tracking_config</span><span class="o">=</span><span class="n">tracking_config</span><span class="p">,</span>
+    <span class="n">calibration_config</span><span class="o">=</span><span class="n">calib_config</span><span class="p">,</span>
+    <span class="n">calibrate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character to be calibrated. Will be modified in-place if locator
+calibration is enabled.</p></li>
+<li><p><strong>identity</strong> – Identity parameters, pass in empty array for default identity</p></li>
+<li><p><strong>marker_data</strong> – A list of marker data for each frame (from ROM/calibration sequence)</p></li>
+<li><p><strong>calibration_config</strong> – Calibration config specifying number of frames, iterations, etc.</p></li>
+<li><p><strong>first_frame</strong> – First frame to be used for calibration</p></li>
+<li><p><strong>max_frames</strong> – Max number of frames to be used for calibration (0 for all)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Calibrated identity parameters (scaling parameters)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

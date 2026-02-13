@@ -28,7 +28,7 @@ var searchData=
   ['blendshape_5fp_25',['BlendShape_p',['../namespacemomentum.html#aae330e8404b34616130e3138b98cce12',1,'momentum']]],
   ['blendshape_5fu_26',['BlendShape_u',['../namespacemomentum.html#a85325def2e2bb74f2269ab7659b82bff',1,'momentum']]],
   ['blendshape_5fw_27',['BlendShape_w',['../namespacemomentum.html#acb5ca4f4de4fb4b73b7f3dc87fd14e3e',1,'momentum']]],
-  ['blendshapebase_28',['blendshapebase',['../structmomentum_1_1BlendShapeBase.html#a0777a03e86d546dd29cd1fe0a5de8c6b',1,'momentum::BlendShapeBase::BlendShapeBase()=default'],['../structmomentum_1_1BlendShapeBase.html#acd3f2a60219406f67d8d337f2962ef03',1,'momentum::BlendShapeBase::BlendShapeBase(size_t modelSize, size_t numShapes, std::span&lt; const std::string &gt; shapeNames={})'],['../structmomentum_1_1BlendShapeBase.html',1,'momentum::BlendShapeBase']]],
+  ['blendshapebase_28',['blendshapebase',['../structmomentum_1_1BlendShapeBase.html',1,'momentum::BlendShapeBase'],['../structmomentum_1_1BlendShapeBase.html#acd3f2a60219406f67d8d337f2962ef03',1,'momentum::BlendShapeBase::BlendShapeBase(size_t modelSize, size_t numShapes, std::span&lt; const std::string &gt; shapeNames={})'],['../structmomentum_1_1BlendShapeBase.html#a0777a03e86d546dd29cd1fe0a5de8c6b',1,'momentum::BlendShapeBase::BlendShapeBase()=default']]],
   ['blendshapebase_5fconst_5fp_29',['BlendShapeBase_const_p',['../namespacemomentum.html#a7872c3c8b09e5c336472ddb25c066285',1,'momentum']]],
   ['blendshapebase_5fconst_5fu_30',['BlendShapeBase_const_u',['../namespacemomentum.html#a34184c33207e6ff563dc94dd3561a4f9',1,'momentum']]],
   ['blendshapebase_5fconst_5fw_31',['BlendShapeBase_const_w',['../namespacemomentum.html#a27ec03d5b9de4e83cb24856f875d5762',1,'momentum']]],
@@ -56,6 +56,7 @@ var searchData=
   ['boxi_53',['Boxi',['../namespacemomentum.html#a8cbfb977160fc29e87bb5f47a75b7d41',1,'momentum']]],
   ['buildjetmat_54',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
   ['buildjetvec_55',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
-  ['bvh_5f_56',['bvh_',['../classmomentum_1_1CollisionErrorFunctionT.html#a8fc74dcad4626ada76516326198c88b2',1,'momentum::CollisionErrorFunctionT::bvh_'],['../classmomentum_1_1SimdCollisionErrorFunctionT.html#af740f7434319715996b61eda025ea0ae',1,'momentum::SimdCollisionErrorFunctionT::bvh_']]],
-  ['bytep_57',['ByteP',['../namespacemomentum.html#afefbc11a7ab8bce20f82b3e22cd0df91',1,'momentum']]]
+  ['buildtriangleadjacency_56',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]],
+  ['bvh_5f_57',['bvh_',['../classmomentum_1_1CollisionErrorFunctionT.html#a8fc74dcad4626ada76516326198c88b2',1,'momentum::CollisionErrorFunctionT::bvh_'],['../classmomentum_1_1SimdCollisionErrorFunctionT.html#af740f7434319715996b61eda025ea0ae',1,'momentum::SimdCollisionErrorFunctionT::bvh_']]],
+  ['bytep_58',['ByteP',['../namespacemomentum.html#afefbc11a7ab8bce20f82b3e22cd0df91',1,'momentum']]]
 ];
