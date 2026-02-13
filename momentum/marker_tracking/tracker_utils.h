@@ -58,7 +58,6 @@ momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceC
 
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
-    const ModelParameters& modelParams,
     float targetDepth = 1.0f,
     float maxSearchDistance = 0.0f,
     float maxNormalAngleDeg = 30.0f);
