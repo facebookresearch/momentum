@@ -133,74 +133,95 @@ std::vector<std::vector<std::pair<Index, Index>>> groupBoundaryEdgesIntoLoops(
 }
 
 /**
- * Fill a single hole using advancing front method.
+ * Test whether a point lies inside a triangle using barycentric coordinates.
  */
 template <typename ScalarType>
-HoleFillingResult fillSingleHole(
+bool isPointInsideTriangle(
+    const Eigen::Vector3<ScalarType>& point,
+    const Eigen::Vector3<ScalarType>& triA,
+    const Eigen::Vector3<ScalarType>& triB,
+    const Eigen::Vector3<ScalarType>& triC) {
+  const Eigen::Vector3<ScalarType> v0 = triC - triA;
+  const Eigen::Vector3<ScalarType> v1 = triB - triA;
+  const Eigen::Vector3<ScalarType> v2 = point - triA;
+
+  const ScalarType dot00 = v0.dot(v0);
+  const ScalarType dot01 = v0.dot(v1);
+  const ScalarType dot02 = v0.dot(v2);
+  const ScalarType dot11 = v1.dot(v1);
+  const ScalarType dot12 = v1.dot(v2);
+
+  const ScalarType invDenom = ScalarType{1} / (dot00 * dot11 - dot01 * dot01);
+  const ScalarType u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+  const ScalarType v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+  return u >= 0 && v >= 0 && u + v <= 1;
+}
+
+/**
+ * Fill a hole by adding a centroid vertex and creating fan triangles.
+ */
+template <typename ScalarType>
+HoleFillingResult fillHoleWithCentroid(
     const HoleBoundary& hole,
     std::span<const Eigen::Vector3<ScalarType>> vertices) {
   HoleFillingResult result;
 
-  if (hole.vertices.size() < 3) {
-    return result; // Cannot fill holes with less than 3 vertices
+  // Compute centroid of boundary vertices
+  Eigen::Vector3<ScalarType> centroid = Eigen::Vector3<ScalarType>::Zero();
+  for (const auto vertexIdx : hole.vertices) {
+    centroid += vertices[vertexIdx];
+  }
+  centroid /= static_cast<ScalarType>(hole.vertices.size());
+
+  // Adjust centroid position to be slightly inside the hole for better triangle quality
+  // Find the normal of the hole plane (average of cross products)
+  Eigen::Vector3<ScalarType> holeNormal = Eigen::Vector3<ScalarType>::Zero();
+  for (size_t i = 0; i < hole.vertices.size(); ++i) {
+    const size_t nextI = (i + 1) % hole.vertices.size();
+    const auto& p1 = vertices[hole.vertices[i]];
+    const auto& p2 = vertices[hole.vertices[nextI]];
+    const auto edge1 = p1 - centroid;
+    const auto edge2 = p2 - centroid;
+    holeNormal += edge1.cross(edge2).normalized();
   }
 
-  // For very small holes (triangles), just create one triangle
-  if (hole.vertices.size() == 3) {
-    // Reverse winding to match mesh exterior
-    result.newTriangles.emplace_back(hole.vertices[2], hole.vertices[1], hole.vertices[0]);
-    result.success = true;
-    return result;
+  if (holeNormal.norm() > ScalarType{1e-6}) {
+    holeNormal.normalize();
+    // Move centroid slightly along the normal to improve triangle quality
+    const ScalarType offset = static_cast<ScalarType>(0.1) * hole.radius;
+    centroid += offset * holeNormal;
   }
 
-  // For small to medium holes, use improved centroid-based triangulation
-  if (hole.vertices.size() <= 8) {
-    // Compute a better centroid position
-    Eigen::Vector3<ScalarType> centroid = Eigen::Vector3<ScalarType>::Zero();
-    for (const auto vertexIdx : hole.vertices) {
-      centroid += vertices[vertexIdx];
-    }
-    centroid /= static_cast<ScalarType>(hole.vertices.size());
+  // Add centroid as new vertex
+  result.newVertices.push_back(centroid.template cast<float>());
+  const auto centroidIdx = static_cast<Index>(vertices.size()); // Index in combined mesh
 
-    // Adjust centroid position to be slightly inside the hole for better triangle quality
-    // Find the normal of the hole plane (average of cross products)
-    Eigen::Vector3<ScalarType> holeNormal = Eigen::Vector3<ScalarType>::Zero();
-    for (size_t i = 0; i < hole.vertices.size(); ++i) {
-      const size_t nextI = (i + 1) % hole.vertices.size();
-      const auto& p1 = vertices[hole.vertices[i]];
-      const auto& p2 = vertices[hole.vertices[nextI]];
-      const auto edge1 = p1 - centroid;
-      const auto edge2 = p2 - centroid;
-      holeNormal += edge1.cross(edge2).normalized();
-    }
+  // Create triangles from centroid to boundary edges with proper winding
+  for (size_t i = 0; i < hole.vertices.size(); ++i) {
+    const size_t nextI = (i + 1) % hole.vertices.size();
 
-    if (holeNormal.norm() > ScalarType{1e-6}) {
-      holeNormal.normalize();
-      // Move centroid slightly along the normal to improve triangle quality
-      const ScalarType offset = static_cast<ScalarType>(0.1) * hole.radius;
-      centroid += offset * holeNormal;
-    }
+    const Index v1 = hole.vertices[i];
+    const Index v2 = hole.vertices[nextI];
 
-    // Add centroid as new vertex
-    result.newVertices.push_back(centroid.template cast<float>());
-    const auto centroidIdx = static_cast<Index>(vertices.size()); // Index in combined mesh
-
-    // Create triangles from centroid to boundary edges with proper winding
-    for (size_t i = 0; i < hole.vertices.size(); ++i) {
-      const size_t nextI = (i + 1) % hole.vertices.size();
-
-      const Index v1 = hole.vertices[i];
-      const Index v2 = hole.vertices[nextI];
-
-      // Create triangle with reversed winding to match mesh exterior
-      result.newTriangles.emplace_back(v2, v1, centroidIdx);
-    }
-
-    result.success = true;
-    return result;
+    // Create triangle with reversed winding to match mesh exterior
+    result.newTriangles.emplace_back(v2, v1, centroidIdx);
   }
 
-  // For larger holes, use improved ear clipping with better ear detection
+  result.success = true;
+  return result;
+}
+
+/**
+ * Fill a hole using ear clipping triangulation.
+ */
+template <typename ScalarType>
+HoleFillingResult fillHoleWithEarClipping(
+    const HoleBoundary& hole,
+    std::span<const Eigen::Vector3<ScalarType>> vertices) {
+  HoleFillingResult result;
+  result.newTriangles.reserve(hole.vertices.size() - 2);
+
   std::vector<Index> remainingVertices = hole.vertices;
 
   while (remainingVertices.size() > 3) {
@@ -241,23 +262,7 @@ HoleFillingResult fillSingleHole(
             continue;
           }
 
-          const auto& testPoint = vertices[remainingVertices[j]];
-          // Simple point-in-triangle test using barycentric coordinates
-          const Eigen::Vector3<ScalarType> v0 = p3 - p1;
-          const Eigen::Vector3<ScalarType> v1 = p2 - p1;
-          const Eigen::Vector3<ScalarType> v2 = testPoint - p1;
-
-          const ScalarType dot00 = v0.dot(v0);
-          const ScalarType dot01 = v0.dot(v1);
-          const ScalarType dot02 = v0.dot(v2);
-          const ScalarType dot11 = v1.dot(v1);
-          const ScalarType dot12 = v1.dot(v2);
-
-          const ScalarType invDenom = ScalarType{1} / (dot00 * dot11 - dot01 * dot01);
-          const ScalarType u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-          const ScalarType v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-          if (u >= 0 && v >= 0 && u + v <= 1) {
+          if (isPointInsideTriangle(vertices[remainingVertices[j]], p1, p2, p3)) {
             isEar = false;
             break;
           }
@@ -302,6 +307,48 @@ HoleFillingResult fillSingleHole(
 
   result.success = !result.newTriangles.empty();
   return result;
+}
+
+/**
+ * Fill a single hole using the specified method.
+ */
+template <typename ScalarType>
+HoleFillingResult fillSingleHole(
+    const HoleBoundary& hole,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    HoleFillingMethod method) {
+  if (hole.vertices.size() < 3) {
+    return {}; // Cannot fill holes with less than 3 vertices
+  }
+
+  // For very small holes (triangles), just create one triangle
+  if (hole.vertices.size() == 3) {
+    HoleFillingResult result;
+    // Reverse winding to match mesh exterior
+    result.newTriangles.emplace_back(hole.vertices[2], hole.vertices[1], hole.vertices[0]);
+    result.success = true;
+    return result;
+  }
+
+  // Determine actual method to use
+  bool useCentroid = false;
+  switch (method) {
+    case HoleFillingMethod::Centroid:
+      useCentroid = true;
+      break;
+    case HoleFillingMethod::EarClipping:
+      useCentroid = false;
+      break;
+    case HoleFillingMethod::Auto:
+      // Use centroid for small to medium holes, ear clipping for larger
+      useCentroid = (hole.vertices.size() <= 8);
+      break;
+  }
+
+  if (useCentroid) {
+    return fillHoleWithCentroid(hole, vertices);
+  }
+  return fillHoleWithEarClipping(hole, vertices);
 }
 
 /**
@@ -469,7 +516,8 @@ std::vector<Eigen::Vector3<ScalarType>> smoothMeshLaplacian(
 template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    std::span<const Eigen::Vector3i> triangles) {
+    std::span<const Eigen::Vector3i> triangles,
+    HoleFillingMethod method) {
   HoleFillingResult result;
 
   // Convert vertices to float for hole detection (detectMeshHoles expects float)
@@ -495,7 +543,7 @@ HoleFillingResult fillMeshHoles(
       continue; // Invalid hole
     }
 
-    const auto holeResult = fillSingleHole(hole, vertices);
+    const auto holeResult = fillSingleHole(hole, vertices, method);
 
     if (!holeResult.success) {
       continue;
@@ -534,8 +582,9 @@ template <typename ScalarType>
 std::pair<std::vector<Eigen::Vector3<ScalarType>>, std::vector<Eigen::Vector3i>>
 fillMeshHolesComplete(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    std::span<const Eigen::Vector3i> triangles) {
-  const auto result = fillMeshHoles(vertices, triangles);
+    std::span<const Eigen::Vector3i> triangles,
+    HoleFillingMethod method) {
+  const auto result = fillMeshHoles(vertices, triangles, method);
 
   // Combine original and new vertices
   std::vector<Eigen::Vector3<ScalarType>> allVertices;
@@ -570,21 +619,25 @@ fillMeshHolesComplete(
 
 template HoleFillingResult fillMeshHoles<float>(
     std::span<const Eigen::Vector3<float>>,
-    std::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3i>,
+    HoleFillingMethod);
 
 template HoleFillingResult fillMeshHoles<double>(
     std::span<const Eigen::Vector3<double>>,
-    std::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3i>,
+    HoleFillingMethod);
 
 template std::pair<std::vector<Eigen::Vector3<float>>, std::vector<Eigen::Vector3i>>
     fillMeshHolesComplete<float>(
         std::span<const Eigen::Vector3<float>>,
-        std::span<const Eigen::Vector3i>);
+        std::span<const Eigen::Vector3i>,
+        HoleFillingMethod);
 
 template std::pair<std::vector<Eigen::Vector3<double>>, std::vector<Eigen::Vector3i>>
     fillMeshHolesComplete<double>(
         std::span<const Eigen::Vector3<double>>,
-        std::span<const Eigen::Vector3i>);
+        std::span<const Eigen::Vector3i>,
+        HoleFillingMethod);
 
 // Triangle mesh smoothing instantiations
 template std::vector<Eigen::Vector3<float>> smoothMeshLaplacian<float, Eigen::Vector3i>(
