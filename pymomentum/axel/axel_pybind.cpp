@@ -181,8 +181,10 @@ PYBIND11_MODULE(axel, m) {
             maxPt.z());
       });
 
-  // Bind SignedDistanceField
-  py::class_<axel::SignedDistanceField<float>>(m, "SignedDistanceField", py::buffer_protocol())
+  // Bind SignedDistanceField with shared_ptr holder for proper lifetime management
+  // when shared with SDFCollider and other types that store shared_ptr<SDF>
+  py::class_<axel::SignedDistanceField<float>, std::shared_ptr<axel::SignedDistanceField<float>>>(
+      m, "SignedDistanceField", py::buffer_protocol())
       .def(
           py::init<const axel::BoundingBox<float>&, const Eigen::Vector3<axel::Index>&, float>(),
           R"(Create a signed distance field with given bounds and resolution.
