@@ -575,10 +575,15 @@ bool isPointInsideByRayCasting(
 
   for (int i = 0; i < directions.size(); ++i) {
     const Ray3<ScalarType> ray(point, directions[i]);
-    const auto hits = bvh.allHits(ray);
+    auto hits = bvh.allHits(ray);
     const ScalarType minDelta = 0.01;
     auto lastHit = minDelta;
     int nHits = 0;
+
+    // Sort hits by distance since allHits returns them in BVH traversal order
+    std::sort(hits.begin(), hits.end(), [](const auto& a, const auto& b) {
+      return a.hitDistance < b.hitDistance;
+    });
 
     // A relatively common case is to hit right on the
     // edge between two triangles, in which case we end
