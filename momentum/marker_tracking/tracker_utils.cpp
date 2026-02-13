@@ -454,7 +454,7 @@ std::vector<CandidateTriangle> findCandidateTrianglesDfs(
     const Eigen::Vector3f& initialPoint,
     const Eigen::Vector3f& referenceNormal,
     uint32_t parentJointIdx,
-    float maxSearchDistance,
+    float maxSearchDistanceCm,
     float maxNormalAngleDeg) {
   std::vector<CandidateTriangle> candidates;
 
@@ -487,7 +487,7 @@ std::vector<CandidateTriangle> findCandidateTrianglesDfs(
 
     // Distance check - if too far, don't add and don't continue DFS from here
     const float dist = (centroid - initialPoint).norm();
-    if (dist > maxSearchDistance) {
+    if (dist > maxSearchDistanceCm) {
       continue;
     }
 
@@ -542,7 +542,7 @@ std::vector<CandidateTriangle> findCandidateTrianglesDfs(
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
     float targetDepth,
-    float maxSearchDistance,
+    float maxSearchDistanceCm,
     float maxNormalAngleDeg) {
   if (!character.mesh || !character.skinWeights) {
     return {};
@@ -557,7 +557,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
 
   // Build triangle adjacency if we need to find candidate triangles
   std::vector<std::vector<size_t>> adjacency;
-  if (maxSearchDistance > 0.0f) {
+  if (maxSearchDistanceCm > 0.0f) {
     adjacency = buildTriangleAdjacency(mesh);
   }
 
@@ -586,7 +586,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     constr.depth = targetDepth;
 
     // Populate candidate triangles if sliding is enabled
-    if (maxSearchDistance > 0.0f) {
+    if (maxSearchDistanceCm > 0.0f) {
       // Compute reference normal from the initial triangle
       const Eigen::Vector3f& v0 = mesh.vertices[constr.tgtTriangleIndices[0]];
       const Eigen::Vector3f& v1 = mesh.vertices[constr.tgtTriangleIndices[1]];
@@ -608,7 +608,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
           p_world,
           referenceNormal,
           locator.parents[0],
-          maxSearchDistance,
+          maxSearchDistanceCm,
           maxNormalAngleDeg);
     }
 
