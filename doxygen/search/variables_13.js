@@ -24,7 +24,7 @@ var searchData=
   ['tjacobian_5f_21',['tJacobian_',['../classmomentum_1_1SolverFunctionT.html#adcdb81b8ab3d755f35220ff9c297fc73',1,'momentum::SolverFunctionT']]],
   ['totaldofs_22',['totalDoFs',['../urdf__io_8cpp.html#ad34a727e4c877a400756378aff424070',1,'urdf_io.cpp']]],
   ['transform_23',['transform',['../structmomentum_1_1InverseParameterTransformT.html#abdb7f8980230d04671d661273e7dba10',1,'momentum::InverseParameterTransformT::transform'],['../structmomentum_1_1JointStateT.html#a4cc644cb9318738ff92a2f52f44fa9c3',1,'momentum::JointStateT::transform'],['../structmomentum_1_1ParameterTransformT.html#ae17cb127a8b2332ae0217a767d10a979',1,'momentum::ParameterTransformT::transform']]],
-  ['transformation_24',['transformation',['../structmomentum_1_1TaperedCapsuleT.html#a62b2cd49394a2e87510941ab19175c57',1,'momentum::TaperedCapsuleT']]],
+  ['transformation_24',['transformation',['../structmomentum_1_1SDFColliderT.html#a0975228b9c8eb21d3e896ac664794397',1,'momentum::SDFColliderT::transformation'],['../structmomentum_1_1TaperedCapsuleT.html#a62b2cd49394a2e87510941ab19175c57',1,'momentum::TaperedCapsuleT::transformation']]],
   ['translation_25',['translation',['../structmomentum_1_1TransformT.html#a57f3a3cff77dd69f77a5136dfe73b412',1,'momentum::TransformT']]],
   ['translationaxis_26',['translationAxis',['../structmomentum_1_1JointStateT.html#a4c15d91005423d2a77a2dc9babdb1314',1,'momentum::JointStateT']]],
   ['translationoffset_27',['translationOffset',['../structmomentum_1_1JointT.html#adab9620ecbbbfd7ae31b8243583b37c9',1,'momentum::JointT']]],

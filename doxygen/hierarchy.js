@@ -11,6 +11,8 @@ var hierarchy =
     [ "momentum::BlendShapeBase", "structmomentum_1_1BlendShapeBase.html", [
       [ "momentum::BlendShape", "structmomentum_1_1BlendShape.html", null ]
     ] ],
+    [ "momentum::BoneCollisionPairT< T >", "structmomentum_1_1BoneCollisionPairT.html", null ],
+    [ "momentum::BoneVertexRange", "structmomentum_1_1BoneVertexRange.html", null ],
     [ "momentum::BoneWeightT< T >", "structmomentum_1_1BoneWeightT.html", null ],
     [ "momentum::CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", null ],
     [ "momentum::GltfBuilder::Impl::CharacterData", "structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html", null ],
@@ -121,6 +123,7 @@ var hierarchy =
     [ "momentum::Random< Generator_ >", "classmomentum_1_1Random.html", null ],
     [ "momentum::AlignedAllocator< T, Alignment >::rebind< U >", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
     [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", null ],
+    [ "momentum::SDFColliderT< S >", "structmomentum_1_1SDFColliderT.html", null ],
     [ "momentum::io_detail::SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", null ],
     [ "momentum::io_detail::SectionSegment", "structmomentum_1_1io__detail_1_1SectionSegment.html", null ],
     [ "momentum::SequenceErrorFunctionT< T >", "classmomentum_1_1SequenceErrorFunctionT.html", [
@@ -182,6 +185,7 @@ var hierarchy =
       [ "momentum::ProjectionErrorFunctionT< T >", "classmomentum_1_1ProjectionErrorFunctionT.html", [
         [ "momentum::FullyDifferentiableProjectionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableProjectionErrorFunctionT.html", null ]
       ] ],
+      [ "momentum::SDFCollisionErrorFunctionT< T >", "classmomentum_1_1SDFCollisionErrorFunctionT.html", null ],
       [ "momentum::SimdCollisionErrorFunctionT< T >", "classmomentum_1_1SimdCollisionErrorFunctionT.html", null ],
       [ "momentum::SimdNormalErrorFunction", "classmomentum_1_1SimdNormalErrorFunction.html", null ],
       [ "momentum::SimdPlaneErrorFunction", "classmomentum_1_1SimdPlaneErrorFunction.html", null ],

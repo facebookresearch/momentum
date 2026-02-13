@@ -54,6 +54,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.BoundingBox.min"><code class="docutils literal notranslate"><span class="pre">BoundingBox.min</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.Auto"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.Auto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.Centroid"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.Centroid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.EarClipping"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.EarClipping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.__init__"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.name"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.value"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.value</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.__init__"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.max_distance"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.max_distance</span></code></a></li>
@@ -211,6 +220,53 @@
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min</span></span><a class="headerlink" href="#pymomentum.axel.BoundingBox.min" title="Link to this definition"></a></dt>
 <dd><p>Get the minimum corner of the bounding box.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">HoleFillingMethod</span></span><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Method for filling mesh holes.</p>
+<p>Available methods:
+- Centroid: Add a centroid vertex and create fan triangles (default, best for SDF generation)
+- EarClipping: Use ear clipping without adding new vertices
+- Auto: Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger)</p>
+<p>Members:</p>
+<blockquote>
+<div><p>Centroid : Add centroid vertex, create fan triangles</p>
+<p>EarClipping : Use ear clipping, no new vertices</p>
+<p>Auto : Auto-select based on hole size</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.Auto">
+<span class="sig-name descname"><span class="pre">Auto</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.Auto:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.Auto" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.Centroid">
+<span class="sig-name descname"><span class="pre">Centroid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.Centroid:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.Centroid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.EarClipping">
+<span class="sig-name descname"><span class="pre">EarClipping</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.EarClipping:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.EarClipping" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod" title="pymomentum.axel.HoleFillingMethod"><span class="pre">pymomentum.axel.HoleFillingMethod</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -655,20 +711,21 @@ triangles, which better preserves surface topology and reduces mesh artifacts.</
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.axel.fill_holes">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">fill_holes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.fill_holes" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">fill_holes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">vertices:</span> <span class="pre">numpy.ndarray[numpy.float32],</span> <span class="pre">triangles:</span> <span class="pre">numpy.ndarray[numpy.int32],</span> <span class="pre">method:</span> <span class="pre">pymomentum.axel.HoleFillingMethod</span> <span class="pre">=</span> <span class="pre">&lt;HoleFillingMethod.Centroid:</span> <span class="pre">0&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.fill_holes" title="Link to this definition"></a></dt>
 <dd><p>Fill holes in a triangle mesh to create a watertight surface.</p>
-<p>This function identifies holes in the mesh and fills them with new triangles using
-an advancing front method. The result is a complete mesh suitable for operations
-that require watertight surfaces, such as SDF generation.</p>
-<p>For small holes (≤6 vertices), a centroid-based fan triangulation is used.
-For larger holes, an ear clipping algorithm is applied.</p>
+<p>This function identifies holes in the mesh and fills them with new triangles.
+The result is a complete mesh suitable for operations that require watertight
+surfaces, such as SDF generation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>vertices</strong> – Vertex positions as 2D array of shape (N, 3) where N is number of vertices.</p></li>
 <li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
 Indices must be valid within the vertices array.</p></li>
-<li><p><strong>config</strong> – Configuration parameters as <code class="xref py py-class docutils literal notranslate"><span class="pre">MeshHoleFillingConfig</span></code> (optional).</p></li>
+<li><p><strong>method</strong> – Hole filling method (default: Centroid). Options are:
+- HoleFillingMethod.Centroid: Add centroid vertex, create fan triangles (best quality)
+- HoleFillingMethod.EarClipping: Use ear clipping, no new vertices
+- HoleFillingMethod.Auto: Auto-select based on hole size</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -697,11 +754,8 @@ Indices must be valid within the vertices array.</p></li>
     <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>   <span class="c1"># right face</span>
 <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">MeshHoleFillingConfig</span><span class="p">()</span>
-<span class="n">config</span><span class="o">.</span><span class="n">max_edge_length_ratio</span> <span class="o">=</span> <span class="mf">2.0</span>
-<span class="n">config</span><span class="o">.</span><span class="n">smoothing_iterations</span> <span class="o">=</span> <span class="mi">3</span>
-
-<span class="n">filled_vertices</span><span class="p">,</span> <span class="n">filled_triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+<span class="c1"># Use centroid method (default) for best triangle quality</span>
+<span class="n">filled_vertices</span><span class="p">,</span> <span class="n">filled_triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filled mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>

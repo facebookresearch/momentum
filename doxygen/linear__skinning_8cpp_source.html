@@ -684,11 +684,11 @@ $(document).ready(function(){initNavTree('linear__skinning_8cpp_source.html','')
 <div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>    <span class="keywordflow">if</span> (weight == 0) {</div>
 <div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>    }</div>
-<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>    <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">boneIndex</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>.parents[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">k</a>];</div>
-<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; jointState = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>.jointState[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">boneIndex</a>];</div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>    <span class="keyword">const</span> <span class="keyword">auto</span> boneIndex = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locator</a>.parents[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">k</a>];</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; jointState = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>.jointState[boneIndex];</div>
 <div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span> </div>
 <div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">worldPos</a> +=</div>
-<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>        weight * (jointState.transform * (inverseBindPose[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">boneIndex</a>].cast&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;() * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">restPosition</a>));</div>
+<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>        weight * (jointState.transform * (inverseBindPose[boneIndex].cast&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;() * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">restPosition</a>));</div>
 <div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">weightSum</a> += weight;</div>
 <div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>  }</div>
 <div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span> </div>
@@ -761,7 +761,7 @@ $(document).ready(function(){initNavTree('linear__skinning_8cpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="linear__skinning_8cpp.html">linear_skinning.cpp</a></li>
-    <li class="footer">Generated on Fri Feb 13 2026 05:59:03 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Feb 13 2026 08:35:53 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

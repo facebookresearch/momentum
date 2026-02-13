@@ -35,6 +35,7 @@ var dir_b19dfde638f642544c68678fc7a0f0f5 =
     [ "parameter_transform.h", "parameter__transform_8h.html", "parameter__transform_8h" ],
     [ "pose_shape.cpp", "pose__shape_8cpp.html", null ],
     [ "pose_shape.h", "pose__shape_8h.html", "pose__shape_8h" ],
+    [ "sdf_collision_geometry.h", "sdf__collision__geometry_8h.html", "sdf__collision__geometry_8h" ],
     [ "skeleton.cpp", "skeleton_8cpp.html", null ],
     [ "skeleton.h", "skeleton_8h.html", "skeleton_8h" ],
     [ "skeleton_state.cpp", "skeleton__state_8cpp.html", "skeleton__state_8cpp" ],

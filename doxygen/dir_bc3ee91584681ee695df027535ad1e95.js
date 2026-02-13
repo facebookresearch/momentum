@@ -40,6 +40,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "position_error_function.h", "position__error__function_8h.html", "position__error__function_8h" ],
     [ "projection_error_function.cpp", "projection__error__function_8cpp.html", null ],
     [ "projection_error_function.h", "projection__error__function_8h.html", "projection__error__function_8h" ],
+    [ "sdf_collision_error_function.cpp", "sdf__collision__error__function_8cpp.html", null ],
+    [ "sdf_collision_error_function.h", "sdf__collision__error__function_8h.html", "sdf__collision__error__function_8h" ],
     [ "simd_collision_error_function.cpp", "simd__collision__error__function_8cpp.html", null ],
     [ "simd_collision_error_function.h", "simd__collision__error__function_8h.html", "simd__collision__error__function_8h" ],
     [ "simd_normal_error_function.cpp", "simd__normal__error__function_8cpp.html", "simd__normal__error__function_8cpp" ],

@@ -397,6 +397,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.ParameterTransform.transform"><code class="docutils literal notranslate"><span class="pre">ParameterTransform.transform</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.SDFCollider"><code class="docutils literal notranslate"><span class="pre">SDFCollider</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.__init__"><code class="docutils literal notranslate"><span class="pre">SDFCollider.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.is_approx"><code class="docutils literal notranslate"><span class="pre">SDFCollider.is_approx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.is_valid"><code class="docutils literal notranslate"><span class="pre">SDFCollider.is_valid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.parent"><code class="docutils literal notranslate"><span class="pre">SDFCollider.parent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.rotation"><code class="docutils literal notranslate"><span class="pre">SDFCollider.rotation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.sdf"><code class="docutils literal notranslate"><span class="pre">SDFCollider.sdf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.SDFCollider.translation"><code class="docutils literal notranslate"><span class="pre">SDFCollider.translation</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Skeleton"><code class="docutils literal notranslate"><span class="pre">Skeleton</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Skeleton.__init__"><code class="docutils literal notranslate"><span class="pre">Skeleton.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Skeleton.get_child_joints"><code class="docutils literal notranslate"><span class="pre">Skeleton.get_child_joints()</span></code></a></li>
@@ -3229,6 +3239,87 @@ can be used to enable/disable finger motion in the character model.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.ParameterTransform.transform">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transform</span></span><a class="headerlink" href="#pymomentum.geometry.ParameterTransform.transform" title="Link to this definition"></a></dt>
 <dd><p>Returns the parameter transform matrix which when applied maps model parameters to joint parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">SDFCollider</span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>An SDF collider attached to a skeleton joint for collision detection. Contains a signed distance field volume positioned relative to a parent joint, used for mesh-to-SDF collision detection during character solving.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.geometry.SDFCollider) -&gt; None</p></li>
+</ol>
+<p>Create an empty SDF collider (world-space, no SDF).</p>
+<ol class="arabic simple" start="2">
+<li><p>__init__(self: pymomentum.geometry.SDFCollider, translation: Optional[numpy.ndarray[numpy.float32[3, 1]]] = None, rotation: Optional[Eigen::Quaternion&lt;float, 0&gt;] = None, parent: int = -1, sdf: Optional[pymomentum.axel.SignedDistanceField] = None) -&gt; None</p></li>
+</ol>
+<p>Create an SDF collider attached to a skeleton joint.</p>
+<p>An SDF collider represents a signed distance field volume attached to a skeleton joint
+for collision detection. The SDF data is shared via shared_ptr to avoid expensive copies
+of potentially large SDF volumes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>translation</strong> – Translation offset from parent joint (default: [0, 0, 0]).</p></li>
+<li><p><strong>rotation</strong> – Rotation quaternion [x, y, z, w] relative to parent (default: identity).</p></li>
+<li><p><strong>parent</strong> – Parent joint index. Use -1 for world-space SDFs (default: -1).</p></li>
+<li><p><strong>sdf</strong> – The signed distance field data (<a class="reference internal" href="axel.html#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.axel.SignedDistanceField</span></code></a>).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.is_approx">
+<span class="sig-name descname"><span class="pre">is_approx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><span class="pre">pymomentum.geometry.SDFCollider</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><span class="pre">pymomentum.geometry.SDFCollider</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999747378752e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.is_approx" title="Link to this definition"></a></dt>
+<dd><p>Check if this collider is approximately equal to another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> – The other collider to compare with.</p></li>
+<li><p><strong>tol</strong> – Tolerance for floating point comparison (default: 1e-4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if colliders are approximately equal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><span class="pre">pymomentum.geometry.SDFCollider</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.is_valid" title="Link to this definition"></a></dt>
+<dd><p>Check if the collider has a valid SDF pointer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.parent">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.parent" title="Link to this definition"></a></dt>
+<dd><p>Parent joint index. -1 indicates world-space.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.rotation">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rotation</span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.rotation" title="Link to this definition"></a></dt>
+<dd><p>Rotation quaternion [x, y, z, w] relative to parent joint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.sdf">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sdf</span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.sdf" title="Link to this definition"></a></dt>
+<dd><p>The signed distance field data (<a class="reference internal" href="axel.html#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.axel.SignedDistanceField</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.SDFCollider.translation">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">translation</span></span><a class="headerlink" href="#pymomentum.geometry.SDFCollider.translation" title="Link to this definition"></a></dt>
+<dd><p>Translation offset from parent joint.</p>
 </dd></dl>
 
 </dd></dl>

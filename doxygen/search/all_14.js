@@ -77,10 +77,10 @@ var searchData=
   ['transform_5fpose_2eh_74',['transform_pose.h',['../transform__pose_8h.html',1,'']]],
   ['transform_5fu_75',['Transform_u',['../namespacemomentum.html#ae369f00558d177c09c92cbdeb4c93ba6',1,'momentum']]],
   ['transform_5fw_76',['Transform_w',['../namespacemomentum.html#a6cd54507cb41a1893e939bbe429599c9',1,'momentum']]],
-  ['transformation_77',['transformation',['../structmomentum_1_1TaperedCapsuleT.html#a62b2cd49394a2e87510941ab19175c57',1,'momentum::TaperedCapsuleT']]],
+  ['transformation_77',['transformation',['../structmomentum_1_1SDFColliderT.html#a0975228b9c8eb21d3e896ac664794397',1,'momentum::SDFColliderT::transformation'],['../structmomentum_1_1TaperedCapsuleT.html#a62b2cd49394a2e87510941ab19175c57',1,'momentum::TaperedCapsuleT::transformation']]],
   ['transformationlist_78',['TransformationList',['../namespacemomentum.html#a72995f508ccba8e3b0c5de349e57f94a',1,'momentum']]],
   ['transformationlistt_79',['TransformationListT',['../namespacemomentum.html#ae81421d9a4068480fa02fcd0ed88bebe',1,'momentum']]],
-  ['transformatob_80',['transformatob',['../namespacemomentum.html#a364f3010613a117b922b2a89415c6d3a',1,'momentum::transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; T &gt; &amp;skelState)'],['../namespacemomentum.html#a202e2f295a4cc9ffd00737d504c65ec3',1,'momentum::transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; float &gt; &amp;skelState)'],['../namespacemomentum.html#a9e9659c62daab9cecfaf39ecf0744b86',1,'momentum::transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; double &gt; &amp;skelState)']]],
+  ['transformatob_80',['transformatob',['../namespacemomentum.html#a9e9659c62daab9cecfaf39ecf0744b86',1,'momentum::transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; double &gt; &amp;skelState)'],['../namespacemomentum.html#a202e2f295a4cc9ffd00737d504c65ec3',1,'momentum::transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; float &gt; &amp;skelState)'],['../namespacemomentum.html#a364f3010613a117b922b2a89415c6d3a',1,'momentum::transformAtoB(size_t jointA, size_t jointB, const Skeleton &amp;referenceSkeleton, const SkeletonStateT&lt; T &gt; &amp;skelState)']]],
   ['transformcharacter_81',['transformCharacter',['../namespacemomentum.html#af9f3c6e1508dc52e560a036181b7e2ce',1,'momentum']]],
   ['transformd_82',['Transformd',['../namespacemomentum.html#ab7055b66cb4fa056c45de0c5c29d0a5b',1,'momentum']]],
   ['transformd_5fconst_5fp_83',['Transformd_const_p',['../namespacemomentum.html#a065734d6b57ee9d28adbd183798c9b11',1,'momentum']]],
@@ -134,7 +134,7 @@ var searchData=
   ['twopi_131',['twopi',['../namespacemomentum.html#ad04627e7b435d62a5fd5f4a8e9854264',1,'momentum']]],
   ['tx_132',['TX',['../namespacemomentum.html#a5733f0ce387026e1c9afe56fc7ba3066a883b922e26105312bff1d27c3ae8e940',1,'momentum']]],
   ['ty_133',['TY',['../namespacemomentum.html#a5733f0ce387026e1c9afe56fc7ba3066a3246c4a75b71b2b2e043ce3b3831c63b',1,'momentum']]],
-  ['type_134',['type',['../structmomentum_1_1ParameterLimit.html#a03795c44fff5f3fcc3df755ec1b9b0c2',1,'momentum::ParameterLimit::type'],['../structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa',1,'momentum::DeduceSpanType::type']]],
+  ['type_134',['type',['../structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa',1,'momentum::DeduceSpanType::type'],['../structmomentum_1_1ParameterLimit.html#a03795c44fff5f3fcc3df755ec1b9b0c2',1,'momentum::ParameterLimit::type']]],
   ['types_2eh_135',['types.h',['../character_2types_8h.html',1,'(Global Namespace)'],['../math_2types_8h.html',1,'(Global Namespace)']]],
   ['tz_136',['TZ',['../namespacemomentum.html#a5733f0ce387026e1c9afe56fc7ba3066a3404b24ed00677463284e59642f80088',1,'momentum']]]
 ];
