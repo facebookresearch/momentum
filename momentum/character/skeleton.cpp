@@ -86,8 +86,11 @@ size_t SkeletonT<T>::commonAncestor(size_t joint1, size_t joint2) const {
   MT_CHECK(joint1 == kInvalidIndex || joint1 < joints.size());
   MT_CHECK(joint2 == kInvalidIndex || joint2 < joints.size());
 
-  while (joint1 != kInvalidIndex && joint2 != kInvalidIndex && joint1 != joint2) {
-    if (joint1 < joint2) {
+  while (joint1 != joint2) {
+    // If either joint is invalid, there is no common ancestor.
+    if (joint1 == kInvalidIndex || joint2 == kInvalidIndex) {
+      return kInvalidIndex;
+    } else if (joint1 < joint2) {
       joint2 = joints[joint2].parent;
     } else {
       joint1 = joints[joint1].parent;

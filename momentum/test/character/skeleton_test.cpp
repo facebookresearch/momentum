@@ -269,6 +269,54 @@ TYPED_TEST(SkeletonTest, CommonAncestor) {
   // Test common ancestor of cousins
   EXPECT_EQ(skeleton.commonAncestor(2, 4), 0); // Common ancestor of Joint 2 and Joint 4 is Root
   EXPECT_EQ(skeleton.commonAncestor(4, 2), 0); // Common ancestor of Joint 4 and Joint 2 is Root
+
+  // Test with kInvalidIndex — no common ancestor exists
+  EXPECT_EQ(skeleton.commonAncestor(0, kInvalidIndex), kInvalidIndex);
+  EXPECT_EQ(skeleton.commonAncestor(kInvalidIndex, 0), kInvalidIndex);
+  EXPECT_EQ(skeleton.commonAncestor(kInvalidIndex, kInvalidIndex), kInvalidIndex);
+}
+
+// Test commonAncestor with disjoint trees (joints that don't share a root)
+TYPED_TEST(SkeletonTest, CommonAncestorDisjointTrees) {
+  // Create a skeleton with two disjoint trees:
+  //   Joint 0: Root A
+  //   Joint 1: Child of Root A
+  //   Joint 2: Root B (parent = kInvalidIndex, a separate tree)
+  //   Joint 3: Child of Root B
+  std::vector<Joint> disjointJoints(4);
+
+  disjointJoints[0].name = "rootA";
+  disjointJoints[0].parent = kInvalidIndex;
+  disjointJoints[0].translationOffset = Vector3<float>::Zero();
+  disjointJoints[0].preRotation = Quaternion<float>::Identity();
+
+  disjointJoints[1].name = "childA";
+  disjointJoints[1].parent = 0;
+  disjointJoints[1].translationOffset = Vector3<float>(1, 0, 0);
+  disjointJoints[1].preRotation = Quaternion<float>::Identity();
+
+  disjointJoints[2].name = "rootB";
+  disjointJoints[2].parent = kInvalidIndex;
+  disjointJoints[2].translationOffset = Vector3<float>(5, 0, 0);
+  disjointJoints[2].preRotation = Quaternion<float>::Identity();
+
+  disjointJoints[3].name = "childB";
+  disjointJoints[3].parent = 2;
+  disjointJoints[3].translationOffset = Vector3<float>(1, 0, 0);
+  disjointJoints[3].preRotation = Quaternion<float>::Identity();
+
+  using SkeletonType = typename TestFixture::SkeletonType;
+  SkeletonType disjointSkeleton(disjointJoints);
+
+  // Joints within the same tree should find a common ancestor
+  EXPECT_EQ(disjointSkeleton.commonAncestor(0, 1), 0);
+  EXPECT_EQ(disjointSkeleton.commonAncestor(2, 3), 2);
+
+  // Joints across disjoint trees should return kInvalidIndex
+  EXPECT_EQ(disjointSkeleton.commonAncestor(0, 2), kInvalidIndex);
+  EXPECT_EQ(disjointSkeleton.commonAncestor(1, 3), kInvalidIndex);
+  EXPECT_EQ(disjointSkeleton.commonAncestor(0, 3), kInvalidIndex);
+  EXPECT_EQ(disjointSkeleton.commonAncestor(1, 2), kInvalidIndex);
 }
 
 // Test cast method

@@ -64,7 +64,8 @@ struct SkeletonT {
   /// Finds the closest common ancestor of two joints in the hierarchy.
   ///
   /// Returns the index of the joint that is the lowest common ancestor
-  /// in the hierarchy for the two specified joints.
+  /// in the hierarchy for the two specified joints. Returns kInvalidIndex
+  /// if either joint is kInvalidIndex.
   [[nodiscard]] size_t commonAncestor(size_t joint1, size_t joint2) const;
 
   /// Converts the skeleton to use a different scalar type.
