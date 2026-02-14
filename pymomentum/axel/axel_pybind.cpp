@@ -394,6 +394,47 @@ More efficient than calling sample() and gradient() separately.
             self.tolerance);
       });
 
+  // Bind MeshToSdfPadding
+  py::class_<axel::MeshToSdfPadding<float>>(
+      m,
+      "MeshToSdfPadding",
+      R"(Padding configuration for mesh-to-SDF bounds computation.
+
+The final per-axis padding is computed as ``max(extent[i] * fractional, absolute)``,
+where ``extent`` is the mesh bounding box size in each dimension.
+
+This allows both proportional and absolute minimum padding to be specified,
+ensuring adequate padding even for very thin mesh regions.
+
+:param fractional: Fractional padding as a fraction of bounding box extent per axis (default: 0.1).
+:param absolute: Absolute minimum padding in world units (e.g. cm), applied per axis (default: 0).)")
+      .def(py::init<>(), "Create :class:`MeshToSdfPadding` with default parameters.")
+      .def(
+          py::init([](float fractional, float absolute) {
+            axel::MeshToSdfPadding<float> p;
+            p.fractional = fractional;
+            p.absolute = absolute;
+            return p;
+          }),
+          R"(Create :class:`MeshToSdfPadding` with specified parameters.
+
+:param fractional: Fractional padding as a fraction of bounding box extent per axis.
+:param absolute: Absolute minimum padding in world units.)",
+          py::arg("fractional"),
+          py::arg("absolute") = 0.0f)
+      .def_readwrite(
+          "fractional",
+          &axel::MeshToSdfPadding<float>::fractional,
+          R"(Fractional padding as a fraction of bounding box extent per axis. Default: 0.1)")
+      .def_readwrite(
+          "absolute",
+          &axel::MeshToSdfPadding<float>::absolute,
+          R"(Absolute minimum padding in world units (e.g. cm), applied per axis. Default: 0)")
+      .def("__repr__", [](const axel::MeshToSdfPadding<float>& self) {
+        return fmt::format(
+            "MeshToSdfPadding(fractional={:.3f}, absolute={:.3f})", self.fractional, self.absolute);
+      });
+
   // Bind mesh_to_sdf function
   m.def(
       "mesh_to_sdf",
@@ -496,29 +537,25 @@ Example usage::
       py::arg("resolution"),
       py::arg("config") = axel::MeshToSdfConfig<float>{});
 
-  // Bind convenience overload with automatic bounds computation
+  // Bind convenience overload with voxel size and automatic bounds computation
   m.def(
       "mesh_to_sdf",
       [](const py::array_t<float>& vertices,
          const py::array_t<int>& triangles,
-         const py::array_t<axel::Index>& resolution,
-         float padding,
+         float voxelSize,
+         const axel::MeshToSdfPadding<float>& padding,
          const axel::MeshToSdfConfig<float>& config) {
         // Validate input arrays
         validatePositionArray(vertices, "vertices");
         validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
 
-        if (resolution.ndim() != 1 || resolution.shape(0) != 3) {
-          throw std::runtime_error(
-              fmt::format(
-                  "Invalid shape for resolution: expected (3,), got {}",
-                  getArrayDimStr(resolution)));
+        if (voxelSize <= 0.0f) {
+          throw std::runtime_error(fmt::format("voxel_size must be positive, got {}", voxelSize));
         }
 
         // Convert numpy arrays to spans
         const auto verticesData = vertices.unchecked<2>();
         const auto trianglesData = triangles.unchecked<2>();
-        const auto resolutionData = resolution.unchecked<1>();
 
         // Convert vertex data to std::vector<Eigen::Vector3f>
         std::vector<Eigen::Vector3f> vertexVector;
@@ -535,29 +572,34 @@ Example usage::
               trianglesData(i, 0), trianglesData(i, 1), trianglesData(i, 2));
         }
 
-        // Convert resolution to Eigen::Vector3<axel::Index>
-        const Eigen::Vector3<axel::Index> resolutionVector(
-            resolutionData(0), resolutionData(1), resolutionData(2));
-
-        // Call the mesh_to_sdf function with automatic bounds
+        // Call the mesh_to_sdf function with voxel size
         return axel::meshToSdf<float>(
             std::span<const Eigen::Vector3f>(vertexVector),
             std::span<const Eigen::Vector3i>(triangleVector),
-            resolutionVector,
+            voxelSize,
             padding,
             config);
       },
-      R"(Convert a triangle mesh to a signed distance field with automatic bounds computation.
+      R"(Convert a triangle mesh to a signed distance field with uniform voxel size.
 
 This convenience function automatically computes the bounding box from the mesh vertices,
-adds padding, and creates a signed distance field.
+adds padding, and creates a signed distance field with uniform (isotropic) voxels.
+Grid dimensions adapt to mesh shape automatically.
+
+The bounds are computed as follows:
+
+1. Compute mesh bounding box from vertices
+2. Per-axis padding = ``max(extent[i] * padding.fractional, padding.absolute)``
+3. Expand bounds by padding on each side
+4. Compute resolution per axis = ``max(1, ceil(padded_extent[i] / voxel_size))``
+5. Adjust bounds so that ``extent / resolution`` is exactly ``voxel_size`` in each dimension
 
 :param vertices: Vertex positions as 2D array of shape (N, 3) where N is number of vertices.
 :param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
-:param resolution: Grid resolution as 1D array of shape (3,) containing (nx, ny, nz).
-:param padding: Extra space around mesh bounds as fraction of bounding box size (default: 0.1).
+:param voxel_size: Uniform voxel size in world units (must be positive).
+:param padding: Padding configuration as :class:`MeshToSdfPadding` (optional, default: 10% fractional).
 :param config: Configuration parameters as :class:`MeshToSdfConfig` (optional).
-:return: Generated :class:`SignedDistanceField`.
+:return: Generated :class:`SignedDistanceField` with isotropic voxels.
 
 Example usage::
 
@@ -576,14 +618,87 @@ Example usage::
         [0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]
     ], dtype=np.int32)
 
-    resolution = np.array([32, 32, 32])
+    # Create SDF with 0.05 cm voxels
+    sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.05)
 
-    # Automatically compute bounds with 20% padding
-    sdf = axel.mesh_to_sdf(vertices, triangles, resolution, padding=0.2))",
+    # With custom padding
+    padding = axel.MeshToSdfPadding(fractional=0.2, absolute=0.5)
+    sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.05, padding=padding))",
       py::arg("vertices"),
       py::arg("triangles"),
-      py::arg("resolution"),
-      py::arg("padding") = 0.1f,
+      py::arg("voxel_size"),
+      py::arg("padding") = axel::MeshToSdfPadding<float>{},
+      py::arg("config") = axel::MeshToSdfConfig<float>{});
+
+  // Bind in-place overload that writes into an existing SDF
+  m.def(
+      "mesh_to_sdf",
+      [](const py::array_t<float>& vertices,
+         const py::array_t<int>& triangles,
+         axel::SignedDistanceField<float>& sdf,
+         const axel::MeshToSdfConfig<float>& config) {
+        // Validate input arrays
+        validatePositionArray(vertices, "vertices");
+        validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
+
+        // Convert numpy arrays to spans
+        const auto verticesData = vertices.unchecked<2>();
+        const auto trianglesData = triangles.unchecked<2>();
+
+        // Convert vertex data to std::vector<Eigen::Vector3f>
+        std::vector<Eigen::Vector3f> vertexVector;
+        vertexVector.reserve(verticesData.shape(0));
+        for (py::ssize_t i = 0; i < verticesData.shape(0); ++i) {
+          vertexVector.emplace_back(verticesData(i, 0), verticesData(i, 1), verticesData(i, 2));
+        }
+
+        // Convert triangle data to std::vector<Eigen::Vector3i>
+        std::vector<Eigen::Vector3i> triangleVector;
+        triangleVector.reserve(trianglesData.shape(0));
+        for (py::ssize_t i = 0; i < trianglesData.shape(0); ++i) {
+          triangleVector.emplace_back(
+              trianglesData(i, 0), trianglesData(i, 1), trianglesData(i, 2));
+        }
+
+        // Call the in-place mesh_to_sdf function
+        axel::meshToSdf<float>(
+            std::span<const Eigen::Vector3f>(vertexVector),
+            std::span<const Eigen::Vector3i>(triangleVector),
+            sdf,
+            config);
+      },
+      R"(Write mesh-to-SDF conversion into a pre-existing signed distance field.
+
+This in-place overload reuses the existing SDF's bounds and resolution,
+writing the computed distance values directly into the grid.
+This is useful when you want to recompute an SDF with a different mesh
+but the same grid layout.
+
+:param vertices: Vertex positions as 2D array of shape (N, 3) where N is number of vertices.
+:param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
+:param sdf: Pre-existing :class:`SignedDistanceField` to write into. Its contents will be overwritten.
+:param config: Configuration parameters as :class:`MeshToSdfConfig` (optional).
+
+Example usage::
+
+    import numpy as np
+    import pymomentum.axel as axel
+
+    # Create an SDF grid
+    bounds = axel.BoundingBox(
+        min_corner=np.array([-1.5, -1.5, -1.5]),
+        max_corner=np.array([1.5, 1.5, 1.5])
+    )
+    resolution = np.array([32, 32, 32])
+    sdf = axel.SignedDistanceField(bounds, resolution)
+
+    # Compute SDF in-place for a mesh
+    vertices = np.array([...], dtype=np.float32)
+    triangles = np.array([...], dtype=np.int32)
+    axel.mesh_to_sdf(vertices, triangles, sdf))",
+      py::arg("vertices"),
+      py::arg("triangles"),
+      py::arg("sdf"),
       py::arg("config") = axel::MeshToSdfConfig<float>{});
 
   // Bind fill_holes function

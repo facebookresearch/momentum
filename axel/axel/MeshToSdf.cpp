@@ -100,6 +100,48 @@ bool isPointInsideByRayCasting(
 } // namespace
 
 // ================================================================================================
+// SHARED PIPELINE
+// ================================================================================================
+
+namespace detail {
+
+template <typename ScalarType>
+void meshToSdfImpl(
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
+    SignedDistanceField<ScalarType>& sdf,
+    const MeshToSdfConfig<ScalarType>& config) {
+  // Convert narrow band width from voxel units to world units
+  const auto voxelSize = sdf.voxelSize();
+  const ScalarType bandWidthWorld = config.narrowBandWidth * voxelSize.maxCoeff();
+
+  // STEP 1: Initialize narrow band with exact triangle distances
+  std::cout << "Step 1: Narrow band initialization..." << std::endl;
+  initializeNarrowBand(vertices, triangles, sdf, bandWidthWorld);
+  std::cout << "Narrow band initialized" << std::endl;
+
+  // STEP 2: Fast marching propagation to fill entire grid
+  std::cout << "Step 2: Fast marching propagation..." << std::endl;
+  fastMarchingPropagate(sdf);
+  std::cout << "Fast marching completed" << std::endl;
+
+  // STEP 3: Apply signs based on inside/outside determination
+  std::cout << "Step 3: Applying signs..." << std::endl;
+  applySignsToDistanceField(sdf, vertices, triangles);
+  std::cout << "Signs applied" << std::endl;
+
+  // Apply distance clamping if configured
+  if (config.maxDistance > ScalarType{0}) {
+    auto& data = sdf.data();
+    for (auto& value : data) {
+      value = std::clamp(value, -config.maxDistance, config.maxDistance);
+    }
+  }
+}
+
+} // namespace detail
+
+// ================================================================================================
 // MAIN API FUNCTIONS
 // ================================================================================================
 
@@ -114,32 +156,7 @@ SignedDistanceField<ScalarType> meshToSdf(
   SignedDistanceField<ScalarType> sdf(
       bounds, resolution, SignedDistanceField<ScalarType>::kVeryFarDistance);
 
-  // Convert narrow band width from voxel units to world units
-  const auto voxelSize = sdf.voxelSize();
-  const ScalarType bandWidthWorld = config.narrowBandWidth * voxelSize.norm();
-
-  // STEP 1: Initialize narrow band with exact triangle distances
-  std::cout << "Step 1: Narrow band initialization..." << std::endl;
-  detail::initializeNarrowBand(vertices, triangles, sdf, bandWidthWorld);
-  std::cout << "Narrow band initialized" << std::endl;
-
-  // STEP 2: Fast marching propagation to fill entire grid
-  std::cout << "Step 2: Fast marching propagation..." << std::endl;
-  detail::fastMarchingPropagate(sdf);
-  std::cout << "Fast marching completed" << std::endl;
-
-  // STEP 3: Apply signs based on inside/outside determination
-  std::cout << "Step 3: Applying signs..." << std::endl;
-  detail::applySignsToDistanceField(sdf, vertices, triangles);
-  std::cout << "Signs applied" << std::endl;
-
-  // Apply distance clamping if configured
-  if (config.maxDistance > ScalarType{0}) {
-    auto& data = sdf.data();
-    for (auto& value : data) {
-      value = std::clamp(value, -config.maxDistance, config.maxDistance);
-    }
-  }
+  detail::meshToSdfImpl(vertices, triangles, sdf, config);
 
   return sdf;
 }
@@ -148,16 +165,54 @@ template <typename ScalarType>
 SignedDistanceField<ScalarType> meshToSdf(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
     std::span<const Eigen::Vector3i> triangles,
-    const Eigen::Vector3<Index>& resolution,
-    ScalarType padding,
+    ScalarType voxelSize,
+    const MeshToSdfPadding<ScalarType>& padding,
     const MeshToSdfConfig<ScalarType>& config) {
-  const auto bounds = detail::computeMeshBounds(vertices);
-  const auto extent = bounds.max() - bounds.min();
-  const auto paddingVec = extent * padding;
+  // Step 1: Compute mesh bounding box
+  const auto meshBounds = detail::computeMeshBounds(vertices);
+  const auto extent = meshBounds.max() - meshBounds.min();
 
-  const BoundingBox<ScalarType> paddedBounds(bounds.min() - paddingVec, bounds.max() + paddingVec);
+  // Step 2: Compute per-axis padding = max(extent[i] * fractional, absolute)
+  Eigen::Vector3<ScalarType> paddingVec;
+  for (int i = 0; i < 3; ++i) {
+    paddingVec[i] = std::max(extent[i] * padding.fractional, padding.absolute);
+  }
 
-  return meshToSdf(vertices, triangles, paddedBounds, resolution, config);
+  // Step 3: Expand bounds by padding on each side
+  const Eigen::Vector3<ScalarType> paddedMin = meshBounds.min() - paddingVec;
+  const Eigen::Vector3<ScalarType> paddedMax = meshBounds.max() + paddingVec;
+  const Eigen::Vector3<ScalarType> paddedExtent = paddedMax - paddedMin;
+
+  // Step 4: Compute resolution per axis = max(1, ceil(paddedExtent[i] / voxelSize))
+  Eigen::Vector3<Index> resolution;
+  for (int i = 0; i < 3; ++i) {
+    resolution[i] = std::max(Index{1}, static_cast<Index>(std::ceil(paddedExtent[i] / voxelSize)));
+  }
+
+  // Step 5: Adjust bounds so that extent / resolution == voxelSize exactly (center-preserving)
+  const Eigen::Vector3<ScalarType> center = (paddedMin + paddedMax) * ScalarType{0.5};
+  Eigen::Vector3<ScalarType> adjustedHalfExtent;
+  for (int i = 0; i < 3; ++i) {
+    adjustedHalfExtent[i] = (voxelSize * static_cast<ScalarType>(resolution[i])) * ScalarType{0.5};
+  }
+
+  const BoundingBox<ScalarType> adjustedBounds(
+      center - adjustedHalfExtent, center + adjustedHalfExtent);
+
+  // Step 6: Call overload 1 with computed uniform-voxel bounds and resolution
+  return meshToSdf(vertices, triangles, adjustedBounds, resolution, config);
+}
+
+template <typename ScalarType>
+void meshToSdf(
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
+    SignedDistanceField<ScalarType>& sdf,
+    const MeshToSdfConfig<ScalarType>& config) {
+  // Reset SDF to initial far distance
+  sdf.fill(SignedDistanceField<ScalarType>::kVeryFarDistance);
+
+  detail::meshToSdfImpl(vertices, triangles, sdf, config);
 }
 
 namespace detail {
@@ -712,19 +767,43 @@ template SignedDistanceField<double> meshToSdf<double>(
 template SignedDistanceField<float> meshToSdf<float>(
     std::span<const Eigen::Vector3<float>>,
     std::span<const Eigen::Vector3i>,
-    const Eigen::Vector3<Index>&,
     float,
+    const MeshToSdfPadding<float>&,
     const MeshToSdfConfig<float>&);
 
 template SignedDistanceField<double> meshToSdf<double>(
     std::span<const Eigen::Vector3<double>>,
     std::span<const Eigen::Vector3i>,
-    const Eigen::Vector3<Index>&,
     double,
+    const MeshToSdfPadding<double>&,
+    const MeshToSdfConfig<double>&);
+
+template void meshToSdf<float>(
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
+    SignedDistanceField<float>&,
+    const MeshToSdfConfig<float>&);
+
+template void meshToSdf<double>(
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
+    SignedDistanceField<double>&,
     const MeshToSdfConfig<double>&);
 
 // Detail namespace explicit instantiations
 namespace detail {
+
+template void meshToSdfImpl<float>(
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
+    SignedDistanceField<float>&,
+    const MeshToSdfConfig<float>&);
+
+template void meshToSdfImpl<double>(
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
+    SignedDistanceField<double>&,
+    const MeshToSdfConfig<double>&);
 
 template void initializeNarrowBand<float>(
     std::span<const Eigen::Vector3<float>>,

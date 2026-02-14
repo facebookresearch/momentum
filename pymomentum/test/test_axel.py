@@ -306,7 +306,7 @@ class TestAxel(unittest.TestCase):
         )
 
     def test_mesh_to_sdf_automatic_bounds(self):
-        """Test mesh_to_sdf with automatic bounds computation."""
+        """Test mesh_to_sdf with voxel size and automatic bounds computation."""
         # Create a simple tetrahedron mesh
         vertices = np.array(
             [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
@@ -317,16 +317,19 @@ class TestAxel(unittest.TestCase):
             [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
         )
 
-        resolution = np.array([20, 20, 20], dtype=np.int64)
-
-        # Generate SDF with automatic bounds computation
-        sdf = axel.mesh_to_sdf(vertices, triangles, resolution, padding=0.2)
+        # Generate SDF with voxel size
+        sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.05)
 
         # Verify basic properties
         self.assertIsInstance(sdf, axel.SignedDistanceField)
-        self.assertEqual(sdf.total_voxels, 20 * 20 * 20)
 
-        # Test that bounds were computed correctly with padding
+        # Voxel size should be uniform and match requested size
+        vs = sdf.voxel_size
+        self.assertAlmostEqual(vs[0], 0.05, places=5)
+        self.assertAlmostEqual(vs[1], 0.05, places=5)
+        self.assertAlmostEqual(vs[2], 0.05, places=5)
+
+        # Test that bounds were computed correctly with default padding
         bounds = sdf.bounds
         min_corner = bounds.min
         max_corner = bounds.max
@@ -347,7 +350,7 @@ class TestAxel(unittest.TestCase):
         )  # Should be greater than max vertex z (1.0)
 
     def test_mesh_to_sdf_cube(self):
-        """Test mesh_to_sdf with a cube mesh."""
+        """Test mesh_to_sdf with a cube mesh using voxel size API."""
         # Create a cube mesh
         vertices = np.array(
             [
@@ -381,13 +384,18 @@ class TestAxel(unittest.TestCase):
             dtype=np.int32,
         )
 
-        resolution = np.array([24, 24, 24], dtype=np.int64)
-
         config = axel.MeshToSdfConfig()
+        padding = axel.MeshToSdfPadding(fractional=0.25)
 
         sdf = axel.mesh_to_sdf(
-            vertices, triangles, resolution, padding=0.25, config=config
+            vertices, triangles, voxel_size=0.2, padding=padding, config=config
         )
+
+        # Voxels should be uniform
+        vs = sdf.voxel_size
+        self.assertAlmostEqual(vs[0], 0.2, places=5)
+        self.assertAlmostEqual(vs[1], 0.2, places=5)
+        self.assertAlmostEqual(vs[2], 0.2, places=5)
 
         # Test center (should be inside)
         center_distance = sdf.sample(np.array([0.0, 0.0, 0.0], dtype=np.float32))
@@ -408,22 +416,124 @@ class TestAxel(unittest.TestCase):
         # Valid base case
         vertices = np.array([[0, 0, 0], [1, 0, 0], [0.5, 1, 0]], dtype=np.float32)
         triangles = np.array([[0, 1, 2]], dtype=np.int32)
-        resolution = np.array([10, 10, 10], dtype=np.int64)
 
         # Test invalid vertex shape
         invalid_vertices = np.array([[0, 0], [1, 0], [0.5, 1]], dtype=np.float32)
         with self.assertRaisesRegex(RuntimeError, "Invalid shape for vertices"):
-            axel.mesh_to_sdf(invalid_vertices, triangles, resolution)
+            axel.mesh_to_sdf(invalid_vertices, triangles, voxel_size=0.1)
 
         # Test invalid triangle shape
         invalid_triangles = np.array([[0, 1]], dtype=np.int32)
         with self.assertRaisesRegex(RuntimeError, "Invalid shape for triangles"):
-            axel.mesh_to_sdf(vertices, invalid_triangles, resolution)
+            axel.mesh_to_sdf(vertices, invalid_triangles, voxel_size=0.1)
 
-        # Test invalid resolution shape
-        invalid_resolution = np.array([10, 10], dtype=np.int64)
-        with self.assertRaisesRegex(RuntimeError, "Invalid shape for resolution"):
-            axel.mesh_to_sdf(vertices, triangles, invalid_resolution)
+        # Test invalid voxel size (negative)
+        with self.assertRaisesRegex(RuntimeError, "voxel_size must be positive"):
+            axel.mesh_to_sdf(vertices, triangles, voxel_size=-0.1)
+
+    def test_mesh_to_sdf_padding_config(self):
+        """Test MeshToSdfPadding configuration."""
+        # Test default padding
+        padding = axel.MeshToSdfPadding()
+        self.assertAlmostEqual(padding.fractional, 0.1, places=5)
+        self.assertAlmostEqual(padding.absolute, 0.0, places=5)
+
+        # Test custom padding
+        padding = axel.MeshToSdfPadding(fractional=0.2, absolute=0.5)
+        self.assertAlmostEqual(padding.fractional, 0.2, places=5)
+        self.assertAlmostEqual(padding.absolute, 0.5, places=5)
+
+        # Test repr
+        repr_str = repr(padding)
+        self.assertIn("0.200", repr_str)
+        self.assertIn("0.500", repr_str)
+
+    def test_mesh_to_sdf_anisotropic_bbox_isotropic_voxels(self):
+        """Test that an elongated mesh produces isotropic voxels."""
+        # Create an elongated box mesh (3:1:1 aspect ratio)
+        vertices = np.array(
+            [
+                [-3, -1, -1],
+                [3, -1, -1],
+                [3, 1, -1],
+                [-3, 1, -1],
+                [-3, -1, 1],
+                [3, -1, 1],
+                [3, 1, 1],
+                [-3, 1, 1],
+            ],
+            dtype=np.float32,
+        )
+
+        triangles = np.array(
+            [
+                [0, 1, 2],
+                [0, 2, 3],
+                [4, 7, 6],
+                [4, 6, 5],
+                [0, 4, 5],
+                [0, 5, 1],
+                [2, 6, 7],
+                [2, 7, 3],
+                [0, 3, 7],
+                [0, 7, 4],
+                [1, 5, 6],
+                [1, 6, 2],
+            ],
+            dtype=np.int32,
+        )
+
+        sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.5)
+
+        # Voxels should be uniform
+        vs = sdf.voxel_size
+        self.assertAlmostEqual(vs[0], 0.5, places=5)
+        self.assertAlmostEqual(vs[1], 0.5, places=5)
+        self.assertAlmostEqual(vs[2], 0.5, places=5)
+
+        # X resolution should be much larger than Y and Z
+        res = sdf.resolution
+        self.assertGreater(
+            res[0], res[1] * 2, "X resolution should be much larger for elongated mesh"
+        )
+
+    def test_mesh_to_sdf_in_place(self):
+        """Test in-place mesh_to_sdf overload."""
+        # Create a tetrahedron mesh
+        vertices = np.array(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.5, 1.0]],
+            dtype=np.float32,
+        )
+
+        triangles = np.array(
+            [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int32
+        )
+
+        # Create an SDF grid
+        bounds = axel.BoundingBox(
+            min_corner=np.array([-0.5, -0.5, -0.5]),
+            max_corner=np.array([1.5, 1.5, 1.5]),
+        )
+        resolution = np.array([16, 16, 16], dtype=np.int64)
+
+        # Create SDF using return overload for comparison
+        config = axel.MeshToSdfConfig()
+        config.narrow_band_width = 2.0
+        sdf_expected = axel.mesh_to_sdf(vertices, triangles, bounds, resolution, config)
+
+        # Create SDF using in-place overload
+        sdf_inplace = axel.SignedDistanceField(bounds, resolution)
+        axel.mesh_to_sdf(vertices, triangles, sdf_inplace, config)
+
+        # Compare results
+        data_expected = np.array(sdf_expected)
+        data_inplace = np.array(sdf_inplace)
+        np.testing.assert_array_almost_equal(
+            data_inplace,
+            data_expected,
+            decimal=5,
+            err_msg="In-place and return overloads should produce identical results",
+        )
 
     def test_fill_holes_cube_with_hole(self):
         """Test fill_holes with a cube mesh that has a missing face (hole)."""
