@@ -530,4 +530,140 @@ TEST_F(MeshToSdfTest, IntegratedTest_CubeSDFProperties) {
   EXPECT_NEAR(faceValue, 0.0f, 0.05f) << "Face center should be on surface";
 }
 
+TEST_F(MeshToSdfTest, VoxelSizeOverload_UniformVoxels) {
+  // Test that the voxel-size overload produces uniform (isotropic) voxels
+  const float voxelSize = 0.1f;
+
+  const auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      voxelSize);
+
+  const auto actualVoxelSize = sdf.voxelSize();
+
+  // All three voxel dimensions should be exactly equal to the requested voxel size
+  EXPECT_NEAR(actualVoxelSize.x(), voxelSize, 1e-6f) << "X voxel size should match requested size";
+  EXPECT_NEAR(actualVoxelSize.y(), voxelSize, 1e-6f) << "Y voxel size should match requested size";
+  EXPECT_NEAR(actualVoxelSize.z(), voxelSize, 1e-6f) << "Z voxel size should match requested size";
+
+  // Resolution should be consistent with the voxel size
+  const auto& bounds = sdf.bounds();
+  const auto& resolution = sdf.resolution();
+  const auto extent = bounds.max() - bounds.min();
+
+  for (int i = 0; i < 3; ++i) {
+    const float expectedExtent = voxelSize * static_cast<float>(resolution[i]);
+    EXPECT_NEAR(extent[i], expectedExtent, 1e-5f)
+        << "Extent[" << i << "] should be voxelSize * resolution";
+  }
+
+  // The SDF should contain the mesh (test center is inside)
+  const float centerValue = sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f));
+  EXPECT_LT(centerValue, 0.0f) << "Center of cube should be inside (negative)";
+}
+
+TEST_F(MeshToSdfTest, VoxelSizeOverload_AnisotropicBboxIsotropicVoxels) {
+  // Create an elongated mesh (anisotropic bounding box) and verify
+  // voxels are still isotropic
+  std::vector<Eigen::Vector3f> elongatedVertices;
+  elongatedVertices.reserve(cubeVertices.size());
+  for (const auto& v : cubeVertices) {
+    // Scale x by 3 to create a 3:1:1 aspect ratio
+    elongatedVertices.emplace_back(v.x() * 3.0f, v.y(), v.z());
+  }
+
+  const float voxelSize = 0.1f;
+
+  const auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(elongatedVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      voxelSize);
+
+  const auto actualVoxelSize = sdf.voxelSize();
+
+  // All three dimensions should still be the same voxel size
+  EXPECT_NEAR(actualVoxelSize.x(), voxelSize, 1e-6f);
+  EXPECT_NEAR(actualVoxelSize.y(), voxelSize, 1e-6f);
+  EXPECT_NEAR(actualVoxelSize.z(), voxelSize, 1e-6f);
+
+  // X resolution should be approximately 3x larger than Y and Z resolutions
+  const auto& resolution = sdf.resolution();
+  EXPECT_GT(resolution.x(), resolution.y() * 2)
+      << "X resolution should be much larger for elongated mesh";
+  EXPECT_NEAR(resolution.y(), resolution.z(), 1)
+      << "Y and Z resolutions should be similar for a cube cross-section";
+
+  std::cout << "Anisotropic mesh resolution: " << resolution.transpose() << std::endl;
+}
+
+TEST_F(MeshToSdfTest, VoxelSizeOverload_CustomPadding) {
+  // Test that custom padding configuration works
+  const float voxelSize = 0.1f;
+
+  MeshToSdfPaddingf padding;
+  padding.fractional = 0.2f;
+  padding.absolute = 0.3f;
+
+  const auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      voxelSize,
+      padding);
+
+  const auto& bounds = sdf.bounds();
+
+  // Mesh extent is 1.0 per axis, so fractional padding = 0.2 * 1.0 = 0.2
+  // Absolute padding = 0.3
+  // max(0.2, 0.3) = 0.3 per side
+  // Total extent should be approximately 1.0 + 2 * 0.3 = 1.6 per axis
+  // (then adjusted to fit exact voxel sizes)
+  const auto extent = bounds.max() - bounds.min();
+  for (int i = 0; i < 3; ++i) {
+    EXPECT_GT(extent[i], 1.5f) << "Padded extent[" << i
+                               << "] should be > 1.5 with absolute padding 0.3";
+  }
+
+  // Voxels should still be isotropic
+  const auto actualVoxelSize = sdf.voxelSize();
+  EXPECT_NEAR(actualVoxelSize.x(), voxelSize, 1e-6f);
+  EXPECT_NEAR(actualVoxelSize.y(), voxelSize, 1e-6f);
+  EXPECT_NEAR(actualVoxelSize.z(), voxelSize, 1e-6f);
+}
+
+TEST_F(MeshToSdfTest, InPlaceOverload_MatchesReturnOverload) {
+  // Test that the in-place overload produces the same result as the return overload
+  const BoundingBoxf bounds(
+      Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
+  const Eigen::Vector3<Index> resolution(12, 12, 12);
+
+  MeshToSdfConfigf config;
+
+  // Generate SDF using return overload
+  const auto sdf1 = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      bounds,
+      resolution,
+      config);
+
+  // Generate SDF using in-place overload
+  SignedDistanceField<float> sdf2(bounds, resolution);
+  meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      sdf2,
+      config);
+
+  // Compare values at all grid points
+  for (Index i = 0; i < resolution.x(); ++i) {
+    for (Index j = 0; j < resolution.y(); ++j) {
+      for (Index k = 0; k < resolution.z(); ++k) {
+        EXPECT_NEAR(sdf1.at(i, j, k), sdf2.at(i, j, k), 1e-6f)
+            << "In-place and return overloads should produce identical results at (" << i << ","
+            << j << "," << k << ")";
+      }
+    }
+  }
+}
+
 } // namespace axel
