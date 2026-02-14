@@ -90,6 +90,10 @@ jobs:
   build_cpu_wheels:
     name: pypi-cpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
     runs-on: ${{ matrix.os }}
+    # Force UTF-8 mode on Windows to prevent UnicodeDecodeError in pip resolver
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
     strategy:
       fail-fast: true
       matrix:
@@ -193,6 +197,10 @@ jobs:
   build_gpu_wheels:
     name: pypi-gpu-py${{ matrix.python-version }}-${{ matrix.os-short }}
     runs-on: ${{ matrix.os }}
+    # Force UTF-8 mode on Windows to prevent UnicodeDecodeError in pip resolver
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
     strategy:
       fail-fast: true
       matrix:
@@ -299,11 +307,67 @@ jobs:
           path: dist/*.whl
           retention-days: 7
 
+  # Linux GPU wheels are built with cibuildwheel (for manylinux_2_28 compatibility)
+  # Same approach as build_cpu_wheels_linux but with PYMOMENTUM_VARIANT=gpu
+  build_gpu_wheels_linux:
+    name: pypi-gpu-linux (cibuildwheel)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0  # Fetch full history for setuptools_scm version detection
+          fetch-tags: true  # Ensure all tags are fetched
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Jinja2
+        run: pip install jinja2
+
+      - name: Generate pyproject.toml
+        run: |
+          python scripts/generate_pyproject.py
+          # Use GPU py312 as base but broaden requires-python to ">=3.12"
+          # so cibuildwheel doesn't skip cp313 (the per-version pyproject with
+          # strict bounds is swapped in by the before-build hook for each build).
+          cp pyproject-pypi-gpu-py312.toml pyproject.toml
+          sed -i 's/requires-python = ">=3.12,<3.13"/requires-python = ">=3.12"/' pyproject.toml
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.3.1
+        env:
+          PYMOMENTUM_VARIANT: gpu
+
+      - name: Verify GPU wheel names
+        run: |
+          echo "Built wheels:"
+          ls -lh ./wheelhouse/*.whl
+          if ls ./wheelhouse/pymomentum_gpu-*.whl 1>/dev/null 2>&1; then
+            echo "✓ GPU wheel(s) found with correct package name"
+          else
+            echo "✗ ERROR: No pymomentum_gpu wheel found!"
+            ls -la ./wheelhouse/
+            exit 1
+          fi
+          if ls ./wheelhouse/pymomentum_cpu-*.whl 1>/dev/null 2>&1; then
+            echo "✗ ERROR: CPU wheel found in GPU build!"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-gpu-linux
+          path: ./wheelhouse/*.whl
+
   # Regression test: Verify pip wheels work correctly (import test, parallel operations)
   # Tests all build variants with same skip logic as builds (py3.13 only on tags/releases)
   test_pip_wheels:
     name: Test pip wheel - ${{ matrix.variant }}-py${{ matrix.python-version }}-${{ matrix.os-short }}
-    needs: [build_cpu_wheels_linux, build_cpu_wheels, build_gpu_wheels]
+    needs: [build_cpu_wheels_linux, build_cpu_wheels, build_gpu_wheels, build_gpu_wheels_linux]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -372,6 +436,22 @@ jobs:
             python-version: '3.13'
             pixi-environment: py313
             artifact-pattern: wheels-gpu-windows-latest-py3.13
+            wheel-type: gpu
+          # Linux GPU - always test py3.12
+          - os: ubuntu-latest
+            os-short: linux
+            variant: gpu
+            python-version: '3.12'
+            pixi-environment: py312
+            artifact-pattern: wheels-gpu-linux
+            wheel-type: gpu
+          # Linux GPU - py3.13 only on tags/releases
+          - os: ubuntu-latest
+            os-short: linux
+            variant: gpu
+            python-version: '3.13'
+            pixi-environment: py313
+            artifact-pattern: wheels-gpu-linux
             wheel-type: gpu
 
     steps:
@@ -468,7 +548,7 @@ jobs:
 
   publish_gpu:
     name: Publish pymomentum-gpu to PyPI
-    needs: [build_gpu_wheels, test_pip_wheels]
+    needs: [build_gpu_wheels, build_gpu_wheels_linux, test_pip_wheels]
     runs-on: ubuntu-latest
     environment:
       name: pypi-gpu

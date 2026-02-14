@@ -257,6 +257,8 @@ def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             [uv_path, "venv", "--python", py_version, str(venv_path)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode != 0:
             print(f"[FAIL] Failed to create venv: {result.stderr}", file=sys.stderr)
@@ -276,6 +278,8 @@ def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             ],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode != 0:
             print(f"[FAIL] Failed to install torch: {result.stderr}", file=sys.stderr)
@@ -286,6 +290,8 @@ def test_locally_with_uv(wheel_file: Path, wheel_type: str, py_ver: str) -> int:
             [uv_path, "pip", "install", "--python", python_exe, str(wheel_file)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode != 0:
             print(f"[FAIL] Failed to install wheel: {result.stderr}", file=sys.stderr)
