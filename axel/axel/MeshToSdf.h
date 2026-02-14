@@ -39,6 +39,21 @@ struct MeshToSdfConfig {
 };
 
 /**
+ * Padding configuration for mesh-to-SDF bounds computation.
+ * Final per-axis padding = max(extent[i] * fractional, absolute).
+ */
+template <typename ScalarType>
+struct MeshToSdfPadding {
+  using Scalar = ScalarType;
+
+  /// Fractional padding as a fraction of bounding box extent per axis.
+  Scalar fractional = Scalar{0.1};
+
+  /// Absolute minimum padding in world units (e.g. cm), applied per axis.
+  Scalar absolute = Scalar{0};
+};
+
+/**
  * Convert a triangle mesh to a signed distance field using modern 3-step approach:
  * 1. Narrow band initialization with exact triangle distances
  * 2. Fast marching propagation using Eikonal equation
@@ -60,21 +75,38 @@ SignedDistanceField<ScalarType> meshToSdf(
     const MeshToSdfConfig<ScalarType>& config = {});
 
 /**
- * Convenience overload that computes bounds automatically from the mesh.
+ * Convenience overload that computes bounds automatically from the mesh
+ * using a uniform voxel size. Grid dimensions adapt to mesh shape.
  *
  * @param vertices Vertex positions as span
  * @param triangles Triangle indices as span
- * @param resolution Grid resolution (nx, ny, nz)
- * @param padding Extra space around mesh bounds (as fraction of bounding box size)
+ * @param voxelSize Uniform voxel size in world units
+ * @param padding Padding configuration for bounds expansion
  * @param config Configuration parameters
- * @return Generated signed distance field
+ * @return Generated signed distance field with isotropic voxels
  */
 template <typename ScalarType>
 SignedDistanceField<ScalarType> meshToSdf(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
     std::span<const Eigen::Vector3i> triangles,
-    const Eigen::Vector3<Index>& resolution,
-    ScalarType padding = ScalarType{0.1},
+    ScalarType voxelSize,
+    const MeshToSdfPadding<ScalarType>& padding = {},
+    const MeshToSdfConfig<ScalarType>& config = {});
+
+/**
+ * In-place overload that writes into a pre-existing SDF grid.
+ * Reuses the existing SDF's bounds and resolution.
+ *
+ * @param vertices Vertex positions as span
+ * @param triangles Triangle indices as span
+ * @param sdf Pre-existing signed distance field to write into
+ * @param config Configuration parameters
+ */
+template <typename ScalarType>
+void meshToSdf(
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
+    SignedDistanceField<ScalarType>& sdf,
     const MeshToSdfConfig<ScalarType>& config = {});
 
 namespace detail {
@@ -119,5 +151,7 @@ BoundingBox<ScalarType> computeMeshBounds(std::span<const Eigen::Vector3<ScalarT
 // Type aliases for convenience
 using MeshToSdfConfigf = MeshToSdfConfig<float>;
 using MeshToSdfConfigd = MeshToSdfConfig<double>;
+using MeshToSdfPaddingf = MeshToSdfPadding<float>;
+using MeshToSdfPaddingd = MeshToSdfPadding<double>;
 
 } // namespace axel
