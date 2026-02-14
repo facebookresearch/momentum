@@ -70,6 +70,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.tolerance"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.tolerance</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding.__init__"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding.absolute"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding.absolute</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding.fractional"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding.fractional</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.__init__"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.bounds"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.bounds</span></code></a></li>
@@ -296,6 +302,59 @@
 <dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfConfig.tolerance">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tolerance</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfConfig.tolerance" title="Link to this definition"></a></dt>
 <dd><p>Numerical tolerance for computations. Default: machine epsilon * 1000</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfPadding">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">MeshToSdfPadding</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfPadding" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Padding configuration for mesh-to-SDF bounds computation.</p>
+<p>The final per-axis padding is computed as <code class="docutils literal notranslate"><span class="pre">max(extent[i]</span> <span class="pre">*</span> <span class="pre">fractional,</span> <span class="pre">absolute)</span></code>,
+where <code class="docutils literal notranslate"><span class="pre">extent</span></code> is the mesh bounding box size in each dimension.</p>
+<p>This allows both proportional and absolute minimum padding to be specified,
+ensuring adequate padding even for very thin mesh regions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fractional</strong> – Fractional padding as a fraction of bounding box extent per axis (default: 0.1).</p></li>
+<li><p><strong>absolute</strong> – Absolute minimum padding in world units (e.g. cm), applied per axis (default: 0).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfPadding.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.axel.MeshToSdfPadding.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.axel.MeshToSdfPadding) -&gt; None</p></li>
+</ol>
+<p>Create <a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding" title="pymomentum.axel.MeshToSdfPadding"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshToSdfPadding</span></code></a> with default parameters.</p>
+<ol class="arabic simple" start="2">
+<li><p>__init__(self: pymomentum.axel.MeshToSdfPadding, fractional: float, absolute: float = 0.0) -&gt; None</p></li>
+</ol>
+<p>Create <a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding" title="pymomentum.axel.MeshToSdfPadding"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshToSdfPadding</span></code></a> with specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fractional</strong> – Fractional padding as a fraction of bounding box extent per axis.</p></li>
+<li><p><strong>absolute</strong> – Absolute minimum padding in world units.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfPadding.absolute">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">absolute</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfPadding.absolute" title="Link to this definition"></a></dt>
+<dd><p>Absolute minimum padding in world units (e.g. cm), applied per axis. Default: 0</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfPadding.fractional">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fractional</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfPadding.fractional" title="Link to this definition"></a></dt>
+<dd><p>Fractional padding as a fraction of bounding box extent per axis. Default: 0.1</p>
 </dd></dl>
 
 </dd></dl>
@@ -822,23 +881,32 @@ Indices must be valid within the vertices array.</p></li>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], resolution: numpy.ndarray[numpy.int32], padding: float = 0.10000000149011612, config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04)) -&gt; pymomentum.axel.SignedDistanceField</p></li>
+<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], voxel_size: float, padding: pymomentum.axel.MeshToSdfPadding = MeshToSdfPadding(fractional=0.100, absolute=0.000), config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04)) -&gt; pymomentum.axel.SignedDistanceField</p></li>
 </ol>
-<p>Convert a triangle mesh to a signed distance field with automatic bounds computation.</p>
+<p>Convert a triangle mesh to a signed distance field with uniform voxel size.</p>
 <p>This convenience function automatically computes the bounding box from the mesh vertices,
-adds padding, and creates a signed distance field.</p>
+adds padding, and creates a signed distance field with uniform (isotropic) voxels.
+Grid dimensions adapt to mesh shape automatically.</p>
+<p>The bounds are computed as follows:</p>
+<ol class="arabic simple">
+<li><p>Compute mesh bounding box from vertices</p></li>
+<li><p>Per-axis padding = <code class="docutils literal notranslate"><span class="pre">max(extent[i]</span> <span class="pre">*</span> <span class="pre">padding.fractional,</span> <span class="pre">padding.absolute)</span></code></p></li>
+<li><p>Expand bounds by padding on each side</p></li>
+<li><p>Compute resolution per axis = <code class="docutils literal notranslate"><span class="pre">max(1,</span> <span class="pre">ceil(padded_extent[i]</span> <span class="pre">/</span> <span class="pre">voxel_size))</span></code></p></li>
+<li><p>Adjust bounds so that <code class="docutils literal notranslate"><span class="pre">extent</span> <span class="pre">/</span> <span class="pre">resolution</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">voxel_size</span></code> in each dimension</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>vertices</strong> – Vertex positions as 2D array of shape (N, 3) where N is number of vertices.</p></li>
 <li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles.</p></li>
-<li><p><strong>resolution</strong> – Grid resolution as 1D array of shape (3,) containing (nx, ny, nz).</p></li>
-<li><p><strong>padding</strong> – Extra space around mesh bounds as fraction of bounding box size (default: 0.1).</p></li>
+<li><p><strong>voxel_size</strong> – Uniform voxel size in world units (must be positive).</p></li>
+<li><p><strong>padding</strong> – Padding configuration as <a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding" title="pymomentum.axel.MeshToSdfPadding"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshToSdfPadding</span></code></a> (optional, default: 10% fractional).</p></li>
 <li><p><strong>config</strong> – Configuration parameters as <a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig" title="pymomentum.axel.MeshToSdfConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshToSdfConfig</span></code></a> (optional).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Generated <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a>.</p>
+<dd class="field-even"><p>Generated <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a> with isotropic voxels.</p>
 </dd>
 </dl>
 <p>Example usage:</p>
@@ -857,10 +925,48 @@ adds padding, and creates a signed distance field.</p>
     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
-<span class="n">resolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
+<span class="c1"># Create SDF with 0.05 cm voxels</span>
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">voxel_size</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 
-<span class="c1"># Automatically compute bounds with 20% padding</span>
-<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="c1"># With custom padding</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">MeshToSdfPadding</span><span class="p">(</span><span class="n">fractional</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">voxel_size</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], sdf: pymomentum.axel.SignedDistanceField, config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04)) -&gt; None</p></li>
+</ol>
+<p>Write mesh-to-SDF conversion into a pre-existing signed distance field.</p>
+<p>This in-place overload reuses the existing SDF’s bounds and resolution,
+writing the computed distance values directly into the grid.
+This is useful when you want to recompute an SDF with a different mesh
+but the same grid layout.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> – Vertex positions as 2D array of shape (N, 3) where N is number of vertices.</p></li>
+<li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles.</p></li>
+<li><p><strong>sdf</strong> – Pre-existing <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a> to write into. Its contents will be overwritten.</p></li>
+<li><p><strong>config</strong> – Configuration parameters as <a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig" title="pymomentum.axel.MeshToSdfConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshToSdfConfig</span></code></a> (optional).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="c1"># Create an SDF grid</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">(</span>
+    <span class="n">min_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">]),</span>
+    <span class="n">max_corner</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>
+<span class="p">)</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">SignedDistanceField</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+
+<span class="c1"># Compute SDF in-place for a mesh</span>
+<span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">...</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">...</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+<span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">sdf</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
