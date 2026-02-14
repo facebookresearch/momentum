@@ -31,6 +31,46 @@ namespace pymomentum {
 
 namespace {
 
+py::tuple dualContouringBinding(
+    const axel::SignedDistanceField<float>& sdf,
+    float isovalue,
+    bool triangulate) {
+  // Call the dual contouring function
+  axel::DualContouringResult<float> result;
+  std::vector<Eigen::Vector3f> normals;
+  std::vector<Eigen::Vector3i> triangles;
+  {
+    py::gil_scoped_release release;
+    result = axel::dualContouring<float>(sdf, isovalue);
+
+    if (!result.success) {
+      throw std::runtime_error("Dual contouring failed");
+    }
+
+    // Compute normals at vertices by sampling SDF gradients
+    normals.reserve(result.vertices.size());
+    for (const auto& vertex : result.vertices) {
+      normals.push_back(sdf.gradient(vertex));
+    }
+
+    // Triangulate quads if requested (pure C++ operation)
+    if (triangulate) {
+      triangles = axel::triangulateQuads(result.quads);
+    }
+  }
+
+  // Convert vertices to numpy array using helper
+  auto vertices = pymomentum::eigenVectorsToArray<float, 3>(result.vertices);
+
+  auto normalsArray = pymomentum::eigenVectorsToArray<float, 3>(normals);
+
+  // Convert faces to numpy array
+  auto faces = triangulate ? pymomentum::eigenVectorsToArray<int, 3>(triangles)
+                           : pymomentum::eigenVectorsToArray<int, 4>(result.quads);
+
+  return py::make_tuple(vertices, normalsArray, faces);
+}
+
 py::array_t<float> smoothMeshLaplacianBinding(
     const py::array_t<float>& vertices,
     const py::array_t<int>& faces,
@@ -92,6 +132,7 @@ py::array_t<float> smoothMeshLaplacianBinding(
     // Triangle mesh - convert faces using utility function
     const auto triangleVector = arrayToEigenVectors<int, 3>(faces, "faces");
 
+    py::gil_scoped_release release;
     smoothedVertices = axel::smoothMeshLaplacian<float, Eigen::Vector3i>(
         std::span<const Eigen::Vector3f>(vertexVector),
         std::span<const Eigen::Vector3i>(triangleVector),
@@ -102,6 +143,7 @@ py::array_t<float> smoothMeshLaplacianBinding(
     // Quad mesh - convert faces using utility function
     const auto quadVector = arrayToEigenVectors<int, 4>(faces, "faces");
 
+    py::gil_scoped_release release;
     smoothedVertices = axel::smoothMeshLaplacian<float, Eigen::Vector4i>(
         std::span<const Eigen::Vector3f>(vertexVector),
         std::span<const Eigen::Vector4i>(quadVector),
@@ -479,12 +521,15 @@ ensuring adequate padding even for very thin mesh regions.
             resolutionData(0), resolutionData(1), resolutionData(2));
 
         // Call the mesh_to_sdf function
-        return axel::meshToSdf<float>(
-            std::span<const Eigen::Vector3f>(vertexVector),
-            std::span<const Eigen::Vector3i>(triangleVector),
-            bounds,
-            resolutionVector,
-            config);
+        {
+          py::gil_scoped_release release;
+          return axel::meshToSdf<float>(
+              std::span<const Eigen::Vector3f>(vertexVector),
+              std::span<const Eigen::Vector3i>(triangleVector),
+              bounds,
+              resolutionVector,
+              config);
+        }
       },
       R"(Convert a triangle mesh to a signed distance field using modern 3-step approach.
 
@@ -573,12 +618,15 @@ Example usage::
         }
 
         // Call the mesh_to_sdf function with voxel size
-        return axel::meshToSdf<float>(
-            std::span<const Eigen::Vector3f>(vertexVector),
-            std::span<const Eigen::Vector3i>(triangleVector),
-            voxelSize,
-            padding,
-            config);
+        {
+          py::gil_scoped_release release;
+          return axel::meshToSdf<float>(
+              std::span<const Eigen::Vector3f>(vertexVector),
+              std::span<const Eigen::Vector3i>(triangleVector),
+              voxelSize,
+              padding,
+              config);
+        }
       },
       R"(Convert a triangle mesh to a signed distance field with uniform voxel size.
 
@@ -661,11 +709,14 @@ Example usage::
         }
 
         // Call the in-place mesh_to_sdf function
-        axel::meshToSdf<float>(
-            std::span<const Eigen::Vector3f>(vertexVector),
-            std::span<const Eigen::Vector3i>(triangleVector),
-            sdf,
-            config);
+        {
+          py::gil_scoped_release release;
+          axel::meshToSdf<float>(
+              std::span<const Eigen::Vector3f>(vertexVector),
+              std::span<const Eigen::Vector3i>(triangleVector),
+              sdf,
+              config);
+        }
       },
       R"(Write mesh-to-SDF conversion into a pre-existing signed distance field.
 
@@ -731,10 +782,15 @@ Example usage::
         }
 
         // Call the fillMeshHolesComplete function with the specified method
-        const auto [filledVertices, filledTriangles] = axel::fillMeshHolesComplete<float>(
-            std::span<const Eigen::Vector3f>(vertexVector),
-            std::span<const Eigen::Vector3i>(triangleVector),
-            method);
+        std::pair<std::vector<Eigen::Vector3f>, std::vector<Eigen::Vector3i>> fillResult;
+        {
+          py::gil_scoped_release release;
+          fillResult = axel::fillMeshHolesComplete<float>(
+              std::span<const Eigen::Vector3f>(vertexVector),
+              std::span<const Eigen::Vector3i>(triangleVector),
+              method);
+        }
+        const auto& [filledVertices, filledTriangles] = fillResult;
 
         // Convert results back to numpy arrays
         // Convert vertices
@@ -810,32 +866,7 @@ Example usage::
   // Bind dual_contouring function (always returns quads)
   m.def(
       "dual_contouring",
-      [](const axel::SignedDistanceField<float>& sdf, float isovalue, bool triangulate) {
-        // Call the dual contouring function
-        const auto result = axel::dualContouring<float>(sdf, isovalue);
-
-        if (!result.success) {
-          throw std::runtime_error("Dual contouring failed");
-        }
-
-        // Convert vertices to numpy array using helper
-        auto vertices = pymomentum::eigenVectorsToArray<float, 3>(result.vertices);
-
-        // Compute normals at vertices by sampling SDF gradients
-        std::vector<Eigen::Vector3f> normals;
-        normals.reserve(result.vertices.size());
-        for (const auto& vertex : result.vertices) {
-          normals.push_back(sdf.gradient(vertex));
-        }
-        auto normalsArray = pymomentum::eigenVectorsToArray<float, 3>(normals);
-
-        // Convert quads to numpy array using helper
-        auto faces = triangulate
-            ? pymomentum::eigenVectorsToArray<int, 3>(axel::triangulateQuads(result.quads))
-            : pymomentum::eigenVectorsToArray<int, 4>(result.quads);
-
-        return py::make_tuple(vertices, normalsArray, faces);
-      },
+      &dualContouringBinding,
       R"(Extract an isosurface from a signed distance field using dual contouring.
 
 Dual contouring places vertices inside grid cells and generates quad faces between
