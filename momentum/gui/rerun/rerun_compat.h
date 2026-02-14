@@ -12,7 +12,11 @@
 #include <string>
 
 // Rerun SDK version compatibility layer
-// This header provides compatibility between rerun 0.23.x and 0.28.x+ APIs.
+// This header provides compatibility between rerun 0.23.x (legacy) and 0.29.x+ (latest) APIs.
+//
+// Minimum supported versions:
+// - rerun-latest: >=0.29.0
+// - rerun-legacy: >=0.23.3,<0.24
 //
 // Key API changes between versions:
 // - 0.24+: Scalar -> Scalars (takes batch of values)
@@ -20,6 +24,7 @@
 // - 0.24+: SeriesPoint -> SeriesPoints
 // - 0.26+: set_time_seconds deprecated -> use set_time_duration_secs
 // - 0.28+: Transform3D::with_axis_length removed (use Axes3D archetype instead)
+// - 0.29+: No breaking API changes affecting this codebase
 //
 // The RERUN_VERSION_GE macro is available since rerun 0.18.
 
