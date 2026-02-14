@@ -505,8 +505,8 @@ dependencies = { python = "3.13.*" }
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
 [feature.rerun-latest.dependencies]
-rerun-sdk = ">=0.28.0,<0.29"
-librerun-sdk = ">=0.28.0,<0.29"
+rerun-sdk = ">=0.29.0"
+librerun-sdk = ">=0.29.0"
 
 [feature.rerun-legacy]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
