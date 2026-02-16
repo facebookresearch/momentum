@@ -306,13 +306,13 @@ void validateKdTree(
   const size_t nTests = 1000;
 
   for (size_t i = 0; i < nTests; ++i) {
-    const Eigen::Matrix<T, 3, 1> queryPoint = momentum::normal<Eigen::Matrix<T, 3, 1>>(0, 3);
+    const auto queryPoint = momentum::normal<Eigen::Matrix<T, 3, 1>>(0, 3);
     validateKdTreeNearestNeighbor(points, normals, colors, kdTree, queryPoint);
     validateKdTreeNearestNeighborWithAcceptance(points, kdTree, queryPoint);
   }
 
   for (size_t i = 0; i < nTests; ++i) {
-    const Eigen::Matrix<T, 3, 1> queryPoint = momentum::normal<Eigen::Matrix<T, 3, 1>>(0, 3);
+    const auto queryPoint = momentum::normal<Eigen::Matrix<T, 3, 1>>(0, 3);
     const Scalar radius = momentum::uniform<float>(0, 5);
     validateKdTreeSphereQuery(points, kdTree, queryPoint, radius);
   }
