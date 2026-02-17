@@ -27,6 +27,8 @@ enum class HoleFillingMethod {
   Centroid,
   /// Use ear clipping without adding new vertices
   EarClipping,
+  /// Fill with a smooth hemispherical cap (produces smoother SDF gradients near cut boundaries)
+  SphericalCap,
   /// Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger)
   Auto
 };
@@ -88,13 +90,16 @@ std::vector<HoleBoundary> detectMeshHoles(
  * @param vertices Original mesh vertices
  * @param triangles Original mesh triangles
  * @param method Hole filling method (default: Centroid for best triangle quality)
+ * @param capHeightRatio Cap height ratio for SphericalCap method, as a fraction of hole radius
+ *   (0.0 = flat fill, 0.5 = half-hemisphere, 1.0 = full hemisphere). Ignored for other methods.
  * @return Result containing new vertices and triangles, or failure info
  */
 template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
     std::span<const Eigen::Vector3i> triangles,
-    HoleFillingMethod method = HoleFillingMethod::Centroid);
+    HoleFillingMethod method = HoleFillingMethod::Centroid,
+    float capHeightRatio = 0.5f);
 
 /**
  * Convenience function that fills holes and returns complete mesh.
@@ -102,6 +107,8 @@ HoleFillingResult fillMeshHoles(
  * @param vertices Original mesh vertices
  * @param triangles Original mesh triangles
  * @param method Hole filling method (default: Centroid for best triangle quality)
+ * @param capHeightRatio Cap height ratio for SphericalCap method, as a fraction of hole radius
+ *   (0.0 = flat fill, 0.5 = half-hemisphere, 1.0 = full hemisphere). Ignored for other methods.
  * @return Pair of (all_vertices, all_triangles) with holes filled
  */
 template <typename ScalarType>
@@ -109,7 +116,8 @@ std::pair<std::vector<Eigen::Vector3<ScalarType>>, std::vector<Eigen::Vector3i>>
 fillMeshHolesComplete(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
     std::span<const Eigen::Vector3i> triangles,
-    HoleFillingMethod method = HoleFillingMethod::Centroid);
+    HoleFillingMethod method = HoleFillingMethod::Centroid,
+    float capHeightRatio = 0.5f);
 
 /**
  * Apply Laplacian smoothing to mesh vertices with optional masking.
