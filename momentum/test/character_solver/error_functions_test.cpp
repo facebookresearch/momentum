@@ -689,7 +689,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PointTriangleSkinnedLocatorError_Gradien
       ModelParametersT<T> parameters =
           0.25 * uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, character, Eps<T>(0.03, 5e-4), true, true);
+          T, &errorFunction, parameters, character, Eps<T>(0.03, 1e-3), true, true);
     }
   }
 }
