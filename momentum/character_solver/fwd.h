@@ -199,6 +199,25 @@ using PositionDatad_const_u = ::std::unique_ptr<const PositionDatad>;
 using PositionDatad_const_w = ::std::weak_ptr<const PositionDatad>;
 
 template <typename T>
+struct ProjectionConstraintT;
+using ProjectionConstraint = ProjectionConstraintT<float>;
+using ProjectionConstraintd = ProjectionConstraintT<double>;
+
+using ProjectionConstraint_p = ::std::shared_ptr<ProjectionConstraint>;
+using ProjectionConstraint_u = ::std::unique_ptr<ProjectionConstraint>;
+using ProjectionConstraint_w = ::std::weak_ptr<ProjectionConstraint>;
+using ProjectionConstraint_const_p = ::std::shared_ptr<const ProjectionConstraint>;
+using ProjectionConstraint_const_u = ::std::unique_ptr<const ProjectionConstraint>;
+using ProjectionConstraint_const_w = ::std::weak_ptr<const ProjectionConstraint>;
+
+using ProjectionConstraintd_p = ::std::shared_ptr<ProjectionConstraintd>;
+using ProjectionConstraintd_u = ::std::unique_ptr<ProjectionConstraintd>;
+using ProjectionConstraintd_w = ::std::weak_ptr<ProjectionConstraintd>;
+using ProjectionConstraintd_const_p = ::std::shared_ptr<const ProjectionConstraintd>;
+using ProjectionConstraintd_const_u = ::std::unique_ptr<const ProjectionConstraintd>;
+using ProjectionConstraintd_const_w = ::std::weak_ptr<const ProjectionConstraintd>;
+
+template <typename T>
 struct SkinnedLocatorConstraintT;
 using SkinnedLocatorConstraint = SkinnedLocatorConstraintT<float>;
 using SkinnedLocatorConstraintd = SkinnedLocatorConstraintT<double>;
@@ -371,6 +390,30 @@ using AimDistErrorFunctiond_w = ::std::weak_ptr<AimDistErrorFunctiond>;
 using AimDistErrorFunctiond_const_p = ::std::shared_ptr<const AimDistErrorFunctiond>;
 using AimDistErrorFunctiond_const_u = ::std::unique_ptr<const AimDistErrorFunctiond>;
 using AimDistErrorFunctiond_const_w = ::std::weak_ptr<const AimDistErrorFunctiond>;
+
+template <typename T>
+class CameraProjectionErrorFunctionT;
+using CameraProjectionErrorFunction = CameraProjectionErrorFunctionT<float>;
+using CameraProjectionErrorFunctiond = CameraProjectionErrorFunctionT<double>;
+
+using CameraProjectionErrorFunction_p = ::std::shared_ptr<CameraProjectionErrorFunction>;
+using CameraProjectionErrorFunction_u = ::std::unique_ptr<CameraProjectionErrorFunction>;
+using CameraProjectionErrorFunction_w = ::std::weak_ptr<CameraProjectionErrorFunction>;
+using CameraProjectionErrorFunction_const_p =
+    ::std::shared_ptr<const CameraProjectionErrorFunction>;
+using CameraProjectionErrorFunction_const_u =
+    ::std::unique_ptr<const CameraProjectionErrorFunction>;
+using CameraProjectionErrorFunction_const_w = ::std::weak_ptr<const CameraProjectionErrorFunction>;
+
+using CameraProjectionErrorFunctiond_p = ::std::shared_ptr<CameraProjectionErrorFunctiond>;
+using CameraProjectionErrorFunctiond_u = ::std::unique_ptr<CameraProjectionErrorFunctiond>;
+using CameraProjectionErrorFunctiond_w = ::std::weak_ptr<CameraProjectionErrorFunctiond>;
+using CameraProjectionErrorFunctiond_const_p =
+    ::std::shared_ptr<const CameraProjectionErrorFunctiond>;
+using CameraProjectionErrorFunctiond_const_u =
+    ::std::unique_ptr<const CameraProjectionErrorFunctiond>;
+using CameraProjectionErrorFunctiond_const_w =
+    ::std::weak_ptr<const CameraProjectionErrorFunctiond>;
 
 template <typename T>
 class CollisionErrorFunctionT;

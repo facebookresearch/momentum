@@ -58,6 +58,7 @@ template_structs = [
     "PointTriangleVertexConstraint",
     "PlaneData",
     "PositionData",
+    "ProjectionConstraint",
     "SkinnedLocatorConstraint",
     "SkinnedLocatorTriangleConstraint",
     "VertexConstraint",
@@ -74,6 +75,7 @@ classes = [
 template_classes = [
     "AimDirErrorFunction",
     "AimDistErrorFunction",
+    "CameraProjectionErrorFunction",
     "CollisionErrorFunction",
     "CollisionErrorFunctionStateless",
     "DistanceErrorFunction",
