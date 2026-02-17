@@ -127,7 +127,6 @@ solver_public_headers = [
     "solver/gauss_newton_solver_sparse.h",
     "solver/solver_function.h",
     "solver/solver.h",
-    "solver/subset_gauss_newton_solver.h",
     "solver/gradient_descent_solver.h",
 ]
 
@@ -136,7 +135,6 @@ solver_sources = [
     "solver/gauss_newton_solver_sparse.cpp",
     "solver/solver_function.cpp",
     "solver/solver.cpp",
-    "solver/subset_gauss_newton_solver.cpp",
     "solver/gradient_descent_solver.cpp",
 ]
 
@@ -145,7 +143,6 @@ solver_test_sources = [
     "test/solver/gradient_descent_solver_test.cpp",
     "test/solver/solver_function_test.cpp",
     "test/solver/solver_test.cpp",
-    "test/solver/subset_gauss_newton_solver_test.cpp",
 ]
 
 skeleton_public_headers = [

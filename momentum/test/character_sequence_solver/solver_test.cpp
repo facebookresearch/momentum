@@ -22,7 +22,6 @@
 #include "momentum/character_solver/trust_region_qr.h"
 #include "momentum/math/fmt_eigen.h"
 #include "momentum/solver/gauss_newton_solver.h"
-#include "momentum/solver/subset_gauss_newton_solver.h"
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/solver/solver_test_helpers.h"
 
