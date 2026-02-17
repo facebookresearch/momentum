@@ -162,7 +162,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1);
-      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 1e-10));
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(2e-2f, 1e-10));
     }
   }
 

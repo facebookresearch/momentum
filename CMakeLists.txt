@@ -221,6 +221,18 @@ mt_library(
 )
 
 mt_library(
+  NAME camera
+  HEADERS_VARS
+    camera_public_headers
+  SOURCES_VARS
+    camera_sources
+  PUBLIC_LINK_LIBRARIES
+    simd
+    drjit
+    Eigen3::Eigen
+)
+
+mt_library(
   NAME fmt_eigen
   HEADERS_VARS fmt_eigen_public_headers
   PUBLIC_LINK_LIBRARIES
@@ -312,6 +324,7 @@ mt_library(
   HEADERS_VARS character_solver_public_headers
   SOURCES_VARS character_solver_sources
   PUBLIC_LINK_LIBRARIES
+    camera
     character
     solver
     axel
@@ -583,18 +596,6 @@ mt_library(
 )
 
 if(MOMENTUM_BUILD_RENDERER)
-  mt_library(
-    NAME camera
-    HEADERS_VARS
-      camera_public_headers
-    SOURCES_VARS
-      camera_sources
-    PUBLIC_LINK_LIBRARIES
-      simd
-      drjit
-      Eigen3::Eigen
-  )
-
   mt_library(
     NAME rasterizer
     HEADERS_VARS
