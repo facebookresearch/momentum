@@ -174,7 +174,8 @@ PYBIND11_MODULE(axel, m) {
 Available methods:
 - Centroid: Add a centroid vertex and create fan triangles (default, best for SDF generation)
 - EarClipping: Use ear clipping without adding new vertices
-- Auto: Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger))")
+- Auto: Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger)
+- SphericalCap: Fill with a smooth hemispherical cap (produces smoother SDF gradients near cut boundaries))")
       .value(
           "Centroid",
           axel::HoleFillingMethod::Centroid,
@@ -182,6 +183,10 @@ Available methods:
       .value(
           "EarClipping", axel::HoleFillingMethod::EarClipping, "Use ear clipping, no new vertices")
       .value("Auto", axel::HoleFillingMethod::Auto, "Auto-select based on hole size")
+      .value(
+          "SphericalCap",
+          axel::HoleFillingMethod::SphericalCap,
+          "Fill with smooth hemispherical cap")
       .export_values();
 
   // Bind BoundingBox
@@ -757,7 +762,8 @@ Example usage::
       "fill_holes",
       [](const py::array_t<float>& vertices,
          const py::array_t<int>& triangles,
-         axel::HoleFillingMethod method) {
+         axel::HoleFillingMethod method,
+         float cap_height_ratio) {
         // Validate input arrays
         validatePositionArray(vertices, "vertices");
         validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
@@ -788,7 +794,8 @@ Example usage::
           fillResult = axel::fillMeshHolesComplete<float>(
               std::span<const Eigen::Vector3f>(vertexVector),
               std::span<const Eigen::Vector3i>(triangleVector),
-              method);
+              method,
+              cap_height_ratio);
         }
         const auto& [filledVertices, filledTriangles] = fillResult;
 
@@ -826,9 +833,14 @@ surfaces, such as SDF generation.
 :param triangles: Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
                   Indices must be valid within the vertices array.
 :param method: Hole filling method (default: Centroid). Options are:
-               - HoleFillingMethod.Centroid: Add centroid vertex, create fan triangles (best quality)
-               - HoleFillingMethod.EarClipping: Use ear clipping, no new vertices
-               - HoleFillingMethod.Auto: Auto-select based on hole size
+               - :attr:`HoleFillingMethod.Centroid`: Add centroid vertex, create fan triangles (best quality)
+               - :attr:`HoleFillingMethod.EarClipping`: Use ear clipping, no new vertices
+               - :attr:`HoleFillingMethod.Auto`: Auto-select based on hole size
+               - :attr:`HoleFillingMethod.SphericalCap`: Fill with smooth hemispherical cap (smoother SDF gradients near cut boundaries)
+:param cap_height_ratio: Controls how far the cap bulges outward for :attr:`HoleFillingMethod.SphericalCap`.
+                         Expressed as a fraction of the hole radius (default: 0.5).
+                         0.0 produces a flat fill, 0.5 a half-hemisphere, 1.0 a full hemisphere.
+                         Ignored for other methods.
 :return: Tuple of (filled_vertices, filled_triangles) where:
          - filled_vertices: 2D array of shape (N', 3) with original + new vertices
          - filled_triangles: 2D array of shape (M', 3) with original + new triangles
@@ -857,11 +869,16 @@ Example usage::
     # Use centroid method (default) for best triangle quality
     filled_vertices, filled_triangles = axel.fill_holes(vertices, triangles)
 
+    # Use spherical cap for smoother SDF gradients
+    filled_vertices, filled_triangles = axel.fill_holes(
+        vertices, triangles, method=axel.HoleFillingMethod.SphericalCap, cap_height_ratio=0.5)
+
     print(f"Original mesh: {len(vertices)} vertices, {len(triangles)} triangles")
     print(f"Filled mesh: {len(filled_vertices)} vertices, {len(filled_triangles)} triangles"))",
       py::arg("vertices"),
       py::arg("triangles"),
-      py::arg("method") = axel::HoleFillingMethod::Centroid);
+      py::arg("method") = axel::HoleFillingMethod::Centroid,
+      py::arg("cap_height_ratio") = 0.5f);
 
   // Bind dual_contouring function (always returns quads)
   m.def(
