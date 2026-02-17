@@ -1735,7 +1735,8 @@ void rasterizeTransforms(
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
 
-  auto a = transforms.accessor<float, 3>();
+  const auto transformsCur = transforms.select(0, 0);
+  const auto a = transformsCur.accessor<float, 3>();
 
   for (int i = 0; i < nTransforms; ++i) {
     const Eigen::Vector3f origin(a[i][0][3], a[i][1][3], a[i][2][3]);
