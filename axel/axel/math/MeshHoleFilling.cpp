@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <numbers>
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
@@ -198,6 +199,7 @@ HoleFillingResult fillHoleWithCentroid(
   const auto centroidIdx = static_cast<Index>(vertices.size()); // Index in combined mesh
 
   // Create triangles from centroid to boundary edges with proper winding
+  result.newTriangles.reserve(hole.vertices.size());
   for (size_t i = 0; i < hole.vertices.size(); ++i) {
     const size_t nextI = (i + 1) % hole.vertices.size();
 
@@ -206,6 +208,123 @@ HoleFillingResult fillHoleWithCentroid(
 
     // Create triangle with reversed winding to match mesh exterior
     result.newTriangles.emplace_back(v2, v1, centroidIdx);
+  }
+
+  result.success = true;
+  return result;
+}
+
+/**
+ * Fill a hole with a smooth hemispherical cap using intermediate rings.
+ * Falls back to centroid method if the hole normal is degenerate.
+ */
+template <typename ScalarType>
+HoleFillingResult fillHoleWithSphericalCap(
+    const HoleBoundary& hole,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    float capHeightRatio) {
+  const size_t boundarySize = hole.vertices.size();
+
+  // Compute centroid
+  Eigen::Vector3<ScalarType> centroid = Eigen::Vector3<ScalarType>::Zero();
+  for (const auto vertexIdx : hole.vertices) {
+    centroid += vertices[vertexIdx];
+  }
+  centroid /= static_cast<ScalarType>(boundarySize);
+
+  // Compute hole normal (average of cross products from centroid)
+  Eigen::Vector3<ScalarType> holeNormal = Eigen::Vector3<ScalarType>::Zero();
+  for (size_t i = 0; i < boundarySize; ++i) {
+    const size_t nextI = (i + 1) % boundarySize;
+    const auto& p1 = vertices[hole.vertices[i]];
+    const auto& p2 = vertices[hole.vertices[nextI]];
+    const auto edge1 = p1 - centroid;
+    const auto edge2 = p2 - centroid;
+    holeNormal += edge1.cross(edge2).normalized();
+  }
+
+  if (holeNormal.norm() < ScalarType{1e-6}) {
+    // Degenerate hole normal, fall back to centroid method
+    return fillHoleWithCentroid(hole, vertices);
+  }
+
+  HoleFillingResult result;
+
+  holeNormal.normalize();
+  // Negate: boundary winding produces an inward-pointing normal,
+  // but we want the cap to bulge outward.
+  holeNormal = -holeNormal;
+
+  // Compute average radius
+  auto radius = ScalarType{0};
+  for (const auto vertexIdx : hole.vertices) {
+    radius += (vertices[vertexIdx] - centroid).norm();
+  }
+  radius /= static_cast<ScalarType>(boundarySize);
+
+  // Determine number of intermediate rings
+  const size_t nRings =
+      std::min(static_cast<size_t>(4), std::max(static_cast<size_t>(2), boundarySize / 4));
+
+  const auto capH = static_cast<ScalarType>(capHeightRatio);
+  const auto pi_half = static_cast<ScalarType>(std::numbers::pi / 2.0);
+  const auto baseIdx = static_cast<Index>(vertices.size());
+
+  // Create intermediate ring vertices
+  // Ring 0 is the original boundary (no new vertices needed).
+  // Rings 1..nRings are intermediate rings.
+  result.newVertices.reserve(nRings * boundarySize + 1);
+  for (size_t k = 1; k <= nRings; ++k) {
+    const auto theta = static_cast<ScalarType>(k) / static_cast<ScalarType>(nRings) * pi_half;
+    const auto ringRadiusFactor = std::cos(theta);
+    const auto ringOffset = capH * radius * std::sin(theta);
+
+    for (size_t i = 0; i < boundarySize; ++i) {
+      const auto pos = centroid + ringRadiusFactor * (vertices[hole.vertices[i]] - centroid) +
+          ringOffset * holeNormal;
+      result.newVertices.push_back(pos.template cast<float>());
+    }
+  }
+
+  // Add pole vertex
+  const auto polePos = centroid + capH * radius * holeNormal;
+  result.newVertices.push_back(polePos.template cast<float>());
+  const auto poleIdx = static_cast<Index>(baseIdx + nRings * boundarySize);
+
+  // Triangulate between consecutive rings
+  // Ring 0 = original boundary vertices (indices from hole.vertices)
+  // Ring k (k>=1) = new vertices starting at baseIdx + (k-1)*boundarySize
+  result.newTriangles.reserve(nRings * boundarySize * 2 + boundarySize);
+  for (size_t k = 0; k < nRings; ++k) {
+    for (size_t i = 0; i < boundarySize; ++i) {
+      const size_t nextI = (i + 1) % boundarySize;
+
+      Index curr0, curr1, next0, next1;
+      if (k == 0) {
+        // Ring 0: original boundary
+        curr0 = hole.vertices[i];
+        curr1 = hole.vertices[nextI];
+      } else {
+        curr0 = static_cast<Index>(baseIdx + (k - 1) * boundarySize + i);
+        curr1 = static_cast<Index>(baseIdx + (k - 1) * boundarySize + nextI);
+      }
+      next0 = static_cast<Index>(baseIdx + k * boundarySize + i);
+      next1 = static_cast<Index>(baseIdx + k * boundarySize + nextI);
+
+      // Two triangles per quad, reversed winding (consistent with existing convention:
+      // boundary edge (curr0, curr1) appears reversed as (curr1, curr0) in triangulation)
+      result.newTriangles.emplace_back(curr1, curr0, next0);
+      result.newTriangles.emplace_back(curr1, next0, next1);
+    }
+  }
+
+  // Close the pole: connect innermost ring to pole vertex
+  for (size_t i = 0; i < boundarySize; ++i) {
+    const size_t nextI = (i + 1) % boundarySize;
+    const auto ringIdx0 = static_cast<Index>(baseIdx + (nRings - 1) * boundarySize + i);
+    const auto ringIdx1 = static_cast<Index>(baseIdx + (nRings - 1) * boundarySize + nextI);
+    // Reversed winding (consistent with centroid fan convention)
+    result.newTriangles.emplace_back(ringIdx1, ringIdx0, poleIdx);
   }
 
   result.success = true;
@@ -316,13 +435,15 @@ template <typename ScalarType>
 HoleFillingResult fillSingleHole(
     const HoleBoundary& hole,
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    HoleFillingMethod method) {
+    HoleFillingMethod method,
+    float capHeightRatio) {
   if (hole.vertices.size() < 3) {
     return {}; // Cannot fill holes with less than 3 vertices
   }
 
   // For very small holes (triangles), just create one triangle
-  if (hole.vertices.size() == 3) {
+  // (unless SphericalCap is requested, which always uses the cap geometry)
+  if (hole.vertices.size() == 3 && method != HoleFillingMethod::SphericalCap) {
     HoleFillingResult result;
     // Reverse winding to match mesh exterior
     result.newTriangles.emplace_back(hole.vertices[2], hole.vertices[1], hole.vertices[0]);
@@ -332,6 +453,7 @@ HoleFillingResult fillSingleHole(
 
   // Determine actual method to use
   bool useCentroid = false;
+  bool useSphericalCap = false;
   switch (method) {
     case HoleFillingMethod::Centroid:
       useCentroid = true;
@@ -343,8 +465,14 @@ HoleFillingResult fillSingleHole(
       // Use centroid for small to medium holes, ear clipping for larger
       useCentroid = (hole.vertices.size() <= 8);
       break;
+    case HoleFillingMethod::SphericalCap:
+      useSphericalCap = true;
+      break;
   }
 
+  if (useSphericalCap) {
+    return fillHoleWithSphericalCap(hole, vertices, capHeightRatio);
+  }
   if (useCentroid) {
     return fillHoleWithCentroid(hole, vertices);
   }
@@ -517,7 +645,8 @@ template <typename ScalarType>
 HoleFillingResult fillMeshHoles(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
     std::span<const Eigen::Vector3i> triangles,
-    HoleFillingMethod method) {
+    HoleFillingMethod method,
+    float capHeightRatio) {
   HoleFillingResult result;
 
   // Convert vertices to float for hole detection (detectMeshHoles expects float)
@@ -543,7 +672,7 @@ HoleFillingResult fillMeshHoles(
       continue; // Invalid hole
     }
 
-    const auto holeResult = fillSingleHole(hole, vertices, method);
+    const auto holeResult = fillSingleHole(hole, vertices, method, capHeightRatio);
 
     if (!holeResult.success) {
       continue;
@@ -583,8 +712,9 @@ std::pair<std::vector<Eigen::Vector3<ScalarType>>, std::vector<Eigen::Vector3i>>
 fillMeshHolesComplete(
     std::span<const Eigen::Vector3<ScalarType>> vertices,
     std::span<const Eigen::Vector3i> triangles,
-    HoleFillingMethod method) {
-  const auto result = fillMeshHoles(vertices, triangles, method);
+    HoleFillingMethod method,
+    float capHeightRatio) {
+  const auto result = fillMeshHoles(vertices, triangles, method, capHeightRatio);
 
   // Combine original and new vertices
   std::vector<Eigen::Vector3<ScalarType>> allVertices;
@@ -620,24 +750,28 @@ fillMeshHolesComplete(
 template HoleFillingResult fillMeshHoles<float>(
     std::span<const Eigen::Vector3<float>>,
     std::span<const Eigen::Vector3i>,
-    HoleFillingMethod);
+    HoleFillingMethod,
+    float);
 
 template HoleFillingResult fillMeshHoles<double>(
     std::span<const Eigen::Vector3<double>>,
     std::span<const Eigen::Vector3i>,
-    HoleFillingMethod);
+    HoleFillingMethod,
+    float);
 
 template std::pair<std::vector<Eigen::Vector3<float>>, std::vector<Eigen::Vector3i>>
-    fillMeshHolesComplete<float>(
-        std::span<const Eigen::Vector3<float>>,
-        std::span<const Eigen::Vector3i>,
-        HoleFillingMethod);
+fillMeshHolesComplete<float>(
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
+    HoleFillingMethod,
+    float);
 
 template std::pair<std::vector<Eigen::Vector3<double>>, std::vector<Eigen::Vector3i>>
-    fillMeshHolesComplete<double>(
-        std::span<const Eigen::Vector3<double>>,
-        std::span<const Eigen::Vector3i>,
-        HoleFillingMethod);
+fillMeshHolesComplete<double>(
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
+    HoleFillingMethod,
+    float);
 
 // Triangle mesh smoothing instantiations
 template std::vector<Eigen::Vector3<float>> smoothMeshLaplacian<float, Eigen::Vector3i>(
