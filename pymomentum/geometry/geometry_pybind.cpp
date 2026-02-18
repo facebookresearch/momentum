@@ -23,6 +23,7 @@
 #include "pymomentum/geometry/sdf_collider_pybind.h"
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
+#include "pymomentum/geometry/texture_classification.h"
 
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
@@ -1327,6 +1328,42 @@ When USD is available, you can load and save USD files (.usd, .usda, .usdc, .usd
   registerSDFColliderBindings(sdfColliderClass);
 
   registerCharacterBindings(characterClass);
+
+  // classify_triangles_by_texture(mesh, texture, region_colors, threshold, num_samples)
+  m.def(
+      "classify_triangles_by_texture",
+      &classifyTrianglesByTexture,
+      R"(Classify mesh triangles into regions based on texture colors.
+
+This function samples texture colors at multiple points within each triangle
+and assigns triangles to regions based on the sampled colors. Uses parallel
+processing for high performance on large meshes (~100-500x faster than Python).
+
+The sampling strategy is deterministic and uses barycentric coordinates.
+
+:param mesh: The :class:`Mesh` containing texture coordinates and texture coordinate faces.
+             Must have non-empty texcoords and texcoord_faces.
+:param texture: RGB texture image as a numpy array with shape [height, width, 3] and dtype uint8.
+:param region_colors: RGB colors for each region as a numpy array with shape [n_regions, 3]
+                      and dtype uint8. The array index corresponds to the region index.
+:param threshold: Fraction of samples that must match for a triangle to be assigned
+                  to a region. 0.0 means >= 1 sample must match (backward compatible),
+                  0.5 means >= 50% must match, 1.0 means all samples must match.
+:param num_samples: Number of sample points per triangle. Valid values:
+                    - 1: Centroid only
+                    - 3: 3 vertices (backward compatible with Python implementation)
+                    - 4: Centroid + 3 vertices
+                    - 6: 3 vertices + 3 edge midpoints
+                    - 7: Centroid + 3 vertices + 3 edge midpoints
+                    - 10: 7 + 3 interior points
+:return: List of sorted triangle index lists, one per region. The outer list index
+         corresponds to the region index in region_colors.
+)",
+      py::arg("mesh"),
+      py::arg("texture"),
+      py::arg("region_colors"),
+      py::arg("threshold") = 0.0f,
+      py::arg("num_samples") = 3);
 
   // Register GltfBuilder bindings
   registerGltfBuilderBindings(m);
