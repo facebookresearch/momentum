@@ -21,5 +21,6 @@ var searchData=
   ['positionerrorfunctiont_18',['PositionErrorFunctionT',['../classmomentum_1_1PositionErrorFunctionT.html',1,'momentum']]],
   ['progressbar_19',['ProgressBar',['../classmomentum_1_1ProgressBar.html',1,'momentum']]],
   ['projectionconstraintdatat_20',['ProjectionConstraintDataT',['../structmomentum_1_1ProjectionConstraintDataT.html',1,'momentum']]],
-  ['projectionerrorfunctiont_21',['ProjectionErrorFunctionT',['../classmomentum_1_1ProjectionErrorFunctionT.html',1,'momentum']]]
+  ['projectionconstraintt_21',['ProjectionConstraintT',['../structmomentum_1_1ProjectionConstraintT.html',1,'momentum']]],
+  ['projectionerrorfunctiont_22',['ProjectionErrorFunctionT',['../classmomentum_1_1ProjectionErrorFunctionT.html',1,'momentum']]]
 ];

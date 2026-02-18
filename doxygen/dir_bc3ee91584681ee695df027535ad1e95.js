@@ -2,6 +2,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
 [
     [ "aim_error_function.cpp", "aim__error__function_8cpp.html", null ],
     [ "aim_error_function.h", "aim__error__function_8h.html", "aim__error__function_8h" ],
+    [ "camera_projection_error_function.cpp", "camera__projection__error__function_8cpp.html", null ],
+    [ "camera_projection_error_function.h", "camera__projection__error__function_8h.html", "camera__projection__error__function_8h" ],
     [ "collision_error_function.cpp", "collision__error__function_8cpp.html", null ],
     [ "collision_error_function.h", "collision__error__function_8h.html", "collision__error__function_8h" ],
     [ "collision_error_function_stateless.cpp", "collision__error__function__stateless_8cpp.html", null ],

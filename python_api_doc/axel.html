@@ -58,6 +58,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.Auto"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.Auto</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.Centroid"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.Centroid</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.EarClipping"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.EarClipping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.SphericalCap"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.SphericalCap</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.__init__"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.name"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.value"><code class="docutils literal notranslate"><span class="pre">HoleFillingMethod.value</span></code></a></li>
@@ -237,16 +238,18 @@
 <p>Available methods:
 - Centroid: Add a centroid vertex and create fan triangles (default, best for SDF generation)
 - EarClipping: Use ear clipping without adding new vertices
-- Auto: Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger)</p>
+- Auto: Automatically choose based on hole size (centroid for ≤8 vertices, ear clipping for larger)
+- SphericalCap: Fill with a smooth hemispherical cap (produces smoother SDF gradients near cut boundaries)</p>
 <p>Members:</p>
 <blockquote>
 <div><p>Centroid : Add centroid vertex, create fan triangles</p>
 <p>EarClipping : Use ear clipping, no new vertices</p>
 <p>Auto : Auto-select based on hole size</p>
+<p>SphericalCap : Fill with smooth hemispherical cap</p>
 </div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.Auto">
-<span class="sig-name descname"><span class="pre">Auto</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.Auto:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.Auto" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Auto</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.Auto:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.Auto" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -257,6 +260,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.EarClipping">
 <span class="sig-name descname"><span class="pre">EarClipping</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.EarClipping:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.EarClipping" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.HoleFillingMethod.SphericalCap">
+<span class="sig-name descname"><span class="pre">SphericalCap</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;HoleFillingMethod.SphericalCap:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.axel.HoleFillingMethod.SphericalCap" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -770,7 +778,7 @@ triangles, which better preserves surface topology and reduces mesh artifacts.</
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.axel.fill_holes">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">fill_holes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">vertices:</span> <span class="pre">numpy.ndarray[numpy.float32],</span> <span class="pre">triangles:</span> <span class="pre">numpy.ndarray[numpy.int32],</span> <span class="pre">method:</span> <span class="pre">pymomentum.axel.HoleFillingMethod</span> <span class="pre">=</span> <span class="pre">&lt;HoleFillingMethod.Centroid:</span> <span class="pre">0&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.fill_holes" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">fill_holes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">vertices:</span> <span class="pre">numpy.ndarray[numpy.float32],</span> <span class="pre">triangles:</span> <span class="pre">numpy.ndarray[numpy.int32],</span> <span class="pre">method:</span> <span class="pre">pymomentum.axel.HoleFillingMethod</span> <span class="pre">=</span> <span class="pre">&lt;HoleFillingMethod.Centroid:</span> <span class="pre">0&gt;,</span> <span class="pre">cap_height_ratio:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.5</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.fill_holes" title="Link to this definition"></a></dt>
 <dd><p>Fill holes in a triangle mesh to create a watertight surface.</p>
 <p>This function identifies holes in the mesh and fills them with new triangles.
 The result is a complete mesh suitable for operations that require watertight
@@ -782,9 +790,14 @@ surfaces, such as SDF generation.</p>
 <li><p><strong>triangles</strong> – Triangle indices as 2D array of shape (M, 3) where M is number of triangles.
 Indices must be valid within the vertices array.</p></li>
 <li><p><strong>method</strong> – Hole filling method (default: Centroid). Options are:
-- HoleFillingMethod.Centroid: Add centroid vertex, create fan triangles (best quality)
-- HoleFillingMethod.EarClipping: Use ear clipping, no new vertices
-- HoleFillingMethod.Auto: Auto-select based on hole size</p></li>
+- <a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.Centroid" title="pymomentum.axel.HoleFillingMethod.Centroid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HoleFillingMethod.Centroid</span></code></a>: Add centroid vertex, create fan triangles (best quality)
+- <a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.EarClipping" title="pymomentum.axel.HoleFillingMethod.EarClipping"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HoleFillingMethod.EarClipping</span></code></a>: Use ear clipping, no new vertices
+- <a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.Auto" title="pymomentum.axel.HoleFillingMethod.Auto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HoleFillingMethod.Auto</span></code></a>: Auto-select based on hole size
+- <a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.SphericalCap" title="pymomentum.axel.HoleFillingMethod.SphericalCap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HoleFillingMethod.SphericalCap</span></code></a>: Fill with smooth hemispherical cap (smoother SDF gradients near cut boundaries)</p></li>
+<li><p><strong>cap_height_ratio</strong> – Controls how far the cap bulges outward for <a class="reference internal" href="#pymomentum.axel.HoleFillingMethod.SphericalCap" title="pymomentum.axel.HoleFillingMethod.SphericalCap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HoleFillingMethod.SphericalCap</span></code></a>.
+Expressed as a fraction of the hole radius (default: 0.5).
+0.0 produces a flat fill, 0.5 a half-hemisphere, 1.0 a full hemisphere.
+Ignored for other methods.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -815,6 +828,10 @@ Indices must be valid within the vertices array.</p></li>
 
 <span class="c1"># Use centroid method (default) for best triangle quality</span>
 <span class="n">filled_vertices</span><span class="p">,</span> <span class="n">filled_triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">)</span>
+
+<span class="c1"># Use spherical cap for smoother SDF gradients</span>
+<span class="n">filled_vertices</span><span class="p">,</span> <span class="n">filled_triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span>
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">axel</span><span class="o">.</span><span class="n">HoleFillingMethod</span><span class="o">.</span><span class="n">SphericalCap</span><span class="p">,</span> <span class="n">cap_height_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filled mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>

@@ -120,6 +120,7 @@ var hierarchy =
     [ "momentum::PositionConstraintT< T >", "structmomentum_1_1PositionConstraintT.html", null ],
     [ "momentum::ProgressBar", "classmomentum_1_1ProgressBar.html", null ],
     [ "momentum::ProjectionConstraintDataT< T >", "structmomentum_1_1ProjectionConstraintDataT.html", null ],
+    [ "momentum::ProjectionConstraintT< T >", "structmomentum_1_1ProjectionConstraintT.html", null ],
     [ "momentum::Random< Generator_ >", "classmomentum_1_1Random.html", null ],
     [ "momentum::AlignedAllocator< T, Alignment >::rebind< U >", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
     [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", null ],
@@ -163,6 +164,7 @@ var hierarchy =
       [ "momentum::ConstraintErrorFunctionT< T, PositionDataT< T > >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
         [ "momentum::PositionErrorFunctionT< T >", "classmomentum_1_1PositionErrorFunctionT.html", null ]
       ] ],
+      [ "momentum::CameraProjectionErrorFunctionT< T >", "classmomentum_1_1CameraProjectionErrorFunctionT.html", null ],
       [ "momentum::CollisionErrorFunctionStatelessT< T >", "classmomentum_1_1CollisionErrorFunctionStatelessT.html", null ],
       [ "momentum::CollisionErrorFunctionT< T >", "classmomentum_1_1CollisionErrorFunctionT.html", null ],
       [ "momentum::ConstraintErrorFunctionT< T, Data, FuncDim, NumVec, NumPos >", "classmomentum_1_1ConstraintErrorFunctionT.html", null ],
