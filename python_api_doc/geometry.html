@@ -460,6 +460,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.apply_parameter_transform"><code class="docutils literal notranslate"><span class="pre">apply_parameter_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.classify_triangles_by_texture"><code class="docutils literal notranslate"><span class="pre">classify_triangles_by_texture()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.compute_vertex_normals"><code class="docutils literal notranslate"><span class="pre">compute_vertex_normals()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.create_test_character"><code class="docutils literal notranslate"><span class="pre">create_test_character()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.create_test_mppca"><code class="docutils literal notranslate"><span class="pre">create_test_mppca()</span></code></a></li>
@@ -3686,6 +3687,41 @@ Output shape: […, numJoints * 7] if flatten=True, […, numJoints, 7] if flatt
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Numpy array containing joint parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.classify_triangles_by_texture">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">classify_triangles_by_texture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.classify_triangles_by_texture" title="Link to this definition"></a></dt>
+<dd><p>Classify mesh triangles into regions based on texture colors.</p>
+<p>This function samples texture colors at multiple points within each triangle
+and assigns triangles to regions based on the sampled colors. Uses parallel
+processing for high performance on large meshes (~100-500x faster than Python).</p>
+<p>The sampling strategy is deterministic and uses barycentric coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> containing texture coordinates and texture coordinate faces.
+Must have non-empty texcoords and texcoord_faces.</p></li>
+<li><p><strong>texture</strong> – RGB texture image as a numpy array with shape [height, width, 3] and dtype uint8.</p></li>
+<li><p><strong>region_colors</strong> – RGB colors for each region as a numpy array with shape [n_regions, 3]
+and dtype uint8. The array index corresponds to the region index.</p></li>
+<li><p><strong>threshold</strong> – Fraction of samples that must match for a triangle to be assigned
+to a region. 0.0 means &gt;= 1 sample must match (backward compatible),
+0.5 means &gt;= 50% must match, 1.0 means all samples must match.</p></li>
+<li><p><strong>num_samples</strong> – Number of sample points per triangle. Valid values:
+- 1: Centroid only
+- 3: 3 vertices (backward compatible with Python implementation)
+- 4: Centroid + 3 vertices
+- 6: 3 vertices + 3 edge midpoints
+- 7: Centroid + 3 vertices + 3 edge midpoints
+- 10: 7 + 3 interior points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of sorted triangle index lists, one per region. The outer list index
+corresponds to the region index in region_colors.</p>
 </dd>
 </dl>
 </dd></dl>
