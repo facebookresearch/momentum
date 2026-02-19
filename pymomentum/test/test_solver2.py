@@ -1264,6 +1264,115 @@ class TestSolver(unittest.TestCase):
         projection_error_function.clear_constraints()
         self.assertTrue(len(projection_error_function.constraints) == 0)
 
+    def test_camera_projection_constraint(self) -> None:
+        """Test CameraProjectionErrorFunction moves a joint to match a target 2D pixel."""
+        import pymomentum.camera as pym_camera
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+
+        # Set up a pinhole camera with known intrinsics
+        fx, fy = 500.0, 500.0
+        cx, cy = 320.0, 240.0
+        intrinsics = pym_camera.PinholeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=fx,
+            fy=fy,
+            cx=cx,
+            cy=cy,
+        )
+
+        # Place the camera looking down the +Z axis with a translation offset
+        # so the skeleton (near origin) is in front of the camera.
+        eye_from_world = np.eye(4, dtype=np.float32)
+        eye_from_world[2, 3] = 5.0  # translate points +5 in Z in eye space
+
+        # Create the error function with a static camera (camera_parent=None)
+        cam_proj = pym_solver2.CameraProjectionErrorFunction(
+            character,
+            intrinsics,
+            camera_offset=eye_from_world,
+            weight=1.0,
+        )
+
+        # Target pixel: slightly off-center
+        target_2d = np.array([400.0, 300.0], dtype=np.float32)
+
+        # Add constraint on the last joint
+        parent_idx: int = character.skeleton.size - 1
+        cam_proj.add_constraint(
+            parent=parent_idx,
+            target=target_2d,
+            weight=1.0,
+        )
+
+        self.assertEqual(cam_proj.num_constraints(), 1)
+
+        # Create solver and run
+        model_params_init = np.zeros(n_params, dtype=np.float32)
+        solver_function = pym_solver2.SkeletonSolverFunction(character, [cam_proj])
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 100
+        solver_options.regularization = 1e-5
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+        model_params_final = solver.solve(model_params_init)
+
+        # Get the final world-space position of the constrained joint
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
+        )
+        final_pos = skel_state_final[parent_idx, :3]
+
+        # Project the final position through the camera to get the pixel coordinates
+        # Transform to eye space: p_eye = eye_from_world @ [p_world; 1]
+        p_eye = eye_from_world[:3, :3] @ final_pos + eye_from_world[:3, 3]
+
+        # Pinhole projection: u = fx * X/Z + cx, v = fy * Y/Z + cy
+        projected_u = fx * p_eye[0] / p_eye[2] + cx
+        projected_v = fy * p_eye[1] / p_eye[2] + cy
+        projected_2d = np.array([projected_u, projected_v])
+
+        np.testing.assert_allclose(
+            projected_2d,
+            target_2d,
+            atol=0.5,
+            err_msg=f"Projected pixel {projected_2d} does not match target {target_2d}",
+        )
+
+        # Verify constraints property and clear
+        constraints = cam_proj.constraints
+        self.assertEqual(len(constraints), 1)
+        self.assertEqual(constraints[0].parent, parent_idx)
+        np.testing.assert_allclose(constraints[0].target, target_2d)
+
+        cam_proj.clear_constraints()
+        self.assertEqual(cam_proj.num_constraints(), 0)
+
+        # Test the Camera-based constructor: should produce the same result
+        camera = pym_camera.Camera(intrinsics, eye_from_world)
+        cam_proj2 = pym_solver2.CameraProjectionErrorFunction(
+            character,
+            camera,
+            weight=1.0,
+        )
+        cam_proj2.add_constraint(
+            parent=parent_idx,
+            target=target_2d,
+            weight=1.0,
+        )
+        solver_function2 = pym_solver2.SkeletonSolverFunction(character, [cam_proj2])
+        solver2 = pym_solver2.GaussNewtonSolver(solver_function2, solver_options)
+        model_params_final2 = solver2.solve(model_params_init)
+
+        np.testing.assert_allclose(
+            model_params_final2,
+            model_params_final,
+            atol=1e-5,
+            err_msg="Camera constructor should produce the same result as intrinsics+offset",
+        )
+
     def test_vertex_projection_constraint(self) -> None:
         """Test VertexProjectionErrorFunction to ensure a 3D vertex projects to a target 2D point."""
 
