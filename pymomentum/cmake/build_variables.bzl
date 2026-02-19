@@ -187,12 +187,14 @@ solver_sources = [
 ]
 
 solver2_public_headers = [
+    "solver2/solver2_camera_intrinsics.h",
     "solver2/solver2_error_functions.h",
     "solver2/solver2_sequence_error_functions.h",
     "solver2/solver2_utility.h",
 ]
 
 solver2_sources = [
+    "solver2/solver2_camera_intrinsics.cpp",
     "solver2/solver2_error_functions.cpp",
     "solver2/solver2_pybind.cpp",
     "solver2/solver2_sequence_error_functions.cpp",

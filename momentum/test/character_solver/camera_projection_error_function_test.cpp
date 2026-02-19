@@ -12,11 +12,14 @@
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character_solver/camera_intrinsics_parameters.h"
 #include "momentum/character_solver/camera_projection_error_function.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/random.h"
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/character_solver/error_function_helpers.h"
+
+#include <set>
 
 using namespace momentum;
 
@@ -140,4 +143,271 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, CameraProjectionError_GradientsAndJacobi
     const double error = errorFunction.getError(modelParams, skelState, MeshStateT<T>());
     EXPECT_NEAR(error, 0.0, Eps<T>(1e-10f, 1e-15));
   }
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, CameraProjectionError_IntrinsicsOptimization) {
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter();
+  const Skeleton& skeleton = baseCharacter.skeleton;
+
+  // Create a float-based model for addCameraIntrinsicsParameters (which takes IntrinsicsModel)
+  auto intrinsicsF = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f);
+  intrinsicsF->setName("cam0");
+
+  // Augment the parameter transform with intrinsics parameters
+  auto ptAndPl = addCameraIntrinsicsParameters(
+      baseCharacter.parameterTransform, baseCharacter.parameterLimits, *intrinsicsF);
+  const auto& pt = std::get<0>(ptAndPl);
+  const auto& pl = std::get<1>(ptAndPl);
+  const Character character(skeleton, pt, pl);
+
+  // Create the T-typed intrinsics model for the error function
+  auto intrinsics = std::make_shared<PinholeIntrinsicsModelT<T>>(640, 480, T(500), T(500));
+  intrinsics->setName("cam0");
+
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // Helper to set intrinsics parameters in model params to their current intrinsics values
+  const auto paramNames = intrinsics->getParameterNames();
+  auto setIntrinsicsParams = [&](ModelParametersT<T>& params) {
+    const auto intrinsicValues = intrinsics->getIntrinsicParameters();
+    for (size_t i = 0; i < paramNames.size(); ++i) {
+      const auto idx =
+          pt.getParameterIdByName(std::string(kIntrinsicsParamPrefix) + "cam0_" + paramNames[i]);
+      params(idx) = T(intrinsicValues(static_cast<Eigen::Index>(i)));
+    }
+  };
+
+  // Static camera at z=10 looking at origin — skeleton joints will be in front of camera.
+  // The intrinsics gradient is independent of camera parenting (that's tested separately in
+  // CameraProjectionError_GradientsAndJacobians); what matters here is that intrinsics
+  // derivatives are correct.
+  Eigen::Transform<T, 3, Eigen::Affine> cameraOffset =
+      Eigen::Transform<T, 3, Eigen::Affine>::Identity();
+  cameraOffset.translation() = Eigen::Vector3<T>(0, 0, T(10));
+
+  CameraProjectionErrorFunctionT<T> errorFunction(
+      skeleton, character.parameterTransform, intrinsics, kInvalidIndex, cameraOffset);
+
+  // Use small offsets so points stay near skeleton joints (and thus project inside the image)
+  for (int i = 0; i < 5; ++i) {
+    errorFunction.addConstraint(
+        ProjectionConstraintT<T>{
+            uniform<size_t>(0, skeleton.joints.size() - 1),
+            normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones() * T(0.1)),
+            uniform<T>(0.1, 2.0),
+            normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones() * T(100))});
+  }
+
+  ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  setIntrinsicsParams(params);
+
+  // Verify error is non-zero to confirm the test is non-trivial
+  {
+    const SkeletonStateT<T> state(transform.apply(params), skeleton);
+    const double err = errorFunction.getError(params, state, MeshStateT<T>());
+    EXPECT_GT(err, 0.0) << "Error should be non-zero to validate gradient test is meaningful";
+  }
+
+  TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, params, character, Eps<T>(5e-2f, 5e-3));
+
+  for (size_t i = 0; i < 10; i++) {
+    ModelParametersT<T> parameters =
+        uniform<VectorX<T>>(transform.numAllModelParameters(), 0.0f, 1.0f);
+    setIntrinsicsParams(parameters);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T, &errorFunction, parameters, character, Eps<T>(1e-1f, 5e-3), Eps<T>(1e-5f, 1e-6));
+  }
+}
+
+// ---- Tests for getParameterNames() and IntrinsicsModel name ----
+
+TEST(CameraIntrinsicsParameters, GetParameterNames) {
+  // Pinhole: 4 params
+  {
+    auto model = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f);
+    const auto names = model->getParameterNames();
+    ASSERT_EQ(names.size(), 4);
+    EXPECT_EQ(names[0], "fx");
+    EXPECT_EQ(names[1], "fy");
+    EXPECT_EQ(names[2], "cx");
+    EXPECT_EQ(names[3], "cy");
+  }
+
+  // OpenCV Fisheye: 8 params
+  {
+    auto model =
+        std::make_shared<OpenCVFisheyeIntrinsicsModel>(640, 480, 500.0f, 500.0f, 320.0f, 240.0f);
+    const auto names = model->getParameterNames();
+    ASSERT_EQ(names.size(), 8);
+    EXPECT_EQ(names[0], "fx");
+    EXPECT_EQ(names[4], "k1");
+    EXPECT_EQ(names[7], "k4");
+  }
+
+  // OpenCV: 14 params
+  {
+    auto model = std::make_shared<OpenCVIntrinsicsModel>(640, 480, 500.0f, 500.0f, 320.0f, 240.0f);
+    const auto names = model->getParameterNames();
+    ASSERT_EQ(names.size(), 14);
+    EXPECT_EQ(names[0], "fx");
+    EXPECT_EQ(names[4], "k1");
+    EXPECT_EQ(names[10], "p1");
+    EXPECT_EQ(names[13], "p4");
+  }
+}
+
+TEST(CameraIntrinsicsParameters, AddCameraIntrinsicsParameters_Pinhole) {
+  const Character character = createTestCharacter();
+  auto intrinsics = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f);
+  intrinsics->setName("cam0");
+
+  const auto origSize = character.parameterTransform.name.size();
+
+  auto [pt, pl] = addCameraIntrinsicsParameters(
+      character.parameterTransform, character.parameterLimits, *intrinsics);
+
+  // Should have added 4 params (fx, fy, cx, cy)
+  EXPECT_EQ(pt.name.size(), origSize + 4);
+  EXPECT_EQ(pt.name[origSize], "intrinsics_cam0_fx");
+  EXPECT_EQ(pt.name[origSize + 1], "intrinsics_cam0_fy");
+  EXPECT_EQ(pt.name[origSize + 2], "intrinsics_cam0_cx");
+  EXPECT_EQ(pt.name[origSize + 3], "intrinsics_cam0_cy");
+
+  // Transform matrix should have grown
+  EXPECT_EQ(pt.transform.cols(), static_cast<Eigen::Index>(pt.name.size()));
+
+  // Named parameter set should exist
+  EXPECT_TRUE(pt.parameterSets.count("intrinsics_cam0") > 0);
+
+  // Verify clone preserves name (guards against forgetting setName in clone())
+  auto cloned = intrinsics->clone();
+  EXPECT_EQ(cloned->name(), "cam0");
+}
+
+TEST(CameraIntrinsicsParameters, AddCameraIntrinsicsParameters_Idempotent) {
+  const Character character = createTestCharacter();
+  auto intrinsics = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f);
+  intrinsics->setName("cam0");
+
+  auto [pt1, pl1] = addCameraIntrinsicsParameters(
+      character.parameterTransform, character.parameterLimits, *intrinsics);
+
+  // Call again — should not duplicate
+  auto [pt2, pl2] = addCameraIntrinsicsParameters(pt1, pl1, *intrinsics);
+
+  EXPECT_EQ(pt1.name.size(), pt2.name.size());
+  EXPECT_EQ(pt1.transform.cols(), pt2.transform.cols());
+}
+
+TEST(CameraIntrinsicsParameters, AddCameraIntrinsicsParameters_MultipleCameras) {
+  const Character character = createTestCharacter();
+  auto intrinsics0 = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f);
+  intrinsics0->setName("cam0");
+
+  auto intrinsics1 =
+      std::make_shared<OpenCVFisheyeIntrinsicsModel>(640, 480, 500.0f, 500.0f, 320.0f, 240.0f);
+  intrinsics1->setName("cam1");
+
+  const auto origSize = character.parameterTransform.name.size();
+
+  auto [pt1, pl1] = addCameraIntrinsicsParameters(
+      character.parameterTransform, character.parameterLimits, *intrinsics0);
+  auto [pt2, pl2] = addCameraIntrinsicsParameters(pt1, pl1, *intrinsics1);
+
+  // cam0 has 4 params, cam1 has 8 params
+  EXPECT_EQ(pt2.name.size(), origSize + 4 + 8);
+
+  // Verify all params are distinct
+  std::set<std::string> allNames(pt2.name.begin(), pt2.name.end());
+  EXPECT_EQ(allNames.size(), pt2.name.size());
+
+  // Per-camera lookup returns correct count
+  EXPECT_EQ(getCameraIntrinsicsParameterSet(pt2, "cam0").count(), 4);
+  EXPECT_EQ(getCameraIntrinsicsParameterSet(pt2, "cam1").count(), 8);
+  EXPECT_EQ(getCameraIntrinsicsParameterSet(pt2, "nonexistent").count(), 0);
+
+  // All-cameras lookup returns union
+  EXPECT_EQ(getAllCameraIntrinsicsParameterSet(pt2).count(), 4 + 8);
+}
+
+TEST(CameraIntrinsicsParameters, ExtractAndSetCameraIntrinsics) {
+  const Character character = createTestCharacter();
+  auto intrinsics =
+      std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f, 320.0f, 240.0f);
+  intrinsics->setName("cam0");
+
+  auto [pt, pl] = addCameraIntrinsicsParameters(
+      character.parameterTransform, character.parameterLimits, *intrinsics);
+
+  // setCameraIntrinsics: write intrinsics model values into model parameters
+  ModelParameters modelParams = ModelParameters::Zero(pt.numAllModelParameters());
+  setCameraIntrinsics(pt, *intrinsics, modelParams);
+
+  // The pinhole params should now be (500, 500, 320, 240) at the right indices
+  const auto fxIdx = pt.getParameterIdByName("intrinsics_cam0_fx");
+  const auto fyIdx = pt.getParameterIdByName("intrinsics_cam0_fy");
+  const auto cxIdx = pt.getParameterIdByName("intrinsics_cam0_cx");
+  const auto cyIdx = pt.getParameterIdByName("intrinsics_cam0_cy");
+  EXPECT_FLOAT_EQ(modelParams(fxIdx), 500.0f);
+  EXPECT_FLOAT_EQ(modelParams(fyIdx), 500.0f);
+  EXPECT_FLOAT_EQ(modelParams(cxIdx), 320.0f);
+  EXPECT_FLOAT_EQ(modelParams(cyIdx), 240.0f);
+
+  // Modify model parameters and extract back
+  modelParams(fxIdx) = 600.0f;
+  modelParams(cyIdx) = 250.0f;
+
+  const auto extracted = extractCameraIntrinsics(pt, modelParams, *intrinsics);
+  ASSERT_EQ(extracted.size(), 4);
+  EXPECT_FLOAT_EQ(extracted(0), 600.0f); // fx — modified
+  EXPECT_FLOAT_EQ(extracted(1), 500.0f); // fy — unchanged
+  EXPECT_FLOAT_EQ(extracted(2), 320.0f); // cx — unchanged
+  EXPECT_FLOAT_EQ(extracted(3), 250.0f); // cy — modified
+
+  // Apply extracted values to a cloned model and verify round-trip
+  auto cloned = intrinsics->clone();
+  cloned->setIntrinsicParameters(extracted);
+  EXPECT_FLOAT_EQ(cloned->fx(), 600.0f);
+}
+
+TEST(CameraIntrinsicsParameters, ExtractCameraIntrinsics_MissingParams) {
+  const Character character = createTestCharacter();
+  auto intrinsics =
+      std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f, 320.0f, 240.0f);
+  intrinsics->setName("cam0");
+
+  auto [pt, pl] = addCameraIntrinsicsParameters(
+      character.parameterTransform, character.parameterLimits, *intrinsics);
+
+  // Downselect to only include fx and cy (simulating a user restricting the parameter set)
+  ParameterSet subset;
+  // Keep all non-intrinsics params
+  for (size_t i = 0; i < pt.name.size(); ++i) {
+    if (pt.name[i].substr(0, std::string(kIntrinsicsParamPrefix).size()) !=
+        std::string(kIntrinsicsParamPrefix)) {
+      subset.set(i);
+    }
+  }
+  // Also keep fx and cy
+  subset.set(pt.getParameterIdByName("intrinsics_cam0_fx"));
+  subset.set(pt.getParameterIdByName("intrinsics_cam0_cy"));
+
+  auto [ptSubset, plSubset] = subsetParameterTransform(pt, pl, subset);
+
+  // Set fx=600 in the reduced model parameters
+  ModelParameters modelParams = ModelParameters::Zero(ptSubset.numAllModelParameters());
+  const auto fxIdx = ptSubset.getParameterIdByName("intrinsics_cam0_fx");
+  modelParams(fxIdx) = 600.0f;
+  const auto cyIdx = ptSubset.getParameterIdByName("intrinsics_cam0_cy");
+  modelParams(cyIdx) = 250.0f;
+
+  // Extract: fx and cy come from modelParams, fy and cx fall back to intrinsics model defaults
+  const auto extracted = extractCameraIntrinsics(ptSubset, modelParams, *intrinsics);
+  ASSERT_EQ(extracted.size(), 4);
+  EXPECT_FLOAT_EQ(extracted(0), 600.0f); // fx — from modelParams
+  EXPECT_FLOAT_EQ(extracted(1), 500.0f); // fy — fallback to model default
+  EXPECT_FLOAT_EQ(extracted(2), 320.0f); // cx — fallback to model default
+  EXPECT_FLOAT_EQ(extracted(3), 250.0f); // cy — from modelParams
 }

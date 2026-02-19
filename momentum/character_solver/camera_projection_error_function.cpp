@@ -22,7 +22,14 @@ CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
     : SkeletonErrorFunctionT<T>(skel, pt),
       intrinsicsModel_(std::move(intrinsicsModel)),
       cameraParent_(cameraParent),
-      cameraOffset_(cameraOffset) {}
+      cameraOffset_(cameraOffset) {
+  if (!intrinsicsModel_->name().empty()) {
+    CameraIntrinsicsMapping<T> mapping(pt, *intrinsicsModel_);
+    if (mapping.hasActiveParams()) {
+      intrinsicsMapping_.emplace(std::move(mapping));
+    }
+  }
+}
 
 template <typename T>
 CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
@@ -33,7 +40,14 @@ CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
     : SkeletonErrorFunctionT<T>(skel, pt),
       intrinsicsModel_(camera.intrinsicsModel()),
       cameraParent_(cameraParent),
-      cameraOffset_(camera.eyeFromWorld()) {}
+      cameraOffset_(camera.eyeFromWorld()) {
+  if (!intrinsicsModel_->name().empty()) {
+    CameraIntrinsicsMapping<T> mapping(pt, *intrinsicsModel_);
+    if (mapping.hasActiveParams()) {
+      intrinsicsMapping_.emplace(std::move(mapping));
+    }
+  }
+}
 
 template <typename T>
 void CameraProjectionErrorFunctionT<T>::addConstraint(const ProjectionConstraintT<T>& constraint) {
@@ -42,10 +56,14 @@ void CameraProjectionErrorFunctionT<T>::addConstraint(const ProjectionConstraint
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& /*params*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/) {
   double error = 0;
+
+  // If intrinsics are being optimized, update from current model parameters
+  const auto& intrinsics =
+      intrinsicsMapping_ ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -68,7 +86,7 @@ double CameraProjectionErrorFunctionT<T>::getError(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics
-    const auto [projected, valid] = intrinsicsModel_->project(p_eye);
+    const auto [projected, valid] = intrinsics.project(p_eye);
     if (!valid) {
       continue;
     }
@@ -82,11 +100,15 @@ double CameraProjectionErrorFunctionT<T>::getError(
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getGradient(
-    const ModelParametersT<T>& /*params*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
+
+  // If intrinsics are being optimized, update from current model parameters
+  const auto& intrinsics =
+      intrinsicsMapping_ ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -110,7 +132,7 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics with Jacobian
-    const auto [projected, J_eye_3x3, valid] = intrinsicsModel_->projectJacobian(p_eye);
+    const auto [projected, J_eye_3x3, valid] = intrinsics.projectJacobian(p_eye);
     if (!valid) {
       continue;
     }
@@ -134,10 +156,17 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
       }
     };
 
+    // For joints that are ancestors of both the constraint point and the camera,
+    // the Walk 1 (+) and Walk 2 (-) contributions cancel exactly (same lever arm,
+    // opposite signs). We skip them by stopping both walks at the LCA.
+    // For static cameras (kInvalidIndex), commonAncestor returns kInvalidIndex,
+    // so the walks naturally go all the way to the root.
+    const size_t lca = this->skeleton_.commonAncestor(cons.parent, cameraParent_);
+
     // Walk 1: Constraint-point parent chain (positive sign)
     {
       size_t jointIndex = cons.parent;
-      while (jointIndex != kInvalidIndex) {
+      while (jointIndex != lca) {
         const auto& js = jointState[jointIndex];
         const size_t paramIndex = jointIndex * kParametersPerJoint;
         const Eigen::Vector3<T> posd = p_world - js.translation();
@@ -166,7 +195,7 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
     // w.r.t. q through eyeFromWorld.
     if (cameraParent_ != kInvalidIndex) {
       size_t jointIndex = cameraParent_;
-      while (jointIndex != kInvalidIndex) {
+      while (jointIndex != lca) {
         const auto& js = jointState[jointIndex];
         const size_t paramIndex = jointIndex * kParametersPerJoint;
         const Eigen::Vector3<T> posd = p_world - js.translation();
@@ -189,6 +218,14 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
         jointIndex = this->skeleton_.joints[jointIndex].parent;
       }
     }
+
+    // Intrinsics parameters gradient
+    if (intrinsicsMapping_) {
+      const auto [projected_i, J_intrinsics, valid_i] = intrinsics.projectIntrinsicsJacobian(p_eye);
+      if (valid_i) {
+        intrinsicsMapping_->addGradient(J_intrinsics, residual, wgt, gradient);
+      }
+    }
   }
 
   return error;
@@ -196,13 +233,17 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getJacobian(
-    const ModelParametersT<T>& /*params*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
   double error = 0;
+
+  // If intrinsics are being optimized, update from current model parameters
+  const auto& intrinsics =
+      intrinsicsMapping_ ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -226,7 +267,7 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics with Jacobian
-    const auto [projected, J_eye_3x3, valid] = intrinsicsModel_->projectJacobian(p_eye);
+    const auto [projected, J_eye_3x3, valid] = intrinsics.projectJacobian(p_eye);
     if (!valid) {
       continue;
     }
@@ -251,10 +292,15 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
       }
     };
 
+    // For joints that are ancestors of both the constraint point and the camera,
+    // the Walk 1 (+) and Walk 2 (-) contributions cancel exactly (same lever arm,
+    // opposite signs). We skip them by stopping both walks at the LCA.
+    const size_t lca = this->skeleton_.commonAncestor(cons.parent, cameraParent_);
+
     // Walk 1: Constraint-point parent chain (positive sign)
     {
       size_t jointIndex = cons.parent;
-      while (jointIndex != kInvalidIndex) {
+      while (jointIndex != lca) {
         const auto& js = jointState[jointIndex];
         const size_t paramIndex = jointIndex * kParametersPerJoint;
         const Eigen::Vector3<T> posd = p_world - js.translation();
@@ -283,7 +329,7 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
     // w.r.t. q through eyeFromWorld.
     if (cameraParent_ != kInvalidIndex) {
       size_t jointIndex = cameraParent_;
-      while (jointIndex != kInvalidIndex) {
+      while (jointIndex != lca) {
         const auto& js = jointState[jointIndex];
         const size_t paramIndex = jointIndex * kParametersPerJoint;
         const Eigen::Vector3<T> posd = p_world - js.translation();
@@ -304,6 +350,14 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
         }
 
         jointIndex = this->skeleton_.joints[jointIndex].parent;
+      }
+    }
+
+    // Intrinsics parameters Jacobian
+    if (intrinsicsMapping_) {
+      const auto [projected_i, J_intrinsics, valid_i] = intrinsics.projectIntrinsicsJacobian(p_eye);
+      if (valid_i) {
+        intrinsicsMapping_->addJacobian(J_intrinsics, wgt, 2 * iCons, jacobian);
       }
     }
   }

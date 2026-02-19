@@ -230,8 +230,15 @@ void PinholeIntrinsicsModelT<T>::setIntrinsicParameters(
 
 template <typename T>
 std::shared_ptr<IntrinsicsModelT<T>> PinholeIntrinsicsModelT<T>::clone() const {
-  return std::make_shared<PinholeIntrinsicsModelT<T>>(
+  auto result = std::make_shared<PinholeIntrinsicsModelT<T>>(
       this->imageWidth(), this->imageHeight(), fx_, fy_, cx_, cy_);
+  result->setName(this->name());
+  return result;
+}
+
+template <typename T>
+std::vector<std::string> PinholeIntrinsicsModelT<T>::getParameterNames() const {
+  return {"fx", "fy", "cx", "cy"};
 }
 
 template <typename T>
@@ -618,8 +625,15 @@ void OpenCVIntrinsicsModelT<T>::setIntrinsicParameters(
 
 template <typename T>
 std::shared_ptr<IntrinsicsModelT<T>> OpenCVIntrinsicsModelT<T>::clone() const {
-  return std::make_shared<OpenCVIntrinsicsModelT<T>>(
+  auto result = std::make_shared<OpenCVIntrinsicsModelT<T>>(
       this->imageWidth(), this->imageHeight(), fx_, fy_, cx_, cy_, distortionParams_);
+  result->setName(this->name());
+  return result;
+}
+
+template <typename T>
+std::vector<std::string> OpenCVIntrinsicsModelT<T>::getParameterNames() const {
+  return {"fx", "fy", "cx", "cy", "k1", "k2", "k3", "k4", "k5", "k6", "p1", "p2", "p3", "p4"};
 }
 
 template <typename T>
@@ -1131,8 +1145,15 @@ void OpenCVFisheyeIntrinsicsModelT<T>::setIntrinsicParameters(
 
 template <typename T>
 std::shared_ptr<IntrinsicsModelT<T>> OpenCVFisheyeIntrinsicsModelT<T>::clone() const {
-  return std::make_shared<OpenCVFisheyeIntrinsicsModelT<T>>(
+  auto result = std::make_shared<OpenCVFisheyeIntrinsicsModelT<T>>(
       this->imageWidth(), this->imageHeight(), fx_, fy_, cx_, cy_, distortionParams_);
+  result->setName(this->name());
+  return result;
+}
+
+template <typename T>
+std::vector<std::string> OpenCVFisheyeIntrinsicsModelT<T>::getParameterNames() const {
+  return {"fx", "fy", "cx", "cy", "k1", "k2", "k3", "k4"};
 }
 
 template <typename T>
