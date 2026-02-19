@@ -267,6 +267,7 @@ mt_python_binding(
     ${ATEN_INCLUDE_DIR}
     ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
+    camera
     character
     character_solver
     character_sequence_solver
@@ -312,17 +313,17 @@ mt_python_binding(
     ${TORCH_CXX_FLAGS}
 )
 
-if(MOMENTUM_BUILD_RENDERER)
-  mt_python_binding(
-    NAME pymomentum_camera
-    MODULE_NAME camera
-    PYMOMENTUM_HEADERS_VARS camera_public_headers
-    PYMOMENTUM_SOURCES_VARS camera_sources
-    LINK_LIBRARIES
-      camera
-      rasterizer
-  )
+mt_python_binding(
+  NAME pymomentum_camera
+  MODULE_NAME camera
+  PYMOMENTUM_HEADERS_VARS camera_public_headers
+  PYMOMENTUM_SOURCES_VARS camera_sources
+  LINK_LIBRARIES
+    camera
+    fmt::fmt-header-only
+)
 
+if(MOMENTUM_BUILD_RENDERER)
   mt_python_binding(
     NAME renderer
     PYMOMENTUM_HEADERS_VARS renderer_public_headers

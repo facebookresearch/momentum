@@ -6,7 +6,7 @@
  */
 
 #include <momentum/camera/camera.h>
-#include <momentum/rasterizer/rasterizer.h>
+#include <momentum/simd/simd.h>
 
 #include <fmt/format.h>
 #include <pybind11/eigen.h>
@@ -101,20 +101,17 @@ The returned model is mutable and can be modified for optimization purposes.
             auto res_acc = result.mutable_unchecked<2>();
             auto pts_acc = points.unchecked<2>();
 
-            for (py::ssize_t i = 0; i < points.shape(0);
-                 i += momentum::rasterizer::kSimdPacketSize) {
-              momentum::rasterizer::FloatP px, py, pz;
+            for (py::ssize_t i = 0; i < points.shape(0); i += momentum::kSimdPacketSize) {
+              momentum::FloatP px, py, pz;
               auto nPtsCur = std::min(
-                  static_cast<py::ssize_t>(momentum::rasterizer::kSimdPacketSize),
-                  points.shape(0) - i);
+                  static_cast<py::ssize_t>(momentum::kSimdPacketSize), points.shape(0) - i);
               for (py::ssize_t k = 0; k < nPtsCur; ++k) {
                 px[k] = pts_acc(i + k, 0);
                 py[k] = pts_acc(i + k, 1);
                 pz[k] = pts_acc(i + k, 2);
               }
 
-              const auto [res, valid] =
-                  intrinsics.project(momentum::rasterizer::Vector3fP(px, py, pz));
+              const auto [res, valid] = intrinsics.project(momentum::Vector3fP(px, py, pz));
 
               for (py::ssize_t k = 0; k < nPtsCur; ++k) {
                 res_acc(i + k, 0) = res.x()[k];

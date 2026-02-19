@@ -23,3 +23,20 @@ exclude_patterns = [
 ]
 
 html_theme = "sphinx_rtd_theme"
+
+
+def skip_pycapsule(app, what, name, obj, skip, options):
+    """Skip PyCapsule members to avoid RST warnings from their docstrings.
+
+    PyCapsule is an internal CPython/pybind11 type used for cross-module type
+    sharing. Its __init__ docstring contains '*' characters that trigger RST
+    parsing warnings. exclude-members only hides it from output but doesn't
+    prevent docstring parsing; this event fires earlier and skips it entirely.
+    """
+    if name == "PyCapsule":
+        return True
+    return skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip_pycapsule)

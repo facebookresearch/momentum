@@ -117,6 +117,7 @@ PYBIND11_MODULE(solver2, m) {
 
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
+  pybind11::module_::import("pymomentum.camera"); // @dep=fbsource//arvr/libraries/pymomentum:camera
 
   // Error functions:
   py::class_<mm::SkeletonErrorFunction, std::shared_ptr<mm::SkeletonErrorFunction>>(
