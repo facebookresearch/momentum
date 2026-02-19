@@ -267,6 +267,7 @@ mt_python_binding(
     ${ATEN_INCLUDE_DIR}
     ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
+    array_utility
     camera
     character
     character_solver

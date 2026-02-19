@@ -533,6 +533,51 @@ class TestCamera(unittest.TestCase):
         # Depth should be unchanged
         np.testing.assert_allclose(crop_proj[:, 2], orig_proj[:, 2], atol=1e-5)
 
+    def test_intrinsics_model_name_and_parameter_names(self) -> None:
+        """Test name property, clone preserving name, and parameter_names for all model types."""
+        # Name property
+        pinhole = pym_camera.PinholeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+        )
+        self.assertEqual(pinhole.name, "")
+        pinhole.name = "cam0"
+        self.assertEqual(pinhole.clone().name, "cam0")
+
+        # parameter_names for each model type
+        self.assertEqual(
+            pinhole.parameter_names,
+            ["fx", "fy", "cx", "cy"],
+        )
+
+        opencv = pym_camera.OpenCVIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+            cx=320.0,
+            cy=240.0,
+        )
+        self.assertEqual(len(opencv.parameter_names), 14)
+        self.assertEqual(opencv.parameter_names[:4], ["fx", "fy", "cx", "cy"])
+        self.assertEqual(
+            opencv.parameter_names[4:10], ["k1", "k2", "k3", "k4", "k5", "k6"]
+        )
+        self.assertEqual(opencv.parameter_names[10:14], ["p1", "p2", "p3", "p4"])
+
+        fisheye = pym_camera.OpenCVFisheyeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+        )
+        self.assertEqual(
+            fisheye.parameter_names,
+            ["fx", "fy", "cx", "cy", "k1", "k2", "k3", "k4"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

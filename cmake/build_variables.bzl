@@ -233,6 +233,7 @@ character_test_sources = [
 
 character_solver_public_headers = [
     "character_solver/aim_error_function.h",
+    "character_solver/camera_intrinsics_parameters.h",
     "character_solver/camera_projection_error_function.h",
     "character_solver/collision_error_function.h",
     "character_solver/collision_error_function_stateless.h",
@@ -271,6 +272,7 @@ character_solver_public_headers = [
 
 character_solver_sources = [
     "character_solver/aim_error_function.cpp",
+    "character_solver/camera_intrinsics_parameters.cpp",
     "character_solver/camera_projection_error_function.cpp",
     "character_solver/collision_error_function.cpp",
     "character_solver/collision_error_function_stateless.cpp",
