@@ -145,6 +145,82 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, CameraProjectionError_GradientsAndJacobi
   }
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, CameraProjectionError_IntrinsicsOptimization) {
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter();
+  const Skeleton& skeleton = baseCharacter.skeleton;
+
+  // Create a float-based model for addCameraIntrinsicsParameters (which takes IntrinsicsModel)
+  auto intrinsicsF = std::make_shared<PinholeIntrinsicsModel>(640, 480, 500.0f, 500.0f);
+  intrinsicsF->setName("cam0");
+
+  // Augment the parameter transform with intrinsics parameters
+  auto ptAndPl = addCameraIntrinsicsParameters(
+      baseCharacter.parameterTransform, baseCharacter.parameterLimits, *intrinsicsF);
+  const auto& pt = std::get<0>(ptAndPl);
+  const auto& pl = std::get<1>(ptAndPl);
+  const Character character(skeleton, pt, pl);
+
+  // Create the T-typed intrinsics model for the error function
+  auto intrinsics = std::make_shared<PinholeIntrinsicsModelT<T>>(640, 480, T(500), T(500));
+  intrinsics->setName("cam0");
+
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // Helper to set intrinsics parameters in model params to their current intrinsics values
+  const auto paramNames = intrinsics->getParameterNames();
+  auto setIntrinsicsParams = [&](ModelParametersT<T>& params) {
+    const auto intrinsicValues = intrinsics->getIntrinsicParameters();
+    for (size_t i = 0; i < paramNames.size(); ++i) {
+      const auto idx =
+          pt.getParameterIdByName(std::string(kIntrinsicsParamPrefix) + "cam0_" + paramNames[i]);
+      params(idx) = T(intrinsicValues(static_cast<Eigen::Index>(i)));
+    }
+  };
+
+  // Static camera at z=10 looking at origin — skeleton joints will be in front of camera.
+  // The intrinsics gradient is independent of camera parenting (that's tested separately in
+  // CameraProjectionError_GradientsAndJacobians); what matters here is that intrinsics
+  // derivatives are correct.
+  Eigen::Transform<T, 3, Eigen::Affine> cameraOffset =
+      Eigen::Transform<T, 3, Eigen::Affine>::Identity();
+  cameraOffset.translation() = Eigen::Vector3<T>(0, 0, T(10));
+
+  CameraProjectionErrorFunctionT<T> errorFunction(
+      skeleton, character.parameterTransform, intrinsics, kInvalidIndex, cameraOffset);
+
+  // Use small offsets so points stay near skeleton joints (and thus project inside the image)
+  for (int i = 0; i < 5; ++i) {
+    errorFunction.addConstraint(
+        ProjectionConstraintT<T>{
+            uniform<size_t>(0, skeleton.joints.size() - 1),
+            normal<Vector3<T>>(Vector3<T>::Zero(), Vector3<T>::Ones() * T(0.1)),
+            uniform<T>(0.1, 2.0),
+            normal<Vector2<T>>(Vector2<T>::Zero(), Vector2<T>::Ones() * T(100))});
+  }
+
+  ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  setIntrinsicsParams(params);
+
+  // Verify error is non-zero to confirm the test is non-trivial
+  {
+    const SkeletonStateT<T> state(transform.apply(params), skeleton);
+    const double err = errorFunction.getError(params, state, MeshStateT<T>());
+    EXPECT_GT(err, 0.0) << "Error should be non-zero to validate gradient test is meaningful";
+  }
+
+  TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, params, character, Eps<T>(5e-2f, 5e-3));
+
+  for (size_t i = 0; i < 10; i++) {
+    ModelParametersT<T> parameters =
+        uniform<VectorX<T>>(transform.numAllModelParameters(), 0.0f, 1.0f);
+    setIntrinsicsParams(parameters);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T, &errorFunction, parameters, character, Eps<T>(1e-1f, 5e-3), Eps<T>(1e-5f, 1e-6));
+  }
+}
+
 // ---- Tests for getParameterNames() and IntrinsicsModel name ----
 
 TEST(CameraIntrinsicsParameters, GetParameterNames) {

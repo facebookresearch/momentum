@@ -8,9 +8,11 @@
 #pragma once
 
 #include <momentum/camera/camera.h>
+#include <momentum/character_solver/camera_intrinsics_parameters.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 
 #include <memory>
+#include <optional>
 
 namespace momentum {
 
@@ -99,6 +101,7 @@ class CameraProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   std::shared_ptr<const IntrinsicsModelT<T>> intrinsicsModel_;
   size_t cameraParent_;
   Eigen::Transform<T, 3, Eigen::Affine> cameraOffset_;
+  std::optional<CameraIntrinsicsMapping<T>> intrinsicsMapping_;
 };
 
 } // namespace momentum

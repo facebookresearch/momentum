@@ -80,4 +80,57 @@ void setCameraIntrinsics(
 [[nodiscard]] ParameterSet getAllCameraIntrinsicsParameterSet(
     const ParameterTransform& paramTransform);
 
+/// Cached mapping between intrinsic parameters and model parameter indices.
+///
+/// This struct is constructed once (at error function setup time) and caches the
+/// index mapping so that solve-time operations avoid string comparisons. It also
+/// holds a mutable clone of the intrinsics model that can be updated from model
+/// parameters each iteration.
+template <typename T>
+struct CameraIntrinsicsMapping {
+  /// For each intrinsic parameter i, the model parameter index, or -1 if absent.
+  std::vector<Eigen::Index> modelParamIndices;
+
+  /// Mutable clone of the intrinsics model, updated each iteration via updateIntrinsics().
+  std::shared_ptr<IntrinsicsModelT<T>> mutableIntrinsics;
+
+  /// Build the mapping from a parameter transform and intrinsics model.
+  /// The intrinsics model must have a non-empty name.
+  CameraIntrinsicsMapping(
+      const ParameterTransform& paramTransform,
+      const IntrinsicsModelT<T>& intrinsicsModel);
+
+  /// Are any intrinsic parameters being optimized?
+  [[nodiscard]] bool hasActiveParams() const;
+
+  /// Update the mutable intrinsics model from current model parameters.
+  /// Only modifies parameters that have active mappings; others retain their
+  /// current values. Returns a reference to the updated model.
+  const IntrinsicsModelT<T>& updateIntrinsics(const ModelParametersT<T>& modelParams);
+
+  /// Accumulate intrinsics Jacobian contributions into the gradient vector.
+  ///
+  /// @param J_intrinsics The 3xN intrinsics Jacobian from projectIntrinsicsJacobian()
+  /// @param residual The 2D residual (projected - target)
+  /// @param weight Combined weight (2 * constraint_weight * error_function_weight)
+  /// @param gradient The gradient vector to accumulate into
+  void addGradient(
+      const Eigen::Matrix<T, 3, Eigen::Dynamic>& J_intrinsics,
+      const Eigen::Vector2<T>& residual,
+      T weight,
+      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
+
+  /// Accumulate intrinsics Jacobian contributions into the Jacobian matrix.
+  ///
+  /// @param J_intrinsics The 3xN intrinsics Jacobian from projectIntrinsicsJacobian()
+  /// @param weight Combined weight (sqrt(constraint_weight * error_function_weight))
+  /// @param rowOffset Row offset into the Jacobian matrix (2 * constraint_index)
+  /// @param jacobian The Jacobian matrix to accumulate into
+  void addJacobian(
+      const Eigen::Matrix<T, 3, Eigen::Dynamic>& J_intrinsics,
+      T weight,
+      Eigen::Index rowOffset,
+      Eigen::Ref<Eigen::MatrixX<T>> jacobian) const;
+};
+
 } // namespace momentum
