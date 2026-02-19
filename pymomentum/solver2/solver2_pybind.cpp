@@ -25,6 +25,7 @@
 #include <pybind11/stl.h>
 #include <Eigen/Core>
 
+#include <pymomentum/solver2/solver2_camera_intrinsics.h>
 #include <pymomentum/solver2/solver2_error_functions.h>
 #include <pymomentum/solver2/solver2_sequence_error_functions.h>
 #include <pymomentum/solver2/solver2_utility.h>
@@ -762,6 +763,8 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       py::arg("solver_function"),
       py::arg("model_params"),
       py::arg("options") = std::optional<mm::SequenceSolverOptions>{});
+
+  addCameraIntrinsicsBindings(m);
 }
 
 } // namespace pymomentum
