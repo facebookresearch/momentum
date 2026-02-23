@@ -75,8 +75,8 @@ void findClosestPointsWithNormal_imp(
     at::Tensor result_indices) {
   assert(points_source.size(1) == 3);
   assert(points_target.size(1) == 3);
-  const Eigen::Vector3f* pts_tgt_ptr = (const Eigen::Vector3f*)points_target.data_ptr();
-  const Eigen::Vector3f* normals_tgt_ptr = (const Eigen::Vector3f*)normals_target.data_ptr();
+  const auto* pts_tgt_ptr = (const Eigen::Vector3f*)points_target.data_ptr();
+  const auto* normals_tgt_ptr = (const Eigen::Vector3f*)normals_target.data_ptr();
 
   const int64_t nSrcPts = points_source.size(0);
   const int64_t nTgtPts = points_target.size(0);
