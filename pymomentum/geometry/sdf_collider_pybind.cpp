@@ -10,6 +10,7 @@
 #include <axel/SignedDistanceField.h>
 #include <momentum/character/sdf_collision_geometry.h>
 #include <momentum/math/constants.h>
+#include <pymomentum/python_utility/eigen_quaternion.h>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>

@@ -77,6 +77,10 @@ PYBIND11_MODULE(geometry, m) {
   m.doc() = "Geometry and forward kinematics for momentum models.  ";
   m.attr("__name__") = "pymomentum.geometry";
 
+  // Import the axel module so pybind11 can resolve axel types
+  // (e.g. axel::SignedDistanceField<float> used by SDFCollider).
+  py::module_::import("pymomentum.axel");
+
   m.attr("PARAMETERS_PER_JOINT") = mm::kParametersPerJoint;
 
   py::enum_<mm::FbxUpVector>(m, "FbxUpVector")
