@@ -36,13 +36,12 @@ py::array_t<T> applyParameterTransformImpl(
 
   // Create output array with shape [..., nJointParams] (flat) or [..., nJoints, 7] (structured)
   py::array_t<T> result;
-  JointParamsShape outputShape;
+  JointParamsShape outputShape = JointParamsShape::Structured;
   if (flatten) {
     result = createOutputArray<T>(leadingDims, {nJointParams});
     outputShape = JointParamsShape::Flat;
   } else {
     result = createOutputArray<T>(leadingDims, {nJoints, static_cast<py::ssize_t>(7)});
-    outputShape = JointParamsShape::Structured;
   }
 
   // Create batch indexer for converting flat indices to multi-dimensional indices
