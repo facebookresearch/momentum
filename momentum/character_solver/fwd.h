@@ -299,6 +299,25 @@ using VertexProjectionConstraintd_const_p = ::std::shared_ptr<const VertexProjec
 using VertexProjectionConstraintd_const_u = ::std::unique_ptr<const VertexProjectionConstraintd>;
 using VertexProjectionConstraintd_const_w = ::std::weak_ptr<const VertexProjectionConstraintd>;
 
+template <typename T>
+struct VertexSDFConstraintT;
+using VertexSDFConstraint = VertexSDFConstraintT<float>;
+using VertexSDFConstraintd = VertexSDFConstraintT<double>;
+
+using VertexSDFConstraint_p = ::std::shared_ptr<VertexSDFConstraint>;
+using VertexSDFConstraint_u = ::std::unique_ptr<VertexSDFConstraint>;
+using VertexSDFConstraint_w = ::std::weak_ptr<VertexSDFConstraint>;
+using VertexSDFConstraint_const_p = ::std::shared_ptr<const VertexSDFConstraint>;
+using VertexSDFConstraint_const_u = ::std::unique_ptr<const VertexSDFConstraint>;
+using VertexSDFConstraint_const_w = ::std::weak_ptr<const VertexSDFConstraint>;
+
+using VertexSDFConstraintd_p = ::std::shared_ptr<VertexSDFConstraintd>;
+using VertexSDFConstraintd_u = ::std::unique_ptr<VertexSDFConstraintd>;
+using VertexSDFConstraintd_w = ::std::weak_ptr<VertexSDFConstraintd>;
+using VertexSDFConstraintd_const_p = ::std::shared_ptr<const VertexSDFConstraintd>;
+using VertexSDFConstraintd_const_u = ::std::unique_ptr<const VertexSDFConstraintd>;
+using VertexSDFConstraintd_const_w = ::std::weak_ptr<const VertexSDFConstraintd>;
+
 class SimdNormalErrorFunction;
 
 using SimdNormalErrorFunction_p = ::std::shared_ptr<SimdNormalErrorFunction>;
@@ -976,6 +995,25 @@ using VertexProjectionErrorFunctiond_const_u =
     ::std::unique_ptr<const VertexProjectionErrorFunctiond>;
 using VertexProjectionErrorFunctiond_const_w =
     ::std::weak_ptr<const VertexProjectionErrorFunctiond>;
+
+template <typename T>
+class VertexSDFErrorFunctionT;
+using VertexSDFErrorFunction = VertexSDFErrorFunctionT<float>;
+using VertexSDFErrorFunctiond = VertexSDFErrorFunctionT<double>;
+
+using VertexSDFErrorFunction_p = ::std::shared_ptr<VertexSDFErrorFunction>;
+using VertexSDFErrorFunction_u = ::std::unique_ptr<VertexSDFErrorFunction>;
+using VertexSDFErrorFunction_w = ::std::weak_ptr<VertexSDFErrorFunction>;
+using VertexSDFErrorFunction_const_p = ::std::shared_ptr<const VertexSDFErrorFunction>;
+using VertexSDFErrorFunction_const_u = ::std::unique_ptr<const VertexSDFErrorFunction>;
+using VertexSDFErrorFunction_const_w = ::std::weak_ptr<const VertexSDFErrorFunction>;
+
+using VertexSDFErrorFunctiond_p = ::std::shared_ptr<VertexSDFErrorFunctiond>;
+using VertexSDFErrorFunctiond_u = ::std::unique_ptr<VertexSDFErrorFunctiond>;
+using VertexSDFErrorFunctiond_w = ::std::weak_ptr<VertexSDFErrorFunctiond>;
+using VertexSDFErrorFunctiond_const_p = ::std::shared_ptr<const VertexSDFErrorFunctiond>;
+using VertexSDFErrorFunctiond_const_u = ::std::unique_ptr<const VertexSDFErrorFunctiond>;
+using VertexSDFErrorFunctiond_const_w = ::std::weak_ptr<const VertexSDFErrorFunctiond>;
 
 template <typename T>
 class VertexVertexDistanceErrorFunctionT;
