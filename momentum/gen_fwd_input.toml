@@ -63,6 +63,7 @@ template_structs = [
     "SkinnedLocatorTriangleConstraint",
     "VertexConstraint",
     "VertexProjectionConstraint",
+    "VertexSDFConstraint",
 ]
 classes = [
     "SimdNormalErrorFunction",
@@ -104,6 +105,7 @@ template_classes = [
     "TrustRegionQR",
     "VertexErrorFunction",
     "VertexProjectionErrorFunction",
+    "VertexSDFErrorFunction",
     "VertexVertexDistanceErrorFunction",
 ]
 
