@@ -2801,3 +2801,142 @@ class TestSolver(unittest.TestCase):
         # Test error handling: wrong number of parameters
         with self.assertRaises(RuntimeError):
             seq_error.get_error(np.zeros((2, n_params + 1), dtype=np.float32))
+
+    def test_add_camera_intrinsics_parameters(self) -> None:
+        """Test adding camera intrinsics parameters for multiple cameras."""
+        import pymomentum.camera as pym_camera
+
+        character = pym_geometry.create_test_character(num_joints=4)
+        orig_n_params = character.parameter_transform.size
+
+        # Create two cameras
+        cam0 = pym_camera.PinholeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+        )
+        cam0.name = "cam0"
+
+        cam1 = pym_camera.OpenCVFisheyeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+        )
+        cam1.name = "cam1"
+
+        # Add cam0 (pinhole: 4 params)
+        character2 = pym_solver2.add_camera_intrinsics_parameters(character, cam0)
+        self.assertEqual(character2.parameter_transform.size, orig_n_params + 4)
+
+        # Add cam1 (fisheye: 8 params)
+        character3 = pym_solver2.add_camera_intrinsics_parameters(character2, cam1)
+        self.assertEqual(character3.parameter_transform.size, orig_n_params + 4 + 8)
+
+        # Verify parameter names
+        param_names = character3.parameter_transform.names
+        cam0_names = [n for n in param_names if n.startswith("intrinsics_cam0_")]
+        cam1_names = [n for n in param_names if n.startswith("intrinsics_cam1_")]
+
+        self.assertEqual(len(cam0_names), 4)
+        self.assertEqual(len(cam1_names), 8)
+        self.assertIn("intrinsics_cam0_fx", cam0_names)
+        self.assertIn("intrinsics_cam0_cy", cam0_names)
+        self.assertIn("intrinsics_cam1_k1", cam1_names)
+        self.assertIn("intrinsics_cam1_k4", cam1_names)
+
+        # Verify idempotency: adding cam0 again should not increase the count
+        character4 = pym_solver2.add_camera_intrinsics_parameters(character3, cam0)
+        self.assertEqual(
+            character4.parameter_transform.size, character3.parameter_transform.size
+        )
+
+    def test_extract_and_set_camera_intrinsics(self) -> None:
+        """Test round-tripping intrinsics values through model parameters."""
+        import pymomentum.camera as pym_camera
+
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        cam = pym_camera.PinholeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+            cx=320.0,
+            cy=240.0,
+        )
+        cam.name = "cam0"
+
+        character2 = pym_solver2.add_camera_intrinsics_parameters(character, cam)
+        n_params = character2.parameter_transform.size
+
+        # set_camera_intrinsics: write model values into model params (returns new array)
+        model_params = pym_solver2.set_camera_intrinsics(
+            character2, cam, np.zeros(n_params, dtype=np.float32)
+        )
+
+        # Extract back and verify round-trip
+        extracted = pym_solver2.extract_camera_intrinsics(character2, model_params, cam)
+        np.testing.assert_allclose(extracted, [500.0, 500.0, 320.0, 240.0], atol=1e-5)
+
+        # Modify a value in model_params and verify extract picks it up
+        param_names = list(character2.parameter_transform.names)
+        fx_idx = param_names.index("intrinsics_cam0_fx")
+        model_params[fx_idx] = 600.0
+        extracted2 = pym_solver2.extract_camera_intrinsics(
+            character2, model_params, cam
+        )
+        self.assertAlmostEqual(float(extracted2[0]), 600.0, places=5)
+        self.assertAlmostEqual(float(extracted2[1]), 500.0, places=5)  # fy unchanged
+
+    def test_batched_camera_intrinsics(self) -> None:
+        """Test extract/set camera intrinsics with batched (2D) model parameters."""
+        import pymomentum.camera as pym_camera
+
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        cam = pym_camera.PinholeIntrinsicsModel(
+            image_width=640,
+            image_height=480,
+            fx=500.0,
+            fy=500.0,
+            cx=320.0,
+            cy=240.0,
+        )
+        cam.name = "cam0"
+
+        character2 = pym_solver2.add_camera_intrinsics_parameters(character, cam)
+        n_params = character2.parameter_transform.size
+
+        batch_size = 3
+        # Create batched zeros and set intrinsics
+        model_params_batch = np.zeros((batch_size, n_params), dtype=np.float32)
+        result_batch = pym_solver2.set_camera_intrinsics(
+            character2, cam, model_params_batch
+        )
+        self.assertEqual(result_batch.shape, (batch_size, n_params))
+
+        # Extract intrinsics from the batched result
+        extracted_batch = pym_solver2.extract_camera_intrinsics(
+            character2, result_batch, cam
+        )
+        self.assertEqual(extracted_batch.shape, (batch_size, 4))
+
+        # Each batch element should have the same intrinsics
+        for i in range(batch_size):
+            np.testing.assert_allclose(
+                extracted_batch[i], [500.0, 500.0, 320.0, 240.0], atol=1e-5
+            )
+
+        # Modify fx in the second batch element and verify
+        param_names = list(character2.parameter_transform.names)
+        fx_idx = param_names.index("intrinsics_cam0_fx")
+        result_batch[1, fx_idx] = 700.0
+
+        extracted_batch2 = pym_solver2.extract_camera_intrinsics(
+            character2, result_batch, cam
+        )
+        self.assertAlmostEqual(float(extracted_batch2[0, 0]), 500.0, places=5)
+        self.assertAlmostEqual(float(extracted_batch2[1, 0]), 700.0, places=5)
+        self.assertAlmostEqual(float(extracted_batch2[2, 0]), 500.0, places=5)
