@@ -132,4 +132,74 @@ ParameterSet getAllCameraIntrinsicsParameterSet(const ParameterTransform& paramT
   return result;
 }
 
+template <typename T>
+CameraIntrinsicsMapping<T>::CameraIntrinsicsMapping(
+    const ParameterTransform& paramTransform,
+    const IntrinsicsModelT<T>& intrinsicsModel)
+    : mutableIntrinsics(intrinsicsModel.clone()) {
+  const std::string prefix = makePrefix(intrinsicsModel.name());
+  const auto paramNames = intrinsicsModel.getParameterNames();
+  modelParamIndices.resize(paramNames.size());
+  for (size_t i = 0; i < paramNames.size(); ++i) {
+    modelParamIndices[i] = findParamIndex(paramTransform, prefix + paramNames[i]);
+  }
+}
+
+template <typename T>
+bool CameraIntrinsicsMapping<T>::hasActiveParams() const {
+  for (const auto idx : modelParamIndices) {
+    if (idx >= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <typename T>
+const IntrinsicsModelT<T>& CameraIntrinsicsMapping<T>::updateIntrinsics(
+    const ModelParametersT<T>& modelParams) {
+  Eigen::VectorX<T> params = mutableIntrinsics->getIntrinsicParameters();
+  for (size_t i = 0; i < modelParamIndices.size(); ++i) {
+    const auto idx = modelParamIndices[i];
+    if (idx >= 0 && idx < modelParams.size()) {
+      params(static_cast<Eigen::Index>(i)) = modelParams(idx);
+    }
+  }
+  mutableIntrinsics->setIntrinsicParameters(params);
+  return *mutableIntrinsics;
+}
+
+template <typename T>
+void CameraIntrinsicsMapping<T>::addGradient(
+    const Eigen::Matrix<T, 3, Eigen::Dynamic>& J_intrinsics,
+    const Eigen::Vector2<T>& residual,
+    T weight,
+    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
+  for (size_t i = 0; i < modelParamIndices.size(); ++i) {
+    const auto idx = modelParamIndices[i];
+    if (idx >= 0) {
+      const T gradVal = J_intrinsics.col(i).template head<2>().dot(residual);
+      gradient[idx] += weight * gradVal;
+    }
+  }
+}
+
+template <typename T>
+void CameraIntrinsicsMapping<T>::addJacobian(
+    const Eigen::Matrix<T, 3, Eigen::Dynamic>& J_intrinsics,
+    T weight,
+    Eigen::Index rowOffset,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobian) const {
+  for (size_t i = 0; i < modelParamIndices.size(); ++i) {
+    const auto idx = modelParamIndices[i];
+    if (idx >= 0) {
+      jacobian.template block<2, 1>(rowOffset, idx) +=
+          weight * J_intrinsics.col(i).template head<2>();
+    }
+  }
+}
+
+template struct CameraIntrinsicsMapping<float>;
+template struct CameraIntrinsicsMapping<double>;
+
 } // namespace momentum
