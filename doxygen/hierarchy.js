@@ -125,6 +125,7 @@ var hierarchy =
     [ "momentum::AlignedAllocator< T, Alignment >::rebind< U >", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
     [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", null ],
     [ "momentum::SDFColliderT< S >", "structmomentum_1_1SDFColliderT.html", null ],
+    [ "momentum::SDFColliderT< float >", "structmomentum_1_1SDFColliderT.html", null ],
     [ "momentum::io_detail::SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", null ],
     [ "momentum::io_detail::SectionSegment", "structmomentum_1_1io__detail_1_1SectionSegment.html", null ],
     [ "momentum::SequenceErrorFunctionT< T >", "classmomentum_1_1SequenceErrorFunctionT.html", [
@@ -200,6 +201,7 @@ var hierarchy =
       [ "momentum::UnionErrorFunctionT< T >", "classmomentum_1_1UnionErrorFunctionT.html", null ],
       [ "momentum::VertexErrorFunctionT< T >", "classmomentum_1_1VertexErrorFunctionT.html", null ],
       [ "momentum::VertexProjectionErrorFunctionT< T >", "classmomentum_1_1VertexProjectionErrorFunctionT.html", null ],
+      [ "momentum::VertexSDFErrorFunctionT< T >", "classmomentum_1_1VertexSDFErrorFunctionT.html", null ],
       [ "momentum::VertexVertexDistanceErrorFunctionT< T >", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html", null ]
     ] ],
     [ "momentum::SkeletonStateT< T >", "structmomentum_1_1SkeletonStateT.html", null ],
@@ -244,9 +246,11 @@ var hierarchy =
     ] ],
     [ "momentum::TaperedCapsuleT< S >", "structmomentum_1_1TaperedCapsuleT.html", null ],
     [ "momentum::TransformT< T >", "structmomentum_1_1TransformT.html", null ],
+    [ "momentum::TransformT< float >", "structmomentum_1_1TransformT.html", null ],
     [ "momentum::TransformT< S >", "structmomentum_1_1TransformT.html", null ],
     [ "momentum::VertexConstraintT< T >", "structmomentum_1_1VertexConstraintT.html", null ],
     [ "momentum::VertexProjectionConstraintT< T >", "structmomentum_1_1VertexProjectionConstraintT.html", null ],
+    [ "momentum::VertexSDFConstraintT< T >", "structmomentum_1_1VertexSDFConstraintT.html", null ],
     [ "momentum::VertexVelocityConstraintT< T >", "structmomentum_1_1VertexVelocityConstraintT.html", null ],
     [ "momentum::VertexVertexDistanceConstraintT< T >", "structmomentum_1_1VertexVertexDistanceConstraintT.html", null ]
 ];

@@ -176,6 +176,8 @@ var annotated_dup =
       [ "VertexErrorFunctionT", "classmomentum_1_1VertexErrorFunctionT.html", "classmomentum_1_1VertexErrorFunctionT" ],
       [ "VertexProjectionConstraintT", "structmomentum_1_1VertexProjectionConstraintT.html", "structmomentum_1_1VertexProjectionConstraintT" ],
       [ "VertexProjectionErrorFunctionT", "classmomentum_1_1VertexProjectionErrorFunctionT.html", "classmomentum_1_1VertexProjectionErrorFunctionT" ],
+      [ "VertexSDFConstraintT", "structmomentum_1_1VertexSDFConstraintT.html", "structmomentum_1_1VertexSDFConstraintT" ],
+      [ "VertexSDFErrorFunctionT", "classmomentum_1_1VertexSDFErrorFunctionT.html", "classmomentum_1_1VertexSDFErrorFunctionT" ],
       [ "VertexSequenceErrorFunctionT", "classmomentum_1_1VertexSequenceErrorFunctionT.html", "classmomentum_1_1VertexSequenceErrorFunctionT" ],
       [ "VertexVelocityConstraintT", "structmomentum_1_1VertexVelocityConstraintT.html", "structmomentum_1_1VertexVelocityConstraintT" ],
       [ "VertexVertexDistanceConstraintT", "structmomentum_1_1VertexVertexDistanceConstraintT.html", "structmomentum_1_1VertexVertexDistanceConstraintT" ],

@@ -34,5 +34,6 @@ var searchData=
   ['_7espanstreambuf_31',['~spanstreambuf',['../structmomentum_1_1spanstreambuf.html#a3db80852f0608b1c8d2918f804c539ab',1,'momentum::spanstreambuf']]],
   ['_7evertexerrorfunctiont_32',['~VertexErrorFunctionT',['../classmomentum_1_1VertexErrorFunctionT.html#ad0ca27c12c86f5d56bbe57d9e6a27e89',1,'momentum::VertexErrorFunctionT']]],
   ['_7evertexprojectionerrorfunctiont_33',['~VertexProjectionErrorFunctionT',['../classmomentum_1_1VertexProjectionErrorFunctionT.html#a52f73747dfeab5589b5bcfe5866cf5c7',1,'momentum::VertexProjectionErrorFunctionT']]],
-  ['_7evertexvertexdistanceerrorfunctiont_34',['~VertexVertexDistanceErrorFunctionT',['../classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0',1,'momentum::VertexVertexDistanceErrorFunctionT']]]
+  ['_7evertexsdferrorfunctiont_34',['~VertexSDFErrorFunctionT',['../classmomentum_1_1VertexSDFErrorFunctionT.html#a1e70f87e42a1546e7985226492edae8d',1,'momentum::VertexSDFErrorFunctionT']]],
+  ['_7evertexvertexdistanceerrorfunctiont_35',['~VertexVertexDistanceErrorFunctionT',['../classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0',1,'momentum::VertexVertexDistanceErrorFunctionT']]]
 ];

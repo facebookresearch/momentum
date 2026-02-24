@@ -71,6 +71,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "vertex_error_function.h", "vertex__error__function_8h.html", "vertex__error__function_8h" ],
     [ "vertex_projection_error_function.cpp", "vertex__projection__error__function_8cpp.html", null ],
     [ "vertex_projection_error_function.h", "vertex__projection__error__function_8h.html", "vertex__projection__error__function_8h" ],
+    [ "vertex_sdf_error_function.cpp", "vertex__sdf__error__function_8cpp.html", null ],
+    [ "vertex_sdf_error_function.h", "vertex__sdf__error__function_8h.html", "vertex__sdf__error__function_8h" ],
     [ "vertex_vertex_distance_error_function.cpp", "vertex__vertex__distance__error__function_8cpp.html", null ],
     [ "vertex_vertex_distance_error_function.h", "vertex__vertex__distance__error__function_8h.html", "vertex__vertex__distance__error__function_8h" ]
 ];
