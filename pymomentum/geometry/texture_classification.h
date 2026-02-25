@@ -52,4 +52,29 @@ std::vector<std::vector<int32_t>> classifyTrianglesByTexture(
     float threshold = 0.0f,
     int32_t numSamples = 3);
 
+/// Split mesh triangles along texture region boundaries via binary search.
+///
+/// For each face in the mesh, classify its texcoord vertices by sampling the texture
+/// at their UV positions. Faces fully inside the region are kept unchanged. Faces fully
+/// outside are discarded. Boundary faces (mixed in/out) are split by finding the crossing
+/// point along each edge via binary search in UV space, creating new vertices and sub-triangles.
+/// The result is compacted using reduceMeshByFaces to remove unused vertices/texcoords.
+///
+/// @param mesh The mesh containing vertices, faces, texcoords, and texcoord_faces.
+///             Must have non-empty texcoords and texcoord_faces.
+/// @param texture RGB texture image as a numpy array with shape [height, width, 3] and dtype uint8.
+/// @param regionColors RGB colors defining the "inside" region as a numpy array with shape
+///                     [n_colors, 3] and dtype uint8. A texcoord vertex is "inside" if the texture
+///                     color at its UV matches any of these colors.
+/// @param numBinarySearchSteps Number of binary search iterations for finding edge crossing points.
+///                             Higher values give more accurate boundaries (8 iterations gives
+///                             1/256 sub-pixel accuracy).
+/// @return A new Mesh containing only the inside portion of the original mesh, with boundary
+///         triangles split along the texture region boundary.
+momentum::Mesh splitMeshByTextureRegion(
+    const momentum::Mesh& mesh,
+    const py::array_t<uint8_t>& texture,
+    const py::array_t<uint8_t>& regionColors,
+    int32_t numBinarySearchSteps = 8);
+
 } // namespace pymomentum

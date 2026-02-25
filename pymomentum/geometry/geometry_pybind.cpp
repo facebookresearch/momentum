@@ -1177,6 +1177,42 @@ blend shapes, pose shapes, and other mesh-related data.
       py::arg("character"),
       py::arg("active_faces"));
 
+  // reduceMeshByVertices(mesh, activeVertices) — Mesh-level overload
+  m.def(
+      "reduce_mesh_by_vertices",
+      [](const momentum::Mesh& mesh, const py::array_t<bool>& activeVertices) {
+        return momentum::reduceMeshByVertices(mesh, boolArrayToVector(activeVertices));
+      },
+      R"(Reduces a standalone mesh to only include the specified vertices and associated faces.
+
+This is the :class:`Mesh`-only version that works without a :class:`Character`. It handles
+vertices, normals, colors, confidence, faces, lines, texcoords, texcoord_faces, and
+texcoord_lines with proper index remapping and compaction.
+
+:param mesh: The mesh to reduce.
+:param active_vertices: A boolean array marking which vertices should be retained.
+:return: A new :class:`Mesh` containing only the marked vertices and their associated faces.)",
+      py::arg("mesh"),
+      py::arg("active_vertices"));
+
+  // reduceMeshByFaces(mesh, activeFaces) — Mesh-level overload
+  m.def(
+      "reduce_mesh_by_faces",
+      [](const momentum::Mesh& mesh, const py::array_t<bool>& activeFaces) {
+        return momentum::reduceMeshByFaces(mesh, boolArrayToVector(activeFaces));
+      },
+      R"(Reduces a standalone mesh to only include the specified faces and associated vertices.
+
+This is the :class:`Mesh`-only version that works without a :class:`Character`. It handles
+vertices, normals, colors, confidence, faces, lines, texcoords, texcoord_faces, and
+texcoord_lines with proper index remapping and compaction.
+
+:param mesh: The mesh to reduce.
+:param active_faces: A boolean array marking which faces should be retained.
+:return: A new :class:`Mesh` containing only the marked faces and their referenced vertices.)",
+      py::arg("mesh"),
+      py::arg("active_faces"));
+
   // reduceToSelectedModelParameters(character, activeParameters)
   m.def(
       "reduce_to_selected_model_parameters",
@@ -1368,6 +1404,41 @@ The sampling strategy is deterministic and uses barycentric coordinates.
       py::arg("region_colors"),
       py::arg("threshold") = 0.0f,
       py::arg("num_samples") = 3);
+
+  // split_mesh_by_texture_region(mesh, texture, region_colors, num_binary_search_steps)
+  m.def(
+      "split_mesh_by_texture_region",
+      &splitMeshByTextureRegion,
+      R"(Split mesh triangles along texture region boundaries via binary search.
+
+For each face in the mesh, this function classifies its texcoord vertices by sampling
+the texture at their UV positions. Faces fully inside the region are kept unchanged.
+Faces fully outside are discarded. Boundary faces (with mixed inside/outside vertices)
+are split by finding the crossing point along each edge via binary search in UV space,
+creating new vertices and sub-triangles. The result is compacted to remove unused
+vertices and texcoords.
+
+This is useful for extracting a clean sub-mesh corresponding to a painted texture region,
+with the boundary triangles cut precisely along the region boundary rather than being
+included or excluded whole.
+
+:param mesh: The :class:`Mesh` containing vertices, faces, texcoords, and texcoord_faces.
+             Must have non-empty texcoords and texcoord_faces.
+:param texture: RGB texture image as a numpy array with shape ``[height, width, 3]``
+                and dtype ``uint8``.
+:param region_colors: RGB colors defining the "inside" region as a numpy array with shape
+                      ``[n_colors, 3]`` and dtype ``uint8``. A texcoord vertex is considered
+                      "inside" if the texture color at its UV matches any of these colors.
+:param num_binary_search_steps: Number of binary search iterations for finding edge crossing
+                                points. Higher values give more accurate boundaries. 8 iterations
+                                gives 1/256 sub-pixel accuracy. Defaults to 8.
+:return: A new :class:`Mesh` containing only the inside portion of the original mesh, with
+         boundary triangles split along the texture region boundary.
+)",
+      py::arg("mesh"),
+      py::arg("texture"),
+      py::arg("region_colors"),
+      py::arg("num_binary_search_steps") = 8);
 
   // Register GltfBuilder bindings
   registerGltfBuilderBindings(m);
