@@ -22,6 +22,7 @@ var annotated_dup =
       [ "BoneVertexRange", "structmomentum_1_1BoneVertexRange.html", "structmomentum_1_1BoneVertexRange" ],
       [ "BoneWeightT", "structmomentum_1_1BoneWeightT.html", "structmomentum_1_1BoneWeightT" ],
       [ "CalibrationConfig", "structmomentum_1_1CalibrationConfig.html", "structmomentum_1_1CalibrationConfig" ],
+      [ "CameraIntrinsicsMapping", "structmomentum_1_1CameraIntrinsicsMapping.html", "structmomentum_1_1CameraIntrinsicsMapping" ],
       [ "CameraProjectionErrorFunctionT", "classmomentum_1_1CameraProjectionErrorFunctionT.html", "classmomentum_1_1CameraProjectionErrorFunctionT" ],
       [ "CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", "structmomentum_1_1CandidateTriangle" ],
       [ "CharacterParametersT", "structmomentum_1_1CharacterParametersT.html", "structmomentum_1_1CharacterParametersT" ],

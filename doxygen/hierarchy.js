@@ -14,6 +14,7 @@ var hierarchy =
     [ "momentum::BoneCollisionPairT< T >", "structmomentum_1_1BoneCollisionPairT.html", null ],
     [ "momentum::BoneVertexRange", "structmomentum_1_1BoneVertexRange.html", null ],
     [ "momentum::BoneWeightT< T >", "structmomentum_1_1BoneWeightT.html", null ],
+    [ "momentum::CameraIntrinsicsMapping< T >", "structmomentum_1_1CameraIntrinsicsMapping.html", null ],
     [ "momentum::CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", null ],
     [ "momentum::GltfBuilder::Impl::CharacterData", "structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html", null ],
     [ "momentum::CharacterParametersT< T >", "structmomentum_1_1CharacterParametersT.html", null ],

@@ -537,6 +537,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexVertexDistanceErrorFunction.num_constraints"><code class="docutils literal notranslate"><span class="pre">VertexVertexDistanceErrorFunction.num_constraints()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.add_camera_intrinsics_parameters"><code class="docutils literal notranslate"><span class="pre">add_camera_intrinsics_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.extract_camera_intrinsics"><code class="docutils literal notranslate"><span class="pre">extract_camera_intrinsics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.set_camera_intrinsics"><code class="docutils literal notranslate"><span class="pre">set_camera_intrinsics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.solve_sequence"><code class="docutils literal notranslate"><span class="pre">solve_sequence()</span></code></a></li>
 </ul>
 </li>
@@ -4076,6 +4079,74 @@ or maintaining the width of body parts.</p>
 <dd><p>Returns the number of constraints.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver2.add_camera_intrinsics_parameters">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">add_camera_intrinsics_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsics_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pymomentum.camera.IntrinsicsModel</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.solver2.add_camera_intrinsics_parameters" title="Link to this definition"></a></dt>
+<dd><p>Add camera intrinsics parameters to the character’s parameter transform.</p>
+<p>Creates a new <a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a> with additional model parameters for the
+given camera’s intrinsic parameters (e.g., fx, fy, cx, cy, distortion coefficients). The parameter
+names follow the convention “intrinsics_{camera_name}_{param_name}”.</p>
+<p>The intrinsics model must have a non-empty name set via the <code class="docutils literal notranslate"><span class="pre">name</span></code> property.</p>
+<p>This operation is idempotent: calling it twice with the same camera name will
+replace the existing parameters rather than duplicating them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character whose parameter transform to augment.</p></li>
+<li><p><strong>intrinsics_model</strong> – The camera intrinsics model whose parameters to add (must have a name set).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Character with the augmented parameter transform.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver2.extract_camera_intrinsics">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">extract_camera_intrinsics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsics_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pymomentum.camera.IntrinsicsModel</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#pymomentum.solver2.extract_camera_intrinsics" title="Link to this definition"></a></dt>
+<dd><p>Extract camera intrinsic parameter values from model parameters.</p>
+<p>Reads the values corresponding to the camera’s intrinsics from the model parameter
+vector. Parameters not present in the parameter transform retain the current values
+from the intrinsics model (useful when working with a downselected parameter set).</p>
+<p>Supports batched input with shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_model_params)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character with camera intrinsics in its parameter transform.</p></li>
+<li><p><strong>model_parameters</strong> – The model parameter array with shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_model_params)</span></code>.</p></li>
+<li><p><strong>intrinsics_model</strong> – The intrinsics model (provides name and default values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of intrinsic parameters with shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_intrinsic_params)</span></code> suitable
+for <code class="xref py py-meth docutils literal notranslate"><span class="pre">set_intrinsic_parameters()</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver2.set_camera_intrinsics">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">set_camera_intrinsics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsics_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pymomentum.camera.IntrinsicsModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#pymomentum.solver2.set_camera_intrinsics" title="Link to this definition"></a></dt>
+<dd><p>Write camera intrinsic parameter values into model parameters.</p>
+<p>Copies the intrinsics model’s current parameter values into the corresponding
+slots of the model parameter vector, returning a new array. Parameters not
+present in the parameter transform are silently skipped.</p>
+<p>Supports batched input with shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_model_params)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character with camera intrinsics in its parameter transform.</p></li>
+<li><p><strong>intrinsics_model</strong> – The intrinsics model to read values from.</p></li>
+<li><p><strong>model_parameters</strong> – The model parameter array with shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_model_params)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new model parameter array with the intrinsics values written in.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
