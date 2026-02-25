@@ -79,7 +79,7 @@ std::vector<T> copyAccessorBuffer(const fx::gltf::Document& model, int32_t id) {
 
   std::vector<T> r(accessor.count);
   for (size_t i = 0; i < accessor.count; i++) {
-    std::memcpy(&r[i], &bytes[i * stride], elsize);
+    std::memcpy(static_cast<void*>(&r[i]), &bytes[i * stride], elsize);
   }
 
   return r;
@@ -117,7 +117,7 @@ std::vector<T> copyAlignedAccessorBuffer(const fx::gltf::Document& model, int32_
 
   std::vector<T> r(accessor.count);
   for (size_t i = 0; i < accessor.count; i++) {
-    std::memcpy(&r[i], &bytes[i * stride], elsize);
+    std::memcpy(static_cast<void*>(&r[i]), &bytes[i * stride], elsize);
   }
 
   return r;
