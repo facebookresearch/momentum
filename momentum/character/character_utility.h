@@ -105,6 +105,34 @@ template <typename T>
     const CharacterT<T>& character,
     const std::vector<bool>& activeFaces);
 
+/// Reduces a standalone mesh to only include the specified vertices and associated faces.
+///
+/// This is the mesh-only version of reduceMeshByVertices that works without a Character.
+/// It handles vertices, normals, colors, confidence, faces, lines, texcoords, texcoord_faces,
+/// and texcoord_lines with proper index remapping and compaction.
+///
+/// @param[in] mesh The mesh to reduce
+/// @param[in] activeVertices Boolean vector indicating which vertices to keep
+/// @return A new mesh containing only the specified vertices and their associated faces
+template <typename T>
+[[nodiscard]] MeshT<T> reduceMeshByVertices(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeVertices);
+
+/// Reduces a standalone mesh to only include the specified faces and associated vertices.
+///
+/// This is the mesh-only version of reduceMeshByFaces that works without a Character.
+/// It handles vertices, normals, colors, confidence, faces, lines, texcoords, texcoord_faces,
+/// and texcoord_lines with proper index remapping and compaction.
+///
+/// @param[in] mesh The mesh to reduce
+/// @param[in] activeFaces Boolean vector indicating which faces to keep
+/// @return A new mesh containing only the specified faces and their referenced vertices
+template <typename T>
+[[nodiscard]] MeshT<T> reduceMeshByFaces(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeFaces);
+
 /// Converts vertex selection to face selection
 ///
 /// @param[in] character Character containing the mesh
