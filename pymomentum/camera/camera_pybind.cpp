@@ -38,6 +38,15 @@ PYBIND11_MODULE(camera, m) {
           "num_intrinsic_parameters",
           &momentum::IntrinsicsModel::numIntrinsicParameters,
           "Number of intrinsic parameters for this model")
+      .def_property(
+          "name",
+          &momentum::IntrinsicsModel::name,
+          &momentum::IntrinsicsModel::setName,
+          "Name identifier for this camera (used in parameter transform naming)")
+      .def_property_readonly(
+          "parameter_names",
+          &momentum::IntrinsicsModel::getParameterNames,
+          "List of intrinsic parameter names (e.g., ['fx', 'fy', 'cx', 'cy']).")
       .def(
           "get_intrinsic_parameters",
           &momentum::IntrinsicsModel::getIntrinsicParameters,
