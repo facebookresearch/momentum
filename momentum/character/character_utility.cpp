@@ -923,6 +923,56 @@ std::vector<bool> facesToVertices(
   return activeVertices;
 }
 
+// Internal mesh reduction function used by both reduceMeshComponents and
+// the public reduceMeshByFaces/reduceMeshByVertices for Mesh.
+template <typename T>
+MeshT<T> reduceMeshInternal(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeVertices,
+    const std::vector<bool>& activeFaces) {
+  const auto [forwardVertexMapping, reverseVertexMapping] = createIndexMapping(activeVertices);
+
+  MeshT<T> newMesh;
+
+  newMesh.vertices = selectVertices(mesh.vertices, forwardVertexMapping);
+
+  if (!mesh.normals.empty()) {
+    newMesh.normals = selectVertices(mesh.normals, forwardVertexMapping);
+  }
+
+  if (!mesh.colors.empty()) {
+    newMesh.colors = selectVertices(mesh.colors, forwardVertexMapping);
+  }
+
+  if (!mesh.confidence.empty()) {
+    newMesh.confidence = selectVertices(mesh.confidence, forwardVertexMapping);
+  }
+
+  newMesh.faces = remapFaces(mesh.faces, reverseVertexMapping, activeFaces);
+
+  if (!mesh.lines.empty()) {
+    newMesh.lines = remapLines(mesh.lines, reverseVertexMapping);
+  }
+
+  if (!mesh.texcoord_faces.empty() && !mesh.texcoords.empty()) {
+    std::vector<bool> activeTextureTriangles = activeFaces;
+    activeTextureTriangles.resize(mesh.texcoord_faces.size(), false);
+
+    const std::vector<bool> activeTextureVertices =
+        facesToVertices(mesh.texcoord_faces, activeTextureTriangles, mesh.texcoords.size());
+
+    auto [forwardTextureVertexMapping, reverseTextureVertexMapping] =
+        createIndexMapping(activeTextureVertices);
+
+    newMesh.texcoords = selectVertices(mesh.texcoords, forwardTextureVertexMapping);
+    newMesh.texcoord_faces =
+        remapFaces(mesh.texcoord_faces, reverseTextureVertexMapping, activeTextureTriangles);
+    newMesh.texcoord_lines = remapLines(mesh.texcoord_lines, reverseTextureVertexMapping);
+  }
+
+  return newMesh;
+}
+
 /// Reduces mesh components based on active vertices and faces
 ///
 /// @param character Character to be reduced
@@ -949,51 +999,9 @@ CharacterT<T> reduceMeshComponents(
   // Create a mapping from old vertex indices to new vertex indices using generic function
   const auto [forwardVertexMapping, reverseVertexMapping] = createIndexMapping(activeVertices);
 
-  // Create new mesh with reduced vertices and faces
-  auto newMesh = std::make_unique<Mesh>();
-
-  // Copy active vertices using generic mapping function
-  newMesh->vertices = selectVertices(character.mesh->vertices, forwardVertexMapping);
-
-  if (!character.mesh->normals.empty()) {
-    newMesh->normals = selectVertices(character.mesh->normals, forwardVertexMapping);
-  }
-
-  if (!character.mesh->colors.empty()) {
-    newMesh->colors = selectVertices(character.mesh->colors, forwardVertexMapping);
-  }
-
-  if (!character.mesh->confidence.empty()) {
-    newMesh->confidence = selectVertices(character.mesh->confidence, forwardVertexMapping);
-  }
-
-  newMesh->faces = remapFaces(character.mesh->faces, reverseVertexMapping, activeFaces);
-
-  if (!character.mesh->lines.empty()) {
-    newMesh->lines = remapLines(character.mesh->lines, reverseVertexMapping);
-  }
-
-  // Handle texture coordinates properly using generic functions
-  if (!character.mesh->texcoord_faces.empty() && !character.mesh->texcoords.empty()) {
-    // Create active texture triangles based on active faces
-    std::vector<bool> activeTextureTriangles = activeFaces;
-    activeTextureTriangles.resize(character.mesh->texcoord_faces.size(), false);
-
-    const std::vector<bool> activeTextureVertices = facesToVertices(
-        character.mesh->texcoord_faces, activeTextureTriangles, character.mesh->texcoords.size());
-
-    auto [forwardTextureVertexMapping, reverseTextureVertexMapping] =
-        createIndexMapping(activeTextureVertices);
-
-    // Copy active texture vertices using generic mapping function
-    newMesh->texcoords = selectVertices(character.mesh->texcoords, forwardTextureVertexMapping);
-
-    newMesh->texcoord_faces = remapFaces(
-        character.mesh->texcoord_faces, reverseTextureVertexMapping, activeTextureTriangles);
-
-    newMesh->texcoord_lines =
-        remapLines(character.mesh->texcoord_lines, reverseTextureVertexMapping);
-  }
+  // Reduce the mesh using the standalone mesh-level function
+  auto newMesh = std::make_unique<Mesh>(
+      reduceMeshInternal<float>(*character.mesh, activeVertices, activeFaces));
 
   // Create new skin weights if they exist
   std::unique_ptr<SkinWeights> newSkinWeights;
@@ -1128,6 +1136,34 @@ CharacterT<T> reduceMeshByFaces(
 }
 
 template <typename T>
+MeshT<T> reduceMeshByVertices(const MeshT<T>& mesh, const std::vector<bool>& activeVertices) {
+  MT_CHECK(
+      activeVertices.size() == mesh.vertices.size(),
+      "Active vertices size ({}) does not match mesh vertex count ({})",
+      activeVertices.size(),
+      mesh.vertices.size());
+
+  // Convert vertex selection to face selection
+  const auto activeFaces = verticesToFaces(mesh, activeVertices);
+
+  return reduceMeshInternal(mesh, activeVertices, activeFaces);
+}
+
+template <typename T>
+MeshT<T> reduceMeshByFaces(const MeshT<T>& mesh, const std::vector<bool>& activeFaces) {
+  MT_CHECK(
+      activeFaces.size() == mesh.faces.size(),
+      "Active faces size ({}) does not match mesh face count ({})",
+      activeFaces.size(),
+      mesh.faces.size());
+
+  // Convert face selection to vertex selection
+  const auto activeVertices = facesToVertices(mesh, activeFaces);
+
+  return reduceMeshInternal(mesh, activeVertices, activeFaces);
+}
+
+template <typename T>
 std::vector<bool> verticesToFaces(const MeshT<T>& mesh, const std::vector<bool>& activeVertices) {
   MT_CHECK(
       activeVertices.size() == mesh.vertices.size(),
@@ -1164,6 +1200,22 @@ template CharacterT<float> reduceMeshByFaces<float>(
 
 template CharacterT<double> reduceMeshByFaces<double>(
     const CharacterT<double>& character,
+    const std::vector<bool>& activeFaces);
+
+template MeshT<float> reduceMeshByVertices<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activeVertices);
+
+template MeshT<double> reduceMeshByVertices<double>(
+    const MeshT<double>& mesh,
+    const std::vector<bool>& activeVertices);
+
+template MeshT<float> reduceMeshByFaces<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activeFaces);
+
+template MeshT<double> reduceMeshByFaces<double>(
+    const MeshT<double>& mesh,
     const std::vector<bool>& activeFaces);
 
 template std::vector<bool> verticesToFaces<float>(
