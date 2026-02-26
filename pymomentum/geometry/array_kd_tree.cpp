@@ -79,10 +79,8 @@ void findClosestPointsWithNormalsImpl(
   const auto tgtPointsMatrix = tgtPointsAcc.toMatrix(tgtIndices);
   const auto tgtNormalsMatrix = tgtNormalsAcc.toMatrix(tgtIndices);
 
-  const Eigen::Vector3f* pts_tgt_ptr =
-      reinterpret_cast<const Eigen::Vector3f*>(tgtPointsMatrix.data());
-  const Eigen::Vector3f* normals_tgt_ptr =
-      reinterpret_cast<const Eigen::Vector3f*>(tgtNormalsMatrix.data());
+  const auto* pts_tgt_ptr = reinterpret_cast<const Eigen::Vector3f*>(tgtPointsMatrix.data());
+  const auto* normals_tgt_ptr = reinterpret_cast<const Eigen::Vector3f*>(tgtNormalsMatrix.data());
   const int64_t nTgtPts = tgtPointsMatrix.rows();
 
   // Build KD-tree from target points and normals
@@ -193,7 +191,7 @@ bool isNormalized(const py::array& arr) {
   const auto elementsToCheck = std::min<py::ssize_t>(10, totalElements);
 
   if (bufInfo.format == py::format_descriptor<float>::format()) {
-    const float* data = static_cast<const float*>(bufInfo.ptr);
+    const auto* data = static_cast<const float*>(bufInfo.ptr);
     for (py::ssize_t i = 0; i < elementsToCheck; ++i) {
       float norm = 0.0f;
       for (int d = 0; d < 3; ++d) {
@@ -206,7 +204,7 @@ bool isNormalized(const py::array& arr) {
       }
     }
   } else if (bufInfo.format == py::format_descriptor<double>::format()) {
-    const double* data = static_cast<const double*>(bufInfo.ptr);
+    const auto* data = static_cast<const double*>(bufInfo.ptr);
     for (py::ssize_t i = 0; i < elementsToCheck; ++i) {
       double norm = 0.0;
       for (int d = 0; d < 3; ++d) {
@@ -372,7 +370,7 @@ findClosestPointsArray(py::buffer points_source, py::buffer points_target, float
   resultValid = createOutputArray<bool>(leadingDims, {nSrcPts});
   auto validInfo = resultValid.request();
   auto indicesInfo = resultIndices.request();
-  const int32_t* indicesData = static_cast<const int32_t*>(indicesInfo.ptr);
+  const auto* indicesData = static_cast<const int32_t*>(indicesInfo.ptr);
   bool* validData = static_cast<bool*>(validInfo.ptr);
 
   for (py::ssize_t i = 0; i < resultIndices.size(); ++i) {
@@ -515,7 +513,7 @@ std::tuple<py::array, py::array, py::array, py::array> findClosestPointsWithNorm
   resultValid = createOutputArray<bool>(leadingDims, {nSrcPts});
   auto validInfo = resultValid.request();
   auto indicesInfo = resultIndices.request();
-  const int32_t* indicesData = static_cast<const int32_t*>(indicesInfo.ptr);
+  const auto* indicesData = static_cast<const int32_t*>(indicesInfo.ptr);
   bool* validData = static_cast<bool*>(validInfo.ptr);
 
   for (py::ssize_t i = 0; i < resultIndices.size(); ++i) {
@@ -635,7 +633,7 @@ std::tuple<py::array, py::array, py::array, py::array> findClosestPointsOnMeshAr
   resultValid = createOutputArray<bool>(leadingDims, {nSrcPts});
   auto validInfo = resultValid.request();
   auto indicesInfo = resultFaceIndices.request();
-  const int32_t* indicesData = static_cast<const int32_t*>(indicesInfo.ptr);
+  const auto* indicesData = static_cast<const int32_t*>(indicesInfo.ptr);
   bool* validData = static_cast<bool*>(validInfo.ptr);
 
   for (py::ssize_t i = 0; i < resultFaceIndices.size(); ++i) {
