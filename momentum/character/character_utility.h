@@ -153,4 +153,29 @@ template <typename T>
     const MeshT<T>& mesh,
     const std::vector<bool>& activeFaces);
 
+/// Result of addRigidTransformNode containing the new character and indices of the added bone and
+/// parameters.
+struct RigidTransformNodeResult {
+  Character character;
+  size_t boneIndex;
+  size_t parameterStartIndex;
+};
+
+/// Adds a new root-level bone with 6 rigid DOF parameters (tx/ty/tz/rx/ry/rz) to a character.
+///
+/// The new joint is parented to kInvalidIndex (root-level) and gets 6 new model parameters
+/// that map directly to the joint's translation and rotation parameters.
+///
+/// @param[in] character Character to add the rigid transform node to
+/// @param[in] name Name for the new joint (also used as prefix for parameter names)
+/// @param[in] translationOffset Translation offset for the new joint
+/// @param[in] preRotation Pre-rotation for the new joint
+/// @return A RigidTransformNodeResult containing the new character, the index of the new bone,
+///         and the start index of the new model parameters
+[[nodiscard]] RigidTransformNodeResult addRigidTransformNode(
+    const Character& character,
+    const std::string& name,
+    const Eigen::Vector3f& translationOffset = Eigen::Vector3f::Zero(),
+    const Eigen::Quaternionf& preRotation = Eigen::Quaternionf::Identity());
+
 } // namespace momentum

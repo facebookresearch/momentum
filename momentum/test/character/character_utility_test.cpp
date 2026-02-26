@@ -1248,3 +1248,97 @@ TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, EdgeCases) {
   EXPECT_FALSE(std::isnan(convertedLargeParams.v(3 * kParametersPerJoint + 4)));
   EXPECT_FALSE(std::isnan(convertedLargeParams.v(3 * kParametersPerJoint + 5)));
 }
+
+TEST_F(CharacterUtilityTest, AddRigidTransformNode) {
+  const size_t originalJointCount = character.skeleton.joints.size();
+  const size_t originalParamCount = character.parameterTransform.numAllModelParameters();
+
+  const Vector3f translationOffset(1.0f, 2.0f, 3.0f);
+  const Quaternionf preRotation(Eigen::AngleAxisf(0.3f, Vector3f::UnitZ()));
+
+  auto result = addRigidTransformNode(character, "camera", translationOffset, preRotation);
+
+  // Validate bone and parameter indices
+  EXPECT_EQ(result.boneIndex, originalJointCount);
+  EXPECT_EQ(result.parameterStartIndex, originalParamCount);
+
+  // Validate skeleton has one more joint
+  EXPECT_EQ(result.character.skeleton.joints.size(), originalJointCount + 1);
+
+  // Validate new joint properties
+  const auto& newJoint = result.character.skeleton.joints[result.boneIndex];
+  EXPECT_EQ(newJoint.name, "camera");
+  EXPECT_EQ(newJoint.parent, kInvalidIndex);
+  EXPECT_TRUE(newJoint.translationOffset.isApprox(translationOffset));
+  EXPECT_TRUE(newJoint.preRotation.isApprox(preRotation));
+
+  // Validate parameter transform has 6 new model parameters
+  const auto& pt = result.character.parameterTransform;
+  EXPECT_EQ(pt.numAllModelParameters(), originalParamCount + 6);
+  EXPECT_EQ(pt.name[result.parameterStartIndex + 0], "camera_tx");
+  EXPECT_EQ(pt.name[result.parameterStartIndex + 1], "camera_ty");
+  EXPECT_EQ(pt.name[result.parameterStartIndex + 2], "camera_tz");
+  EXPECT_EQ(pt.name[result.parameterStartIndex + 3], "camera_rx");
+  EXPECT_EQ(pt.name[result.parameterStartIndex + 4], "camera_ry");
+  EXPECT_EQ(pt.name[result.parameterStartIndex + 5], "camera_rz");
+
+  // Validate the sparse transform matrix maps new parameters to the new joint's parameter slots
+  const auto& transform = pt.transform;
+  EXPECT_EQ(transform.rows(), (originalJointCount + 1) * kParametersPerJoint);
+  EXPECT_EQ(transform.cols(), originalParamCount + 6);
+
+  // Check that each new model parameter maps to the correct joint parameter row
+  const size_t jointParamBase = result.boneIndex * kParametersPerJoint;
+  EXPECT_FLOAT_EQ(transform.coeff(jointParamBase + TX, result.parameterStartIndex + 0), 1.0f);
+  EXPECT_FLOAT_EQ(transform.coeff(jointParamBase + TY, result.parameterStartIndex + 1), 1.0f);
+  EXPECT_FLOAT_EQ(transform.coeff(jointParamBase + TZ, result.parameterStartIndex + 2), 1.0f);
+  EXPECT_FLOAT_EQ(transform.coeff(jointParamBase + RX, result.parameterStartIndex + 3), 1.0f);
+  EXPECT_FLOAT_EQ(transform.coeff(jointParamBase + RY, result.parameterStartIndex + 4), 1.0f);
+  EXPECT_FLOAT_EQ(transform.coeff(jointParamBase + RZ, result.parameterStartIndex + 5), 1.0f);
+
+  // Validate that existing joints are preserved
+  for (size_t i = 0; i < originalJointCount; ++i) {
+    EXPECT_EQ(result.character.skeleton.joints[i].name, character.skeleton.joints[i].name);
+    EXPECT_EQ(result.character.skeleton.joints[i].parent, character.skeleton.joints[i].parent);
+  }
+
+  // Validate that existing model parameters are preserved
+  for (size_t i = 0; i < originalParamCount; ++i) {
+    EXPECT_EQ(pt.name[i], character.parameterTransform.name[i]);
+  }
+
+  // Validate that existing transform entries are preserved
+  for (int k = 0; k < character.parameterTransform.transform.outerSize(); ++k) {
+    for (SparseRowMatrixf::InnerIterator it(character.parameterTransform.transform, k); it; ++it) {
+      EXPECT_FLOAT_EQ(transform.coeff(it.row(), it.col()), it.value());
+    }
+  }
+
+  // Validate that other character data is preserved
+  EXPECT_EQ(result.character.locators.size(), character.locators.size());
+  EXPECT_TRUE(result.character.mesh != nullptr);
+  EXPECT_EQ(result.character.mesh->vertices.size(), character.mesh->vertices.size());
+  EXPECT_EQ(result.character.name, character.name);
+  EXPECT_EQ(result.character.metadata, character.metadata);
+
+  // Validate inverse bind pose was recomputed
+  EXPECT_EQ(result.character.inverseBindPose.size(), originalJointCount + 1);
+
+  // Validate FK with the new parameters produces expected transforms
+  ModelParameters modelParams(pt.numAllModelParameters());
+  modelParams.v.setZero();
+
+  // Set a translation on the new bone
+  modelParams.v[result.parameterStartIndex + 0] = 10.0f; // tx
+  modelParams.v[result.parameterStartIndex + 1] = 20.0f; // ty
+  modelParams.v[result.parameterStartIndex + 2] = 30.0f; // tz
+
+  JointParameters jointParams = pt.apply(modelParams);
+  SkeletonState skelState(jointParams, result.character.skeleton);
+
+  // The new bone's world translation should reflect translationOffset + applied translation
+  // (for a root joint, translation = translationOffset + [TX, TY, TZ])
+  const auto& newBoneState = skelState.jointState[result.boneIndex];
+  Vector3f expectedTranslation = translationOffset + Vector3f(10.0f, 20.0f, 30.0f);
+  EXPECT_TRUE(newBoneState.translation().isApprox(expectedTranslation, 1e-4f));
+}
