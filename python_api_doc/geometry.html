@@ -487,6 +487,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.replace_rest_mesh"><code class="docutils literal notranslate"><span class="pre">replace_rest_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.replace_skeleton_hierarchy"><code class="docutils literal notranslate"><span class="pre">replace_skeleton_hierarchy()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">skeleton_state_to_joint_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.split_mesh_by_texture_region"><code class="docutils literal notranslate"><span class="pre">split_mesh_by_texture_region()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.strip_joints"><code class="docutils literal notranslate"><span class="pre">strip_joints()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.strip_lower_body_vertices"><code class="docutils literal notranslate"><span class="pre">strip_lower_body_vertices()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.uniform_random_to_model_parameters"><code class="docutils literal notranslate"><span class="pre">uniform_random_to_model_parameters()</span></code></a></li>
@@ -4155,8 +4156,12 @@ Shape: […, numJoints, 8]</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.reduce_mesh_by_faces">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_faces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_faces" title="Link to this definition"></a></dt>
-<dd><p>Reduces the mesh to only include the specified faces and associated vertices.</p>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_faces" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>reduce_mesh_by_faces(character: pymomentum.geometry.Character, active_faces: numpy.ndarray[bool]) -&gt; pymomentum.geometry.Character</p></li>
+</ol>
+<p>Reduces the mesh to only include the specified faces and associated vertices.</p>
 <p>Creates a new character with mesh reduced to the specified faces. This function
 handles all character components including mesh vertices/faces, skin weights,
 blend shapes, pose shapes, and other mesh-related data.</p>
@@ -4171,12 +4176,34 @@ blend shapes, pose shapes, and other mesh-related data.</p>
 <dd class="field-even"><p>A new character whose mesh only includes the marked faces and their associated data.</p>
 </dd>
 </dl>
+<ol class="arabic simple" start="2">
+<li><p>reduce_mesh_by_faces(mesh: pymomentum.geometry.Mesh, active_faces: numpy.ndarray[bool]) -&gt; pymomentum.geometry.Mesh</p></li>
+</ol>
+<p>Reduces a standalone mesh to only include the specified faces and associated vertices.</p>
+<p>This is the <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a>-only version that works without a <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>. It handles
+vertices, normals, colors, confidence, faces, lines, texcoords, texcoord_faces, and
+texcoord_lines with proper index remapping and compaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The mesh to reduce.</p></li>
+<li><p><strong>active_faces</strong> – A boolean array marking which faces should be retained.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> containing only the marked faces and their referenced vertices.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.reduce_mesh_by_vertices">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_vertices" title="Link to this definition"></a></dt>
-<dd><p>Reduces the mesh to only include the specified vertices and associated faces.</p>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_vertices" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>reduce_mesh_by_vertices(character: pymomentum.geometry.Character, active_vertices: numpy.ndarray[bool]) -&gt; pymomentum.geometry.Character</p></li>
+</ol>
+<p>Reduces the mesh to only include the specified vertices and associated faces.</p>
 <p>Creates a new character with mesh reduced to the specified vertices. This function
 handles all character components including mesh vertices/faces, skin weights,
 blend shapes, pose shapes, and other mesh-related data.</p>
@@ -4189,6 +4216,24 @@ blend shapes, pose shapes, and other mesh-related data.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A new character whose mesh only includes the marked vertices and their associated data.</p>
+</dd>
+</dl>
+<ol class="arabic simple" start="2">
+<li><p>reduce_mesh_by_vertices(mesh: pymomentum.geometry.Mesh, active_vertices: numpy.ndarray[bool]) -&gt; pymomentum.geometry.Mesh</p></li>
+</ol>
+<p>Reduces a standalone mesh to only include the specified vertices and associated faces.</p>
+<p>This is the <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a>-only version that works without a <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>. It handles
+vertices, normals, colors, confidence, faces, lines, texcoords, texcoord_faces, and
+texcoord_lines with proper index remapping and compaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The mesh to reduce.</p></li>
+<li><p><strong>active_vertices</strong> – A boolean array marking which vertices should be retained.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> containing only the marked vertices and their associated faces.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4269,6 +4314,41 @@ Shape: […, numJoints, 8]</p></li>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Numpy array containing the joint parameters.
 Shape: […, numJointParams]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.split_mesh_by_texture_region">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">split_mesh_by_texture_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_binary_search_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.split_mesh_by_texture_region" title="Link to this definition"></a></dt>
+<dd><p>Split mesh triangles along texture region boundaries via binary search.</p>
+<p>For each face in the mesh, this function classifies its texcoord vertices by sampling
+the texture at their UV positions. Faces fully inside the region are kept unchanged.
+Faces fully outside are discarded. Boundary faces (with mixed inside/outside vertices)
+are split by finding the crossing point along each edge via binary search in UV space,
+creating new vertices and sub-triangles. The result is compacted to remove unused
+vertices and texcoords.</p>
+<p>This is useful for extracting a clean sub-mesh corresponding to a painted texture region,
+with the boundary triangles cut precisely along the region boundary rather than being
+included or excluded whole.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> containing vertices, faces, texcoords, and texcoord_faces.
+Must have non-empty texcoords and texcoord_faces.</p></li>
+<li><p><strong>texture</strong> – RGB texture image as a numpy array with shape <code class="docutils literal notranslate"><span class="pre">[height,</span> <span class="pre">width,</span> <span class="pre">3]</span></code>
+and dtype <code class="docutils literal notranslate"><span class="pre">uint8</span></code>.</p></li>
+<li><p><strong>region_colors</strong> – RGB colors defining the “inside” region as a numpy array with shape
+<code class="docutils literal notranslate"><span class="pre">[n_colors,</span> <span class="pre">3]</span></code> and dtype <code class="docutils literal notranslate"><span class="pre">uint8</span></code>. A texcoord vertex is considered
+“inside” if the texture color at its UV matches any of these colors.</p></li>
+<li><p><strong>num_binary_search_steps</strong> – Number of binary search iterations for finding edge crossing
+points. Higher values give more accurate boundaries. 8 iterations
+gives 1/256 sub-pixel accuracy. Defaults to 8.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> containing only the inside portion of the original mesh, with
+boundary triangles split along the texture region boundary.</p>
 </dd>
 </dl>
 </dd></dl>
