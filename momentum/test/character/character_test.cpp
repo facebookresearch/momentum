@@ -1568,3 +1568,24 @@ TYPED_TEST(CharacterTest, MeshReductionSkinningConsistency) {
         << ", reduced=" << reducedVertex.transpose();
   }
 }
+
+// Test that simplifySkeleton properly validates collision geometry parent indices.
+// This tests the bounds checking fix in character.cpp.
+TYPED_TEST(CharacterTest, SimplifySkeletonCollisionBoundsCheck) {
+  // Create a character with valid collision geometry
+  std::vector<bool> activeJoints(this->character.skeleton.joints.size(), false);
+  activeJoints[0] = true; // root is active
+  activeJoints[2] = true; // joint2 is active
+
+  // Simplify skeleton - collision geometry should be properly remapped
+  auto simplifiedCharacter = this->character.simplifySkeleton(activeJoints);
+
+  // Verify that collision geometry parent indices are within valid bounds
+  if (simplifiedCharacter.collision != nullptr) {
+    for (const auto& capsule : *simplifiedCharacter.collision) {
+      EXPECT_LT(capsule.parent, simplifiedCharacter.skeleton.joints.size())
+          << "Collision parent index " << capsule.parent << " exceeds skeleton size "
+          << simplifiedCharacter.skeleton.joints.size();
+    }
+  }
+}

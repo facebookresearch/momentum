@@ -326,10 +326,12 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
         continue;
       }
 
-      const Packet<T> overlapFraction = overlap / distance;
+      // Use clamped distance to avoid division by zero in SIMD lanes
+      constexpr T kMinSafeDistance = T(1e-8);
+      const Packet<T> safeDistance = drjit::maximum(distance, Packet<T>(kMinSafeDistance));
 
       // calculate weight
-      const Packet<T> wgt = -2.0f * kCollisionWeight * this->weight_ * overlapFraction;
+      const Packet<T> wgt = -2.0f * kCollisionWeight * this->weight_ * overlap / safeDistance;
 
       drjit::masked(error, finalMask) +=
           kCollisionWeight * this->weight_ * drjit::square(radius - distance);
@@ -523,9 +525,13 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
       drjit::masked(error, finalMask) +=
           kCollisionWeight * this->weight_ * drjit::square(radius - distance);
 
+      // Use clamped distance to avoid division by zero in SIMD lanes
+      constexpr T kMinSafeDistance = T(1e-8);
+      const Packet<T> safeDistance = drjit::maximum(distance, Packet<T>(kMinSafeDistance));
+
       // calculate collision resolve direction. this is what we need to push joint parent i in.
       // the direction for joint parent j is the inverse
-      const Packet<T> inverseDistance = 1.0 / distance;
+      const Packet<T> inverseDistance = T(1.0) / safeDistance;
 
       // calculate constant factor
       const Packet<T> fac = 2.0f * inverseDistance * wgt;
