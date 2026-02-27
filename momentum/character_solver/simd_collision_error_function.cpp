@@ -10,8 +10,10 @@
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character_solver/error_function_utils.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
+#include "momentum/math/constants.h"
 #include "momentum/simd/simd.h"
 
 namespace momentum {
@@ -134,56 +136,13 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
   // Iterate over all possible pairs of geometry objects
   const auto numPotentialPairs = n * (n - 1) / 2;
   excludingPairIds_.reserve(numPotentialPairs);
-  T distance = NAN;
-  Vector2<T> cp;
-  T overlap = NAN;
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = i + 1; j < n; ++j) {
-      const std::pair<size_t, size_t> pairId = std::make_pair(i, j);
-
-      // Check if the pair intersects in the initial pose
-      if (!overlaps(
-              collisionState_.origin[i],
-              collisionState_.direction[i],
-              collisionState_.radius[i],
-              collisionState_.delta[i],
-              collisionState_.origin[j],
-              collisionState_.direction[j],
-              collisionState_.radius[j],
-              collisionState_.delta[j],
-              distance,
-              cp,
-              overlap)) {
-        // no, it doesn't. check
-
-        // walk down the this->skeleton_ hierarchy for the collision pair until we find a common
-        // ancestor
-        size_t p0 = collisionGeometry_[i].parent;
-        size_t p1 = collisionGeometry_[j].parent;
-        size_t count = 0;
-
-        // Find the common ancestor. We can always just walk up the higher joint index because the
-        // parent always has to have a lower index than the child joint.
-        while (p0 != p1) {
-          if (p0 > p1) {
-            p0 = this->skeleton_.joints[p0].parent;
-          } else {
-            p1 = this->skeleton_.joints[p1].parent;
-          }
-          count++;
-        }
-
-        // Store collision pairs excluding those with the same parent or adjacent joints
-        // If there's an overlap, add the pair ID to the set of excluding pair IDs
-        if (count <= 1) {
-          excludingPairIds_.insert(pairId);
-        }
-
+      if (isValidCollisionPair(collisionState_, collisionGeometry_, this->skeleton_, i, j)) {
         jacobianSize_++;
-        continue;
+      } else {
+        excludingPairIds_.insert(std::make_pair(i, j));
       }
-
-      excludingPairIds_.insert(pairId);
     }
   }
   // TODO: Consider using BVH for faster intersection checks
@@ -347,6 +306,13 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
         const Eigen::Vector3<T> position_ik = extractSingleElement(position_i, k);
         const Eigen::Vector3<T> position_jk = extractSingleElement(position_j, k);
         const T wgt_k = wgt[k];
+        const T distance_k = distance[k];
+
+        // Effective radii at the closest points (for scale derivative correction)
+        const T radiusA_at_cp_k =
+            collisionState_.radius[iCol][0] + T(t_i[k]) * collisionState_.delta[iCol];
+        const T radiusB_at_cp_k =
+            collisionState_.radius[jCol[k]][0] + T(t_j[k]) * collisionState_.delta[jCol[k]];
 
         // -----------------------------------
         //  process first joint
@@ -357,49 +323,33 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
           const size_t paramIndex = jointIndex * kParametersPerJoint;
           const Vector3<T> posd = position_ik - jointState.translation();
 
-          // calculate derivatives based on active joints
           for (size_t d = 0; d < 3; d++) {
             if (this->activeJointParams_[paramIndex + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * wgt_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-                   index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index) {
-                gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              gradient_jointParams_to_modelParams(
+                  direction_k.dot(jointState.getTranslationDerivative(d)) * wgt_k,
+                  paramIndex + d,
+                  this->parameterTransform_,
+                  gradient);
             }
             if (this->activeJointParams_[paramIndex + 3 + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * wgt_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index =
-                       this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-                   index <
-                   this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index) {
-                gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              gradient_jointParams_to_modelParams(
+                  direction_k.dot(jointState.getRotationDerivative(d, posd)) * wgt_k,
+                  paramIndex + 3 + d,
+                  this->parameterTransform_,
+                  gradient);
             }
           }
           if (this->activeJointParams_[paramIndex + 6]) {
-            // calculate joint gradient
-            const T val = direction_k.dot(jointState.getScaleDerivative(posd)) * wgt_k;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-                 index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index) {
-              gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                  val * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            // Scale derivative has an extra radius term
+            gradient_jointParams_to_modelParams(
+                (direction_k.dot(jointState.getScaleDerivative(posd)) -
+                 distance_k * radiusA_at_cp_k * ln2<T>()) *
+                    wgt_k,
+                paramIndex + 6,
+                this->parameterTransform_,
+                gradient);
           }
 
-          // go to the next joint
           jointIndex = this->skeleton_.joints[jointIndex].parent;
         }
 
@@ -412,53 +362,52 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
           const size_t paramIndex = jointIndex * kParametersPerJoint;
           const Vector3<T> posd = position_jk - jointState.translation();
 
-          // calculate derivatives based on active joints
           for (size_t d = 0; d < 3; d++) {
             if (this->activeJointParams_[paramIndex + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * -wgt_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-                   index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index) {
-                gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              gradient_jointParams_to_modelParams(
+                  direction_k.dot(jointState.getTranslationDerivative(d)) * -wgt_k,
+                  paramIndex + d,
+                  this->parameterTransform_,
+                  gradient);
             }
             if (this->activeJointParams_[paramIndex + 3 + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * -wgt_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              const auto maxIndex =
-                  this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-              for (auto index =
-                       this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-                   index < maxIndex;
-                   ++index) {
-                gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              gradient_jointParams_to_modelParams(
+                  direction_k.dot(jointState.getRotationDerivative(d, posd)) * -wgt_k,
+                  paramIndex + 3 + d,
+                  this->parameterTransform_,
+                  gradient);
             }
           }
           if (this->activeJointParams_[paramIndex + 6]) {
-            // calculate joint gradient
-            const T val = direction_k.dot(jointState.getScaleDerivative(posd)) * -wgt_k;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            const auto maxIndex =
-                this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-            for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-                 index < maxIndex;
-                 ++index) {
-              gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                  val * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            gradient_jointParams_to_modelParams(
+                (direction_k.dot(jointState.getScaleDerivative(posd)) +
+                 distance_k * radiusB_at_cp_k * ln2<T>()) *
+                    -wgt_k,
+                paramIndex + 6,
+                this->parameterTransform_,
+                gradient);
           }
 
-          // go to the next joint
           jointIndex = this->skeleton_.joints[jointIndex].parent;
+        }
+
+        // -----------------------------------
+        //  process scale derivatives above common ancestor
+        // -----------------------------------
+        // Translation and rotation derivatives cancel above the LCA; scale does not.
+        {
+          const T netScaleVal =
+              (direction_k.squaredNorm() - distance_k * (radiusA_at_cp_k + radiusB_at_cp_k)) *
+              ln2<T>() * wgt_k;
+          size_t ancestorIndex = commonAncestor;
+          while (ancestorIndex != kInvalidIndex) {
+            const size_t paramIndex = ancestorIndex * kParametersPerJoint;
+            if (this->activeJointParams_[paramIndex + 6]) {
+              gradient_jointParams_to_modelParams(
+                  netScaleVal, paramIndex + 6, this->parameterTransform_, gradient);
+            }
+            ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
+          }
         }
       }
     }
@@ -528,7 +477,7 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
       const Packet<T> inverseDistance = 1.0 / distance;
 
       // calculate constant factor
-      const Packet<T> fac = 2.0f * inverseDistance * wgt;
+      const Packet<T> fac = inverseDistance * wgt;
 
       const size_t iJoint = collisionGeometry_[iCol].parent;
       for (uint32_t k = 0; k < kSimdPacketSize; ++k) {
@@ -541,6 +490,15 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
 
         const Eigen::Vector3<T> direction_k = extractSingleElement(direction, k);
         const T fac_k = fac[k];
+        const T wgt_k = wgt;
+
+        // Effective radii at the closest points (for scale derivative correction)
+        const T radiusA_at_cp_k =
+            collisionState_.radius[iCol][0] + T(t_i[k]) * collisionState_.delta[iCol];
+        const T radiusB_at_cp_k =
+            collisionState_.radius[jCol[k]][0] + T(t_j[k]) * collisionState_.delta[jCol[k]];
+
+        auto jacobianRow = jacobian.middleRows(row, 1);
 
         // -----------------------------------
         //  process first joint
@@ -552,49 +510,32 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
           const Eigen::Vector3<T> posd =
               extractSingleElement(position_i, k) - jointState.translation();
 
-          // calculate derivatives based on active joints
           for (size_t d = 0; d < 3; d++) {
             if (this->activeJointParams_[paramIndex + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * -fac_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-                   index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index) {
-                jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              jacobian_jointParams_to_modelParams<T>(
+                  direction_k.dot(jointState.getTranslationDerivative(d)) * -fac_k,
+                  paramIndex + d,
+                  this->parameterTransform_,
+                  jacobianRow);
             }
             if (this->activeJointParams_[paramIndex + 3 + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * -fac_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index =
-                       this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-                   index <
-                   this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index) {
-                jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              jacobian_jointParams_to_modelParams<T>(
+                  direction_k.dot(jointState.getRotationDerivative(d, posd)) * -fac_k,
+                  paramIndex + 3 + d,
+                  this->parameterTransform_,
+                  jacobianRow);
             }
           }
           if (this->activeJointParams_[paramIndex + 6]) {
-            // calculate joint gradient
-            const T val = direction_k.dot(jointState.getScaleDerivative(posd)) * -fac_k;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-                 index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index) {
-              jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                  val * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            // Scale derivative has an extra radius term
+            jacobian_jointParams_to_modelParams<T>(
+                direction_k.dot(jointState.getScaleDerivative(posd)) * -fac_k +
+                    wgt_k * radiusA_at_cp_k * ln2<T>(),
+                paramIndex + 6,
+                this->parameterTransform_,
+                jacobianRow);
           }
 
-          // go to the next joint
           jointIndex = this->skeleton_.joints[jointIndex].parent;
         }
 
@@ -607,53 +548,53 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
           const size_t paramIndex = jointIndex * kParametersPerJoint;
           const Vector3<T> posd = extractSingleElement(position_j, k) - jointState.translation();
 
-          // calculate derivatives based on active joints
           for (size_t d = 0; d < 3; d++) {
             if (this->activeJointParams_[paramIndex + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * fac_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-                   index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index) {
-                jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              jacobian_jointParams_to_modelParams<T>(
+                  direction_k.dot(jointState.getTranslationDerivative(d)) * fac_k,
+                  paramIndex + d,
+                  this->parameterTransform_,
+                  jacobianRow);
             }
             if (this->activeJointParams_[paramIndex + 3 + d]) {
-              // calculate joint gradient
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * fac_k;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index =
-                       this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-                   index <
-                   this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index) {
-                jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                    val * this->parameterTransform_.transform.valuePtr()[index];
-              }
+              jacobian_jointParams_to_modelParams<T>(
+                  direction_k.dot(jointState.getRotationDerivative(d, posd)) * fac_k,
+                  paramIndex + 3 + d,
+                  this->parameterTransform_,
+                  jacobianRow);
             }
           }
           if (this->activeJointParams_[paramIndex + 6]) {
-            // calculate joint gradient
-            const T val = direction_k.dot(jointState.getScaleDerivative(posd)) * fac_k;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-                 index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index) {
-              jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                  val * this->parameterTransform_.transform.valuePtr()[index];
-            }
+            jacobian_jointParams_to_modelParams<T>(
+                direction_k.dot(jointState.getScaleDerivative(posd)) * fac_k +
+                    wgt_k * radiusB_at_cp_k * ln2<T>(),
+                paramIndex + 6,
+                this->parameterTransform_,
+                jacobianRow);
           }
 
-          // go to the next joint
           jointIndex = this->skeleton_.joints[jointIndex].parent;
         }
 
-        residual(row) = overlap[k] * wgt;
+        // -----------------------------------
+        //  process scale derivatives above common ancestor
+        // -----------------------------------
+        // Translation and rotation derivatives cancel above the LCA; scale does not.
+        {
+          const T netScaleVal = -fac_k * ln2<T>() * direction_k.squaredNorm() +
+              wgt_k * (radiusA_at_cp_k + radiusB_at_cp_k) * ln2<T>();
+          size_t ancestorIndex = commonAncestor;
+          while (ancestorIndex != kInvalidIndex) {
+            const size_t paramIndex = ancestorIndex * kParametersPerJoint;
+            if (this->activeJointParams_[paramIndex + 6]) {
+              jacobian_jointParams_to_modelParams<T>(
+                  netScaleVal, paramIndex + 6, this->parameterTransform_, jacobianRow);
+            }
+            ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
+          }
+        }
+
+        residual(row) = overlap[k] * wgt_k;
         row++;
       } // for each element of the packet k
     } // for each simd packet j

@@ -61,6 +61,13 @@ struct SkeletonT {
   /// A joint is considered to be its own ancestor (isAncestor(id, id) returns true).
   [[nodiscard]] bool isAncestor(size_t jointId, size_t ancestorJointId) const;
 
+  /// Checks if two joints are the same joint or directly adjacent (one is the direct parent
+  /// of the other) in the skeleton hierarchy.
+  ///
+  /// Returns false if either joint is kInvalidIndex, since world-fixed entities have no
+  /// joint ancestry and are never considered adjacent to skeleton joints.
+  [[nodiscard]] bool isSameOrAdjacentJoints(size_t joint1, size_t joint2) const;
+
   /// Finds the closest common ancestor of two joints in the hierarchy.
   ///
   /// Returns the index of the joint that is the lowest common ancestor
