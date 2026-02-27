@@ -82,6 +82,16 @@ bool SkeletonT<T>::isAncestor(size_t jointId, size_t ancestorJointId) const {
 }
 
 template <typename T>
+bool SkeletonT<T>::isSameOrAdjacentJoints(size_t joint1, size_t joint2) const {
+  if (joint1 == kInvalidIndex || joint2 == kInvalidIndex) {
+    return false;
+  }
+  MT_CHECK(joint1 < joints.size(), "{} vs {}", joint1, joints.size());
+  MT_CHECK(joint2 < joints.size(), "{} vs {}", joint2, joints.size());
+  return joint1 == joint2 || joints[joint1].parent == joint2 || joints[joint2].parent == joint1;
+}
+
+template <typename T>
 size_t SkeletonT<T>::commonAncestor(size_t joint1, size_t joint2) const {
   MT_CHECK(joint1 == kInvalidIndex || joint1 < joints.size());
   MT_CHECK(joint2 == kInvalidIndex || joint2 < joints.size());
