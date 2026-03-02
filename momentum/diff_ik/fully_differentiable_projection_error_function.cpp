@@ -42,7 +42,7 @@ template <typename JetType>
       (projection_cons * p_world_cm.homogeneous()).eval();
 
   // Behind camera:
-  if (p_projected_cm.z().a < _nearClip) {
+  if (p_projected_cm.z().a < nearClip_) {
     return result;
   }
 

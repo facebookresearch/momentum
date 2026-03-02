@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/constraint_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -32,7 +32,7 @@ struct PositionDataT : ConstraintData {
 /// Each constraint specifies a locator on the skeleton (parent joint and offset), and its target 3D
 /// position.
 template <typename T>
-class PositionErrorFunctionT : public ConstraintErrorFunctionT<T, PositionDataT<T>> {
+class PositionErrorFunctionT : public JointErrorFunctionT<T, PositionDataT<T>> {
  public:
   /// Constructor
   ///
@@ -45,7 +45,7 @@ class PositionErrorFunctionT : public ConstraintErrorFunctionT<T, PositionDataT<
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, PositionDataT<T>>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, PositionDataT<T>>(skel, pt, lossAlpha, lossC) {}
 
   /// A convenience api where character contains info of the skeleton and parameter transform.
   ///
@@ -68,8 +68,8 @@ class PositionErrorFunctionT : public ConstraintErrorFunctionT<T, PositionDataT<
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector3<T>& f,
-      optional_ref<std::array<Vector3<T>, 1>> v = {},
-      optional_ref<std::array<Matrix3<T>, 1>> dfdv = {}) const final;
+      std::array<Vector3<T>, 1>& v,
+      std::array<Matrix3<T>, 1>& dfdv) const final;
 };
 
 } // namespace momentum
