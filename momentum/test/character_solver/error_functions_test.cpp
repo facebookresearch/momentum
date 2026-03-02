@@ -2116,7 +2116,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, DistanceConstraint_GradientsAndJacobians
     constraintData.origin = normal<Vector3<T>>(0, 1);
     constraintData.target = 2.3f;
     constraintData.weight = kTestWeightValue;
-    errorFunction.setConstraints({constraintData});
+    const std::array constraints = {constraintData};
+    errorFunction.setConstraints(constraints);
 
     if constexpr (std::is_same_v<T, float>) {
       TEST_GRADIENT_AND_JACOBIAN(
