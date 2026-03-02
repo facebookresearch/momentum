@@ -234,7 +234,9 @@ character_test_sources = [
 character_solver_public_headers = [
     "character_solver/aim_error_function.h",
     "character_solver/camera_intrinsics_parameters.h",
+    "character_solver/camera_projection_constraint_error_function.h",
     "character_solver/camera_projection_error_function.h",
+    "character_solver/center_of_mass_error_function.h",
     "character_solver/collision_error_function.h",
     "character_solver/collision_error_function_stateless.h",
     "character_solver/distance_error_function.h",
@@ -249,6 +251,7 @@ character_solver_public_headers = [
     "character_solver/joint_to_joint_position_error_function.h",
     "character_solver/limit_error_function.h",
     "character_solver/model_parameters_error_function.h",
+    "character_solver/multi_source_error_function.h",
     "character_solver/normal_error_function.h",
     "character_solver/orientation_error_function.h",
     "character_solver/plane_error_function.h",
@@ -280,7 +283,9 @@ character_solver_public_headers = [
 character_solver_sources = [
     "character_solver/aim_error_function.cpp",
     "character_solver/camera_intrinsics_parameters.cpp",
+    "character_solver/camera_projection_constraint_error_function.cpp",
     "character_solver/camera_projection_error_function.cpp",
+    "character_solver/center_of_mass_error_function.cpp",
     "character_solver/collision_error_function.cpp",
     "character_solver/collision_error_function_stateless.cpp",
     "character_solver/distance_error_function.cpp",
@@ -291,6 +296,7 @@ character_solver_sources = [
     "character_solver/joint_to_joint_position_error_function.cpp",
     "character_solver/limit_error_function.cpp",
     "character_solver/model_parameters_error_function.cpp",
+    "character_solver/multi_source_error_function.cpp",
     "character_solver/normal_error_function.cpp",
     "character_solver/orientation_error_function.cpp",
     "character_solver/plane_error_function.cpp",
@@ -320,8 +326,11 @@ character_solver_sources = [
 
 character_solver_test_sources = [
     "test/character_solver/blend_shape_test.cpp",
+    "test/character_solver/camera_projection_constraint_error_function_test.cpp",
     "test/character_solver/camera_projection_error_function_test.cpp",
+    "test/character_solver/center_of_mass_error_function_test.cpp",
     "test/character_solver/error_functions_test.cpp",
+    "test/character_solver/general_error_function_test.cpp",
     "test/character_solver/inverse_kinematics_test.cpp",
     "test/character_solver/skeleton_derivative_test.cpp",
     "test/character_solver/solver_test.cpp",
