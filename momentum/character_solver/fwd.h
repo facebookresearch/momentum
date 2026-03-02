@@ -262,44 +262,6 @@ using SkinnedLocatorTriangleConstraintd_const_w =
     ::std::weak_ptr<const SkinnedLocatorTriangleConstraintd>;
 
 template <typename T>
-struct VertexConstraintT;
-using VertexConstraint = VertexConstraintT<float>;
-using VertexConstraintd = VertexConstraintT<double>;
-
-using VertexConstraint_p = ::std::shared_ptr<VertexConstraint>;
-using VertexConstraint_u = ::std::unique_ptr<VertexConstraint>;
-using VertexConstraint_w = ::std::weak_ptr<VertexConstraint>;
-using VertexConstraint_const_p = ::std::shared_ptr<const VertexConstraint>;
-using VertexConstraint_const_u = ::std::unique_ptr<const VertexConstraint>;
-using VertexConstraint_const_w = ::std::weak_ptr<const VertexConstraint>;
-
-using VertexConstraintd_p = ::std::shared_ptr<VertexConstraintd>;
-using VertexConstraintd_u = ::std::unique_ptr<VertexConstraintd>;
-using VertexConstraintd_w = ::std::weak_ptr<VertexConstraintd>;
-using VertexConstraintd_const_p = ::std::shared_ptr<const VertexConstraintd>;
-using VertexConstraintd_const_u = ::std::unique_ptr<const VertexConstraintd>;
-using VertexConstraintd_const_w = ::std::weak_ptr<const VertexConstraintd>;
-
-template <typename T>
-struct VertexProjectionConstraintT;
-using VertexProjectionConstraint = VertexProjectionConstraintT<float>;
-using VertexProjectionConstraintd = VertexProjectionConstraintT<double>;
-
-using VertexProjectionConstraint_p = ::std::shared_ptr<VertexProjectionConstraint>;
-using VertexProjectionConstraint_u = ::std::unique_ptr<VertexProjectionConstraint>;
-using VertexProjectionConstraint_w = ::std::weak_ptr<VertexProjectionConstraint>;
-using VertexProjectionConstraint_const_p = ::std::shared_ptr<const VertexProjectionConstraint>;
-using VertexProjectionConstraint_const_u = ::std::unique_ptr<const VertexProjectionConstraint>;
-using VertexProjectionConstraint_const_w = ::std::weak_ptr<const VertexProjectionConstraint>;
-
-using VertexProjectionConstraintd_p = ::std::shared_ptr<VertexProjectionConstraintd>;
-using VertexProjectionConstraintd_u = ::std::unique_ptr<VertexProjectionConstraintd>;
-using VertexProjectionConstraintd_w = ::std::weak_ptr<VertexProjectionConstraintd>;
-using VertexProjectionConstraintd_const_p = ::std::shared_ptr<const VertexProjectionConstraintd>;
-using VertexProjectionConstraintd_const_u = ::std::unique_ptr<const VertexProjectionConstraintd>;
-using VertexProjectionConstraintd_const_w = ::std::weak_ptr<const VertexProjectionConstraintd>;
-
-template <typename T>
 struct VertexSDFConstraintT;
 using VertexSDFConstraint = VertexSDFConstraintT<float>;
 using VertexSDFConstraintd = VertexSDFConstraintT<double>;
@@ -952,49 +914,6 @@ using TrustRegionQRd_w = ::std::weak_ptr<TrustRegionQRd>;
 using TrustRegionQRd_const_p = ::std::shared_ptr<const TrustRegionQRd>;
 using TrustRegionQRd_const_u = ::std::unique_ptr<const TrustRegionQRd>;
 using TrustRegionQRd_const_w = ::std::weak_ptr<const TrustRegionQRd>;
-
-template <typename T>
-class VertexErrorFunctionT;
-using VertexErrorFunction = VertexErrorFunctionT<float>;
-using VertexErrorFunctiond = VertexErrorFunctionT<double>;
-
-using VertexErrorFunction_p = ::std::shared_ptr<VertexErrorFunction>;
-using VertexErrorFunction_u = ::std::unique_ptr<VertexErrorFunction>;
-using VertexErrorFunction_w = ::std::weak_ptr<VertexErrorFunction>;
-using VertexErrorFunction_const_p = ::std::shared_ptr<const VertexErrorFunction>;
-using VertexErrorFunction_const_u = ::std::unique_ptr<const VertexErrorFunction>;
-using VertexErrorFunction_const_w = ::std::weak_ptr<const VertexErrorFunction>;
-
-using VertexErrorFunctiond_p = ::std::shared_ptr<VertexErrorFunctiond>;
-using VertexErrorFunctiond_u = ::std::unique_ptr<VertexErrorFunctiond>;
-using VertexErrorFunctiond_w = ::std::weak_ptr<VertexErrorFunctiond>;
-using VertexErrorFunctiond_const_p = ::std::shared_ptr<const VertexErrorFunctiond>;
-using VertexErrorFunctiond_const_u = ::std::unique_ptr<const VertexErrorFunctiond>;
-using VertexErrorFunctiond_const_w = ::std::weak_ptr<const VertexErrorFunctiond>;
-
-template <typename T>
-class VertexProjectionErrorFunctionT;
-using VertexProjectionErrorFunction = VertexProjectionErrorFunctionT<float>;
-using VertexProjectionErrorFunctiond = VertexProjectionErrorFunctionT<double>;
-
-using VertexProjectionErrorFunction_p = ::std::shared_ptr<VertexProjectionErrorFunction>;
-using VertexProjectionErrorFunction_u = ::std::unique_ptr<VertexProjectionErrorFunction>;
-using VertexProjectionErrorFunction_w = ::std::weak_ptr<VertexProjectionErrorFunction>;
-using VertexProjectionErrorFunction_const_p =
-    ::std::shared_ptr<const VertexProjectionErrorFunction>;
-using VertexProjectionErrorFunction_const_u =
-    ::std::unique_ptr<const VertexProjectionErrorFunction>;
-using VertexProjectionErrorFunction_const_w = ::std::weak_ptr<const VertexProjectionErrorFunction>;
-
-using VertexProjectionErrorFunctiond_p = ::std::shared_ptr<VertexProjectionErrorFunctiond>;
-using VertexProjectionErrorFunctiond_u = ::std::unique_ptr<VertexProjectionErrorFunctiond>;
-using VertexProjectionErrorFunctiond_w = ::std::weak_ptr<VertexProjectionErrorFunctiond>;
-using VertexProjectionErrorFunctiond_const_p =
-    ::std::shared_ptr<const VertexProjectionErrorFunctiond>;
-using VertexProjectionErrorFunctiond_const_u =
-    ::std::unique_ptr<const VertexProjectionErrorFunctiond>;
-using VertexProjectionErrorFunctiond_const_w =
-    ::std::weak_ptr<const VertexProjectionErrorFunctiond>;
 
 template <typename T>
 class VertexSDFErrorFunctionT;

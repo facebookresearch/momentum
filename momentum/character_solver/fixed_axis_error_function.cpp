@@ -7,9 +7,6 @@
 
 #include "momentum/character_solver/fixed_axis_error_function.h"
 
-#include "momentum/character/character.h"
-#include "momentum/character/skeleton.h"
-#include "momentum/character/skeleton_state.h"
 #include "momentum/common/profile.h"
 
 namespace momentum {
@@ -19,19 +16,14 @@ void FixedAxisDiffErrorFunctionT<T>::evalFunction(
     const size_t constrIndex,
     const JointStateT<T>& state,
     Vector3<T>& f,
-    optional_ref<std::array<Vector3<T>, 1>> v,
-    optional_ref<std::array<Matrix3<T>, 1>> dfdv) const {
+    std::array<Vector3<T>, 1>& v,
+    std::array<Matrix3<T>, 1>& dfdv) const {
   MT_PROFILE_FUNCTION();
 
   const FixedAxisDataT<T>& constr = this->constraints_[constrIndex];
-  Vector3<T> vec = state.rotation() * constr.localAxis;
-  f = vec - constr.globalAxis;
-  if (v) {
-    v->get().at(0) = std::move(vec);
-  }
-  if (dfdv) {
-    dfdv->get().at(0).setIdentity();
-  }
+  v[0] = state.rotation() * constr.localAxis;
+  f = v[0] - constr.globalAxis;
+  dfdv[0].setIdentity();
 }
 
 template <typename T>
@@ -39,19 +31,14 @@ void FixedAxisCosErrorFunctionT<T>::evalFunction(
     const size_t constrIndex,
     const JointStateT<T>& state,
     Vector<T, 1>& f,
-    optional_ref<std::array<Vector3<T>, 1>> v,
-    optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 1>> dfdv) const {
+    std::array<Vector3<T>, 1>& v,
+    std::array<Eigen::Matrix<T, 1, 3>, 1>& dfdv) const {
   MT_PROFILE_FUNCTION();
 
   const FixedAxisDataT<T>& constr = this->constraints_[constrIndex];
-  Vector3<T> vec = state.rotation() * constr.localAxis;
-  f[0] = 1 - vec.dot(constr.globalAxis);
-  if (v) {
-    v->get().at(0) = std::move(vec);
-  }
-  if (dfdv) {
-    dfdv->get().at(0) = -constr.globalAxis;
-  }
+  v[0] = state.rotation() * constr.localAxis;
+  f[0] = 1 - v[0].dot(constr.globalAxis);
+  dfdv[0] = -constr.globalAxis.transpose();
 }
 
 template <typename T>
@@ -59,29 +46,24 @@ void FixedAxisAngleErrorFunctionT<T>::evalFunction(
     const size_t constrIndex,
     const JointStateT<T>& state,
     Vector<T, 1>& f,
-    optional_ref<std::array<Vector3<T>, 1>> v,
-    optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 1>> dfdv) const {
+    std::array<Vector3<T>, 1>& v,
+    std::array<Eigen::Matrix<T, 1, 3>, 1>& dfdv) const {
   MT_PROFILE_FUNCTION();
 
   const FixedAxisDataT<T>& constr = this->constraints_[constrIndex];
-  Vector3<T> vec = state.rotation() * constr.localAxis;
-  const T dot = vec.dot(constr.globalAxis);
+  v[0] = state.rotation() * constr.localAxis;
+  const T dot = v[0].dot(constr.globalAxis);
   f[0] = std::acos(std::clamp(dot, -T(1), T(1)));
-  if (v) {
-    v->get().at(0) = std::move(vec);
-  }
-  if (dfdv) {
-    // The derivative of d[acos(x)]/dx  = -1/sqrt(1-x^2), where x is the cosine of the angle.
-    // When the angle is 0 or 180, x=+/-1.0, and d[acos(x)] is infinity. But because dx=sine(angle)
-    // is also zero, the final derivative will be zero as well.
-    // Comparing to the Cos version, this Acos version scales up the jacobian by the inverse of
-    // sine.
-    const T sine = sqrt(1 - dot * dot);
-    if (sine > 1e-9) {
-      dfdv->get().at(0) = -constr.globalAxis / sine;
-    } else {
-      dfdv->get().at(0).setZero();
-    }
+  // The derivative of d[acos(x)]/dx  = -1/sqrt(1-x^2), where x is the cosine of the angle.
+  // When the angle is 0 or 180, x=+/-1.0, and d[acos(x)] is infinity. But because dx=sine(angle)
+  // is also zero, the final derivative will be zero as well.
+  // Comparing to the Cos version, this Acos version scales up the jacobian by the inverse of
+  // sine.
+  const T sine = std::sqrt(1 - dot * dot);
+  if (sine > 1e-9) {
+    dfdv[0] = -constr.globalAxis.transpose() / sine;
+  } else {
+    dfdv[0].setZero();
   }
 }
 

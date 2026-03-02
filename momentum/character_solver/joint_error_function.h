@@ -9,39 +9,21 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/types.h>
+#include <momentum/character_solver/error_function_types.h>
+#include <momentum/character_solver/skeleton_derivative.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/math/generalized_loss.h>
 #include <momentum/math/types.h>
 
 #include <optional>
+#include <span>
 
 namespace momentum {
 
-/// Base structure of constraint data
-struct ConstraintData {
-  /// Parent joint index this constraint is under
-  size_t parent = kInvalidIndex;
-  /// Weight of the constraint
-  float weight = 0.0;
-  /// Name of the constraint
-  std::string name = {};
-
-  ConstraintData(size_t pIndex, float w, const std::string& n = "")
-      : parent(pIndex), weight(w), name(n) {}
-};
-
-/// A list of ConstraintData
-using ConstraintDataList = std::vector<ConstraintData>;
-
-/// An optional of a reference. Because optional<T&> is invalid, we need to use reference_wrapper to
-/// make the reference of T as an optional.
-template <typename T>
-using optional_ref = std::optional<std::reference_wrapper<T>>;
-
-/// The ConstraintErrorFunction is a base class of a general form of constraint errors l = w *
-/// loss(f^2), where w is the weight (could be a product of different weighting terms), loss() is
-/// the generalized loss function (see math/generalized_loss.h), and f is a difference vector we
-/// want to minimize.
+/// The JointErrorFunction is a base class for constraint errors of the form l = w * loss(f^2),
+/// where w is the weight (could be a product of different weighting terms), loss() is the
+/// generalized loss function (see math/generalized_loss.h), and f is a difference vector we want to
+/// minimize.
 ///
 /// f takes the form of f(v, target), where v = T(q)*source. T is the global transformation of the
 /// parent joint of the source, and target is the desired value of source in global space. f
@@ -50,15 +32,14 @@ using optional_ref = std::optional<std::reference_wrapper<T>>;
 /// Based on the above, we have
 /// Jacobian: df/dq = df/dv * dv/dT * dT/dq, and
 /// Gradient: dl/dq = dl/df * Jac
-/// Both dl/df and dT/dq are boiler plate code that we can implement in the base class, so a derived
-/// class only needs to implement f and df/dT. However, dT/dq is not efficient to compute, and
-/// Momentum instead implements dv/dq, for any 3-vector v. Therefore, we will compute df/dq = df/dv
-/// * dv/dq, and implement dv/dq in the base class. So a derived class now needs to implement f and
-/// df/dv.
+///
+/// The derivative computation (hierarchy walk from joint to root) is delegated to
+/// SkeletonDerivativeT, keeping the per-constraint logic minimal. Derived classes implement
+/// evalFunction() to define the constraint residual and its derivatives.
 ///
 /// This should work for a point (eg. PositionErrorFunction), or an axis (eg.
 /// FixedAxisErrorFunction), but it can also work for a rotation matrix, or a 3x4 transformation
-/// matrix, by applying the transformation one axis/point at a time.The number of 3-vectors to be
+/// matrix, by applying the transformation one axis/point at a time. The number of 3-vectors to be
 /// transformed in a constraint is NumVec.
 template <
     typename T, // float or double
@@ -70,7 +51,7 @@ template <
         1> // we assume a constraint can be a function of both points and axes, and points come
            // before axes in the NumVec of "v"s. This specifies how many "v"s are points. For
            // example, it's 1 for a point constraint, and 0 for a rotation matrix.
-class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
+class JointErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
   static constexpr size_t kFuncDim = FuncDim;
   static constexpr size_t kNumVec = NumVec;
@@ -80,13 +61,14 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   using VType = Vector3<T>; // vector type for v
   using DfdvType = Eigen::Matrix<T, FuncDim, 3>; // type for dfdv - it's effectively a vector if f
                                                  // is a scalar (FuncDim=1, eg. PlaneErrorFunction)
+
   /// Constructor
   ///
   /// @param[in] skel: character skeleton
   /// @param[in] pt: parameter transformation
   /// @param[in] lossAlpha: alpha parameter for the loss function
   /// @param[in] lossC: c parameter for the loss function
-  explicit ConstraintErrorFunctionT(
+  explicit JointErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
@@ -98,11 +80,11 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// @param[in] character: character definition
   /// @param[in] lossAlpha: alpha parameter for the loss function
   /// @param[in] lossC: c parameter for the loss function
-  explicit ConstraintErrorFunctionT(
+  explicit JointErrorFunctionT(
       const Character& character,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, Data, FuncDim, NumVec, NumPos>(
+      : JointErrorFunctionT<T, Data, FuncDim, NumVec, NumPos>(
             character.skeleton,
             character.parameterTransform,
             lossAlpha,
@@ -115,20 +97,20 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// implements the rest.
   ///
   /// @param[in] params: current model parameters
-  /// @param[in] state: curren global skeleton joint states computed from the model parameters
+  /// @param[in] state: current global skeleton joint states computed from the model parameters
   /// @param[in] meshState: current mesh state (unused by this base class)
   ///
   /// @return the error function value l
   [[nodiscard]] double getError(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      const MeshStateT<T>& /* meshState */) final;
+      const MeshStateT<T>& meshState) final;
 
-  /// The gradient of the error function: dl/dq = dl/d[f^2] * 2f * df/dv * dv/dq. It gets df/dv from
-  /// the derived class, and implements the rest.
+  /// The gradient of the error function: dl/dq = dl/d[f^2] * 2f * df/dv * dv/dq. It gets df/dv
+  /// from the derived class, and implements the rest.
   ///
   /// @param[in] params: current model parameters
-  /// @param[in] state: curren global skeleton joint states computed from the model parameters
+  /// @param[in] state: current global skeleton joint states computed from the model parameters
   /// @param[in] meshState: current mesh state (unused by this base class)
   /// @param[out] gradient: the gradient vector to accumulate into
   ///
@@ -136,17 +118,17 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      const MeshStateT<T>& /* meshState */,
+      const MeshStateT<T>& meshState,
       Ref<VectorX<T>> gradient) final;
 
   /// For least-square problems, we assume l is the square of a vector function F. The jacobian is
   /// then dF/dq. (A factor 2 is implemented in the solver.) With l2 loss, we have F = sqrt(w) * f,
   /// and the jacobian is sqrt(w) * df/dv * dv/dq. With the generalized loss, the jacobian becomes
-  /// sqrt(w * d[loss]/d[f^2]) * df/dv * dv/dq. It gets df/dv from the derived class, and implements
-  /// the rest.
+  /// sqrt(w * d[loss]/d[f^2]) * df/dv * dv/dq. It gets df/dv from the derived class, and
+  /// implements the rest.
   ///
   /// @param[in] params: current model parameters
-  /// @param[in] state: curren global skeleton joint states computed from the model parameters
+  /// @param[in] state: current global skeleton joint states computed from the model parameters
   /// @param[in] meshState: current mesh state (unused by this base class)
   /// @param[out] jacobian: the output jacobian matrix
   /// @param[out] residual: the output function residual (ie. f scaled by the loss gradient)
@@ -156,7 +138,7 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      const MeshStateT<T>& /* meshState */,
+      const MeshStateT<T>& meshState,
       Ref<MatrixX<T>> jacobian,
       Ref<VectorX<T>> residual,
       int& usedRows) final;
@@ -193,7 +175,7 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 
@@ -211,38 +193,25 @@ class ConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// the constructor to save some dynamic allocation.
   VectorX<T> jointGrad_;
 
-  /// The only function a derived class needs to implement.
-  /// f is needed both for errors and derivatives, v and dfdv are needed only for computing
-  /// derivatives, and therefore optional. An implementation should check if they are provided
-  /// before computing and setting their values. And don't assume they are zero-initialized. Each
-  /// returned v and df/dv corresponds to a source 3-vector (eg. a position constraint, or each of
-  /// the three axis of a rotation constraint).
+  /// Evaluate the constraint residual and derivatives for a single constraint.
   ///
-  /// @param[in] constrIndex: index of the constraint to evaluate
-  /// @param[in] state: JointState of the parent joint with transformation T
-  /// @param[out] f: output the value of f of dimension FuncDim
-  /// @param[out] v: if valid, output the vector v=T*source; there could be NumVec of vs
-  /// @param[out] dfdv: if valid, output the matrix df/dv of dimension FuncDim x 3 per v
+  /// The leaf class computes the world-space vectors v, the residual f, and the
+  /// derivatives dfdv from the constraint data and the parent joint state.
+  /// The first NumPos entries of v are points (w=1), the rest are directions (w=0).
+  ///
+  /// @param[in] constrIndex: index of the constraint
+  /// @param[in] state: the joint state of the constraint's parent joint
+  /// @param[out] f: output residual vector of dimension FuncDim
+  /// @param[out] v: output world-space vectors (NumVec entries)
+  /// @param[out] dfdv: output df/dv matrices (one per world vector)
   virtual void evalFunction(
       size_t constrIndex,
       const JointStateT<T>& state,
       FuncType& f,
-      optional_ref<std::array<VType, NumVec>> v = {},
-      optional_ref<std::array<DfdvType, NumVec>> dfdv = {}) const = 0;
-
- private:
-  double getJacobianForSingleConstraint(
-      const JointStateListT<T>& jointStates,
-      size_t iConstr,
-      Ref<Eigen::MatrixX<T>> jacobian,
-      Ref<Eigen::VectorX<T>> residual);
-
-  double getGradientForSingleConstraint(
-      const JointStateListT<T>& jointStates,
-      size_t iConstr,
-      Ref<VectorX<T>> gradient);
+      std::array<VType, NumVec>& v,
+      std::array<DfdvType, NumVec>& dfdv) const = 0;
 };
 
 } // namespace momentum
 
-#include "momentum/character_solver/constraint_error_function-inl.h"
+#include "momentum/character_solver/joint_error_function-inl.h"

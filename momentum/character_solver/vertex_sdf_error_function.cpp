@@ -88,7 +88,7 @@ const std::vector<VertexSDFConstraintT<T>>& VertexSDFErrorFunctionT<T>::getConst
 }
 
 template <typename T>
-size_t VertexSDFErrorFunctionT<T>::numConstraints() const {
+size_t VertexSDFErrorFunctionT<T>::getNumConstraints() const {
   return constraints_.size();
 }
 

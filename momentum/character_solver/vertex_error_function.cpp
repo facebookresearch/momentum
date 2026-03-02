@@ -6,20 +6,11 @@
  */
 
 #include "momentum/character_solver/vertex_error_function.h"
-#include "momentum/character_solver/skinning_weight_iterator.h"
 
-#include "momentum/character/blend_shape.h"
-#include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
-#include "momentum/character/linear_skinning.h"
 #include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton.h"
-#include "momentum/character/skeleton_state.h"
-#include "momentum/character/skin_weights.h"
-#include "momentum/character_solver/error_function_utils.h"
 #include "momentum/common/checks.h"
-#include "momentum/common/profile.h"
-#include "momentum/math/mesh.h"
 
 #include <dispenso/parallel_for.h>
 
@@ -27,613 +18,155 @@
 
 namespace momentum {
 
-std::string_view toString(VertexConstraintType type) {
-  static const std::array<std::string_view, 4> strings = {
-      "Position", "Plane", "Normal", "SymmetricNormal"};
-  return strings[static_cast<size_t>(type)];
+template <typename T, class Data, size_t FuncDim>
+VertexErrorFunctionT<T, Data, FuncDim>::VertexErrorFunctionT(
+    const Character& character,
+    const ParameterTransform& parameterTransform,
+    const T& lossAlpha,
+    const T& lossC)
+    : SkeletonErrorFunctionT<T>(character.skeleton, parameterTransform),
+      character_(character),
+      loss_(lossAlpha, lossC) {}
+
+template <typename T, class Data, size_t FuncDim>
+const Character* VertexErrorFunctionT<T, Data, FuncDim>::getCharacter() const {
+  return &character_;
 }
 
-template <typename T>
-VertexErrorFunctionT<T>::VertexErrorFunctionT(
-    const Character& character_in,
-    VertexConstraintType type,
-    uint32_t maxThreads)
-    : SkeletonErrorFunctionT<T>(character_in.skeleton, character_in.parameterTransform),
-      character_(character_in),
-      constraintType_(type),
-      maxThreads_(maxThreads) {
-  MT_CHECK(static_cast<bool>(character_in.mesh));
-  MT_CHECK(static_cast<bool>(character_in.skinWeights));
-  MT_THROW_IF(
-      character_in.faceExpressionBlendShape && (type != VertexConstraintType::Position),
-      "Constraint type {} not implemented yet for face. Only Position type is supported.",
-      toString(type));
+template <typename T, class Data, size_t FuncDim>
+bool VertexErrorFunctionT<T, Data, FuncDim>::needsMesh() const {
+  return true;
 }
 
-template <typename T>
-VertexErrorFunctionT<T>::~VertexErrorFunctionT() = default;
+template <typename T, class Data, size_t FuncDim>
+void VertexErrorFunctionT<T, Data, FuncDim>::addConstraint(const Data& constraint) {
+  MT_CHECK(constraint.vertexIndex != kInvalidIndex, "Constraint must have a valid vertex index");
+  constraints_.push_back(constraint);
+}
 
-template <typename T>
-void VertexErrorFunctionT<T>::clearConstraints() {
+template <typename T, class Data, size_t FuncDim>
+void VertexErrorFunctionT<T, Data, FuncDim>::setConstraints(std::span<const Data> constraints) {
+  constraints_.assign(constraints.begin(), constraints.end());
+}
+
+template <typename T, class Data, size_t FuncDim>
+void VertexErrorFunctionT<T, Data, FuncDim>::clearConstraints() {
   constraints_.clear();
 }
 
-template <typename T>
-void VertexErrorFunctionT<T>::addConstraint(
-    int vertexIndex,
-    T weight,
-    const Eigen::Vector3<T>& targetPosition,
-    const Eigen::Vector3<T>& targetNormal) {
-  MT_CHECK(vertexIndex >= 0 && ((size_t)vertexIndex) < character_.mesh->vertices.size());
-  constraints_.push_back(VertexConstraintT<T>{vertexIndex, weight, targetPosition, targetNormal});
+template <typename T, class Data, size_t FuncDim>
+const std::vector<Data>& VertexErrorFunctionT<T, Data, FuncDim>::getConstraints() const {
+  return constraints_;
 }
 
-template <typename T>
-double VertexErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& /* modelParameters */,
-    const SkeletonStateT<T>& /* state */,
+template <typename T, class Data, size_t FuncDim>
+double VertexErrorFunctionT<T, Data, FuncDim>::getError(
+    const ModelParametersT<T>& /*params*/,
+    const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState) {
-  MT_PROFILE_FUNCTION();
+  const size_t numConstraints = constraints_.size();
+  if (numConstraints == 0) {
+    return 0.0;
+  }
 
-  MT_CHECK_NOTNULL(meshState.posedMesh_);
-  MT_CHECK_NOTNULL(meshState.restMesh_);
-
-  // loop over all constraints and calculate the error
   double error = 0.0;
-
-  if (constraintType_ == VertexConstraintType::Position) {
-    for (size_t i = 0; i < constraints_.size(); ++i) {
-      const VertexConstraintT<T>& constr = constraints_[i];
-
-      const Eigen::Vector3<T> diff =
-          meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
-      error += constr.weight * diff.squaredNorm() * kPositionWeight;
-    }
-  } else {
-    const auto [sourceNormalWeight, targetNormalWeight] = computeNormalWeights();
-    for (size_t i = 0; i < constraints_.size(); ++i) {
-      const VertexConstraintT<T>& constr = constraints_[i];
-
-      const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.vertexIndex];
-      Eigen::Vector3<T> targetNormal = constr.targetNormal;
-      if (sourceNormal.dot(constr.targetNormal) < 0) {
-        targetNormal *= -1;
-      }
-      const Eigen::Vector3<T> normal =
-          sourceNormalWeight * sourceNormal + targetNormalWeight * targetNormal;
-
-      // calculate point->plane distance and error
-      const Eigen::Vector3<T> diff =
-          meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
-      const T dist = normal.dot(diff);
-      error += constr.weight * dist * dist * kPlaneWeight;
-    }
-  }
-
-  // return error
-  return error * this->weight_;
-}
-
-template <typename T>
-void VertexErrorFunctionT<T>::calculateDWorldPos(
-    const SkeletonStateT<T>& state,
-    const VertexConstraintT<T>& constr,
-    const Eigen::Vector3<T>& d_restPos,
-    Eigen::Vector3<T>& d_worldPos) const {
-  const auto& skinWeights = *character_.skinWeights;
-
-  for (uint32_t i = 0; i < kMaxSkinJoints; ++i) {
-    const auto w = skinWeights.weight(constr.vertexIndex, i);
-    const auto parentBone = skinWeights.index(constr.vertexIndex, i);
-    if (w > 0) {
-      d_worldPos += w *
-          (state.jointState[parentBone].transform.toLinear() *
-           (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
-    }
-  }
-}
-
-template <typename T>
-double VertexErrorFunctionT<T>::calculatePositionGradient(
-    const ModelParametersT<T>& /* modelParameters */,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    const VertexConstraintT<T>& constr,
-    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const Eigen::Vector3<T> diff =
-      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
-
-  // calculate the difference between target and position and error
-  const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
-
-  SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
-
-  // IN handle derivatives wrt jointParameters
-  while (!skinningIter.finished()) {
-    size_t jointIndex = 0;
-    T boneWeight;
-    Eigen::Vector3<T> pos;
-    std::tie(jointIndex, boneWeight, pos) = skinningIter.next();
-
-    // check for valid index
-    MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-    // calculate derivatives based on active joints
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        // Gradient wrt translation:
-        gradient_jointParams_to_modelParams(
-            boneWeight * diff.dot(jointState.getTranslationDerivative(d)) * wgt,
-            paramIndex + d,
-            this->parameterTransform_,
-            gradient);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        // Gradient wrt rotation:
-        gradient_jointParams_to_modelParams(
-            boneWeight * diff.dot(jointState.getRotationDerivative(d, posd)) * wgt,
-            paramIndex + 3 + d,
-            this->parameterTransform_,
-            gradient);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      // Gradient wrt scale:
-      gradient_jointParams_to_modelParams(
-          boneWeight * diff.dot(jointState.getScaleDerivative(posd)) * wgt,
-          paramIndex + 6,
-          this->parameterTransform_,
-          gradient);
-    }
-  } // OUT handle derivatives wrt jointParameters
-
-  // IN handle derivatives wrt blend shape parameters
-  if (this->character_.blendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.blendShape->getShapeVectors()
-              .template block<3, 1>(3 * constr.vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, constr, d_restPos, d_worldPos);
-
-      gradient[paramIdx] += wgt * diff.dot(d_worldPos);
-    }
-  }
-  // OUT handle derivatives wrt blend shape parameters
-
-  // IN handle derivatives wrt face expression blend shape parameters
-  if (this->character_.faceExpressionBlendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.faceExpressionParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.faceExpressionParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.faceExpressionBlendShape->getShapeVectors()
-              .template block<3, 1>(3 * constr.vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, constr, d_restPos, d_worldPos);
-
-      gradient[paramIdx] += wgt * diff.dot(d_worldPos);
-    }
-  }
-  // OUT handle derivatives wrt face expression blend shape parameters
-
-  return constr.weight * diff.squaredNorm() * kPositionWeight;
-}
-
-template <typename T>
-double VertexErrorFunctionT<T>::calculatePositionJacobian(
-    const ModelParametersT<T>& /* modelParameters */,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    const VertexConstraintT<T>& constr,
-    Ref<Eigen::MatrixX<T>> jac,
-    Ref<Eigen::VectorX<T>> res) const {
-  // calculate the difference between target and position and error
-  const Eigen::Vector3<T> diff =
-      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
-
-  const T wgt = std::sqrt(constr.weight * kPositionWeight * this->weight_);
-
-  SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
-
-  // IN handle derivatives wrt jointParameters
-  while (!skinningIter.finished()) {
-    size_t jointIndex = 0;
-    T boneWeight;
-    Eigen::Vector3<T> pos;
-    std::tie(jointIndex, boneWeight, pos) = skinningIter.next();
-
-    // check for valid index
-    MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-    // calculate derivatives based on active joints
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * wgt * jointState.getTranslationDerivative(d),
-            paramIndex + d,
-            this->parameterTransform_,
-            jac);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * wgt * jointState.getRotationDerivative(d, posd),
-            paramIndex + d + 3,
-            this->parameterTransform_,
-            jac);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      jacobian_jointParams_to_modelParams<T>(
-          boneWeight * wgt * jointState.getScaleDerivative(posd),
-          paramIndex + 6,
-          this->parameterTransform_,
-          jac);
-    }
-  }
-  // OUT handle derivatives wrt jointParameters
-
-  // IN handle derivatives wrt blend shape parameters
-  if (this->character_.blendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.blendShape->getShapeVectors()
-              .template block<3, 1>(3 * constr.vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, constr, d_restPos, d_worldPos);
-
-      jac.col(paramIdx) += wgt * d_worldPos;
-    }
-  }
-  // OUT handle derivatives wrt blend shape parameters
-
-  // IN handle derivatives wrt face expression blend shape parameters
-  if (this->character_.faceExpressionBlendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.faceExpressionParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.faceExpressionParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.faceExpressionBlendShape->getShapeVectors()
-              .template block<3, 1>(3 * constr.vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, constr, d_restPos, d_worldPos);
-
-      jac.col(paramIdx) += wgt * d_worldPos;
-    }
-  }
-  // OUT handle derivatives wrt face expression blend shape parameters
-
-  res = diff * wgt;
-
-  return wgt * wgt * diff.squaredNorm();
-}
-
-template <typename T>
-double VertexErrorFunctionT<T>::calculateNormalGradient(
-    const ModelParametersT<T>& /* modelParameters */,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    const VertexConstraintT<T>& constr,
-    const T sourceNormalWeight,
-    const T targetNormalWeight,
-    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const auto& skinWeights = *character_.skinWeights;
-
-  const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.vertexIndex];
-  Eigen::Vector3<T> targetNormal = constr.targetNormal;
-  if (sourceNormal.dot(constr.targetNormal) < 0) {
-    targetNormal *= -1;
-  }
-  const Eigen::Vector3<T> normal =
-      sourceNormalWeight * sourceNormal + targetNormalWeight * targetNormal;
-
-  const Eigen::Vector3<T> diff =
-      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
-  const T dist = diff.dot(normal);
-
-  // calculate the difference between target and position and error
-  const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
-
-  SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
-
-  // IN handle derivatives wrt jointParameters
-  while (!skinningIter.finished()) {
-    const auto [jointIndex, boneWeight, pos] = skinningIter.next();
-
-    // check for valid index
-    MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-    // calculate derivatives based on active joints
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        // Gradient wrt translation:
-        gradient_jointParams_to_modelParams(
-            boneWeight * wgt * dist * normal.dot(jointState.getTranslationDerivative(d)),
-            paramIndex + d,
-            this->parameterTransform_,
-            gradient);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        // Gradient wrt rotation:
-        const Eigen::Vector3<T> cross =
-            -sourceNormal.cross(constr.targetPosition - jointState.translation());
-        const T diff_src = jointState.rotationAxis.col(d).dot(cross);
-        const T diff_tgt = targetNormal.dot(jointState.getRotationDerivative(d, posd));
-
-        gradient_jointParams_to_modelParams(
-            boneWeight * wgt * dist *
-                (sourceNormalWeight * diff_src + targetNormalWeight * diff_tgt),
-            paramIndex + 3 + d,
-            this->parameterTransform_,
-            gradient);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      // Gradient wrt scale:
-      gradient_jointParams_to_modelParams(
-          boneWeight * wgt * dist * normal.dot(jointState.getScaleDerivative(posd)),
-          paramIndex + 6,
-          this->parameterTransform_,
-          gradient);
-    }
-  } // OUT handle derivatives wrt jointParameters
-
-  // IN handle derivatives wrt blend shape parameters:
-  if (this->character_.blendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.blendShape->getShapeVectors()
-              .template block<3, 1>(3 * constr.vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-
-      for (uint32_t jWeight = 0; jWeight < kMaxSkinJoints; ++jWeight) {
-        const auto w = skinWeights.weight(constr.vertexIndex, jWeight);
-        const auto parentBone = skinWeights.index(constr.vertexIndex, jWeight);
-        if (w > 0) {
-          d_worldPos += w *
-              (state.jointState[parentBone].transform.toLinear() *
-               (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
-        }
-      }
-
-      gradient[paramIdx] += wgt * dist * normal.dot(d_worldPos);
-    }
-  }
-  // OUT handle derivatives wrt blend shape parameters:
-
-  return constr.weight * dist * dist * kPlaneWeight;
-}
-
-template <typename T>
-double VertexErrorFunctionT<T>::calculateNormalJacobian(
-    const ModelParametersT<T>& /* modelParameters */,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    const VertexConstraintT<T>& constr,
-    const T sourceNormalWeight,
-    const T targetNormalWeight,
-    Ref<Eigen::MatrixX<T>> jac,
-    T& res) const {
-  const auto& skinWeights = *character_.skinWeights;
-
-  const Eigen::Vector3<T> sourceNormal = meshState.posedMesh_->normals[constr.vertexIndex];
-  Eigen::Vector3<T> targetNormal = constr.targetNormal;
-  if (sourceNormal.dot(constr.targetNormal) < 0) {
-    targetNormal *= -1;
-  }
-  const Eigen::Vector3<T> normal =
-      sourceNormalWeight * sourceNormal + targetNormalWeight * targetNormal;
-
-  // calculate the difference between target and position and error
-  const Eigen::Vector3<T> diff =
-      meshState.posedMesh_->vertices[constr.vertexIndex] - constr.targetPosition;
-  const T dist = diff.dot(normal);
-
-  const T wgt = std::sqrt(constr.weight * kPlaneWeight * this->weight_);
-
-  SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState.restMesh_, state, constr.vertexIndex);
-
-  // IN handle derivatives wrt jointParameters
-  while (!skinningIter.finished()) {
-    const auto [jointIndex, boneWeight, pos] = skinningIter.next();
-
-    // check for valid index
-    MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-    // calculate derivatives based on active joints
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        // Jacobian wrt translation:
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * wgt * normal.dot(jointState.getTranslationDerivative(d)),
-            paramIndex + d,
-            this->parameterTransform_,
-            jac);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        // Jacobian wrt rotation:
-        const Eigen::Vector3<T> cross =
-            -sourceNormal.cross(constr.targetPosition - jointState.translation());
-        const T diff_src = jointState.rotationAxis.col(d).dot(cross);
-        const T diff_tgt = targetNormal.dot(jointState.getRotationDerivative(d, posd));
-
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * wgt * (sourceNormalWeight * diff_src + targetNormalWeight * diff_tgt),
-            paramIndex + d + 3,
-            this->parameterTransform_,
-            jac);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      // Jacobian wrt scale:
-      jacobian_jointParams_to_modelParams<T>(
-          boneWeight * wgt * normal.dot(jointState.getScaleDerivative(posd)),
-          paramIndex + 6,
-          this->parameterTransform_,
-          jac);
-    }
-  }
-  // OUT handle derivatives wrt jointParameters
-
-  // IN handle derivatives wrt blend shape parameters:
-  for (Eigen::Index iBlendShape = 0;
-       iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-       ++iBlendShape) {
-    const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-    if (paramIdx < 0) {
+  for (size_t i = 0; i < numConstraints; ++i) {
+    const T constrWeight = static_cast<T>(constraints_[i].weight);
+    if (constrWeight == T(0)) {
       continue;
     }
 
-    const Eigen::Vector3<T> d_restPos =
-        this->character_.blendShape->getShapeVectors()
-            .template block<3, 1>(3 * constr.vertexIndex, iBlendShape, 3, 1)
-            .template cast<T>();
-    Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
+    const size_t vertexIndex = constraints_[i].vertexIndex;
+    const Eigen::Vector3<T> worldVec =
+        meshState.posedMesh_->vertices[vertexIndex].template cast<T>();
 
-    for (uint32_t i = 0; i < kMaxSkinJoints; ++i) {
-      const auto w = skinWeights.weight(constr.vertexIndex, i);
-      const auto parentBone = skinWeights.index(constr.vertexIndex, i);
-      if (w > 0) {
-        d_worldPos += w *
-            (state.jointState[parentBone].transform.toLinear() *
-             (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
-      }
-    }
+    FuncType f;
+    std::span<DfdvType> emptyDfdv;
+    evalFunction(
+        i, state, meshState, std::span<const Eigen::Vector3<T>>(&worldVec, 1), f, emptyDfdv);
 
-    jac(0, paramIdx) += wgt * d_worldPos.dot(normal);
+    const T sqrError = f.squaredNorm();
+    error += constrWeight * loss_.value(sqrError);
   }
-  // OUT handle derivatives wrt blend shape parameters:
-
-  res = dist * wgt;
-
-  return wgt * wgt * dist * dist;
+  return this->weight_ * legacyWeight_ * error;
 }
 
-template <typename T>
-std::pair<T, T> VertexErrorFunctionT<T>::computeNormalWeights() const {
-  switch (constraintType_) {
-    case VertexConstraintType::Plane:
-      return {T(0), T(1)};
-    case VertexConstraintType::Normal:
-      return {T(1), T(0)};
-    case VertexConstraintType::SymmetricNormal:
-    default:
-      return {T(0.5), T(0.5)};
-  }
-}
-
-template <typename T>
-double VertexErrorFunctionT<T>::getGradient(
-    const ModelParametersT<T>& modelParameters,
+template <typename T, class Data, size_t FuncDim>
+double VertexErrorFunctionT<T, Data, FuncDim>::getGradient(
+    const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
-  MT_CHECK_NOTNULL(meshState.posedMesh_);
-  MT_CHECK_NOTNULL(meshState.restMesh_);
-
-  double error = 0;
-  std::vector<std::tuple<double, VectorX<T>>> errorGradThread;
+  const size_t numConstraints = constraints_.size();
+  if (numConstraints == 0) {
+    return 0.0;
+  }
 
   auto dispensoOptions = dispenso::ParForOptions();
-  dispensoOptions.maxThreads = maxThreads_;
+  dispensoOptions.maxThreads = static_cast<uint32_t>(maxThreads_);
 
-  if (constraintType_ == VertexConstraintType::Position) {
-    dispenso::parallel_for(
-        errorGradThread,
-        [&]() -> std::tuple<double, VectorX<T>> {
-          return {0.0, VectorX<T>::Zero(modelParameters.size())};
-        },
-        0,
-        constraints_.size(),
-        [&](std::tuple<double, VectorX<T>>& errorGradLocal, const size_t iCons) {
-          double& errorLocal = std::get<0>(errorGradLocal);
-          auto& gradLocal = std::get<1>(errorGradLocal);
-          errorLocal += calculatePositionGradient(
-              modelParameters, state, meshState, constraints_[iCons], gradLocal);
-        },
-        dispensoOptions);
-  } else {
-    T sourceNormalWeight;
-    T targetNormalWeight;
-    std::tie(sourceNormalWeight, targetNormalWeight) = computeNormalWeights();
+  const SkeletonDerivativeT<T> skeletonDerivative(
+      this->skeleton_,
+      this->parameterTransform_,
+      this->activeJointParams_,
+      this->enabledParameters_);
 
-    dispenso::parallel_for(
-        errorGradThread,
-        [&]() -> std::tuple<double, VectorX<T>> {
-          return {0.0, VectorX<T>::Zero(modelParameters.size())};
-        },
-        0,
-        constraints_.size(),
-        [&](std::tuple<double, VectorX<T>>& errorGradLocal, const size_t iCons) {
-          double& errorLocal = std::get<0>(errorGradLocal);
-          auto& gradLocal = std::get<1>(errorGradLocal);
-          errorLocal += calculateNormalGradient(
-              modelParameters,
-              state,
-              meshState,
-              constraints_[iCons],
-              sourceNormalWeight,
-              targetNormalWeight,
-              gradLocal);
-        },
-        dispensoOptions);
-  }
+  const bool isL2 = loss_.isL2();
+  const T lossInvC2 = loss_.invC2();
+
+  std::vector<std::tuple<double, VectorX<T>>> errorGradThread;
+  dispenso::parallel_for(
+      errorGradThread,
+      [&]() -> std::tuple<double, VectorX<T>> {
+        return {0.0, VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters())};
+      },
+      size_t(0),
+      numConstraints,
+      [&](std::tuple<double, VectorX<T>>& errorGradLocal, const size_t i) {
+        double& errorLocal = std::get<0>(errorGradLocal);
+        auto& gradLocal = std::get<1>(errorGradLocal);
+
+        const T constrWeight = static_cast<T>(constraints_[i].weight);
+        if (constrWeight == T(0)) {
+          return;
+        }
+
+        const size_t vertexIndex = constraints_[i].vertexIndex;
+        const Eigen::Vector3<T> worldVec =
+            meshState.posedMesh_->vertices[vertexIndex].template cast<T>();
+
+        FuncType f;
+        DfdvType dfdv;
+        dfdv.setZero();
+
+        evalFunction(
+            i,
+            state,
+            meshState,
+            std::span<const Eigen::Vector3<T>>(&worldVec, 1),
+            f,
+            std::span<DfdvType>(&dfdv, 1));
+
+        if (f.isZero()) {
+          return;
+        }
+
+        const T sqrError = f.squaredNorm();
+        const T w = constrWeight * this->weight_ * legacyWeight_;
+
+        FuncType weightedResidual;
+        if (isL2) {
+          errorLocal += w * sqrError * lossInvC2;
+          weightedResidual = T(2) * w * lossInvC2 * f;
+        } else {
+          errorLocal += w * loss_.value(sqrError);
+          weightedResidual = T(2) * w * loss_.deriv(sqrError) * f;
+        }
+
+        skeletonDerivative.template accumulateVertexGradient<FuncDim>(
+            vertexIndex, worldVec, dfdv, weightedResidual, state, meshState, character_, gradLocal);
+      },
+      dispensoOptions);
 
   if (!errorGradThread.empty()) {
     errorGradThread[0] = std::accumulate(
@@ -644,103 +177,128 @@ double VertexErrorFunctionT<T>::getGradient(
           return {std::get<0>(a) + std::get<0>(b), std::get<1>(a) + std::get<1>(b)};
         });
 
-    // finalize the gradient
     gradient += std::get<1>(errorGradThread[0]);
-    error = std::get<0>(errorGradThread[0]);
+    return std::get<0>(errorGradThread[0]);
   }
 
-  return this->weight_ * error;
+  return 0.0;
 }
 
-template <typename T>
-double VertexErrorFunctionT<T>::getJacobian(
-    const ModelParametersT<T>& modelParameters,
+template <typename T, class Data, size_t FuncDim>
+double VertexErrorFunctionT<T, Data, FuncDim>::getJacobian(
+    const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
-  MT_CHECK(
-      jacobian.cols() == static_cast<Eigen::Index>(this->parameterTransform_.transform.cols()));
-  MT_CHECK(jacobian.rows() >= (Eigen::Index)(1 * constraints_.size()));
-  MT_CHECK(residual.rows() >= (Eigen::Index)(1 * constraints_.size()));
-
-  MT_CHECK_NOTNULL(meshState.posedMesh_);
-  MT_CHECK_NOTNULL(meshState.restMesh_);
-
-  double error = 0;
-  std::vector<double> errorThread;
+  const size_t numConstraints = constraints_.size();
+  usedRows = 0;
+  if (numConstraints == 0) {
+    return 0.0;
+  }
 
   auto dispensoOptions = dispenso::ParForOptions();
-  dispensoOptions.maxThreads = maxThreads_;
+  dispensoOptions.maxThreads = static_cast<uint32_t>(maxThreads_);
 
-  if (constraintType_ == VertexConstraintType::Position) {
-    MT_PROFILE_EVENT("VertexErrorFunction - position jacobians");
+  const SkeletonDerivativeT<T> skeletonDerivative(
+      this->skeleton_,
+      this->parameterTransform_,
+      this->activeJointParams_,
+      this->enabledParameters_);
 
-    dispenso::parallel_for(
-        errorThread,
-        [&]() -> double { return 0.0; },
-        0,
-        constraints_.size(),
-        [&](double& errorLocal, const size_t iCons) {
-          errorLocal += calculatePositionJacobian(
-              modelParameters,
-              state,
-              meshState,
-              constraints_[iCons],
-              jacobian.block(3 * iCons, 0, 3, modelParameters.size()),
-              residual.middleRows(3 * iCons, 3));
-        },
-        dispensoOptions);
-    usedRows = 3 * constraints_.size();
-  } else {
-    MT_PROFILE_EVENT("VertexErrorFunction - normal jacobians");
-    T sourceNormalWeight;
-    T targetNormalWeight;
-    std::tie(sourceNormalWeight, targetNormalWeight) = computeNormalWeights();
+  const bool isL2Jac = loss_.isL2();
+  const T lossInvC2Jac = loss_.invC2();
 
-    dispenso::parallel_for(
-        errorThread,
-        [&]() -> double { return 0.0; },
-        0,
-        constraints_.size(),
-        [&](double& errorLocal, const size_t iCons) {
-          errorLocal += calculateNormalJacobian(
-              modelParameters,
-              state,
-              meshState,
-              constraints_[iCons],
-              sourceNormalWeight,
-              targetNormalWeight,
-              jacobian.block(iCons, 0, 1, modelParameters.size()),
-              residual(iCons));
-        },
-        dispensoOptions);
+  std::vector<double> errorThread;
+  dispenso::parallel_for(
+      errorThread,
+      [&]() -> double { return 0.0; },
+      size_t(0),
+      numConstraints,
+      [&](double& errorLocal, const size_t i) {
+        const T constrWeight = static_cast<T>(constraints_[i].weight);
+        if (constrWeight == T(0)) {
+          return;
+        }
 
-    usedRows = constraints_.size();
-  }
+        const size_t vertexIndex = constraints_[i].vertexIndex;
+        const Eigen::Vector3<T> worldVec =
+            meshState.posedMesh_->vertices[vertexIndex].template cast<T>();
+
+        const size_t rowIndex = i * FuncDim;
+        FuncType f;
+        DfdvType dfdv;
+        dfdv.setZero();
+
+        evalFunction(
+            i,
+            state,
+            meshState,
+            std::span<const Eigen::Vector3<T>>(&worldVec, 1),
+            f,
+            std::span<DfdvType>(&dfdv, 1));
+
+        const T sqrError = f.squaredNorm();
+        const T w = constrWeight * this->weight_ * legacyWeight_;
+
+        T deriv;
+        if (isL2Jac) {
+          errorLocal += w * sqrError * lossInvC2Jac;
+          deriv = std::sqrt(w * lossInvC2Jac);
+        } else {
+          errorLocal += w * loss_.value(sqrError);
+          deriv = std::sqrt(w * loss_.deriv(sqrError));
+        }
+
+        residual.template segment<FuncDim>(rowIndex).noalias() = deriv * f;
+
+        if (deriv == T(0)) {
+          return;
+        }
+
+        skeletonDerivative.template accumulateVertexJacobian<FuncDim>(
+            vertexIndex, worldVec, dfdv, deriv, state, meshState, character_, jacobian, rowIndex);
+      },
+      dispensoOptions);
+
+  usedRows = static_cast<int>(numConstraints * FuncDim);
 
   if (!errorThread.empty()) {
-    error = std::accumulate(errorThread.begin() + 1, errorThread.end(), errorThread[0]);
+    return std::accumulate(errorThread.begin() + 1, errorThread.end(), errorThread[0]);
   }
 
-  return error;
+  return 0.0;
 }
 
-template <typename T>
-size_t VertexErrorFunctionT<T>::getJacobianSize() const {
-  switch (constraintType_) {
-    case VertexConstraintType::Position:
-      return 3 * constraints_.size();
-    case VertexConstraintType::Normal:
-    case VertexConstraintType::Plane:
-    case VertexConstraintType::SymmetricNormal:
-    default:
-      return constraints_.size();
-  }
-}
+// Explicit instantiations for common constraint types
+template class VertexErrorFunctionT<float, VertexConstraintData, 1>;
+template class VertexErrorFunctionT<float, VertexConstraintData, 2>;
+template class VertexErrorFunctionT<float, VertexConstraintData, 3>;
+template class VertexErrorFunctionT<double, VertexConstraintData, 1>;
+template class VertexErrorFunctionT<double, VertexConstraintData, 2>;
+template class VertexErrorFunctionT<double, VertexConstraintData, 3>;
 
-template class VertexErrorFunctionT<float>;
-template class VertexErrorFunctionT<double>;
+} // namespace momentum
+
+// Include leaf class headers for explicit instantiations
+#include "momentum/character_solver/vertex_normal_error_function.h"
+#include "momentum/character_solver/vertex_plane_error_function.h"
+#include "momentum/character_solver/vertex_position_error_function.h"
+#include "momentum/character_solver/vertex_projection_error_function.h"
+
+namespace momentum {
+
+template class VertexErrorFunctionT<float, VertexPositionDataT<float>, 3>;
+template class VertexErrorFunctionT<double, VertexPositionDataT<double>, 3>;
+
+template class VertexErrorFunctionT<float, VertexNormalDataT<float>, 1>;
+template class VertexErrorFunctionT<double, VertexNormalDataT<double>, 1>;
+
+template class VertexErrorFunctionT<float, VertexPlaneDataT<float>, 1>;
+template class VertexErrorFunctionT<double, VertexPlaneDataT<double>, 1>;
+
+template class VertexErrorFunctionT<float, VertexProjectionDataT<float>, 2>;
+template class VertexErrorFunctionT<double, VertexProjectionDataT<double>, 2>;
 
 } // namespace momentum

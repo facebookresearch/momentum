@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/constraint_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -41,14 +41,14 @@ struct AimDataT : ConstraintData {
 /// projection to the ray direction and the aim vector itself (therefore a shorter aim vector also
 /// has a smaller norm).
 template <typename T>
-class AimDistErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
+class AimDistErrorFunctionT : public JointErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
  public:
   explicit AimDistErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
 
   explicit AimDistErrorFunctionT(
       const Character& character,
@@ -69,23 +69,25 @@ class AimDistErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3,
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector3<T>& f,
-      optional_ref<std::array<Vector3<T>, 2>> v = {},
-      optional_ref<std::array<Eigen::Matrix3<T>, 2>> dfdv = {}) const final;
+      std::array<Vector3<T>, 2>& v,
+      std::array<Eigen::Matrix3<T>, 2>& dfdv) const final;
 };
+
+/// The AimDirErrorFunction
 
 /// The AimDirErrorFunction computes the element-wise differences between the normalized aim vector
 /// and the ray direction. Because the aim vector is normalized, the distance to the ray origin
 /// doesn't affect the loss as in AimDistErrorFunction. When the aim vector is close to zero length,
 /// we will clamp it to zero.
 template <typename T>
-class AimDirErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
+class AimDirErrorFunctionT : public JointErrorFunctionT<T, AimDataT<T>, 3, 2, 1> {
  public:
   explicit AimDirErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, AimDataT<T>, 3, 2, 1>(skel, pt, lossAlpha, lossC) {}
 
   explicit AimDirErrorFunctionT(
       const Character& character,
@@ -106,7 +108,7 @@ class AimDirErrorFunctionT : public ConstraintErrorFunctionT<T, AimDataT<T>, 3, 
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector3<T>& f,
-      optional_ref<std::array<Vector3<T>, 2>> v = {},
-      optional_ref<std::array<Eigen::Matrix3<T>, 2>> dfdv = {}) const final;
+      std::array<Vector3<T>, 2>& v,
+      std::array<Eigen::Matrix3<T>, 2>& dfdv) const final;
 };
 } // namespace momentum
