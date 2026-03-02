@@ -7,7 +7,7 @@
 
 #pragma once
 #include <momentum/character/locator.h>
-#include <momentum/character_solver/skeleton_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -33,53 +33,58 @@ struct ProjectionConstraintDataT {
   static ProjectionConstraintDataT<T> createFromLocator(const momentum::Locator& locator);
 };
 
+/// ProjectionErrorFunctionT computes a 2D perspective projection error.
+///
+/// For each constraint, it transforms a 3D offset attached to a joint into world space,
+/// projects it using a 3x4 projection matrix, and computes the 2D residual against a target.
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
-class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
+class ProjectionErrorFunctionT
+    : public JointErrorFunctionT<T, ProjectionConstraintDataT<T>, 2, 1, 1> {
  public:
+  using Base = JointErrorFunctionT<T, ProjectionConstraintDataT<T>, 2, 1, 1>;
+  using typename Base::DfdvType;
+  using typename Base::FuncType;
+  using typename Base::VType;
+
+  /// Constructor
+  ///
+  /// @param[in] skel Character skeleton
+  /// @param[in] pt Parameter transformation
+  /// @param[in] nearClip Distance threshold below which constraints are ignored (prevents
+  ///                     divide-by-zero and bad behavior near the camera)
   ProjectionErrorFunctionT(
       const momentum::Skeleton& skel,
       const momentum::ParameterTransform& pt,
       T nearClip = T(1));
 
-  [[nodiscard]] double getError(
-      const momentum::ModelParametersT<T>& params,
-      const momentum::SkeletonStateT<T>& state,
-      const momentum::MeshStateT<T>& meshState) final;
-  double getGradient(
-      const momentum::ModelParametersT<T>& params,
-      const momentum::SkeletonStateT<T>& state,
-      const momentum::MeshStateT<T>& meshState,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) final;
-  double getJacobian(
-      const momentum::ModelParametersT<T>& params,
-      const momentum::SkeletonStateT<T>& state,
-      const momentum::MeshStateT<T>& meshState,
-      Eigen::Ref<Eigen::MatrixX<T>> jacobian,
-      Eigen::Ref<Eigen::VectorX<T>> residual,
-      int& usedRows) final;
-  [[nodiscard]] size_t getJacobianSize() const final;
-
-  void addConstraint(const ProjectionConstraintDataT<T>& data);
-
-  void clearConstraints() {
-    constraints_.clear();
-  }
+  /// @return Whether the constraint list is empty
   [[nodiscard]] bool empty() const {
-    return constraints_.empty();
-  }
-  [[nodiscard]] size_t numConstraints() const {
-    return constraints_.size();
-  }
-  void setConstraints(std::vector<ProjectionConstraintDataT<T>> constraints) {
-    constraints_ = std::move(constraints);
+    return this->constraints_.empty();
   }
 
-  [[nodiscard]] const std::vector<ProjectionConstraintDataT<T>>& getConstraints() const {
-    return constraints_;
+  void setConstraints(std::vector<ProjectionConstraintDataT<T>> constraints) {
+    this->constraints_ = std::move(constraints);
   }
 
  protected:
-  std::vector<ProjectionConstraintDataT<T>> constraints_;
+  /// Evaluates the projection error function for a single constraint.
+  ///
+  /// Computes f = (x/z - target_x, y/z - target_y) where (x, y, z) is the projected point.
+  /// If z < nearClip, returns zero (constraint ignored).
+  ///
+  /// @param[in] constrIndex Index of the constraint to evaluate
+  /// @param[in] state Joint state of the constraint's parent joint
+  /// @param[out] f Output residual of dimension 2
+  /// @param[out] v Output world-space vectors
+  /// @param[out] dfdv The 2x3 Jacobian df/dv
+  void evalFunction(
+      size_t constrIndex,
+      const JointStateT<T>& state,
+      FuncType& f,
+      std::array<VType, 1>& v,
+      std::array<DfdvType, 1>& dfdv) const override;
 
   // Projection error is roughly in radians, so a value near 1 is reasonable here:
   static constexpr T kProjectionWeight = 1.0f;
@@ -87,7 +92,7 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
   // Ignore projection constraints involving joints closer than this distance.
   // Prevents divide-by-zero in the projection matrix and bad behavior close to
   // the camera.
-  T _nearClip = 1.0f;
+  T nearClip_ = 1.0f;
 };
 
 } // namespace momentum

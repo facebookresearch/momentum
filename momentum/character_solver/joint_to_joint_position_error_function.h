@@ -7,9 +7,13 @@
 
 #pragma once
 
+#include <momentum/character/fwd.h>
 #include <momentum/character_solver/fwd.h>
-#include <momentum/character_solver/skeleton_error_function.h>
-#include <momentum/math/types.h>
+#include <momentum/character_solver/multi_source_error_function.h>
+
+#include <Eigen/Core>
+
+#include <vector>
 
 namespace momentum {
 
@@ -68,33 +72,19 @@ struct JointToJointPositionDataT {
 ///
 /// where T_ref and T_src are the global transformations of the reference and
 /// source joints respectively.
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
-class JointToJointPositionErrorFunctionT : public SkeletonErrorFunctionT<T> {
+class JointToJointPositionErrorFunctionT : public MultiSourceErrorFunctionT<T, 3> {
  public:
+  using typename MultiSourceErrorFunctionT<T, 3>::FuncType;
+  using typename MultiSourceErrorFunctionT<T, 3>::DfdvType;
+
   explicit JointToJointPositionErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
 
   explicit JointToJointPositionErrorFunctionT(const Character& character);
 
-  [[nodiscard]] double getError(
-      const ModelParametersT<T>& params,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState) final;
-
-  double getGradient(
-      const ModelParametersT<T>& params,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      Ref<VectorX<T>> gradient) override;
-
-  double getJacobian(
-      const ModelParametersT<T>& params,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      Ref<MatrixX<T>> jacobian,
-      Ref<VectorX<T>> residual,
-      int& usedRows) override;
-
-  [[nodiscard]] size_t getJacobianSize() const final;
+  ~JointToJointPositionErrorFunctionT() override = default;
 
   /// Add a joint-to-joint position constraint.
   ///
@@ -125,13 +115,49 @@ class JointToJointPositionErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
-  /// Get number of constraints.
-  [[nodiscard]] size_t numConstraints() const {
-    return constraints_.size();
-  }
+  /// Returns the number of constraints.
+  [[nodiscard]] size_t getNumConstraints() const override;
+  [[nodiscard]] T getConstraintWeight(size_t constrIndex) const override;
+
+  /// Returns the contributions for a constraint.
+  ///
+  /// Each constraint has 5 contributions:
+  ///   [0] JointPoint: source world position
+  ///   [1] JointPoint: reference world position (origin of reference frame)
+  ///   [2] JointDirection: x-axis of reference frame (first row of R_ref)
+  ///   [3] JointDirection: y-axis of reference frame (second row of R_ref)
+  ///   [4] JointDirection: z-axis of reference frame (third row of R_ref)
+  [[nodiscard]] std::span<const SourceT<T>> getContributions(size_t constrIndex) const override;
+
+  /// Computes the residual and derivatives.
+  ///
+  /// The residual is:
+  ///   f = R_ref^T * (srcWorldPos - refWorldPos) - target
+  ///
+  /// where R_ref is the world rotation matrix of the reference joint.
+  ///
+  /// @param constrIndex Index of the constraint
+  /// @param state Current skeleton state
+  /// @param meshState Current mesh state (unused)
+  /// @param worldVecs Pre-computed world vectors for all contributions
+  /// @param f Output: residual (3x1)
+  /// @param dfdv Output: derivative df/dv for each contribution
+  void evalFunction(
+      size_t constrIndex,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
+      std::span<const Eigen::Vector3<T>> worldVecs,
+      FuncType& f,
+      std::span<DfdvType> dfdv) const override;
 
  private:
   std::vector<JointToJointPositionDataT<T>> constraints_;
+
+  // Cached contributions per constraint (5 contributions per constraint)
+  mutable std::vector<std::array<SourceT<T>, 5>> contributionsCache_;
+  mutable bool contributionsCacheValid_ = false;
+
+  void rebuildContributionsCache() const;
 };
 
 } // namespace momentum

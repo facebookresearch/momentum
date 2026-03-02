@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/constraint_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -44,7 +44,7 @@ std::vector<PlaneDataT<T>> createFloorConstraints(
 /// using the plane equation. For half-plane error (above = true), the error is zero when the
 /// distance is greater than zero (ie. the point being above).
 template <typename T>
-class PlaneErrorFunctionT : public ConstraintErrorFunctionT<T, PlaneDataT<T>, 1> {
+class PlaneErrorFunctionT : public JointErrorFunctionT<T, PlaneDataT<T>, 1> {
  public:
   /// Constructor
   ///
@@ -60,8 +60,7 @@ class PlaneErrorFunctionT : public ConstraintErrorFunctionT<T, PlaneDataT<T>, 1>
       const bool above = false,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, PlaneDataT<T>, 1>(skel, pt, lossAlpha, lossC),
-        halfPlane_(above) {}
+      : JointErrorFunctionT<T, PlaneDataT<T>, 1>(skel, pt, lossAlpha, lossC), halfPlane_(above) {}
 
   /// A convenience api where character contains info of the skeleton and parameter transform.
   ///
@@ -91,8 +90,8 @@ class PlaneErrorFunctionT : public ConstraintErrorFunctionT<T, PlaneDataT<T>, 1>
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector<T, 1>& f,
-      optional_ref<std::array<Vector3<T>, 1>> v = {},
-      optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 1>> /*dfdv*/ = {}) const final;
+      std::array<Vector3<T>, 1>& v,
+      std::array<Eigen::Matrix<T, 1, 3>, 1>& dfdv) const final;
 
  private:
   /// True for an inequality constraint to be *above* the plane rather than *on* the plane
