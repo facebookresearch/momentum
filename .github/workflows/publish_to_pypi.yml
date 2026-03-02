@@ -80,7 +80,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-cpu-linux
           path: ./wheelhouse/*.whl
@@ -186,7 +186,7 @@ jobs:
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-cpu-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/*.whl
@@ -301,7 +301,7 @@ jobs:
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-gpu-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/*.whl
@@ -358,7 +358,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-gpu-linux
           path: ./wheelhouse/*.whl
