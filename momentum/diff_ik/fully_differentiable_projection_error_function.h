@@ -58,7 +58,7 @@ class FullyDifferentiableProjectionErrorFunctionT
       const Eigen::Vector2<JetType>& target_cons,
       Eigen::Ref<const Eigen::VectorX<T>> inputVec) const;
 
-  using momentum::ProjectionErrorFunctionT<T>::_nearClip;
+  using momentum::ProjectionErrorFunctionT<T>::nearClip_;
   using momentum::ProjectionErrorFunctionT<T>::kProjectionWeight;
 };
 
