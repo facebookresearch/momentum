@@ -7,15 +7,10 @@
 
 #include "momentum/character_solver/vertex_vertex_distance_error_function.h"
 
-#include "momentum/character/blend_shape.h"
-#include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
-#include "momentum/character/linear_skinning.h"
 #include "momentum/character/mesh_state.h"
-#include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
-#include "momentum/character_solver/error_function_utils.h"
-#include "momentum/character_solver/skinning_weight_iterator.h"
+#include "momentum/character_solver/skeleton_derivative.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
@@ -139,7 +134,7 @@ size_t VertexVertexDistanceErrorFunctionT<T>::getJacobianSize() const {
 
 template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::calculateJacobian(
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     const VertexVertexDistanceConstraintT<T>& constraint,
@@ -168,124 +163,31 @@ double VertexVertexDistanceErrorFunctionT<T>::calculateJacobian(
   // Set residual: wgt * distanceDiff
   residual = wgt * distanceDiff;
 
+  // df/dv for distance function is the normalized direction (1×3 matrix)
+  // For vertex1: positive contribution, for vertex2: negative contribution
+  const Eigen::Matrix<T, 1, 3> dfdv1 = distanceGradient.transpose();
+  const Eigen::Matrix<T, 1, 3> dfdv2 = -distanceGradient.transpose();
+
+  SkeletonDerivativeT<T> deriv(
+      this->skeleton_,
+      this->parameterTransform_,
+      this->activeJointParams_,
+      this->enabledParameters_);
+
   // Calculate jacobian contribution from vertex1 (positive contribution)
-  calculateVertexJacobian(
-      modelParameters, state, meshState, constraint.vertexIndex1, wgt * distanceGradient, jacobian);
+  deriv.template accumulateVertexJacobian<1>(
+      constraint.vertexIndex1, pos1, dfdv1, wgt, state, meshState, character_, jacobian, 0);
 
   // Calculate jacobian contribution from vertex2 (negative contribution)
-  calculateVertexJacobian(
-      modelParameters,
-      state,
-      meshState,
-      constraint.vertexIndex2,
-      -wgt * distanceGradient,
-      jacobian);
+  deriv.template accumulateVertexJacobian<1>(
+      constraint.vertexIndex2, pos2, dfdv2, wgt, state, meshState, character_, jacobian, 0);
 
   return wgt * wgt * distanceDiff * distanceDiff;
 }
 
 template <typename T>
-void VertexVertexDistanceErrorFunctionT<T>::calculateVertexJacobian(
-    const ModelParametersT<T>& /*modelParameters*/,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    int vertexIndex,
-    const Eigen::Vector3<T>& jacobianDirection,
-    Eigen::Ref<Eigen::MatrixX<T>> jacobian) const {
-  MT_PROFILE_FUNCTION();
-
-  SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState.restMesh_, state, vertexIndex);
-
-  // Handle derivatives wrt joint parameters
-  while (!skinningIter.finished()) {
-    size_t jointIndex = 0;
-    T boneWeight;
-    Eigen::Vector3<T> pos;
-    std::tie(jointIndex, boneWeight, pos) = skinningIter.next();
-
-    // Check for valid index
-    MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-    // Calculate derivatives based on active joints
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        // Jacobian wrt translation:
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * jacobianDirection.dot(jointState.getTranslationDerivative(d)),
-            paramIndex + d,
-            this->parameterTransform_,
-            jacobian);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        // Jacobian wrt rotation:
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * jacobianDirection.dot(jointState.getRotationDerivative(d, posd)),
-            paramIndex + 3 + d,
-            this->parameterTransform_,
-            jacobian);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      // Jacobian wrt scale:
-      jacobian_jointParams_to_modelParams<T>(
-          boneWeight * jacobianDirection.dot(jointState.getScaleDerivative(posd)),
-          paramIndex + 6,
-          this->parameterTransform_,
-          jacobian);
-    }
-  }
-
-  // Handle derivatives wrt blend shape parameters
-  if (this->character_.blendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.blendShape->getShapeVectors()
-              .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, vertexIndex, d_restPos, d_worldPos);
-
-      jacobian(0, paramIdx) += jacobianDirection.dot(d_worldPos);
-    }
-  }
-
-  // Handle derivatives wrt face expression blend shape parameters
-  if (this->character_.faceExpressionBlendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.faceExpressionParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.faceExpressionParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.faceExpressionBlendShape->getShapeVectors()
-              .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, vertexIndex, d_restPos, d_worldPos);
-
-      jacobian(0, paramIdx) += jacobianDirection.dot(d_worldPos);
-    }
-  }
-}
-
-template <typename T>
 double VertexVertexDistanceErrorFunctionT<T>::calculateGradient(
-    const ModelParametersT<T>& modelParameters,
+    const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
     const VertexVertexDistanceConstraintT<T>& constraint,
@@ -306,141 +208,46 @@ double VertexVertexDistanceErrorFunctionT<T>::calculateGradient(
   const T distanceDiff = actualDistance - constraint.targetDistance;
   const Eigen::Vector3<T> distanceGradient = diff / actualDistance; // normalized difference vector
 
-  // Weight for the gradient: 2 * weight * distanceDiff * this->weight_
-  const T wgt = T(2) * constraint.weight * distanceDiff * this->weight_;
+  // df/dv for distance function is the normalized direction (1×3 matrix)
+  // For vertex1: positive contribution, for vertex2: negative contribution
+  const Eigen::Matrix<T, 1, 3> dfdv1 = distanceGradient.transpose();
+  const Eigen::Matrix<T, 1, 3> dfdv2 = -distanceGradient.transpose();
+
+  // weightedResidual = 2 * weight * loss_deriv * f
+  // For distance: f = distanceDiff, loss = 0.5 * f^2, loss_deriv = 1
+  // So weightedResidual = 2 * weight * distanceDiff
+  const Eigen::Matrix<T, 1, 1> weightedResidual =
+      Eigen::Matrix<T, 1, 1>::Constant(T(2) * constraint.weight * this->weight_ * distanceDiff);
+
+  SkeletonDerivativeT<T> deriv(
+      this->skeleton_,
+      this->parameterTransform_,
+      this->activeJointParams_,
+      this->enabledParameters_);
 
   // Calculate gradient contribution from vertex1 (positive contribution)
-  calculateVertexGradient(
-      modelParameters, state, meshState, constraint.vertexIndex1, wgt * distanceGradient, gradient);
-
-  // Calculate gradient contribution from vertex2 (negative contribution)
-  calculateVertexGradient(
-      modelParameters,
+  deriv.template accumulateVertexGradient<1>(
+      constraint.vertexIndex1,
+      pos1,
+      dfdv1,
+      weightedResidual,
       state,
       meshState,
+      character_,
+      gradient);
+
+  // Calculate gradient contribution from vertex2 (negative contribution)
+  deriv.template accumulateVertexGradient<1>(
       constraint.vertexIndex2,
-      -wgt * distanceGradient,
+      pos2,
+      dfdv2,
+      weightedResidual,
+      state,
+      meshState,
+      character_,
       gradient);
 
   return constraint.weight * distanceDiff * distanceDiff;
-}
-
-template <typename T>
-void VertexVertexDistanceErrorFunctionT<T>::calculateVertexGradient(
-    const ModelParametersT<T>& /*modelParameters*/,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    int vertexIndex,
-    const Eigen::Vector3<T>& gradientDirection,
-    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  MT_PROFILE_FUNCTION();
-
-  SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState.restMesh_, state, vertexIndex);
-
-  // Handle derivatives wrt joint parameters
-  while (!skinningIter.finished()) {
-    size_t jointIndex = 0;
-    T boneWeight;
-    Eigen::Vector3<T> pos;
-    std::tie(jointIndex, boneWeight, pos) = skinningIter.next();
-
-    // Check for valid index
-    MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-    // Calculate derivatives based on active joints
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        // Gradient wrt translation:
-        gradient_jointParams_to_modelParams(
-            boneWeight * gradientDirection.dot(jointState.getTranslationDerivative(d)),
-            paramIndex + d,
-            this->parameterTransform_,
-            gradient);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        // Gradient wrt rotation:
-        gradient_jointParams_to_modelParams(
-            boneWeight * gradientDirection.dot(jointState.getRotationDerivative(d, posd)),
-            paramIndex + 3 + d,
-            this->parameterTransform_,
-            gradient);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      // Gradient wrt scale:
-      gradient_jointParams_to_modelParams(
-          boneWeight * gradientDirection.dot(jointState.getScaleDerivative(posd)),
-          paramIndex + 6,
-          this->parameterTransform_,
-          gradient);
-    }
-  }
-
-  // Handle derivatives wrt blend shape parameters
-  if (this->character_.blendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.blendShape->getShapeVectors()
-              .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, vertexIndex, d_restPos, d_worldPos);
-
-      gradient[paramIdx] += gradientDirection.dot(d_worldPos);
-    }
-  }
-
-  // Handle derivatives wrt face expression blend shape parameters
-  if (this->character_.faceExpressionBlendShape) {
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.faceExpressionParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.faceExpressionParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
-      }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.faceExpressionBlendShape->getShapeVectors()
-              .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-      Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(state, vertexIndex, d_restPos, d_worldPos);
-
-      gradient[paramIdx] += gradientDirection.dot(d_worldPos);
-    }
-  }
-}
-
-template <typename T>
-void VertexVertexDistanceErrorFunctionT<T>::calculateDWorldPos(
-    const SkeletonStateT<T>& state,
-    int vertexIndex,
-    const Eigen::Vector3<T>& d_restPos,
-    Eigen::Vector3<T>& d_worldPos) const {
-  const auto& skinWeights = *character_.skinWeights;
-
-  for (uint32_t i = 0; i < kMaxSkinJoints; ++i) {
-    const auto w = skinWeights.weight(vertexIndex, i);
-    const auto parentBone = skinWeights.index(vertexIndex, i);
-    if (w > 0) {
-      d_worldPos += w *
-          (state.jointState[parentBone].transform.toLinear() *
-           (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
-    }
-  }
 }
 
 // Explicit template instantiations
