@@ -266,7 +266,12 @@ character_solver_public_headers = [
     "character_solver/state_error_function.h",
     "character_solver/transform_pose.h",
     "character_solver/trust_region_qr.h",
+    "character_solver/vertex_constraint_error_function.h",
     "character_solver/vertex_error_function.h",
+    "character_solver/vertex_normal_constraint_error_function.h",
+    "character_solver/vertex_plane_constraint_error_function.h",
+    "character_solver/vertex_position_constraint_error_function.h",
+    "character_solver/vertex_projection_constraint_error_function.h",
     "character_solver/vertex_projection_error_function.h",
     "character_solver/vertex_sdf_error_function.h",
     "character_solver/vertex_vertex_distance_error_function.h",
@@ -302,7 +307,12 @@ character_solver_sources = [
     "character_solver/state_error_function.cpp",
     "character_solver/transform_pose.cpp",
     "character_solver/trust_region_qr.cpp",
+    "character_solver/vertex_constraint_error_function.cpp",
     "character_solver/vertex_error_function.cpp",
+    "character_solver/vertex_normal_constraint_error_function.cpp",
+    "character_solver/vertex_plane_constraint_error_function.cpp",
+    "character_solver/vertex_position_constraint_error_function.cpp",
+    "character_solver/vertex_projection_constraint_error_function.cpp",
     "character_solver/vertex_projection_error_function.cpp",
     "character_solver/vertex_sdf_error_function.cpp",
     "character_solver/vertex_vertex_distance_error_function.cpp",
@@ -315,6 +325,7 @@ character_solver_test_sources = [
     "test/character_solver/inverse_kinematics_test.cpp",
     "test/character_solver/skeleton_derivative_test.cpp",
     "test/character_solver/solver_test.cpp",
+    "test/character_solver/vertex_constraint_leaves_test.cpp",
 ]
 
 simd_constraints_public_headers = [
