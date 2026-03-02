@@ -7,9 +7,13 @@
 
 #pragma once
 
+#include <momentum/character/fwd.h>
 #include <momentum/character_solver/fwd.h>
-#include <momentum/character_solver/skeleton_error_function.h>
-#include <momentum/math/types.h>
+#include <momentum/character_solver/multi_source_error_function.h>
+
+#include <Eigen/Core>
+
+#include <vector>
 
 namespace momentum {
 
@@ -56,33 +60,25 @@ struct JointToJointDistanceConstraintT {
 /// This is useful for enforcing distance constraints between different parts of a character, such
 /// as maintaining a fixed distance between hands or ensuring two joints stay a certain distance
 /// apart.
+///
+/// The residual is:
+///   f = ||p1 - p2|| - targetDistance
+///
+/// where p1 and p2 are the world-space positions of the two joint points.
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
-class JointToJointDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
+class JointToJointDistanceErrorFunctionT : public MultiSourceErrorFunctionT<T, 1> {
  public:
+  using typename MultiSourceErrorFunctionT<T, 1>::FuncType;
+  using typename MultiSourceErrorFunctionT<T, 1>::DfdvType;
+  using ConstraintType = JointToJointDistanceConstraintT<T>;
+
   explicit JointToJointDistanceErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
 
   explicit JointToJointDistanceErrorFunctionT(const Character& character);
 
-  [[nodiscard]] double getError(
-      const ModelParametersT<T>& params,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState) final;
-
-  double getGradient(
-      const ModelParametersT<T>& params,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      Ref<VectorX<T>> gradient) override;
-
-  double getJacobian(
-      const ModelParametersT<T>& params,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      Ref<MatrixX<T>> jacobian,
-      Ref<VectorX<T>> residual,
-      int& usedRows) override;
-
-  [[nodiscard]] size_t getJacobianSize() const final;
+  ~JointToJointDistanceErrorFunctionT() override = default;
 
   /// Add a constraint between two joints with local offsets.
   void addConstraint(
@@ -97,15 +93,49 @@ class JointToJointDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   void clearConstraints();
 
   /// Get all constraints.
-  [[nodiscard]] const std::vector<JointToJointDistanceConstraintT<T>>& getConstraints() const {
+  [[nodiscard]] const std::vector<ConstraintType>& getConstraints() const {
     return constraints_;
   }
+
+  /// Returns the number of constraints.
+  [[nodiscard]] size_t getNumConstraints() const override;
+
+  /// Returns the per-constraint weight, including the kDistanceWeight factor.
+  /// The total weight applied is: constr.weight * kDistanceWeight * this->weight_
+  [[nodiscard]] T getConstraintWeight(size_t constrIndex) const override;
+
+  /// Returns the contributions for a constraint (2 JointPoint contributions).
+  [[nodiscard]] std::span<const SourceT<T>> getContributions(size_t constrIndex) const override;
+
+  /// Computes the residual and derivatives.
+  ///
+  /// The residual is f = ||p1 - p2|| - targetDistance.
+  ///
+  /// @param constrIndex Index of the constraint
+  /// @param state Current skeleton state
+  /// @param meshState Current mesh state (unused)
+  /// @param worldVecs Pre-computed world positions of the two joint points
+  /// @param f Output: residual (1x1)
+  /// @param dfdv Output: derivative df/dv for each joint point
+  void evalFunction(
+      size_t constrIndex,
+      const SkeletonStateT<T>& state,
+      const MeshStateT<T>& meshState,
+      std::span<const Eigen::Vector3<T>> worldVecs,
+      FuncType& f,
+      std::span<DfdvType> dfdv) const override;
 
   /// Default weight for distance constraints.
   static constexpr T kDistanceWeight = 1e-2f;
 
  private:
-  std::vector<JointToJointDistanceConstraintT<T>> constraints_;
+  std::vector<ConstraintType> constraints_;
+
+  // Cached contributions per constraint (2 JointPoints per constraint)
+  mutable std::vector<std::array<SourceT<T>, 2>> contributionsCache_;
+  mutable bool contributionsCacheValid_ = false;
+
+  void rebuildContributionsCache() const;
 };
 
 } // namespace momentum
