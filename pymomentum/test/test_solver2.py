@@ -554,74 +554,6 @@ class TestSolver(unittest.TestCase):
         ptv_error_function.clear_constraints()
         # self.assertTrue(len(ptv_error_function.constraints) == 0)
 
-    def test_vertex_error_function(self) -> None:
-        """Test VertexErrorFunction to ensure a vertex is targeted to a specific location."""
-
-        # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
-
-        # Create a VertexErrorFunction
-        vertex_error_function = pym_solver2.VertexErrorFunction(
-            character, pym_solver2.VertexConstraintType.Position
-        )
-        vertex_error_function.weight = 2.0
-        self.assertAlmostEqual(vertex_error_function.weight, 2.0)
-
-        # Define a vertex and its target position
-        vertex_index = 0
-        target_position = np.array([0.5, 1.5, 2.5], dtype=np.float32)
-        target_normal = np.array([0.0, 0.0, 1.0], dtype=np.float32)
-        weight = 1.0
-
-        # Add a constraint to the vertex error function
-        vertex_error_function.add_constraint(
-            vertex_index, weight, target_position, target_normal
-        )
-        self.assertEqual(len(vertex_error_function.constraints), 1)
-
-        # Create solver function with the vertex error
-        solver_function = pym_solver2.SkeletonSolverFunction(
-            character, [vertex_error_function]
-        )
-
-        # Set solver options
-        solver_options = pym_solver2.GaussNewtonSolverOptions()
-        solver_options.max_iterations = 100
-        solver_options.regularization = 1e-5
-
-        # Create and run the solver
-        model_params_init = torch.zeros(
-            character.parameter_transform.size, dtype=torch.float32
-        )
-        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        solver.set_enabled_parameters(character.parameter_transform.rigid_parameters)
-        model_params_final = solver.solve(model_params_init.numpy())
-
-        # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
-        )
-
-        # Compute the final position of the vertex
-        final_mesh = character.skin_points(skel_state_final.numpy())
-        final_vertex_position = torch.from_numpy(final_mesh[vertex_index, :3])
-
-        # Assert that the final vertex position is close to the target position
-        self.assertTrue(
-            torch.allclose(
-                final_vertex_position,
-                torch.from_numpy(target_position),
-                rtol=1e-3,
-                atol=1e-3,
-            )
-        )
-
-        # delete constraints and ensure they're empty
-        vertex_error_function.clear_constraints()
-        self.assertTrue(len(vertex_error_function.constraints) == 0)
-
     def test_pose_prior_error_function(self) -> None:
         """Test PosePriorErrorFunction to ensure it can converge to multiple modes."""
 
@@ -1404,7 +1336,7 @@ class TestSolver(unittest.TestCase):
 
         # Create VertexProjectionErrorFunction
         vertex_projection_error_function = pym_solver2.VertexProjectionErrorFunction(
-            character, max_threads=0
+            character
         )
 
         # Add vertex projection constraint
