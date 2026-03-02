@@ -7,8 +7,8 @@
 
 #include "momentum/character_solver/camera_projection_error_function.h"
 
-#include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character_solver/skeleton_derivative.h"
 
 namespace momentum {
 
@@ -22,14 +22,8 @@ CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
     : SkeletonErrorFunctionT<T>(skel, pt),
       intrinsicsModel_(std::move(intrinsicsModel)),
       cameraParent_(cameraParent),
-      cameraOffset_(cameraOffset) {
-  if (!intrinsicsModel_->name().empty()) {
-    CameraIntrinsicsMapping<T> mapping(pt, *intrinsicsModel_);
-    if (mapping.hasActiveParams()) {
-      intrinsicsMapping_.emplace(std::move(mapping));
-    }
-  }
-}
+      cameraOffset_(cameraOffset),
+      skeletonDerivative_(skel, pt, this->activeJointParams_, this->enabledParameters_) {}
 
 template <typename T>
 CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
@@ -40,14 +34,8 @@ CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
     : SkeletonErrorFunctionT<T>(skel, pt),
       intrinsicsModel_(camera.intrinsicsModel()),
       cameraParent_(cameraParent),
-      cameraOffset_(camera.eyeFromWorld()) {
-  if (!intrinsicsModel_->name().empty()) {
-    CameraIntrinsicsMapping<T> mapping(pt, *intrinsicsModel_);
-    if (mapping.hasActiveParams()) {
-      intrinsicsMapping_.emplace(std::move(mapping));
-    }
-  }
-}
+      cameraOffset_(camera.eyeFromWorld()),
+      skeletonDerivative_(skel, pt, this->activeJointParams_, this->enabledParameters_) {}
 
 template <typename T>
 void CameraProjectionErrorFunctionT<T>::addConstraint(const ProjectionConstraintT<T>& constraint) {
@@ -56,14 +44,10 @@ void CameraProjectionErrorFunctionT<T>::addConstraint(const ProjectionConstraint
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& params,
+    const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/) {
   double error = 0;
-
-  // If intrinsics are being optimized, update from current model parameters
-  const auto& intrinsics =
-      intrinsicsMapping_ ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -86,7 +70,7 @@ double CameraProjectionErrorFunctionT<T>::getError(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics
-    const auto [projected, valid] = intrinsics.project(p_eye);
+    const auto [projected, valid] = intrinsicsModel_->project(p_eye);
     if (!valid) {
       continue;
     }
@@ -100,15 +84,11 @@ double CameraProjectionErrorFunctionT<T>::getError(
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getGradient(
-    const ModelParametersT<T>& params,
+    const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
-
-  // If intrinsics are being optimized, update from current model parameters
-  const auto& intrinsics =
-      intrinsicsMapping_ ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -122,6 +102,10 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
   }
   const Eigen::Matrix<T, 3, 3> R_eyeFromWorld = eyeFromWorld.linear();
 
+  // Pre-allocate joint gradient storage
+  Eigen::VectorX<T> jointGrad =
+      Eigen::VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters());
+
   for (size_t iCons = 0; iCons < constraints_.size(); ++iCons) {
     const auto& cons = constraints_[iCons];
 
@@ -132,7 +116,7 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics with Jacobian
-    const auto [projected, J_eye_3x3, valid] = intrinsics.projectJacobian(p_eye);
+    const auto [projected, J_eye_3x3, valid] = intrinsicsModel_->projectJacobian(p_eye);
     if (!valid) {
       continue;
     }
@@ -145,105 +129,59 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
     // J_pixel_world = J_eye_3x3.topRows<2>() * R_eyeFromWorld
     const Eigen::Matrix<T, 2, 3> J_pixel_world = J_eye_3x3.template topRows<2>() * R_eyeFromWorld;
 
-    // Helper to accumulate gradient for a given full-body DOF
-    auto addGradient = [&](const size_t jFullBodyDOF, const Eigen::Vector2<T>& d_pixel) {
-      const T gradVal = d_pixel.dot(residual);
-      for (auto index = this->parameterTransform_.transform.outerIndexPtr()[jFullBodyDOF];
-           index < this->parameterTransform_.transform.outerIndexPtr()[jFullBodyDOF + 1];
-           ++index) {
-        gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-            this->parameterTransform_.transform.valuePtr()[index] * wgt * gradVal;
-      }
-    };
-
-    // For joints that are ancestors of both the constraint point and the camera,
-    // the Walk 1 (+) and Walk 2 (-) contributions cancel exactly (same lever arm,
-    // opposite signs). We skip them by stopping both walks at the LCA.
-    // For static cameras (kInvalidIndex), commonAncestor returns kInvalidIndex,
-    // so the walks naturally go all the way to the root.
-    const size_t lca = this->skeleton_.commonAncestor(cons.parent, cameraParent_);
-
     // Walk 1: Constraint-point parent chain (positive sign)
+    // p_world is a point (isPoint=1) attached to cons.parent
     {
-      size_t jointIndex = cons.parent;
-      while (jointIndex != lca) {
-        const auto& js = jointState[jointIndex];
-        const size_t paramIndex = jointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd = p_world - js.translation();
+      const Eigen::Vector2<T> weightedResidual = wgt * residual;
+      std::array<Eigen::Vector3<T>, 1> worldVecs = {p_world};
+      std::array<Eigen::Matrix<T, 2, 3>, 1> dfdvArr = {J_pixel_world};
+      std::array<uint8_t, 1> isPoints = {1};
 
-        for (size_t d = 0; d < 3; d++) {
-          if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector2<T> dp = J_pixel_world * js.getTranslationDerivative(d);
-            addGradient(paramIndex + d, dp);
-          }
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector2<T> dp = J_pixel_world * js.getRotationDerivative(d, posd);
-            addGradient(paramIndex + 3 + d, dp);
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector2<T> dp = J_pixel_world * js.getScaleDerivative(posd);
-          addGradient(paramIndex + 6, dp);
-        }
-
-        jointIndex = this->skeleton_.joints[jointIndex].parent;
-      }
+      skeletonDerivative_.template accumulateJointGradient<2>(
+          cons.parent,
+          std::span<const Eigen::Vector3<T>>(worldVecs.data(), 1),
+          std::span<const Eigen::Matrix<T, 2, 3>>(dfdvArr.data(), 1),
+          std::span<const uint8_t>(isPoints.data(), 1),
+          weightedResidual,
+          jointState,
+          jointGrad);
     }
 
     // Walk 2: Camera-parent chain (negative sign)
     // The lever arm uses p_world because we differentiate eyeFromWorld * p_world
-    // w.r.t. q through eyeFromWorld.
+    // w.r.t. q through eyeFromWorld. The negative sign is because increasing
+    // camera joint parameters moves the camera, which has the opposite effect
+    // on the projected point.
     if (cameraParent_ != kInvalidIndex) {
-      size_t jointIndex = cameraParent_;
-      while (jointIndex != lca) {
-        const auto& js = jointState[jointIndex];
-        const size_t paramIndex = jointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd = p_world - js.translation();
+      const Eigen::Vector2<T> weightedResidual = -wgt * residual;
+      std::array<Eigen::Vector3<T>, 1> worldVecs = {p_world};
+      std::array<Eigen::Matrix<T, 2, 3>, 1> dfdvArr = {J_pixel_world};
+      std::array<uint8_t, 1> isPoints = {1};
 
-        for (size_t d = 0; d < 3; d++) {
-          if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector2<T> dp = -J_pixel_world * js.getTranslationDerivative(d);
-            addGradient(paramIndex + d, dp);
-          }
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector2<T> dp = -J_pixel_world * js.getRotationDerivative(d, posd);
-            addGradient(paramIndex + 3 + d, dp);
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector2<T> dp = -J_pixel_world * js.getScaleDerivative(posd);
-          addGradient(paramIndex + 6, dp);
-        }
-
-        jointIndex = this->skeleton_.joints[jointIndex].parent;
-      }
-    }
-
-    // Intrinsics parameters gradient
-    if (intrinsicsMapping_) {
-      const auto [projected_i, J_intrinsics, valid_i] = intrinsics.projectIntrinsicsJacobian(p_eye);
-      if (valid_i) {
-        intrinsicsMapping_->addGradient(J_intrinsics, residual, wgt, gradient);
-      }
+      skeletonDerivative_.template accumulateJointGradient<2>(
+          cameraParent_,
+          std::span<const Eigen::Vector3<T>>(worldVecs.data(), 1),
+          std::span<const Eigen::Matrix<T, 2, 3>>(dfdvArr.data(), 1),
+          std::span<const uint8_t>(isPoints.data(), 1),
+          weightedResidual,
+          jointState,
+          jointGrad);
     }
   }
 
+  gradient += jointGrad;
   return error;
 }
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getJacobian(
-    const ModelParametersT<T>& params,
+    const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
   double error = 0;
-
-  // If intrinsics are being optimized, update from current model parameters
-  const auto& intrinsics =
-      intrinsicsMapping_ ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -267,7 +205,7 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics with Jacobian
-    const auto [projected, J_eye_3x3, valid] = intrinsics.projectJacobian(p_eye);
+    const auto [projected, J_eye_3x3, valid] = intrinsicsModel_->projectJacobian(p_eye);
     if (!valid) {
       continue;
     }
@@ -276,89 +214,44 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
     error += cons.weight * this->weight_ * res.squaredNorm();
 
     const T wgt = std::sqrt(cons.weight * this->weight_);
-    residual.template segment<2>(2 * iCons) = wgt * res;
+    const size_t rowIndex = 2 * iCons;
+    residual.template segment<2>(rowIndex) = wgt * res;
 
     // J_pixel_world = J_eye_3x3.topRows<2>() * R_eyeFromWorld
     const Eigen::Matrix<T, 2, 3> J_pixel_world = J_eye_3x3.template topRows<2>() * R_eyeFromWorld;
 
-    // Helper to accumulate Jacobian for a given full-body DOF
-    auto addJacobian = [&](const size_t jFullBodyDOF, const Eigen::Vector2<T>& d_pixel) {
-      for (auto index = this->parameterTransform_.transform.outerIndexPtr()[jFullBodyDOF];
-           index < this->parameterTransform_.transform.outerIndexPtr()[jFullBodyDOF + 1];
-           ++index) {
-        const auto jReducedDOF = this->parameterTransform_.transform.innerIndexPtr()[index];
-        jacobian.template block<2, 1>(2 * iCons, jReducedDOF) +=
-            this->parameterTransform_.transform.valuePtr()[index] * wgt * d_pixel;
-      }
-    };
-
-    // For joints that are ancestors of both the constraint point and the camera,
-    // the Walk 1 (+) and Walk 2 (-) contributions cancel exactly (same lever arm,
-    // opposite signs). We skip them by stopping both walks at the LCA.
-    const size_t lca = this->skeleton_.commonAncestor(cons.parent, cameraParent_);
-
     // Walk 1: Constraint-point parent chain (positive sign)
     {
-      size_t jointIndex = cons.parent;
-      while (jointIndex != lca) {
-        const auto& js = jointState[jointIndex];
-        const size_t paramIndex = jointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd = p_world - js.translation();
+      std::array<Eigen::Vector3<T>, 1> worldVecs = {p_world};
+      std::array<Eigen::Matrix<T, 2, 3>, 1> dfdvArr = {J_pixel_world};
+      std::array<uint8_t, 1> isPoints = {1};
 
-        for (size_t d = 0; d < 3; d++) {
-          if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector2<T> dp = J_pixel_world * js.getTranslationDerivative(d);
-            addJacobian(paramIndex + d, dp);
-          }
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector2<T> dp = J_pixel_world * js.getRotationDerivative(d, posd);
-            addJacobian(paramIndex + 3 + d, dp);
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector2<T> dp = J_pixel_world * js.getScaleDerivative(posd);
-          addJacobian(paramIndex + 6, dp);
-        }
-
-        jointIndex = this->skeleton_.joints[jointIndex].parent;
-      }
+      skeletonDerivative_.template accumulateJointJacobian<2>(
+          cons.parent,
+          std::span<const Eigen::Vector3<T>>(worldVecs.data(), 1),
+          std::span<const Eigen::Matrix<T, 2, 3>>(dfdvArr.data(), 1),
+          std::span<const uint8_t>(isPoints.data(), 1),
+          wgt,
+          jointState,
+          jacobian,
+          rowIndex);
     }
 
     // Walk 2: Camera-parent chain (negative sign)
-    // The lever arm uses p_world because we differentiate eyeFromWorld * p_world
-    // w.r.t. q through eyeFromWorld.
     if (cameraParent_ != kInvalidIndex) {
-      size_t jointIndex = cameraParent_;
-      while (jointIndex != lca) {
-        const auto& js = jointState[jointIndex];
-        const size_t paramIndex = jointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd = p_world - js.translation();
+      std::array<Eigen::Vector3<T>, 1> worldVecs = {p_world};
+      std::array<Eigen::Matrix<T, 2, 3>, 1> dfdvArr = {J_pixel_world};
+      std::array<uint8_t, 1> isPoints = {1};
 
-        for (size_t d = 0; d < 3; d++) {
-          if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector2<T> dp = -J_pixel_world * js.getTranslationDerivative(d);
-            addJacobian(paramIndex + d, dp);
-          }
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector2<T> dp = -J_pixel_world * js.getRotationDerivative(d, posd);
-            addJacobian(paramIndex + 3 + d, dp);
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector2<T> dp = -J_pixel_world * js.getScaleDerivative(posd);
-          addJacobian(paramIndex + 6, dp);
-        }
-
-        jointIndex = this->skeleton_.joints[jointIndex].parent;
-      }
-    }
-
-    // Intrinsics parameters Jacobian
-    if (intrinsicsMapping_) {
-      const auto [projected_i, J_intrinsics, valid_i] = intrinsics.projectIntrinsicsJacobian(p_eye);
-      if (valid_i) {
-        intrinsicsMapping_->addJacobian(J_intrinsics, wgt, 2 * iCons, jacobian);
-      }
+      skeletonDerivative_.template accumulateJointJacobian<2>(
+          cameraParent_,
+          std::span<const Eigen::Vector3<T>>(worldVecs.data(), 1),
+          std::span<const Eigen::Matrix<T, 2, 3>>(dfdvArr.data(), 1),
+          std::span<const uint8_t>(isPoints.data(), 1),
+          -wgt,
+          jointState,
+          jacobian,
+          rowIndex);
     }
   }
 
