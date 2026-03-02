@@ -257,6 +257,7 @@ character_solver_public_headers = [
     "character_solver/position_error_function.h",
     "character_solver/projection_error_function.h",
     "character_solver/sdf_collision_error_function.h",
+    "character_solver/skeleton_derivative.h",
     "character_solver/skeleton_error_function.h",
     "character_solver/skeleton_solver_function.h",
     "character_solver/skinned_locator_error_function.h",
@@ -293,6 +294,7 @@ character_solver_sources = [
     "character_solver/position_error_function.cpp",
     "character_solver/projection_error_function.cpp",
     "character_solver/sdf_collision_error_function.cpp",
+    "character_solver/skeleton_derivative.cpp",
     "character_solver/skeleton_solver_function.cpp",
     "character_solver/skinned_locator_error_function.cpp",
     "character_solver/skinned_locator_triangle_error_function.cpp",
@@ -311,6 +313,7 @@ character_solver_test_sources = [
     "test/character_solver/camera_projection_error_function_test.cpp",
     "test/character_solver/error_functions_test.cpp",
     "test/character_solver/inverse_kinematics_test.cpp",
+    "test/character_solver/skeleton_derivative_test.cpp",
     "test/character_solver/solver_test.cpp",
 ]
 
