@@ -10,7 +10,7 @@
 #include "tensor_error_function_utility.h"
 
 #include <momentum/character/character.h>
-#include <momentum/character_solver/vertex_projection_constraint_error_function.h>
+#include <momentum/character_solver/vertex_projection_error_function.h>
 
 namespace pymomentum {
 
@@ -86,7 +86,7 @@ TensorVertexProjectionErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result = std::make_unique<momentum::VertexProjectionConstraintErrorFunctionT<T>>(
+  auto result = std::make_unique<momentum::VertexProjectionErrorFunctionT<T>>(
       character, character.parameterTransform);
 
   const auto weights = this->getTensorInput(kWeightsName).template toEigenMap<T>(iBatch, jFrame);
@@ -100,7 +100,7 @@ TensorVertexProjectionErrorFunction<T>::createErrorFunctionImp(
   const auto nCons = this->sharedSize(NCONS_IDX);
   for (Eigen::Index i = 0; i < nCons; ++i) {
     result->addConstraint(
-        momentum::VertexProjectionConstraintDataT<T>(
+        momentum::VertexProjectionDataT<T>(
             static_cast<size_t>(extractScalar<int>(vertices, i)),
             extractVector<T, 2>(target_positions, i),
             extractMatrix<T, 3, 4>(projections, i),

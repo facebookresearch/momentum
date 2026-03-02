@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character_solver/vertex_plane_constraint_error_function.h"
+#include "momentum/character_solver/vertex_plane_error_function.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/mesh_state.h"
@@ -15,12 +15,12 @@
 namespace momentum {
 
 template <typename T>
-VertexPlaneConstraintErrorFunctionT<T>::VertexPlaneConstraintErrorFunctionT(
+VertexPlaneErrorFunctionT<T>::VertexPlaneErrorFunctionT(
     const Character& character,
     const ParameterTransform& parameterTransform,
     const T& lossAlpha,
     const T& lossC)
-    : VertexConstraintErrorFunctionT<T, VertexPlaneConstraintDataT<T>, 1>(
+    : VertexErrorFunctionT<T, VertexPlaneDataT<T>, 1>(
           character,
           parameterTransform,
           lossAlpha,
@@ -29,7 +29,7 @@ VertexPlaneConstraintErrorFunctionT<T>::VertexPlaneConstraintErrorFunctionT(
 }
 
 template <typename T>
-void VertexPlaneConstraintErrorFunctionT<T>::evalFunction(
+void VertexPlaneErrorFunctionT<T>::evalFunction(
     size_t constrIndex,
     const SkeletonStateT<T>& /*state*/,
     const MeshStateT<T>& meshState,
@@ -72,7 +72,7 @@ void VertexPlaneConstraintErrorFunctionT<T>::evalFunction(
 }
 
 // Explicit template instantiations
-template class VertexPlaneConstraintErrorFunctionT<float>;
-template class VertexPlaneConstraintErrorFunctionT<double>;
+template class VertexPlaneErrorFunctionT<float>;
+template class VertexPlaneErrorFunctionT<double>;
 
 } // namespace momentum

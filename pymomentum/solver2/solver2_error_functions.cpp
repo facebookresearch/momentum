@@ -28,10 +28,10 @@
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/state_error_function.h>
 #include <momentum/character_solver/vertex_error_function.h>
-#include <momentum/character_solver/vertex_normal_constraint_error_function.h>
-#include <momentum/character_solver/vertex_plane_constraint_error_function.h>
-#include <momentum/character_solver/vertex_position_constraint_error_function.h>
-#include <momentum/character_solver/vertex_projection_constraint_error_function.h>
+#include <momentum/character_solver/vertex_normal_error_function.h>
+#include <momentum/character_solver/vertex_plane_error_function.h>
+#include <momentum/character_solver/vertex_position_error_function.h>
+#include <momentum/character_solver/vertex_projection_error_function.h>
 #include <momentum/character_solver/vertex_sdf_error_function.h>
 #include <momentum/character_solver/vertex_vertex_distance_error_function.h>
 #include <pymomentum/python_utility/eigen_quaternion.h>
@@ -59,7 +59,10 @@ void defAimErrorFunction(py::module_& m, const char* name, const char* descripti
           "__repr__",
           [=](const AimErrorFunctionT& self) -> std::string {
             return fmt::format(
-                "{}(weight={}, num_constraints={})", name, self.getWeight(), self.numConstraints());
+                "{}(weight={}, num_constraints={})",
+                name,
+                self.getWeight(),
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -193,7 +196,10 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
           "__repr__",
           [=](const FixedAxisErrorFunctionT& self) -> std::string {
             return fmt::format(
-                "{}(weight={}, num_constraints={})", name, self.getWeight(), self.numConstraints());
+                "{}(weight={}, num_constraints={})",
+                name,
+                self.getWeight(),
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -345,7 +351,7 @@ plane defined by a local point and a local normal vector.)")
             return fmt::format(
                 "NormalErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -519,7 +525,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
             return fmt::format(
                 "DistanceErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -629,7 +635,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
           "Returns true if there are no constraints.")
       .def(
           "num_constraints",
-          &mm::DistanceErrorFunctionT<float>::numConstraints,
+          &mm::DistanceErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.")
       .def_property_readonly(
           "constraints",
@@ -678,7 +684,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
             return fmt::format(
                 "ProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -810,7 +816,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
           "Returns true if there are no constraints.")
       .def(
           "num_constraints",
-          &mm::ProjectionErrorFunctionT<float>::numConstraints,
+          &mm::ProjectionErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.")
       .def_property_readonly(
           "constraints",
@@ -819,11 +825,11 @@ This is useful for camera-based constraints where you want to match a 3D point t
 }
 
 void defVertexProjectionErrorFunction(py::module_& m) {
-  py::class_<mm::VertexProjectionConstraintDataT<float>>(
+  py::class_<mm::VertexProjectionDataT<float>>(
       m, "VertexProjectionConstraint", "Read-only access to a vertex projection constraint.")
       .def(
           "__repr__",
-          [](const mm::VertexProjectionConstraintDataT<float>& self) {
+          [](const mm::VertexProjectionDataT<float>& self) {
             return fmt::format(
                 "VertexProjectionConstraint(vertex_index={}, weight={}, target_position=[{:.3f}, {:.3f}])",
                 self.vertexIndex,
@@ -833,43 +839,43 @@ void defVertexProjectionErrorFunction(py::module_& m) {
           })
       .def_readonly(
           "vertex_index",
-          &mm::VertexProjectionConstraintDataT<float>::vertexIndex,
+          &mm::VertexProjectionDataT<float>::vertexIndex,
           "Returns the index of the vertex to project.")
       .def_readonly(
           "weight",
-          &mm::VertexProjectionConstraintDataT<float>::weight,
+          &mm::VertexProjectionDataT<float>::weight,
           "Returns the weight of the constraint.")
       .def_readonly(
           "target_position",
-          &mm::VertexProjectionConstraintDataT<float>::target,
+          &mm::VertexProjectionDataT<float>::target,
           "Returns the target 2D position.")
       .def_readonly(
           "projection",
-          &mm::VertexProjectionConstraintDataT<float>::projectionMatrix,
+          &mm::VertexProjectionDataT<float>::projectionMatrix,
           "Returns the 3x4 projection matrix.");
 
   py::class_<
-      mm::VertexProjectionConstraintErrorFunctionT<float>,
+      mm::VertexProjectionErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
-      std::shared_ptr<mm::VertexProjectionConstraintErrorFunctionT<float>>>(
+      std::shared_ptr<mm::VertexProjectionErrorFunctionT<float>>>(
       m,
       "VertexProjectionErrorFunction",
       R"(The VertexProjectionErrorFunction projects 3D vertices onto 2D points using a projection matrix.
 This is useful for camera-based constraints where you want to match a 3D vertex to a 2D observation.)")
       .def(
           "__repr__",
-          [](const mm::VertexProjectionConstraintErrorFunctionT<float>& self) {
+          [](const mm::VertexProjectionErrorFunctionT<float>& self) {
             return fmt::format(
                 "VertexProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
               [](const mm::Character& character, float lossAlpha, float lossC, float weight)
-                  -> std::shared_ptr<mm::VertexProjectionConstraintErrorFunctionT<float>> {
+                  -> std::shared_ptr<mm::VertexProjectionErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<mm::VertexProjectionConstraintErrorFunctionT<float>>(
+                auto result = std::make_shared<mm::VertexProjectionErrorFunctionT<float>>(
                     character, character.parameterTransform, lossAlpha, lossC);
                 result->setWeight(weight);
                 return result;
@@ -888,7 +894,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           py::arg("weight") = 1.0f)
       .def(
           "add_constraint",
-          [](mm::VertexProjectionConstraintErrorFunctionT<float>& self,
+          [](mm::VertexProjectionErrorFunctionT<float>& self,
              int vertexIndex,
              float weight,
              const Eigen::Vector2f& targetPosition,
@@ -896,8 +902,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
             validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validateWeight(weight, "weight");
             self.addConstraint(
-                mm::VertexProjectionConstraintDataT<float>(
-                    vertexIndex, targetPosition, projection, weight));
+                mm::VertexProjectionDataT<float>(vertexIndex, targetPosition, projection, weight));
           },
           R"(Adds a vertex projection constraint to the error function.
 
@@ -911,17 +916,17 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           py::arg("projection"))
       .def(
           "clear_constraints",
-          &mm::VertexProjectionConstraintErrorFunctionT<float>::clearConstraints,
+          &mm::VertexProjectionErrorFunctionT<float>::clearConstraints,
           "Clears all vertex projection constraints from the error function.")
       .def_property_readonly(
           "constraints",
-          [](const mm::VertexProjectionConstraintErrorFunctionT<float>& self) {
+          [](const mm::VertexProjectionErrorFunctionT<float>& self) {
             return self.getConstraints();
           },
           "Returns the list of vertex projection constraints.")
       .def(
           "add_constraints",
-          [](mm::VertexProjectionConstraintErrorFunctionT<float>& self,
+          [](mm::VertexProjectionErrorFunctionT<float>& self,
              const py::array_t<int>& vertexIndex,
              const py::array_t<float>& weight,
              const py::array_t<float>& targetPosition,
@@ -952,7 +957,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
               }
 
               self.addConstraint(
-                  mm::VertexProjectionConstraintDataT<float>(
+                  mm::VertexProjectionDataT<float>(
                       vertexIndexAcc(i),
                       Eigen::Vector2f(targetPositionAcc(i, 0), targetPositionAcc(i, 1)),
                       proj,
@@ -1010,7 +1015,7 @@ distance is greater than zero (ie. the point being above).)")
             return fmt::format(
                 "PlaneErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -1186,7 +1191,7 @@ or maintaining the width of body parts.)")
             return fmt::format(
                 "VertexVertexDistanceErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -1279,7 +1284,7 @@ or maintaining the width of body parts.)")
           "Returns the list of vertex-to-vertex distance constraints.")
       .def(
           "num_constraints",
-          &mm::VertexVertexDistanceErrorFunctionT<float>::numConstraints,
+          &mm::VertexVertexDistanceErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.");
 }
 
@@ -1708,7 +1713,7 @@ camera_offset is used directly as the eye-from-world transform.)")
             return fmt::format(
                 "CameraProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -1866,7 +1871,7 @@ camera_offset is used directly as the eye-from-world transform.)")
           "Clears all camera projection constraints.")
       .def(
           "num_constraints",
-          &mm::CameraProjectionErrorFunctionT<float>::numConstraints,
+          &mm::CameraProjectionErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.")
       .def_property_readonly(
           "constraints",
@@ -2057,7 +2062,7 @@ Uses a generalized loss function that support various forms of losses such as L1
             return fmt::format(
                 "PositionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -2405,9 +2410,8 @@ computation with Taylor series for small angles.)");
       .def_readonly("weight", &mm::VertexConstraintData::weight, "The constraint weight.");
 
   // VertexErrorFunction: a Python-side facade that creates the correct leaf error function
-  // (VertexPositionConstraintErrorFunctionT, VertexNormalConstraintErrorFunctionT, or
-  // VertexPlaneConstraintErrorFunctionT) based on VertexConstraintType, and provides a uniform
-  // add_constraint / add_constraints API.
+  // (VertexPositionErrorFunctionT, VertexNormalErrorFunctionT, or VertexPlaneErrorFunctionT)
+  // based on VertexConstraintType, and provides a uniform add_constraint / add_constraints API.
   //
   // Because the leaf classes are different template instantiations of VertexErrorFunctionT
   // (with different Data and FuncDim), they share no common base beyond SkeletonErrorFunctionT.
@@ -2477,24 +2481,24 @@ computation with Taylor series for small angles.)");
           const Eigen::Vector3f& targetNormal) {
         switch (constraintType_) {
           case mm::VertexConstraintType::Position: {
-            auto* fn = static_cast<mm::VertexPositionConstraintErrorFunctionT<float>*>(impl_.get());
+            auto* fn = static_cast<mm::VertexPositionErrorFunctionT<float>*>(impl_.get());
             fn->addConstraint(
-                mm::VertexPositionConstraintDataT<float>(
+                mm::VertexPositionDataT<float>(
                     static_cast<size_t>(vertexIndex), targetPosition, weight));
             break;
           }
           case mm::VertexConstraintType::Normal:
           case mm::VertexConstraintType::SymmetricNormal: {
-            auto* fn = static_cast<mm::VertexNormalConstraintErrorFunctionT<float>*>(impl_.get());
+            auto* fn = static_cast<mm::VertexNormalErrorFunctionT<float>*>(impl_.get());
             fn->addConstraint(
-                mm::VertexNormalConstraintDataT<float>(
+                mm::VertexNormalDataT<float>(
                     static_cast<size_t>(vertexIndex), targetPosition, targetNormal, weight));
             break;
           }
           case mm::VertexConstraintType::Plane: {
-            auto* fn = static_cast<mm::VertexPlaneConstraintErrorFunctionT<float>*>(impl_.get());
+            auto* fn = static_cast<mm::VertexPlaneErrorFunctionT<float>*>(impl_.get());
             fn->addConstraint(
-                mm::VertexPlaneConstraintDataT<float>(
+                mm::VertexPlaneDataT<float>(
                     static_cast<size_t>(vertexIndex),
                     targetNormal.normalized(),
                     targetPosition,
@@ -2508,34 +2512,30 @@ computation with Taylor series for small angles.)");
       void clearConstraints() {
         switch (constraintType_) {
           case mm::VertexConstraintType::Position:
-            static_cast<mm::VertexPositionConstraintErrorFunctionT<float>*>(impl_.get())
-                ->clearConstraints();
+            static_cast<mm::VertexPositionErrorFunctionT<float>*>(impl_.get())->clearConstraints();
             break;
           case mm::VertexConstraintType::Normal:
           case mm::VertexConstraintType::SymmetricNormal:
-            static_cast<mm::VertexNormalConstraintErrorFunctionT<float>*>(impl_.get())
-                ->clearConstraints();
+            static_cast<mm::VertexNormalErrorFunctionT<float>*>(impl_.get())->clearConstraints();
             break;
           case mm::VertexConstraintType::Plane:
-            static_cast<mm::VertexPlaneConstraintErrorFunctionT<float>*>(impl_.get())
-                ->clearConstraints();
+            static_cast<mm::VertexPlaneErrorFunctionT<float>*>(impl_.get())->clearConstraints();
             break;
         }
       }
 
-      [[nodiscard]] size_t numConstraints() const {
+      [[nodiscard]] size_t getNumConstraints() const {
         switch (constraintType_) {
           case mm::VertexConstraintType::Position:
-            return static_cast<const mm::VertexPositionConstraintErrorFunctionT<float>*>(
-                       impl_.get())
-                ->numConstraints();
+            return static_cast<const mm::VertexPositionErrorFunctionT<float>*>(impl_.get())
+                ->getNumConstraints();
           case mm::VertexConstraintType::Normal:
           case mm::VertexConstraintType::SymmetricNormal:
-            return static_cast<const mm::VertexNormalConstraintErrorFunctionT<float>*>(impl_.get())
-                ->numConstraints();
+            return static_cast<const mm::VertexNormalErrorFunctionT<float>*>(impl_.get())
+                ->getNumConstraints();
           case mm::VertexConstraintType::Plane:
-            return static_cast<const mm::VertexPlaneConstraintErrorFunctionT<float>*>(impl_.get())
-                ->numConstraints();
+            return static_cast<const mm::VertexPlaneErrorFunctionT<float>*>(impl_.get())
+                ->getNumConstraints();
         }
         return 0;
       }
@@ -2550,17 +2550,17 @@ computation with Taylor series for small angles.)");
         R"(A vertex error function that constrains mesh vertices to target positions, normals, or planes.
 
 Dispatches to the appropriate specialized error function based on the constraint_type parameter:
-  - Position: constrains vertex to a target 3D position (VertexPositionConstraintErrorFunctionT)
-  - Normal: point-to-plane using source (body) normal (VertexNormalConstraintErrorFunctionT)
-  - SymmetricNormal: point-to-plane using 50/50 mix of source and target normal (VertexNormalConstraintErrorFunctionT)
-  - Plane: point-to-plane using target normal (VertexPlaneConstraintErrorFunctionT))")
+  - Position: constrains vertex to a target 3D position (VertexPositionErrorFunctionT)
+  - Normal: point-to-plane using source (body) normal (VertexNormalErrorFunctionT)
+  - SymmetricNormal: point-to-plane using 50/50 mix of source and target normal (VertexNormalErrorFunctionT)
+  - Plane: point-to-plane using target normal (VertexPlaneErrorFunctionT))")
         .def(
             "__repr__",
             [](const VertexErrorFunctionFacade& self) {
               return fmt::format(
                   "VertexErrorFunction(weight={}, num_constraints={})",
                   self.impl_->getWeight(),
-                  self.numConstraints());
+                  self.getNumConstraints());
             })
         .def(
             py::init<>(
@@ -2576,7 +2576,7 @@ Dispatches to the appropriate specialized error function based on the constraint
                   std::shared_ptr<mm::SkeletonErrorFunction> impl;
                   switch (constraintType) {
                     case mm::VertexConstraintType::Position: {
-                      auto fn = std::make_shared<mm::VertexPositionConstraintErrorFunctionT<float>>(
+                      auto fn = std::make_shared<mm::VertexPositionErrorFunctionT<float>>(
                           character, character.parameterTransform);
                       fn->setWeight(weight);
                       if (maxThreads > 0) {
@@ -2586,7 +2586,7 @@ Dispatches to the appropriate specialized error function based on the constraint
                       break;
                     }
                     case mm::VertexConstraintType::Normal: {
-                      auto fn = std::make_shared<mm::VertexNormalConstraintErrorFunctionT<float>>(
+                      auto fn = std::make_shared<mm::VertexNormalErrorFunctionT<float>>(
                           character, character.parameterTransform, 1.0f, 0.0f);
                       fn->setWeight(weight);
                       if (maxThreads > 0) {
@@ -2596,7 +2596,7 @@ Dispatches to the appropriate specialized error function based on the constraint
                       break;
                     }
                     case mm::VertexConstraintType::SymmetricNormal: {
-                      auto fn = std::make_shared<mm::VertexNormalConstraintErrorFunctionT<float>>(
+                      auto fn = std::make_shared<mm::VertexNormalErrorFunctionT<float>>(
                           character, character.parameterTransform, 0.5f, 0.5f);
                       fn->setWeight(weight);
                       if (maxThreads > 0) {
@@ -2606,7 +2606,7 @@ Dispatches to the appropriate specialized error function based on the constraint
                       break;
                     }
                     case mm::VertexConstraintType::Plane: {
-                      auto fn = std::make_shared<mm::VertexPlaneConstraintErrorFunctionT<float>>(
+                      auto fn = std::make_shared<mm::VertexPlaneErrorFunctionT<float>>(
                           character, character.parameterTransform);
                       fn->setWeight(weight);
                       if (maxThreads > 0) {
@@ -2696,7 +2696,7 @@ Dispatches to the appropriate specialized error function based on the constraint
             "Clears all vertex constraints.")
         .def_property_readonly(
             "num_constraints",
-            &VertexErrorFunctionFacade::numConstraints,
+            &VertexErrorFunctionFacade::getNumConstraints,
             "Returns the number of constraints.");
   }
 
@@ -2910,7 +2910,7 @@ rotation matrix to a target rotation.)")
             return fmt::format(
                 "OrientationErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -3090,7 +3090,7 @@ rotation matrix to a target rotation.)")
             return fmt::format(
                 "VertexSDFErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>([](const mm::Character& character,
@@ -3141,7 +3141,7 @@ distance value against a single SDF, enabling use cases like fitting a mesh to a
           R"(Clear all constraints.)")
       .def_property_readonly(
           "num_constraints",
-          &mm::VertexSDFErrorFunction::numConstraints,
+          &mm::VertexSDFErrorFunction::getNumConstraints,
           R"(The number of active constraints.)");
 
   // Plane error function

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/vertex_constraint_error_function.h>
+#include <momentum/character_solver/vertex_error_function.h>
 
 namespace momentum {
 
@@ -15,12 +15,12 @@ namespace momentum {
 ///
 /// Constrains a mesh vertex to a target 3D position.
 template <typename T>
-struct VertexPositionConstraintDataT : public VertexConstraintData {
+struct VertexPositionDataT : public VertexConstraintData {
   /// Target position in world space
   Eigen::Vector3<T> target = Eigen::Vector3<T>::Zero();
 
-  VertexPositionConstraintDataT() = default;
-  VertexPositionConstraintDataT(
+  VertexPositionDataT() = default;
+  VertexPositionDataT(
       size_t vIndex,
       const Eigen::Vector3<T>& targetPos,
       float w,
@@ -35,20 +35,19 @@ struct VertexPositionConstraintDataT : public VertexConstraintData {
 ///
 /// @tparam T Scalar type (float or double)
 template <typename T>
-class VertexPositionConstraintErrorFunctionT
-    : public VertexConstraintErrorFunctionT<T, VertexPositionConstraintDataT<T>, 3> {
+class VertexPositionErrorFunctionT : public VertexErrorFunctionT<T, VertexPositionDataT<T>, 3> {
  public:
-  using Base = VertexConstraintErrorFunctionT<T, VertexPositionConstraintDataT<T>, 3>;
+  using Base = VertexErrorFunctionT<T, VertexPositionDataT<T>, 3>;
   using typename Base::DfdvType;
   using typename Base::FuncType;
 
-  explicit VertexPositionConstraintErrorFunctionT(
+  explicit VertexPositionErrorFunctionT(
       const Character& character,
       const ParameterTransform& parameterTransform,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1));
 
-  ~VertexPositionConstraintErrorFunctionT() override = default;
+  ~VertexPositionErrorFunctionT() override = default;
 
   void evalFunction(
       size_t constrIndex,

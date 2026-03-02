@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character_solver/vertex_position_constraint_error_function.h"
+#include "momentum/character_solver/vertex_position_error_function.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/mesh_state.h"
@@ -18,12 +18,12 @@
 namespace momentum {
 
 template <typename T>
-VertexPositionConstraintErrorFunctionT<T>::VertexPositionConstraintErrorFunctionT(
+VertexPositionErrorFunctionT<T>::VertexPositionErrorFunctionT(
     const Character& character,
     const ParameterTransform& parameterTransform,
     const T& lossAlpha,
     const T& lossC)
-    : VertexConstraintErrorFunctionT<T, VertexPositionConstraintDataT<T>, 3>(
+    : VertexErrorFunctionT<T, VertexPositionDataT<T>, 3>(
           character,
           parameterTransform,
           lossAlpha,
@@ -32,7 +32,7 @@ VertexPositionConstraintErrorFunctionT<T>::VertexPositionConstraintErrorFunction
 }
 
 template <typename T>
-void VertexPositionConstraintErrorFunctionT<T>::evalFunction(
+void VertexPositionErrorFunctionT<T>::evalFunction(
     size_t constrIndex,
     const SkeletonStateT<T>& /*state*/,
     const MeshStateT<T>& /*meshState*/,
@@ -55,7 +55,7 @@ void VertexPositionConstraintErrorFunctionT<T>::evalFunction(
 }
 
 template <typename T>
-double VertexPositionConstraintErrorFunctionT<T>::getGradient(
+double VertexPositionErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
@@ -140,7 +140,7 @@ double VertexPositionConstraintErrorFunctionT<T>::getGradient(
 }
 
 template <typename T>
-double VertexPositionConstraintErrorFunctionT<T>::getJacobian(
+double VertexPositionErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
@@ -221,7 +221,7 @@ double VertexPositionConstraintErrorFunctionT<T>::getJacobian(
 }
 
 // Explicit template instantiations
-template class VertexPositionConstraintErrorFunctionT<float>;
-template class VertexPositionConstraintErrorFunctionT<double>;
+template class VertexPositionErrorFunctionT<float>;
+template class VertexPositionErrorFunctionT<double>;
 
 } // namespace momentum

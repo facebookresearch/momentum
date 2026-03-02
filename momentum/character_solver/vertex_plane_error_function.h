@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/vertex_constraint_error_function.h>
+#include <momentum/character_solver/vertex_error_function.h>
 
 namespace momentum {
 
@@ -15,7 +15,7 @@ namespace momentum {
 ///
 /// Constrains a mesh vertex to lie on or above a plane.
 template <typename T>
-struct VertexPlaneConstraintDataT : public VertexConstraintData {
+struct VertexPlaneDataT : public VertexConstraintData {
   /// Plane normal (must be normalized)
   Eigen::Vector3<T> normal = Eigen::Vector3<T>::UnitY();
 
@@ -25,8 +25,8 @@ struct VertexPlaneConstraintDataT : public VertexConstraintData {
   /// If true, constrain vertex to be above the plane (half-space)
   bool above = false;
 
-  VertexPlaneConstraintDataT() = default;
-  VertexPlaneConstraintDataT(
+  VertexPlaneDataT() = default;
+  VertexPlaneDataT(
       size_t vIndex,
       const Eigen::Vector3<T>& n,
       const Eigen::Vector3<T>& p,
@@ -46,20 +46,19 @@ struct VertexPlaneConstraintDataT : public VertexConstraintData {
 ///
 /// @tparam T Scalar type (float or double)
 template <typename T>
-class VertexPlaneConstraintErrorFunctionT
-    : public VertexConstraintErrorFunctionT<T, VertexPlaneConstraintDataT<T>, 1> {
+class VertexPlaneErrorFunctionT : public VertexErrorFunctionT<T, VertexPlaneDataT<T>, 1> {
  public:
-  using Base = VertexConstraintErrorFunctionT<T, VertexPlaneConstraintDataT<T>, 1>;
+  using Base = VertexErrorFunctionT<T, VertexPlaneDataT<T>, 1>;
   using typename Base::DfdvType;
   using typename Base::FuncType;
 
-  explicit VertexPlaneConstraintErrorFunctionT(
+  explicit VertexPlaneErrorFunctionT(
       const Character& character,
       const ParameterTransform& parameterTransform,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1));
 
-  ~VertexPlaneConstraintErrorFunctionT() override = default;
+  ~VertexPlaneErrorFunctionT() override = default;
 
   void evalFunction(
       size_t constrIndex,

@@ -110,7 +110,7 @@ struct SourceT {
 /// @section Architecture
 /// This is Level 1 of the three-level hierarchy:
 /// - **Level 1**: MultiSourceErrorFunctionT (this class) - handles ANY contribution combination
-/// - **Level 2**: Mid-level adapters (ConstraintErrorFunctionT, VertexConstraintErrorFunctionT)
+/// - **Level 2**: Mid-level adapters (JointErrorFunctionT, VertexErrorFunctionT)
 /// - **Level 3**: Leaf classes that implement evalFunction()
 ///
 /// @section Usage
@@ -287,6 +287,7 @@ class MultiSourceErrorFunctionT : public SkeletonErrorFunctionT<T> {
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       size_t rowIndex) const;
 
+  // Mutable for lazy caching in const methods. Requires external synchronization for thread safety.
   mutable bool needsMeshCached_ = false;
   mutable bool needsMeshCacheValid_ = false;
 };

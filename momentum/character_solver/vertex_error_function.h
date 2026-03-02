@@ -7,149 +7,171 @@
 
 #pragma once
 
+#include <momentum/character/fwd.h>
 #include <momentum/character_solver/fwd.h>
-#include <momentum/character_solver/plane_error_function.h>
-#include <momentum/character_solver/position_error_function.h>
+#include <momentum/character_solver/skeleton_derivative.h>
 #include <momentum/character_solver/skeleton_error_function.h>
-#include <momentum/math/fwd.h>
+#include <momentum/math/generalized_loss.h>
+
+#include <Eigen/Core>
+
+#include <span>
+#include <string>
+#include <vector>
 
 namespace momentum {
 
-template <typename T>
-struct VertexConstraintT {
-  int vertexIndex = -1;
-  T weight = 1;
-  Eigen::Vector3<T> targetPosition;
-  Eigen::Vector3<T> targetNormal;
+/// Base structure for vertex constraint data.
+///
+/// Derived constraint types extend this with their specific target data.
+struct VertexConstraintData {
+  /// Vertex index in the mesh
+  size_t vertexIndex = kInvalidIndex;
 
-  template <typename T2>
-  VertexConstraintT<T2> cast() const {
-    return {
-        this->vertexIndex,
-        static_cast<T2>(this->weight),
-        this->targetPosition.template cast<T2>(),
-        this->targetNormal.template cast<T2>()};
-  }
+  /// Weight of the constraint
+  float weight = 0.0f;
+
+  /// Name of the constraint (for debugging)
+  std::string name;
+
+  VertexConstraintData() = default;
+  VertexConstraintData(size_t vIndex, float w, const std::string& n = "")
+      : vertexIndex(vIndex), weight(w), name(n) {}
 };
 
-enum class VertexConstraintType {
-  Position, // Target the vertex position
-  Plane, // point-to-plane distance using the target normal
-  Normal, // point-to-plane distance using the source (body) normal
-  SymmetricNormal, // Point-to-plane using a 50/50 mix of source and target normal
-};
-
-[[nodiscard]] std::string_view toString(VertexConstraintType type);
-
-template <typename T>
+/// Mid-level adapter for single-vertex constraints.
+///
+/// VertexErrorFunctionT handles constraints involving a single mesh vertex.
+/// It inherits from SkeletonErrorFunctionT directly and uses SkeletonDerivativeT
+/// for derivative computation through skinning weights.
+///
+/// Derived classes implement evalFunction() with vertex-specific logic.
+/// The base class handles:
+/// - Computing world-space vertex position from mesh state
+/// - Skinning weight-based derivative chain rule via SkeletonDerivativeT
+/// - Threading via dispenso
+/// - Generalized loss function
+///
+/// @tparam T Scalar type (float or double)
+/// @tparam Data Derived constraint data type (must extend VertexConstraintData)
+/// @tparam FuncDim Dimension of the residual (1, 2, 3, or 9)
+template <typename T, class Data, size_t FuncDim = 3>
 class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
+  using FuncType = Eigen::Matrix<T, FuncDim, 1>;
+  using DfdvType = Eigen::Matrix<T, FuncDim, 3>;
+
+  static constexpr size_t kFuncDim = FuncDim;
+
+  /// Default constant weight for backwards compatibility with the legacy VertexErrorFunctionT.
+  /// Position/Normal/Plane leaf classes set this to 1e-4 (matching
+  /// PositionErrorFunctionT::kLegacyWeight). Defaults to 1 (no scaling) for other leaf classes.
+  static constexpr T kLegacyWeight = T(1e-4);
+
+  /// Constructor.
+  ///
+  /// @param character The character (needed for mesh access)
+  /// @param parameterTransform Maps joint parameters to model parameters
+  /// @param lossAlpha Alpha parameter for the generalized loss function (default: L2)
+  /// @param lossC C parameter for the generalized loss function (default: 1)
   explicit VertexErrorFunctionT(
       const Character& character,
-      VertexConstraintType type = VertexConstraintType::Position,
-      uint32_t maxThreads = 0);
-  virtual ~VertexErrorFunctionT() override;
+      const ParameterTransform& parameterTransform,
+      const T& lossAlpha = GeneralizedLossT<T>::kL2,
+      const T& lossC = T(1));
 
+  ~VertexErrorFunctionT() override = default;
+
+  /// Returns the character (needed for mesh-based computations).
+  [[nodiscard]] const Character* getCharacter() const final;
+
+  /// Returns true (vertex constraints always need mesh).
+  [[nodiscard]] bool needsMesh() const final;
+
+  /// Adds a constraint.
+  void addConstraint(const Data& constraint);
+
+  /// Appends a list of constraints.
+  void addConstraints(std::span<const Data> constraints) {
+    for (const auto& c : constraints) {
+      addConstraint(c);
+    }
+  }
+
+  /// Sets all constraints, replacing existing ones.
+  void setConstraints(std::span<const Data> constraints);
+
+  /// Clears all constraints.
+  void clearConstraints();
+
+  /// Returns the current constraints.
+  [[nodiscard]] const std::vector<Data>& getConstraints() const;
+
+  /// Returns the number of constraints.
+  [[nodiscard]] size_t getNumConstraints() const {
+    return constraints_.size();
+  }
+
+  /// Returns the Jacobian size.
+  [[nodiscard]] size_t getJacobianSize() const final {
+    return FuncDim * constraints_.size();
+  }
+
+  /// Sets the maximum number of threads for parallel execution.
+  void setMaxThreads(size_t maxThreads) {
+    maxThreads_ = maxThreads;
+  }
+
+  /// Computes the error.
   [[nodiscard]] double getError(
-      const ModelParametersT<T>& modelParameters,
+      const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState) final;
+      const MeshStateT<T>& meshState) override;
 
+  /// Computes the gradient.
   double getGradient(
-      const ModelParametersT<T>& modelParameters,
+      const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
       const MeshStateT<T>& meshState,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) final;
+      Eigen::Ref<Eigen::VectorX<T>> gradient) override;
 
+  /// Computes the Jacobian.
   double getJacobian(
-      const ModelParametersT<T>& modelParameters,
+      const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
       const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::MatrixX<T>> jacobian,
       Eigen::Ref<Eigen::VectorX<T>> residual,
-      int& usedRows) final;
+      int& usedRows) override;
 
-  [[nodiscard]] size_t getJacobianSize() const final;
-
-  void addConstraint(
-      int vertexIndex,
-      T weight,
-      const Eigen::Vector3<T>& targetPosition,
-      const Eigen::Vector3<T>& targetNormal);
-  void clearConstraints();
-
-  [[nodiscard]] const std::vector<VertexConstraintT<T>>& getConstraints() const {
-    return constraints_;
-  }
-
-  [[nodiscard]] size_t numConstraints() const {
-    return constraints_.size();
-  }
-
-  static constexpr T kPositionWeight = PositionErrorFunctionT<T>::kLegacyWeight;
-  static constexpr T kPlaneWeight = PlaneErrorFunctionT<T>::kLegacyWeight;
-
-  [[nodiscard]] const Character* getCharacter() const override {
-    return &character_;
-  }
-
-  /// Override to indicate this function requires mesh state
-  [[nodiscard]] bool needsMesh() const override {
-    return true;
-  }
-
- private:
-  double calculatePositionJacobian(
-      const ModelParametersT<T>& modelParameters,
+  /// Computes the residual and derivatives.
+  ///
+  /// Derived classes implement this with their specific constraint logic.
+  /// worldVecs[0] is the pre-computed vertex world position.
+  ///
+  /// @param constrIndex Index of the constraint
+  /// @param state Current skeleton state
+  /// @param meshState Current mesh state
+  /// @param worldVecs Pre-computed world position (size 1 for vertex constraints)
+  /// @param f Output: residual (FuncDim x 1)
+  /// @param dfdv Output: derivative df/dv (must be filled if non-empty)
+  virtual void evalFunction(
+      size_t constrIndex,
       const SkeletonStateT<T>& state,
       const MeshStateT<T>& meshState,
-      const VertexConstraintT<T>& constr,
-      Ref<Eigen::MatrixX<T>> jac,
-      Ref<Eigen::VectorX<T>> res) const;
+      std::span<const Eigen::Vector3<T>> worldVecs,
+      FuncType& f,
+      std::span<DfdvType> dfdv) const = 0;
 
-  double calculateNormalJacobian(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      const VertexConstraintT<T>& constr,
-      T sourceNormalWeight,
-      T targetNormalWeight,
-      Ref<Eigen::MatrixX<T>> jac,
-      T& res) const;
-
-  double calculatePositionGradient(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      const VertexConstraintT<T>& constr,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
-
-  double calculateNormalGradient(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      const VertexConstraintT<T>& constr,
-      T sourceNormalWeight,
-      T targetNormalWeight,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
-
-  // Utility function used now in calculateNormalJacobian and calculatePositionGradient
-  // to calculate derivatives with respect to position in world space (considering skinning)
-  void calculateDWorldPos(
-      const SkeletonStateT<T>& state,
-      const VertexConstraintT<T>& constr,
-      const Eigen::Vector3<T>& d_restPos,
-      Eigen::Vector3<T>& d_worldPos) const;
-
-  std::pair<T, T> computeNormalWeights() const;
-
+ protected:
   const Character& character_;
+  std::vector<Data> constraints_;
+  GeneralizedLossT<T> loss_;
+  size_t maxThreads_ = 0;
 
-  std::vector<VertexConstraintT<T>> constraints_;
-
-  const VertexConstraintType constraintType_;
-
-  uint32_t maxThreads_;
+  /// Legacy weight multiplied into error/gradient/Jacobian for backwards compatibility.
+  /// Leaf classes that replace the old VertexErrorFunctionT set this to kLegacyWeight (1e-4).
+  T legacyWeight_ = T(1);
 };
 
 } // namespace momentum

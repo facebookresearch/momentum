@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/vertex_constraint_error_function.h>
+#include <momentum/character_solver/vertex_error_function.h>
 
 namespace momentum {
 
@@ -16,15 +16,15 @@ namespace momentum {
 /// Constrains a mesh vertex using a point-to-plane distance where the plane normal
 /// can be the source (mesh) normal, the target normal, or a mix of both.
 template <typename T>
-struct VertexNormalConstraintDataT : public VertexConstraintData {
+struct VertexNormalDataT : public VertexConstraintData {
   /// Target position in world space
   Eigen::Vector3<T> targetPosition = Eigen::Vector3<T>::Zero();
 
   /// Target normal direction (will be flipped if facing away from source normal)
   Eigen::Vector3<T> targetNormal = Eigen::Vector3<T>::Zero();
 
-  VertexNormalConstraintDataT() = default;
-  VertexNormalConstraintDataT(
+  VertexNormalDataT() = default;
+  VertexNormalDataT(
       size_t vIndex,
       const Eigen::Vector3<T>& targetPos,
       const Eigen::Vector3<T>& targetNorm,
@@ -47,10 +47,9 @@ struct VertexNormalConstraintDataT : public VertexConstraintData {
 ///
 /// @tparam T Scalar type (float or double)
 template <typename T>
-class VertexNormalConstraintErrorFunctionT
-    : public VertexConstraintErrorFunctionT<T, VertexNormalConstraintDataT<T>, 1> {
+class VertexNormalErrorFunctionT : public VertexErrorFunctionT<T, VertexNormalDataT<T>, 1> {
  public:
-  using Base = VertexConstraintErrorFunctionT<T, VertexNormalConstraintDataT<T>, 1>;
+  using Base = VertexErrorFunctionT<T, VertexNormalDataT<T>, 1>;
   using typename Base::DfdvType;
   using typename Base::FuncType;
 
@@ -66,7 +65,7 @@ class VertexNormalConstraintErrorFunctionT
   /// @param computeAccurateNormalDerivatives If true, compute expensive
   /// d(normal)/d(blendShapeWeight)
   ///   terms in the gradient and Jacobian. Default false for better performance.
-  explicit VertexNormalConstraintErrorFunctionT(
+  explicit VertexNormalErrorFunctionT(
       const Character& character,
       const ParameterTransform& parameterTransform,
       T sourceNormalWeight = T(1),
@@ -75,7 +74,7 @@ class VertexNormalConstraintErrorFunctionT
       const T& lossC = T(1),
       bool computeAccurateNormalDerivatives = false);
 
-  ~VertexNormalConstraintErrorFunctionT() override = default;
+  ~VertexNormalErrorFunctionT() override = default;
 
   void evalFunction(
       size_t constrIndex,

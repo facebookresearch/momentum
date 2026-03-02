@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character_solver/vertex_normal_constraint_error_function.h"
+#include "momentum/character_solver/vertex_normal_error_function.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/mesh_state.h"
@@ -20,7 +20,7 @@
 namespace momentum {
 
 template <typename T>
-VertexNormalConstraintErrorFunctionT<T>::VertexNormalConstraintErrorFunctionT(
+VertexNormalErrorFunctionT<T>::VertexNormalErrorFunctionT(
     const Character& character,
     const ParameterTransform& parameterTransform,
     T sourceNormalWeight,
@@ -28,7 +28,7 @@ VertexNormalConstraintErrorFunctionT<T>::VertexNormalConstraintErrorFunctionT(
     const T& lossAlpha,
     const T& lossC,
     bool computeAccurateNormalDerivatives)
-    : VertexConstraintErrorFunctionT<T, VertexNormalConstraintDataT<T>, 1>(
+    : VertexErrorFunctionT<T, VertexNormalDataT<T>, 1>(
           character,
           parameterTransform,
           lossAlpha,
@@ -40,7 +40,7 @@ VertexNormalConstraintErrorFunctionT<T>::VertexNormalConstraintErrorFunctionT(
 }
 
 template <typename T>
-void VertexNormalConstraintErrorFunctionT<T>::evalFunction(
+void VertexNormalErrorFunctionT<T>::evalFunction(
     size_t constrIndex,
     const SkeletonStateT<T>& /*state*/,
     const MeshStateT<T>& meshState,
@@ -79,7 +79,7 @@ void VertexNormalConstraintErrorFunctionT<T>::evalFunction(
 }
 
 template <typename T>
-void VertexNormalConstraintErrorFunctionT<T>::buildVertexToFaceAdjacency(
+void VertexNormalErrorFunctionT<T>::buildVertexToFaceAdjacency(
     const MeshStateT<T>& meshState) const {
   if (vertexToFaceAdjacencyValid_) {
     return;
@@ -104,7 +104,7 @@ void VertexNormalConstraintErrorFunctionT<T>::buildVertexToFaceAdjacency(
 }
 
 template <typename T>
-double VertexNormalConstraintErrorFunctionT<T>::getGradient(
+double VertexNormalErrorFunctionT<T>::getGradient(
     const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
@@ -247,7 +247,7 @@ double VertexNormalConstraintErrorFunctionT<T>::getGradient(
 }
 
 template <typename T>
-double VertexNormalConstraintErrorFunctionT<T>::getJacobian(
+double VertexNormalErrorFunctionT<T>::getJacobian(
     const ModelParametersT<T>& /*params*/,
     const SkeletonStateT<T>& state,
     const MeshStateT<T>& meshState,
@@ -389,7 +389,7 @@ double VertexNormalConstraintErrorFunctionT<T>::getJacobian(
   return 0.0;
 }
 
-template class VertexNormalConstraintErrorFunctionT<float>;
-template class VertexNormalConstraintErrorFunctionT<double>;
+template class VertexNormalErrorFunctionT<float>;
+template class VertexNormalErrorFunctionT<double>;
 
 } // namespace momentum

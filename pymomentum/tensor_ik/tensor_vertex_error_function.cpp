@@ -10,10 +10,10 @@
 #include "pymomentum/tensor_ik/tensor_error_function_utility.h"
 
 #include <momentum/character/character.h>
-#include <momentum/character_solver/joint_error_function.h>
-#include <momentum/character_solver/vertex_normal_constraint_error_function.h>
-#include <momentum/character_solver/vertex_plane_constraint_error_function.h>
-#include <momentum/character_solver/vertex_position_constraint_error_function.h>
+#include <momentum/character_solver/error_function_types.h>
+#include <momentum/character_solver/vertex_normal_error_function.h>
+#include <momentum/character_solver/vertex_plane_error_function.h>
+#include <momentum/character_solver/vertex_position_error_function.h>
 
 namespace pymomentum {
 
@@ -113,11 +113,11 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
 
   switch (_constraintType) {
     case momentum::VertexConstraintType::Position: {
-      auto result = std::make_unique<momentum::VertexPositionConstraintErrorFunctionT<T>>(
+      auto result = std::make_unique<momentum::VertexPositionErrorFunctionT<T>>(
           character, character.parameterTransform);
       for (Eigen::Index i = 0; i < nCons; ++i) {
         result->addConstraint(
-            momentum::VertexPositionConstraintDataT<T>(
+            momentum::VertexPositionDataT<T>(
                 static_cast<size_t>(extractScalar<int>(vertices, i)),
                 extractVector<T, 3>(target_positions, i),
                 extractScalar<T>(weights, i, T(1))));
@@ -125,11 +125,11 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
       return result;
     }
     case momentum::VertexConstraintType::Normal: {
-      auto result = std::make_unique<momentum::VertexNormalConstraintErrorFunctionT<T>>(
+      auto result = std::make_unique<momentum::VertexNormalErrorFunctionT<T>>(
           character, character.parameterTransform, T(1), T(0));
       for (Eigen::Index i = 0; i < nCons; ++i) {
         result->addConstraint(
-            momentum::VertexNormalConstraintDataT<T>(
+            momentum::VertexNormalDataT<T>(
                 static_cast<size_t>(extractScalar<int>(vertices, i)),
                 extractVector<T, 3>(target_positions, i),
                 extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::Zero()),
@@ -138,11 +138,11 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
       return result;
     }
     case momentum::VertexConstraintType::SymmetricNormal: {
-      auto result = std::make_unique<momentum::VertexNormalConstraintErrorFunctionT<T>>(
+      auto result = std::make_unique<momentum::VertexNormalErrorFunctionT<T>>(
           character, character.parameterTransform, T(0.5), T(0.5));
       for (Eigen::Index i = 0; i < nCons; ++i) {
         result->addConstraint(
-            momentum::VertexNormalConstraintDataT<T>(
+            momentum::VertexNormalDataT<T>(
                 static_cast<size_t>(extractScalar<int>(vertices, i)),
                 extractVector<T, 3>(target_positions, i),
                 extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::Zero()),
@@ -151,11 +151,11 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
       return result;
     }
     case momentum::VertexConstraintType::Plane: {
-      auto result = std::make_unique<momentum::VertexPlaneConstraintErrorFunctionT<T>>(
+      auto result = std::make_unique<momentum::VertexPlaneErrorFunctionT<T>>(
           character, character.parameterTransform);
       for (Eigen::Index i = 0; i < nCons; ++i) {
         result->addConstraint(
-            momentum::VertexPlaneConstraintDataT<T>(
+            momentum::VertexPlaneDataT<T>(
                 static_cast<size_t>(extractScalar<int>(vertices, i)),
                 extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::UnitZ()),
                 extractVector<T, 3>(target_positions, i),
