@@ -309,9 +309,16 @@ character_solver_sources = [
 character_solver_test_sources = [
     "test/character_solver/blend_shape_test.cpp",
     "test/character_solver/camera_projection_error_function_test.cpp",
-    "test/character_solver/error_functions_test.cpp",
+    "test/character_solver/collision_error_function_test.cpp",
+    "test/character_solver/geometric_error_function_test.cpp",
     "test/character_solver/inverse_kinematics_test.cpp",
+    "test/character_solver/limit_error_function_test.cpp",
+    "test/character_solver/orientation_error_function_test.cpp",
+    "test/character_solver/position_error_function_test.cpp",
+    "test/character_solver/skinned_locator_error_function_test.cpp",
     "test/character_solver/solver_test.cpp",
+    "test/character_solver/state_error_function_test.cpp",
+    "test/character_solver/vertex_error_function_test.cpp",
 ]
 
 simd_constraints_public_headers = [
