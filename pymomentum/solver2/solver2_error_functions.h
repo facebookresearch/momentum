@@ -14,4 +14,10 @@ namespace pymomentum {
 
 void addErrorFunctions(pybind11::module_& m);
 
-}
+void addAimAxisErrorFunctions(pybind11::module_& m);
+
+void addProjectionErrorFunctions(pybind11::module_& m);
+
+void addDistanceErrorFunctions(pybind11::module_& m);
+
+} // namespace pymomentum
