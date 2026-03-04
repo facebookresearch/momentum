@@ -497,15 +497,22 @@ io_gltf_public_headers = [
 ]
 
 io_gltf_private_headers = [
+    "io/gltf/gltf_animation_io.h",
+    "io/gltf/gltf_io_internal.h",
+    "io/gltf/gltf_mesh_io.h",
+    "io/gltf/gltf_skeleton_io.h",
     "io/gltf/utils/json_utils.h",
     "io/gltf/utils/accessor_utils.h",
     "io/gltf/utils/coordinate_utils.h",
 ]
 
 io_gltf_sources = [
-    "io/gltf/utils/json_utils.cpp",
+    "io/gltf/gltf_animation_io.cpp",
     "io/gltf/gltf_builder.cpp",
     "io/gltf/gltf_io.cpp",
+    "io/gltf/gltf_mesh_io.cpp",
+    "io/gltf/gltf_skeleton_io.cpp",
+    "io/gltf/utils/json_utils.cpp",
 ]
 
 io_gltf_test_sources = [
