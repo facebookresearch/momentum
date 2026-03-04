@@ -218,6 +218,208 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
   return pt;
 }
 
+namespace {
+
+void minMaxToJson(const Character& character, const ParameterLimit& lim, nlohmann::json& li) {
+  li["type"] = "minmax";
+  MT_THROW_IF(
+      character.parameterTransform.name.empty() ||
+          lim.data.minMax.parameterIndex >= character.parameterTransform.name.size(),
+      "MinMax parameter index {} is out of bounds (name size: {})",
+      lim.data.minMax.parameterIndex,
+      character.parameterTransform.name.size());
+  li["parameter"] = character.parameterTransform.name[lim.data.minMax.parameterIndex];
+  li["limits"] = lim.data.minMax.limits;
+}
+
+void minMaxJointToJson(
+    const Character& character,
+    const ParameterLimit& lim,
+    nlohmann::json& li,
+    const char* typeName) {
+  li["type"] = typeName;
+  if (!character.skeleton.joints.empty() &&
+      lim.data.minMaxJoint.jointIndex < character.skeleton.joints.size()) {
+    li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
+  }
+  li["jointParameter"] = kJointParameterNames[lim.data.minMaxJoint.jointParameter];
+  li["limits"] = lim.data.minMaxJoint.limits;
+}
+
+void linearToJson(const Character& character, const ParameterLimit& lim, nlohmann::json& li) {
+  li["type"] = "linear";
+  MT_THROW_IF(
+      character.parameterTransform.name.empty() ||
+          lim.data.linear.referenceIndex >= character.parameterTransform.name.size(),
+      "Linear referenceIndex {} is out of bounds (name size: {})",
+      lim.data.linear.referenceIndex,
+      character.parameterTransform.name.size());
+  li["referenceParameter"] = character.parameterTransform.name[lim.data.linear.referenceIndex];
+  MT_THROW_IF(
+      character.parameterTransform.name.empty() ||
+          lim.data.linear.targetIndex >= character.parameterTransform.name.size(),
+      "Linear targetIndex {} is out of bounds (name size: {})",
+      lim.data.linear.targetIndex,
+      character.parameterTransform.name.size());
+  li["targetParameter"] = character.parameterTransform.name[lim.data.linear.targetIndex];
+  li["scale"] = lim.data.linear.scale;
+  li["offset"] = lim.data.linear.offset;
+  if (lim.data.linear.rangeMin != -std::numeric_limits<float>::max()) {
+    li["rangeMin"] = lim.data.linear.rangeMin;
+  }
+  if (lim.data.linear.rangeMax != std::numeric_limits<float>::max()) {
+    li["rangeMax"] = lim.data.linear.rangeMax;
+  }
+}
+
+void linearJointToJson(const Character& character, const ParameterLimit& lim, nlohmann::json& li) {
+  li["type"] = "linear_joint";
+  if (!character.skeleton.joints.empty() &&
+      lim.data.linearJoint.referenceJointIndex < character.skeleton.joints.size()) {
+    li["referenceJoint"] = character.skeleton.joints[lim.data.linearJoint.referenceJointIndex].name;
+  }
+  li["referenceJointParameter"] = lim.data.linearJoint.referenceJointParameter;
+  if (!character.skeleton.joints.empty() &&
+      lim.data.linearJoint.targetJointIndex < character.skeleton.joints.size()) {
+    li["targetJoint"] = character.skeleton.joints[lim.data.linearJoint.targetJointIndex].name;
+  }
+  li["targetJointParameter"] = lim.data.linearJoint.targetJointParameter;
+  li["scale"] = lim.data.linearJoint.scale;
+  li["offset"] = lim.data.linearJoint.offset;
+  if (lim.data.linearJoint.rangeMin != -std::numeric_limits<float>::max()) {
+    li["rangeMin"] = lim.data.linearJoint.rangeMin;
+  }
+  if (lim.data.linearJoint.rangeMax != std::numeric_limits<float>::max()) {
+    li["rangeMax"] = lim.data.linearJoint.rangeMax;
+  }
+}
+
+void halfPlaneToJson(const Character& character, const ParameterLimit& lim, nlohmann::json& li) {
+  li["type"] = "half_plane";
+  MT_THROW_IF(
+      character.parameterTransform.name.empty() ||
+          lim.data.halfPlane.param1 >= character.parameterTransform.name.size(),
+      "HalfPlane param1 index {} is out of bounds (name size: {})",
+      lim.data.halfPlane.param1,
+      character.parameterTransform.name.size());
+  li["param1"] = character.parameterTransform.name[lim.data.halfPlane.param1];
+  MT_THROW_IF(
+      character.parameterTransform.name.empty() ||
+          lim.data.halfPlane.param2 >= character.parameterTransform.name.size(),
+      "HalfPlane param2 index {} is out of bounds (name size: {})",
+      lim.data.halfPlane.param2,
+      character.parameterTransform.name.size());
+  li["param2"] = character.parameterTransform.name[lim.data.halfPlane.param2];
+  li["normal"] = lim.data.halfPlane.normal;
+  li["offset"] = lim.data.halfPlane.offset;
+}
+
+void ellipsoidToJson(const Character& character, const ParameterLimit& lim, nlohmann::json& li) {
+  li["type"] = "ellipsoid";
+  if (!character.skeleton.joints.empty() &&
+      lim.data.ellipsoid.parent < character.skeleton.joints.size()) {
+    li["parent"] = character.skeleton.joints[lim.data.ellipsoid.parent].name;
+  }
+  if (!character.skeleton.joints.empty() &&
+      lim.data.ellipsoid.ellipsoidParent < character.skeleton.joints.size()) {
+    li["ellipsoidParent"] = character.skeleton.joints[lim.data.ellipsoid.ellipsoidParent].name;
+  }
+  li["offset"] = lim.data.ellipsoid.offset * toM();
+  auto eli = lim.data.ellipsoid.ellipsoid;
+  eli.translation() *= toM();
+  toJson(eli.matrix(), li["ellipsoid"]);
+}
+
+size_t parseJointParameterIndex(const std::string& attribute) {
+  for (size_t t = 0; t < kParametersPerJoint; t++) {
+    if (attribute == kJointParameterNames[t]) {
+      return t;
+    }
+  }
+  return kInvalidIndex;
+}
+
+void minMaxFromJson(const Character& character, const nlohmann::json& element, ParameterLimit& l) {
+  l.type = MinMax;
+  l.data.minMax.parameterIndex =
+      character.parameterTransform.getParameterIdByName(element.value("parameter", ""));
+  l.data.minMax.limits = fromJson<Vector2f>(element["limits"]);
+}
+
+void minMaxJointFromJson(
+    const Character& character,
+    const nlohmann::json& element,
+    ParameterLimit& l,
+    LimitType limitType) {
+  l.type = limitType;
+  l.data.minMaxJoint.jointIndex =
+      character.skeleton.getJointIdByName(element.value("jointIndex", ""));
+  const std::string attribute = element.value("jointParameter", "");
+  l.data.minMaxJoint.jointParameter = parseJointParameterIndex(attribute);
+  l.data.minMaxJoint.limits = fromJson<Vector2f>(element["limits"]);
+}
+
+void linearFromJson(const Character& character, const nlohmann::json& element, ParameterLimit& l) {
+  l.type = Linear;
+  l.data.linear.referenceIndex =
+      character.parameterTransform.getParameterIdByName(element.value("referenceParameter", ""));
+  l.data.linear.targetIndex =
+      character.parameterTransform.getParameterIdByName(element.value("targetParameter", ""));
+  l.data.linear.scale = element["scale"];
+  l.data.linear.offset = element["offset"];
+  l.data.linear.rangeMin = element.value("rangeMin", -std::numeric_limits<float>::max());
+  l.data.linear.rangeMax = element.value("rangeMax", std::numeric_limits<float>::max());
+}
+
+void linearJointFromJson(
+    const Character& character,
+    const nlohmann::json& element,
+    ParameterLimit& l) {
+  l.type = LinearJoint;
+  l.data.linearJoint.referenceJointIndex =
+      character.skeleton.getJointIdByName(element.value("referenceJoint", ""));
+  l.data.linearJoint.targetJointIndex =
+      character.skeleton.getJointIdByName(element.value("targetJoint", ""));
+  l.data.linearJoint.referenceJointParameter = element["referenceJointParameter"].get<size_t>();
+  l.data.linearJoint.targetJointParameter = element["targetJointParameter"].get<size_t>();
+  l.data.linearJoint.scale = element["scale"];
+  l.data.linearJoint.offset = element["offset"];
+  l.data.linearJoint.rangeMin = element.value("rangeMin", -std::numeric_limits<float>::max());
+  l.data.linearJoint.rangeMax = element.value("rangeMax", std::numeric_limits<float>::max());
+}
+
+void halfPlaneFromJson(
+    const Character& character,
+    const nlohmann::json& element,
+    ParameterLimit& l) {
+  l.type = HalfPlane;
+  l.data.halfPlane.param1 =
+      character.parameterTransform.getParameterIdByName(element.value("param1", ""));
+  l.data.halfPlane.param2 =
+      character.parameterTransform.getParameterIdByName(element.value("param2", ""));
+  l.data.halfPlane.normal = fromJson<Vector2f>(element["normal"]);
+  l.data.halfPlane.offset = element["offset"];
+}
+
+void ellipsoidFromJson(
+    const Character& character,
+    const nlohmann::json& element,
+    ParameterLimit& l,
+    const std::string& parentKey,
+    const std::string& ellipsoidKey) {
+  l.type = Ellipsoid;
+  l.data.ellipsoid.parent = character.skeleton.getJointIdByName(element.value("parent", ""));
+  l.data.ellipsoid.ellipsoidParent =
+      character.skeleton.getJointIdByName(element.value(parentKey, ""));
+  l.data.ellipsoid.offset = fromJson<Vector3f>(element["offset"]);
+  l.data.ellipsoid.offset /= toM();
+  l.data.ellipsoid.ellipsoid.matrix() = fromJson<Matrix4f>(element[ellipsoidKey]);
+  l.data.ellipsoid.ellipsoid.translation() /= toM();
+  l.data.ellipsoid.ellipsoidInv = l.data.ellipsoid.ellipsoid.inverse();
+}
+
+} // namespace
+
 void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
   j = nlohmann::json::array();
   for (const auto& lim : character.parameterLimits) {
@@ -227,125 +429,32 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
 
     switch (lim.type) {
       case MinMax:
-        li["type"] = "minmax";
-        MT_THROW_IF(
-            character.parameterTransform.name.empty() ||
-                lim.data.minMax.parameterIndex >= character.parameterTransform.name.size(),
-            "MinMax parameter index {} is out of bounds (name size: {})",
-            lim.data.minMax.parameterIndex,
-            character.parameterTransform.name.size());
-        li["parameter"] = character.parameterTransform.name[lim.data.minMax.parameterIndex];
-        li["limits"] = lim.data.minMax.limits;
+        minMaxToJson(character, lim, li);
         break;
       case MinMaxJoint:
-        li["type"] = "minmax_joint";
-        if (!character.skeleton.joints.empty() &&
-            lim.data.minMaxJoint.jointIndex < character.skeleton.joints.size()) {
-          li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
-        }
-        li["jointParameter"] = kJointParameterNames[lim.data.minMaxJoint.jointParameter];
-        li["limits"] = lim.data.minMaxJoint.limits;
+        minMaxJointToJson(character, lim, li, "minmax_joint");
         break;
       case MinMaxJointPassive:
-        li["type"] = "minmax_joint_passive";
-        if (!character.skeleton.joints.empty() &&
-            lim.data.minMaxJoint.jointIndex < character.skeleton.joints.size()) {
-          li["jointIndex"] = character.skeleton.joints[lim.data.minMaxJoint.jointIndex].name;
-        }
-        li["jointParameter"] = kJointParameterNames[lim.data.minMaxJoint.jointParameter];
-        li["limits"] = lim.data.minMaxJoint.limits;
+        minMaxJointToJson(character, lim, li, "minmax_joint_passive");
         break;
       case Linear:
-        li["type"] = "linear";
-        MT_THROW_IF(
-            character.parameterTransform.name.empty() ||
-                lim.data.linear.referenceIndex >= character.parameterTransform.name.size(),
-            "Linear referenceIndex {} is out of bounds (name size: {})",
-            lim.data.linear.referenceIndex,
-            character.parameterTransform.name.size());
-        li["referenceParameter"] =
-            character.parameterTransform.name[lim.data.linear.referenceIndex];
-        MT_THROW_IF(
-            character.parameterTransform.name.empty() ||
-                lim.data.linear.targetIndex >= character.parameterTransform.name.size(),
-            "Linear targetIndex {} is out of bounds (name size: {})",
-            lim.data.linear.targetIndex,
-            character.parameterTransform.name.size());
-        li["targetParameter"] = character.parameterTransform.name[lim.data.linear.targetIndex];
-        li["scale"] = lim.data.linear.scale;
-        li["offset"] = lim.data.linear.offset;
-        if (lim.data.linear.rangeMin != -std::numeric_limits<float>::max()) {
-          li["rangeMin"] = lim.data.linear.rangeMin;
-        }
-        if (lim.data.linear.rangeMax != std::numeric_limits<float>::max()) {
-          li["rangeMax"] = lim.data.linear.rangeMax;
-        }
+        linearToJson(character, lim, li);
         break;
       case LinearJoint:
-        li["type"] = "linear_joint";
-        if (!character.skeleton.joints.empty() &&
-            lim.data.linearJoint.referenceJointIndex < character.skeleton.joints.size()) {
-          li["referenceJoint"] =
-              character.skeleton.joints[lim.data.linearJoint.referenceJointIndex].name;
-        }
-        li["referenceJointParameter"] = lim.data.linearJoint.referenceJointParameter;
-        if (!character.skeleton.joints.empty() &&
-            lim.data.linearJoint.targetJointIndex < character.skeleton.joints.size()) {
-          li["targetJoint"] = character.skeleton.joints[lim.data.linearJoint.targetJointIndex].name;
-        }
-        li["targetJointParameter"] = lim.data.linearJoint.targetJointParameter;
-        li["scale"] = lim.data.linearJoint.scale;
-        li["offset"] = lim.data.linearJoint.offset;
-        if (lim.data.linearJoint.rangeMin != -std::numeric_limits<float>::max()) {
-          li["rangeMin"] = lim.data.linearJoint.rangeMin;
-        }
-        if (lim.data.linearJoint.rangeMax != std::numeric_limits<float>::max()) {
-          li["rangeMax"] = lim.data.linearJoint.rangeMax;
-        }
+        linearJointToJson(character, lim, li);
         break;
       case HalfPlane:
-        li["type"] = "half_plane";
-        MT_THROW_IF(
-            character.parameterTransform.name.empty() ||
-                lim.data.halfPlane.param1 >= character.parameterTransform.name.size(),
-            "HalfPlane param1 index {} is out of bounds (name size: {})",
-            lim.data.halfPlane.param1,
-            character.parameterTransform.name.size());
-        li["param1"] = character.parameterTransform.name[lim.data.halfPlane.param1];
-        MT_THROW_IF(
-            character.parameterTransform.name.empty() ||
-                lim.data.halfPlane.param2 >= character.parameterTransform.name.size(),
-            "HalfPlane param2 index {} is out of bounds (name size: {})",
-            lim.data.halfPlane.param2,
-            character.parameterTransform.name.size());
-        li["param2"] = character.parameterTransform.name[lim.data.halfPlane.param2];
-        li["normal"] = lim.data.halfPlane.normal;
-        li["offset"] = lim.data.halfPlane.offset;
+        halfPlaneToJson(character, lim, li);
         break;
-      case Ellipsoid: {
-        li["type"] = "ellipsoid";
-        if (!character.skeleton.joints.empty() &&
-            lim.data.ellipsoid.parent < character.skeleton.joints.size()) {
-          li["parent"] = character.skeleton.joints[lim.data.ellipsoid.parent].name;
-        }
-        if (!character.skeleton.joints.empty() &&
-            lim.data.ellipsoid.ellipsoidParent < character.skeleton.joints.size()) {
-          li["ellipsoidParent"] =
-              character.skeleton.joints[lim.data.ellipsoid.ellipsoidParent].name;
-        }
-        li["offset"] = lim.data.ellipsoid.offset * toM();
-        auto eli = lim.data.ellipsoid.ellipsoid;
-        eli.translation() *= toM();
-        toJson(eli.matrix(), li["ellipsoid"]);
+      case Ellipsoid:
+        ellipsoidToJson(character, lim, li);
         break;
-      }
-      default: {
+      default:
         MT_LOGE(
             "Unknown parameter limit type '{}' from character name '{}'",
             toString(lim.type),
             character.name);
         break;
-      }
     }
   }
 }
@@ -357,92 +466,26 @@ ParameterLimits parameterLimitsFromJson(const Character& character, const nlohma
     const std::string type = element.value("type", "");
     ParameterLimit l;
     l.weight = element.value("weight", 0.0f);
+
     if (type == "minmax") {
-      l.type = MinMax;
-      l.data.minMax.parameterIndex =
-          character.parameterTransform.getParameterIdByName(element.value("parameter", ""));
-      l.data.minMax.limits = fromJson<Vector2f>(element["limits"]);
+      minMaxFromJson(character, element, l);
     } else if (type == "minmax_joint") {
-      l.type = MinMaxJoint;
-      l.data.minMaxJoint.jointIndex =
-          character.skeleton.getJointIdByName(element.value("jointIndex", ""));
-      const std::string attribute = element.value("jointParameter", "");
-      size_t attributeIndex = kInvalidIndex;
-      for (size_t t = 0; t < kParametersPerJoint; t++) {
-        if (attribute == kJointParameterNames[t]) {
-          attributeIndex = t;
-          break;
-        }
-      }
-      l.data.minMaxJoint.jointParameter = attributeIndex;
-      l.data.minMaxJoint.limits = fromJson<Vector2f>(element["limits"]);
+      minMaxJointFromJson(character, element, l, MinMaxJoint);
     } else if (type == "minmax_joint_passive") {
-      l.type = MinMaxJointPassive;
-      l.data.minMaxJoint.jointIndex =
-          character.skeleton.getJointIdByName(element.value("jointIndex", ""));
-      const std::string attribute = element.value("jointParameter", "");
-      size_t attributeIndex = kInvalidIndex;
-      for (size_t t = 0; t < kParametersPerJoint; t++) {
-        if (attribute == kJointParameterNames[t]) {
-          attributeIndex = t;
-          break;
-        }
-      }
-      l.data.minMaxJoint.jointParameter = attributeIndex;
-      l.data.minMaxJoint.limits = fromJson<Vector2f>(element["limits"]);
+      minMaxJointFromJson(character, element, l, MinMaxJointPassive);
     } else if (type == "linear") {
-      l.type = Linear;
-      l.data.linear.referenceIndex = character.parameterTransform.getParameterIdByName(
-          element.value("referenceParameter", ""));
-      l.data.linear.targetIndex =
-          character.parameterTransform.getParameterIdByName(element.value("targetParameter", ""));
-      l.data.linear.scale = element["scale"];
-      l.data.linear.offset = element["offset"];
-      l.data.linear.rangeMin = element.value("rangeMin", -std::numeric_limits<float>::max());
-      l.data.linear.rangeMax = element.value("rangeMax", std::numeric_limits<float>::max());
+      linearFromJson(character, element, l);
     } else if (type == "linear_joint") {
-      l.type = LinearJoint;
-      l.data.linearJoint.referenceJointIndex =
-          character.skeleton.getJointIdByName(element.value("referenceJoint", ""));
-      l.data.linearJoint.targetJointIndex =
-          character.skeleton.getJointIdByName(element.value("targetJoint", ""));
-      l.data.linearJoint.referenceJointParameter = element["referenceJointParameter"].get<size_t>();
-      l.data.linearJoint.targetJointParameter = element["targetJointParameter"].get<size_t>();
-      l.data.linearJoint.scale = element["scale"];
-      l.data.linearJoint.offset = element["offset"];
-      l.data.linearJoint.rangeMin = element.value("rangeMin", -std::numeric_limits<float>::max());
-      l.data.linearJoint.rangeMax = element.value("rangeMax", std::numeric_limits<float>::max());
+      linearJointFromJson(character, element, l);
     } else if (type == "half_plane") {
-      l.type = HalfPlane;
-      l.data.halfPlane.param1 =
-          character.parameterTransform.getParameterIdByName(element.value("param1", ""));
-      l.data.halfPlane.param2 =
-          character.parameterTransform.getParameterIdByName(element.value("param2", ""));
-      l.data.halfPlane.normal = fromJson<Vector2f>(element["normal"]);
-      l.data.halfPlane.offset = element["offset"];
+      halfPlaneFromJson(character, element, l);
     } else if (type == "ellipsoid") {
-      l.type = Ellipsoid;
-      l.data.ellipsoid.parent = character.skeleton.getJointIdByName(element.value("parent", ""));
-      l.data.ellipsoid.ellipsoidParent =
-          character.skeleton.getJointIdByName(element.value("ellipsoidParent", ""));
-      l.data.ellipsoid.offset = fromJson<Vector3f>(element["offset"]);
-      l.data.ellipsoid.offset /= toM();
-      l.data.ellipsoid.ellipsoid.matrix() = fromJson<Matrix4f>(element["ellipsoid"]);
-      l.data.ellipsoid.ellipsoid.translation() /= toM();
-      l.data.ellipsoid.ellipsoidInv = l.data.ellipsoid.ellipsoid.inverse();
+      ellipsoidFromJson(character, element, l, "ellipsoidParent", "ellipsoid");
     } else if (type == "elipsoid") {
       // TODO: Remove once all the model files are migrated to ellipsoid
       MT_LOGW_ONCE(
           "Deprecated parameter limit type: {} (typo). Please use 'ellipsoid' instead.", type);
-      l.type = Ellipsoid;
-      l.data.ellipsoid.parent = character.skeleton.getJointIdByName(element.value("parent", ""));
-      l.data.ellipsoid.ellipsoidParent =
-          character.skeleton.getJointIdByName(element.value("elipsoidParent", ""));
-      l.data.ellipsoid.offset = fromJson<Vector3f>(element["offset"]);
-      l.data.ellipsoid.offset /= toM();
-      l.data.ellipsoid.ellipsoid.matrix() = fromJson<Matrix4f>(element["elipsoid"]);
-      l.data.ellipsoid.ellipsoid.translation() /= toM();
-      l.data.ellipsoid.ellipsoidInv = l.data.ellipsoid.ellipsoid.inverse();
+      ellipsoidFromJson(character, element, l, "elipsoidParent", "elipsoid");
     } else {
       MT_THROW("Unknown parameter limit type '{}' from character name '{}'.", type, character.name);
     }
