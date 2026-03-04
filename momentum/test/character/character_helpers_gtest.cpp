@@ -100,6 +100,12 @@ void compareMeshes(const Mesh_u& refMesh, const Mesh_u& mesh) {
       refMesh->confidence, testing::Pointwise(testing::DoubleNear(0.0001), mesh->confidence));
   EXPECT_THAT(
       refMesh->texcoord_faces, testing::Pointwise(IntExactPointwise(), mesh->texcoord_faces));
+  // Only compare polygon data when both meshes have it (e.g. glTF doesn't populate poly fields)
+  if (!refMesh->polyFaces.empty() && !mesh->polyFaces.empty()) {
+    EXPECT_EQ(refMesh->polyFaces, mesh->polyFaces);
+    EXPECT_EQ(refMesh->polyFaceSizes, mesh->polyFaceSizes);
+    EXPECT_EQ(refMesh->polyTexcoordFaces, mesh->polyTexcoordFaces);
+  }
 }
 
 void compareBlendShapes(const BlendShape_const_p& refShapes, const BlendShape_const_p& shapes) {

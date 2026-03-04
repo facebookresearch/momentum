@@ -29,6 +29,52 @@ namespace pymomentum {
 
 namespace {
 
+void validateAndSetPolyData(
+    mm::Mesh& mesh,
+    std::vector<uint32_t> poly_faces,
+    std::vector<uint32_t> poly_face_sizes,
+    std::vector<uint32_t> poly_texcoord_faces,
+    int nVerts,
+    int nTextureCoords) {
+  MT_THROW_IF(
+      poly_faces.empty() != poly_face_sizes.empty(),
+      "poly_faces and poly_face_sizes must both be empty or both be non-empty");
+  if (!poly_face_sizes.empty()) {
+    uint32_t totalSize = 0;
+    for (const auto s : poly_face_sizes) {
+      MT_THROW_IF(s < 3, "poly_face_sizes entries must be >= 3, got {}", s);
+      totalSize += s;
+    }
+    MT_THROW_IF(
+        totalSize != poly_faces.size(),
+        "poly_face_sizes sum ({}) must equal poly_faces length ({})",
+        totalSize,
+        poly_faces.size());
+    for (const auto idx : poly_faces) {
+      MT_THROW_IF(
+          idx >= static_cast<uint32_t>(nVerts),
+          "poly_faces index ({}) exceeded vertex count ({})",
+          idx,
+          nVerts);
+    }
+    MT_THROW_IF(
+        !poly_texcoord_faces.empty() && poly_texcoord_faces.size() != poly_faces.size(),
+        "poly_texcoord_faces must be empty or same length as poly_faces ({} vs {})",
+        poly_texcoord_faces.size(),
+        poly_faces.size());
+    for (const auto idx : poly_texcoord_faces) {
+      MT_THROW_IF(
+          idx >= static_cast<uint32_t>(nTextureCoords),
+          "poly_texcoord_faces index ({}) exceeded texcoord count ({})",
+          idx,
+          nTextureCoords);
+    }
+  }
+  mesh.polyFaces = std::move(poly_faces);
+  mesh.polyFaceSizes = std::move(poly_face_sizes);
+  mesh.polyTexcoordFaces = std::move(poly_texcoord_faces);
+}
+
 mm::Mesh createMesh(
     const py::array_t<float>& vertices,
     const py::array_t<int>& faces,
@@ -38,7 +84,10 @@ mm::Mesh createMesh(
     const std::vector<float>& confidence,
     std::optional<py::array_t<float>> texcoords,
     std::optional<py::array_t<int>> texcoord_faces,
-    const std::vector<std::vector<int32_t>>& texcoord_lines) {
+    const std::vector<std::vector<int32_t>>& texcoord_lines,
+    std::vector<uint32_t> poly_faces,
+    std::vector<uint32_t> poly_face_sizes,
+    std::vector<uint32_t> poly_texcoord_faces) {
   mm::Mesh mesh;
   MT_THROW_IF(vertices.ndim() != 2, "vertices must be a 2D array");
   MT_THROW_IF(vertices.shape(1) != 3, "vertices must have size n x 3");
@@ -110,6 +159,14 @@ mm::Mesh createMesh(
 
   mesh.texcoord_lines = texcoord_lines;
 
+  validateAndSetPolyData(
+      mesh,
+      std::move(poly_faces),
+      std::move(poly_face_sizes),
+      std::move(poly_texcoord_faces),
+      static_cast<int>(nVerts),
+      nTextureCoords);
+
   return mesh;
 }
 
@@ -136,6 +193,9 @@ void registerMeshBindings(py::class_<mm::Mesh>& meshClass) {
 :param texcoords: Optional n x 2 array of texture coordinates.
 :param texcoord_faces: Optional n x 3 array of triangles in the texture map.  Each triangle corresponds to a triangle on the mesh, but indices should refer to the texcoord array.
 :param texcoord_lines: Optional list of lines, where each line is a list of texture coordinate indices.
+:param poly_faces: Optional list of packed polygon face vertex indices (all polygons concatenated). The triangulated ``faces`` parameter is always required; polygon data is optional and preserves original topology.
+:param poly_face_sizes: Optional list of vertex counts per polygon face.
+:param poly_texcoord_faces: Optional list of packed polygon face texture coordinate indices (same layout as poly_faces).
           )",
           py::arg("vertices"),
           py::arg("faces"),
@@ -146,7 +206,10 @@ void registerMeshBindings(py::class_<mm::Mesh>& meshClass) {
           py::arg("confidence") = std::vector<float>{},
           py::arg("texcoords") = std::optional<py::array_t<float>>{},
           py::arg("texcoord_faces") = std::optional<py::array_t<int>>{},
-          py::arg("texcoord_lines") = std::vector<std::vector<int32_t>>{})
+          py::arg("texcoord_lines") = std::vector<std::vector<int32_t>>{},
+          py::arg("poly_faces") = std::vector<uint32_t>{},
+          py::arg("poly_face_sizes") = std::vector<uint32_t>{},
+          py::arg("poly_texcoord_faces") = std::vector<uint32_t>{})
       .def_property_readonly(
           "n_vertices",
           [](const mm::Mesh& mesh) { return mesh.vertices.size(); },
@@ -188,6 +251,24 @@ void registerMeshBindings(py::class_<mm::Mesh>& meshClass) {
           "texcoord_lines",
           &mm::Mesh::texcoord_lines,
           "Texture coordinate indices for each line.  ")
+      .def_readonly(
+          "poly_faces",
+          &mm::Mesh::polyFaces,
+          "Packed polygon face vertex indices (all polygons concatenated back-to-back). "
+          "This is optional — the triangulated :attr:`faces` field is always required.")
+      .def_readonly(
+          "poly_face_sizes",
+          &mm::Mesh::polyFaceSizes,
+          "Number of vertices in each polygon face. May be empty if polygon data is not available.")
+      .def_readonly(
+          "poly_texcoord_faces",
+          &mm::Mesh::polyTexcoordFaces,
+          "Packed polygon face texture coordinate indices (same layout as :attr:`poly_faces`). "
+          "May be empty if texture coordinates are not available.")
+      .def_property_readonly(
+          "n_poly_faces",
+          [](const mm::Mesh& mesh) { return mesh.polyFaceSizes.size(); },
+          ":return: The number of polygon faces in the mesh.")
       .def(
           "self_intersections",
           [](const mm::Mesh& mesh) {
@@ -204,12 +285,13 @@ void registerMeshBindings(py::class_<mm::Mesh>& meshClass) {
           })
       .def("__repr__", [](const mm::Mesh& m) {
         return fmt::format(
-            "Mesh(vertices={}, faces={}, has_normals={}, has_colors={}, has_texcoords={})",
+            "Mesh(vertices={}, faces={}, has_normals={}, has_colors={}, has_texcoords={}, poly_faces={})",
             m.vertices.size(),
             m.faces.size(),
             !m.normals.empty() ? "True" : "False",
             !m.colors.empty() ? "True" : "False",
-            !m.texcoords.empty() ? "True" : "False");
+            !m.texcoords.empty() ? "True" : "False",
+            m.polyFaceSizes.size());
       });
 }
 
