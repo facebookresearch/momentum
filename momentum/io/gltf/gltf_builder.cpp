@@ -861,7 +861,7 @@ struct GltfBuilder::Impl {
 };
 
 GltfBuilder::Impl::Impl() : document(fx::gltf::Document()) {
-  document.extensionsUsed.push_back("FB_momentum");
+  document.extensionsUsed.emplace_back("FB_momentum");
 }
 
 GltfBuilder::GltfBuilder() {
