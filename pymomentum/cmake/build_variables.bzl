@@ -179,10 +179,12 @@ diff_geometry_sources = [
 
 solver_public_headers = [
     "solver/momentum_ik.h",
+    "solver/momentum_ik_autograd.h",
 ]
 
 solver_sources = [
     "solver/momentum_ik.cpp",
+    "solver/momentum_ik_autograd.cpp",
     "solver/solver_pybind.cpp",
 ]
 
