@@ -253,12 +253,15 @@ character_manager_sources = [
 renderer_public_headers = [
     "renderer/mesh_processing.h",
     "renderer/momentum_render.h",
+    "renderer/rasterizer_primitives.h",
+    "renderer/rasterizer_utility.h",
     "renderer/software_rasterizer.h",
 ]
 
 renderer_sources = [
     "renderer/mesh_processing.cpp",
     "renderer/momentum_render.cpp",
+    "renderer/rasterizer_primitives.cpp",
     "renderer/renderer_pybind.cpp",
     "renderer/software_rasterizer.cpp",
 ]
