@@ -209,6 +209,8 @@ character_sources = [
 character_test_sources = [
     "test/character/blend_shape_skinning_test.cpp",
     "test/character/blend_shape_test.cpp",
+    "test/character/character_blend_shape_test.cpp",
+    "test/character/character_mesh_test.cpp",
     "test/character/character_state_test.cpp",
     "test/character/character_test.cpp",
     "test/character/character_utility_test.cpp",
