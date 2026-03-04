@@ -163,7 +163,25 @@ $(document).ready(function(){initNavTree('error__function__utils_8h_source.html'
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
 </div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a1f9f092de71f3a7ec6835ce10ed5cbe4">   61</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacemomentum.html#a58976f70181d218f1b771f9756c74a8c">jacobian_jointParams_to_modelParams</a>(</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jacobian_jointParams</a>,</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">const</span> Eigen::Index <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iJointParam</a>,</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> Eigen::Index <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iRow</a>,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1ParameterTransformT.html">ParameterTransform</a>&amp; <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian) {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="comment">// explicitly multiply with the parameter transform to generate parameter space gradients</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span> index = <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>.<a class="code hl_variable" href="structmomentum_1_1ParameterTransformT.html#ae17cb127a8b2332ae0217a767d10a979">transform</a>.outerIndexPtr()[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iJointParam</a>];</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>       index &lt; <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>.<a class="code hl_variable" href="structmomentum_1_1ParameterTransformT.html#ae17cb127a8b2332ae0217a767d10a979">transform</a>.outerIndexPtr()[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iJointParam</a> + 1];</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>       ++index) {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    jacobian(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iRow</a>, <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>.<a class="code hl_variable" href="structmomentum_1_1ParameterTransformT.html#ae17cb127a8b2332ae0217a767d10a979">transform</a>.innerIndexPtr()[index]) +=</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jacobian_jointParams</a> * <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>.<a class="code hl_variable" href="structmomentum_1_1ParameterTransformT.html#ae17cb127a8b2332ae0217a767d10a979">transform</a>.valuePtr()[index];</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>}</div>
+</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="acharacter_2fwd_8h_html"><div class="ttname"><a href="character_2fwd_8h.html">fwd.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
@@ -179,7 +197,7 @@ $(document).ready(function(){initNavTree('error__function__utils_8h_source.html'
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="error__function__utils_8h.html">error_function_utils.h</a></li>
-    <li class="footer">Generated on Thu Feb 26 2026 19:56:50 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Mar 4 2026 16:10:49 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
