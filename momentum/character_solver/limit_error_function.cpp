@@ -10,12 +10,567 @@
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character_solver/error_function_utils.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 
 namespace momentum {
 
+namespace {
+
 constexpr float kPositionWeight = 1e-4f;
+
+template <typename T>
+T computeMinMaxError(
+    const LimitMinMax& data,
+    const ModelParametersT<T>& params,
+    T limitWeight,
+    const ParameterSet& enabledParameters) {
+  if (!enabledParameters.test(data.parameterIndex)) {
+    return T(0);
+  }
+  T error = T(0);
+  if (params(data.parameterIndex) < data.limits[0]) {
+    const T val = data.limits[0] - params(data.parameterIndex);
+    error = val * val * limitWeight;
+  }
+  if (params(data.parameterIndex) > data.limits[1]) {
+    const T val = data.limits[1] - params(data.parameterIndex);
+    error = val * val * limitWeight;
+  }
+  return error;
+}
+
+template <typename T>
+T computeMinMaxJointError(
+    const LimitMinMaxJoint& data,
+    const SkeletonStateT<T>& state,
+    T limitWeight,
+    const Eigen::VectorX<bool>& activeJointParams) {
+  const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
+  MT_CHECK(parameterIndex < static_cast<size_t>(state.jointParameters.size()));
+  if (!activeJointParams[parameterIndex]) {
+    return T(0);
+  }
+  T error = T(0);
+  if (state.jointParameters(parameterIndex) < data.limits[0]) {
+    const T val = data.limits[0] - state.jointParameters[parameterIndex];
+    error = val * val * limitWeight;
+  }
+  if (state.jointParameters(parameterIndex) > data.limits[1]) {
+    const T val = data.limits[1] - state.jointParameters[parameterIndex];
+    error = val * val * limitWeight;
+  }
+  return error;
+}
+
+template <typename T>
+T computeLinearError(
+    const LimitLinear& data,
+    const ModelParametersT<T>& params,
+    T limitWeight,
+    const ParameterSet& enabledParameters) {
+  MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
+  MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
+  if ((!enabledParameters.test(data.targetIndex) && !enabledParameters.test(data.referenceIndex)) ||
+      !isInRange(data, params(data.targetIndex))) {
+    return T(0);
+  }
+  const T residual =
+      params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
+  return residual * residual * limitWeight;
+}
+
+template <typename T>
+T computeLinearJointError(
+    const LimitLinearJoint& data,
+    const SkeletonStateT<T>& state,
+    T limitWeight,
+    const Eigen::VectorX<bool>& activeJointParams) {
+  const size_t referenceParameterIndex =
+      data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
+  const size_t targetParameterIndex =
+      data.targetJointIndex * kParametersPerJoint + data.targetJointParameter;
+  MT_CHECK(referenceParameterIndex < static_cast<size_t>(state.jointParameters.size()));
+  MT_CHECK(targetParameterIndex < static_cast<size_t>(state.jointParameters.size()));
+  if ((!activeJointParams[referenceParameterIndex] && !activeJointParams[targetParameterIndex]) ||
+      !isInRange(data, state.jointParameters[targetParameterIndex])) {
+    return T(0);
+  }
+  const T residual = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
+      state.jointParameters(referenceParameterIndex);
+  return residual * residual * limitWeight;
+}
+
+template <typename T>
+T computeHalfPlaneError(
+    const LimitHalfPlane& data,
+    const ModelParametersT<T>& params,
+    T limitWeight,
+    const ParameterSet& enabledParameters) {
+  MT_CHECK(data.param1 < static_cast<size_t>(params.size()));
+  MT_CHECK(data.param2 < static_cast<size_t>(params.size()));
+  if (!enabledParameters.test(data.param1) && !enabledParameters.test(data.param2)) {
+    return T(0);
+  }
+  const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
+  const T residual = p.dot(data.normal.template cast<T>()) - data.offset;
+  if (residual < 0) {
+    return residual * residual * limitWeight;
+  }
+  return T(0);
+}
+
+template <typename T>
+T computeEllipsoidError(const LimitEllipsoid& ct, const SkeletonStateT<T>& state, T limitWeight) {
+  const Eigen::Vector3<T> position =
+      state.jointState[ct.parent].transform * ct.offset.template cast<T>();
+  const Eigen::Vector3<T> localPosition =
+      state.jointState[ct.ellipsoidParent].transform.inverse() * position;
+  const Eigen::Vector3<T> ellipsoidPosition = ct.ellipsoidInv.template cast<T>() * localPosition;
+  const Eigen::Vector3<T> normalizedPosition = ellipsoidPosition.normalized();
+  const Eigen::Vector3<T> projectedPosition = ct.ellipsoid.template cast<T>() * normalizedPosition;
+  const Eigen::Vector3<T> diff =
+      position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
+  return diff.squaredNorm() * T(kPositionWeight) * limitWeight;
+}
+
+template <typename T>
+T computeMinMaxGradient(
+    const LimitMinMax& data,
+    const ModelParametersT<T>& params,
+    T tWeight,
+    T limitWeight,
+    const ParameterSet& enabledParameters,
+    Ref<Eigen::VectorX<T>> gradient) {
+  if (!enabledParameters.test(data.parameterIndex)) {
+    return T(0);
+  }
+  T error = T(0);
+  if (params(data.parameterIndex) < data.limits[0]) {
+    const T val = params(data.parameterIndex) - data.limits[0];
+    error = val * val * tWeight * limitWeight;
+    gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight;
+  }
+  if (params(data.parameterIndex) > data.limits[1]) {
+    const T val = params(data.parameterIndex) - data.limits[1];
+    error = val * val * tWeight * limitWeight;
+    gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight;
+  }
+  return error;
+}
+
+template <typename T>
+T computeMinMaxJointGradient(
+    const LimitMinMaxJoint& data,
+    const SkeletonStateT<T>& state,
+    T tWeight,
+    T limitWeight,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const ParameterTransform& parameterTransform,
+    Ref<Eigen::VectorX<T>> gradient) {
+  const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
+  MT_CHECK(parameterIndex < static_cast<size_t>(state.jointParameters.size()));
+  if (!activeJointParams[parameterIndex]) {
+    return T(0);
+  }
+
+  T error = T(0);
+  if (state.jointParameters(parameterIndex) < data.limits[0]) {
+    const T val = state.jointParameters[parameterIndex] - data.limits[0];
+    error = val * val * tWeight * limitWeight;
+    const T jGrad = T(2) * val * tWeight * limitWeight;
+    gradient_jointParams_to_modelParams(jGrad, parameterIndex, parameterTransform, gradient);
+  }
+  if (state.jointParameters(parameterIndex) > data.limits[1]) {
+    const T val = state.jointParameters[parameterIndex] - data.limits[1];
+    error = val * val * tWeight * limitWeight;
+    const T jGrad = T(2) * val * tWeight * limitWeight;
+    gradient_jointParams_to_modelParams(jGrad, parameterIndex, parameterTransform, gradient);
+  }
+  return error;
+}
+
+template <typename T>
+T computeLinearGradient(
+    const LimitLinear& data,
+    const ModelParametersT<T>& params,
+    T tWeight,
+    T limitWeight,
+    const ParameterSet& enabledParameters,
+    Ref<Eigen::VectorX<T>> gradient) {
+  MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
+  MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
+  if (!isInRange(data, params(data.targetIndex))) {
+    return T(0);
+  }
+  const T residual =
+      params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
+  const T error = residual * residual * limitWeight * tWeight;
+  if (enabledParameters.test(data.targetIndex)) {
+    gradient[data.targetIndex] += T(2) * residual * T(data.scale) * limitWeight * tWeight;
+  }
+  if (enabledParameters.test(data.referenceIndex)) {
+    gradient[data.referenceIndex] -= T(2) * residual * limitWeight * tWeight;
+  }
+  return error;
+}
+
+template <typename T>
+T computeLinearJointGradient(
+    const LimitLinearJoint& data,
+    const SkeletonStateT<T>& state,
+    T tWeight,
+    T limitWeight,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const ParameterTransform& parameterTransform,
+    Ref<Eigen::VectorX<T>> gradient) {
+  const size_t referenceParameterIndex =
+      data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
+  const size_t targetParameterIndex =
+      data.targetJointIndex * kParametersPerJoint + data.targetJointParameter;
+  MT_CHECK(referenceParameterIndex < static_cast<size_t>(state.jointParameters.size()));
+  MT_CHECK(targetParameterIndex < static_cast<size_t>(state.jointParameters.size()));
+
+  if ((!activeJointParams[referenceParameterIndex] && !activeJointParams[targetParameterIndex]) ||
+      !isInRange(data, state.jointParameters[targetParameterIndex])) {
+    return T(0);
+  }
+
+  const T residual = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
+      state.jointParameters(referenceParameterIndex);
+  const T error = residual * residual * limitWeight * tWeight;
+
+  const T targetGrad = T(2) * residual * T(data.scale) * limitWeight * tWeight;
+  gradient_jointParams_to_modelParams(
+      targetGrad, targetParameterIndex, parameterTransform, gradient);
+
+  const T referenceGrad = T(-2) * residual * limitWeight * tWeight;
+  gradient_jointParams_to_modelParams(
+      referenceGrad, referenceParameterIndex, parameterTransform, gradient);
+
+  return error;
+}
+
+template <typename T>
+T computeHalfPlaneGradient(
+    const LimitHalfPlane& data,
+    const ModelParametersT<T>& params,
+    T tWeight,
+    T limitWeight,
+    const ParameterSet& enabledParameters,
+    Ref<Eigen::VectorX<T>> gradient) {
+  if (!enabledParameters.test(data.param1) && !enabledParameters.test(data.param2)) {
+    return T(0);
+  }
+  const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
+  const T residual = p.dot(data.normal.template cast<T>()) - data.offset;
+  if (residual >= T(0)) {
+    return T(0);
+  }
+  const T error = residual * residual * limitWeight * tWeight;
+  if (enabledParameters.test(data.param1)) {
+    gradient[data.param1] += T(2) * residual * T(data.normal[0]) * tWeight;
+  }
+  if (enabledParameters.test(data.param2)) {
+    gradient[data.param2] += T(2) * residual * T(data.normal[1]) * tWeight;
+  }
+  return error;
+}
+
+template <typename T>
+T computeEllipsoidGradient(
+    const LimitEllipsoid& ct,
+    const SkeletonStateT<T>& state,
+    T tWeight,
+    T limitWeight,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const Skeleton& skeleton,
+    const ParameterTransform& parameterTransform,
+    Ref<Eigen::VectorX<T>> gradient) {
+  const Eigen::Vector3<T> position =
+      state.jointState[ct.parent].transform * ct.offset.template cast<T>();
+  const Eigen::Vector3<T> localPosition =
+      state.jointState[ct.ellipsoidParent].transform.inverse() * position;
+  const Eigen::Vector3<T> ellipsoidPosition = ct.ellipsoidInv.template cast<T>() * localPosition;
+  const Eigen::Vector3<T> normalizedPosition = ellipsoidPosition.normalized();
+  const Eigen::Vector3<T> projectedPosition = ct.ellipsoid.template cast<T>() * normalizedPosition;
+  const Eigen::Vector3<T> diff =
+      position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
+  const T wgt = T(2) * T(kPositionWeight) * limitWeight * tWeight;
+
+  size_t jointIndex = ct.parent;
+  while (jointIndex != ct.ellipsoidParent && jointIndex != kInvalidIndex) {
+    MT_CHECK(jointIndex < skeleton.joints.size());
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Eigen::Vector3<T> posd = position - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (activeJointParams[paramIndex + d]) {
+        const T val = diff.dot(jointState.getTranslationDerivative(d)) * wgt;
+        gradient_jointParams_to_modelParams(val, paramIndex + d, parameterTransform, gradient);
+      }
+      if (activeJointParams[paramIndex + 3 + d]) {
+        const T val = diff.dot(jointState.getRotationDerivative(d, posd)) * wgt;
+        gradient_jointParams_to_modelParams(val, paramIndex + 3 + d, parameterTransform, gradient);
+      }
+    }
+    if (activeJointParams[paramIndex + 6]) {
+      const T val = diff.dot(jointState.getScaleDerivative(posd)) * wgt;
+      gradient_jointParams_to_modelParams(val, paramIndex + 6, parameterTransform, gradient);
+    }
+    jointIndex = skeleton.joints[jointIndex].parent;
+  }
+
+  return diff.squaredNorm() * T(kPositionWeight) * tWeight * limitWeight;
+}
+
+template <typename T>
+T computeMinMaxJacobian(
+    const LimitMinMax& data,
+    const ModelParametersT<T>& params,
+    T tWeight,
+    T limitWeight,
+    T wgt,
+    const ParameterSet& enabledParameters,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int row) {
+  if (!enabledParameters.test(data.parameterIndex)) {
+    return T(0);
+  }
+  if (params(data.parameterIndex) < data.limits[0]) {
+    const T val = params(data.parameterIndex) - data.limits[0];
+    jacobian(row, data.parameterIndex) = wgt;
+    residual(row) = val * wgt;
+    return val * val * limitWeight * tWeight;
+  }
+  if (params(data.parameterIndex) > data.limits[1]) {
+    const T val = params(data.parameterIndex) - data.limits[1];
+    jacobian(row, data.parameterIndex) = wgt;
+    residual(row) = val * wgt;
+    return val * val * limitWeight * tWeight;
+  }
+  return T(0);
+}
+
+template <typename T>
+T computeMinMaxJointJacobian(
+    const LimitMinMaxJoint& data,
+    const SkeletonStateT<T>& state,
+    T tWeight,
+    T limitWeight,
+    T wgt,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const ParameterTransform& parameterTransform,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int row) {
+  const size_t jointIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
+  MT_CHECK(jointIndex < static_cast<size_t>(state.jointParameters.size()));
+  if (!activeJointParams[jointIndex]) {
+    return T(0);
+  }
+  if (state.jointParameters(jointIndex) < data.limits[0]) {
+    const T val = state.jointParameters[jointIndex] - data.limits[0];
+    jacobian_jointParams_to_modelParams(
+        wgt, Eigen::Index(jointIndex), Eigen::Index(row), parameterTransform, jacobian);
+    residual(row) = val * wgt;
+    return val * val * limitWeight * tWeight;
+  }
+  if (state.jointParameters(jointIndex) > data.limits[1]) {
+    const T val = state.jointParameters[jointIndex] - data.limits[1];
+    jacobian_jointParams_to_modelParams(
+        wgt, Eigen::Index(jointIndex), Eigen::Index(row), parameterTransform, jacobian);
+    residual(row) = val * wgt;
+    return val * val * limitWeight * tWeight;
+  }
+  return T(0);
+}
+
+template <typename T>
+T computeLinearJacobian(
+    const LimitLinear& data,
+    const ModelParametersT<T>& params,
+    T tWeight,
+    T limitWeight,
+    T wgt,
+    const ParameterSet& enabledParameters,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int row) {
+  MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
+  MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
+
+  if ((!enabledParameters.test(data.targetIndex) && !enabledParameters.test(data.referenceIndex)) ||
+      !isInRange(data, params(data.targetIndex))) {
+    return T(0);
+  }
+  const T res = params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
+  residual(row) = res * wgt;
+  if (enabledParameters.test(data.targetIndex)) {
+    jacobian(row, data.targetIndex) = T(data.scale) * wgt;
+  }
+  if (enabledParameters.test(data.referenceIndex)) {
+    jacobian(row, data.referenceIndex) = -wgt;
+  }
+  return res * res * limitWeight * tWeight;
+}
+
+template <typename T>
+T computeLinearJointJacobian(
+    const LimitLinearJoint& data,
+    const SkeletonStateT<T>& state,
+    T tWeight,
+    T limitWeight,
+    T wgt,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const ParameterTransform& parameterTransform,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int row) {
+  const size_t referenceParameterIndex =
+      data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
+  const size_t targetParameterIndex =
+      data.targetJointIndex * kParametersPerJoint + data.targetJointParameter;
+  MT_CHECK(referenceParameterIndex < static_cast<size_t>(state.jointParameters.size()));
+  MT_CHECK(targetParameterIndex < static_cast<size_t>(state.jointParameters.size()));
+
+  if ((!activeJointParams[referenceParameterIndex] && !activeJointParams[targetParameterIndex]) ||
+      !isInRange(data, state.jointParameters(targetParameterIndex))) {
+    return T(0);
+  }
+
+  const T res = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
+      state.jointParameters(referenceParameterIndex);
+  residual(row) = res * wgt;
+
+  if (activeJointParams[targetParameterIndex]) {
+    jacobian_jointParams_to_modelParams(
+        T(data.scale) * wgt,
+        Eigen::Index(targetParameterIndex),
+        Eigen::Index(row),
+        parameterTransform,
+        jacobian);
+  }
+  if (activeJointParams[referenceParameterIndex]) {
+    jacobian_jointParams_to_modelParams(
+        -wgt,
+        Eigen::Index(referenceParameterIndex),
+        Eigen::Index(row),
+        parameterTransform,
+        jacobian);
+  }
+  return res * res * limitWeight * tWeight;
+}
+
+template <typename T>
+T computeHalfPlaneJacobian(
+    const LimitHalfPlane& data,
+    const ModelParametersT<T>& params,
+    T tWeight,
+    T limitWeight,
+    T wgt,
+    const ParameterSet& enabledParameters,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int row) {
+  MT_CHECK(data.param1 < static_cast<size_t>(params.size()));
+  MT_CHECK(data.param2 < static_cast<size_t>(params.size()));
+
+  if (!enabledParameters.test(data.param1) && !enabledParameters.test(data.param2)) {
+    return T(0);
+  }
+  const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
+  const T res = p.dot(data.normal.template cast<T>()) - data.offset;
+  if (res >= T(0)) {
+    return T(0);
+  }
+  residual(row) = res * wgt;
+  if (enabledParameters.test(data.param1)) {
+    jacobian(row, data.param1) = T(data.normal[0]) * wgt;
+  }
+  if (enabledParameters.test(data.param2)) {
+    jacobian(row, data.param2) = T(data.normal[1]) * wgt;
+  }
+  return res * res * limitWeight * tWeight;
+}
+
+template <typename T>
+T computeEllipsoidJacobian(
+    const LimitEllipsoid& ct,
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state,
+    T totalWeight,
+    T limitWeight,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const Skeleton& skeleton,
+    const ParameterTransform& parameterTransform,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int row) {
+  const Eigen::Vector3<T> position =
+      state.jointState[ct.parent].transform * ct.offset.template cast<T>();
+  const Eigen::Vector3<T> localPosition =
+      state.jointState[ct.ellipsoidParent].transform.inverse() * position;
+  const Eigen::Vector3<T> ellipsoidPosition = ct.ellipsoidInv.template cast<T>() * localPosition;
+  const Eigen::Vector3<T> normalizedPosition = ellipsoidPosition.normalized();
+  const Eigen::Vector3<T> projectedPosition = ct.ellipsoid.template cast<T>() * normalizedPosition;
+  const Eigen::Vector3<T> diff =
+      position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
+
+  Eigen::Ref<Eigen::MatrixX<T>> jac = jacobian.block(row, 0, 3, params.size());
+  Eigen::Ref<Eigen::VectorX<T>> res = residual.middleRows(row, 3);
+  MT_CHECK(jac.cols() == static_cast<Eigen::Index>(parameterTransform.transform.cols()));
+  MT_CHECK(jac.rows() == 3);
+
+  const T jwgt = std::sqrt(totalWeight * T(kPositionWeight) * limitWeight);
+
+  size_t jointIndex = ct.parent;
+  while (jointIndex != ct.ellipsoidParent && jointIndex != kInvalidIndex) {
+    MT_CHECK(jointIndex < skeleton.joints.size());
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Eigen::Vector3<T> posd = position - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (activeJointParams[paramIndex + d]) {
+        const Eigen::Vector3<T> jc = jointState.getTranslationDerivative(d) * jwgt;
+        for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
+             index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
+             ++index) {
+          jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
+              jc * parameterTransform.transform.valuePtr()[index];
+        }
+      }
+      if (activeJointParams[paramIndex + 3 + d]) {
+        const Eigen::Vector3<T> jc = jointState.getRotationDerivative(d, posd) * jwgt;
+        for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d];
+             index < parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d + 1];
+             ++index) {
+          jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
+              jc * parameterTransform.transform.valuePtr()[index];
+        }
+      }
+    }
+    if (activeJointParams[paramIndex + 6]) {
+      const Eigen::Vector3<T> jc = jointState.getScaleDerivative(posd) * jwgt;
+      for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
+           index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
+           ++index) {
+        jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
+            jc * parameterTransform.transform.valuePtr()[index];
+      }
+    }
+    jointIndex = skeleton.joints[jointIndex].parent;
+  }
+
+  res = diff * jwgt;
+  return jwgt * jwgt * diff.squaredNorm();
+}
+
+} // namespace
 
 template <typename T>
 LimitErrorFunctionT<T>::LimitErrorFunctionT(
@@ -42,138 +597,46 @@ double LimitErrorFunctionT<T>::getError(
     const MeshStateT<T>& /* meshState */) {
   MT_PROFILE_FUNCTION();
 
-  // check all is valid
   MT_CHECK(
       state.jointParameters.size() ==
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
 
-  // loop over all joints and check for limit violations
   double error = 0.0;
 
-  // ---------------------------------------
-  //  new joint error
-  // ---------------------------------------
   for (const auto& limit : limits_) {
+    const T limitWeight = T(limit.weight);
     switch (limit.type) {
-      case MinMax: {
-        const auto& data = limit.data.minMax;
-        MT_CHECK(data.parameterIndex <= static_cast<size_t>(params.size()));
-        if (this->enabledParameters_.test(data.parameterIndex)) {
-          if (params(data.parameterIndex) < data.limits[0]) {
-            const T val = data.limits[0] - params(data.parameterIndex);
-            error += val * val * limit.weight;
-          }
-          if (params(data.parameterIndex) > data.limits[1]) {
-            const T val = data.limits[1] - params(data.parameterIndex);
-            error += val * val * limit.weight;
-          }
-        }
+      case MinMax:
+        error +=
+            computeMinMaxError(limit.data.minMax, params, limitWeight, this->enabledParameters_);
         break;
-      }
-      case MinMaxJoint: {
-        const auto& data = limit.data.minMaxJoint;
-        const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
-        MT_CHECK(parameterIndex < (size_t)state.jointParameters.size());
-        if (this->activeJointParams_[parameterIndex]) {
-          if (state.jointParameters(parameterIndex) < data.limits[0]) {
-            const T val = data.limits[0] - state.jointParameters[parameterIndex];
-            error += val * val * limit.weight;
-          }
-          if (state.jointParameters(parameterIndex) > data.limits[1]) {
-            const T val = data.limits[1] - state.jointParameters[parameterIndex];
-            error += val * val * limit.weight;
-          }
-        }
+      case MinMaxJoint:
+        error += computeMinMaxJointError(
+            limit.data.minMaxJoint, state, limitWeight, this->activeJointParams_);
         break;
-      }
-      case MinMaxJointPassive: {
+      case MinMaxJointPassive:
         break;
-      }
-      case Linear: {
-        const auto& data = limit.data.linear;
-        MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
-        MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
-
-        if ((this->enabledParameters_.test(data.targetIndex) ||
-             this->enabledParameters_.test(data.referenceIndex)) &&
-            isInRange(data, params(data.targetIndex))) {
-          const T residual =
-              params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
-          error += residual * residual * limit.weight;
-        }
+      case Linear:
+        error +=
+            computeLinearError(limit.data.linear, params, limitWeight, this->enabledParameters_);
         break;
-      }
-      case LinearJoint: {
-        const auto& data = limit.data.linearJoint;
-        const size_t referenceParameterIndex =
-            data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
-        const size_t targetParameterIndex =
-            data.targetJointIndex * kParametersPerJoint + data.targetJointParameter;
-        MT_CHECK(referenceParameterIndex < (size_t)state.jointParameters.size());
-        MT_CHECK(targetParameterIndex < (size_t)state.jointParameters.size());
-
-        if ((this->activeJointParams_[referenceParameterIndex] ||
-             this->activeJointParams_[targetParameterIndex]) &&
-            isInRange(data, state.jointParameters[targetParameterIndex])) {
-          const T residual = state.jointParameters(targetParameterIndex) * data.scale -
-              data.offset - state.jointParameters(referenceParameterIndex);
-          error += residual * residual * limit.weight;
-        }
+      case LinearJoint:
+        error += computeLinearJointError(
+            limit.data.linearJoint, state, limitWeight, this->activeJointParams_);
         break;
-      }
-
-      case HalfPlane: {
-        const auto& data = limit.data.halfPlane;
-        MT_CHECK(data.param1 < static_cast<size_t>(params.size()));
-        MT_CHECK(data.param2 < static_cast<size_t>(params.size()));
-
-        if ((this->enabledParameters_.test(data.param1) ||
-             this->enabledParameters_.test(data.param2))) {
-          const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
-          const T residual = p.dot(data.normal.template cast<T>()) - data.offset;
-          if (residual < 0) {
-            error += residual * residual * limit.weight;
-          }
-        }
+      case HalfPlane:
+        error += computeHalfPlaneError(
+            limit.data.halfPlane, params, limitWeight, this->enabledParameters_);
         break;
-      }
-      case Ellipsoid: {
-        const auto& ct = limit.data.ellipsoid;
-
-        // get the constraint position in global space
-        const Eigen::Vector3<T> position =
-            state.jointState[ct.parent].transform * ct.offset.template cast<T>();
-
-        // get the constraint position in local ellipsoid space
-        const Eigen::Vector3<T> localPosition =
-            state.jointState[ct.ellipsoidParent].transform.inverse() * position;
-
-        // calculate constraint position in ellipsoid space
-        const Eigen::Vector3<T> ellipsoidPosition =
-            ct.ellipsoidInv.template cast<T>() * localPosition;
-
-        // project onto closest surface point
-        const Eigen::Vector3<T> normalizedPosition = ellipsoidPosition.normalized();
-
-        // go back to ellipsoid frame
-        const Eigen::Vector3<T> projectedPosition =
-            ct.ellipsoid.template cast<T>() * normalizedPosition;
-
-        // calculate the difference between projected position and actual position
-        const Eigen::Vector3<T> diff =
-            position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
-
-        error += diff.squaredNorm() * kPositionWeight * limit.weight;
+      case Ellipsoid:
+        error += computeEllipsoidError(limit.data.ellipsoid, state, limitWeight);
         break;
-      }
       default:
-        // should never get here
         MT_THROW("Unknown parameter type for joint limit");
         break;
     }
   }
 
-  // return error
   return error * kLimitWeight * this->weight_;
 }
 
@@ -186,238 +649,63 @@ double LimitErrorFunctionT<T>::getGradient(
   MT_PROFILE_FUNCTION();
 
   const auto& parameterTransform = this->parameterTransform_;
-
-  // loop over all joints and check for limit violations
   double error = 0.0;
-
   const T tWeight = kLimitWeight * this->weight_;
 
-  // ---------------------------------------
-  //  new joint error
-  // ---------------------------------------
   for (const auto& limit : limits_) {
+    const T limitWeight = T(limit.weight);
     switch (limit.type) {
-      case MinMax: {
-        const auto& data = limit.data.minMax;
-        MT_CHECK(data.parameterIndex < static_cast<size_t>(params.size()));
-        if (this->enabledParameters_.test(data.parameterIndex)) {
-          if (params(data.parameterIndex) < data.limits[0]) {
-            const T val = params(data.parameterIndex) - data.limits[0];
-            error += val * val * tWeight * limit.weight;
-            gradient[data.parameterIndex] += T(2) * val * tWeight * limit.weight;
-          }
-          if (params(data.parameterIndex) > data.limits[1]) {
-            const T val = params(data.parameterIndex) - data.limits[1];
-            error += val * val * tWeight * limit.weight;
-            gradient[data.parameterIndex] += T(2) * val * tWeight * limit.weight;
-          }
-        }
+      case MinMax:
+        error += computeMinMaxGradient(
+            limit.data.minMax, params, tWeight, limitWeight, this->enabledParameters_, gradient);
         break;
-      }
-      case MinMaxJoint: {
-        const auto& data = limit.data.minMaxJoint;
-        const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
-        MT_CHECK(parameterIndex < (size_t)state.jointParameters.size());
-        if (this->activeJointParams_[parameterIndex]) {
-          if (state.jointParameters(parameterIndex) < data.limits[0]) {
-            const T val = state.jointParameters[parameterIndex] - data.limits[0];
-            error += val * val * tWeight * limit.weight;
-            // explicitly multiply joint gradient with the parameter transform to generate parameter
-            // space gradients
-            const T jGrad = T(2) * val * tWeight * limit.weight;
-            for (auto index = parameterTransform.transform.outerIndexPtr()[parameterIndex];
-                 index < parameterTransform.transform.outerIndexPtr()[parameterIndex + 1];
-                 ++index) {
-              gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                  jGrad * parameterTransform.transform.valuePtr()[index];
-            }
-          }
-          if (state.jointParameters(parameterIndex) > data.limits[1]) {
-            const T val = state.jointParameters[parameterIndex] - data.limits[1];
-            error += val * val * tWeight * limit.weight;
-            // explicitly multiply joint gradient with the parameter transform to generate parameter
-            // space gradients
-            const T jGrad = T(2) * val * tWeight * limit.weight;
-            for (auto index = parameterTransform.transform.outerIndexPtr()[parameterIndex];
-                 index < parameterTransform.transform.outerIndexPtr()[parameterIndex + 1];
-                 ++index) {
-              gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                  jGrad * parameterTransform.transform.valuePtr()[index];
-            }
-          }
-        }
+      case MinMaxJoint:
+        error += computeMinMaxJointGradient(
+            limit.data.minMaxJoint,
+            state,
+            tWeight,
+            limitWeight,
+            this->activeJointParams_,
+            parameterTransform,
+            gradient);
         break;
-      }
-      case MinMaxJointPassive: {
+      case MinMaxJointPassive:
         break;
-      }
-      case Linear: {
-        const auto& data = limit.data.linear;
-        MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
-        MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
-        if (isInRange(data, params(data.targetIndex))) {
-          const T residual =
-              params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
-          error += residual * residual * limit.weight * tWeight;
-
-          if (this->enabledParameters_.test(data.targetIndex)) {
-            gradient[data.targetIndex] += T(2) * residual * data.scale * limit.weight * tWeight;
-          }
-          if (this->enabledParameters_.test(data.referenceIndex)) {
-            gradient[data.referenceIndex] -= T(2) * residual * limit.weight * tWeight;
-          }
-        }
+      case Linear:
+        error += computeLinearGradient(
+            limit.data.linear, params, tWeight, limitWeight, this->enabledParameters_, gradient);
         break;
-      }
-      case LinearJoint: {
-        const auto& data = limit.data.linearJoint;
-        const size_t referenceParameterIndex =
-            data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
-        const size_t targetParameterIndex =
-            data.targetJointIndex * kParametersPerJoint + data.targetJointParameter;
-        MT_CHECK(referenceParameterIndex < (size_t)state.jointParameters.size());
-        MT_CHECK(targetParameterIndex < (size_t)state.jointParameters.size());
-
-        if ((this->activeJointParams_[referenceParameterIndex] ||
-             this->activeJointParams_[targetParameterIndex]) &&
-            isInRange(data, state.jointParameters[targetParameterIndex])) {
-          const T residual = state.jointParameters(targetParameterIndex) * data.scale -
-              data.offset - state.jointParameters(referenceParameterIndex);
-          error += residual * residual * limit.weight * tWeight;
-
-          // explicitly multiply joint gradient with the parameter transform to generate parameter
-          // space gradients
-          const T targetGrad = T(2) * residual * data.scale * limit.weight * tWeight;
-          for (auto index = parameterTransform.transform.outerIndexPtr()[targetParameterIndex];
-               index < parameterTransform.transform.outerIndexPtr()[targetParameterIndex + 1];
-               ++index) {
-            gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                targetGrad * parameterTransform.transform.valuePtr()[index];
-          }
-
-          const T referenceGrad = T(-2) * residual * limit.weight * tWeight;
-          for (auto index = parameterTransform.transform.outerIndexPtr()[referenceParameterIndex];
-               index < parameterTransform.transform.outerIndexPtr()[referenceParameterIndex + 1];
-               ++index) {
-            gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                referenceGrad * parameterTransform.transform.valuePtr()[index];
-          }
-        }
+      case LinearJoint:
+        error += computeLinearJointGradient(
+            limit.data.linearJoint,
+            state,
+            tWeight,
+            limitWeight,
+            this->activeJointParams_,
+            parameterTransform,
+            gradient);
         break;
-      }
-      case HalfPlane: {
-        const auto& data = limit.data.halfPlane;
-        if ((this->enabledParameters_.test(data.param1) ||
-             this->enabledParameters_.test(data.param2))) {
-          const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
-          const T residual = p.dot(data.normal.template cast<T>()) - data.offset;
-          if (residual < 0.0f) {
-            error += residual * residual * limit.weight * tWeight;
-
-            if (this->enabledParameters_.test(data.param1)) {
-              gradient[data.param1] += T(2) * residual * data.normal[0] * tWeight;
-            }
-            if (this->enabledParameters_.test(data.param2)) {
-              gradient[data.param2] += T(2) * residual * data.normal[1] * tWeight;
-            }
-          }
-        }
+      case HalfPlane:
+        error += computeHalfPlaneGradient(
+            limit.data.halfPlane, params, tWeight, limitWeight, this->enabledParameters_, gradient);
         break;
-      }
-      case Ellipsoid: {
-        // NOTE: The gradient for these is currently simplified
-        // It assumes the ellipsoid is static and doesn't move with the parent joint
-        const auto& ct = limit.data.ellipsoid;
-
-        // get the constraint position in global space
-        const Eigen::Vector3<T> position =
-            state.jointState[ct.parent].transform * ct.offset.template cast<T>();
-
-        // get the constraint position in local ellipsoid space
-        const Eigen::Vector3<T> localPosition =
-            state.jointState[ct.ellipsoidParent].transform.inverse() * position;
-
-        // calculate constraint position in ellipsoid space
-        const Eigen::Vector3<T> ellipsoidPosition =
-            ct.ellipsoidInv.template cast<T>() * localPosition;
-
-        // project onto closest surface point
-        const Eigen::Vector3<T> normalizedPosition = ellipsoidPosition.normalized();
-
-        // go back to ellipsoid frame
-        const Eigen::Vector3<T> projectedPosition =
-            ct.ellipsoid.template cast<T>() * normalizedPosition;
-
-        // calculate the difference between projected position and actual position
-        const Eigen::Vector3<T> diff =
-            position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
-        const T wgt = T(2) * kPositionWeight * limit.weight * tWeight;
-
-        // loop over all joints the constraint is attached to and calculate gradient
-        size_t jointIndex = ct.parent;
-        while (jointIndex != ct.ellipsoidParent && jointIndex != kInvalidIndex) {
-          // check for valid index
-          MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-          const auto& jointState = state.jointState[jointIndex];
-          const size_t paramIndex = jointIndex * kParametersPerJoint;
-          const Eigen::Vector3<T> posd = position - jointState.translation();
-
-          // calculate derivatives based on active joints
-          for (size_t d = 0; d < 3; d++) {
-            if (this->activeJointParams_[paramIndex + d]) {
-              // calculate joint gradient
-              const T val = diff.dot(jointState.getTranslationDerivative(d)) * wgt;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
-                   index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index) {
-                gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                    val * parameterTransform.transform.valuePtr()[index];
-              }
-            }
-            if (this->activeJointParams_[paramIndex + 3 + d]) {
-              // calculate joint gradient
-              const T val = diff.dot(jointState.getRotationDerivative(d, posd)) * wgt;
-              // explicitly multiply with the parameter transform to generate parameter space
-              // gradients
-              for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 3 + d];
-                   index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index) {
-                gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                    val * parameterTransform.transform.valuePtr()[index];
-              }
-            }
-          }
-          if (this->activeJointParams_[paramIndex + 6]) {
-            // calculate joint gradient
-            const T val = diff.dot(jointState.getScaleDerivative(posd)) * wgt;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
-                 index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index) {
-              gradient[parameterTransform.transform.innerIndexPtr()[index]] +=
-                  val * parameterTransform.transform.valuePtr()[index];
-            }
-          }
-
-          // go to the next joint
-          jointIndex = this->skeleton_.joints[jointIndex].parent;
-        }
-
-        error += diff.squaredNorm() * kPositionWeight * tWeight * limit.weight;
+      case Ellipsoid:
+        error += computeEllipsoidGradient(
+            limit.data.ellipsoid,
+            state,
+            tWeight,
+            limitWeight,
+            this->activeJointParams_,
+            this->skeleton_,
+            parameterTransform,
+            gradient);
         break;
-      }
       default:
-        // should never get here
         MT_THROW("Unknown parameter type for joint limit");
         break;
     }
   }
 
-  // return error
   return error;
 }
 
@@ -432,266 +720,108 @@ double LimitErrorFunctionT<T>::getJacobian(
   MT_PROFILE_FUNCTION();
 
   const auto& parameterTransform = this->parameterTransform_;
-
-  // loop over all joints and check for limit violations
   double error = 0.0;
-
   const T tWeight = kLimitWeight * this->weight_;
 
   jacobian.setZero();
   residual.setZero();
 
   int count = 0;
-  // ---------------------------------------
-  //  new joint error
-  // ---------------------------------------
   for (const auto& limit : limits_) {
-    const T wgt = std::sqrt(kLimitWeight * this->weight_ * limit.weight);
+    const T limitWeight = T(limit.weight);
+    const T wgt = std::sqrt(T(kLimitWeight) * this->weight_ * limitWeight);
     switch (limit.type) {
-      case MinMax: {
-        const auto& data = limit.data.minMax;
-        MT_CHECK(data.parameterIndex < static_cast<size_t>(params.size()));
-        if (this->enabledParameters_.test(data.parameterIndex)) {
-          if (params(data.parameterIndex) < data.limits[0]) {
-            const T val = params(data.parameterIndex) - data.limits[0];
-            error += val * val * limit.weight * tWeight;
-            jacobian(count, data.parameterIndex) = wgt;
-            residual(count) = val * wgt;
-          } else if (params(data.parameterIndex) > data.limits[1]) {
-            const T val = params(data.parameterIndex) - data.limits[1];
-            error += val * val * limit.weight * tWeight;
-            jacobian(count, data.parameterIndex) = wgt;
-            residual(count) = val * wgt;
-          }
-        }
+      case MinMax:
+        error += computeMinMaxJacobian(
+            limit.data.minMax,
+            params,
+            tWeight,
+            limitWeight,
+            wgt,
+            this->enabledParameters_,
+            jacobian,
+            residual,
+            count);
         count++;
         break;
-      }
-      case MinMaxJoint: {
-        // simple case, our jacobians are currently in joint space, just add them up
-        const auto& data = limit.data.minMaxJoint;
-        const size_t jointIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
-        MT_CHECK(jointIndex < (size_t)state.jointParameters.size());
-        if (this->activeJointParams_[jointIndex]) {
-          if (state.jointParameters(jointIndex) < data.limits[0]) {
-            const T val = state.jointParameters[jointIndex] - data.limits[0];
-            error += val * val * limit.weight * tWeight;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = parameterTransform.transform.outerIndexPtr()[jointIndex];
-                 index < parameterTransform.transform.outerIndexPtr()[jointIndex + 1];
-                 ++index) {
-              jacobian(count, parameterTransform.transform.innerIndexPtr()[index]) +=
-                  wgt * parameterTransform.transform.valuePtr()[index];
-            }
-            residual(count) = val * wgt;
-          } else if (state.jointParameters(jointIndex) > data.limits[1]) {
-            const T val = state.jointParameters[jointIndex] - data.limits[1];
-            error += val * val * limit.weight * tWeight;
-            // explicitly multiply with the parameter transform to generate parameter space
-            // gradients
-            for (auto index = parameterTransform.transform.outerIndexPtr()[jointIndex];
-                 index < parameterTransform.transform.outerIndexPtr()[jointIndex + 1];
-                 ++index) {
-              jacobian(count, parameterTransform.transform.innerIndexPtr()[index]) +=
-                  wgt * parameterTransform.transform.valuePtr()[index];
-            }
-            residual(count) = val * wgt;
-          }
-        }
+      case MinMaxJoint:
+        error += computeMinMaxJointJacobian(
+            limit.data.minMaxJoint,
+            state,
+            tWeight,
+            limitWeight,
+            wgt,
+            this->activeJointParams_,
+            parameterTransform,
+            jacobian,
+            residual,
+            count);
         count++;
         break;
-      }
-      case MinMaxJointPassive: {
+      case MinMaxJointPassive:
         break;
-      }
-      case Linear: {
-        const auto& data = limit.data.linear;
-        MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
-        MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
-
-        if ((this->enabledParameters_.test(data.targetIndex) ||
-             this->enabledParameters_.test(data.referenceIndex)) &&
-            isInRange(data, params(data.targetIndex))) {
-          const T res =
-              params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
-          error += res * res * limit.weight * tWeight;
-          residual(count) = res * wgt;
-
-          if (this->enabledParameters_.test(data.targetIndex)) {
-            jacobian(count, data.targetIndex) = data.scale * wgt;
-          }
-
-          if (this->enabledParameters_.test(data.referenceIndex)) {
-            jacobian(count, data.referenceIndex) = -wgt;
-          }
-        }
+      case Linear:
+        error += computeLinearJacobian(
+            limit.data.linear,
+            params,
+            tWeight,
+            limitWeight,
+            wgt,
+            this->enabledParameters_,
+            jacobian,
+            residual,
+            count);
         count++;
         break;
-      }
-      case LinearJoint: {
-        const auto& data = limit.data.linearJoint;
-        const size_t referenceParameterIndex =
-            data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
-        const size_t targetParameterIndex =
-            data.targetJointIndex * kParametersPerJoint + data.targetJointParameter;
-        MT_CHECK(referenceParameterIndex < (size_t)state.jointParameters.size());
-        MT_CHECK(targetParameterIndex < (size_t)state.jointParameters.size());
-        if ((this->activeJointParams_[referenceParameterIndex] ||
-             this->activeJointParams_[targetParameterIndex]) &&
-            isInRange(data, state.jointParameters(targetParameterIndex))) {
-          const T res = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
-              state.jointParameters(referenceParameterIndex);
-          error += res * res * limit.weight * tWeight;
-
-          residual(count) = res * wgt;
-
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
-          if (this->activeJointParams_[targetParameterIndex]) {
-            for (auto index = parameterTransform.transform.outerIndexPtr()[targetParameterIndex];
-                 index < parameterTransform.transform.outerIndexPtr()[targetParameterIndex + 1];
-                 ++index) {
-              jacobian(count, parameterTransform.transform.innerIndexPtr()[index]) +=
-                  data.scale * wgt * parameterTransform.transform.valuePtr()[index];
-            }
-          }
-
-          if (this->activeJointParams_[referenceParameterIndex]) {
-            for (auto index = parameterTransform.transform.outerIndexPtr()[referenceParameterIndex];
-                 index < parameterTransform.transform.outerIndexPtr()[referenceParameterIndex + 1];
-                 ++index) {
-              jacobian(count, parameterTransform.transform.innerIndexPtr()[index]) -=
-                  wgt * parameterTransform.transform.valuePtr()[index];
-            }
-          }
-        }
+      case LinearJoint:
+        error += computeLinearJointJacobian(
+            limit.data.linearJoint,
+            state,
+            tWeight,
+            limitWeight,
+            wgt,
+            this->activeJointParams_,
+            parameterTransform,
+            jacobian,
+            residual,
+            count);
         count++;
         break;
-      }
-      case HalfPlane: {
-        const auto& data = limit.data.halfPlane;
-        MT_CHECK(data.param1 < static_cast<size_t>(params.size()));
-        MT_CHECK(data.param2 < static_cast<size_t>(params.size()));
-
-        if ((this->enabledParameters_.test(data.param1) ||
-             this->enabledParameters_.test(data.param2))) {
-          const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
-          const T res = p.dot(data.normal.template cast<T>()) - data.offset;
-          if (res < 0) {
-            error += res * res * limit.weight * tWeight;
-            residual(count) = res * wgt;
-
-            if (this->enabledParameters_.test(data.param1)) {
-              jacobian(count, data.param1) = data.normal[0] * wgt;
-            }
-
-            if (this->enabledParameters_.test(data.param2)) {
-              jacobian(count, data.param2) = data.normal[1] * wgt;
-            }
-          }
-        }
+      case HalfPlane:
+        error += computeHalfPlaneJacobian(
+            limit.data.halfPlane,
+            params,
+            tWeight,
+            limitWeight,
+            wgt,
+            this->enabledParameters_,
+            jacobian,
+            residual,
+            count);
         count++;
         break;
-      }
-      case Ellipsoid: {
-        // NOTE: The jacobian for these is currently simplified
-        // It assumes the ellipsoid is static and doesn't move with the parent joint
-        const auto& ct = limit.data.ellipsoid;
-
-        // get the constraint position in global space
-        const Eigen::Vector3<T> position =
-            state.jointState[ct.parent].transform * ct.offset.template cast<T>();
-
-        // get the constraint position in local ellipsoid space
-        const Eigen::Vector3<T> localPosition =
-            state.jointState[ct.ellipsoidParent].transform.inverse() * position;
-
-        // calculate constraint position in ellipsoid space
-        const Eigen::Vector3<T> ellipsoidPosition =
-            ct.ellipsoidInv.template cast<T>() * localPosition;
-
-        // project onto closest surface point
-        const Eigen::Vector3<T> normalizedPosition = ellipsoidPosition.normalized();
-
-        // go back to ellipsoid frame
-        const Eigen::Vector3<T> projectedPosition =
-            ct.ellipsoid.template cast<T>() * normalizedPosition;
-
-        // calculate the difference between projected position and actual position
-        const Eigen::Vector3<T> diff =
-            position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
-
-        // calculate offset in jacobian
-        Eigen::Ref<Eigen::MatrixX<T>> jac = jacobian.block(count, 0, 3, params.size());
-        Eigen::Ref<Eigen::VectorX<T>> res = residual.middleRows(count, 3);
-        MT_CHECK(jac.cols() == static_cast<Eigen::Index>(parameterTransform.transform.cols()));
-        MT_CHECK(jac.rows() == 3);
-
-        // calculate the difference between target and position and error
-        const T jwgt = std::sqrt(kLimitWeight * kPositionWeight * this->weight_ * limit.weight);
-
-        // loop over all joints the constraint is attached to and calculate gradient
-        size_t jointIndex = ct.parent;
-        while (jointIndex != ct.ellipsoidParent && jointIndex != kInvalidIndex) {
-          // check for valid index
-          MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-          const auto& jointState = state.jointState[jointIndex];
-          const size_t paramIndex = jointIndex * kParametersPerJoint;
-          const Eigen::Vector3<T> posd = position - jointState.translation();
-
-          // calculate derivatives based on active joints
-          for (size_t d = 0; d < 3; d++) {
-            if (this->activeJointParams_[paramIndex + d]) {
-              const Eigen::Vector3<T> jc = jointState.getTranslationDerivative(d) * jwgt;
-              for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d];
-                   index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
-                   ++index) {
-                jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
-                    jc * parameterTransform.transform.valuePtr()[index];
-              }
-            }
-            if (this->activeJointParams_[paramIndex + 3 + d]) {
-              const Eigen::Vector3<T> jc = jointState.getRotationDerivative(d, posd) * jwgt;
-              for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3];
-                   index < parameterTransform.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-                   ++index) {
-                jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
-                    jc * parameterTransform.transform.valuePtr()[index];
-              }
-            }
-          }
-          if (this->activeJointParams_[paramIndex + 6]) {
-            const Eigen::Vector3<T> jc = jointState.getScaleDerivative(posd) * jwgt;
-            for (auto index = parameterTransform.transform.outerIndexPtr()[paramIndex + 6];
-                 index < parameterTransform.transform.outerIndexPtr()[paramIndex + 6 + 1];
-                 ++index) {
-              jac.col(parameterTransform.transform.innerIndexPtr()[index]) +=
-                  jc * parameterTransform.transform.valuePtr()[index];
-            }
-          }
-
-          // go to the next joint
-          jointIndex = this->skeleton_.joints[jointIndex].parent;
-        }
-
-        res = diff * jwgt;
-        error += jwgt * jwgt * diff.squaredNorm();
+      case Ellipsoid:
+        error += computeEllipsoidJacobian(
+            limit.data.ellipsoid,
+            params,
+            state,
+            tWeight,
+            limitWeight,
+            this->activeJointParams_,
+            this->skeleton_,
+            parameterTransform,
+            jacobian,
+            residual,
+            count);
         count += 3;
-
         break;
-      }
       default:
-        // should never get here
         MT_THROW("Unknown parameter type for joint limit");
         break;
     }
   }
 
   usedRows = count;
-
-  // return error
   return error;
 }
 
@@ -713,7 +843,6 @@ size_t LimitErrorFunctionT<T>::getJacobianSize() const {
         count += 3;
         break;
       default:
-        // should never get here
         MT_THROW("Unknown parameter type for joint limit");
         break;
     }

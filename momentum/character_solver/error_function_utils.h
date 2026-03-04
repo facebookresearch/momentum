@@ -57,4 +57,20 @@ void jacobian_jointParams_to_modelParams(
   }
 }
 
+template <typename T>
+void jacobian_jointParams_to_modelParams(
+    const T& jacobian_jointParams,
+    const Eigen::Index iJointParam,
+    const Eigen::Index iRow,
+    const ParameterTransform& parameterTransform,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobian) {
+  // explicitly multiply with the parameter transform to generate parameter space gradients
+  for (auto index = parameterTransform.transform.outerIndexPtr()[iJointParam];
+       index < parameterTransform.transform.outerIndexPtr()[iJointParam + 1];
+       ++index) {
+    jacobian(iRow, parameterTransform.transform.innerIndexPtr()[index]) +=
+        jacobian_jointParams * parameterTransform.transform.valuePtr()[index];
+  }
+}
+
 } // namespace momentum
