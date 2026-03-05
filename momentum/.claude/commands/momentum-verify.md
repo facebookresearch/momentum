@@ -5,7 +5,7 @@ Full pre-diff verification for momentum. Runs build, tests, and checks.
 
 Do the following steps in order. Stop and report at the first failure.
 
-1. **Read build modes**: Read `.llms/rules/overview.md` to get the correct build mode for the current platform.
+1. **Determine build mode**: Read `.llms/rules/overview.md` to get the correct build mode for the current platform. Store this once and reuse it for all buck commands in the remaining steps.
 
 2. **Build**: Build all of momentum using the platform-appropriate mode:
    `buck build @BUILD_MODE //arvr/libraries/momentum/...`
