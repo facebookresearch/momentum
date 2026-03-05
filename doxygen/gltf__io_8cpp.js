@@ -9,6 +9,7 @@ var gltf__io_8cpp =
     [ "loadGltfCharacter", "gltf__io_8cpp.html#a806967d366a08f1bbeeaf9dd230f4764", null ],
     [ "loadGltfCharacter", "gltf__io_8cpp.html#acc049309dfd76de97f325de527d60692", null ],
     [ "loadGltfCharacter", "gltf__io_8cpp.html#ac00d6d69b68187eaeae5a937d3189e8f", null ],
+    [ "loadGltfCharacterInternal", "gltf__io_8cpp.html#a5e8e64436b9d787f532d1b75d87e8332", null ],
     [ "loadMarkerSequence", "gltf__io_8cpp.html#aaf255ac6caa4128f5a31c7cfb089774d", null ],
     [ "loadMotion", "gltf__io_8cpp.html#a06ff22b041f41c37ec0793777c9ce93e", null ],
     [ "loadMotionOnCharacter", "gltf__io_8cpp.html#ad685200370fc04b8a3c930fccb45fd74", null ],
