@@ -17,10 +17,10 @@ Do the following:
    - `arvr/libraries/pymomentum/.llms/rules/code_style.md` — pybind11 conventions (if pymomentum files touched)
 
 3. **Diff summary review**:
-   - Check that the public portion of the summary contains no internal references (team names, internal URLs, task/SEV/diff IDs, internal tools, internal file paths, project codenames). Follow the guidance in `oss_maintenance.md`.
+   - First, run `python3 arvr/libraries/momentum/ci/diff_review.py` to catch mechanical issues (internal URLs, task/SEV/diff IDs, internal tools/paths, build file updates, BUCK/CMake sync, reviewer).
+   - Then read the public portion of the summary (everything before `Internal:`) and evaluate it as if you were an external open-source contributor reading a GitHub commit message. Flag anything that references Meta-internal context (teams, orgs, projects, people, partners), describes motivation in terms of internal requests, mentions infrastructure that only exists inside Meta, or would confuse someone with no knowledge of Meta internals.
    - Check that internal context is behind `Internal:` on its own line.
    - Check that the title follows the commit format in `overview.md`.
-   - Check that `Reviewers: momentum` is set.
 
 4. **Code review**:
    - Check changed code against `cpp_style.md` (naming, docs, headers, error handling).
