@@ -38,6 +38,9 @@ TYPED_TEST(MeshTest, DefaultConstructor) {
   EXPECT_TRUE(mesh.texcoords.empty());
   EXPECT_TRUE(mesh.texcoord_faces.empty());
   EXPECT_TRUE(mesh.texcoord_lines.empty());
+  EXPECT_TRUE(mesh.polyFaces.empty());
+  EXPECT_TRUE(mesh.polyFaceSizes.empty());
+  EXPECT_TRUE(mesh.polyTexcoordFaces.empty());
 }
 
 // Test updateNormals with a tetrahedron
@@ -166,6 +169,11 @@ TYPED_TEST(MeshTest, Cast) {
 
   mesh.confidence = {0.5, 0.6, 0.7};
 
+  // Add polygon data: a quad (v0,v1,v2,v3) + a triangle (v0,v1,v2)
+  mesh.polyFaces = {0, 1, 2, 0, 0, 1, 2};
+  mesh.polyFaceSizes = {4, 3};
+  mesh.polyTexcoordFaces = {10, 11, 12, 13, 14, 15, 16};
+
   // Cast to the same type (should be a copy)
   auto sameMesh = mesh.template cast<T>();
 
@@ -179,6 +187,9 @@ TYPED_TEST(MeshTest, Cast) {
     EXPECT_TRUE(sameMesh.normals[i].isApprox(mesh.normals[i]));
     EXPECT_NEAR(sameMesh.confidence[i], mesh.confidence[i], Eps<T>(1e-5f, 1e-13));
   }
+  EXPECT_EQ(sameMesh.polyFaces, mesh.polyFaces);
+  EXPECT_EQ(sameMesh.polyFaceSizes, mesh.polyFaceSizes);
+  EXPECT_EQ(sameMesh.polyTexcoordFaces, mesh.polyTexcoordFaces);
 
   // Cast to the other type
   using OtherT = typename std::conditional<std::is_same<T, float>::value, double, float>::type;
@@ -195,6 +206,9 @@ TYPED_TEST(MeshTest, Cast) {
     // Use a more relaxed tolerance for float-to-double or double-to-float conversions
     EXPECT_NEAR(static_cast<T>(otherMesh.confidence[i]), mesh.confidence[i], Eps<T>(1e-4f, 1e-6));
   }
+  EXPECT_EQ(otherMesh.polyFaces, mesh.polyFaces);
+  EXPECT_EQ(otherMesh.polyFaceSizes, mesh.polyFaceSizes);
+  EXPECT_EQ(otherMesh.polyTexcoordFaces, mesh.polyTexcoordFaces);
 }
 
 // Test reset method
@@ -225,6 +239,10 @@ TYPED_TEST(MeshTest, Reset) {
 
   mesh.texcoord_lines = {{0, 1}, {1, 2}, {2, 0}};
 
+  mesh.polyFaces = {0, 1, 2, 0, 0, 1, 2};
+  mesh.polyFaceSizes = {4, 3};
+  mesh.polyTexcoordFaces = {10, 11, 12, 13, 14, 15, 16};
+
   // Reset the mesh
   mesh.reset();
 
@@ -238,6 +256,9 @@ TYPED_TEST(MeshTest, Reset) {
   EXPECT_TRUE(mesh.texcoords.empty());
   EXPECT_TRUE(mesh.texcoord_faces.empty());
   EXPECT_TRUE(mesh.texcoord_lines.empty());
+  EXPECT_TRUE(mesh.polyFaces.empty());
+  EXPECT_TRUE(mesh.polyFaceSizes.empty());
+  EXPECT_TRUE(mesh.polyTexcoordFaces.empty());
 }
 
 // Test with a complex mesh
@@ -351,6 +372,9 @@ TYPED_TEST(MeshTest, EmptyMesh) {
   EXPECT_TRUE(castedMesh.texcoords.empty());
   EXPECT_TRUE(castedMesh.texcoord_faces.empty());
   EXPECT_TRUE(castedMesh.texcoord_lines.empty());
+  EXPECT_TRUE(castedMesh.polyFaces.empty());
+  EXPECT_TRUE(castedMesh.polyFaceSizes.empty());
+  EXPECT_TRUE(castedMesh.polyTexcoordFaces.empty());
 
   // Reset an empty mesh
   EXPECT_NO_THROW(mesh.reset());
@@ -461,4 +485,67 @@ TYPED_TEST(MeshTest, Lines) {
   // Reset and check that lines are cleared
   mesh.reset();
   EXPECT_TRUE(mesh.lines.empty());
+}
+
+// Test polygon face representation
+TYPED_TEST(MeshTest, PolygonFaces) {
+  using T = TypeParam;
+  using MeshType = typename TestFixture::MeshType;
+  using Vector3 = Eigen::Vector3<T>;
+
+  MeshType mesh;
+
+  // Create a mesh with 5 vertices
+  mesh.vertices = {
+      Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(0, 1, 0), Vector3(0.5, 0.5, 1)};
+
+  // Polygon representation: a quad (4 verts) + a triangle (3 verts)
+  mesh.polyFaces = {0, 1, 2, 3, 0, 1, 4};
+  mesh.polyFaceSizes = {4, 3};
+  mesh.polyTexcoordFaces = {0, 1, 2, 3, 4, 5, 6};
+
+  // Verify sizes sum matches polyFaces length
+  uint32_t totalSize = 0;
+  for (auto s : mesh.polyFaceSizes) {
+    totalSize += s;
+  }
+  EXPECT_EQ(totalSize, mesh.polyFaces.size());
+  EXPECT_EQ(totalSize, mesh.polyTexcoordFaces.size());
+
+  // Cast and verify preservation
+  using OtherT = typename std::conditional<std::is_same<T, float>::value, double, float>::type;
+  auto otherMesh = mesh.template cast<OtherT>();
+  EXPECT_EQ(otherMesh.polyFaces, mesh.polyFaces);
+  EXPECT_EQ(otherMesh.polyFaceSizes, mesh.polyFaceSizes);
+  EXPECT_EQ(otherMesh.polyTexcoordFaces, mesh.polyTexcoordFaces);
+
+  // Reset and verify cleared
+  mesh.reset();
+  EXPECT_TRUE(mesh.polyFaces.empty());
+  EXPECT_TRUE(mesh.polyFaceSizes.empty());
+  EXPECT_TRUE(mesh.polyTexcoordFaces.empty());
+}
+
+// Test polygon faces with empty texcoord faces
+TYPED_TEST(MeshTest, PolygonFacesNoTexcoords) {
+  using T = TypeParam;
+  using MeshType = typename TestFixture::MeshType;
+  using Vector3 = Eigen::Vector3<T>;
+
+  MeshType mesh;
+
+  mesh.vertices = {Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0)};
+  mesh.polyFaces = {0, 1, 2};
+  mesh.polyFaceSizes = {3};
+  // polyTexcoordFaces intentionally left empty
+
+  EXPECT_EQ(mesh.polyFaces.size(), 3u);
+  EXPECT_EQ(mesh.polyFaceSizes.size(), 1u);
+  EXPECT_TRUE(mesh.polyTexcoordFaces.empty());
+
+  // Cast preserves the empty texcoord faces
+  auto castedMesh = mesh.template cast<T>();
+  EXPECT_EQ(castedMesh.polyFaces, mesh.polyFaces);
+  EXPECT_EQ(castedMesh.polyFaceSizes, mesh.polyFaceSizes);
+  EXPECT_TRUE(castedMesh.polyTexcoordFaces.empty());
 }

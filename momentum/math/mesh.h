@@ -56,6 +56,26 @@ struct MeshT {
   /// Maps each line to its corresponding texture coordinates
   std::vector<std::vector<int32_t>> texcoord_lines;
 
+  /// Packed polygon face vertex indices (all polygons concatenated back-to-back).
+  ///
+  /// For example, a quad followed by a triangle would be: [v0, v1, v2, v3, v4, v5, v6].
+  /// This is an optional, redundant representation — the triangulated @ref faces field is always
+  /// required and used by all downstream code. Polygon data preserves the original topology (quads,
+  /// n-gons) from source files like FBX.
+  std::vector<uint32_t> polyFaces;
+
+  /// Number of vertices in each polygon face.
+  ///
+  /// For example, [4, 3] means the first polygon is a quad, the second is a triangle.
+  /// May be empty if polygon data is not available; see @ref polyFaces.
+  std::vector<uint32_t> polyFaceSizes;
+
+  /// Packed polygon face texture coordinate indices (same layout as polyFaces).
+  ///
+  /// Uses the same polyFaceSizes array — polygon sizes are identical for geometry and texcoords.
+  /// May be empty if texture coordinates are not available; see @ref polyFaces.
+  std::vector<uint32_t> polyTexcoordFaces;
+
   /// Compute vertex normals by averaging connected face normals.
   ///
   /// This method calculates normals for each vertex by averaging the normals of all

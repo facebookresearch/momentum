@@ -69,6 +69,9 @@ MeshT<T2> MeshT<T>::cast() const {
   result.texcoords = this->texcoords;
   result.texcoord_faces = this->texcoord_faces;
   result.texcoord_lines = this->texcoord_lines;
+  result.polyFaces = this->polyFaces;
+  result.polyFaceSizes = this->polyFaceSizes;
+  result.polyTexcoordFaces = this->polyTexcoordFaces;
   return result;
 }
 
@@ -83,6 +86,9 @@ void MeshT<T>::reset() {
   texcoords.clear();
   texcoord_faces.clear();
   texcoord_lines.clear();
+  polyFaces.clear();
+  polyFaceSizes.clear();
+  polyTexcoordFaces.clear();
 }
 
 template MeshT<float> MeshT<float>::cast<float>() const;
