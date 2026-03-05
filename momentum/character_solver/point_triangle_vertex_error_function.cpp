@@ -420,33 +420,6 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
   const auto d_targetPos_d_tgtTriVertexPos =
       compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
 
-// Verify derivative:
-#if 0
-  {
-    const int kTriVert = 0;
-    auto meshTmp = *this->posedMesh_;
-    const float eps = 1e-5;
-    const Eigen::Vector3<T> srcPosOrig = meshTmp.vertices[constr.tgtTriangleIndices[kTriVert]];
-    Eigen::Matrix3<T> diff_est = Eigen::Matrix3<T>::Zero();
-    for (int k = 0; k < 3; ++k) {
-      meshTmp.vertices[constr.tgtTriangleIndices[kTriVert]] =
-          srcPosOrig + eps * Eigen::Vector3<T>::Unit(k);
-      const Eigen::Vector3<T> tgtPosPlus = computeTargetPosition(meshTmp, constr);
-      meshTmp.vertices[constr.tgtTriangleIndices[kTriVert]] = srcPosOrig;
-
-      const Eigen::Vector3<T> tgtPosPlusDiff = (tgtPosPlus - tgtPos) / eps;
-      diff_est.col(k) = tgtPosPlusDiff;
-    }
-
-    const T derivativeMismatch = (d_targetPos_d_srcPos[kTriVert] - diff_est).norm();
-    if (derivativeMismatch > 1e-6) {
-      MT_LOGI("Target position derivative mismatch detected: {}", derivativeMismatch);
-      MT_LOGI("  d_targetPos_d_srcPos (computed): \n{}", d_targetPos_d_srcPos[kTriVert]);
-      MT_LOGI("  d_targetPos_d_srcPos (estimated): \n{}", diff_est);
-    }
-  }
-#endif
-
   // To simplify things we'll have one loop that goes through all 3 target triangle vertices _and_
   // the source vertex.
   //   iter 0-3: target triangle vertices
