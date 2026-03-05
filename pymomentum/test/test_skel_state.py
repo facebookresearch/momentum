@@ -6,7 +6,7 @@
 # pyre-strict
 
 import unittest
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
@@ -18,6 +18,33 @@ from torch.nn import Parameter as P
 
 # Flag to check if autograd is enabled (disabled in arvr build modes)
 AUTOGRAD_ENABLED: bool = pym_diff_geometry.AUTOGRAD_ENABLED
+
+# Tests that require autograd; excluded via load_tests() when unavailable
+# to avoid "Skipping" notifications in CI.
+_AUTOGRAD_TESTS = frozenset(
+    {"test_bulk_multiplication_backward", "test_multiply_backprop"}
+)
+
+
+def load_tests(
+    loader: unittest.TestLoader,
+    standard_tests: unittest.TestSuite,
+    pattern: Optional[str],
+) -> unittest.TestSuite:
+    """Custom test loader that excludes autograd tests when autograd is unavailable.
+
+    This prevents 'Skipping' notifications in CI by not discovering
+    the tests at all, rather than discovering and then skipping them.
+    """
+    if AUTOGRAD_ENABLED:
+        return standard_tests
+
+    filtered = unittest.TestSuite()
+    for suite in standard_tests:
+        for test in suite:
+            if test._testMethodName not in _AUTOGRAD_TESTS:
+                filtered.addTest(test)
+    return filtered
 
 
 def generate_skel_state_components(
@@ -376,7 +403,6 @@ class TestSkelState(unittest.TestCase):
 
         self.assertTrue(torch.allclose(p1, p2, atol=1e-5, rtol=1e-5))
 
-    @unittest.skipUnless(AUTOGRAD_ENABLED, "Autograd not available in ARVR build modes")
     def test_bulk_multiplication_backward(self) -> None:
         """Test multiplication backward pass using the same approach as sim3 tests"""
         torch.manual_seed(10023893)
@@ -419,7 +445,6 @@ class TestSkelState(unittest.TestCase):
         state3 = pym_skel_state.multiply(state_inv, state)
         self.assertTrue(torch.allclose(state3, state_expected, atol=1e-5, rtol=1e-5))
 
-    @unittest.skipUnless(AUTOGRAD_ENABLED, "Autograd not available in ARVR build modes")
     def test_multiply_backprop(self) -> None:
         """Test multiply_backprop function matches autograd gradients"""
         torch.manual_seed(10023893)
