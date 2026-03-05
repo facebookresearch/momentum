@@ -338,15 +338,84 @@ std::vector<double> extractPropertyFloatArray(const ofbx::IElement* element, con
 }
 
 void stripNamespace(const ofbx::Object* obj) {
-  // Find the last colon in the name
   const char* lastColon = std::strrchr(obj->name, ':');
-  // If we found a colon, strip the namespace by moving the string
   if (lastColon) {
-    // Point to the character after the last colon (the actual name without namespace)
     const char* newName = lastColon + 1;
-    // Move the name portion to the beginning of the string, including null terminator (+1)
     std::memmove(const_cast<char*>(obj->name), newName, std::strlen(newName) + 1);
   }
+}
+
+void extractCollisionCapsule(const ofbx::Object* node, size_t parent, CollisionGeometry& capsules) {
+  const double length = resolveDoubleProperty(*node, "length");
+  const double rad_a = resolveDoubleProperty(*node, "rad_a");
+  const double rad_b = resolveDoubleProperty(*node, "rad_b");
+
+  const auto xf = node->getLocalTransform();
+
+  TaperedCapsule capsule;
+  capsule.parent = parent;
+  capsule.length = length;
+  capsule.radius = {rad_a, rad_b};
+  capsule.transformation = toEigen(xf).cast<float>();
+  capsules.push_back(capsule);
+}
+
+void extractLocator(const ofbx::Object* node, size_t parent, LocatorList& locators) {
+  Locator locator;
+  locator.name = node->name;
+  const auto translationOffset = node->getLocalTranslation();
+  locator.offset = toEigen(translationOffset).cast<float>();
+  locator.parent = parent;
+  locators.push_back(locator);
+}
+
+void validateAndLogRotation(
+    const ofbx::Object* node,
+    const std::string& jointName,
+    Permissive permissive) {
+  auto order = node->getRotationOrder();
+  if (order != ofbx::RotationOrder::EULER_XYZ) {
+    if (permissive == Permissive::Yes) {
+      MT_LOGW(
+          "momentum supports only XYZ rotation; joint {} has {} rotation order.",
+          jointName,
+          rotationOrderStr(order));
+    } else {
+      MT_THROW(
+          "momentum supports only XYZ rotation; joint {} has {} rotation order.",
+          jointName,
+          rotationOrderStr(order));
+    }
+  }
+}
+
+Eigen::Quaterniond computeLocalRotation(
+    const ofbx::Object* node,
+    const std::string& jointName,
+    Permissive permissive) {
+  auto order = node->getRotationOrder();
+  auto localRot = fbxEulerRotationToQuat(node->getLocalRotation(), order);
+  if (Eigen::AngleAxisd(localRot).angle() > 1e-2) {
+    if (permissive == Permissive::Yes) {
+      MT_LOGW(
+          "{}: Node {} has nonzero rest rotation ({}, {}, {}), which will be baked into the skeleton.",
+          __func__,
+          jointName,
+          node->getLocalRotation().x,
+          node->getLocalRotation().y,
+          node->getLocalRotation().z);
+    } else {
+      MT_LOGE(
+          "{}: Node {} has nonzero rest rotation ({}, {}, {}) and it will be ignored",
+          __func__,
+          jointName,
+          node->getLocalRotation().x,
+          node->getLocalRotation().y,
+          node->getLocalRotation().z);
+      localRot = Eigen::Quaterniond::Identity();
+    }
+  }
+  return localRot;
 }
 
 void parseSkeleton(
@@ -359,123 +428,59 @@ void parseSkeleton(
     Permissive permissive) {
   MT_CHECK(curSkelNode, "Skeleton node for parent '{}' is null", parent);
 
-  // Skip non-transform nodes:
   if (!curSkelNode->isNode()) {
     return;
   }
+
   const auto type = curSkelNode->getType();
   const std::string jointName = curSkelNode->name;
 
-  // A transform node could be a lot of different objects.
   if (type == ofbx::Object::Type::NULL_NODE) {
-    // Check for collision capsule in a custom attribute
     auto* res = resolveProperty(*curSkelNode, "col_type");
-
     if (res != nullptr) {
-      // Extract the capsule if present:
-      const double length = resolveDoubleProperty(*curSkelNode, "length");
-      const double rad_a = resolveDoubleProperty(*curSkelNode, "rad_a");
-      const double rad_b = resolveDoubleProperty(*curSkelNode, "rad_b");
-
-      const auto xf = curSkelNode->getLocalTransform();
-
-      TaperedCapsule capsule;
-      capsule.parent = parent;
-      capsule.length = length;
-      capsule.radius = {rad_a, rad_b};
-      capsule.transformation = toEigen(xf).cast<float>();
-      capsules.push_back(capsule);
+      extractCollisionCapsule(curSkelNode, parent, capsules);
     } else if (parent != kInvalidIndex) {
-      // It's a locator if it has a parent joint
-      Locator locator;
-      locator.name = jointName;
-      const auto translationOffset = curSkelNode->getLocalTranslation();
-      locator.offset = toEigen(translationOffset).cast<float>();
-      locator.parent = parent;
-      // TODO when we have rotations in the locator:
-      // locator.rotationOffset = preRotation.cast<float>();
-      locators.push_back(locator);
-    } else if (parent == kInvalidIndex) {
-      // If we haven't found the skeleton root yet, this could be a group node and we will try to
-      // traverse it.
+      extractLocator(curSkelNode, parent, locators);
+    } else {
       int i = 0;
       while (ofbx::Object* child = curSkelNode->resolveObjectLink(i++)) {
         parseSkeleton(child, kInvalidIndex, skeleton, fbxObjects, capsules, locators, permissive);
       }
     }
-  } else if (type == ofbx::Object::Type::LIMB_NODE) {
-    // Get node transformation info
-    // get rotation order
-    auto order = curSkelNode->getRotationOrder();
-    if (order != ofbx::RotationOrder::EULER_XYZ) {
-      if (permissive == Permissive::Yes) {
-        MT_LOGW(
-            "momentum supports only XYZ rotation; joint {} has {} rotation order.",
-            jointName,
-            rotationOrderStr(order));
-      } else {
-        MT_THROW(
-            "momentum supports only XYZ rotation; joint {} has {} rotation order.",
-            jointName,
-            rotationOrderStr(order));
-      }
-    }
+    return;
+  }
 
-    // get local rotation
-    auto localRot = fbxEulerRotationToQuat(curSkelNode->getLocalRotation(), order);
-    if (Eigen::AngleAxisd(localRot).angle() > 1e-2) {
-      if (permissive == Permissive::Yes) {
-        MT_LOGW(
-            "{}: Node {} has nonzero rest rotation ({}, {}, {}), which will be baked into the skeleton.",
-            __func__,
-            jointName,
-            curSkelNode->getLocalRotation().x,
-            curSkelNode->getLocalRotation().y,
-            curSkelNode->getLocalRotation().z);
-      } else {
-        MT_LOGE(
-            "{}: Node {} has nonzero rest rotation ({}, {}, {}) and it will be ignored",
-            __func__,
-            jointName,
-            curSkelNode->getLocalRotation().x,
-            curSkelNode->getLocalRotation().y,
-            curSkelNode->getLocalRotation().z);
-        localRot = Eigen::Quaterniond::Identity();
-      }
-    }
+  if (type != ofbx::Object::Type::LIMB_NODE) {
+    return;
+  }
 
-    // get pre- and post-rotation
-    const auto preRotEuler = curSkelNode->getPreRotation();
-    // Pre-rot always uses XYZ order:
-    const Eigen::Quaterniond preRotation =
-        fbxEulerRotationToQuat(preRotEuler, ofbx::RotationOrder::EULER_XYZ) * localRot;
+  validateAndLogRotation(curSkelNode, jointName, permissive);
+  const Eigen::Quaterniond localRot = computeLocalRotation(curSkelNode, jointName, permissive);
 
-    MT_LOGE_IF(
-        toEigen(curSkelNode->getPostRotation()).head<3>().norm() > 1e-8,
-        "{}: Node {} has nonzero post-rotation; it will be ignored.",
-        __func__,
-        jointName);
+  const auto preRotEuler = curSkelNode->getPreRotation();
+  const Eigen::Quaterniond preRotation =
+      fbxEulerRotationToQuat(preRotEuler, ofbx::RotationOrder::EULER_XYZ) * localRot;
 
-    // get local offset
-    const auto translationOffset = curSkelNode->getLocalTranslation();
+  MT_LOGE_IF(
+      toEigen(curSkelNode->getPostRotation()).head<3>().norm() > 1e-8,
+      "{}: Node {} has nonzero post-rotation; it will be ignored.",
+      __func__,
+      jointName);
 
-    // ignore scaling values for now
+  const auto translationOffset = curSkelNode->getLocalTranslation();
 
-    // Create a skeleton joint
-    Joint joint;
-    joint.name = jointName;
-    joint.parent = parent;
-    joint.preRotation = preRotation.cast<float>();
-    joint.translationOffset = toEigen(translationOffset).cast<float>();
-    const size_t jointIndex = skeleton.joints.size();
-    skeleton.joints.push_back(joint);
-    fbxObjects.push_back(curSkelNode);
+  Joint joint;
+  joint.name = jointName;
+  joint.parent = parent;
+  joint.preRotation = preRotation.cast<float>();
+  joint.translationOffset = toEigen(translationOffset).cast<float>();
+  const size_t jointIndex = skeleton.joints.size();
+  skeleton.joints.push_back(joint);
+  fbxObjects.push_back(curSkelNode);
 
-    // Traverse the skeleton hierarchy.
-    int i = 0;
-    while (ofbx::Object* child = curSkelNode->resolveObjectLink(i++)) {
-      parseSkeleton(child, jointIndex, skeleton, fbxObjects, capsules, locators, permissive);
-    }
+  int i = 0;
+  while (ofbx::Object* child = curSkelNode->resolveObjectLink(i++)) {
+    parseSkeleton(child, jointIndex, skeleton, fbxObjects, capsules, locators, permissive);
   }
 }
 
@@ -501,250 +506,180 @@ parseSkeleton(const ofbx::Object* sceneRoot, const std::string& skelRoot, Permis
   return {skeleton, jointFbxNodes, locators, collision};
 }
 
-void parseSkinnedModel(
-    const ofbx::Mesh* meshRoot,
-    const std::vector<const ofbx::Object*>& boneFbxNodes,
-    Mesh& mesh,
-    std::unique_ptr<SkinWeights>& skinWeights,
-    TransformationList& inverseBindPoseTransforms,
-    BlendShape_p& blendShape,
-    Permissive permissive,
-    LoadBlendShapes loadBlendShapes) {
-  enum EMapping {
-    MappingUnknown,
-    MappingByPolyVertex,
-    MappingByVertex,
-  };
-  enum EReference {
-    RefUnknown,
-    RefIndexToDirect,
-    RefDirect,
-  };
+enum EMapping {
+  MappingUnknown,
+  MappingByPolyVertex,
+  MappingByVertex,
+};
 
-  // We will parse out the geometry ourselves rather than using OpenFBX's
-  // Geometry class, since the latter throws away a lot of useful information.
-  const auto* geometry = meshRoot->getGeometry();
-  const auto& geomElement = geometry->element;
+enum EReference {
+  RefUnknown,
+  RefIndexToDirect,
+  RefDirect,
+};
 
-  const auto* vertices_element = findChild(geomElement, "Vertices");
-  MT_THROW_IF(
-      vertices_element == nullptr || !vertices_element->getFirstProperty(),
-      "No vertices found in mesh element.");
-  const auto vertexPositions =
-      extractPropertyVecArray<std::vector<Eigen::Vector3f>>(vertices_element, "Vertices");
-  const auto nVerts = vertexPositions.size();
-
-  const auto* polys_element = findChild(geomElement, "PolygonVertexIndex");
-  MT_THROW_IF(
-      polys_element == nullptr || !polys_element->getFirstProperty(),
-      "No polygons found in mesh element.");
-  const auto indices = extractPropertyArray<int>(polys_element, "PolygonVertexIndex");
-
-  PolygonData vertices;
-  vertices.indices.reserve(indices.size());
-  for (const auto& i : indices) {
-    if (i < 0) {
-      // end of polygon is indicated by a negative index:
-      vertices.indices.push_back(-(i + 1));
-      vertices.offsets.push_back((uint32_t)vertices.indices.size());
-    } else {
-      vertices.indices.push_back(i);
-    }
-  }
-
+std::vector<Eigen::Vector2f>
+parseUVMapping(const ofbx::IElement& geomElement, PolygonData& vertices, size_t nVerts) {
   std::vector<Eigen::Vector2f> textureCoords;
   const auto* layer_uv_element = findChild(geomElement, "LayerElementUV");
-  if (layer_uv_element != nullptr) {
-    const auto* uvs_element = findChild(*layer_uv_element, "UV");
-    if (uvs_element == nullptr || !uvs_element->getFirstProperty()) {
-      // Some legitimate uses of fbxsdk (ie fbx_io.cpp:saveFbx) seem to be unable to write to this
-      // element. So we are not hard-failing to remain "compatible".
-      MT_LOGE("No UVs found in mesh element.");
-    } else {
-      EMapping mapping = MappingUnknown;
-      const auto* mapping_element = findChild(*layer_uv_element, "MappingInformationType");
-      if (mapping_element != nullptr && mapping_element->getFirstProperty() != nullptr) {
-        const ofbx::DataView& view = mapping_element->getFirstProperty()->getValue();
-        if (view == "ByPolygonVertex") {
-          mapping = MappingByPolyVertex;
-        } else if (view == "ByVertex" || view == "ByVertice") {
-          mapping = MappingByVertex;
-        }
-      }
-      MT_THROW_IF(
-          mapping == MappingUnknown,
-          "Don't currently know how to deal with mapping type that is not 'ByPolygonVertex' or 'ByVertex'.");
-
-      EReference reference = RefUnknown;
-      const auto* reference_element = findChild(*layer_uv_element, "ReferenceInformationType");
-      if (reference_element != nullptr && reference_element->getFirstProperty() != nullptr) {
-        const ofbx::DataView& view = reference_element->getFirstProperty()->getValue();
-        if (view == "IndexToDirect") {
-          reference = RefIndexToDirect;
-        } else if (view == "Direct") {
-          reference = RefDirect;
-        }
-      }
-      MT_THROW_IF(
-          reference == RefUnknown,
-          "Don't currently know how to deal with reference type that is not 'IndexToDirect' or 'Direct'.");
-
-      // Coords array is handled the same for either mapping type
-      textureCoords = extractPropertyVecArray<std::vector<Eigen::Vector2f>>(uvs_element, "UV");
-
-      if (reference == RefIndexToDirect) {
-        // IndexToDirect means there is another mapping array which gives the order of the UVs in
-        // the mesh
-        const auto* indices_element = findChild(*layer_uv_element, "UVIndex");
-        MT_THROW_IF(indices_element == nullptr, "Missing indices element.");
-        const auto textureIndices =
-            extractPropertyArray<int>(indices_element, "PolygonVertexIndex");
-
-        MT_THROW_IF(
-            textureIndices.size() != vertices.indices.size(),
-            "Mismatch between texture indices size {} and vertex indices size {}.",
-            textureIndices.size(),
-            vertices.indices.size());
-        std::copy(
-            textureIndices.begin(),
-            textureIndices.end(),
-            std::back_inserter(vertices.textureIndices));
-      } else if (reference == RefDirect) {
-        // Direct means the UV array is already in order.
-        if (mapping == MappingByPolyVertex) {
-          MT_THROW_IF(
-              textureCoords.size() != vertices.indices.size(),
-              "Mismatch between 'Direct' texture coord array size {} and vertex indices size {}.",
-              textureCoords.size(),
-              vertices.indices.size());
-          vertices.textureIndices.resize(vertices.indices.size());
-        } else if (mapping == MappingByVertex) {
-          MT_THROW_IF(
-              textureCoords.size() != nVerts,
-              "Mismatch between 'Direct' texture coord array size {} and vertex count {}.",
-              textureCoords.size(),
-              nVerts);
-        }
-        std::iota(vertices.textureIndices.begin(), vertices.textureIndices.end(), 0);
-      } else {
-        MT_THROW("UV reading code failed to handle a valid reference type. This is a bug.");
-      }
-    }
+  if (layer_uv_element == nullptr) {
+    return textureCoords;
   }
 
-  // Momentum wants the y coords flipped:
+  const auto* uvs_element = findChild(*layer_uv_element, "UV");
+  if (uvs_element == nullptr || !uvs_element->getFirstProperty()) {
+    MT_LOGE("No UVs found in mesh element.");
+    return textureCoords;
+  }
+
+  EMapping mapping = MappingUnknown;
+  const auto* mapping_element = findChild(*layer_uv_element, "MappingInformationType");
+  if (mapping_element != nullptr && mapping_element->getFirstProperty() != nullptr) {
+    const ofbx::DataView& view = mapping_element->getFirstProperty()->getValue();
+    if (view == "ByPolygonVertex") {
+      mapping = MappingByPolyVertex;
+    } else if (view == "ByVertex" || view == "ByVertice") {
+      mapping = MappingByVertex;
+    }
+  }
+  MT_THROW_IF(
+      mapping == MappingUnknown,
+      "Don't currently know how to deal with mapping type that is not 'ByPolygonVertex' or 'ByVertex'.");
+
+  EReference reference = RefUnknown;
+  const auto* reference_element = findChild(*layer_uv_element, "ReferenceInformationType");
+  if (reference_element != nullptr && reference_element->getFirstProperty() != nullptr) {
+    const ofbx::DataView& view = reference_element->getFirstProperty()->getValue();
+    if (view == "IndexToDirect") {
+      reference = RefIndexToDirect;
+    } else if (view == "Direct") {
+      reference = RefDirect;
+    }
+  }
+  MT_THROW_IF(
+      reference == RefUnknown,
+      "Don't currently know how to deal with reference type that is not 'IndexToDirect' or 'Direct'.");
+
+  textureCoords = extractPropertyVecArray<std::vector<Eigen::Vector2f>>(uvs_element, "UV");
+
+  if (reference == RefIndexToDirect) {
+    const auto* indices_element = findChild(*layer_uv_element, "UVIndex");
+    MT_THROW_IF(indices_element == nullptr, "Missing indices element.");
+    const auto textureIndices = extractPropertyArray<int>(indices_element, "PolygonVertexIndex");
+
+    MT_THROW_IF(
+        textureIndices.size() != vertices.indices.size(),
+        "Mismatch between texture indices size {} and vertex indices size {}.",
+        textureIndices.size(),
+        vertices.indices.size());
+    std::copy(
+        textureIndices.begin(), textureIndices.end(), std::back_inserter(vertices.textureIndices));
+  } else if (reference == RefDirect) {
+    if (mapping == MappingByPolyVertex) {
+      MT_THROW_IF(
+          textureCoords.size() != vertices.indices.size(),
+          "Mismatch between 'Direct' texture coord array size {} and vertex indices size {}.",
+          textureCoords.size(),
+          vertices.indices.size());
+      vertices.textureIndices.resize(vertices.indices.size());
+    } else if (mapping == MappingByVertex) {
+      MT_THROW_IF(
+          textureCoords.size() != nVerts,
+          "Mismatch between 'Direct' texture coord array size {} and vertex count {}.",
+          textureCoords.size(),
+          nVerts);
+    }
+    std::iota(vertices.textureIndices.begin(), vertices.textureIndices.end(), 0);
+  } else {
+    MT_THROW("UV reading code failed to handle a valid reference type. This is a bug.");
+  }
+
   for (auto& tc : textureCoords) {
     tc.y() = 1.0f - tc.y();
   }
 
-  auto errMsg = vertices.errorMessage(nVerts);
-  MT_THROW_IF(!errMsg.empty(), "Error reading polygons from FBX file: {}", errMsg);
-  errMsg = vertices.warnMessage(textureCoords.size());
-  MT_LOGW_IF(!errMsg.empty(), "Error reading polygon data from FBX file: {}", errMsg);
+  return textureCoords;
+}
 
-  const size_t vertexOffset = mesh.vertices.size();
-  std::copy(
-      std::begin(vertexPositions), std::end(vertexPositions), std::back_inserter(mesh.vertices));
-  for (const auto& t : triangulate(vertices.indices, vertices.offsets)) {
-    mesh.faces.emplace_back(t + Eigen::Vector3i::Constant(vertexOffset));
+void parseBlendShapes(
+    const ofbx::BlendShape* blendshapes,
+    const std::vector<Eigen::Vector3f>& vertexPositions,
+    size_t vertexOffset,
+    BlendShape_p& blendShape,
+    const Mesh& mesh) {
+  if (!blendShape) {
+    blendShape = std::make_shared<BlendShape>();
   }
 
-  mesh.normals.resize(vertexOffset + nVerts, Vector3f::Zero());
-  mesh.colors.resize(vertexOffset + nVerts, Vector3b::Zero());
-  mesh.confidence.resize(vertexOffset + nVerts, 1);
-
-  const size_t textureCoordOffset = mesh.texcoords.size();
-  std::copy(std::begin(textureCoords), std::end(textureCoords), std::back_inserter(mesh.texcoords));
-  for (const auto& t : triangulate(vertices.textureIndices, vertices.offsets)) {
-    mesh.texcoord_faces.emplace_back(t + Eigen::Vector3i::Constant(textureCoordOffset));
+  int newShapes = 0;
+  int numChannels = blendshapes->getBlendShapeChannelCount();
+  for (int c = 0; c < numChannels; ++c) {
+    const auto* channel = blendshapes->getBlendShapeChannel(c);
+    newShapes += channel->getShapeCount();
   }
 
-  const auto* blendshapes = geometry->getBlendShape();
-  if (loadBlendShapes == LoadBlendShapes::Yes && blendshapes) {
-    if (!blendShape) {
-      blendShape = std::make_shared<BlendShape>();
-    }
-    // first count number of shapes to add
-    int newShapes = 0;
-    int numChannels = blendshapes->getBlendShapeChannelCount();
-    for (int c = 0; c < numChannels; ++c) {
-      const auto* channel = blendshapes->getBlendShapeChannel(c);
-      newShapes += channel->getShapeCount();
-    }
+  std::vector<std::string> shapeNames = blendShape->getShapeNames();
+  MatrixXf shapes = blendShape->getShapeVectors();
+  const int currentShapes = static_cast<int>(shapes.cols());
+  shapes.conservativeResize(shapes.rows() + vertexPositions.size() * 3, shapes.cols() + newShapes);
+  shapes.bottomRows(vertexPositions.size() * 3) =
+      MatrixXf::Zero(vertexPositions.size() * 3, shapes.cols());
+  shapes.rightCols(newShapes) = MatrixXf::Zero(shapes.rows(), newShapes);
+  shapeNames.resize(shapeNames.size() + newShapes, "");
 
-    std::vector<std::string> shapeNames = blendShape->getShapeNames();
-    MatrixXf shapes = blendShape->getShapeVectors();
-    const int currentShapes = shapes.cols();
-    shapes.conservativeResize(
-        shapes.rows() + vertexPositions.size() * 3, shapes.cols() + newShapes);
-    shapes.bottomRows(vertexPositions.size() * 3) =
-        MatrixXf::Zero(vertexPositions.size() * 3, shapes.cols());
-    shapes.rightCols(newShapes) = MatrixXf::Zero(shapes.rows(), newShapes);
-    shapeNames.resize(shapeNames.size() + newShapes, "");
-
-    // now actually fill in the data
-    int shapeIndex = 0;
-    for (int c = 0; c < numChannels; ++c) {
-      const auto channel = blendshapes->getBlendShapeChannel(c);
-      int numShapes = channel->getShapeCount();
-      for (int s = 0; s < numShapes; ++s) {
-        const auto shape = channel->getShape(s);
-        int numVertices = shape->getVertexCount();
-        const auto shapeV = shape->getVertices();
-        int numIndices = shape->getIndexCount();
-        const auto indexV = shape->getIndices();
-        MT_CHECK(numIndices == numVertices);
-        for (int v = 0; v < numVertices; ++v) {
-          MT_THROW_IF(v >= numIndices, "Vertex index {} exceeds numIndices {}", v, numIndices);
-          shapes(vertexOffset * 3 + indexV[v] * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
-          shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
-          shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
-        }
-        shapeNames[currentShapes + shapeIndex] = shape->name;
-        shapeIndex++;
+  int shapeIndex = 0;
+  for (int c = 0; c < numChannels; ++c) {
+    const auto* const channel = blendshapes->getBlendShapeChannel(c);
+    int numShapes = channel->getShapeCount();
+    for (int s = 0; s < numShapes; ++s) {
+      const auto* const shape = channel->getShape(s);
+      int numVertices = shape->getVertexCount();
+      const auto* const shapeV = shape->getVertices();
+      int numIndices = shape->getIndexCount();
+      const auto* const indexV = shape->getIndices();
+      MT_CHECK(numIndices == numVertices);
+      for (int v = 0; v < numVertices; ++v) {
+        MT_THROW_IF(v >= numIndices, "Vertex index {} exceeds numIndices {}", v, numIndices);
+        shapes(vertexOffset * 3 + indexV[v] * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
+        shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
+        shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
       }
+      MT_CHECK(
+          static_cast<size_t>(currentShapes + shapeIndex) < shapeNames.size(),
+          "Shape index {} out of bounds (shapeNames size: {})",
+          currentShapes + shapeIndex,
+          shapeNames.size());
+      shapeNames[currentShapes + shapeIndex] = shape->name;
+      shapeIndex++;
     }
-
-    // add shapes back to blendshapes
-    blendShape->setShapeVectors(shapes, shapeNames);
-
-    // set the mean shape to the mesh
-    blendShape->setBaseShape(mesh.vertices);
   }
 
-  const auto* fbxskin = geometry->getSkin();
-  if (!fbxskin) {
-    MT_THROW_IF(
-        permissive == Permissive::No,
-        "No skin found for geometry. Enable permissive mode to allow saving as a mesh-only character.");
-    return; // Just return a mesh-only character.
-  }
+  blendShape->setShapeVectors(shapes, shapeNames);
+  blendShape->setBaseShape(mesh.vertices);
+}
 
-  // Need a fast map from an FbxNode to the bone index in our representation:
-  std::unordered_map<const ofbx::Object*, size_t> boneMap;
-  for (size_t i = 0; i < boneFbxNodes.size(); ++i) {
-    boneMap.insert(std::make_pair(boneFbxNodes[i], i));
-  }
-  // The weights in the FBX file are stored by bone rather than by
-  // vertex; we will cache them all as (vertex, bone, weight) in
-  // this array and then sort it to get them in vertex order.
-  using VertexBoneWithWeight = std::tuple<size_t, size_t, double>;
-  std::vector<VertexBoneWithWeight> weights;
-  weights.reserve(2 * nVerts);
+using VertexBoneWithWeight = std::tuple<size_t, size_t, double>;
 
+void collectClusterWeights(
+    const ofbx::Skin* fbxskin,
+    const std::unordered_map<const ofbx::Object*, size_t>& boneMap,
+    TransformationList& inverseBindPoseTransforms,
+    std::vector<VertexBoneWithWeight>& weights,
+    size_t nVerts,
+    const char* meshName) {
   int clusterCount = fbxskin->getClusterCount();
   for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++) {
     const auto* cluster = fbxskin->getCluster(clusterIndex);
     MT_CHECK(cluster != nullptr);
 
     const auto* bone = cluster->getLink();
-
     const auto fbxJointItr = boneMap.find(bone);
     MT_THROW_IF(
         fbxJointItr == boneMap.end(),
         "Cluster {} references invalid bone: {}",
         cluster->name,
         bone->name);
+
     const size_t boneIndex = fbxJointItr->second;
     if (boneIndex < inverseBindPoseTransforms.size()) {
       inverseBindPoseTransforms[boneIndex] =
@@ -756,7 +691,7 @@ void parseSkinnedModel(
       MT_LOGT(
           "Skipping as no skinning indices found in cluster element {} (mesh is {}).",
           cluster->name,
-          meshRoot->name);
+          meshName);
       continue;
     }
 
@@ -767,16 +702,16 @@ void parseSkinnedModel(
         skinning_weights_element == nullptr || !skinning_weights_element->getFirstProperty(),
         "No skinning weights found in cluster element {} (mesh is {}).",
         cluster->name,
-        meshRoot->name);
+        meshName);
     const auto skinningWeights = extractPropertyFloatArray(skinning_weights_element, "Weights");
 
-    // iterate through all the vertices, which are affected by the bone
     MT_THROW_IF(
         skinningIndices.size() != skinningWeights.size(),
         "Mismatch between indices count ({}) and weight count ({}) in cluster {}",
         skinningIndices.size(),
         skinningWeights.size(),
         cluster->name);
+
     const auto numBoneVertexIndices = skinningIndices.size();
     for (size_t boneVIndex = 0; boneVIndex < numBoneVertexIndices; boneVIndex++) {
       const int boneVertexIndex = skinningIndices[boneVIndex];
@@ -797,7 +732,14 @@ void parseSkinnedModel(
       weights.emplace_back(boneVertexIndex, boneIndex, boneWeight);
     }
   }
+}
 
+void assignSkinWeights(
+    std::vector<VertexBoneWithWeight>& weights,
+    std::unique_ptr<SkinWeights>& skinWeights,
+    size_t vertexOffset,
+    size_t nVerts,
+    const char* meshName) {
   if (!skinWeights) {
     skinWeights = std::make_unique<SkinWeights>();
   }
@@ -816,13 +758,14 @@ void parseSkinnedModel(
 
   using BoneWeight = std::pair<size_t, double>;
   std::vector<BoneWeight> curBoneWeights;
+
   for (size_t iVertex = 0; iVertex < nVerts; ++iVertex) {
     curBoneWeights.clear();
     MT_THROW_IF(
         weightItr == weights.end() || std::get<0>(*weightItr) != iVertex,
         "No weights found for vertex {} in mesh {}",
         iVertex,
-        meshRoot->name);
+        meshName);
 
     auto vertWeightsBegin = weightItr;
     while (weightItr != weights.end() && std::get<0>(*weightItr) == iVertex) {
@@ -848,7 +791,7 @@ void parseSkinnedModel(
     }
 
     MT_THROW_IF(
-        weightSum <= 0, "Empty weight sum found for vertex {} in mesh {}", iVertex, meshRoot->name);
+        weightSum <= 0, "Empty weight sum found for vertex {} in mesh {}", iVertex, meshName);
 
     for (int iPr = 0; iPr < curBoneWeights.size() && iPr < kMaxSkinJoints; ++iPr) {
       const auto [boneIdx, weight] = curBoneWeights[iPr];
@@ -856,6 +799,93 @@ void parseSkinnedModel(
       skinWeights->weight(vertexOffset + iVertex, iPr) = weight / weightSum;
     }
   }
+}
+
+void parseSkinnedModel(
+    const ofbx::Mesh* meshRoot,
+    const std::vector<const ofbx::Object*>& boneFbxNodes,
+    Mesh& mesh,
+    std::unique_ptr<SkinWeights>& skinWeights,
+    TransformationList& inverseBindPoseTransforms,
+    BlendShape_p& blendShape,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes) {
+  const auto* geometry = meshRoot->getGeometry();
+  const auto& geomElement = geometry->element;
+
+  const auto* vertices_element = findChild(geomElement, "Vertices");
+  MT_THROW_IF(
+      vertices_element == nullptr || !vertices_element->getFirstProperty(),
+      "No vertices found in mesh element.");
+  const auto vertexPositions =
+      extractPropertyVecArray<std::vector<Eigen::Vector3f>>(vertices_element, "Vertices");
+  const auto nVerts = vertexPositions.size();
+
+  const auto* polys_element = findChild(geomElement, "PolygonVertexIndex");
+  MT_THROW_IF(
+      polys_element == nullptr || !polys_element->getFirstProperty(),
+      "No polygons found in mesh element.");
+  const auto indices = extractPropertyArray<int>(polys_element, "PolygonVertexIndex");
+
+  PolygonData vertices;
+  vertices.indices.reserve(indices.size());
+  for (const auto& i : indices) {
+    if (i < 0) {
+      vertices.indices.push_back(-(i + 1));
+      vertices.offsets.push_back((uint32_t)vertices.indices.size());
+    } else {
+      vertices.indices.push_back(i);
+    }
+  }
+
+  std::vector<Eigen::Vector2f> textureCoords = parseUVMapping(geomElement, vertices, nVerts);
+
+  auto errMsg = vertices.errorMessage(nVerts);
+  MT_THROW_IF(!errMsg.empty(), "Error reading polygons from FBX file: {}", errMsg);
+  errMsg = vertices.warnMessage(textureCoords.size());
+  MT_LOGW_IF(!errMsg.empty(), "Error reading polygon data from FBX file: {}", errMsg);
+
+  const size_t vertexOffset = mesh.vertices.size();
+  std::copy(
+      std::begin(vertexPositions), std::end(vertexPositions), std::back_inserter(mesh.vertices));
+  for (const auto& t : triangulate(vertices.indices, vertices.offsets)) {
+    mesh.faces.emplace_back(t + Eigen::Vector3i::Constant(static_cast<int>(vertexOffset)));
+  }
+
+  mesh.normals.resize(vertexOffset + nVerts, Vector3f::Zero());
+  mesh.colors.resize(vertexOffset + nVerts, Vector3b::Zero());
+  mesh.confidence.resize(vertexOffset + nVerts, 1);
+
+  const size_t textureCoordOffset = mesh.texcoords.size();
+  std::copy(std::begin(textureCoords), std::end(textureCoords), std::back_inserter(mesh.texcoords));
+  for (const auto& t : triangulate(vertices.textureIndices, vertices.offsets)) {
+    mesh.texcoord_faces.emplace_back(
+        t + Eigen::Vector3i::Constant(static_cast<int>(textureCoordOffset)));
+  }
+
+  const auto* blendshapes = geometry->getBlendShape();
+  if (loadBlendShapes == LoadBlendShapes::Yes && blendshapes) {
+    parseBlendShapes(blendshapes, vertexPositions, vertexOffset, blendShape, mesh);
+  }
+
+  const auto* fbxskin = geometry->getSkin();
+  if (!fbxskin) {
+    MT_THROW_IF(
+        permissive == Permissive::No,
+        "No skin found for geometry. Enable permissive mode to allow saving as a mesh-only character.");
+    return;
+  }
+
+  std::unordered_map<const ofbx::Object*, size_t> boneMap;
+  for (size_t i = 0; i < boneFbxNodes.size(); ++i) {
+    boneMap.insert(std::make_pair(boneFbxNodes[i], i));
+  }
+
+  std::vector<VertexBoneWithWeight> weights;
+  weights.reserve(2 * nVerts);
+  collectClusterWeights(
+      fbxskin, boneMap, inverseBindPoseTransforms, weights, nVerts, meshRoot->name);
+  assignSkinWeights(weights, skinWeights, vertexOffset, nVerts, meshRoot->name);
 }
 
 double getMaxSeconds(const std::vector<const ofbx::AnimationCurveNode*>& curves) {
