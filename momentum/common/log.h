@@ -77,8 +77,9 @@
     MT_LOGE(__VA_ARGS__);          \
   }
 
-// This function is designed to limit the number of times an error is logged.
-// Please note that in a multi-threaded context, its behavior may not be guaranteed.
+// Limits logging to once per call site using atomic compare-exchange.
+// Thread-safe via atomic operations, though rare race conditions may allow duplicate logs during
+// initialization.
 #define _MT_RUN_ONCE(runcode)                                \
   {                                                          \
     static std::atomic<bool> codeRan(false);                 \
@@ -162,12 +163,18 @@ enum class LogLevel {
   Trace,
 };
 
+/// Returns a map of log level names to LogLevel enum values.
 [[nodiscard]] std::map<std::string, LogLevel> logLevelMap();
 
+/// Sets the logging level.
+/// @param level The log level to set.
 void setLogLevel(LogLevel level);
 
+/// Sets the logging level from a string representation.
+/// @param levelStr The log level as a string (case-insensitive).
 void setLogLevel(const std::string& levelStr);
 
+/// Returns the current logging level.
 [[nodiscard]] LogLevel getLogLevel();
 
 } // namespace momentum

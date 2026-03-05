@@ -19,7 +19,7 @@
 
 #include <cassert>
 
-// TODO: Support asserts with messages as XR_CHECK does
+// TODO: Implement message formatting for MT_CHECK macros to match XR_CHECK functionality
 #define MT_CHECK(condition, ...) assert(condition)
 #define MT_CHECK_LT(val1, val2, ...) assert(val1 < val2)
 #define MT_CHECK_NOTNULL(ptr, ...) assert(ptr != nullptr)

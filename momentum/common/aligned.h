@@ -49,8 +49,14 @@ inline void aligned_free(void* ptr) {
 
 #endif
 
+/// Rounds a value up to the nearest multiple of the specified alignment.
+/// @param value The value to round up.
+/// @param alignment The alignment boundary (must be non-zero).
+/// @return The smallest multiple of alignment that is >= value.
 inline constexpr std::size_t roundUpToAlignment(std::size_t value, std::size_t alignment) {
   MT_THROW_IF_T(alignment == 0, std::invalid_argument, "Alignment must be non-zero");
+  // Formula: ((value + alignment - 1) / alignment) * alignment
+  // Rounds up by adding (alignment-1) before integer division truncates, then re-multiplies
   return ((value + alignment - 1) / alignment) * alignment;
 }
 
@@ -105,13 +111,11 @@ class AlignedAllocator {
   AlignedAllocator() noexcept = default;
 
   template <class U>
-  explicit AlignedAllocator(const AlignedAllocator<U, Alignment>& /*other*/) noexcept {
-    // Empty
-  }
+  explicit AlignedAllocator(const AlignedAllocator<U, Alignment>& /*other*/) noexcept {}
 
   /// Allocates a block of memory that can hold `n` elements of type `T`.
   ///
-  /// @param[in] n The number of elements to allocate space for.
+  /// @param n The number of elements to allocate space for.
   /// @return A pointer to the first byte of the allocated memory block.
   [[nodiscard]] T* allocate(std::size_t n) {
     return alignedAlloc<T, Alignment>(n);
@@ -119,7 +123,7 @@ class AlignedAllocator {
 
   /// Deallocates a block of memory that was previously allocated by `allocate`.
   ///
-  /// @param[in] ptr A pointer to the first byte of the memory block to deallocate.
+  /// @param ptr A pointer to the first byte of the memory block to deallocate.
   /// @param size The size of the memory block to deallocate. This parameter is not used, but it is
   /// included to maintain compatibility with `std::allocator`.
   void deallocate(T* ptr, std::size_t /*n*/) noexcept {
