@@ -474,6 +474,7 @@ mt_library(
   SOURCES_VARS io_gltf_sources
   PUBLIC_LINK_LIBRARIES
     character
+    coordinate_system
     io_common
     io_file_save_options
     io_skeleton
