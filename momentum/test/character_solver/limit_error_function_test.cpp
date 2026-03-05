@@ -268,32 +268,4 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, LimitError_GradientsAndJacobians) {
       TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(2e-2f, 1e-10));
     }
   }
-
-  //{
-  //    SCOPED_TRACE("Limit Ellipsoid Test");
-  //    limit.type = ELLIPSOID;
-  //    limit.weight = 1.0f;
-  //    limit.data.ellipsoid.parent = 2;
-  //    limit.data.ellipsoid.ellipsoidParent = 0;
-  //    limit.data.ellipsoid.offset = Vector3f(0, -1, 0);
-  //    limit.data.ellipsoid.ellipsoid = Affine3f::Identity();
-  //    limit.data.ellipsoid.ellipsoid.translation() = Vector3f(0.5f, 0.5f, 0.5f);
-  //    limit.data.ellipsoid.ellipsoid.linear() = (Quaternionf(Eigen::AngleAxisf(0.1f,
-  //    Vector3f::UnitZ())) *
-  //                                            Quaternionf(Eigen::AngleAxisf(0.2f,
-  //                                            Vector3f::UnitY())) *
-  //                                            Quaternionf(Eigen::AngleAxisf(0.3f,
-  //                                            Vector3f::UnitX()))).toRotationMatrix() *
-  //                                            Scaling(2.0f, 1.5f, 0.5f);
-  //    limit.data.ellipsoid.ellipsoidInv = limit.data.ellipsoid.ellipsoid.inverse();
-
-  //    errorFunction.setLimits(lm);
-  //    parameters.setZero();
-  //    testGradientAndJacobian(&errorFunction, parameters, skeleton, transform);
-  //    for (size_t i = 0; i < 3; i++)
-  //    {
-  //        parameters = VectorXd::Random(transform.numAllModelParameters());
-  //        testGradientAndJacobian(&errorFunction, parameters, skeleton, transform);
-  //    }
-  //}
 }

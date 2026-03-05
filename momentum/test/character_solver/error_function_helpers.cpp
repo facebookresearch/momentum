@@ -104,9 +104,6 @@ void testGradientAndJacobian(
   for (auto p = 0; p < transform.numAllModelParameters(); p++) {
     // perform higher-order finite differences for accuracy
     ModelParametersT<T> parameters = referenceParameters;
-    // parameters(p) = static_cast<float>(referenceParameters(p) - 2.0f * kStepSize);
-    // state.set(transform.apply(parameters), skeleton);
-    // const T h_2 = errorFunction->getError(parameters, state);
     parameters(p) = referenceParameters(p) - kStepSize;
     state.set(transform.apply(parameters), character.skeleton);
     if (errorFunction->needsMesh()) {
@@ -119,11 +116,6 @@ void testGradientAndJacobian(
       meshState.update(parameters, state, character);
     }
     const T h1 = errorFunction->getError(parameters, state, meshState);
-    // parameters(p) = static_cast<float>(referenceParameters(p) + 2.0f * kStepSize);
-    // state.set(transform.apply(parameters), skeleton);
-    // const T h2 = errorFunction->getError(parameters, state);
-    //        numGradient(p) = static_cast<float>((h_2 - 8.0 * h_1 + 8.0 * h1 - h2) / (12.0 *
-    //        kStepSize));
     numGradient(p) = (h1 - h_1) / (2.0 * kStepSize);
   }
 

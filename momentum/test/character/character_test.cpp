@@ -609,12 +609,6 @@ TYPED_TEST(CharacterTest, Simplify) {
   EXPECT_EQ(simplifiedCharacter.skeleton.joints[0].name, "root");
   EXPECT_EQ(simplifiedCharacter.skeleton.joints[1].name, "joint1");
 
-  // Note: The implementation doesn't actually simplify the parameter transform
-  // EXPECT_EQ(simplifiedCharacter.parameterTransform.name.size(), 3);
-  // EXPECT_EQ(simplifiedCharacter.parameterTransform.name[0], "root_tx");
-  // EXPECT_EQ(simplifiedCharacter.parameterTransform.name[1], "root_rx");
-  // EXPECT_EQ(simplifiedCharacter.parameterTransform.name[2], "joint1_rx");
-
   // Check that we preserve metadata
   EXPECT_EQ(simplifiedCharacter.metadata, this->character.metadata);
 }

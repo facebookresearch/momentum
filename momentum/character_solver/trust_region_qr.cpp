@@ -129,7 +129,6 @@ void TrustRegionQRT<T>::doIteration() {
 
   // This is the local approximation to the function used in the trust region solve:
   auto evalQuadraticModel = [&](Eigen::Ref<const Eigen::VectorX<T>> p) -> T {
-    // MT_LOGI("In evalQuadraticModel(); orig error: {}", this->error_);
     T result = this->error_;
     result -= this->gradientSub_.dot(p);
     // Normally in textbooks you'd see this multiplied by 1/2 for the proper Taylor series

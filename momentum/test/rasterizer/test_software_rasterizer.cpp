@@ -106,20 +106,6 @@ void visualizeZBuffer(Span2f zBuffer) {
   }
 }
 
-void visualizeIndexBuffer(Span2i idxBuffer) {
-  for (int i = 0; i < idxBuffer.extent(0); ++i) {
-    for (int j = 0; j < idxBuffer.extent(1); ++j) {
-      const auto idx = idxBuffer(i, j);
-      if (idx < 0) {
-        std::cout << " ";
-      } else {
-        std::cout << idx;
-      }
-    }
-    std::cout << "\n";
-  }
-}
-
 void testRasterizerWithGeometry(const Camera& camera, const Mesh& mesh) {
   auto zBuffer_rasterizer = makeRasterizerZBuffer(camera);
   auto triangleIndexBuffer_rasterizer = makeRasterizerIndexBuffer(camera);
@@ -142,14 +128,12 @@ void testRasterizerWithGeometry(const Camera& camera, const Mesh& mesh) {
       std::vector<Light>{createAmbientLight()},
       true);
   visualizeZBuffer(zBuffer_rasterizer.view());
-  // visualizeIndexBuffer(triangleIndexBuffer_rasterizer);
 
   auto zBuffer_rayTrace = makeRasterizerZBuffer(camera);
   auto triangleIndexBuffer_rayTrace = makeRasterizerIndexBuffer(camera);
   rasterizeMeshWithRayTracer(
       camera, mesh, zBuffer_rayTrace.view(), triangleIndexBuffer_rayTrace.view());
   visualizeZBuffer(zBuffer_rayTrace.view());
-  // visualizeIndexBuffer(triangleIndexBuffer_rayTrace);
 
   int numTriDifferences = 0;
   int numDepthDifferences = 0;

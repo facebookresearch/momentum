@@ -12,7 +12,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <cmath>
-#include <fstream>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -60,53 +59,26 @@ void checkTrianglesValid(const Mesh& mesh) {
   }
 }
 
-void dumpObjFile(const Mesh& mesh, const std::string& filename) {
-  std::ofstream oss(filename.c_str());
-  if (!oss.good()) {
-    throw std::runtime_error("Unable to open file " + filename + " for writing.");
-  }
-
-  for (size_t iVert = 0; iVert < mesh.vertices.size(); ++iVert) {
-    const auto& pos = mesh.vertices[iVert];
-    const auto& n = mesh.normals[iVert];
-    oss << "v " << pos.x() << " " << pos.y() << " " << pos.z() << "\n";
-    oss << "vn " << n.x() << " " << n.y() << " " << n.z() << "\n";
-  }
-
-  for (size_t iTri = 0; iTri < mesh.faces.size(); ++iTri) {
-    const Eigen::Vector3i tri = mesh.faces[iTri] + Eigen::Vector3i::Ones();
-    oss << "f ";
-    for (int k = 0; k < 3; ++k) {
-      oss << tri[k] << "//" << tri[k] << " ";
-    }
-    oss << "\n";
-  }
-}
-
 TEST(SoftwareRasterizer, CreateCylinder) {
   const auto cylinder = makeCylinder(20, 10);
-  // dumpObjFile(cylinder, "/Users/cdtwigg/cylinder.obj");
   checkTrianglesValid(cylinder);
   checkNormalsValid(cylinder, momentum::pi<float>() / 16.0f);
 }
 
 TEST(SoftwareRasterizer, CreateCapsule) {
   const auto capsule = makeCapsule(20, 10, 1.0, 0.5, 2.0);
-  // dumpObjFile(capsule, "/Users/cdtwigg/capsule.obj");
   checkTrianglesValid(capsule);
   checkNormalsValid(capsule, momentum::pi<float>() / 16.0f);
 }
 
 TEST(SoftwareRasterizer, CreateArrow) {
   const auto arrowhead = makeArrow(20, 10, 0.2, 0.4, 0.5, 1.0);
-  // dumpObjFile(arrowhead, "/Users/cdtwigg/arrow.obj");
   checkTrianglesValid(arrowhead);
   checkNormalsValid(arrowhead, momentum::pi<float>() / 16.0f);
 }
 
 TEST(SoftwareRasterizer, CreateSphere) {
   const auto sphere = makeSphere(2);
-  // dumpObjFile(sphere, "/Users/cdtwigg/sphere.obj");
   checkTrianglesValid(sphere);
   checkNormalsValid(
       sphere, momentum::pi<float>() / 8.0f); // Allow slightly larger angle tolerance for sphere
