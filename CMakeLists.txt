@@ -266,6 +266,14 @@ mt_library(
 )
 
 mt_library(
+  NAME coordinate_system
+  HEADERS_VARS coordinate_system_public_headers
+  SOURCES_VARS coordinate_system_sources
+  PUBLIC_LINK_LIBRARIES
+    math
+)
+
+mt_library(
   NAME simd_generalized_loss
   HEADERS_VARS simd_generalized_loss_public_headers
   SOURCES_VARS simd_generalized_loss_sources
@@ -532,6 +540,7 @@ mt_library(
   SOURCES_VARS io_marker_sources
   PUBLIC_LINK_LIBRARIES
     character
+    coordinate_system
   PRIVATE_LINK_LIBRARIES
     io_common
     io_gltf
@@ -544,6 +553,7 @@ mt_library(
   HEADERS_VARS io_public_headers
   SOURCES_VARS io_sources
   PUBLIC_LINK_LIBRARIES
+    coordinate_system
     io_common
     io_fbx
     io_gltf
@@ -736,6 +746,12 @@ if(MOMENTUM_BUILD_TESTING)
     NAME math_test
     SOURCES_VARS math_test_sources
     LINK_LIBRARIES math
+  )
+
+  mt_test(
+    NAME coordinate_system_test
+    SOURCES_VARS coordinate_system_test_sources
+    LINK_LIBRARIES coordinate_system
   )
 
   mt_test(
