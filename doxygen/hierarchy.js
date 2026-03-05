@@ -35,6 +35,7 @@ var hierarchy =
       [ "momentum::PlaneDataT< T >", "structmomentum_1_1PlaneDataT.html", null ],
       [ "momentum::PositionDataT< T >", "structmomentum_1_1PositionDataT.html", null ]
     ] ],
+    [ "momentum::CoordinateSystem", "structmomentum_1_1CoordinateSystem.html", null ],
     [ "momentum::DeduceSpanType< T >", "structmomentum_1_1DeduceSpanType.html", null ],
     [ "std::disjunction", null, [
       [ "momentum::detail::is_compatible_to_uniform_int_distribution< T >", "structmomentum_1_1detail_1_1is__compatible__to__uniform__int__distribution.html", null ]

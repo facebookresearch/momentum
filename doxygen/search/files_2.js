@@ -28,8 +28,9 @@ var searchData=
   ['constraint_5ferror_5ffunction_2eh_25',['constraint_error_function.h',['../constraint__error__function_8h.html',1,'']]],
   ['conversions_2ecpp_26',['conversions.cpp',['../conversions_8cpp.html',1,'']]],
   ['conversions_2eh_27',['conversions.h',['../conversions_8h.html',1,'']]],
-  ['coordinate_5fsystem_2eh_28',['coordinate_system.h',['../coordinate__system_8h.html',1,'']]],
-  ['coordinate_5futils_2eh_29',['coordinate_utils.h',['../coordinate__utils_8h.html',1,'']]],
-  ['covariance_5fmatrix_2ecpp_30',['covariance_matrix.cpp',['../covariance__matrix_8cpp.html',1,'']]],
-  ['covariance_5fmatrix_2eh_31',['covariance_matrix.h',['../covariance__matrix_8h.html',1,'']]]
+  ['coordinate_5fsystem_2ecpp_28',['coordinate_system.cpp',['../coordinate__system_8cpp.html',1,'']]],
+  ['coordinate_5fsystem_2eh_29',['coordinate_system.h',['../io_2marker_2coordinate__system_8h.html',1,'(Global Namespace)'],['../math_2coordinate__system_8h.html',1,'(Global Namespace)']]],
+  ['coordinate_5futils_2eh_30',['coordinate_utils.h',['../coordinate__utils_8h.html',1,'']]],
+  ['covariance_5fmatrix_2ecpp_31',['covariance_matrix.cpp',['../covariance__matrix_8cpp.html',1,'']]],
+  ['covariance_5fmatrix_2eh_32',['covariance_matrix.h',['../covariance__matrix_8h.html',1,'']]]
 ];

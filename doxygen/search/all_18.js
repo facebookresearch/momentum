@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['x_0',['x',['../structmomentum_1_1JointStateT.html#a7edeb651c34e7eaa5edd5caaa7759648',1,'momentum::JointStateT::x() const'],['../structmomentum_1_1JointStateT.html#a290b76ba6f633658cbe5444e192129d3',1,'momentum::JointStateT::x()'],['../namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda02129bb861061d1a052c592e2dc6b383',1,'momentum::X']]],
+  ['x_0',['x',['../structmomentum_1_1JointStateT.html#a7edeb651c34e7eaa5edd5caaa7759648',1,'momentum::JointStateT::x() const'],['../structmomentum_1_1JointStateT.html#a290b76ba6f633658cbe5444e192129d3',1,'momentum::JointStateT::x()'],['../namespacemomentum.html#ac69a5fced65610b4cb802bf0234e4d21a02129bb861061d1a052c592e2dc6b383',1,'momentum::X'],['../namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda02129bb861061d1a052c592e2dc6b383',1,'momentum::X']]],
   ['x_5fdense_1',['x_dense',['../classmomentum_1_1OnlineBlockHouseholderQR.html#a6e97d33ae79cf56100305c12e1d00afe',1,'momentum::OnlineBlockHouseholderQR::x_dense()'],['../classmomentum_1_1OnlineBandedHouseholderQR.html#a377becc8dca7af608455a77e136710f5',1,'momentum::OnlineBandedHouseholderQR::x_dense()']]],
   ['x_5fi_2',['x_i',['../classmomentum_1_1OnlineBlockHouseholderQR.html#a205a7106a44f09a99c7d40700b5bb69c',1,'momentum::OnlineBlockHouseholderQR']]],
   ['x_5fn_3',['x_n',['../classmomentum_1_1OnlineBlockHouseholderQR.html#a495b5aa9f6d8e2f18e3db6f0f38e0baf',1,'momentum::OnlineBlockHouseholderQR']]],

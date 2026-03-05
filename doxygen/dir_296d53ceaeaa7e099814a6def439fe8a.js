@@ -1,6 +1,8 @@
 var dir_296d53ceaeaa7e099814a6def439fe8a =
 [
     [ "constants.h", "constants_8h.html", "constants_8h" ],
+    [ "coordinate_system.cpp", "coordinate__system_8cpp.html", "coordinate__system_8cpp" ],
+    [ "coordinate_system.h", "math_2coordinate__system_8h.html", "math_2coordinate__system_8h" ],
     [ "covariance_matrix.cpp", "covariance__matrix_8cpp.html", null ],
     [ "covariance_matrix.h", "covariance__matrix_8h.html", "covariance__matrix_8h" ],
     [ "fmt_eigen.h", "fmt__eigen_8h.html", null ],

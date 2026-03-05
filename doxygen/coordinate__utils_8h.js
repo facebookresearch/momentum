@@ -6,5 +6,6 @@ var coordinate__utils_8h =
     [ "fromMomentumVec3f", "coordinate__utils_8h.html#a5342cfb3b70fcd8dc713aacec5d1eafb", null ],
     [ "toMomentumQuaternionf", "coordinate__utils_8h.html#a0b6518dbf3bb255f302a0bc95dafe3d0", null ],
     [ "toMomentumVec3f", "coordinate__utils_8h.html#a70f1c805ecb6005e0944ee9d03b57a4b", null ],
-    [ "toMomentumVec3f", "coordinate__utils_8h.html#a851bba61cbe390f4f2bc68a3461ffec0", null ]
+    [ "toMomentumVec3f", "coordinate__utils_8h.html#a851bba61cbe390f4f2bc68a3461ffec0", null ],
+    [ "kGltfCoordinateSystem", "coordinate__utils_8h.html#a22b7b65dd16f821b652b4423af618f02", null ]
 ];

@@ -34,6 +34,7 @@ var annotated_dup =
       [ "ColumnIndexedMatrix", "classmomentum_1_1ColumnIndexedMatrix.html", "classmomentum_1_1ColumnIndexedMatrix" ],
       [ "ConstraintData", "structmomentum_1_1ConstraintData.html", "structmomentum_1_1ConstraintData" ],
       [ "ConstraintErrorFunctionT", "classmomentum_1_1ConstraintErrorFunctionT.html", "classmomentum_1_1ConstraintErrorFunctionT" ],
+      [ "CoordinateSystem", "structmomentum_1_1CoordinateSystem.html", "structmomentum_1_1CoordinateSystem" ],
       [ "DeduceSpanType", "structmomentum_1_1DeduceSpanType.html", "structmomentum_1_1DeduceSpanType" ],
       [ "DistanceConstraintDataT", "structmomentum_1_1DistanceConstraintDataT.html", "structmomentum_1_1DistanceConstraintDataT" ],
       [ "DistanceErrorFunctionT", "classmomentum_1_1DistanceErrorFunctionT.html", "classmomentum_1_1DistanceErrorFunctionT" ],

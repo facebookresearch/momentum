@@ -25,5 +25,6 @@ var searchData=
   ['constrainterrorfunctiont_3c_20t_2c_20normaldatat_3c_20t_20_3e_2c_201_2c_202_2c_201_20_3e_22',['ConstraintErrorFunctionT&lt; T, NormalDataT&lt; T &gt;, 1, 2, 1 &gt;',['../classmomentum_1_1ConstraintErrorFunctionT.html',1,'momentum']]],
   ['constrainterrorfunctiont_3c_20t_2c_20orientationdatat_3c_20t_20_3e_2c_209_2c_203_2c_200_20_3e_23',['ConstraintErrorFunctionT&lt; T, OrientationDataT&lt; T &gt;, 9, 3, 0 &gt;',['../classmomentum_1_1ConstraintErrorFunctionT.html',1,'momentum']]],
   ['constrainterrorfunctiont_3c_20t_2c_20planedatat_3c_20t_20_3e_2c_201_20_3e_24',['ConstraintErrorFunctionT&lt; T, PlaneDataT&lt; T &gt;, 1 &gt;',['../classmomentum_1_1ConstraintErrorFunctionT.html',1,'momentum']]],
-  ['constrainterrorfunctiont_3c_20t_2c_20positiondatat_3c_20t_20_3e_20_3e_25',['ConstraintErrorFunctionT&lt; T, PositionDataT&lt; T &gt; &gt;',['../classmomentum_1_1ConstraintErrorFunctionT.html',1,'momentum']]]
+  ['constrainterrorfunctiont_3c_20t_2c_20positiondatat_3c_20t_20_3e_20_3e_25',['ConstraintErrorFunctionT&lt; T, PositionDataT&lt; T &gt; &gt;',['../classmomentum_1_1ConstraintErrorFunctionT.html',1,'momentum']]],
+  ['coordinatesystem_26',['CoordinateSystem',['../structmomentum_1_1CoordinateSystem.html',1,'momentum']]]
 ];
