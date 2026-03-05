@@ -8,6 +8,7 @@
 #include "momentum/io/marker/conversions.h"
 
 #include "momentum/common/log.h"
+#include "momentum/math/coordinate_system.h"
 
 namespace momentum {
 
@@ -43,58 +44,56 @@ namespace {
   }
 }
 
+// Maps the legacy Unit enum to LengthUnit for use with the coordinate system utility.
+[[nodiscard]] LengthUnit toLengthUnit(Unit unit) {
+  switch (unit) {
+    case Unit::M:
+      return LengthUnit::Meter;
+    case Unit::DM:
+      return LengthUnit::Decimeter;
+    case Unit::CM:
+      return LengthUnit::Centimeter;
+    case Unit::MM:
+      return LengthUnit::Millimeter;
+    case Unit::Unknown:
+    default:
+      return LengthUnit::Centimeter; // Fallback: treat as cm
+  }
+}
+
 } // namespace
 
 template <typename T>
 Vector3<T> toMomentumVector3(const Vector3<T>& vec, UpVector up, Unit unit) {
-  // Convert the input vector's units to centimeters
-  Vector3<T> vec_in_cm;
-  switch (unit) {
-    case Unit::M: // Meters
-      vec_in_cm = vec * (T)100;
-      break;
-    case Unit::DM: // Decimeter
-      vec_in_cm = vec * (T)10;
-      break;
-    case Unit::CM: // Centimeters
-      vec_in_cm = vec;
-      break;
-    case Unit::MM: // Millimeters
-      vec_in_cm = vec * (T)0.1;
-      break;
-    case Unit::Unknown: // Unknown units, default to centimeters
-      MT_LOGE(
-          "{}: Unknown unit '{}' found in the file. Use centimeters instead.",
-          __func__,
-          toString(unit));
-      vec_in_cm = vec;
-      break;
-    default:
-      vec_in_cm = vec;
-      break;
+  if (unit == Unit::Unknown) {
+    MT_LOGE(
+        "{}: Unknown unit '{}' found in the file. Use centimeters instead.",
+        __func__,
+        toString(unit));
   }
 
-  // Converting from the given UpVector coordinate system to the target coordinate system
-  Vector3<T> vec_in_momentum;
+  // Use the coordinate system utility for unit conversion
+  const LengthUnit srcUnit = toLengthUnit(unit);
+  const T s = scaleFactor<T>(
+      CoordinateSystem{UpAxis::Y, Handedness::Right, srcUnit},
+      CoordinateSystem{UpAxis::Y, Handedness::Right, LengthUnit::Centimeter});
+  Vector3<T> vec_in_cm = vec * s;
+
+  // Preserve the existing axis remapping exactly as-is.
+  // The marker I/O converts to Z-up internally (Z is identity).
+  // TODO: Migrate to use changeVector() once marker convention is unified to Y-up.
   switch (up) {
-    case UpVector::X: // X-up
-      vec_in_momentum = Vector3<T>(vec_in_cm.y(), vec_in_cm.z(), vec_in_cm.x());
-      break;
-    case UpVector::Y: // Y-up
-      vec_in_momentum = Vector3<T>(vec_in_cm.x(), vec_in_cm.z(), -vec_in_cm.y());
-      break;
-    case UpVector::Z: // Z-up
-      vec_in_momentum = vec_in_cm;
-      break;
-    case UpVector::YNeg: // Negative Y-up
-      vec_in_momentum = Vector3<T>(vec_in_cm.x(), -vec_in_cm.z(), vec_in_cm.y());
-      break;
+    case UpVector::X:
+      return {vec_in_cm.y(), vec_in_cm.z(), vec_in_cm.x()};
+    case UpVector::Y:
+      return {vec_in_cm.x(), vec_in_cm.z(), -vec_in_cm.y()};
+    case UpVector::Z:
+      return vec_in_cm;
+    case UpVector::YNeg:
+      return {vec_in_cm.x(), -vec_in_cm.z(), vec_in_cm.y()};
     default:
-      vec_in_momentum = vec_in_cm;
-      break;
+      return vec_in_cm;
   }
-
-  return vec_in_momentum;
 }
 
 template <typename T>
