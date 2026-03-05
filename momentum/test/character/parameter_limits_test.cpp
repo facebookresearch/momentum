@@ -250,22 +250,6 @@ TEST(ParameterLimitsTest, ApplyPassiveJointParameterLimitsEdgeCases) {
 
   // Should return unchanged parameters
   EXPECT_EQ(result(0), 0.5f);
-
-  // Test with empty joint parameters
-  JointParameters emptyJointParams = JointParameters::Zero(0);
-  ParameterLimits limits;
-
-  ParameterLimit limit;
-  limit.type = LimitType::MinMaxJointPassive;
-  limit.data.minMaxJoint.jointIndex = 0;
-  limit.data.minMaxJoint.jointParameter = 0;
-  limit.data.minMaxJoint.limits = Vector2f::Constant(0.0f);
-  limit.data.minMaxJoint.limits[1] = 1.0f;
-  limits.push_back(limit);
-
-  // This should not crash, but we can't test the result directly
-  // as it would trigger the MT_CHECK assertion
-  // applyPassiveJointParameterLimits(limits, emptyJointParams);
 }
 
 // Test self-assignment for LimitData
