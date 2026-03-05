@@ -109,6 +109,18 @@ math_test_sources = [
     "test/math/utility_test.cpp",
 ]
 
+coordinate_system_public_headers = [
+    "math/coordinate_system.h",
+]
+
+coordinate_system_sources = [
+    "math/coordinate_system.cpp",
+]
+
+coordinate_system_test_sources = [
+    "test/math/coordinate_system_test.cpp",
+]
+
 simd_generalized_loss_public_headers = [
     "math/simd_generalized_loss.h",
 ]
