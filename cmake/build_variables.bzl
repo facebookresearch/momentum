@@ -697,6 +697,10 @@ process_markers_sources = [
     "marker_tracking/process_markers.cpp",
 ]
 
+process_markers_test_sources = [
+    "test/process_markers/process_markers_test.cpp",
+]
+
 rerun_eigen_adapters_public_headers = [
     "gui/rerun/eigen_adapters.h",
 ]
