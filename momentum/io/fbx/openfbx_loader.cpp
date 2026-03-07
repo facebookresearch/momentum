@@ -506,6 +506,27 @@ parseSkeleton(const ofbx::Object* sceneRoot, const std::string& skelRoot, Permis
   return {skeleton, jointFbxNodes, locators, collision};
 }
 
+// Note: we intentionally omit reserve() here. This function is called once per sub-mesh in a loop,
+// and reserve(size() + batchSize) defeats std::vector's geometric growth, causing O(K*N) copies
+// instead of O(N) amortized. Letting the default 2x growth strategy handle it is more efficient.
+void populatePolyFaceData(
+    Mesh& mesh,
+    const PolygonData& vertices,
+    size_t vertexOffset,
+    size_t textureCoordOffset) {
+  for (const auto& idx : vertices.indices) {
+    mesh.polyFaces.push_back(idx + static_cast<uint32_t>(vertexOffset));
+  }
+  for (size_t i = 0; i + 1 < vertices.offsets.size(); ++i) {
+    mesh.polyFaceSizes.push_back(vertices.offsets[i + 1] - vertices.offsets[i]);
+  }
+  if (!vertices.textureIndices.empty()) {
+    for (const auto& idx : vertices.textureIndices) {
+      mesh.polyTexcoordFaces.push_back(idx + static_cast<uint32_t>(textureCoordOffset));
+    }
+  }
+}
+
 enum EMapping {
   MappingUnknown,
   MappingByPolyVertex,
@@ -862,6 +883,9 @@ void parseSkinnedModel(
     mesh.texcoord_faces.emplace_back(
         t + Eigen::Vector3i::Constant(static_cast<int>(textureCoordOffset)));
   }
+
+  // Populate polygon face data (preserves original topology)
+  populatePolyFaceData(mesh, vertices, vertexOffset, textureCoordOffset);
 
   const auto* blendshapes = geometry->getBlendShape();
   if (loadBlendShapes == LoadBlendShapes::Yes && blendshapes) {

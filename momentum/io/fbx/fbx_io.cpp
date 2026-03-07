@@ -561,6 +561,56 @@ void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character
   }
 }
 
+void writePolygonsToFbxMesh(const Mesh& mesh, ::fbxsdk::FbxMesh* lMesh) {
+  if (!mesh.polyFaces.empty() && !mesh.polyFaceSizes.empty()) {
+    // Write original polygon topology
+    uint32_t offset = 0;
+    for (const auto polySize : mesh.polyFaceSizes) {
+      lMesh->BeginPolygon();
+      for (uint32_t i = 0; i < polySize; ++i) {
+        lMesh->AddPolygon(mesh.polyFaces[offset + i]);
+      }
+      lMesh->EndPolygon();
+      offset += polySize;
+    }
+  } else {
+    // Fall back to triangulated faces
+    for (const auto& face : mesh.faces) {
+      lMesh->BeginPolygon();
+      for (int i = 0; i < 3; i++) {
+        lMesh->AddPolygon(face[i]);
+      }
+      lMesh->EndPolygon();
+    }
+  }
+}
+
+void writeTextureUVIndicesToFbxMesh(
+    const Mesh& mesh,
+    ::fbxsdk::FbxMesh* lMesh,
+    fbxsdk::FbxLayerElement::EType uvType) {
+  if (!mesh.polyFaces.empty() && !mesh.polyFaceSizes.empty()) {
+    uint32_t offset = 0;
+    int polyIdx = 0;
+    for (const auto polySize : mesh.polyFaceSizes) {
+      for (uint32_t i = 0; i < polySize; ++i) {
+        const uint32_t texIdx = mesh.polyTexcoordFaces.empty() ? mesh.polyFaces[offset + i]
+                                                               : mesh.polyTexcoordFaces[offset + i];
+        lMesh->SetTextureUVIndex(polyIdx, i, texIdx, uvType);
+      }
+      offset += polySize;
+      polyIdx++;
+    }
+  } else {
+    for (int faceIdx = 0; faceIdx < static_cast<int>(mesh.texcoord_faces.size()); ++faceIdx) {
+      const auto& texcoords = mesh.texcoord_faces[faceIdx];
+      lMesh->SetTextureUVIndex(faceIdx, 0, texcoords[0], uvType);
+      lMesh->SetTextureUVIndex(faceIdx, 1, texcoords[1], uvType);
+      lMesh->SetTextureUVIndex(faceIdx, 2, texcoords[2], uvType);
+    }
+  }
+}
+
 void saveFbxCommon(
     const filesystem::path& filename,
     const Character& character,
@@ -687,7 +737,6 @@ void saveFbxCommon(
   if (saveMesh && character.mesh != nullptr) {
     // Add the mesh
     const int numVertices = character.mesh.get()->vertices.size();
-    const int numFaces = character.mesh.get()->faces.size();
     ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(scene, "body_mesh");
     ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, "mesh");
     lMesh->SetControlPointCount(numVertices);
@@ -704,14 +753,7 @@ void saveFbxCommon(
       lMesh->SetControlPointAt(point, normal, i);
     }
     // Add polygons to lMesh
-    for (int iFace = 0; iFace < numFaces; iFace++) {
-      lMesh->BeginPolygon();
-      for (int i = 0; i < 3; i++) { // We have tris for models. This could be extended for
-                                    // supporting Quads or npoly if needed.
-        lMesh->AddPolygon(character.mesh.get()->faces[iFace][i]);
-      }
-      lMesh->EndPolygon();
-    }
+    writePolygonsToFbxMesh(*character.mesh, lMesh);
     lMesh->BuildMeshEdgeArray();
     meshNode->SetNodeAttribute(lMesh);
 
@@ -733,13 +775,8 @@ void saveFbxCommon(
         lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
       }
 
-      // Set UV indices for each face. We only have triangles.
-      int faceCount = 0;
-      for (const auto& texcoords : character.mesh->texcoord_faces) {
-        lMesh->SetTextureUVIndex(faceCount, 0, texcoords[0], uvType);
-        lMesh->SetTextureUVIndex(faceCount, 1, texcoords[1], uvType);
-        lMesh->SetTextureUVIndex(faceCount++, 2, texcoords[2], uvType);
-      }
+      // Set UV indices for each face.
+      writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
     }
 
     // ---------------------------------------------
