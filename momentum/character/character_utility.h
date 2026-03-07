@@ -145,12 +145,60 @@ template <typename T>
 
 /// Converts face selection to vertex selection
 ///
-/// @param[in] character Character containing the mesh
+/// @param[in] mesh The mesh containing the faces
 /// @param[in] activeFaces Boolean vector indicating which faces are active
 /// @return Boolean vector indicating which vertices are used by active faces
 template <typename T>
 [[nodiscard]] std::vector<bool> facesToVertices(
     const MeshT<T>& mesh,
     const std::vector<bool>& activeFaces);
+
+/// Converts vertex selection to polygon selection
+///
+/// A polygon is active if all its vertices are active.
+///
+/// @param[in] mesh The mesh containing the polygon data
+/// @param[in] activeVertices Boolean vector indicating which vertices are active
+/// @return Boolean vector indicating which polygons only contain active vertices
+template <typename T>
+[[nodiscard]] std::vector<bool> verticesToPolys(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeVertices);
+
+/// Converts polygon selection to vertex selection
+///
+/// @param[in] mesh The mesh containing the polygon data
+/// @param[in] activePolys Boolean vector indicating which polygons are active
+/// @return Boolean vector indicating which vertices are used by active polygons
+template <typename T>
+[[nodiscard]] std::vector<bool> polysToVertices(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activePolys);
+
+/// Reduces a standalone mesh to only include the specified polygons and associated vertices.
+///
+/// Converts polygon selection to vertex selection and face selection, then reduces the mesh.
+/// Both triangulated faces and polygon data are filtered and remapped.
+///
+/// @param[in] mesh The mesh to reduce
+/// @param[in] activePolys Boolean vector indicating which polygons to keep
+/// @return A new mesh containing only the specified polygons and their referenced vertices
+template <typename T>
+[[nodiscard]] MeshT<T> reduceMeshByPolys(
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activePolys);
+
+/// Reduces the mesh to only include the specified polygons and associated vertices
+///
+/// Converts polygon selection to vertex selection and face selection, then reduces the mesh.
+/// Both triangulated faces and polygon data are filtered and remapped.
+///
+/// @param[in] character Character to be reduced
+/// @param[in] activePolys Boolean vector indicating which polygons to keep
+/// @return A new character with mesh reduced to the specified polygons
+template <typename T>
+[[nodiscard]] CharacterT<T> reduceMeshByPolys(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activePolys);
 
 } // namespace momentum

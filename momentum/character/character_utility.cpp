@@ -845,6 +845,53 @@ std::vector<Eigen::Vector3i> remapFaces(
   return remappedFaces;
 }
 
+template <typename T>
+void remapPolyFaces(
+    MeshT<T>& newMesh,
+    const MeshT<T>& mesh,
+    const std::vector<bool>& activeVertices,
+    const std::vector<size_t>& reverseVertexMapping,
+    const std::vector<size_t>& reverseTexcoordMapping) {
+  if (mesh.polyFaces.empty()) {
+    return;
+  }
+
+  newMesh.polyFaceSizes.reserve(mesh.polyFaceSizes.size());
+  newMesh.polyFaces.reserve(mesh.polyFaces.size());
+  if (!mesh.polyTexcoordFaces.empty()) {
+    newMesh.polyTexcoordFaces.reserve(mesh.polyTexcoordFaces.size());
+  }
+
+  uint32_t offset = 0;
+  for (const auto polySize : mesh.polyFaceSizes) {
+    // Check if all vertices of this polygon are active
+    bool allActive = true;
+    for (uint32_t i = 0; i < polySize; ++i) {
+      const auto vtx = mesh.polyFaces[offset + i];
+      if (vtx >= activeVertices.size() || !activeVertices[vtx]) {
+        allActive = false;
+        break;
+      }
+    }
+
+    if (allActive) {
+      newMesh.polyFaceSizes.push_back(polySize);
+      for (uint32_t i = 0; i < polySize; ++i) {
+        newMesh.polyFaces.push_back(
+            static_cast<uint32_t>(reverseVertexMapping[mesh.polyFaces[offset + i]]));
+      }
+      if (!mesh.polyTexcoordFaces.empty()) {
+        for (uint32_t i = 0; i < polySize; ++i) {
+          newMesh.polyTexcoordFaces.push_back(
+              static_cast<uint32_t>(reverseTexcoordMapping[mesh.polyTexcoordFaces[offset + i]]));
+        }
+      }
+    }
+
+    offset += polySize;
+  }
+}
+
 std::vector<std::vector<int32_t>> remapLines(
     const std::vector<std::vector<int32_t>>& lines,
     const std::vector<size_t>& mapping) {
@@ -923,6 +970,57 @@ std::vector<bool> facesToVertices(
   return activeVertices;
 }
 
+std::vector<bool> verticesToPolys(
+    const std::vector<uint32_t>& polyFaces,
+    const std::vector<uint32_t>& polyFaceSizes,
+    const std::vector<bool>& activeVertices) {
+  if (polyFaceSizes.empty()) {
+    return {};
+  }
+  MT_CHECK(!polyFaceSizes.empty());
+  std::vector<bool> activePolys(polyFaceSizes.size(), false);
+  uint32_t offset = 0;
+  for (size_t polyIdx = 0; polyIdx < polyFaceSizes.size(); ++polyIdx) {
+    const auto polySize = polyFaceSizes[polyIdx];
+    bool allActive = true;
+    for (uint32_t i = 0; i < polySize; ++i) {
+      const auto vtx = polyFaces[offset + i];
+      if (vtx >= activeVertices.size() || !activeVertices[vtx]) {
+        allActive = false;
+        break;
+      }
+    }
+    activePolys[polyIdx] = allActive;
+    offset += polySize;
+  }
+  return activePolys;
+}
+
+std::vector<bool> polysToVertices(
+    const std::vector<uint32_t>& polyFaces,
+    const std::vector<uint32_t>& polyFaceSizes,
+    const std::vector<bool>& activePolys,
+    size_t vertexCount) {
+  std::vector<bool> activeVertices(vertexCount, false);
+  if (activePolys.empty()) {
+    return activeVertices;
+  }
+  uint32_t offset = 0;
+  for (size_t polyIdx = 0; polyIdx < polyFaceSizes.size(); ++polyIdx) {
+    const auto polySize = polyFaceSizes[polyIdx];
+    if (activePolys[polyIdx]) {
+      for (uint32_t i = 0; i < polySize; ++i) {
+        const auto vtx = polyFaces[offset + i];
+        if (vtx < vertexCount) {
+          activeVertices[vtx] = true;
+        }
+      }
+    }
+    offset += polySize;
+  }
+  return activeVertices;
+}
+
 // Internal mesh reduction function used by both reduceMeshComponents and
 // the public reduceMeshByFaces/reduceMeshByVertices for Mesh.
 template <typename T>
@@ -954,6 +1052,7 @@ MeshT<T> reduceMeshInternal(
     newMesh.lines = remapLines(mesh.lines, reverseVertexMapping);
   }
 
+  std::vector<size_t> reverseTextureVertexMapping;
   if (!mesh.texcoord_faces.empty() && !mesh.texcoords.empty()) {
     std::vector<bool> activeTextureTriangles = activeFaces;
     activeTextureTriangles.resize(mesh.texcoord_faces.size(), false);
@@ -961,14 +1060,17 @@ MeshT<T> reduceMeshInternal(
     const std::vector<bool> activeTextureVertices =
         facesToVertices(mesh.texcoord_faces, activeTextureTriangles, mesh.texcoords.size());
 
-    auto [forwardTextureVertexMapping, reverseTextureVertexMapping] =
-        createIndexMapping(activeTextureVertices);
+    auto [forwardTextureVertexMapping, revTexMapping] = createIndexMapping(activeTextureVertices);
+    reverseTextureVertexMapping = std::move(revTexMapping);
 
     newMesh.texcoords = selectVertices(mesh.texcoords, forwardTextureVertexMapping);
     newMesh.texcoord_faces =
         remapFaces(mesh.texcoord_faces, reverseTextureVertexMapping, activeTextureTriangles);
     newMesh.texcoord_lines = remapLines(mesh.texcoord_lines, reverseTextureVertexMapping);
   }
+
+  // Remap polygon face data
+  remapPolyFaces(newMesh, mesh, activeVertices, reverseVertexMapping, reverseTextureVertexMapping);
 
   return newMesh;
 }
@@ -1185,6 +1287,61 @@ std::vector<bool> facesToVertices(const MeshT<T>& mesh, const std::vector<bool>&
   return facesToVertices(mesh.faces, activeFaces, mesh.vertices.size());
 }
 
+template <typename T>
+std::vector<bool> verticesToPolys(const MeshT<T>& mesh, const std::vector<bool>& activeVertices) {
+  MT_CHECK(
+      activeVertices.size() == mesh.vertices.size(),
+      "Active vertices size ({}) does not match mesh vertex count ({})",
+      activeVertices.size(),
+      mesh.vertices.size());
+
+  return verticesToPolys(mesh.polyFaces, mesh.polyFaceSizes, activeVertices);
+}
+
+template <typename T>
+std::vector<bool> polysToVertices(const MeshT<T>& mesh, const std::vector<bool>& activePolys) {
+  MT_CHECK(
+      activePolys.size() == mesh.polyFaceSizes.size(),
+      "Active polys size ({}) does not match polygon count ({})",
+      activePolys.size(),
+      mesh.polyFaceSizes.size());
+
+  return polysToVertices(mesh.polyFaces, mesh.polyFaceSizes, activePolys, mesh.vertices.size());
+}
+
+template <typename T>
+MeshT<T> reduceMeshByPolys(const MeshT<T>& mesh, const std::vector<bool>& activePolys) {
+  MT_CHECK(
+      activePolys.size() == mesh.polyFaceSizes.size(),
+      "Active polys size ({}) does not match polygon count ({})",
+      activePolys.size(),
+      mesh.polyFaceSizes.size());
+
+  // Convert polygon selection to vertex selection, then to face selection
+  const auto activeVertices = polysToVertices(mesh, activePolys);
+  const auto activeFaces = verticesToFaces(mesh, activeVertices);
+
+  return reduceMeshInternal(mesh, activeVertices, activeFaces);
+}
+
+template <typename T>
+CharacterT<T> reduceMeshByPolys(
+    const CharacterT<T>& character,
+    const std::vector<bool>& activePolys) {
+  MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
+  MT_CHECK(
+      activePolys.size() == character.mesh->polyFaceSizes.size(),
+      "Active polys size ({}) does not match polygon count ({})",
+      activePolys.size(),
+      character.mesh->polyFaceSizes.size());
+
+  // Convert polygon selection to vertex selection, then to face selection
+  const auto activeVertices = polysToVertices(*character.mesh, activePolys);
+  const auto activeFaces = verticesToFaces(*character.mesh, activeVertices);
+
+  return reduceMeshComponents(character, activeVertices, activeFaces);
+}
+
 // Explicit instantiations for commonly used types
 template CharacterT<float> reduceMeshByVertices<float>(
     const CharacterT<float>& character,
@@ -1233,5 +1390,37 @@ template std::vector<bool> facesToVertices<float>(
 template std::vector<bool> facesToVertices<double>(
     const MeshT<double>& mesh,
     const std::vector<bool>& activeFaces);
+
+template std::vector<bool> verticesToPolys<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activeVertices);
+
+template std::vector<bool> verticesToPolys<double>(
+    const MeshT<double>& mesh,
+    const std::vector<bool>& activeVertices);
+
+template std::vector<bool> polysToVertices<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activePolys);
+
+template std::vector<bool> polysToVertices<double>(
+    const MeshT<double>& mesh,
+    const std::vector<bool>& activePolys);
+
+template MeshT<float> reduceMeshByPolys<float>(
+    const MeshT<float>& mesh,
+    const std::vector<bool>& activePolys);
+
+template MeshT<double> reduceMeshByPolys<double>(
+    const MeshT<double>& mesh,
+    const std::vector<bool>& activePolys);
+
+template CharacterT<float> reduceMeshByPolys<float>(
+    const CharacterT<float>& character,
+    const std::vector<bool>& activePolys);
+
+template CharacterT<double> reduceMeshByPolys<double>(
+    const CharacterT<double>& character,
+    const std::vector<bool>& activePolys);
 
 } // namespace momentum
