@@ -295,7 +295,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           py::arg("skinned_locators"),
           py::arg("replace") = false)
       .def_readonly("name", &mm::Character::name, "The character's name.")
-      .def_readonly("metadata", &mm::Character::metadata, "The character's metadata.")
+      .def_readwrite("metadata", &mm::Character::metadata, "The character's metadata.")
       .def_readonly(
           "skeleton", &mm::Character::skeleton, "The character's skeleton. See :class:`Skeleton`.")
       .def_readonly(
