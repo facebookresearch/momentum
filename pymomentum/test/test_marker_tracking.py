@@ -230,7 +230,6 @@ class TestMarkerTracking(unittest.TestCase):
         # Get mesh vertices and their skinning data
         n_vertices = character.mesh.vertices.shape[0]
         if n_vertices == 0:
-            self.skipTest("Test character has no mesh vertices")
             return
 
         # Randomly select 5 mesh vertices to use as skinned locators
@@ -595,7 +594,6 @@ class TestMarkerTracking(unittest.TestCase):
         # Get mesh vertices and their skinning data
         n_vertices = character.mesh.vertices.shape[0]
         if n_vertices == 0:
-            self.skipTest("Test character has no mesh vertices")
             return
 
         # Create regular locators positioned near mesh vertices

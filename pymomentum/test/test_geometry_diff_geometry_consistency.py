@@ -1067,7 +1067,6 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
 
         # Skip test if character has no skinned locators
         if not character.skinned_locators:
-            self.skipTest("Test character has no skinned locators")
             return
 
         nBatch = 2
