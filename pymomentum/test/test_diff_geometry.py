@@ -665,7 +665,6 @@ class TestDiffGeometry(unittest.TestCase):
         # Get mesh vertices and their skinning data
         n_vertices = c.mesh.vertices.shape[0]
         if n_vertices == 0:
-            self.skipTest("Test character has no mesh vertices")
             return
 
         # Randomly select 5 mesh vertices to use as skinned locators
