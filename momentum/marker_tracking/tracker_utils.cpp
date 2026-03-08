@@ -62,7 +62,7 @@ std::vector<std::vector<PositionData>> createConstraintData(
           locators.at(locatorIdx).offset,
           jMarker.pos.cast<float>(),
           locators.at(locatorIdx).parent,
-          locators.at(locatorIdx).weight));
+          locators.at(locatorIdx).weight * jMarker.confidence));
     }
   }
 

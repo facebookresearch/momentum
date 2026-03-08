@@ -16,15 +16,19 @@ namespace momentum {
 
 /// Marker represents a motion capture marker that defines an active marker during motion capture.
 struct Marker {
-  /// The name of the marker, default is "Undefined"
+  /// The name of the marker, default is "Undefined".
   std::string name = "Undefined";
 
   /// The 3D position of the marker as a Vector3d object, where the unit is assumed to be in
   /// centimeters.
   Vector3d pos = {0.0, 0.0, 0.0};
 
-  /// The occlusion status of the marker, true if occluded, false otherwise
+  /// The occlusion status of the marker, true if occluded, false otherwise.
   bool occluded = true;
+
+  /// How much to trust this observation, eg. a keypoint. The value should be in [0, 1] but not
+  /// enforced.
+  float confidence = 1.0;
 };
 
 /// MarkerSequence stores all the frames from a single capture sequence for one subject (motion
