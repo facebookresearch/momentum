@@ -7,9 +7,6 @@
 
 #include "momentum/character_solver/normal_error_function.h"
 
-#include "momentum/character/character.h"
-#include "momentum/character/skeleton.h"
-#include "momentum/character/skeleton_state.h"
 #include "momentum/common/profile.h"
 
 namespace momentum {
@@ -19,24 +16,18 @@ void NormalErrorFunctionT<T>::evalFunction(
     const size_t constrIndex,
     const JointStateT<T>& state,
     Vector<T, 1>& f,
-    optional_ref<std::array<Vector3<T>, 2>> v,
-    optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 2>> dfdv) const {
+    std::array<Vector3<T>, 2>& v,
+    std::array<Eigen::Matrix<T, 1, 3>, 2>& dfdv) const {
   MT_PROFILE_FUNCTION();
 
   const NormalDataT<T>& constr = this->constraints_[constrIndex];
-  Vector3<T> point = state.transform * constr.localPoint;
-  Vector3<T> normal = state.rotation() * constr.localNormal;
-  const Vector3<T> dist = point - constr.globalPoint;
+  v[0] = state.transform * constr.localPoint;
+  v[1] = state.rotation() * constr.localNormal;
+  const Vector3<T> dist = v[0] - constr.globalPoint;
 
-  f[0] = normal.dot(dist);
-  if (v) {
-    v->get().at(0) = std::move(point);
-    v->get().at(1) = normal;
-  }
-  if (dfdv) {
-    dfdv->get().at(0) = std::move(normal);
-    dfdv->get().at(1) = dist;
-  }
+  f[0] = v[1].dot(dist);
+  dfdv[0] = v[1].transpose();
+  dfdv[1] = dist.transpose();
 }
 
 template class NormalErrorFunctionT<float>;
