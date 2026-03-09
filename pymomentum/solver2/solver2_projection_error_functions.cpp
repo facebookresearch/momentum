@@ -10,7 +10,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character_solver/camera_projection_error_function.h>
 #include <momentum/character_solver/projection_error_function.h>
-#include <momentum/character_solver/vertex_projection_error_function.h>
+#include <momentum/character_solver/vertex_projection_constraint_error_function.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
 #include <fmt/format.h>
@@ -207,46 +207,46 @@ This is useful for camera-based constraints where you want to match a 3D point t
           "Returns the list of projection constraints.");
 
   // Vertex projection error function
-  py::class_<mm::VertexProjectionConstraint>(
+  py::class_<mm::VertexProjectionConstraintDataT<float>>(
       m, "VertexProjectionConstraint", "Read-only access to a vertex projection constraint.")
       .def(
           "__repr__",
-          [](const mm::VertexProjectionConstraint& self) {
+          [](const mm::VertexProjectionConstraintDataT<float>& self) {
             return fmt::format(
                 "VertexProjectionConstraint(vertex_index={}, weight={}, target_position=[{:.3f}, {:.3f}])",
                 self.vertexIndex,
                 self.weight,
-                self.targetPosition.x(),
-                self.targetPosition.y());
+                self.target.x(),
+                self.target.y());
           })
       .def_readonly(
           "vertex_index",
-          &mm::VertexProjectionConstraint::vertexIndex,
+          &mm::VertexProjectionConstraintDataT<float>::vertexIndex,
           "Returns the index of the vertex to project.")
       .def_readonly(
           "weight",
-          &mm::VertexProjectionConstraint::weight,
+          &mm::VertexProjectionConstraintDataT<float>::weight,
           "Returns the weight of the constraint.")
       .def_readonly(
           "target_position",
-          &mm::VertexProjectionConstraint::targetPosition,
+          &mm::VertexProjectionConstraintDataT<float>::target,
           "Returns the target 2D position.")
       .def_readonly(
           "projection",
-          &mm::VertexProjectionConstraint::projection,
+          &mm::VertexProjectionConstraintDataT<float>::projectionMatrix,
           "Returns the 3x4 projection matrix.");
 
   py::class_<
-      mm::VertexProjectionErrorFunctionT<float>,
+      mm::VertexProjectionConstraintErrorFunctionT<float>,
       mm::SkeletonErrorFunction,
-      std::shared_ptr<mm::VertexProjectionErrorFunctionT<float>>>(
+      std::shared_ptr<mm::VertexProjectionConstraintErrorFunctionT<float>>>(
       m,
       "VertexProjectionErrorFunction",
       R"(The VertexProjectionErrorFunction projects 3D vertices onto 2D points using a projection matrix.
 This is useful for camera-based constraints where you want to match a 3D vertex to a 2D observation.)")
       .def(
           "__repr__",
-          [](const mm::VertexProjectionErrorFunctionT<float>& self) {
+          [](const mm::VertexProjectionConstraintErrorFunctionT<float>& self) {
             return fmt::format(
                 "VertexProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
@@ -254,12 +254,12 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           })
       .def(
           py::init<>(
-              [](const mm::Character& character,
-                 size_t maxThreads,
-                 float weight) -> std::shared_ptr<mm::VertexProjectionErrorFunctionT<float>> {
+              [](const mm::Character& character, size_t maxThreads, float weight)
+                  -> std::shared_ptr<mm::VertexProjectionConstraintErrorFunctionT<float>> {
                 validateWeight(weight, "weight");
-                auto result = std::make_shared<mm::VertexProjectionErrorFunctionT<float>>(
-                    character, maxThreads);
+                auto result = std::make_shared<mm::VertexProjectionConstraintErrorFunctionT<float>>(
+                    character, character.parameterTransform);
+                result->setMaxThreads(static_cast<uint32_t>(maxThreads));
                 result->setWeight(weight);
                 return result;
               }),
@@ -274,14 +274,16 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           py::arg("weight") = 1.0f)
       .def(
           "add_constraint",
-          [](mm::VertexProjectionErrorFunctionT<float>& self,
+          [](mm::VertexProjectionConstraintErrorFunctionT<float>& self,
              int vertexIndex,
              float weight,
              const Eigen::Vector2f& targetPosition,
              const Eigen::Matrix<float, 3, 4>& projection) {
             validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
             validateWeight(weight, "weight");
-            self.addConstraint(vertexIndex, weight, targetPosition, projection);
+            self.addConstraint(
+                mm::VertexProjectionConstraintDataT<float>(
+                    vertexIndex, targetPosition, projection, weight));
           },
           R"(Adds a vertex projection constraint to the error function.
 
@@ -295,17 +297,17 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
           py::arg("projection"))
       .def(
           "clear_constraints",
-          &mm::VertexProjectionErrorFunctionT<float>::clearConstraints,
+          &mm::VertexProjectionConstraintErrorFunctionT<float>::clearConstraints,
           "Clears all vertex projection constraints from the error function.")
       .def_property_readonly(
           "constraints",
-          [](const mm::VertexProjectionErrorFunctionT<float>& self) {
+          [](const mm::VertexProjectionConstraintErrorFunctionT<float>& self) {
             return self.getConstraints();
           },
           "Returns the list of vertex projection constraints.")
       .def(
           "add_constraints",
-          [](mm::VertexProjectionErrorFunctionT<float>& self,
+          [](mm::VertexProjectionConstraintErrorFunctionT<float>& self,
              const py::array_t<int>& vertexIndex,
              const py::array_t<float>& weight,
              const py::array_t<float>& targetPosition,
@@ -336,10 +338,11 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
               }
 
               self.addConstraint(
-                  vertexIndexAcc(i),
-                  weightAcc(i),
-                  Eigen::Vector2f(targetPositionAcc(i, 0), targetPositionAcc(i, 1)),
-                  proj);
+                  mm::VertexProjectionConstraintDataT<float>(
+                      vertexIndexAcc(i),
+                      Eigen::Vector2f(targetPositionAcc(i, 0), targetPositionAcc(i, 1)),
+                      proj,
+                      weightAcc(i)));
             }
           },
           R"(Adds multiple vertex projection constraints to the error function.
