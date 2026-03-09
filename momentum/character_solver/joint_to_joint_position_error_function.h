@@ -68,6 +68,8 @@ struct JointToJointPositionDataT {
 ///
 /// where T_ref and T_src are the global transformations of the reference and
 /// source joints respectively.
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
 class JointToJointPositionErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
@@ -125,8 +127,8 @@ class JointToJointPositionErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
-  /// Get number of constraints.
-  [[nodiscard]] size_t numConstraints() const {
+  /// Returns the number of constraints.
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 
