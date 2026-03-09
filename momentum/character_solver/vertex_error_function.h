@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character_solver/error_function_types.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/plane_error_function.h>
 #include <momentum/character_solver/position_error_function.h>
@@ -31,15 +32,6 @@ struct VertexConstraintT {
         this->targetNormal.template cast<T2>()};
   }
 };
-
-enum class VertexConstraintType {
-  Position, // Target the vertex position
-  Plane, // point-to-plane distance using the target normal
-  Normal, // point-to-plane distance using the source (body) normal
-  SymmetricNormal, // Point-to-plane using a 50/50 mix of source and target normal
-};
-
-[[nodiscard]] std::string_view toString(VertexConstraintType type);
 
 template <typename T>
 class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
@@ -82,7 +74,7 @@ class VertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 

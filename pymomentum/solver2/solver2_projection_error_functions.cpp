@@ -67,7 +67,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
             return fmt::format(
                 "ProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -199,7 +199,7 @@ This is useful for camera-based constraints where you want to match a 3D point t
           "Returns true if there are no constraints.")
       .def(
           "num_constraints",
-          &mm::ProjectionErrorFunctionT<float>::numConstraints,
+          &mm::ProjectionErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.")
       .def_property_readonly(
           "constraints",
@@ -250,7 +250,7 @@ This is useful for camera-based constraints where you want to match a 3D vertex 
             return fmt::format(
                 "VertexProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -400,7 +400,7 @@ camera_offset is used directly as the eye-from-world transform.)")
             return fmt::format(
                 "CameraProjectionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -558,7 +558,7 @@ camera_offset is used directly as the eye-from-world transform.)")
           "Clears all camera projection constraints.")
       .def(
           "num_constraints",
-          &mm::CameraProjectionErrorFunctionT<float>::numConstraints,
+          &mm::CameraProjectionErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.")
       .def_property_readonly(
           "constraints",

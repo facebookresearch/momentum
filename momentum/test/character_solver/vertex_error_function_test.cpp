@@ -644,7 +644,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexSDFError_GradientsAndJacobians) {
     errorFunction.addConstraint(constraint);
   }
 
-  EXPECT_EQ(errorFunction.numConstraints(), numTestVertices);
+  EXPECT_EQ(errorFunction.getNumConstraints(), numTestVertices);
 
   {
     SCOPED_TRACE("Vertex SDF Error Test - Zero Parameters");
@@ -697,7 +697,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexSDFError_GradientsAndJacobians) {
     SCOPED_TRACE("Clear Constraints Test");
 
     errorFunction.clearConstraints();
-    EXPECT_EQ(errorFunction.numConstraints(), 0);
+    EXPECT_EQ(errorFunction.getNumConstraints(), 0);
 
     const ModelParametersT<T> zeroParams =
         ModelParametersT<T>::Zero(transform.numAllModelParameters());

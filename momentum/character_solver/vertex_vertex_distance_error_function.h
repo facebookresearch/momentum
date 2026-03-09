@@ -82,7 +82,7 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   }
 
   /// Get the number of constraints
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 
