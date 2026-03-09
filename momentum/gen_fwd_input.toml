@@ -97,6 +97,7 @@ template_classes = [
     "ProjectionErrorFunction",
     "SDFCollisionErrorFunction",
     "SimdCollisionErrorFunction",
+    "SkeletonDerivative",
     "SkeletonErrorFunction",
     "SkeletonSolverFunction",
     "SkinnedLocatorErrorFunction",
