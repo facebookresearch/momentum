@@ -22,7 +22,6 @@
 #include <momentum/character_solver/trust_region_qr.h>
 #include <momentum/diff_ik/fully_differentiable_body_ik.h>
 #include <momentum/solver/gauss_newton_solver.h>
-#include <momentum/solver/subset_gauss_newton_solver.h>
 
 #include <atomic>
 
@@ -140,10 +139,10 @@ at::Tensor solveTensorIKProblem(
 
       std::unique_ptr<momentum::SolverT<T>> solver;
       if (solverOptions.linearSolverType == LinearSolverType::Cholesky) {
-        auto derivedSolverOptions = momentum::SubsetGaussNewtonSolverOptions(momentumSolverOptions);
+        auto derivedSolverOptions = momentum::GaussNewtonSolverOptions(momentumSolverOptions);
         derivedSolverOptions.regularization = solverOptions.levmar_lambda;
         derivedSolverOptions.doLineSearch = solverOptions.lineSearch;
-        solver = std::make_unique<momentum::SubsetGaussNewtonSolverT<T>>(
+        solver = std::make_unique<momentum::GaussNewtonSolverT<T>>(
             derivedSolverOptions, &solverFunction);
       } else if (solverOptions.linearSolverType == LinearSolverType::TrustRegionQR) {
         solver =
