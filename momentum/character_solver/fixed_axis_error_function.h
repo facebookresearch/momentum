@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/constraint_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -35,14 +35,14 @@ struct FixedAxisDataT : ConstraintData {
 
 /// Diff: compute the element wise differences between the two axis
 template <typename T>
-class FixedAxisDiffErrorFunctionT : public ConstraintErrorFunctionT<T, FixedAxisDataT<T>, 3, 1, 0> {
+class FixedAxisDiffErrorFunctionT : public JointErrorFunctionT<T, FixedAxisDataT<T>, 3, 1, 0> {
  public:
   explicit FixedAxisDiffErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, FixedAxisDataT<T>, 3, 1, 0>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, FixedAxisDataT<T>, 3, 1, 0>(skel, pt, lossAlpha, lossC) {}
 
   explicit FixedAxisDiffErrorFunctionT(
       const Character& character,
@@ -63,20 +63,20 @@ class FixedAxisDiffErrorFunctionT : public ConstraintErrorFunctionT<T, FixedAxis
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector3<T>& f,
-      optional_ref<std::array<Vector3<T>, 1>> v = {},
-      optional_ref<std::array<Matrix3<T>, 1>> dfdv = {}) const final;
+      std::array<Vector3<T>, 1>& v,
+      std::array<Matrix3<T>, 1>& dfdv) const final;
 };
 
 /// Cos: compute the dot product between the two axis - cosine of the angle between them
 template <typename T>
-class FixedAxisCosErrorFunctionT : public ConstraintErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0> {
+class FixedAxisCosErrorFunctionT : public JointErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0> {
  public:
   explicit FixedAxisCosErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0>(skel, pt, lossAlpha, lossC) {}
 
   explicit FixedAxisCosErrorFunctionT(
       const Character& character,
@@ -97,21 +97,22 @@ class FixedAxisCosErrorFunctionT : public ConstraintErrorFunctionT<T, FixedAxisD
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector<T, 1>& f,
-      optional_ref<std::array<Vector3<T>, 1>> v = {},
-      optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 1>> dfdv = {}) const final;
+      std::array<Vector3<T>, 1>& v,
+      std::array<Eigen::Matrix<T, 1, 3>, 1>& dfdv) const final;
 };
+
+/// Angle: compute the angle
 
 /// Angle: compute the angle between the two axis using acosine of their dot product.
 template <typename T>
-class FixedAxisAngleErrorFunctionT
-    : public ConstraintErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0> {
+class FixedAxisAngleErrorFunctionT : public JointErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0> {
  public:
   explicit FixedAxisAngleErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, FixedAxisDataT<T>, 1, 1, 0>(skel, pt, lossAlpha, lossC) {}
 
   explicit FixedAxisAngleErrorFunctionT(
       const Character& character,
@@ -132,8 +133,8 @@ class FixedAxisAngleErrorFunctionT
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector<T, 1>& f,
-      optional_ref<std::array<Vector3<T>, 1>> v = {},
-      optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 1>> dfdv = {}) const final;
+      std::array<Vector3<T>, 1>& v,
+      std::array<Eigen::Matrix<T, 1, 3>, 1>& dfdv) const final;
 };
 
 } // namespace momentum
