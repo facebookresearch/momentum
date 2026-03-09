@@ -6,7 +6,6 @@
  */
 
 #include "momentum/character_solver/point_triangle_vertex_error_function.h"
-#include "momentum/character_solver/skinning_weight_iterator.h"
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/blend_shape_skinning.h"
@@ -16,6 +15,8 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
+#include "momentum/character_solver/skeleton_derivative.h"
+#include "momentum/character_solver/skinning_weight_iterator.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/profile.h"
@@ -161,21 +162,6 @@ void gradient_jointParams_to_modelParams(
 
 template <typename T>
 void jacobian_jointParams_to_modelParams(
-    const Eigen::Ref<const Eigen::VectorX<T>> jacobian_jointParams,
-    const Eigen::Index iJointParam,
-    const ParameterTransform& parameterTransform,
-    Eigen::Ref<Eigen::MatrixX<T>> jacobian) {
-  // explicitly multiply with the parameter transform to generate parameter space gradients
-  for (auto index = parameterTransform.transform.outerIndexPtr()[iJointParam];
-       index < parameterTransform.transform.outerIndexPtr()[iJointParam + 1];
-       ++index) {
-    jacobian.col(parameterTransform.transform.innerIndexPtr()[index]) +=
-        jacobian_jointParams * parameterTransform.transform.valuePtr()[index];
-  }
-}
-
-template <typename T>
-void jacobian_jointParams_to_modelParams(
     const T jacobian_jointParams,
     const Eigen::Index iJointParam,
     const ParameterTransform& parameterTransform,
@@ -215,135 +201,6 @@ Eigen::Vector3<T> calculateDWorldPos(
   }
 
   return d_worldPos;
-}
-
-template <typename T>
-double PointTriangleVertexErrorFunctionT<T>::calculatePositionGradient(
-    const ModelParametersT<T>& /* modelParameters */,
-    const SkeletonStateT<T>& state,
-    const MeshStateT<T>& meshState,
-    const PointTriangleVertexConstraintT<T>& constr,
-    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  const Eigen::Vector3<T> srcPos = meshState.posedMesh_->vertices[constr.srcVertexIndex];
-  const Eigen::Vector3<T> tgtPos = computeTargetPosition(*meshState.posedMesh_, constr);
-
-  const Eigen::Vector3<T> diff = srcPos - tgtPos;
-
-  // calculate the difference between target and position and error
-  const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
-
-  const auto d_targetPos_d_tgtTriVertexPos =
-      compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
-
-  // To simplify things we'll have one loop that goes through all 3 target triangle vertices _and_
-  // the source vertex.
-  //   iter 0-3: target triangle vertices
-  //   iter 4: source vertex
-  for (int iTriVert = 0; iTriVert < 4; ++iTriVert) {
-    const auto vertexIndex =
-        iTriVert < 3 ? constr.tgtTriangleIndices[iTriVert] : constr.srcVertexIndex;
-    // Flip sign for the target vertex since the actual error is (srcPoint - tgtPoint)
-    const Eigen::Matrix3<T> d_targetPos_d_vertexIndex = iTriVert < 3
-        ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
-        : Eigen::Matrix3<T>::Identity();
-
-    SkinningWeightIteratorT<T> skinningIter(
-        this->character_, *meshState.restMesh_, state, vertexIndex);
-
-    // IN handle derivatives wrt jointParameters
-    while (!skinningIter.finished()) {
-      size_t jointIndex = 0;
-      T boneWeight;
-      Eigen::Vector3<T> pos;
-      std::tie(jointIndex, boneWeight, pos) = skinningIter.next();
-
-      // check for valid index
-      MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-      const auto& jointState = state.jointState[jointIndex];
-      const size_t paramIndex = jointIndex * kParametersPerJoint;
-      const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-      // calculate derivatives based on active joints
-      for (size_t d = 0; d < 3; d++) {
-        if (this->activeJointParams_[paramIndex + d]) {
-          // Gradient wrt translation:
-          gradient_jointParams_to_modelParams(
-              boneWeight *
-                  diff.dot(d_targetPos_d_vertexIndex * jointState.getTranslationDerivative(d)) *
-                  wgt,
-              paramIndex + d,
-              this->parameterTransform_,
-              gradient);
-        }
-        if (this->activeJointParams_[paramIndex + 3 + d]) {
-          // Gradient wrt rotation:
-          gradient_jointParams_to_modelParams(
-              boneWeight *
-                  diff.dot(d_targetPos_d_vertexIndex * jointState.getRotationDerivative(d, posd)) *
-                  wgt,
-              paramIndex + 3 + d,
-              this->parameterTransform_,
-              gradient);
-        }
-      }
-      if (this->activeJointParams_[paramIndex + 6]) {
-        // Gradient wrt scale:
-        gradient_jointParams_to_modelParams(
-            boneWeight * diff.dot(d_targetPos_d_vertexIndex * jointState.getScaleDerivative(posd)) *
-                wgt,
-            paramIndex + 6,
-            this->parameterTransform_,
-            gradient);
-      }
-    } // OUT handle derivatives wrt jointParameters
-
-    // IN handle derivatives wrt blend shape parameters
-    if (this->character_.blendShape) {
-      for (Eigen::Index iBlendShape = 0;
-           iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-           ++iBlendShape) {
-        const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-        if (paramIdx < 0) {
-          continue;
-        }
-
-        const Eigen::Vector3<T> d_restPos =
-            this->character_.blendShape->getShapeVectors()
-                .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-                .template cast<T>();
-        Eigen::Vector3<T> d_worldPos =
-            calculateDWorldPos(character_, state, vertexIndex, d_restPos);
-
-        gradient[paramIdx] += wgt * diff.dot(d_targetPos_d_vertexIndex * d_worldPos);
-      }
-    }
-    // OUT handle derivatives wrt blend shape parameters
-
-    // IN handle derivatives wrt face expression blend shape parameters
-    if (this->character_.faceExpressionBlendShape) {
-      for (Eigen::Index iBlendShape = 0;
-           iBlendShape < this->parameterTransform_.faceExpressionParameters.size();
-           ++iBlendShape) {
-        const auto paramIdx = this->parameterTransform_.faceExpressionParameters[iBlendShape];
-        if (paramIdx < 0) {
-          continue;
-        }
-
-        const Eigen::Vector3<T> d_restPos =
-            this->character_.faceExpressionBlendShape->getShapeVectors()
-                .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-                .template cast<T>();
-        Eigen::Vector3<T> d_worldPos =
-            calculateDWorldPos(character_, state, vertexIndex, d_restPos);
-
-        gradient[paramIdx] += wgt * diff.dot(d_targetPos_d_vertexIndex * d_worldPos);
-      }
-    }
-    // OUT handle derivatives wrt face expression blend shape parameters
-  }
-
-  return constr.weight * diff.squaredNorm() * kPositionWeight;
 }
 
 template <typename T>
@@ -399,6 +256,56 @@ std::array<Eigen::Matrix3<T>, 3> compute_d_targetPos_d_vertexPos(
 }
 
 template <typename T>
+double PointTriangleVertexErrorFunctionT<T>::calculatePositionGradient(
+    const ModelParametersT<T>& /* modelParameters */,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
+    const PointTriangleVertexConstraintT<T>& constr,
+    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
+  const Eigen::Vector3<T> srcPos = meshState.posedMesh_->vertices[constr.srcVertexIndex];
+  const Eigen::Vector3<T> tgtPos = computeTargetPosition(*meshState.posedMesh_, constr);
+
+  const Eigen::Vector3<T> diff = srcPos - tgtPos;
+
+  // calculate the difference between target and position and error
+  const T wgt = constr.weight * 2.0f * kPositionWeight * this->weight_;
+
+  const auto d_targetPos_d_tgtTriVertexPos =
+      compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
+
+  // weightedResidual = 2 * weight * loss_deriv * f
+  // For position: f = diff, loss = 0.5 * f^2, loss_deriv = 1
+  // So weightedResidual = 2 * weight * diff (already scaled by wgt)
+  const Eigen::Vector3<T> weightedResidual = wgt * diff;
+
+  SkeletonDerivativeT<T> skeletonDerivative(
+      this->skeleton_,
+      this->parameterTransform_,
+      this->activeJointParams_,
+      this->enabledParameters_);
+
+  // To simplify things we'll have one loop that goes through all 3 target triangle vertices _and_
+  // the source vertex.
+  //   iter 0-2: target triangle vertices
+  //   iter 3: source vertex
+  for (int iTriVert = 0; iTriVert < 4; ++iTriVert) {
+    const auto vertexIndex =
+        iTriVert < 3 ? constr.tgtTriangleIndices[iTriVert] : constr.srcVertexIndex;
+    const Eigen::Vector3<T>& vertexPos = meshState.posedMesh_->vertices[vertexIndex];
+
+    // Flip sign for the target vertex since the actual error is (srcPoint - tgtPoint)
+    const Eigen::Matrix3<T> dfdv = iTriVert < 3
+        ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
+        : Eigen::Matrix3<T>::Identity();
+
+    skeletonDerivative.template accumulateVertexGradient<3>(
+        vertexIndex, vertexPos, dfdv, weightedResidual, state, meshState, character_, gradient);
+  }
+
+  return constr.weight * diff.squaredNorm() * kPositionWeight;
+}
+
+template <typename T>
 double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
     const ModelParametersT<T>& /* modelParameters */,
     const SkeletonStateT<T>& state,
@@ -410,9 +317,6 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
   const Eigen::Vector3<T> srcPos = meshState.posedMesh_->vertices[constr.srcVertexIndex];
   const Eigen::Vector3<T> tgtPos = computeTargetPosition(*meshState.posedMesh_, constr);
 
-  // The derivative of the target position wrt the triangle vertices:
-  //   p_tgt = bary_0 * p_0 + bary_1 * p_1 + bary_2 * p_2 + depth * n
-
   const Eigen::Vector3<T> diff = meshState.posedMesh_->vertices[constr.srcVertexIndex] - tgtPos;
 
   const T wgt = std::sqrt(constr.weight * kPositionWeight * this->weight_);
@@ -420,107 +324,30 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
   const auto d_targetPos_d_tgtTriVertexPos =
       compute_d_targetPos_d_vertexPos(constr, *meshState.posedMesh_);
 
+  SkeletonDerivativeT<T> skeletonDerivative(
+      this->skeleton_,
+      this->parameterTransform_,
+      this->activeJointParams_,
+      this->enabledParameters_);
+
   // To simplify things we'll have one loop that goes through all 3 target triangle vertices _and_
   // the source vertex.
-  //   iter 0-3: target triangle vertices
-  //   iter 4: source vertex
+  //   iter 0-2: target triangle vertices
+  //   iter 3: source vertex
   for (int iTriVert = 0; iTriVert < 4; ++iTriVert) {
     const auto vertexIndex =
         iTriVert < 3 ? constr.tgtTriangleIndices[iTriVert] : constr.srcVertexIndex;
+    const Eigen::Vector3<T>& vertexPos = meshState.posedMesh_->vertices[vertexIndex];
+
     // Flip sign for the target vertex since the actual error is (srcPoint - tgtPoint)
-    const Eigen::Matrix3<T> d_targetPos_d_vertexPos = iTriVert < 3
+    const Eigen::Matrix3<T> dfdv = iTriVert < 3
         ? Eigen::Matrix3<T>(-d_targetPos_d_tgtTriVertexPos[iTriVert])
         : Eigen::Matrix3<T>::Identity();
 
-    SkinningWeightIteratorT<T> skinningIter(
-        this->character_, *meshState.restMesh_, state, vertexIndex);
-
-    // IN handle derivatives wrt jointParameters
-    while (!skinningIter.finished()) {
-      size_t jointIndex = 0;
-      T boneWeight;
-      Eigen::Vector3<T> pos;
-      std::tie(jointIndex, boneWeight, pos) = skinningIter.next();
-
-      // check for valid index
-      MT_CHECK(jointIndex < this->skeleton_.joints.size());
-
-      const auto& jointState = state.jointState[jointIndex];
-      const size_t paramIndex = jointIndex * kParametersPerJoint;
-      const Eigen::Vector3<T> posd = pos - jointState.translation();
-
-      // calculate derivatives based on active joints
-      for (size_t d = 0; d < 3; d++) {
-        if (this->activeJointParams_[paramIndex + d]) {
-          jacobian_jointParams_to_modelParams<T>(
-              boneWeight * wgt * d_targetPos_d_vertexPos * jointState.getTranslationDerivative(d),
-              paramIndex + d,
-              this->parameterTransform_,
-              jac);
-        }
-        if (this->activeJointParams_[paramIndex + 3 + d]) {
-          jacobian_jointParams_to_modelParams<T>(
-              boneWeight * wgt * d_targetPos_d_vertexPos *
-                  jointState.getRotationDerivative(d, posd),
-              paramIndex + d + 3,
-              this->parameterTransform_,
-              jac);
-        }
-      }
-      if (this->activeJointParams_[paramIndex + 6]) {
-        jacobian_jointParams_to_modelParams<T>(
-            boneWeight * wgt * d_targetPos_d_vertexPos * jointState.getScaleDerivative(posd),
-            paramIndex + 6,
-            this->parameterTransform_,
-            jac);
-      }
-    }
-    // OUT handle derivatives wrt jointParameters
-
-    // IN handle derivatives wrt blend shape parameters
-    if (this->character_.blendShape) {
-      for (Eigen::Index iBlendShape = 0;
-           iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-           ++iBlendShape) {
-        const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-        if (paramIdx < 0) {
-          continue;
-        }
-
-        const Eigen::Vector3<T> d_restPos =
-            this->character_.blendShape->getShapeVectors()
-                .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-                .template cast<T>();
-        Eigen::Vector3<T> d_worldPos =
-            calculateDWorldPos(this->character_, state, vertexIndex, d_restPos);
-
-        jac.col(paramIdx) += wgt * d_targetPos_d_vertexPos * d_worldPos;
-      }
-    }
-    // OUT handle derivatives wrt blend shape parameters
-
-    // IN handle derivatives wrt face expression blend shape parameters
-    if (this->character_.faceExpressionBlendShape) {
-      for (Eigen::Index iBlendShape = 0;
-           iBlendShape < this->parameterTransform_.faceExpressionParameters.size();
-           ++iBlendShape) {
-        const auto paramIdx = this->parameterTransform_.faceExpressionParameters[iBlendShape];
-        if (paramIdx < 0) {
-          continue;
-        }
-
-        const Eigen::Vector3<T> d_restPos =
-            this->character_.faceExpressionBlendShape->getShapeVectors()
-                .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-                .template cast<T>();
-        Eigen::Vector3<T> d_worldPos =
-            calculateDWorldPos(this->character_, state, vertexIndex, d_restPos);
-
-        jac.col(paramIdx) += wgt * d_targetPos_d_vertexPos * d_worldPos;
-      }
-    }
+    skeletonDerivative.template accumulateVertexJacobian<3>(
+        vertexIndex, vertexPos, dfdv, wgt, state, meshState, character_, jac, 0);
   }
-  // OUT handle derivatives wrt face expression blend shape parameters
+
   res = diff * wgt;
 
   return wgt * wgt * diff.squaredNorm();
