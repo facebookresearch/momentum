@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/constraint_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -39,14 +39,14 @@ struct OrientationDataT : ConstraintData {
 /// rotation matrix to a target rotation. Therefore, function f has 9 numbers (FuncDim), and
 /// NumVec=3 for the 3 rotation axis.
 template <typename T>
-class OrientationErrorFunctionT : public ConstraintErrorFunctionT<T, OrientationDataT<T>, 9, 3, 0> {
+class OrientationErrorFunctionT : public JointErrorFunctionT<T, OrientationDataT<T>, 9, 3, 0> {
  public:
   explicit OrientationErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, OrientationDataT<T>, 9, 3, 0>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, OrientationDataT<T>, 9, 3, 0>(skel, pt, lossAlpha, lossC) {}
 
   explicit OrientationErrorFunctionT(
       const Character& character,
@@ -67,8 +67,8 @@ class OrientationErrorFunctionT : public ConstraintErrorFunctionT<T, Orientation
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector<T, 9>& f,
-      optional_ref<std::array<Vector3<T>, 3>> v = {},
-      optional_ref<std::array<Eigen::Matrix<T, 9, 3>, 3>> dfdv = {}) const final;
+      std::array<Vector3<T>, 3>& v,
+      std::array<Eigen::Matrix<T, 9, 3>, 3>& dfdv) const final;
 };
 
 } // namespace momentum
