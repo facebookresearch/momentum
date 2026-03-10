@@ -56,7 +56,7 @@ class VertexSDFErrorFunctionT : public SkeletonErrorFunctionT<T> {
   [[nodiscard]] const std::vector<VertexSDFConstraintT<T>>& getConstraints() const;
 
   /// Returns the number of constraints.
-  [[nodiscard]] size_t numConstraints() const;
+  [[nodiscard]] size_t getNumConstraints() const;
 
   /// Computes the error for the given model parameters and skeleton state.
   [[nodiscard]] double getError(

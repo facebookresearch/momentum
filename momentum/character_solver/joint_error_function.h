@@ -9,6 +9,7 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/types.h>
+#include <momentum/character_solver/error_function_types.h>
 #include <momentum/character_solver/skeleton_derivative.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/math/generalized_loss.h>
@@ -18,27 +19,6 @@
 #include <span>
 
 namespace momentum {
-
-/// Base structure of constraint data
-struct ConstraintData {
-  /// Parent joint index this constraint is under
-  size_t parent = kInvalidIndex;
-  /// Weight of the constraint
-  float weight = 0.0;
-  /// Name of the constraint
-  std::string name = {};
-
-  ConstraintData(size_t pIndex, float w, const std::string& n = "")
-      : parent(pIndex), weight(w), name(n) {}
-};
-
-/// A list of ConstraintData
-using ConstraintDataList = std::vector<ConstraintData>;
-
-/// An optional of a reference. Because optional<T&> is invalid, we need to use reference_wrapper to
-/// make the reference of T as an optional.
-template <typename T>
-using optional_ref = std::optional<std::reference_wrapper<T>>;
 
 /// The JointErrorFunction is a base class for constraint errors of the form l = w * loss(f^2),
 /// where w is the weight (could be a product of different weighting terms), loss() is the
@@ -195,7 +175,7 @@ class JointErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 
