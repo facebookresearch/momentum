@@ -7,12 +7,12 @@
 
 #pragma once
 
+#include <momentum/character_solver/error_function_types.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/plane_error_function.h>
 #include <momentum/character_solver/position_error_function.h>
 #include <momentum/character_solver/skeleton_derivative.h>
 #include <momentum/character_solver/skeleton_error_function.h>
-#include <momentum/character_solver/vertex_error_function.h>
 #include <momentum/math/fwd.h>
 
 namespace momentum {

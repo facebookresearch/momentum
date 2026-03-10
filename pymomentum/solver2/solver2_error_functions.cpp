@@ -12,6 +12,8 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_solver/collision_error_function.h>
 #include <momentum/character_solver/height_error_function.h>
+#include <momentum/character_solver/joint_to_joint_distance_error_function.h>
+#include <momentum/character_solver/joint_to_joint_position_error_function.h>
 #include <momentum/character_solver/limit_error_function.h>
 #include <momentum/character_solver/model_parameters_error_function.h>
 #include <momentum/character_solver/orientation_error_function.h>
@@ -20,7 +22,6 @@
 #include <momentum/character_solver/position_error_function.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/state_error_function.h>
-#include <momentum/character_solver/vertex_error_function.h>
 #include <momentum/character_solver/vertex_normal_error_function.h>
 #include <momentum/character_solver/vertex_plane_error_function.h>
 #include <momentum/character_solver/vertex_position_error_function.h>
@@ -489,20 +490,7 @@ computation with Taylor series for small angles.)");
       .def_readonly("weight", &mm::VertexConstraintData::weight, "The constraint weight.");
 
   // VertexErrorFunction: a Python-side facade that creates the correct leaf error function
-  // (VertexPositionErrorFunctionT, VertexNormalErrorFunctionT, or
-  // VertexPlaneErrorFunctionT) based on VertexConstraintType, and provides a uniform
-  // add_constraint / add_constraints API.
-  //
-  // Because the leaf classes are different template instantiations of VertexErrorFunctionT
-  // (with different Data and FuncDim), they share no common base beyond SkeletonErrorFunctionT.
-  // This wrapper holds a shared_ptr<SkeletonErrorFunction> to the leaf and dispatches
-  // add_constraint/clear_constraints/getConstraints by constraint type.
-  //
-  // Registered as a SkeletonErrorFunction subclass so it can be used directly with
-  // SequenceSolverFunction::add_error_function and isinstance() checks.
   {
-    // We need a C++ class that inherits SkeletonErrorFunctionT<float> and delegates
-    // all virtual methods to the held implementation.
     struct VertexErrorFunctionFacade : public mm::SkeletonErrorFunctionT<float> {
       std::shared_ptr<mm::SkeletonErrorFunction> impl_;
       mm::VertexConstraintType constraintType_;
@@ -516,7 +504,6 @@ computation with Taylor series for small angles.)");
             impl_(std::move(impl)),
             constraintType_(ct) {}
 
-      // Forward all SkeletonErrorFunctionT virtuals to impl_
       [[nodiscard]] size_t getJacobianSize() const final {
         return impl_->getJacobianSize();
       }
@@ -553,7 +540,6 @@ computation with Taylor series for small angles.)");
         impl_->setWeight(w);
       }
 
-      // Constraint dispatch methods
       void addConstraint(
           int vertexIndex,
           float weight,
@@ -627,13 +613,7 @@ computation with Taylor series for small angles.)");
         std::shared_ptr<VertexErrorFunctionFacade>>(
         m,
         "VertexErrorFunction",
-        R"(A vertex error function that constrains mesh vertices to target positions, normals, or planes.
-
-Dispatches to the appropriate specialized error function based on the constraint_type parameter:
-  - Position: constrains vertex to a target 3D position (VertexPositionErrorFunctionT)
-  - Normal: point-to-plane using source (body) normal (VertexNormalErrorFunctionT)
-  - SymmetricNormal: point-to-plane using 50/50 mix of source and target normal (VertexNormalErrorFunctionT)
-  - Plane: point-to-plane using target normal (VertexPlaneErrorFunctionT))")
+        R"(A vertex error function that constrains mesh vertices to target positions, normals, or planes.)")
         .def(
             "__repr__",
             [](const VertexErrorFunctionFacade& self) {
@@ -706,7 +686,7 @@ Dispatches to the appropriate specialized error function based on the constraint
             R"(Initialize a VertexErrorFunction.
 
 :param character: The character to use.
-:param constraint_type: The type of vertex constraint (Position, Plane, Normal, SymmetricNormal).
+:param constraint_type: The type of vertex constraint.
 :param weight: The weight applied to the error function.
 :param max_threads: Maximum number of threads for parallel computation (0 = unlimited).)",
             py::keep_alive<1, 2>(),

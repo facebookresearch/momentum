@@ -14,8 +14,11 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
+#include "momentum/character_solver/error_function_types.h"
 #include "momentum/character_solver/point_triangle_vertex_error_function.h"
-#include "momentum/character_solver/vertex_error_function.h"
+#include "momentum/character_solver/vertex_normal_error_function.h"
+#include "momentum/character_solver/vertex_plane_error_function.h"
+#include "momentum/character_solver/vertex_position_error_function.h"
 #include "momentum/character_solver/vertex_projection_error_function.h"
 #include "momentum/character_solver/vertex_sdf_error_function.h"
 #include "momentum/character_solver/vertex_vertex_distance_error_function.h"
@@ -187,45 +190,103 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     momentum::MeshT<T> targetMesh = character_orig.mesh->cast<T>();
     applySSD(ibp, skin, mesh, skelState, targetMesh);
 
-    for (VertexConstraintType type :
-         {VertexConstraintType::Position,
-          VertexConstraintType::Plane,
-          VertexConstraintType::Normal,
-          VertexConstraintType::SymmetricNormal}) {
-      SCOPED_TRACE(fmt::format("Constraint type: {}", toString(type)));
-
-      const T errorTol = [&]() {
-        switch (type) {
-          case VertexConstraintType::Position:
-          case VertexConstraintType::Plane:
-            return Eps<T>(5e-2f, 1e-5);
-
-          // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
-          // it would be good to dig into this.
-          case VertexConstraintType::Normal:
-          case VertexConstraintType::SymmetricNormal:
-            return Eps<T>(5e-2f, 5e-2);
-
-          default:
-            // Shouldn't reach here
-            return T(0);
-        }
-      }();
-
-      VertexErrorFunctionT<T> errorFunction(character_orig, type, 0);
+    // Position constraints
+    {
+      SCOPED_TRACE("Constraint type: Position");
+      VertexPositionErrorFunctionT<T> errorFunction(
+          character_orig, character_orig.parameterTransform);
+      errorFunction.setMaxThreads(0);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-        const int index =
+        const size_t index =
             uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
         errorFunction.addConstraint(
-            index, uniform<T>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
+            VertexPositionDataT<T>(index, targetMesh.vertices[index], uniform<T>(0, 1e-2)));
       }
-
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
           modelParams,
           character_orig,
-          errorTol,
+          Eps<T>(5e-2f, 1e-5),
+          Eps<T>(1e-6f, 1e-14),
+          true,
+          false);
+    }
+
+    // Plane constraints
+    {
+      SCOPED_TRACE("Constraint type: Plane");
+      VertexPlaneErrorFunctionT<T> errorFunction(character_orig, character_orig.parameterTransform);
+      errorFunction.setMaxThreads(0);
+      for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        const size_t index =
+            uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+        errorFunction.addConstraint(
+            VertexPlaneDataT<T>(
+                index,
+                targetMesh.normals[index],
+                targetMesh.vertices[index],
+                false,
+                uniform<T>(0, 1e-2)));
+      }
+      TEST_GRADIENT_AND_JACOBIAN(
+          T,
+          &errorFunction,
+          modelParams,
+          character_orig,
+          Eps<T>(5e-2f, 1e-5),
+          Eps<T>(1e-6f, 1e-14),
+          true,
+          false);
+    }
+
+    // Normal constraints
+    {
+      SCOPED_TRACE("Constraint type: Normal");
+      VertexNormalErrorFunctionT<T> errorFunction(
+          character_orig, character_orig.parameterTransform, T(1), T(0));
+      errorFunction.setMaxThreads(0);
+      for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        const size_t index =
+            uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+        errorFunction.addConstraint(
+            VertexNormalDataT<T>(
+                index, targetMesh.vertices[index], targetMesh.normals[index], uniform<T>(0, 1e-2)));
+      }
+      // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
+      // it would be good to dig into this.
+      TEST_GRADIENT_AND_JACOBIAN(
+          T,
+          &errorFunction,
+          modelParams,
+          character_orig,
+          Eps<T>(5e-2f, 5e-2),
+          Eps<T>(1e-6f, 1e-14),
+          true,
+          false);
+    }
+
+    // SymmetricNormal constraints
+    {
+      SCOPED_TRACE("Constraint type: SymmetricNormal");
+      VertexNormalErrorFunctionT<T> errorFunction(
+          character_orig, character_orig.parameterTransform, T(0.5), T(0.5));
+      errorFunction.setMaxThreads(0);
+      for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        const size_t index =
+            uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+        errorFunction.addConstraint(
+            VertexNormalDataT<T>(
+                index, targetMesh.vertices[index], targetMesh.normals[index], uniform<T>(0, 1e-2)));
+      }
+      // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
+      // it would be good to dig into this.
+      TEST_GRADIENT_AND_JACOBIAN(
+          T,
+          &errorFunction,
+          modelParams,
+          character_orig,
+          Eps<T>(5e-2f, 5e-2),
           Eps<T>(1e-6f, 1e-14),
           true,
           false);
@@ -260,18 +321,44 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionSerial) {
     // thing to do since the blend shapes can drastically change the shape) and thus the normals
     // depend on the blend shapes in a very complicated way that we aren't currently trying to
     // model.
-    for (VertexConstraintType type :
-         {VertexConstraintType::Position, VertexConstraintType::Plane}) {
-      SCOPED_TRACE(fmt::format("Constraint type: {}", toString(type)));
-
-      VertexErrorFunctionT<T> errorFunction(character_blend, type);
+    // Position constraints
+    {
+      SCOPED_TRACE("Constraint type: Position");
+      VertexPositionErrorFunctionT<T> errorFunction(
+          character_blend, character_blend.parameterTransform);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-        const int index =
+        const size_t index =
             uniform<int>(0, static_cast<int>(character_blend.mesh->vertices.size() - 1));
         errorFunction.addConstraint(
-            index, uniform<T>(0, 1e-2), targetMesh.vertices[index], targetMesh.normals[index]);
+            VertexPositionDataT<T>(index, targetMesh.vertices[index], uniform<T>(0, 1e-2)));
       }
+      TEST_GRADIENT_AND_JACOBIAN(
+          T,
+          &errorFunction,
+          modelParams,
+          character_blend,
+          Eps<T>(1e-2f, 1e-5),
+          Eps<T>(1e-6f, 1e-14),
+          true,
+          false);
+    }
 
+    // Plane constraints
+    {
+      SCOPED_TRACE("Constraint type: Plane");
+      VertexPlaneErrorFunctionT<T> errorFunction(
+          character_blend, character_blend.parameterTransform);
+      for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+        const size_t index =
+            uniform<int>(0, static_cast<int>(character_blend.mesh->vertices.size() - 1));
+        errorFunction.addConstraint(
+            VertexPlaneDataT<T>(
+                index,
+                targetMesh.normals[index],
+                targetMesh.vertices[index],
+                false,
+                uniform<T>(0, 1e-2)));
+      }
       TEST_GRADIENT_AND_JACOBIAN(
           T,
           &errorFunction,
@@ -311,44 +398,103 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexErrorFunctionParallel) {
   momentum::MeshT<T> targetMesh = character_orig.mesh->cast<T>();
   applySSD(ibp, skin, mesh, skelState, targetMesh);
 
-  for (VertexConstraintType type :
-       {VertexConstraintType::Position,
-        VertexConstraintType::Plane,
-        VertexConstraintType::Normal,
-        VertexConstraintType::SymmetricNormal}) {
-    SCOPED_TRACE(fmt::format("Constraint type: {}", toString(type)));
-
-    const T errorTol = [&]() {
-      switch (type) {
-        case VertexConstraintType::Position:
-        case VertexConstraintType::Plane:
-          return Eps<T>(5e-2f, 1e-5);
-
-        // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
-        // it would be good to dig into this.
-        case VertexConstraintType::Normal:
-        case VertexConstraintType::SymmetricNormal:
-          return Eps<T>(5e-2f, 5e-2);
-
-        default:
-          // Shouldn't reach here
-          return T(0);
-      }
-    }();
-
-    VertexErrorFunctionT<T> errorFunction(character_orig, type, 100000);
+  // Position constraints
+  {
+    SCOPED_TRACE("Constraint type: Position");
+    VertexPositionErrorFunctionT<T> errorFunction(
+        character_orig, character_orig.parameterTransform);
+    errorFunction.setMaxThreads(100000);
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
-      const int index = uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+      const size_t index =
+          uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
       errorFunction.addConstraint(
-          index, uniform<T>(0, 1e-4), targetMesh.vertices[index], targetMesh.normals[index]);
+          VertexPositionDataT<T>(index, targetMesh.vertices[index], uniform<T>(0, 1e-4)));
     }
-
     TEST_GRADIENT_AND_JACOBIAN(
         T,
         &errorFunction,
         modelParams,
         character_orig,
-        errorTol,
+        Eps<T>(5e-2f, 1e-5),
+        Eps<T>(1e-6f, 1e-15),
+        true,
+        false);
+  }
+
+  // Plane constraints
+  {
+    SCOPED_TRACE("Constraint type: Plane");
+    VertexPlaneErrorFunctionT<T> errorFunction(character_orig, character_orig.parameterTransform);
+    errorFunction.setMaxThreads(100000);
+    for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      const size_t index =
+          uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+      errorFunction.addConstraint(
+          VertexPlaneDataT<T>(
+              index,
+              targetMesh.normals[index],
+              targetMesh.vertices[index],
+              false,
+              uniform<T>(0, 1e-4)));
+    }
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        modelParams,
+        character_orig,
+        Eps<T>(5e-2f, 1e-5),
+        Eps<T>(1e-6f, 1e-15),
+        true,
+        false);
+  }
+
+  // Normal constraints
+  {
+    SCOPED_TRACE("Constraint type: Normal");
+    VertexNormalErrorFunctionT<T> errorFunction(
+        character_orig, character_orig.parameterTransform, T(1), T(0));
+    errorFunction.setMaxThreads(100000);
+    for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      const size_t index =
+          uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+      errorFunction.addConstraint(
+          VertexNormalDataT<T>(
+              index, targetMesh.vertices[index], targetMesh.normals[index], uniform<T>(0, 1e-4)));
+    }
+    // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
+    // it would be good to dig into this.
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        modelParams,
+        character_orig,
+        Eps<T>(5e-2f, 5e-2),
+        Eps<T>(1e-6f, 1e-15),
+        true,
+        false);
+  }
+
+  // SymmetricNormal constraints
+  {
+    SCOPED_TRACE("Constraint type: SymmetricNormal");
+    VertexNormalErrorFunctionT<T> errorFunction(
+        character_orig, character_orig.parameterTransform, T(0.5), T(0.5));
+    errorFunction.setMaxThreads(100000);
+    for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      const size_t index =
+          uniform<int>(0, static_cast<int>(character_orig.mesh->vertices.size() - 1));
+      errorFunction.addConstraint(
+          VertexNormalDataT<T>(
+              index, targetMesh.vertices[index], targetMesh.normals[index], uniform<T>(0, 1e-4)));
+    }
+    // TODO Normal constraints have a much higher epsilon than I'd prefer to see;
+    // it would be good to dig into this.
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        modelParams,
+        character_orig,
+        Eps<T>(5e-2f, 5e-2),
         Eps<T>(1e-6f, 1e-15),
         true,
         false);
@@ -393,12 +539,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
 
     const T errorTol = Eps<T>(5e-2f, 1e-5);
 
-    VertexProjectionErrorFunctionT<T> errorFunction(character_orig, 0);
+    VertexProjectionErrorFunctionT<T> errorFunction(
+        character_orig, character_orig.parameterTransform);
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
       const int index = uniform<int>(0, character_orig.mesh->vertices.size() - 1);
       const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
       const Eigen::Vector2<T> target2d = target.hnormalized() + uniform<Vector2<T>>(-1, 1) * 0.1;
-      errorFunction.addConstraint(index, uniform<T>(0, 1e-2), target2d, projection);
+      errorFunction.addConstraint(
+          VertexProjectionDataT<T>(
+              static_cast<size_t>(index), target2d, projection, uniform<T>(0, 1e-2)));
     }
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -443,12 +592,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexProjectionErrorFunction) {
     // thing to do since the blend shapes can drastically change the shape) and thus the normals
     // depend on the blend shapes in a very complicated way that we aren't currently trying to
     // model.
-    VertexProjectionErrorFunctionT<T> errorFunction(character_blend);
+    VertexProjectionErrorFunctionT<T> errorFunction(
+        character_blend, character_blend.parameterTransform);
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
       const int index = uniform<int>(0, character_blend.mesh->vertices.size() - 1);
       const Eigen::Vector3<T> target = projection * targetMesh.vertices[index].homogeneous();
       const Eigen::Vector2<T> target2d = target.hnormalized();
-      errorFunction.addConstraint(index, uniform<T>(0, 1e-2), target2d, projection);
+      errorFunction.addConstraint(
+          VertexProjectionDataT<T>(
+              static_cast<size_t>(index), target2d, projection, uniform<T>(0, 1e-2)));
     }
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -553,14 +705,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
         uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
 
     // TODO: Add Plane, Normal and SymmetricNormal?
-    for (VertexConstraintType type : {VertexConstraintType::Position}) {
-      VertexErrorFunctionT<T> errorFunction(character_blend, type);
+    {
+      VertexPositionErrorFunctionT<T> errorFunction(
+          character_blend, character_blend.parameterTransform);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
         errorFunction.addConstraint(
-            uniform<int>(0, character_blend.mesh->vertices.size() - 1),
-            uniform<T>(0, 1),
-            uniform<Vector3<T>>(0, 1),
-            uniform<Vector3<T>>(0.1, 1).normalized());
+            VertexPositionDataT<T>(
+                static_cast<size_t>(
+                    uniform<int>(0, static_cast<int>(character_blend.mesh->vertices.size()) - 1)),
+                uniform<Vector3<T>>(0, 1),
+                uniform<T>(0, 1)));
       }
 
       TEST_GRADIENT_AND_JACOBIAN(
@@ -583,14 +737,16 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, VertexPositionErrorFunctionFaceParameter
         uniform<VectorX<T>>(character_blend.parameterTransform.numAllModelParameters(), -1, 1);
 
     // TODO: Add Plane, Normal and SymmetricNormal?
-    for (VertexConstraintType type : {VertexConstraintType::Position}) {
-      VertexErrorFunctionT<T> errorFunction(character_blend, type);
+    {
+      VertexPositionErrorFunctionT<T> errorFunction(
+          character_blend, character_blend.parameterTransform);
       for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
         errorFunction.addConstraint(
-            uniform<int>(0, character_blend.mesh->vertices.size() - 1),
-            uniform<T>(0, 1),
-            uniform<Vector3<T>>(0, 1),
-            uniform<Vector3<T>>(0.1, 1).normalized());
+            VertexPositionDataT<T>(
+                static_cast<size_t>(
+                    uniform<int>(0, static_cast<int>(character_blend.mesh->vertices.size()) - 1)),
+                uniform<Vector3<T>>(0, 1),
+                uniform<T>(0, 1)));
       }
 
       TEST_GRADIENT_AND_JACOBIAN(

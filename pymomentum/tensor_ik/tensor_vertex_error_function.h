@@ -9,7 +9,7 @@
 
 #include <pymomentum/tensor_ik/tensor_error_function.h>
 
-#include <momentum/character_solver/vertex_error_function.h>
+#include <momentum/character_solver/error_function_types.h>
 
 #include <ATen/ATen.h>
 

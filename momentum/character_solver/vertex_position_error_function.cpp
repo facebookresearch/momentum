@@ -23,7 +23,7 @@ VertexPositionErrorFunctionT<T>::VertexPositionErrorFunctionT(
     const ParameterTransform& parameterTransform,
     const T& lossAlpha,
     const T& lossC)
-    : VertexConstraintErrorFunctionT<T, VertexPositionDataT<T>, 3>(
+    : VertexErrorFunctionT<T, VertexPositionDataT<T>, 3>(
           character,
           parameterTransform,
           lossAlpha,
