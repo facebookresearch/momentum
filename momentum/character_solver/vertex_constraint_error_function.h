@@ -101,7 +101,7 @@ class VertexConstraintErrorFunctionT : public SkeletonErrorFunctionT<T> {
   [[nodiscard]] const std::vector<Data>& getConstraints() const;
 
   /// Returns the number of constraints.
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 

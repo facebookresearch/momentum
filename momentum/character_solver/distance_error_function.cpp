@@ -66,7 +66,7 @@ double DistanceErrorFunctionT<T>::getGradient(
     error += cons.weight * kDistanceWeight * this->weight_ * sqr(diff);
     const T wgt = T(2) * cons.weight * kDistanceWeight * this->weight_;
 
-    auto addGradient = [&](const int jFullBodyDOF, const Eigen::Vector3<T>& diff_p_world_cm) {
+    auto addGradient = [&](const size_t jFullBodyDOF, const Eigen::Vector3<T>& diff_p_world_cm) {
       // d(distance)/dTheta = d(distance)/d(p_world_cm) * d(p_world_cm)/dTheta
       // distance is defined as ||p_world_cm - cons.origin||, so
       // d(distance)/d(p_world_cm) =

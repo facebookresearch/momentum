@@ -69,7 +69,7 @@ plane defined by a local point and a local normal vector.)")
             return fmt::format(
                 "NormalErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -244,7 +244,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
             return fmt::format(
                 "DistanceErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -354,7 +354,7 @@ and a target distance. The constraint is defined as ||(p_joint - origin)^2 - tar
           "Returns true if there are no constraints.")
       .def(
           "num_constraints",
-          &mm::DistanceErrorFunctionT<float>::numConstraints,
+          &mm::DistanceErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.")
       .def_property_readonly(
           "constraints",
@@ -402,7 +402,7 @@ distance is greater than zero (ie. the point being above).)")
             return fmt::format(
                 "PlaneErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -579,7 +579,7 @@ or maintaining the width of body parts.)")
             return fmt::format(
                 "VertexVertexDistanceErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -672,7 +672,7 @@ or maintaining the width of body parts.)")
           "Returns the list of vertex-to-vertex distance constraints.")
       .def(
           "num_constraints",
-          &mm::VertexVertexDistanceErrorFunctionT<float>::numConstraints,
+          &mm::VertexVertexDistanceErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.");
 }
 
