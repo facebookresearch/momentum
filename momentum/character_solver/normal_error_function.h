@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/constraint_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
 
 namespace momentum {
 
@@ -39,14 +39,14 @@ struct NormalDataT : ConstraintData {
 /// plane defined by a local point and a local normal vector. The name is not informative but chosen
 /// for backwards compatibility purpose.
 template <typename T>
-class NormalErrorFunctionT : public ConstraintErrorFunctionT<T, NormalDataT<T>, 1, 2, 1> {
+class NormalErrorFunctionT : public JointErrorFunctionT<T, NormalDataT<T>, 1, 2, 1> {
  public:
   explicit NormalErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
       const T& lossAlpha = GeneralizedLossT<T>::kL2,
       const T& lossC = T(1))
-      : ConstraintErrorFunctionT<T, NormalDataT<T>, 1, 2, 1>(skel, pt, lossAlpha, lossC) {}
+      : JointErrorFunctionT<T, NormalDataT<T>, 1, 2, 1>(skel, pt, lossAlpha, lossC) {}
 
   explicit NormalErrorFunctionT(
       const Character& character,
@@ -67,7 +67,7 @@ class NormalErrorFunctionT : public ConstraintErrorFunctionT<T, NormalDataT<T>, 
       size_t constrIndex,
       const JointStateT<T>& state,
       Vector<T, 1>& f,
-      optional_ref<std::array<Vector3<T>, 2>> v = {},
-      optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 2>> dfdv = {}) const final;
+      std::array<Vector3<T>, 2>& v,
+      std::array<Eigen::Matrix<T, 1, 3>, 2>& dfdv) const final;
 };
 } // namespace momentum
