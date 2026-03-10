@@ -7,9 +7,6 @@
 
 #include "momentum/character_solver/plane_error_function.h"
 
-#include "momentum/character/character.h"
-#include "momentum/character/skeleton.h"
-#include "momentum/character/skeleton_state.h"
 #include "momentum/common/profile.h"
 
 namespace momentum {
@@ -55,26 +52,21 @@ void PlaneErrorFunctionT<T>::evalFunction(
     const size_t constrIndex,
     const JointStateT<T>& state,
     Vector<T, 1>& f,
-    optional_ref<std::array<Vector3<T>, 1>> v,
-    optional_ref<std::array<Eigen::Matrix<T, 1, 3>, 1>> dfdv) const {
+    std::array<Vector3<T>, 1>& v,
+    std::array<Eigen::Matrix<T, 1, 3>, 1>& dfdv) const {
   MT_PROFILE_FUNCTION();
 
   const PlaneDataT<T>& constr = this->constraints_[constrIndex];
-  Vector3<T> vec = state.transform * constr.offset;
-  T val = vec.dot(constr.normal) - constr.d;
+  v[0] = state.transform * constr.offset;
+  T val = v[0].dot(constr.normal) - constr.d;
   if (halfPlane_ && val > T(0)) {
     val = T(0);
   }
   f[0] = val;
 
-  if (v) {
-    v->get().at(0) = std::move(vec);
-  }
-  if (dfdv) {
-    dfdv->get().at(0).setZero();
-    if (!halfPlane_ || val < T(0)) {
-      dfdv->get().at(0) = constr.normal;
-    }
+  dfdv[0].setZero();
+  if (!halfPlane_ || val < T(0)) {
+    dfdv[0] = constr.normal.transpose();
   }
 }
 

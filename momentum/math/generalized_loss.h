@@ -39,6 +39,17 @@ class GeneralizedLossT {
   /// This effectively scales the gradient of what's being squared.
   [[nodiscard]] T deriv(const T& sqrError) const;
 
+  /// Returns true if this loss is an L2 loss (alpha ~= 2).
+  /// Useful for fast-path optimizations that bypass value()/deriv() calls.
+  [[nodiscard]] bool isL2() const {
+    return lossType_ == LossType::L2;
+  }
+
+  /// Returns the stored 1/c^2 value. For default c=1, this is 1.0.
+  [[nodiscard]] T invC2() const {
+    return invC2_;
+  }
+
  protected:
   enum class LossType {
     L1,

@@ -7,9 +7,6 @@
 
 #include "momentum/character_solver/position_error_function.h"
 
-#include "momentum/character/character.h"
-#include "momentum/character/skeleton.h"
-#include "momentum/character/skeleton_state.h"
 #include "momentum/common/profile.h"
 
 namespace momentum {
@@ -19,19 +16,14 @@ void PositionErrorFunctionT<T>::evalFunction(
     const size_t constrIndex,
     const JointStateT<T>& state,
     Vector3<T>& f,
-    optional_ref<std::array<Vector3<T>, 1>> v,
-    optional_ref<std::array<Matrix3<T>, 1>> dfdv) const {
+    std::array<Vector3<T>, 1>& v,
+    std::array<Matrix3<T>, 1>& dfdv) const {
   MT_PROFILE_FUNCTION();
 
   const PositionDataT<T>& constr = this->constraints_[constrIndex];
-  Vector3<T> vec = state.transform * constr.offset;
-  f = vec - constr.target;
-  if (v) {
-    v->get().at(0) = std::move(vec);
-  }
-  if (dfdv) {
-    dfdv->get().at(0).setIdentity();
-  }
+  v[0] = state.transform * constr.offset;
+  f = v[0] - constr.target;
+  dfdv[0].setIdentity();
 }
 
 template class PositionErrorFunctionT<float>;
