@@ -7,111 +7,60 @@
 
 #pragma once
 
-#include <momentum/character_solver/fwd.h>
-#include <momentum/character_solver/skeleton_error_function.h>
-#include <momentum/math/fwd.h>
+#include <momentum/character_solver/vertex_error_function.h>
 
 namespace momentum {
 
+/// Constraint data for a vertex 2D projection target.
+///
+/// Constrains a mesh vertex projected to a 2D target position.
 template <typename T>
-struct VertexProjectionConstraintT {
-  int vertexIndex = -1;
-  T weight = 1;
-  Eigen::Vector2<T> targetPosition;
-  Eigen::Matrix<T, 3, 4> projection; // Projection matrix
+struct VertexProjectionDataT : public VertexConstraintData {
+  /// Target position in 2D screen space
+  Eigen::Vector2<T> target = Eigen::Vector2<T>::Zero();
 
-  template <typename T2>
-  VertexProjectionConstraintT<T2> cast() const {
-    return {
-        this->vertexIndex,
-        (T)this->weight,
-        this->targetPosition.template cast<T2>(),
-    };
-  }
+  /// Camera projection matrix (3x4)
+  Eigen::Matrix<T, 3, 4> projectionMatrix = Eigen::Matrix<T, 3, 4>::Zero();
+
+  VertexProjectionDataT() = default;
+  VertexProjectionDataT(
+      size_t vIndex,
+      const Eigen::Vector2<T>& targetPos,
+      const Eigen::Matrix<T, 3, 4>& proj,
+      float w,
+      const std::string& nm = "")
+      : VertexConstraintData(vIndex, w, nm), target(targetPos), projectionMatrix(proj) {}
 };
 
+/// Error function that constrains mesh vertices to 2D projected positions.
+///
+/// The residual is the 2D vector from the projected vertex to the target:
+///   p = project(vertexPosition)
+///   f = p - target
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
-class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
+class VertexProjectionErrorFunctionT : public VertexErrorFunctionT<T, VertexProjectionDataT<T>, 2> {
  public:
-  explicit VertexProjectionErrorFunctionT(const Character& character, uint32_t maxThreads = 0);
-  ~VertexProjectionErrorFunctionT() override;
+  using Base = VertexErrorFunctionT<T, VertexProjectionDataT<T>, 2>;
+  using typename Base::DfdvType;
+  using typename Base::FuncType;
 
-  [[nodiscard]] double getError(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState) final;
+  explicit VertexProjectionErrorFunctionT(
+      const Character& character,
+      const ParameterTransform& parameterTransform,
+      const T& lossAlpha = GeneralizedLossT<T>::kL2,
+      const T& lossC = T(1));
 
-  double getGradient(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) final;
+  ~VertexProjectionErrorFunctionT() override = default;
 
-  double getJacobian(
-      const ModelParametersT<T>& modelParameters,
+  void evalFunction(
+      size_t constrIndex,
       const SkeletonStateT<T>& state,
       const MeshStateT<T>& meshState,
-      Eigen::Ref<Eigen::MatrixX<T>> jacobian,
-      Eigen::Ref<Eigen::VectorX<T>> residual,
-      int& usedRows) final;
-
-  [[nodiscard]] size_t getJacobianSize() const final;
-
-  void addConstraint(
-      int vertexIndex,
-      T weight,
-      const Eigen::Vector2<T>& targetPosition,
-      const Eigen::Matrix<T, 3, 4>& projection);
-  void clearConstraints();
-
-  [[nodiscard]] const std::vector<VertexProjectionConstraintT<T>>& getConstraints() const {
-    return constraints_;
-  }
-
-  [[nodiscard]] const Character* getCharacter() const override {
-    return &character_;
-  }
-
-  [[nodiscard]] size_t getNumConstraints() const {
-    return constraints_.size();
-  }
-
-  /// Override to indicate this function requires mesh state
-  [[nodiscard]] bool needsMesh() const override {
-    return true;
-  }
-
- private:
-  double calculateJacobian(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      const VertexProjectionConstraintT<T>& constr,
-      Ref<Eigen::MatrixX<T>> jac,
-      Ref<Eigen::VectorX<T>> res) const;
-
-  double calculateGradient(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      const VertexProjectionConstraintT<T>& constr,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
-
-  // Utility function used now in calculateJacobian and calculateGradient
-  // to calculate derivatives with respect to position in world space (considering skinning)
-  void calculateDWorldPos(
-      const SkeletonStateT<T>& state,
-      const VertexProjectionConstraintT<T>& constr,
-      const Eigen::Vector3<T>& d_restPos,
-      Eigen::Vector3<T>& d_worldPos) const;
-
-  const Character& character_;
-
-  std::vector<VertexProjectionConstraintT<T>> constraints_;
-
-  uint32_t maxThreads_;
-
-  T _nearClip = 1.0f;
+      std::span<const Eigen::Vector3<T>> worldVecs,
+      FuncType& f,
+      std::span<DfdvType> dfdv) const final;
 };
 
 } // namespace momentum

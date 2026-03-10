@@ -10,7 +10,7 @@
 #include "pymomentum/tensor_ik/tensor_error_function_utility.h"
 
 #include <momentum/character/character.h>
-#include <momentum/character_solver/joint_error_function.h>
+#include <momentum/character_solver/error_function_types.h>
 #include <momentum/character_solver/vertex_normal_error_function.h>
 #include <momentum/character_solver/vertex_plane_error_function.h>
 #include <momentum/character_solver/vertex_position_error_function.h>

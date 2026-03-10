@@ -49,6 +49,7 @@ structs = [
     "SimdNormalConstraints",
     "SimdPlaneConstraints",
     "SimdPositionConstraints",
+    "VertexConstraintData",
 ]
 template_structs = [
     "AimData",
@@ -61,8 +62,6 @@ template_structs = [
     "ProjectionConstraint",
     "SkinnedLocatorConstraint",
     "SkinnedLocatorTriangleConstraint",
-    "VertexConstraint",
-    "VertexProjectionConstraint",
     "VertexSDFConstraint",
 ]
 classes = [
@@ -77,6 +76,7 @@ template_classes = [
     "AimDirErrorFunction",
     "AimDistErrorFunction",
     "CameraProjectionErrorFunction",
+    "CenterOfMassErrorFunction",
     "CollisionErrorFunction",
     "CollisionErrorFunctionStateless",
     "DistanceErrorFunction",
@@ -85,6 +85,8 @@ template_classes = [
     "FixedAxisDiffErrorFunction",
     "GaussNewtonSolverQR",
     "HeightErrorFunction",
+    "JointToJointDistanceErrorFunction",
+    "JointToJointPositionErrorFunction",
     "LimitErrorFunction",
     "ModelParametersErrorFunction",
     "NormalErrorFunction",
@@ -104,7 +106,9 @@ template_classes = [
     "SkinnedLocatorTriangleErrorFunction",
     "StateErrorFunction",
     "TrustRegionQR",
-    "VertexErrorFunction",
+    "VertexNormalErrorFunction",
+    "VertexPlaneErrorFunction",
+    "VertexPositionErrorFunction",
     "VertexProjectionErrorFunction",
     "VertexSDFErrorFunction",
     "VertexVertexDistanceErrorFunction",

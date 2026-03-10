@@ -20,7 +20,7 @@ VertexPlaneErrorFunctionT<T>::VertexPlaneErrorFunctionT(
     const ParameterTransform& parameterTransform,
     const T& lossAlpha,
     const T& lossC)
-    : VertexConstraintErrorFunctionT<T, VertexPlaneDataT<T>, 1>(
+    : VertexErrorFunctionT<T, VertexPlaneDataT<T>, 1>(
           character,
           parameterTransform,
           lossAlpha,
