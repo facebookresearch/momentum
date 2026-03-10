@@ -77,6 +77,7 @@ void rasterizeMesh(
 
   const int nVertsBindingID = -1;
   const int nTrisBindingID = -2;
+  const int nTexCoordsBindingID = -3;
 
   TensorChecker checker("rasterize");
   positions = checker.validateAndFixTensor(
@@ -100,8 +101,8 @@ void rasterizeMesh(
     textureCoordinates = checker.validateAndFixTensor(
         textureCoordinates.value(),
         "texture_coordinates",
-        {nVertsBindingID, 2},
-        {"nVerts", "uv"},
+        {nTexCoordsBindingID, 2},
+        {"nTexCoords", "uv"},
         at::kFloat,
         true,
         false);
