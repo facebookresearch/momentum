@@ -60,6 +60,15 @@ using SimdPositionConstraints_const_p = ::std::shared_ptr<const SimdPositionCons
 using SimdPositionConstraints_const_u = ::std::unique_ptr<const SimdPositionConstraints>;
 using SimdPositionConstraints_const_w = ::std::weak_ptr<const SimdPositionConstraints>;
 
+struct VertexConstraintData;
+
+using VertexConstraintData_p = ::std::shared_ptr<VertexConstraintData>;
+using VertexConstraintData_u = ::std::unique_ptr<VertexConstraintData>;
+using VertexConstraintData_w = ::std::weak_ptr<VertexConstraintData>;
+using VertexConstraintData_const_p = ::std::shared_ptr<const VertexConstraintData>;
+using VertexConstraintData_const_u = ::std::unique_ptr<const VertexConstraintData>;
+using VertexConstraintData_const_w = ::std::weak_ptr<const VertexConstraintData>;
+
 template <typename T>
 struct AimDataT;
 using AimData = AimDataT<float>;
@@ -397,6 +406,25 @@ using CameraProjectionErrorFunctiond_const_w =
     ::std::weak_ptr<const CameraProjectionErrorFunctiond>;
 
 template <typename T>
+class CenterOfMassErrorFunctionT;
+using CenterOfMassErrorFunction = CenterOfMassErrorFunctionT<float>;
+using CenterOfMassErrorFunctiond = CenterOfMassErrorFunctionT<double>;
+
+using CenterOfMassErrorFunction_p = ::std::shared_ptr<CenterOfMassErrorFunction>;
+using CenterOfMassErrorFunction_u = ::std::unique_ptr<CenterOfMassErrorFunction>;
+using CenterOfMassErrorFunction_w = ::std::weak_ptr<CenterOfMassErrorFunction>;
+using CenterOfMassErrorFunction_const_p = ::std::shared_ptr<const CenterOfMassErrorFunction>;
+using CenterOfMassErrorFunction_const_u = ::std::unique_ptr<const CenterOfMassErrorFunction>;
+using CenterOfMassErrorFunction_const_w = ::std::weak_ptr<const CenterOfMassErrorFunction>;
+
+using CenterOfMassErrorFunctiond_p = ::std::shared_ptr<CenterOfMassErrorFunctiond>;
+using CenterOfMassErrorFunctiond_u = ::std::unique_ptr<CenterOfMassErrorFunctiond>;
+using CenterOfMassErrorFunctiond_w = ::std::weak_ptr<CenterOfMassErrorFunctiond>;
+using CenterOfMassErrorFunctiond_const_p = ::std::shared_ptr<const CenterOfMassErrorFunctiond>;
+using CenterOfMassErrorFunctiond_const_u = ::std::unique_ptr<const CenterOfMassErrorFunctiond>;
+using CenterOfMassErrorFunctiond_const_w = ::std::weak_ptr<const CenterOfMassErrorFunctiond>;
+
+template <typename T>
 class CollisionErrorFunctionT;
 using CollisionErrorFunction = CollisionErrorFunctionT<float>;
 using CollisionErrorFunctiond = CollisionErrorFunctionT<double>;
@@ -553,6 +581,56 @@ using HeightErrorFunctiond_w = ::std::weak_ptr<HeightErrorFunctiond>;
 using HeightErrorFunctiond_const_p = ::std::shared_ptr<const HeightErrorFunctiond>;
 using HeightErrorFunctiond_const_u = ::std::unique_ptr<const HeightErrorFunctiond>;
 using HeightErrorFunctiond_const_w = ::std::weak_ptr<const HeightErrorFunctiond>;
+
+template <typename T>
+class JointToJointDistanceErrorFunctionT;
+using JointToJointDistanceErrorFunction = JointToJointDistanceErrorFunctionT<float>;
+using JointToJointDistanceErrorFunctiond = JointToJointDistanceErrorFunctionT<double>;
+
+using JointToJointDistanceErrorFunction_p = ::std::shared_ptr<JointToJointDistanceErrorFunction>;
+using JointToJointDistanceErrorFunction_u = ::std::unique_ptr<JointToJointDistanceErrorFunction>;
+using JointToJointDistanceErrorFunction_w = ::std::weak_ptr<JointToJointDistanceErrorFunction>;
+using JointToJointDistanceErrorFunction_const_p =
+    ::std::shared_ptr<const JointToJointDistanceErrorFunction>;
+using JointToJointDistanceErrorFunction_const_u =
+    ::std::unique_ptr<const JointToJointDistanceErrorFunction>;
+using JointToJointDistanceErrorFunction_const_w =
+    ::std::weak_ptr<const JointToJointDistanceErrorFunction>;
+
+using JointToJointDistanceErrorFunctiond_p = ::std::shared_ptr<JointToJointDistanceErrorFunctiond>;
+using JointToJointDistanceErrorFunctiond_u = ::std::unique_ptr<JointToJointDistanceErrorFunctiond>;
+using JointToJointDistanceErrorFunctiond_w = ::std::weak_ptr<JointToJointDistanceErrorFunctiond>;
+using JointToJointDistanceErrorFunctiond_const_p =
+    ::std::shared_ptr<const JointToJointDistanceErrorFunctiond>;
+using JointToJointDistanceErrorFunctiond_const_u =
+    ::std::unique_ptr<const JointToJointDistanceErrorFunctiond>;
+using JointToJointDistanceErrorFunctiond_const_w =
+    ::std::weak_ptr<const JointToJointDistanceErrorFunctiond>;
+
+template <typename T>
+class JointToJointPositionErrorFunctionT;
+using JointToJointPositionErrorFunction = JointToJointPositionErrorFunctionT<float>;
+using JointToJointPositionErrorFunctiond = JointToJointPositionErrorFunctionT<double>;
+
+using JointToJointPositionErrorFunction_p = ::std::shared_ptr<JointToJointPositionErrorFunction>;
+using JointToJointPositionErrorFunction_u = ::std::unique_ptr<JointToJointPositionErrorFunction>;
+using JointToJointPositionErrorFunction_w = ::std::weak_ptr<JointToJointPositionErrorFunction>;
+using JointToJointPositionErrorFunction_const_p =
+    ::std::shared_ptr<const JointToJointPositionErrorFunction>;
+using JointToJointPositionErrorFunction_const_u =
+    ::std::unique_ptr<const JointToJointPositionErrorFunction>;
+using JointToJointPositionErrorFunction_const_w =
+    ::std::weak_ptr<const JointToJointPositionErrorFunction>;
+
+using JointToJointPositionErrorFunctiond_p = ::std::shared_ptr<JointToJointPositionErrorFunctiond>;
+using JointToJointPositionErrorFunctiond_u = ::std::unique_ptr<JointToJointPositionErrorFunctiond>;
+using JointToJointPositionErrorFunctiond_w = ::std::weak_ptr<JointToJointPositionErrorFunctiond>;
+using JointToJointPositionErrorFunctiond_const_p =
+    ::std::shared_ptr<const JointToJointPositionErrorFunctiond>;
+using JointToJointPositionErrorFunctiond_const_u =
+    ::std::unique_ptr<const JointToJointPositionErrorFunctiond>;
+using JointToJointPositionErrorFunctiond_const_w =
+    ::std::weak_ptr<const JointToJointPositionErrorFunctiond>;
 
 template <typename T>
 class LimitErrorFunctionT;
@@ -933,6 +1011,87 @@ using TrustRegionQRd_w = ::std::weak_ptr<TrustRegionQRd>;
 using TrustRegionQRd_const_p = ::std::shared_ptr<const TrustRegionQRd>;
 using TrustRegionQRd_const_u = ::std::unique_ptr<const TrustRegionQRd>;
 using TrustRegionQRd_const_w = ::std::weak_ptr<const TrustRegionQRd>;
+
+template <typename T>
+class VertexNormalErrorFunctionT;
+using VertexNormalErrorFunction = VertexNormalErrorFunctionT<float>;
+using VertexNormalErrorFunctiond = VertexNormalErrorFunctionT<double>;
+
+using VertexNormalErrorFunction_p = ::std::shared_ptr<VertexNormalErrorFunction>;
+using VertexNormalErrorFunction_u = ::std::unique_ptr<VertexNormalErrorFunction>;
+using VertexNormalErrorFunction_w = ::std::weak_ptr<VertexNormalErrorFunction>;
+using VertexNormalErrorFunction_const_p = ::std::shared_ptr<const VertexNormalErrorFunction>;
+using VertexNormalErrorFunction_const_u = ::std::unique_ptr<const VertexNormalErrorFunction>;
+using VertexNormalErrorFunction_const_w = ::std::weak_ptr<const VertexNormalErrorFunction>;
+
+using VertexNormalErrorFunctiond_p = ::std::shared_ptr<VertexNormalErrorFunctiond>;
+using VertexNormalErrorFunctiond_u = ::std::unique_ptr<VertexNormalErrorFunctiond>;
+using VertexNormalErrorFunctiond_w = ::std::weak_ptr<VertexNormalErrorFunctiond>;
+using VertexNormalErrorFunctiond_const_p = ::std::shared_ptr<const VertexNormalErrorFunctiond>;
+using VertexNormalErrorFunctiond_const_u = ::std::unique_ptr<const VertexNormalErrorFunctiond>;
+using VertexNormalErrorFunctiond_const_w = ::std::weak_ptr<const VertexNormalErrorFunctiond>;
+
+template <typename T>
+class VertexPlaneErrorFunctionT;
+using VertexPlaneErrorFunction = VertexPlaneErrorFunctionT<float>;
+using VertexPlaneErrorFunctiond = VertexPlaneErrorFunctionT<double>;
+
+using VertexPlaneErrorFunction_p = ::std::shared_ptr<VertexPlaneErrorFunction>;
+using VertexPlaneErrorFunction_u = ::std::unique_ptr<VertexPlaneErrorFunction>;
+using VertexPlaneErrorFunction_w = ::std::weak_ptr<VertexPlaneErrorFunction>;
+using VertexPlaneErrorFunction_const_p = ::std::shared_ptr<const VertexPlaneErrorFunction>;
+using VertexPlaneErrorFunction_const_u = ::std::unique_ptr<const VertexPlaneErrorFunction>;
+using VertexPlaneErrorFunction_const_w = ::std::weak_ptr<const VertexPlaneErrorFunction>;
+
+using VertexPlaneErrorFunctiond_p = ::std::shared_ptr<VertexPlaneErrorFunctiond>;
+using VertexPlaneErrorFunctiond_u = ::std::unique_ptr<VertexPlaneErrorFunctiond>;
+using VertexPlaneErrorFunctiond_w = ::std::weak_ptr<VertexPlaneErrorFunctiond>;
+using VertexPlaneErrorFunctiond_const_p = ::std::shared_ptr<const VertexPlaneErrorFunctiond>;
+using VertexPlaneErrorFunctiond_const_u = ::std::unique_ptr<const VertexPlaneErrorFunctiond>;
+using VertexPlaneErrorFunctiond_const_w = ::std::weak_ptr<const VertexPlaneErrorFunctiond>;
+
+template <typename T>
+class VertexPositionErrorFunctionT;
+using VertexPositionErrorFunction = VertexPositionErrorFunctionT<float>;
+using VertexPositionErrorFunctiond = VertexPositionErrorFunctionT<double>;
+
+using VertexPositionErrorFunction_p = ::std::shared_ptr<VertexPositionErrorFunction>;
+using VertexPositionErrorFunction_u = ::std::unique_ptr<VertexPositionErrorFunction>;
+using VertexPositionErrorFunction_w = ::std::weak_ptr<VertexPositionErrorFunction>;
+using VertexPositionErrorFunction_const_p = ::std::shared_ptr<const VertexPositionErrorFunction>;
+using VertexPositionErrorFunction_const_u = ::std::unique_ptr<const VertexPositionErrorFunction>;
+using VertexPositionErrorFunction_const_w = ::std::weak_ptr<const VertexPositionErrorFunction>;
+
+using VertexPositionErrorFunctiond_p = ::std::shared_ptr<VertexPositionErrorFunctiond>;
+using VertexPositionErrorFunctiond_u = ::std::unique_ptr<VertexPositionErrorFunctiond>;
+using VertexPositionErrorFunctiond_w = ::std::weak_ptr<VertexPositionErrorFunctiond>;
+using VertexPositionErrorFunctiond_const_p = ::std::shared_ptr<const VertexPositionErrorFunctiond>;
+using VertexPositionErrorFunctiond_const_u = ::std::unique_ptr<const VertexPositionErrorFunctiond>;
+using VertexPositionErrorFunctiond_const_w = ::std::weak_ptr<const VertexPositionErrorFunctiond>;
+
+template <typename T>
+class VertexProjectionErrorFunctionT;
+using VertexProjectionErrorFunction = VertexProjectionErrorFunctionT<float>;
+using VertexProjectionErrorFunctiond = VertexProjectionErrorFunctionT<double>;
+
+using VertexProjectionErrorFunction_p = ::std::shared_ptr<VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_u = ::std::unique_ptr<VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_w = ::std::weak_ptr<VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_const_p =
+    ::std::shared_ptr<const VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_const_u =
+    ::std::unique_ptr<const VertexProjectionErrorFunction>;
+using VertexProjectionErrorFunction_const_w = ::std::weak_ptr<const VertexProjectionErrorFunction>;
+
+using VertexProjectionErrorFunctiond_p = ::std::shared_ptr<VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_u = ::std::unique_ptr<VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_w = ::std::weak_ptr<VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_const_p =
+    ::std::shared_ptr<const VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_const_u =
+    ::std::unique_ptr<const VertexProjectionErrorFunctiond>;
+using VertexProjectionErrorFunctiond_const_w =
+    ::std::weak_ptr<const VertexProjectionErrorFunctiond>;
 
 template <typename T>
 class VertexSDFErrorFunctionT;
