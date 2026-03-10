@@ -11,7 +11,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_sequence_solver/fwd.h>
 #include <momentum/character_sequence_solver/sequence_error_function.h>
-#include <momentum/character_solver/vertex_error_function.h>
+#include <momentum/character_solver/error_function_types.h>
 #include <momentum/math/mesh.h>
 
 #include <span>

@@ -28,7 +28,7 @@ VertexNormalErrorFunctionT<T>::VertexNormalErrorFunctionT(
     const T& lossAlpha,
     const T& lossC,
     bool computeAccurateNormalDerivatives)
-    : VertexConstraintErrorFunctionT<T, VertexNormalDataT<T>, 1>(
+    : VertexErrorFunctionT<T, VertexNormalDataT<T>, 1>(
           character,
           parameterTransform,
           lossAlpha,

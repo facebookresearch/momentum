@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <momentum/character_solver/vertex_constraint_error_function.h>
+#include <momentum/character_solver/vertex_error_function.h>
 
 namespace momentum {
 
@@ -47,10 +47,9 @@ struct VertexNormalDataT : public VertexConstraintData {
 ///
 /// @tparam T Scalar type (float or double)
 template <typename T>
-class VertexNormalErrorFunctionT
-    : public VertexConstraintErrorFunctionT<T, VertexNormalDataT<T>, 1> {
+class VertexNormalErrorFunctionT : public VertexErrorFunctionT<T, VertexNormalDataT<T>, 1> {
  public:
-  using Base = VertexConstraintErrorFunctionT<T, VertexNormalDataT<T>, 1>;
+  using Base = VertexErrorFunctionT<T, VertexNormalDataT<T>, 1>;
   using typename Base::DfdvType;
   using typename Base::FuncType;
 

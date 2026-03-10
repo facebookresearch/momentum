@@ -7,11 +7,12 @@
 
 #pragma once
 
+#include <momentum/character/character.h>
 #include <momentum/character/skinned_locator.h>
+#include <momentum/character_solver/error_function_types.h>
 #include <momentum/character_solver/error_function_utils.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_error_function.h>
-#include <momentum/character_solver/vertex_error_function.h>
 #include <momentum/math/fwd.h>
 
 #include <vector>
