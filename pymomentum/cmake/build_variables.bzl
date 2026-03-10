@@ -74,6 +74,10 @@ tensor_momentum_sources = [
     "tensor_momentum/tensor_transforms.cpp",
 ]
 
+tensor_momentum_test_sources = [
+    "cpp_test/tensor_momentum_test.cpp",
+]
+
 tensor_ik_public_headers = [
     "tensor_ik/solver_options.h",
     "tensor_ik/tensor_collision_error_function.h",
