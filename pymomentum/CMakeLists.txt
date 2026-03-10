@@ -454,6 +454,15 @@ if(MOMENTUM_BUILD_TESTING)
       tensor_utility
       Python3::Python
   )
+
+  mt_test(
+    NAME tensor_momentum_test
+    PYMOMENTUM_SOURCES_VARS tensor_momentum_test_sources
+    LINK_LIBRARIES
+      tensor_momentum
+      tensor_utility
+      Python3::Python
+  )
 endif()
 
 #===============================================================================
