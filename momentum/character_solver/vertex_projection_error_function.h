@@ -72,7 +72,7 @@ class VertexProjectionErrorFunctionT : public SkeletonErrorFunctionT<T> {
     return &character_;
   }
 
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 

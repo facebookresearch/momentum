@@ -27,12 +27,6 @@
 
 namespace momentum {
 
-std::string_view toString(VertexConstraintType type) {
-  static const std::array<std::string_view, 4> strings = {
-      "Position", "Plane", "Normal", "SymmetricNormal"};
-  return strings[static_cast<size_t>(type)];
-}
-
 template <typename T>
 VertexErrorFunctionT<T>::VertexErrorFunctionT(
     const Character& character_in,

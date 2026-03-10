@@ -33,7 +33,10 @@ void defAimErrorFunction(py::module_& m, const char* name, const char* descripti
           "__repr__",
           [=](const AimErrorFunctionT& self) -> std::string {
             return fmt::format(
-                "{}(weight={}, num_constraints={})", name, self.getWeight(), self.numConstraints());
+                "{}(weight={}, num_constraints={})",
+                name,
+                self.getWeight(),
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -168,7 +171,10 @@ void defFixedAxisError(py::module_& m, const char* name, const char* description
           "__repr__",
           [=](const FixedAxisErrorFunctionT& self) -> std::string {
             return fmt::format(
-                "{}(weight={}, num_constraints={})", name, self.getWeight(), self.numConstraints());
+                "{}(weight={}, num_constraints={})",
+                name,
+                self.getWeight(),
+                self.getNumConstraints());
           })
       .def(
           py::init<>(

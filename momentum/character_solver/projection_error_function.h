@@ -67,7 +67,7 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
   [[nodiscard]] bool empty() const {
     return constraints_.empty();
   }
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
   void setConstraints(std::vector<ProjectionConstraintDataT<T>> constraints) {

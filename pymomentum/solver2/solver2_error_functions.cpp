@@ -220,7 +220,7 @@ Uses a generalized loss function that support various forms of losses such as L1
             return fmt::format(
                 "PositionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -608,14 +608,14 @@ computation with Taylor series for small angles.)");
         switch (constraintType_) {
           case mm::VertexConstraintType::Position:
             return static_cast<const mm::VertexPositionErrorFunctionT<float>*>(impl_.get())
-                ->numConstraints();
+                ->getNumConstraints();
           case mm::VertexConstraintType::Normal:
           case mm::VertexConstraintType::SymmetricNormal:
             return static_cast<const mm::VertexNormalErrorFunctionT<float>*>(impl_.get())
-                ->numConstraints();
+                ->getNumConstraints();
           case mm::VertexConstraintType::Plane:
             return static_cast<const mm::VertexPlaneErrorFunctionT<float>*>(impl_.get())
-                ->numConstraints();
+                ->getNumConstraints();
         }
         return 0;
       }
@@ -995,7 +995,7 @@ rotation matrix to a target rotation.)")
             return fmt::format(
                 "OrientationErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -1172,7 +1172,7 @@ rotation matrix to a target rotation.)")
             return fmt::format(
                 "VertexSDFErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>([](const mm::Character& character,
@@ -1223,7 +1223,7 @@ distance value against a single SDF, enabling use cases like fitting a mesh to a
           R"(Clear all constraints.)")
       .def_property_readonly(
           "num_constraints",
-          &mm::VertexSDFErrorFunction::numConstraints,
+          [](const mm::VertexSDFErrorFunctionT<float>& self) { return self.getNumConstraints(); },
           R"(The number of active constraints.)");
 
   // Call sub-registration functions

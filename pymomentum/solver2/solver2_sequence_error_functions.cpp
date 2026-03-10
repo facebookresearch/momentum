@@ -418,7 +418,7 @@ the gradient contribution is set to zero.
             return fmt::format(
                 "VertexSequenceErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>([](const mm::Character& character, float weight) {
@@ -502,7 +502,7 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
           "Returns the list of vertex velocity constraints.")
       .def_property_readonly(
           "num_constraints",
-          &mm::VertexSequenceErrorFunctionT<float>::numConstraints,
+          &mm::VertexSequenceErrorFunctionT<float>::getNumConstraints,
           "Returns the number of vertex velocity constraints.")
       .def_property_readonly(
           "character",

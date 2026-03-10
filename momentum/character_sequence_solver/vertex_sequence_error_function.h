@@ -88,7 +88,7 @@ class VertexSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
   }
 
   /// Get the number of constraints.
-  [[nodiscard]] size_t numConstraints() const {
+  [[nodiscard]] size_t getNumConstraints() const {
     return constraints_.size();
   }
 
