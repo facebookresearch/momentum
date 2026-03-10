@@ -10,7 +10,10 @@
 #include "pymomentum/tensor_ik/tensor_error_function_utility.h"
 
 #include <momentum/character/character.h>
-#include <momentum/character_solver/vertex_error_function.h>
+#include <momentum/character_solver/joint_error_function.h>
+#include <momentum/character_solver/vertex_normal_error_function.h>
+#include <momentum/character_solver/vertex_plane_error_function.h>
+#include <momentum/character_solver/vertex_position_error_function.h>
 
 namespace pymomentum {
 
@@ -99,8 +102,6 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
     const momentum::Character& character,
     size_t iBatch,
     size_t jFrame) const {
-  auto result = std::make_unique<momentum::VertexErrorFunctionT<T>>(character, _constraintType);
-
   const auto weights = this->getTensorInput(kWeightsName).template toEigenMap<T>(iBatch, jFrame);
   const auto vertices =
       this->getTensorInput(kVerticesName).template toEigenMap<int>(iBatch, jFrame);
@@ -108,17 +109,63 @@ TensorVertexErrorFunction<T>::createErrorFunctionImp(
       this->getTensorInput(kTargetPositionsName).template toEigenMap<T>(iBatch, jFrame);
   const auto target_normals =
       this->getTensorInput(kTargetNormalsName).template toEigenMap<T>(iBatch, jFrame);
-
   const auto nCons = this->sharedSize(NCONS_IDX);
-  for (Eigen::Index i = 0; i < nCons; ++i) {
-    result->addConstraint(
-        extractScalar<int>(vertices, i),
-        extractScalar<T>(weights, i, T(1)),
-        extractVector<T, 3>(target_positions, i),
-        extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::Zero()));
-  }
 
-  return result;
+  switch (_constraintType) {
+    case momentum::VertexConstraintType::Position: {
+      auto result = std::make_unique<momentum::VertexPositionErrorFunctionT<T>>(
+          character, character.parameterTransform);
+      for (Eigen::Index i = 0; i < nCons; ++i) {
+        result->addConstraint(
+            momentum::VertexPositionDataT<T>(
+                static_cast<size_t>(extractScalar<int>(vertices, i)),
+                extractVector<T, 3>(target_positions, i),
+                extractScalar<T>(weights, i, T(1))));
+      }
+      return result;
+    }
+    case momentum::VertexConstraintType::Normal: {
+      auto result = std::make_unique<momentum::VertexNormalErrorFunctionT<T>>(
+          character, character.parameterTransform, T(1), T(0));
+      for (Eigen::Index i = 0; i < nCons; ++i) {
+        result->addConstraint(
+            momentum::VertexNormalDataT<T>(
+                static_cast<size_t>(extractScalar<int>(vertices, i)),
+                extractVector<T, 3>(target_positions, i),
+                extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::Zero()),
+                extractScalar<T>(weights, i, T(1))));
+      }
+      return result;
+    }
+    case momentum::VertexConstraintType::SymmetricNormal: {
+      auto result = std::make_unique<momentum::VertexNormalErrorFunctionT<T>>(
+          character, character.parameterTransform, T(0.5), T(0.5));
+      for (Eigen::Index i = 0; i < nCons; ++i) {
+        result->addConstraint(
+            momentum::VertexNormalDataT<T>(
+                static_cast<size_t>(extractScalar<int>(vertices, i)),
+                extractVector<T, 3>(target_positions, i),
+                extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::Zero()),
+                extractScalar<T>(weights, i, T(1))));
+      }
+      return result;
+    }
+    case momentum::VertexConstraintType::Plane: {
+      auto result = std::make_unique<momentum::VertexPlaneErrorFunctionT<T>>(
+          character, character.parameterTransform);
+      for (Eigen::Index i = 0; i < nCons; ++i) {
+        result->addConstraint(
+            momentum::VertexPlaneDataT<T>(
+                static_cast<size_t>(extractScalar<int>(vertices, i)),
+                extractVector<T, 3>(target_normals, i, Eigen::Vector3<T>::UnitZ()),
+                extractVector<T, 3>(target_positions, i),
+                false,
+                extractScalar<T>(weights, i, T(1))));
+      }
+      return result;
+    }
+  }
+  return nullptr;
 }
 
 template class TensorVertexErrorFunction<float>;
