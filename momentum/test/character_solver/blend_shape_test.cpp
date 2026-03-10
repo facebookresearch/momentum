@@ -16,7 +16,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/gauss_newton_solver_qr.h"
 #include "momentum/character_solver/skeleton_solver_function.h"
-#include "momentum/character_solver/vertex_error_function.h"
+#include "momentum/character_solver/vertex_position_error_function.h"
 #include "momentum/math/mesh.h"
 #include "momentum/test/character/character_helpers.h"
 
@@ -157,9 +157,11 @@ TYPED_TEST(BlendShapesTest, Fitting) {
   // Use IK to fit the pose + blend shapes.
   SkeletonSolverFunctionT<T> solverFunction(characterBlend, castedCharacterBlendParameterTransform);
 
-  auto errorFunction = std::make_shared<VertexErrorFunctionT<T>>(characterBlend);
+  auto errorFunction = std::make_shared<VertexPositionErrorFunctionT<T>>(
+      characterBlend, characterBlend.parameterTransform);
   for (size_t iVert = 0; iVert < targetMesh.vertices.size(); ++iVert) {
-    errorFunction->addConstraint(iVert, 1.0, targetMesh.vertices[iVert], targetMesh.normals[iVert]);
+    errorFunction->addConstraint(
+        VertexPositionDataT<T>(iVert, targetMesh.vertices[iVert].template cast<T>(), 1.0f));
   }
   solverFunction.addErrorFunction(errorFunction);
 
