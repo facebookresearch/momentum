@@ -829,6 +829,25 @@ using SimdCollisionErrorFunctiond_const_u = ::std::unique_ptr<const SimdCollisio
 using SimdCollisionErrorFunctiond_const_w = ::std::weak_ptr<const SimdCollisionErrorFunctiond>;
 
 template <typename T>
+class SkeletonDerivativeT;
+using SkeletonDerivative = SkeletonDerivativeT<float>;
+using SkeletonDerivatived = SkeletonDerivativeT<double>;
+
+using SkeletonDerivative_p = ::std::shared_ptr<SkeletonDerivative>;
+using SkeletonDerivative_u = ::std::unique_ptr<SkeletonDerivative>;
+using SkeletonDerivative_w = ::std::weak_ptr<SkeletonDerivative>;
+using SkeletonDerivative_const_p = ::std::shared_ptr<const SkeletonDerivative>;
+using SkeletonDerivative_const_u = ::std::unique_ptr<const SkeletonDerivative>;
+using SkeletonDerivative_const_w = ::std::weak_ptr<const SkeletonDerivative>;
+
+using SkeletonDerivatived_p = ::std::shared_ptr<SkeletonDerivatived>;
+using SkeletonDerivatived_u = ::std::unique_ptr<SkeletonDerivatived>;
+using SkeletonDerivatived_w = ::std::weak_ptr<SkeletonDerivatived>;
+using SkeletonDerivatived_const_p = ::std::shared_ptr<const SkeletonDerivatived>;
+using SkeletonDerivatived_const_u = ::std::unique_ptr<const SkeletonDerivatived>;
+using SkeletonDerivatived_const_w = ::std::weak_ptr<const SkeletonDerivatived>;
+
+template <typename T>
 class SkeletonErrorFunctionT;
 using SkeletonErrorFunction = SkeletonErrorFunctionT<float>;
 using SkeletonErrorFunctiond = SkeletonErrorFunctionT<double>;
