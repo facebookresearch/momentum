@@ -334,20 +334,34 @@ character_solver_sources = [
 ]
 
 character_solver_test_sources = [
+    "test/character_solver/aim_error_function_test.cpp",
     "test/character_solver/blend_shape_test.cpp",
     "test/character_solver/camera_projection_error_function_test.cpp",
     "test/character_solver/center_of_mass_error_function_test.cpp",
     "test/character_solver/collision_error_function_test.cpp",
-    "test/character_solver/geometric_error_function_test.cpp",
+    "test/character_solver/distance_error_function_test.cpp",
+    "test/character_solver/fixed_axis_error_function_test.cpp",
+    "test/character_solver/height_error_function_test.cpp",
     "test/character_solver/inverse_kinematics_test.cpp",
+    "test/character_solver/joint_to_joint_distance_error_function_test.cpp",
+    "test/character_solver/joint_to_joint_position_error_function_test.cpp",
     "test/character_solver/limit_error_function_test.cpp",
+    "test/character_solver/normal_error_function_test.cpp",
     "test/character_solver/orientation_error_function_test.cpp",
+    "test/character_solver/plane_error_function_test.cpp",
+    "test/character_solver/point_triangle_vertex_error_function_test.cpp",
     "test/character_solver/position_error_function_test.cpp",
+    "test/character_solver/projection_error_function_test.cpp",
     "test/character_solver/skeleton_derivative_test.cpp",
     "test/character_solver/skinned_locator_error_function_test.cpp",
     "test/character_solver/solver_test.cpp",
     "test/character_solver/state_error_function_test.cpp",
-    "test/character_solver/vertex_error_function_test.cpp",
+    "test/character_solver/vertex_normal_error_function_test.cpp",
+    "test/character_solver/vertex_plane_error_function_test.cpp",
+    "test/character_solver/vertex_position_error_function_test.cpp",
+    "test/character_solver/vertex_projection_error_function_test.cpp",
+    "test/character_solver/vertex_sdf_error_function_test.cpp",
+    "test/character_solver/vertex_vertex_distance_error_function_test.cpp",
 ]
 
 simd_constraints_public_headers = [
@@ -365,7 +379,10 @@ simd_constraints_sources = [
 ]
 
 simd_constraints_test_sources = [
-    "test/character_solver/simd_functions_test.cpp",
+    "test/character_solver/simd_collision_error_function_test.cpp",
+    "test/character_solver/simd_normal_error_function_test.cpp",
+    "test/character_solver/simd_plane_error_function_test.cpp",
+    "test/character_solver/simd_position_error_function_test.cpp",
 ]
 
 character_sequence_solver_public_headers = [
