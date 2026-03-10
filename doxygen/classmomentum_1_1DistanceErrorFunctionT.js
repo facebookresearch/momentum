@@ -9,7 +9,7 @@ var classmomentum_1_1DistanceErrorFunctionT =
     [ "getGradient", "classmomentum_1_1DistanceErrorFunctionT.html#af4ca5487052416b02d40f2667a8d409b", null ],
     [ "getJacobian", "classmomentum_1_1DistanceErrorFunctionT.html#a0580bdc1497bc125d292fdbf4619fc83", null ],
     [ "getJacobianSize", "classmomentum_1_1DistanceErrorFunctionT.html#aa71b23c9fb25f7d2aa6a728013236358", null ],
-    [ "numConstraints", "classmomentum_1_1DistanceErrorFunctionT.html#abe3f1b22dce2fb461f92fa1b44c49163", null ],
+    [ "getNumConstraints", "classmomentum_1_1DistanceErrorFunctionT.html#a6b1b38faad57f8a9abc8d19ce6f691aa", null ],
     [ "setConstraints", "classmomentum_1_1DistanceErrorFunctionT.html#a9895609711162e64db481b4bb6e36eb4", null ],
     [ "constraints_", "classmomentum_1_1DistanceErrorFunctionT.html#a6b18256fe8561abde299dd3b15724b5e", null ],
     [ "kDistanceWeight", "classmomentum_1_1DistanceErrorFunctionT.html#a83bffe8b7bd2edb17927c8089e24cebd", null ]

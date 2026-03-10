@@ -126,6 +126,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3f6cf464728d9d426d8023957ab5c7eb" id="r_a3f6cf464728d9d426d8023957ab5c7eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1GeneralizedLossT.html#a3f6cf464728d9d426d8023957ab5c7eb">deriv</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sqrError</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="memdesc:a3f6cf464728d9d426d8023957ab5c7eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative of the loss with respective to the input squared error.  <br /></td></tr>
 <tr class="separator:a3f6cf464728d9d426d8023957ab5c7eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a031a6c12afc594bee9a917fb1b475ebc" id="r_a031a6c12afc594bee9a917fb1b475ebc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1GeneralizedLossT.html#a031a6c12afc594bee9a917fb1b475ebc">isL2</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a031a6c12afc594bee9a917fb1b475ebc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if this loss is an L2 loss (alpha ~= 2).  <br /></td></tr>
+<tr class="separator:a031a6c12afc594bee9a917fb1b475ebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c93cf2827cbdf0664a41f842be5087a" id="r_a2c93cf2827cbdf0664a41f842be5087a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1GeneralizedLossT.html#a2c93cf2827cbdf0664a41f842be5087a">invC2</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a2c93cf2827cbdf0664a41f842be5087a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the stored 1/c^2 value. For default c=1, this is 1.0.  <br /></td></tr>
+<tr class="separator:a2c93cf2827cbdf0664a41f842be5087a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -201,7 +207,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <tr><td class="fieldname"><a id="aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f" name="aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f"></a>General&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00043">43</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00054">54</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
 
 </div>
 </div>
@@ -236,7 +242,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="generalized__loss_8cpp_source.html#l00064">64</a> of file <a class="el" href="generalized__loss_8cpp_source.html">generalized_loss.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="generalized__loss_8h_source.html#l00054">momentum::GeneralizedLossT&lt; T &gt;::alpha_</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a2ee21c55474972b3e65b31a6b0b57dc8">momentum::GeneralizedLossT&lt; T &gt;::Cauchy</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f">momentum::GeneralizedLossT&lt; T &gt;::General</a>, <a class="el" href="generalized__loss_8h_source.html#l00026">momentum::GeneralizedLossT&lt; T &gt;::kCauchy</a>, <a class="el" href="generalized__loss_8h_source.html#l00052">momentum::GeneralizedLossT&lt; T &gt;::kEps</a>, <a class="el" href="generalized__loss_8h_source.html#l00025">momentum::GeneralizedLossT&lt; T &gt;::kL1</a>, <a class="el" href="generalized__loss_8h_source.html#l00024">momentum::GeneralizedLossT&lt; T &gt;::kL2</a>, <a class="el" href="generalized__loss_8h_source.html#l00027">momentum::GeneralizedLossT&lt; T &gt;::kWelsch</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a9ec4c0afd450ceac7adb81c3bcfc9732">momentum::GeneralizedLossT&lt; T &gt;::L1</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a7e6aa2d53f6ee2b1a34b017fa403cb76">momentum::GeneralizedLossT&lt; T &gt;::L2</a>, <a class="el" href="generalized__loss_8h_source.html#l00059">momentum::GeneralizedLossT&lt; T &gt;::lossType_</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a72f82728658c822b13155628339d3df9">momentum::GeneralizedLossT&lt; T &gt;::Welsch</a>.</p>
+<p class="reference">References <a class="el" href="generalized__loss_8h_source.html#l00065">momentum::GeneralizedLossT&lt; T &gt;::alpha_</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a2ee21c55474972b3e65b31a6b0b57dc8">momentum::GeneralizedLossT&lt; T &gt;::Cauchy</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f">momentum::GeneralizedLossT&lt; T &gt;::General</a>, <a class="el" href="generalized__loss_8h_source.html#l00026">momentum::GeneralizedLossT&lt; T &gt;::kCauchy</a>, <a class="el" href="generalized__loss_8h_source.html#l00063">momentum::GeneralizedLossT&lt; T &gt;::kEps</a>, <a class="el" href="generalized__loss_8h_source.html#l00025">momentum::GeneralizedLossT&lt; T &gt;::kL1</a>, <a class="el" href="generalized__loss_8h_source.html#l00024">momentum::GeneralizedLossT&lt; T &gt;::kL2</a>, <a class="el" href="generalized__loss_8h_source.html#l00027">momentum::GeneralizedLossT&lt; T &gt;::kWelsch</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a9ec4c0afd450ceac7adb81c3bcfc9732">momentum::GeneralizedLossT&lt; T &gt;::L1</a>, <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a7e6aa2d53f6ee2b1a34b017fa403cb76">momentum::GeneralizedLossT&lt; T &gt;::L2</a>, <a class="el" href="generalized__loss_8h_source.html#l00070">momentum::GeneralizedLossT&lt; T &gt;::lossType_</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, and <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a72f82728658c822b13155628339d3df9">momentum::GeneralizedLossT&lt; T &gt;::Welsch</a>.</p>
 
 </div>
 </div>
@@ -265,6 +271,73 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p class="definition">Definition at line <a class="el" href="generalized__loss_8cpp_source.html#l00105">105</a> of file <a class="el" href="generalized__loss_8cpp_source.html">generalized_loss.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="log_8h_source.html#l00126">MT_LOGE</a>.</p>
+
+</div>
+</div>
+<a id="a2c93cf2827cbdf0664a41f842be5087a" name="a2c93cf2827cbdf0664a41f842be5087a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c93cf2827cbdf0664a41f842be5087a">&#9670;&#160;</a></span>invC2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="classmomentum_1_1GeneralizedLossT.html">momentum::GeneralizedLossT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::invC2 </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the stored 1/c^2 value. For default c=1, this is 1.0. </p>
+
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00049">49</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+
+<p class="reference">References <a class="el" href="generalized__loss_8h_source.html#l00068">momentum::GeneralizedLossT&lt; T &gt;::invC2_</a>.</p>
+
+</div>
+</div>
+<a id="a031a6c12afc594bee9a917fb1b475ebc" name="a031a6c12afc594bee9a917fb1b475ebc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a031a6c12afc594bee9a917fb1b475ebc">&#9670;&#160;</a></span>isL2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="classmomentum_1_1GeneralizedLossT.html">momentum::GeneralizedLossT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::isL2 </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if this loss is an L2 loss (alpha ~= 2). </p>
+<p>Useful for fast-path optimizations that bypass <a class="el" href="classmomentum_1_1GeneralizedLossT.html#a28df165318ba09277880704efd016929">value()</a>/deriv() calls. </p>
+
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00044">44</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+
+<p class="reference">References <a class="el" href="classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a7e6aa2d53f6ee2b1a34b017fa403cb76">momentum::GeneralizedLossT&lt; T &gt;::L2</a>, and <a class="el" href="generalized__loss_8h_source.html#l00070">momentum::GeneralizedLossT&lt; T &gt;::lossType_</a>.</p>
 
 </div>
 </div>
@@ -315,7 +388,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00054">54</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00065">65</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="generalized__loss_8cpp_source.html#l00064">momentum::GeneralizedLossT&lt; T &gt;::GeneralizedLossT()</a>.</p>
 
@@ -343,7 +416,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00057">57</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00068">68</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="generalized__loss_8h_source.html#l00049">momentum::GeneralizedLossT&lt; T &gt;::invC2()</a>.</p>
 
 </div>
 </div>
@@ -397,7 +472,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00052">52</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00063">63</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="generalized__loss_8cpp_source.html#l00064">momentum::GeneralizedLossT&lt; T &gt;::GeneralizedLossT()</a>.</p>
 
@@ -509,9 +584,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00059">59</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="generalized__loss_8h_source.html#l00070">70</a> of file <a class="el" href="generalized__loss_8h_source.html">generalized_loss.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="generalized__loss_8cpp_source.html#l00064">momentum::GeneralizedLossT&lt; T &gt;::GeneralizedLossT()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="generalized__loss_8cpp_source.html#l00064">momentum::GeneralizedLossT&lt; T &gt;::GeneralizedLossT()</a>, and <a class="el" href="generalized__loss_8h_source.html#l00044">momentum::GeneralizedLossT&lt; T &gt;::isL2()</a>.</p>
 
 </div>
 </div>
@@ -526,7 +601,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1GeneralizedLossT.html">GeneralizedLossT</a></li>
-    <li class="footer">Generated on Sat Mar 7 2026 07:56:34 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Mar 10 2026 08:36:24 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

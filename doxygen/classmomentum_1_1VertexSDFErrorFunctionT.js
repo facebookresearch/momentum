@@ -9,6 +9,6 @@ var classmomentum_1_1VertexSDFErrorFunctionT =
     [ "getGradient", "classmomentum_1_1VertexSDFErrorFunctionT.html#aefabf16f141831d1794b2594254fa277", null ],
     [ "getJacobian", "classmomentum_1_1VertexSDFErrorFunctionT.html#af1f71ace3e1a431adcf14c7930302134", null ],
     [ "getJacobianSize", "classmomentum_1_1VertexSDFErrorFunctionT.html#a8ea1c51bd54a1a75494cec3205123c8e", null ],
-    [ "needsMesh", "classmomentum_1_1VertexSDFErrorFunctionT.html#ad3926bff2c19338654b60238ae438783", null ],
-    [ "numConstraints", "classmomentum_1_1VertexSDFErrorFunctionT.html#ac7eab5a8a4f8977d55a50abb9acc4c42", null ]
+    [ "getNumConstraints", "classmomentum_1_1VertexSDFErrorFunctionT.html#ab49f5f1779fba13566a883d866b77777", null ],
+    [ "needsMesh", "classmomentum_1_1VertexSDFErrorFunctionT.html#ad3926bff2c19338654b60238ae438783", null ]
 ];

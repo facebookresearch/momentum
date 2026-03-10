@@ -12,8 +12,8 @@ var classmomentum_1_1VertexVertexDistanceErrorFunctionT =
     [ "getGradient", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#af5cd15f7c74b1b7468d6658eed420490", null ],
     [ "getJacobian", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#a0c14c16780e77eb2db49e03e025d1b4c", null ],
     [ "getJacobianSize", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#aee1d7cc06e53029601bf3d6fab95a623", null ],
+    [ "getNumConstraints", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97", null ],
     [ "needsMesh", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#a756ee0f1b88d3043d42c2438b767777b", null ],
-    [ "numConstraints", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#a900ec2b47fc2431d273f4126996273f0", null ],
     [ "operator=", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ae9189c37a70303dbfd941b8b5cc6cd4b", null ],
     [ "operator=", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#a9e1408aa0769bd2879a58835ea9636bb", null ]
 ];

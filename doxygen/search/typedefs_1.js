@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['base_0',['Base',['../classmomentum_1_1SimdGeneralizedLossT.html#a7f25ad45c9d6258268d093e3ffc7b178',1,'momentum::SimdGeneralizedLossT']]],
+  ['base_0',['base',['../classmomentum_1_1VertexNormalErrorFunctionT.html#ae8c53ad06e4ecf94942e2bc340614533',1,'momentum::VertexNormalErrorFunctionT::Base'],['../classmomentum_1_1SimdGeneralizedLossT.html#a7f25ad45c9d6258268d093e3ffc7b178',1,'momentum::SimdGeneralizedLossT::Base'],['../classmomentum_1_1VertexProjectionErrorFunctionT.html#ada73955a0dc6e30c9ec02f976621a869',1,'momentum::VertexProjectionErrorFunctionT::Base'],['../classmomentum_1_1VertexPositionErrorFunctionT.html#a4e741747fd8cf02a588e868ec4871c08',1,'momentum::VertexPositionErrorFunctionT::Base'],['../classmomentum_1_1VertexPlaneErrorFunctionT.html#ab8aaf7a6669a0b1bc65a0ea06b27438a',1,'momentum::VertexPlaneErrorFunctionT::Base']]],
   ['blendshape_5fconst_5fp_1',['BlendShape_const_p',['../namespacemomentum.html#a6472912b236f6061a827e78eb44659c4',1,'momentum']]],
   ['blendshape_5fconst_5fu_2',['BlendShape_const_u',['../namespacemomentum.html#a4df6fbd49e38c79801190865c68ab35c',1,'momentum']]],
   ['blendshape_5fconst_5fw_3',['BlendShape_const_w',['../namespacemomentum.html#ac254ff96a2d8b506de8b52a62e8f94e3',1,'momentum']]],

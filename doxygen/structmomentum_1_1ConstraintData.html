@@ -98,10 +98,10 @@ $(document).ready(function(){initNavTree('structmomentum_1_1ConstraintData.html'
 </div><!--header-->
 <div class="contents">
 
-<p>Base structure of constraint data.  
+<p>Base structure of constraint data for joint-based error functions.  
  <a href="structmomentum_1_1ConstraintData.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="error__function__types_8h_source.html">error_function_types.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::ConstraintData:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -129,7 +129,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:af1a0306884fe71aa6bb2d343198bc339" id="r_af1a0306884fe71aa6bb2d343198bc339"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1ConstraintData.html#af1a0306884fe71aa6bb2d343198bc339">parent</a> = <a class="el" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a></td></tr>
 <tr class="memdesc:af1a0306884fe71aa6bb2d343198bc339"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parent joint index this constraint is under.  <br /></td></tr>
 <tr class="separator:af1a0306884fe71aa6bb2d343198bc339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acab172ebf212999a3b0b90011b449eb0" id="r_acab172ebf212999a3b0b90011b449eb0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1ConstraintData.html#acab172ebf212999a3b0b90011b449eb0">weight</a> = 0.0</td></tr>
+<tr class="memitem:acab172ebf212999a3b0b90011b449eb0" id="r_acab172ebf212999a3b0b90011b449eb0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1ConstraintData.html#acab172ebf212999a3b0b90011b449eb0">weight</a> = 0.0f</td></tr>
 <tr class="memdesc:acab172ebf212999a3b0b90011b449eb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight of the constraint.  <br /></td></tr>
 <tr class="separator:acab172ebf212999a3b0b90011b449eb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa37c525a7a1ad7ac78759850f0ff542b" id="r_aa37c525a7a1ad7ac78759850f0ff542b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1ConstraintData.html#aa37c525a7a1ad7ac78759850f0ff542b">name</a> = {}</td></tr>
@@ -137,9 +137,10 @@ Public Attributes</h2></td></tr>
 <tr class="separator:aa37c525a7a1ad7ac78759850f0ff542b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Base structure of constraint data. </p>
+<div class="textblock"><p>Base structure of constraint data for joint-based error functions. </p>
+<p>Provides the common fields shared by all constraint types: the parent joint index, constraint weight, and an optional name for debugging. </p>
 
-<p class="definition">Definition at line <a class="el" href="constraint__error__function_8h_source.html#l00021">21</a> of file <a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="error__function__types_8h_source.html#l00034">34</a> of file <a class="el" href="error__function__types_8h_source.html">error_function_types.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a45e0180a86885c3835ce530d761cf08b" name="a45e0180a86885c3835ce530d761cf08b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a45e0180a86885c3835ce530d761cf08b">&#9670;&#160;</a></span>ConstraintData()</h2>
@@ -181,7 +182,7 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="constraint__error__function_8h_source.html#l00029">29</a> of file <a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="error__function__types_8h_source.html#l00042">42</a> of file <a class="el" href="error__function__types_8h_source.html">error_function_types.h</a>.</p>
 
 </div>
 </div>
@@ -200,7 +201,7 @@ Public Attributes</h2></td></tr>
 
 <p>Name of the constraint. </p>
 
-<p class="definition">Definition at line <a class="el" href="constraint__error__function_8h_source.html#l00027">27</a> of file <a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="error__function__types_8h_source.html#l00040">40</a> of file <a class="el" href="error__function__types_8h_source.html">error_function_types.h</a>.</p>
 
 </div>
 </div>
@@ -218,7 +219,7 @@ Public Attributes</h2></td></tr>
 
 <p>Parent joint index this constraint is under. </p>
 
-<p class="definition">Definition at line <a class="el" href="constraint__error__function_8h_source.html#l00023">23</a> of file <a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="error__function__types_8h_source.html#l00036">36</a> of file <a class="el" href="error__function__types_8h_source.html">error_function_types.h</a>.</p>
 
 </div>
 </div>
@@ -229,19 +230,19 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::ConstraintData::weight = 0.0</td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::ConstraintData::weight = 0.0f</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Weight of the constraint. </p>
 
-<p class="definition">Definition at line <a class="el" href="constraint__error__function_8h_source.html#l00025">25</a> of file <a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="error__function__types_8h_source.html#l00038">38</a> of file <a class="el" href="error__function__types_8h_source.html">error_function_types.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>character_solver/<a class="el" href="constraint__error__function_8h_source.html">constraint_error_function.h</a></li>
+<li>character_solver/<a class="el" href="error__function__types_8h_source.html">error_function_types.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -249,7 +250,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1ConstraintData.html">ConstraintData</a></li>
-    <li class="footer">Generated on Sat Mar 7 2026 07:56:34 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Mar 10 2026 08:36:24 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

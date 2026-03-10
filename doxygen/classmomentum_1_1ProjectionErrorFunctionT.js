@@ -9,7 +9,7 @@ var classmomentum_1_1ProjectionErrorFunctionT =
     [ "getGradient", "classmomentum_1_1ProjectionErrorFunctionT.html#ac9d556d832fe3a1b3012844ff71ac267", null ],
     [ "getJacobian", "classmomentum_1_1ProjectionErrorFunctionT.html#a9817c6010bf23b4d7d3c97f50e6dced5", null ],
     [ "getJacobianSize", "classmomentum_1_1ProjectionErrorFunctionT.html#a23a8eb3303f57daee9b71ca1b4d28e4f", null ],
-    [ "numConstraints", "classmomentum_1_1ProjectionErrorFunctionT.html#a9db8b95383380f3c800cab694c8896e8", null ],
+    [ "getNumConstraints", "classmomentum_1_1ProjectionErrorFunctionT.html#a03e48f4fd404cc033c51134f74eadb05", null ],
     [ "setConstraints", "classmomentum_1_1ProjectionErrorFunctionT.html#a03a8d8f2dd68a82db71f2f71ccd721b0", null ],
     [ "_nearClip", "classmomentum_1_1ProjectionErrorFunctionT.html#aed0d5a22cb149392bb30a4b45e800193", null ],
     [ "constraints_", "classmomentum_1_1ProjectionErrorFunctionT.html#a77e06ae039e78934b45b5bd5d567f291", null ]

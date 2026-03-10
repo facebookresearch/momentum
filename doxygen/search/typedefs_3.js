@@ -1,7 +1,7 @@
 var searchData=
 [
   ['defaultexception_0',['DefaultException',['../namespacemomentum_1_1detail.html#a61b2f9f4ddba0b8c95c3934020e8dfb0',1,'momentum::detail']]],
-  ['dfdvtype_1',['DfdvType',['../classmomentum_1_1ConstraintErrorFunctionT.html#a102f38cefcad821f39cbb557c8a7859b',1,'momentum::ConstraintErrorFunctionT']]],
+  ['dfdvtype_1',['dfdvtype',['../classmomentum_1_1VertexErrorFunctionT.html#a8b3ec4cc7ab35fe666c7321b03c1d2cc',1,'momentum::VertexErrorFunctionT::DfdvType'],['../classmomentum_1_1JointErrorFunctionT.html#a767f4458819cdecef8d8ee8ae711b1bd',1,'momentum::JointErrorFunctionT::DfdvType']]],
   ['distanceerrorfunction_2',['DistanceErrorFunction',['../namespacemomentum.html#aa0ae0c8295d808c0ddede34932dcad10',1,'momentum']]],
   ['distanceerrorfunction_5fconst_5fp_3',['DistanceErrorFunction_const_p',['../namespacemomentum.html#a8a3d06e6aa3761b99a7e0e7103b7c80d',1,'momentum']]],
   ['distanceerrorfunction_5fconst_5fu_4',['DistanceErrorFunction_const_u',['../namespacemomentum.html#a8370bb9a71189e1a770ddfbf35046494',1,'momentum']]],

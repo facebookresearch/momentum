@@ -7,6 +7,5 @@ var point__triangle__vertex__error__function_8cpp =
     [ "computeTargetPosition", "point__triangle__vertex__error__function_8cpp.html#a5ea0c2916a4be5038f8ea748669b2905", null ],
     [ "computeTargetTriangleNormal", "point__triangle__vertex__error__function_8cpp.html#a9df15d7f5cab0a4f631e238632d33e88", null ],
     [ "gradient_jointParams_to_modelParams", "point__triangle__vertex__error__function_8cpp.html#aa0673a1e9f70b2c9aed21f95dc8e8427", null ],
-    [ "jacobian_jointParams_to_modelParams", "point__triangle__vertex__error__function_8cpp.html#a9d52a51c47d7eb931d52250addc66d76", null ],
     [ "jacobian_jointParams_to_modelParams", "point__triangle__vertex__error__function_8cpp.html#a75f92c9556cc340ba6afd88f1cbf3983", null ]
 ];

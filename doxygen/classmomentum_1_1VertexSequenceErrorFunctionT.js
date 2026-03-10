@@ -9,7 +9,7 @@ var classmomentum_1_1VertexSequenceErrorFunctionT =
     [ "getGradient", "classmomentum_1_1VertexSequenceErrorFunctionT.html#afbe56782ed046e06315d71ff29780b0d", null ],
     [ "getJacobian", "classmomentum_1_1VertexSequenceErrorFunctionT.html#a60885464f05af0a383e4eefe77d89024", null ],
     [ "getJacobianSize", "classmomentum_1_1VertexSequenceErrorFunctionT.html#a6c595cffd1e5e7469874198f9f9ca6fe", null ],
+    [ "getNumConstraints", "classmomentum_1_1VertexSequenceErrorFunctionT.html#a49e2ede941c498a72b3a438d1395ab73", null ],
     [ "needsMesh", "classmomentum_1_1VertexSequenceErrorFunctionT.html#aa13dd03d290beb2de9ace40de0733ee3", null ],
-    [ "numConstraints", "classmomentum_1_1VertexSequenceErrorFunctionT.html#a0f402e9d8d3cbe6d899b364ca0284733", null ],
     [ "numFrames", "classmomentum_1_1VertexSequenceErrorFunctionT.html#a47d0b085284f55eb56811b45938bd5bc", null ]
 ];

@@ -9,6 +9,8 @@ var classmomentum_1_1GeneralizedLossT =
     ] ],
     [ "GeneralizedLossT", "classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e", null ],
     [ "deriv", "classmomentum_1_1GeneralizedLossT.html#a3f6cf464728d9d426d8023957ab5c7eb", null ],
+    [ "invC2", "classmomentum_1_1GeneralizedLossT.html#a2c93cf2827cbdf0664a41f842be5087a", null ],
+    [ "isL2", "classmomentum_1_1GeneralizedLossT.html#a031a6c12afc594bee9a917fb1b475ebc", null ],
     [ "value", "classmomentum_1_1GeneralizedLossT.html#a28df165318ba09277880704efd016929", null ],
     [ "alpha_", "classmomentum_1_1GeneralizedLossT.html#a8bd3714b7eba70b0dc1dafe6affe5f0e", null ],
     [ "invC2_", "classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002", null ],

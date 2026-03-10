@@ -455,8 +455,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint"><code class="docutils literal notranslate"><span class="pre">VertexConstraint</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.__init__"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.target_normal"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.target_normal</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.target_position"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.target_position</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.vertex_index"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.vertex_index</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexConstraint.weight"><code class="docutils literal notranslate"><span class="pre">VertexConstraint.weight</span></code></a></li>
 </ul>
@@ -476,7 +474,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.add_constraint()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.add_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.clear_constraints()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.num_constraints"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.num_constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction.weight"><code class="docutils literal notranslate"><span class="pre">VertexErrorFunction.weight</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.VertexProjectionConstraint"><code class="docutils literal notranslate"><span class="pre">VertexProjectionConstraint</span></code></a><ul>
@@ -3522,33 +3521,22 @@ the gradient contribution is set to zero.</p>
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexConstraint</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Read-only access to a vertex constraint.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.target_normal">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_normal</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.target_normal" title="Link to this definition"></a></dt>
-<dd><p>The target normal for the vertex.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.target_position">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_position</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.target_position" title="Link to this definition"></a></dt>
-<dd><p>The target position for the vertex.</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.vertex_index">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vertex_index</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.vertex_index" title="Link to this definition"></a></dt>
-<dd><p>The index of the vertex to constrain.</p>
+<dd><p>The vertex index.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexConstraint.weight">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.VertexConstraint.weight" title="Link to this definition"></a></dt>
-<dd><p>The weight of the constraint.</p>
+<dd><p>The constraint weight.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3603,79 +3591,71 @@ the gradient contribution is set to zero.</p>
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">VertexErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
+<p>A vertex error function that constrains mesh vertices to target positions, normals, or planes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">pymomentum.solver2.VertexErrorFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character:</span> <span class="pre">pymomentum.geometry.Character</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.__init__" title="Link to this definition"></a></dt>
-<dd><p>A skeleton error function that penalizes vertex distance to a target point.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param character<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The character to use.</p>
-</dd>
-<dt class="field-even">param constraint_type<span class="colon">:</span></dt>
-<dd class="field-even"><p>The type of vertex constraint to apply.</p>
-</dd>
-<dt class="field-odd">param max_threads<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The maximum number of threads to use for computation.</p>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">pymomentum.solver2.VertexErrorFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character:</span> <span class="pre">pymomentum.geometry.Character</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a VertexErrorFunction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to use.</p></li>
+<li><p><strong>constraint_type</strong> – The type of vertex constraint.</p></li>
+<li><p><strong>weight</strong> – The weight applied to the error function.</p></li>
+<li><p><strong>max_threads</strong> – Maximum number of threads for parallel computation (0 = unlimited).</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.add_constraint">
 <span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction" title="pymomentum.solver2.VertexErrorFunction"><span class="pre">pymomentum.solver2.VertexErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.add_constraint" title="Link to this definition"></a></dt>
-<dd><p>Adds a vertex constraint to the error function.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param vertex_index<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The index of the vertex to constrain.</p>
-</dd>
-<dt class="field-even">param weight<span class="colon">:</span></dt>
-<dd class="field-even"><p>The weight of the constraint.</p>
-</dd>
-<dt class="field-odd">param target_position<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The target position for the vertex.</p>
-</dd>
-<dt class="field-even">param target_normal<span class="colon">:</span></dt>
-<dd class="field-even"><p>The target normal for the vertex.</p>
+<dd><p>Adds a single vertex constraint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertex_index</strong> – The index of the mesh vertex.</p></li>
+<li><p><strong>weight</strong> – The weight of the constraint.</p></li>
+<li><p><strong>target_position</strong> – The target position (3D vector).</p></li>
+<li><p><strong>target_normal</strong> – The target normal direction (3D vector).</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.add_constraints">
 <span class="sig-name descname"><span class="pre">add_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction" title="pymomentum.solver2.VertexErrorFunction"><span class="pre">pymomentum.solver2.VertexErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertex_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.add_constraints" title="Link to this definition"></a></dt>
-<dd><p>Adds multiple vertex constraints to the error function.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param vertex_index<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The indices of the vertices to constrain.</p>
-</dd>
-<dt class="field-even">param target_position<span class="colon">:</span></dt>
-<dd class="field-even"><p>The target positions for the vertices.</p>
-</dd>
-<dt class="field-odd">param target_normal<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The target normals for the vertices.</p>
-</dd>
-<dt class="field-even">param weight<span class="colon">:</span></dt>
-<dd class="field-even"><p>The weights of the constraints.</p>
+<dd><p>Adds multiple vertex constraints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertex_index</strong> – Array of vertex indices (n_cons,).</p></li>
+<li><p><strong>target_position</strong> – Array of target positions (n_cons, 3).</p></li>
+<li><p><strong>target_normal</strong> – Array of target normals (n_cons, 3).</p></li>
+<li><p><strong>weight</strong> – Array of constraint weights (n_cons,).</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.clear_constraints">
 <span class="sig-name descname"><span class="pre">clear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.VertexErrorFunction" title="pymomentum.solver2.VertexErrorFunction"><span class="pre">pymomentum.solver2.VertexErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.clear_constraints" title="Link to this definition"></a></dt>
-<dd><p>Clears all vertex constraints from the error function.</p>
+<dd><p>Clears all vertex constraints.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.constraints">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.constraints" title="Link to this definition"></a></dt>
-<dd><p>Returns the list of vertex constraints.</p>
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.num_constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_constraints</span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.num_constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of constraints.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.VertexErrorFunction.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.VertexErrorFunction.weight" title="Link to this definition"></a></dt>
+<dd><p>The weight applied to this error function.</p>
 </dd></dl>
 
 </dd></dl>

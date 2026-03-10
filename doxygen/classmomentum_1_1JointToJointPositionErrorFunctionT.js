@@ -10,5 +10,5 @@ var classmomentum_1_1JointToJointPositionErrorFunctionT =
     [ "getGradient", "classmomentum_1_1JointToJointPositionErrorFunctionT.html#a5e16100a868c246bdd0696679f81249d", null ],
     [ "getJacobian", "classmomentum_1_1JointToJointPositionErrorFunctionT.html#adc76b705f1ac05c8e4856204c8b87992", null ],
     [ "getJacobianSize", "classmomentum_1_1JointToJointPositionErrorFunctionT.html#aba99de08be2ec13326e10dd4974c4173", null ],
-    [ "numConstraints", "classmomentum_1_1JointToJointPositionErrorFunctionT.html#a09ccdb4a38d50046efc8d1e1e4bf0e94", null ]
+    [ "getNumConstraints", "classmomentum_1_1JointToJointPositionErrorFunctionT.html#adc015a0861cdebeca51ec54c9ea251f1", null ]
 ];

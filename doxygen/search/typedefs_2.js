@@ -96,5 +96,6 @@ var searchData=
   ['constraintdata_5fp_93',['ConstraintData_p',['../namespacemomentum.html#aacbad7d45c17bf49dda245b8a1256429',1,'momentum']]],
   ['constraintdata_5fu_94',['ConstraintData_u',['../namespacemomentum.html#a67897f95a55dcca3cbf64aaab7a568e3',1,'momentum']]],
   ['constraintdata_5fw_95',['ConstraintData_w',['../namespacemomentum.html#a5364cf62cf6c604eccdf698fd53bc548',1,'momentum']]],
-  ['constraintdatalist_96',['ConstraintDataList',['../namespacemomentum.html#ab6b0e7056fd0d4bbc61259d31621560f',1,'momentum']]]
+  ['constraintdatalist_96',['ConstraintDataList',['../namespacemomentum.html#ab6b0e7056fd0d4bbc61259d31621560f',1,'momentum']]],
+  ['constrainttype_97',['ConstraintType',['../classmomentum_1_1CenterOfMassErrorFunctionT.html#ade56baf39fc3359d9a421c3c8f24fc9b',1,'momentum::CenterOfMassErrorFunctionT']]]
 ];

@@ -10,11 +10,11 @@ var classmomentum_1_1CameraProjectionErrorFunctionT =
     [ "getGradient", "classmomentum_1_1CameraProjectionErrorFunctionT.html#addb838104fcc4eeaf8c0b8ad0a4dfe57", null ],
     [ "getJacobian", "classmomentum_1_1CameraProjectionErrorFunctionT.html#a507c47c41949f935fe6b1b2b8dc264b5", null ],
     [ "getJacobianSize", "classmomentum_1_1CameraProjectionErrorFunctionT.html#acf24546f0fd8602010de0c3f0014402f", null ],
-    [ "numConstraints", "classmomentum_1_1CameraProjectionErrorFunctionT.html#af40a5256b47c2b9e9ead70fca18b885f", null ],
+    [ "getNumConstraints", "classmomentum_1_1CameraProjectionErrorFunctionT.html#ad9e44a83dcb117509ce81ce4488920d5", null ],
     [ "setConstraints", "classmomentum_1_1CameraProjectionErrorFunctionT.html#a85aaaa2b8691dacf81049fcb4805e8a1", null ],
     [ "cameraOffset_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#ad4511d545da0eb01140ce57f0f6de24e", null ],
     [ "cameraParent_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#a68fc66430b977fd19d493cede91e2915", null ],
     [ "constraints_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#a2f714fb487f155d264a8120449c42c20", null ],
-    [ "intrinsicsMapping_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#ad36c6bbbd445a5263ee6cd2b95276115", null ],
-    [ "intrinsicsModel_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c", null ]
+    [ "intrinsicsModel_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c", null ],
+    [ "skeletonDerivative_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#aa9a5324606a31f4cdfdf21d1cd7412af", null ]
 ];

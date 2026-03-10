@@ -8,5 +8,6 @@ var classmomentum_1_1JointToJointDistanceErrorFunctionT =
     [ "getError", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html#a19e0a05fa42314d5b91da98ae79ff66f", null ],
     [ "getGradient", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html#a8c7b5fbf6d482a34d60df4f0e5763049", null ],
     [ "getJacobian", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html#a1bb5ac8d2daefaf0805c27044c002d42", null ],
-    [ "getJacobianSize", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html#a4c934d7c7159c564083e47c8d9753696", null ]
+    [ "getJacobianSize", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html#a4c934d7c7159c564083e47c8d9753696", null ],
+    [ "getNumConstraints", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html#a897a6ffaaaf1c9b40fd565572545b2d3", null ]
 ];

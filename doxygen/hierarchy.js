@@ -16,6 +16,7 @@ var hierarchy =
     [ "momentum::BoneWeightT< T >", "structmomentum_1_1BoneWeightT.html", null ],
     [ "momentum::CameraIntrinsicsMapping< T >", "structmomentum_1_1CameraIntrinsicsMapping.html", null ],
     [ "momentum::CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", null ],
+    [ "momentum::CenterOfMassConstraintT< T >", "structmomentum_1_1CenterOfMassConstraintT.html", null ],
     [ "momentum::GltfBuilder::Impl::CharacterData", "structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html", null ],
     [ "momentum::CharacterParametersT< T >", "structmomentum_1_1CharacterParametersT.html", null ],
     [ "momentum::CharacterParametersT< float >", "structmomentum_1_1CharacterParametersT.html", null ],
@@ -143,40 +144,54 @@ var hierarchy =
     [ "momentum::SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html", null ],
     [ "momentum::SimdPlaneConstraints", "structmomentum_1_1SimdPlaneConstraints.html", null ],
     [ "momentum::SimdPositionConstraints", "structmomentum_1_1SimdPositionConstraints.html", null ],
+    [ "momentum::SkeletonDerivativeT< T >", "classmomentum_1_1SkeletonDerivativeT.html", null ],
     [ "momentum::SkeletonErrorFunctionT< T >", "classmomentum_1_1SkeletonErrorFunctionT.html", [
-      [ "momentum::ConstraintErrorFunctionT< T, AimDataT< T >, 3, 2, 1 >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, AimDataT< T >, 3, 2, 1 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::AimDirErrorFunctionT< T >", "classmomentum_1_1AimDirErrorFunctionT.html", null ],
         [ "momentum::AimDistErrorFunctionT< T >", "classmomentum_1_1AimDistErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::ConstraintErrorFunctionT< T, FixedAxisDataT< T >, 1, 1, 0 >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, FixedAxisDataT< T >, 1, 1, 0 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::FixedAxisAngleErrorFunctionT< T >", "classmomentum_1_1FixedAxisAngleErrorFunctionT.html", null ],
         [ "momentum::FixedAxisCosErrorFunctionT< T >", "classmomentum_1_1FixedAxisCosErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::ConstraintErrorFunctionT< T, FixedAxisDataT< T >, 3, 1, 0 >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, FixedAxisDataT< T >, 3, 1, 0 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::FixedAxisDiffErrorFunctionT< T >", "classmomentum_1_1FixedAxisDiffErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::ConstraintErrorFunctionT< T, NormalDataT< T >, 1, 2, 1 >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, NormalDataT< T >, 1, 2, 1 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::NormalErrorFunctionT< T >", "classmomentum_1_1NormalErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::ConstraintErrorFunctionT< T, OrientationDataT< T >, 9, 3, 0 >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, OrientationDataT< T >, 9, 3, 0 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::OrientationErrorFunctionT< T >", "classmomentum_1_1OrientationErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::ConstraintErrorFunctionT< T, PlaneDataT< T >, 1 >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, PlaneDataT< T >, 1 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::PlaneErrorFunctionT< T >", "classmomentum_1_1PlaneErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::ConstraintErrorFunctionT< T, PositionDataT< T > >", "classmomentum_1_1ConstraintErrorFunctionT.html", [
+      [ "momentum::JointErrorFunctionT< T, PositionDataT< T > >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::PositionErrorFunctionT< T >", "classmomentum_1_1PositionErrorFunctionT.html", null ]
       ] ],
+      [ "momentum::VertexErrorFunctionT< T, VertexNormalDataT< T >, 1 >", "classmomentum_1_1VertexErrorFunctionT.html", [
+        [ "momentum::VertexNormalErrorFunctionT< T >", "classmomentum_1_1VertexNormalErrorFunctionT.html", null ]
+      ] ],
+      [ "momentum::VertexErrorFunctionT< T, VertexPlaneDataT< T >, 1 >", "classmomentum_1_1VertexErrorFunctionT.html", [
+        [ "momentum::VertexPlaneErrorFunctionT< T >", "classmomentum_1_1VertexPlaneErrorFunctionT.html", null ]
+      ] ],
+      [ "momentum::VertexErrorFunctionT< T, VertexPositionDataT< T >, 3 >", "classmomentum_1_1VertexErrorFunctionT.html", [
+        [ "momentum::VertexPositionErrorFunctionT< T >", "classmomentum_1_1VertexPositionErrorFunctionT.html", null ]
+      ] ],
+      [ "momentum::VertexErrorFunctionT< T, VertexProjectionDataT< T >, 2 >", "classmomentum_1_1VertexErrorFunctionT.html", [
+        [ "momentum::VertexProjectionErrorFunctionT< T >", "classmomentum_1_1VertexProjectionErrorFunctionT.html", null ]
+      ] ],
       [ "momentum::CameraProjectionErrorFunctionT< T >", "classmomentum_1_1CameraProjectionErrorFunctionT.html", null ],
+      [ "momentum::CenterOfMassErrorFunctionT< T >", "classmomentum_1_1CenterOfMassErrorFunctionT.html", null ],
       [ "momentum::CollisionErrorFunctionStatelessT< T >", "classmomentum_1_1CollisionErrorFunctionStatelessT.html", null ],
       [ "momentum::CollisionErrorFunctionT< T >", "classmomentum_1_1CollisionErrorFunctionT.html", null ],
-      [ "momentum::ConstraintErrorFunctionT< T, Data, FuncDim, NumVec, NumPos >", "classmomentum_1_1ConstraintErrorFunctionT.html", null ],
       [ "momentum::DistanceErrorFunctionT< T >", "classmomentum_1_1DistanceErrorFunctionT.html", [
         [ "momentum::FullyDifferentiableDistanceErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html", null ]
       ] ],
       [ "momentum::FullyDifferentiableOrientationErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableOrientationErrorFunctionT.html", null ],
       [ "momentum::FullyDifferentiablePositionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiablePositionErrorFunctionT.html", null ],
       [ "momentum::HeightErrorFunctionT< T >", "classmomentum_1_1HeightErrorFunctionT.html", null ],
+      [ "momentum::JointErrorFunctionT< T, Data, FuncDim, NumVec, NumPos >", "classmomentum_1_1JointErrorFunctionT.html", null ],
       [ "momentum::JointToJointDistanceErrorFunctionT< T >", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html", null ],
       [ "momentum::JointToJointPositionErrorFunctionT< T >", "classmomentum_1_1JointToJointPositionErrorFunctionT.html", null ],
       [ "momentum::LimitErrorFunctionT< T >", "classmomentum_1_1LimitErrorFunctionT.html", null ],
@@ -201,8 +216,7 @@ var hierarchy =
         [ "momentum::FullyDifferentiableStateErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableStateErrorFunctionT.html", null ]
       ] ],
       [ "momentum::UnionErrorFunctionT< T >", "classmomentum_1_1UnionErrorFunctionT.html", null ],
-      [ "momentum::VertexErrorFunctionT< T >", "classmomentum_1_1VertexErrorFunctionT.html", null ],
-      [ "momentum::VertexProjectionErrorFunctionT< T >", "classmomentum_1_1VertexProjectionErrorFunctionT.html", null ],
+      [ "momentum::VertexErrorFunctionT< T, Data, FuncDim >", "classmomentum_1_1VertexErrorFunctionT.html", null ],
       [ "momentum::VertexSDFErrorFunctionT< T >", "classmomentum_1_1VertexSDFErrorFunctionT.html", null ],
       [ "momentum::VertexVertexDistanceErrorFunctionT< T >", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html", null ]
     ] ],
@@ -250,8 +264,12 @@ var hierarchy =
     [ "momentum::TransformT< T >", "structmomentum_1_1TransformT.html", null ],
     [ "momentum::TransformT< float >", "structmomentum_1_1TransformT.html", null ],
     [ "momentum::TransformT< S >", "structmomentum_1_1TransformT.html", null ],
-    [ "momentum::VertexConstraintT< T >", "structmomentum_1_1VertexConstraintT.html", null ],
-    [ "momentum::VertexProjectionConstraintT< T >", "structmomentum_1_1VertexProjectionConstraintT.html", null ],
+    [ "momentum::VertexConstraintData", "structmomentum_1_1VertexConstraintData.html", [
+      [ "momentum::VertexNormalDataT< T >", "structmomentum_1_1VertexNormalDataT.html", null ],
+      [ "momentum::VertexPlaneDataT< T >", "structmomentum_1_1VertexPlaneDataT.html", null ],
+      [ "momentum::VertexPositionDataT< T >", "structmomentum_1_1VertexPositionDataT.html", null ],
+      [ "momentum::VertexProjectionDataT< T >", "structmomentum_1_1VertexProjectionDataT.html", null ]
+    ] ],
     [ "momentum::VertexSDFConstraintT< T >", "structmomentum_1_1VertexSDFConstraintT.html", null ],
     [ "momentum::VertexVelocityConstraintT< T >", "structmomentum_1_1VertexVelocityConstraintT.html", null ],
     [ "momentum::VertexVertexDistanceConstraintT< T >", "structmomentum_1_1VertexVertexDistanceConstraintT.html", null ]

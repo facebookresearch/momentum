@@ -139,9 +139,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab0b67a28008cb5fdaf930178e54f04ba" id="r_ab0b67a28008cb5fdaf930178e54f04ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1JointToJointPositionDataT.html">JointToJointPositionDataT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1JointToJointPositionErrorFunctionT.html#ab0b67a28008cb5fdaf930178e54f04ba">getConstraints</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="memdesc:ab0b67a28008cb5fdaf930178e54f04ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all constraints.  <br /></td></tr>
 <tr class="separator:ab0b67a28008cb5fdaf930178e54f04ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09ccdb4a38d50046efc8d1e1e4bf0e94" id="r_a09ccdb4a38d50046efc8d1e1e4bf0e94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1JointToJointPositionErrorFunctionT.html#a09ccdb4a38d50046efc8d1e1e4bf0e94">numConstraints</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a09ccdb4a38d50046efc8d1e1e4bf0e94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of constraints.  <br /></td></tr>
-<tr class="separator:a09ccdb4a38d50046efc8d1e1e4bf0e94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc015a0861cdebeca51ec54c9ea251f1" id="r_adc015a0861cdebeca51ec54c9ea251f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1JointToJointPositionErrorFunctionT.html#adc015a0861cdebeca51ec54c9ea251f1">getNumConstraints</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:adc015a0861cdebeca51ec54c9ea251f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of constraints.  <br /></td></tr>
+<tr class="separator:adc015a0861cdebeca51ec54c9ea251f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmomentum_1_1SkeletonErrorFunctionT"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmomentum_1_1SkeletonErrorFunctionT')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT&lt; T &gt;</a></td></tr>
 <tr class="memitem:a7e2cbf27313c809844ee08a6cda4fdad inherit pub_methods_classmomentum_1_1SkeletonErrorFunctionT" id="r_a7e2cbf27313c809844ee08a6cda4fdad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a7e2cbf27313c809844ee08a6cda4fdad">SkeletonErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pt</a>)</td></tr>
 <tr class="separator:a7e2cbf27313c809844ee08a6cda4fdad inherit pub_methods_classmomentum_1_1SkeletonErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -194,9 +194,15 @@ Additional Inherited Members</h2></td></tr>
 class momentum::JointToJointPositionErrorFunctionT&lt; T &gt;</div><p>Error function that penalizes deviation from a target position expressed in a reference joint's coordinate frame. </p>
 <p>This is useful for constraints where you want to control the relative position between two body parts, such as keeping a hand at a specific position relative to the body, or maintaining a specific relationship between two joints that should move together.</p>
 <p>The error is computed as: error = T_ref^{-1} * (T_src * src_offset) - target</p>
-<p>where T_ref and T_src are the global transformations of the reference and source joints respectively. </p>
+<p>where T_ref and T_src are the global transformations of the reference and source joints respectively.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Scalar type (float or double) </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="joint__to__joint__position__error__function_8h_source.html#l00072">72</a> of file <a class="el" href="joint__to__joint__position__error__function_8h_source.html">joint_to_joint_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="joint__to__joint__position__error__function_8h_source.html#l00074">74</a> of file <a class="el" href="joint__to__joint__position__error__function_8h_source.html">joint_to_joint_position_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a0d50c8c3eed8ce4ac6b8d19b3d5cbff5" name="a0d50c8c3eed8ce4ac6b8d19b3d5cbff5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0d50c8c3eed8ce4ac6b8d19b3d5cbff5">&#9670;&#160;</a></span>JointToJointPositionErrorFunctionT() <span class="overload">[1/2]</span></h2>
@@ -423,7 +429,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Get all constraints. </p>
 
-<p class="definition">Definition at line <a class="el" href="joint__to__joint__position__error__function_8h_source.html#l00124">124</a> of file <a class="el" href="joint__to__joint__position__error__function_8h_source.html">joint_to_joint_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="joint__to__joint__position__error__function_8h_source.html#l00126">126</a> of file <a class="el" href="joint__to__joint__position__error__function_8h_source.html">joint_to_joint_position_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -626,8 +632,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
-<a id="a09ccdb4a38d50046efc8d1e1e4bf0e94" name="a09ccdb4a38d50046efc8d1e1e4bf0e94"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09ccdb4a38d50046efc8d1e1e4bf0e94">&#9670;&#160;</a></span>numConstraints()</h2>
+<a id="adc015a0861cdebeca51ec54c9ea251f1" name="adc015a0861cdebeca51ec54c9ea251f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc015a0861cdebeca51ec54c9ea251f1">&#9670;&#160;</a></span>getNumConstraints()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -638,7 +644,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1JointToJointPositionErrorFunctionT.html">momentum::JointToJointPositionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::numConstraints </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1JointToJointPositionErrorFunctionT.html">momentum::JointToJointPositionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getNumConstraints </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -651,9 +657,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Get number of constraints. </p>
+<p>Returns the number of constraints. </p>
 
-<p class="definition">Definition at line <a class="el" href="joint__to__joint__position__error__function_8h_source.html#l00129">129</a> of file <a class="el" href="joint__to__joint__position__error__function_8h_source.html">joint_to_joint_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="joint__to__joint__position__error__function_8h_source.html#l00131">131</a> of file <a class="el" href="joint__to__joint__position__error__function_8h_source.html">joint_to_joint_position_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -667,7 +673,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1JointToJointPositionErrorFunctionT.html">JointToJointPositionErrorFunctionT</a></li>
-    <li class="footer">Generated on Sat Mar 7 2026 07:56:34 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Mar 10 2026 08:36:24 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

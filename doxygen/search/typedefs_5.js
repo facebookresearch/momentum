@@ -183,5 +183,5 @@ var searchData=
   ['fullydifferentiablestateerrorfunctiond_5fp_180',['FullyDifferentiableStateErrorFunctiond_p',['../namespacemomentum.html#a72d7dad8dbb66d2150254f0990eba965',1,'momentum']]],
   ['fullydifferentiablestateerrorfunctiond_5fu_181',['FullyDifferentiableStateErrorFunctiond_u',['../namespacemomentum.html#a39519e1fdc82ee61ea2e5fbec24d4e9a',1,'momentum']]],
   ['fullydifferentiablestateerrorfunctiond_5fw_182',['FullyDifferentiableStateErrorFunctiond_w',['../namespacemomentum.html#a3fca4941c222b0ca289ab3c5c0017b9d',1,'momentum']]],
-  ['functype_183',['FuncType',['../classmomentum_1_1ConstraintErrorFunctionT.html#ab4ac88ea85328554c2d9968edebac02d',1,'momentum::ConstraintErrorFunctionT']]]
+  ['functype_183',['functype',['../classmomentum_1_1VertexErrorFunctionT.html#a628984f6f814ac950a5e76c399b78a25',1,'momentum::VertexErrorFunctionT::FuncType'],['../classmomentum_1_1JointErrorFunctionT.html#a004b83c5b5d1e0a5af747a1a71c309e9',1,'momentum::JointErrorFunctionT::FuncType']]]
 ];

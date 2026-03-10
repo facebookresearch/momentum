@@ -16,7 +16,7 @@ var searchData=
   ['depth_13',['depth',['../structmomentum_1_1PointTriangleVertexConstraintT.html#a07011ef71496ca00566d985de8bb5c8c',1,'momentum::PointTriangleVertexConstraintT::depth'],['../structmomentum_1_1SkinnedLocatorTriangleConstraintT.html#a404dcb80cd835ee4539f73f4195c4ed6',1,'momentum::SkinnedLocatorTriangleConstraintT::depth']]],
   ['deriv_14',['deriv',['../classmomentum_1_1GeneralizedLossT.html#a3f6cf464728d9d426d8023957ab5c7eb',1,'momentum::GeneralizedLossT::deriv()'],['../classmomentum_1_1SimdGeneralizedLossT.html#ad0fe27adf240860d17b5eff36ac30571',1,'momentum::SimdGeneralizedLossT::deriv()']]],
   ['derivdirty_15',['derivDirty',['../structmomentum_1_1JointStateT.html#aecb95188727254231cc7f042ec8b0a6c',1,'momentum::JointStateT']]],
-  ['dfdvtype_16',['DfdvType',['../classmomentum_1_1ConstraintErrorFunctionT.html#a102f38cefcad821f39cbb557c8a7859b',1,'momentum::ConstraintErrorFunctionT']]],
+  ['dfdvtype_16',['dfdvtype',['../classmomentum_1_1JointErrorFunctionT.html#a767f4458819cdecef8d8ee8ae711b1bd',1,'momentum::JointErrorFunctionT::DfdvType'],['../classmomentum_1_1VertexErrorFunctionT.html#a8b3ec4cc7ab35fe666c7321b03c1d2cc',1,'momentum::VertexErrorFunctionT::DfdvType']]],
   ['dimension_17',['dimension',['../classmomentum_1_1LowRankCovarianceMatrixT.html#a96cd7f6fd8cd22bfa0f49fc9fafb4349',1,'momentum::LowRankCovarianceMatrixT']]],
   ['direction_18',['direction',['../structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105',1,'momentum::CollisionGeometryStateT']]],
   ['directsparsejtj_19',['directSparseJtJ',['../structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48',1,'momentum::SparseGaussNewtonSolverOptions']]],
