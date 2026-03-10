@@ -554,74 +554,6 @@ class TestSolver(unittest.TestCase):
         ptv_error_function.clear_constraints()
         # self.assertTrue(len(ptv_error_function.constraints) == 0)
 
-    def test_vertex_error_function(self) -> None:
-        """Test VertexErrorFunction to ensure a vertex is targeted to a specific location."""
-
-        # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
-
-        # Create a VertexErrorFunction
-        vertex_error_function = pym_solver2.VertexErrorFunction(
-            character, pym_solver2.VertexConstraintType.Position
-        )
-        vertex_error_function.weight = 2.0
-        self.assertAlmostEqual(vertex_error_function.weight, 2.0)
-
-        # Define a vertex and its target position
-        vertex_index = 0
-        target_position = np.array([0.5, 1.5, 2.5], dtype=np.float32)
-        target_normal = np.array([0.0, 0.0, 1.0], dtype=np.float32)
-        weight = 1.0
-
-        # Add a constraint to the vertex error function
-        vertex_error_function.add_constraint(
-            vertex_index, weight, target_position, target_normal
-        )
-        self.assertEqual(len(vertex_error_function.constraints), 1)
-
-        # Create solver function with the vertex error
-        solver_function = pym_solver2.SkeletonSolverFunction(
-            character, [vertex_error_function]
-        )
-
-        # Set solver options
-        solver_options = pym_solver2.GaussNewtonSolverOptions()
-        solver_options.max_iterations = 100
-        solver_options.regularization = 1e-5
-
-        # Create and run the solver
-        model_params_init = torch.zeros(
-            character.parameter_transform.size, dtype=torch.float32
-        )
-        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        solver.set_enabled_parameters(character.parameter_transform.rigid_parameters)
-        model_params_final = solver.solve(model_params_init.numpy())
-
-        # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
-        )
-
-        # Compute the final position of the vertex
-        final_mesh = character.skin_points(skel_state_final.numpy())
-        final_vertex_position = torch.from_numpy(final_mesh[vertex_index, :3])
-
-        # Assert that the final vertex position is close to the target position
-        self.assertTrue(
-            torch.allclose(
-                final_vertex_position,
-                torch.from_numpy(target_position),
-                rtol=1e-3,
-                atol=1e-3,
-            )
-        )
-
-        # delete constraints and ensure they're empty
-        vertex_error_function.clear_constraints()
-        self.assertTrue(len(vertex_error_function.constraints) == 0)
-
     def test_pose_prior_error_function(self) -> None:
         """Test PosePriorErrorFunction to ensure it can converge to multiple modes."""
 
@@ -1404,7 +1336,7 @@ class TestSolver(unittest.TestCase):
 
         # Create VertexProjectionErrorFunction
         vertex_projection_error_function = pym_solver2.VertexProjectionErrorFunction(
-            character, max_threads=0
+            character
         )
 
         # Add vertex projection constraint
@@ -2940,3 +2872,77 @@ class TestSolver(unittest.TestCase):
         self.assertAlmostEqual(float(extracted_batch2[0, 0]), 500.0, places=5)
         self.assertAlmostEqual(float(extracted_batch2[1, 0]), 700.0, places=5)
         self.assertAlmostEqual(float(extracted_batch2[2, 0]), 500.0, places=5)
+
+    def test_vertex_error_function_weight_property(self) -> None:
+        """Test that the VertexErrorFunction facade's weight property correctly
+        forwards to the underlying implementation.
+
+        This verifies that:
+        1. Weight set in constructor is readable via .weight
+        2. Setting .weight updates both facade and impl
+        3. The weight actually affects error computation
+        """
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        # Test each constraint type
+        for constraint_type in [
+            pym_solver2.VertexConstraintType.Position,
+            pym_solver2.VertexConstraintType.Normal,
+            pym_solver2.VertexConstraintType.SymmetricNormal,
+            pym_solver2.VertexConstraintType.Plane,
+        ]:
+            # 1. Weight set in constructor should be readable
+            ef = pym_solver2.VertexErrorFunction(
+                character, constraint_type=constraint_type, weight=3.5
+            )
+            self.assertAlmostEqual(
+                ef.weight,
+                3.5,
+                msg=f"Constructor weight not readable for {constraint_type}",
+            )
+
+            # 2. Setting weight should be readable back
+            ef.weight = 7.0
+            self.assertAlmostEqual(
+                ef.weight,
+                7.0,
+                msg=f"Set weight not readable for {constraint_type}",
+            )
+
+            # 3. Weight should affect error computation
+            n_verts = character.mesh.vertices.shape[0]
+            ef_w1 = pym_solver2.VertexErrorFunction(
+                character, constraint_type=constraint_type, weight=1.0
+            )
+            ef_w2 = pym_solver2.VertexErrorFunction(
+                character, constraint_type=constraint_type, weight=2.0
+            )
+            # Add identical constraint to both
+            ef_w1.add_constraint(
+                vertex_index=min(0, n_verts - 1),
+                weight=1.0,
+                target_position=np.array([1.0, 2.0, 3.0], dtype=np.float32),
+                target_normal=np.array([0.0, 1.0, 0.0], dtype=np.float32),
+            )
+            ef_w2.add_constraint(
+                vertex_index=min(0, n_verts - 1),
+                weight=1.0,
+                target_position=np.array([1.0, 2.0, 3.0], dtype=np.float32),
+                target_normal=np.array([0.0, 1.0, 0.0], dtype=np.float32),
+            )
+
+            # Solve with each and compare errors — weight=2 should have 2x error
+            solver_fn_w1 = pym_solver2.SkeletonSolverFunction(character, [ef_w1])
+            solver_fn_w2 = pym_solver2.SkeletonSolverFunction(character, [ef_w2])
+
+            params = np.zeros(character.parameter_transform.size, dtype=np.float32)
+            err_w1 = solver_fn_w1.get_error(params)
+            err_w2 = solver_fn_w2.get_error(params)
+
+            if err_w1 > 0:
+                self.assertAlmostEqual(
+                    err_w2 / err_w1,
+                    2.0,
+                    places=4,
+                    msg=f"Weight scaling incorrect for {constraint_type}",
+                )

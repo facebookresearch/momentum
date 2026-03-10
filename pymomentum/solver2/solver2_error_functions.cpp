@@ -20,6 +20,10 @@
 #include <momentum/character_solver/position_error_function.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/state_error_function.h>
+#include <momentum/character_solver/vertex_error_function.h>
+#include <momentum/character_solver/vertex_normal_error_function.h>
+#include <momentum/character_solver/vertex_plane_error_function.h>
+#include <momentum/character_solver/vertex_position_error_function.h>
 #include <momentum/character_solver/vertex_sdf_error_function.h>
 #include <pymomentum/python_utility/eigen_quaternion.h>
 #include <pymomentum/solver2/solver2_utility.h>
@@ -472,141 +476,314 @@ computation with Taylor series for small angles.)");
           mm::VertexConstraintType::SymmetricNormal,
           "Point-to-plane using a 50/50 mix of source and target normal");
 
-  py::class_<mm::VertexConstraint>(m, "VertexConstraint")
+  // VertexConstraint data class for read-only access to constraint data
+  py::class_<mm::VertexConstraintData>(
+      m, "VertexConstraint", "Read-only access to a vertex constraint.")
       .def(
           "__repr__",
-          [](const mm::VertexConstraint& self) {
+          [](const mm::VertexConstraintData& self) {
             return fmt::format(
-                "VertexConstraint(vertex_index={}, weight={}, target_position=[{:.3f}, {:.3f}, {:.3f}])",
-                self.vertexIndex,
-                self.weight,
-                self.targetPosition.x(),
-                self.targetPosition.y(),
-                self.targetPosition.z());
+                "VertexConstraint(vertex_index={}, weight={})", self.vertexIndex, self.weight);
           })
-      .def_readonly(
-          "vertex_index",
-          &mm::VertexConstraint::vertexIndex,
-          "The index of the vertex to constrain.")
-      .def_readonly("weight", &mm::VertexConstraint::weight, "The weight of the constraint.")
-      .def_readonly(
-          "target_position",
-          &mm::VertexConstraint::targetPosition,
-          "The target position for the vertex.")
-      .def_readonly(
-          "target_normal",
-          &mm::VertexConstraint::targetNormal,
-          "The target normal for the vertex.");
+      .def_readonly("vertex_index", &mm::VertexConstraintData::vertexIndex, "The vertex index.")
+      .def_readonly("weight", &mm::VertexConstraintData::weight, "The constraint weight.");
 
-  py::class_<
-      mm::VertexErrorFunction,
-      mm::SkeletonErrorFunction,
-      std::shared_ptr<mm::VertexErrorFunction>>(m, "VertexErrorFunction")
-      .def(
-          "__repr__",
-          [](const mm::VertexErrorFunction& self) {
-            return fmt::format(
-                "VertexErrorFunction(weight={}, num_constraints={})",
-                self.getWeight(),
-                self.numConstraints());
-          })
-      .def(
-          py::init<>([](const mm::Character& character,
-                        mm::VertexConstraintType constraintType,
-                        float weight,
-                        size_t maxThreads) {
-            validateWeight(weight, "weight");
-            auto result =
-                std::make_shared<mm::VertexErrorFunction>(character, constraintType, maxThreads);
-            result->setWeight(weight);
-            return result;
-          }),
-          R"(A skeleton error function that penalizes vertex distance to a target point.
+  // VertexErrorFunction: a Python-side facade that creates the correct leaf error function
+  // (VertexPositionErrorFunctionT, VertexNormalErrorFunctionT, or
+  // VertexPlaneErrorFunctionT) based on VertexConstraintType, and provides a uniform
+  // add_constraint / add_constraints API.
+  //
+  // Because the leaf classes are different template instantiations of VertexErrorFunctionT
+  // (with different Data and FuncDim), they share no common base beyond SkeletonErrorFunctionT.
+  // This wrapper holds a shared_ptr<SkeletonErrorFunction> to the leaf and dispatches
+  // add_constraint/clear_constraints/getConstraints by constraint type.
+  //
+  // Registered as a SkeletonErrorFunction subclass so it can be used directly with
+  // SequenceSolverFunction::add_error_function and isinstance() checks.
+  {
+    // We need a C++ class that inherits SkeletonErrorFunctionT<float> and delegates
+    // all virtual methods to the held implementation.
+    struct VertexErrorFunctionFacade : public mm::SkeletonErrorFunctionT<float> {
+      std::shared_ptr<mm::SkeletonErrorFunction> impl_;
+      mm::VertexConstraintType constraintType_;
 
-  :param character: The character to use.
-  :param constraint_type: The type of vertex constraint to apply.
-  :param max_threads: The maximum number of threads to use for computation.)",
-          py::arg("character"),
-          py::arg("constraint_type") = mm::VertexConstraintType::Position,
-          py::arg("weight") = 1.0f,
-          py::arg("max_threads") = 0)
-      .def(
-          "add_constraint",
-          [](mm::VertexErrorFunction& self,
-             int vertexIndex,
-             float weight,
-             const Eigen::Vector3f& targetPosition,
-             const Eigen::Vector3f& targetNormal) {
-            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
-            validateWeight(weight, "weight");
-            self.addConstraint(vertexIndex, weight, targetPosition, targetNormal);
-          },
-          R"(Adds a vertex constraint to the error function.
+      VertexErrorFunctionFacade(
+          std::shared_ptr<mm::SkeletonErrorFunction> impl,
+          mm::VertexConstraintType ct,
+          const mm::Skeleton& skel,
+          const mm::ParameterTransform& pt)
+          : mm::SkeletonErrorFunctionT<float>(skel, pt),
+            impl_(std::move(impl)),
+            constraintType_(ct) {}
 
-  :param vertex_index: The index of the vertex to constrain.
-  :param weight: The weight of the constraint.
-  :param target_position: The target position for the vertex.
-  :param target_normal: The target normal for the vertex.)",
-          py::arg("vertex_index"),
-          py::arg("weight"),
-          py::arg("target_position"),
-          py::arg("target_normal"))
-      .def(
-          "add_constraints",
-          [](mm::VertexErrorFunction& errf,
-             const py::array_t<int>& vertexIndex,
-             const py::array_t<float, 2>& targetPosition,
-             const py::array_t<float, 2>& targetNormal,
-             const py::array_t<float>& weight) {
-            ArrayShapeValidator validator;
-            const int nConsIdx = -1;
-            validator.validate(vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
-            validateVertexIndex(vertexIndex, "vertex_index", errf.getCharacter());
-            validator.validate(targetPosition, "target_position", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(targetNormal, "target_normal", {nConsIdx, 3}, {"n_cons", "xyz"});
-            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+      // Forward all SkeletonErrorFunctionT virtuals to impl_
+      [[nodiscard]] size_t getJacobianSize() const final {
+        return impl_->getJacobianSize();
+      }
+      [[nodiscard]] bool needsMesh() const final {
+        return impl_->needsMesh();
+      }
+      [[nodiscard]] const mm::Character* getCharacter() const final {
+        return impl_->getCharacter();
+      }
+      double getError(
+          const mm::ModelParametersT<float>& p,
+          const mm::SkeletonStateT<float>& s,
+          const mm::MeshStateT<float>& m) override {
+        return impl_->getError(p, s, m);
+      }
+      double getGradient(
+          const mm::ModelParametersT<float>& p,
+          const mm::SkeletonStateT<float>& s,
+          const mm::MeshStateT<float>& m,
+          Eigen::Ref<Eigen::VectorXf> g) override {
+        return impl_->getGradient(p, s, m, g);
+      }
+      double getJacobian(
+          const mm::ModelParametersT<float>& p,
+          const mm::SkeletonStateT<float>& s,
+          const mm::MeshStateT<float>& m,
+          Eigen::Ref<Eigen::MatrixXf> j,
+          Eigen::Ref<Eigen::VectorXf> r,
+          int& usedRows) override {
+        return impl_->getJacobian(p, s, m, j, r, usedRows);
+      }
+      void setWeight(float w) {
+        mm::SkeletonErrorFunctionT<float>::setWeight(w);
+        impl_->setWeight(w);
+      }
 
-            auto vertex_index_acc = vertexIndex.unchecked<1>();
-            auto target_position_acc = targetPosition.unchecked<2>();
-            auto target_normal_acc = targetNormal.unchecked<2>();
-            auto weight_acc = weight.unchecked<1>();
+      // Constraint dispatch methods
+      void addConstraint(
+          int vertexIndex,
+          float weight,
+          const Eigen::Vector3f& targetPosition,
+          const Eigen::Vector3f& targetNormal) {
+        switch (constraintType_) {
+          case mm::VertexConstraintType::Position: {
+            auto* fn = static_cast<mm::VertexPositionErrorFunctionT<float>*>(impl_.get());
+            fn->addConstraint(
+                mm::VertexPositionDataT<float>(
+                    static_cast<size_t>(vertexIndex), targetPosition, weight));
+            break;
+          }
+          case mm::VertexConstraintType::Normal:
+          case mm::VertexConstraintType::SymmetricNormal: {
+            auto* fn = static_cast<mm::VertexNormalErrorFunctionT<float>*>(impl_.get());
+            fn->addConstraint(
+                mm::VertexNormalDataT<float>(
+                    static_cast<size_t>(vertexIndex), targetPosition, targetNormal, weight));
+            break;
+          }
+          case mm::VertexConstraintType::Plane: {
+            auto* fn = static_cast<mm::VertexPlaneErrorFunctionT<float>*>(impl_.get());
+            fn->addConstraint(
+                mm::VertexPlaneDataT<float>(
+                    static_cast<size_t>(vertexIndex),
+                    targetNormal.normalized(),
+                    targetPosition,
+                    false,
+                    weight));
+            break;
+          }
+        }
+      }
 
-            validateWeights(weight, "weight");
+      void clearConstraints() {
+        switch (constraintType_) {
+          case mm::VertexConstraintType::Position:
+            static_cast<mm::VertexPositionErrorFunctionT<float>*>(impl_.get())->clearConstraints();
+            break;
+          case mm::VertexConstraintType::Normal:
+          case mm::VertexConstraintType::SymmetricNormal:
+            static_cast<mm::VertexNormalErrorFunctionT<float>*>(impl_.get())->clearConstraints();
+            break;
+          case mm::VertexConstraintType::Plane:
+            static_cast<mm::VertexPlaneErrorFunctionT<float>*>(impl_.get())->clearConstraints();
+            break;
+        }
+      }
 
-            py::gil_scoped_release release;
+      [[nodiscard]] size_t numConstraints() const {
+        switch (constraintType_) {
+          case mm::VertexConstraintType::Position:
+            return static_cast<const mm::VertexPositionErrorFunctionT<float>*>(impl_.get())
+                ->numConstraints();
+          case mm::VertexConstraintType::Normal:
+          case mm::VertexConstraintType::SymmetricNormal:
+            return static_cast<const mm::VertexNormalErrorFunctionT<float>*>(impl_.get())
+                ->numConstraints();
+          case mm::VertexConstraintType::Plane:
+            return static_cast<const mm::VertexPlaneErrorFunctionT<float>*>(impl_.get())
+                ->numConstraints();
+        }
+        return 0;
+      }
+    };
 
-            for (size_t iCons = 0; iCons < vertex_index_acc.shape(0); ++iCons) {
-              errf.addConstraint(
-                  vertex_index_acc(iCons),
-                  weight_acc(iCons),
-                  Eigen::Vector3f(
-                      target_position_acc(iCons, 0),
-                      target_position_acc(iCons, 1),
-                      target_position_acc(iCons, 2)),
-                  Eigen::Vector3f(
-                      target_normal_acc(iCons, 0),
-                      target_normal_acc(iCons, 1),
-                      target_normal_acc(iCons, 2)));
-            }
-          },
-          R"(Adds multiple vertex constraints to the error function.
+    py::class_<
+        VertexErrorFunctionFacade,
+        mm::SkeletonErrorFunction,
+        std::shared_ptr<VertexErrorFunctionFacade>>(
+        m,
+        "VertexErrorFunction",
+        R"(A vertex error function that constrains mesh vertices to target positions, normals, or planes.
 
-  :param vertex_index: The indices of the vertices to constrain.
-  :param target_position: The target positions for the vertices.
-  :param target_normal: The target normals for the vertices.
-  :param weight: The weights of the constraints.)",
-          py::arg("vertex_index"),
-          py::arg("target_position"),
-          py::arg("target_normal"),
-          py::arg("weight"))
-      .def(
-          "clear_constraints",
-          &mm::VertexErrorFunction::clearConstraints,
-          "Clears all vertex constraints from the error function.")
-      .def_property_readonly(
-          "constraints",
-          [](const mm::VertexErrorFunction& self) { return self.getConstraints(); },
-          "Returns the list of vertex constraints.");
+Dispatches to the appropriate specialized error function based on the constraint_type parameter:
+  - Position: constrains vertex to a target 3D position (VertexPositionErrorFunctionT)
+  - Normal: point-to-plane using source (body) normal (VertexNormalErrorFunctionT)
+  - SymmetricNormal: point-to-plane using 50/50 mix of source and target normal (VertexNormalErrorFunctionT)
+  - Plane: point-to-plane using target normal (VertexPlaneErrorFunctionT))")
+        .def(
+            "__repr__",
+            [](const VertexErrorFunctionFacade& self) {
+              return fmt::format(
+                  "VertexErrorFunction(weight={}, num_constraints={})",
+                  self.impl_->getWeight(),
+                  self.numConstraints());
+            })
+        .def(
+            py::init<>(
+                [](const mm::Character& character,
+                   mm::VertexConstraintType constraintType,
+                   float weight,
+                   int maxThreads) -> std::shared_ptr<VertexErrorFunctionFacade> {
+                  if (!character.mesh || !character.skinWeights) {
+                    throw std::runtime_error("No mesh or skin weights found");
+                  }
+                  validateWeight(weight, "weight");
+
+                  std::shared_ptr<mm::SkeletonErrorFunction> impl;
+                  switch (constraintType) {
+                    case mm::VertexConstraintType::Position: {
+                      auto fn = std::make_shared<mm::VertexPositionErrorFunctionT<float>>(
+                          character, character.parameterTransform);
+                      fn->setWeight(weight);
+                      if (maxThreads > 0) {
+                        fn->setMaxThreads(static_cast<size_t>(maxThreads));
+                      }
+                      impl = std::move(fn);
+                      break;
+                    }
+                    case mm::VertexConstraintType::Normal: {
+                      auto fn = std::make_shared<mm::VertexNormalErrorFunctionT<float>>(
+                          character, character.parameterTransform, 1.0f, 0.0f);
+                      fn->setWeight(weight);
+                      if (maxThreads > 0) {
+                        fn->setMaxThreads(static_cast<size_t>(maxThreads));
+                      }
+                      impl = std::move(fn);
+                      break;
+                    }
+                    case mm::VertexConstraintType::SymmetricNormal: {
+                      auto fn = std::make_shared<mm::VertexNormalErrorFunctionT<float>>(
+                          character, character.parameterTransform, 0.5f, 0.5f);
+                      fn->setWeight(weight);
+                      if (maxThreads > 0) {
+                        fn->setMaxThreads(static_cast<size_t>(maxThreads));
+                      }
+                      impl = std::move(fn);
+                      break;
+                    }
+                    case mm::VertexConstraintType::Plane: {
+                      auto fn = std::make_shared<mm::VertexPlaneErrorFunctionT<float>>(
+                          character, character.parameterTransform);
+                      fn->setWeight(weight);
+                      if (maxThreads > 0) {
+                        fn->setMaxThreads(static_cast<size_t>(maxThreads));
+                      }
+                      impl = std::move(fn);
+                      break;
+                    }
+                  }
+
+                  return std::make_shared<VertexErrorFunctionFacade>(
+                      std::move(impl),
+                      constraintType,
+                      character.skeleton,
+                      character.parameterTransform);
+                }),
+            R"(Initialize a VertexErrorFunction.
+
+:param character: The character to use.
+:param constraint_type: The type of vertex constraint (Position, Plane, Normal, SymmetricNormal).
+:param weight: The weight applied to the error function.
+:param max_threads: Maximum number of threads for parallel computation (0 = unlimited).)",
+            py::keep_alive<1, 2>(),
+            py::arg("character"),
+            py::kw_only(),
+            py::arg("constraint_type") = mm::VertexConstraintType::Position,
+            py::arg("weight") = 1.0f,
+            py::arg("max_threads") = 0)
+        .def_property(
+            "weight",
+            [](const VertexErrorFunctionFacade& self) -> float { return self.impl_->getWeight(); },
+            [](VertexErrorFunctionFacade& self, float w) { self.setWeight(w); },
+            "The weight applied to this error function.")
+        .def(
+            "add_constraint",
+            &VertexErrorFunctionFacade::addConstraint,
+            R"(Adds a single vertex constraint.
+
+:param vertex_index: The index of the mesh vertex.
+:param weight: The weight of the constraint.
+:param target_position: The target position (3D vector).
+:param target_normal: The target normal direction (3D vector).)",
+            py::arg("vertex_index"),
+            py::arg("weight"),
+            py::arg("target_position"),
+            py::arg("target_normal"))
+        .def(
+            "add_constraints",
+            [](VertexErrorFunctionFacade& self,
+               const py::array_t<int>& vertexIndex,
+               const py::array_t<float>& targetPosition,
+               const py::array_t<float>& targetNormal,
+               const py::array_t<float>& weight) {
+              ArrayShapeValidator validator;
+              const int nConsIdx = -1;
+              validator.validate(vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
+              validator.validate(
+                  targetPosition, "target_position", {nConsIdx, 3}, {"n_cons", "xyz"});
+              validator.validate(targetNormal, "target_normal", {nConsIdx, 3}, {"n_cons", "xyz"});
+              validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+
+              auto vertex_idx_acc = vertexIndex.unchecked<1>();
+              auto target_pos_acc = targetPosition.unchecked<2>();
+              auto target_nrm_acc = targetNormal.unchecked<2>();
+              auto weight_acc = weight.unchecked<1>();
+
+              py::gil_scoped_release release;
+
+              for (py::ssize_t i = 0; i < vertex_idx_acc.shape(0); ++i) {
+                self.addConstraint(
+                    vertex_idx_acc(i),
+                    weight_acc(i),
+                    Eigen::Vector3f(
+                        target_pos_acc(i, 0), target_pos_acc(i, 1), target_pos_acc(i, 2)),
+                    Eigen::Vector3f(
+                        target_nrm_acc(i, 0), target_nrm_acc(i, 1), target_nrm_acc(i, 2)));
+              }
+            },
+            R"(Adds multiple vertex constraints.
+
+:param vertex_index: Array of vertex indices (n_cons,).
+:param target_position: Array of target positions (n_cons, 3).
+:param target_normal: Array of target normals (n_cons, 3).
+:param weight: Array of constraint weights (n_cons,).)",
+            py::arg("vertex_index"),
+            py::arg("target_position"),
+            py::arg("target_normal"),
+            py::arg("weight"))
+        .def(
+            "clear_constraints",
+            &VertexErrorFunctionFacade::clearConstraints,
+            "Clears all vertex constraints.")
+        .def_property_readonly(
+            "num_constraints",
+            &VertexErrorFunctionFacade::numConstraints,
+            "Returns the number of constraints.");
+  }
 
   py::class_<mm::PointTriangleVertexConstraint>(m, "PointTriangleVertexConstraint")
       .def(
