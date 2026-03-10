@@ -56,6 +56,13 @@ struct JointToJointDistanceConstraintT {
 /// This is useful for enforcing distance constraints between different parts of a character, such
 /// as maintaining a fixed distance between hands or ensuring two joints stay a certain distance
 /// apart.
+///
+/// The residual is:
+///   f = ||p1 - p2|| - targetDistance
+///
+/// where p1 and p2 are the world-space positions of the two joint points.
+///
+/// @tparam T Scalar type (float or double)
 template <typename T>
 class JointToJointDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
@@ -99,6 +106,11 @@ class JointToJointDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// Get all constraints.
   [[nodiscard]] const std::vector<JointToJointDistanceConstraintT<T>>& getConstraints() const {
     return constraints_;
+  }
+
+  /// Returns the number of constraints.
+  [[nodiscard]] size_t getNumConstraints() const {
+    return constraints_.size();
   }
 
   /// Default weight for distance constraints.

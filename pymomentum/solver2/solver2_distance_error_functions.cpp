@@ -921,7 +921,7 @@ source joints respectively.)")
             return fmt::format(
                 "JointToJointPositionErrorFunction(weight={}, num_constraints={})",
                 self.getWeight(),
-                self.numConstraints());
+                self.getNumConstraints());
           })
       .def(
           py::init<>(
@@ -1055,7 +1055,7 @@ source joints respectively.)")
           "Returns the list of joint-to-joint position constraints.")
       .def(
           "num_constraints",
-          &mm::JointToJointPositionErrorFunctionT<float>::numConstraints,
+          &mm::JointToJointPositionErrorFunctionT<float>::getNumConstraints,
           "Returns the number of constraints.");
 }
 
