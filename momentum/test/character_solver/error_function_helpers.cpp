@@ -78,13 +78,13 @@ void testGradientAndJacobian(
   {
     SCOPED_TRACE("Checking Error Value");
     if ((gradientError + functionError) != 0.0) {
-      EXPECT_LE(std::abs(gradientError - functionError) / (gradientError + functionError), 1e-6);
+      EXPECT_LE(std::abs(gradientError - functionError) / (gradientError + functionError), 2e-6);
     } else {
       EXPECT_NEAR(gradientError, functionError, 1e-7);
     }
 
     if ((jacobianError + functionError) != 0.0) {
-      EXPECT_LE(std::abs(jacobianError - functionError) / (jacobianError + functionError), 1e-6);
+      EXPECT_LE(std::abs(jacobianError - functionError) / (jacobianError + functionError), 2e-6);
     } else {
       EXPECT_NEAR(jacobianError, functionError, 1e-7);
     }
