@@ -230,10 +230,7 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
       // calculate derivatives based on active joints
       for (size_t d = 0; d < 3; d++) {
         if (this->activeJointParams_[paramIndex + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getTranslationDerivative(d)) * wgt;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
                ++index) {
@@ -242,10 +239,7 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
           }
         }
         if (this->activeJointParams_[paramIndex + 3 + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * wgt;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
                ++index) {
@@ -255,10 +249,7 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
         }
       }
       if (this->activeJointParams_[paramIndex + 6]) {
-        // calculate joint gradient
         const T val = direction.dot(jointState.getScaleDerivative(posd)) * wgt;
-        // explicitly multiply with the parameter transform to generate parameter space
-        // gradients
         for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
              index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
              ++index) {
@@ -283,10 +274,7 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
       // calculate derivatives based on active joints
       for (size_t d = 0; d < 3; d++) {
         if (this->activeJointParams_[paramIndex + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getTranslationDerivative(d)) * -wgt;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
                ++index) {
@@ -295,10 +283,7 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
           }
         }
         if (this->activeJointParams_[paramIndex + 3 + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * -wgt;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           const auto maxIndex =
               this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
@@ -310,10 +295,7 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
         }
       }
       if (this->activeJointParams_[paramIndex + 6]) {
-        // calculate joint gradient
         const T val = direction.dot(jointState.getScaleDerivative(posd)) * -wgt;
-        // explicitly multiply with the parameter transform to generate parameter space
-        // gradients
         const auto maxIndex =
             this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
         for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
@@ -427,10 +409,7 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
       // calculate derivatives based on active joints
       for (size_t d = 0; d < 3; d++) {
         if (this->activeJointParams_[paramIndex + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getTranslationDerivative(d)) * -fac;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
                ++index) {
@@ -439,10 +418,7 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
           }
         }
         if (this->activeJointParams_[paramIndex + 3 + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * -fac;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
                ++index) {
@@ -452,10 +428,7 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
         }
       }
       if (this->activeJointParams_[paramIndex + 6]) {
-        // calculate joint gradient
         const T val = direction.dot(jointState.getScaleDerivative(posd)) * -fac;
-        // explicitly multiply with the parameter transform to generate parameter space
-        // gradients
         for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
              index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
              ++index) {
@@ -480,10 +453,7 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
       // calculate derivatives based on active joints
       for (size_t d = 0; d < 3; d++) {
         if (this->activeJointParams_[paramIndex + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getTranslationDerivative(d)) * fac;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
                ++index) {
@@ -492,10 +462,7 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
           }
         }
         if (this->activeJointParams_[paramIndex + 3 + d]) {
-          // calculate joint gradient
           const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * fac;
-          // explicitly multiply with the parameter transform to generate parameter space
-          // gradients
           for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
                index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
                ++index) {
@@ -505,10 +472,7 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
         }
       }
       if (this->activeJointParams_[paramIndex + 6]) {
-        // calculate joint gradient
         const T val = direction.dot(jointState.getScaleDerivative(posd)) * fac;
-        // explicitly multiply with the parameter transform to generate parameter space
-        // gradients
         for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
              index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
              ++index) {
