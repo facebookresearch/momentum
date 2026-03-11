@@ -12,6 +12,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
+#include "momentum/math/constants.h"
 #include "momentum/simd/simd.h"
 
 namespace momentum {
@@ -174,12 +175,12 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
         }
 
         // Store collision pairs excluding those with the same parent or adjacent joints
-        // If there's an overlap, add the pair ID to the set of excluding pair IDs
         if (count <= 1) {
           excludingPairIds_.insert(pairId);
+        } else {
+          jacobianSize_++;
         }
 
-        jacobianSize_++;
         continue;
       }
 
@@ -269,11 +270,13 @@ double SimdCollisionErrorFunctionT<T>::getError(
       const Vector3P<T> closestPoint_j = p_j + t_j * d_j;
       const Packet<T> distance = drjit::norm(closestPoint_i - closestPoint_j);
 
-      // TODO check these:
       const Packet<T> radius = (radius_i.x() * (1.0f - t_i) + radius_i.y() * t_i) +
           (radius_j.x() * (1.0f - t_j) + radius_j.y() * t_j);
 
-      drjit::masked(error, mask) += drjit::square(drjit::maximum(radius - distance, 0));
+      // Skip degenerate cases where capsules are nearly coincident
+      const auto validMask =
+          drjit::PacketMask<int, kSimdPacketSize>(mask) && distance >= Eps<T>(1e-8f, 1e-17);
+      drjit::masked(error, validMask) += drjit::square(drjit::maximum(radius - distance, 0));
     }
   }
 
@@ -315,12 +318,13 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
       const Vector3P<T> direction = position_i - position_j;
       const Packet<T> distance = drjit::norm(direction);
 
-      // TODO check these:
       const Packet<T> radius = (radius_i.x() * (1.0f - t_i) + radius_i.y() * t_i) +
           (radius_j.x() * (1.0f - t_j) + radius_j.y() * t_j);
       const Packet<T> overlap = radius - distance;
 
-      const auto finalMask = drjit::PacketMask<int, kSimdPacketSize>(mask) && distance < radius;
+      // Skip degenerate cases where capsules are nearly coincident
+      const auto finalMask = drjit::PacketMask<int, kSimdPacketSize>(mask) &&
+          distance >= Eps<T>(1e-8f, 1e-17) && distance < radius;
 
       if (!drjit::any(finalMask)) {
         continue;
@@ -509,12 +513,13 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
       const Vector3P<T> direction = position_i - position_j;
       const Packet<T> distance = drjit::norm(direction);
 
-      // TODO check these:
       const Packet<T> radius = (radius_i.x() * (1.0f - t_i) + radius_i.y() * t_i) +
           (radius_j.x() * (1.0f - t_j) + radius_j.y() * t_j);
       const Packet<T> overlap = radius - distance;
 
-      const auto finalMask = drjit::PacketMask<int, kSimdPacketSize>(mask) && distance < radius;
+      // Skip degenerate cases where capsules are nearly coincident
+      const auto finalMask = drjit::PacketMask<int, kSimdPacketSize>(mask) &&
+          distance >= Eps<T>(1e-8f, 1e-17) && distance < radius;
 
       if (!drjit::any(finalMask)) {
         continue;
