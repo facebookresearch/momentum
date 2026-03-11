@@ -211,6 +211,251 @@ computeMatrixDiffRotationJacobianNext(const Quaternion<T>& rot, const Vector3<T>
   return Map<const Eigen::Matrix<T, 9, 1>>(rotD.data(), rotD.size());
 }
 
+/// Helper enum to specify whether we're computing gradients/Jacobians for the previous or next
+/// state.
+enum class StateType { Prev, Next };
+
+/// Parameters needed for per-state gradient computation.
+template <typename T>
+struct GradientComputationParams {
+  size_t jointIndex;
+  const TransformT<T>& targetTransform;
+  const Eigen::Quaternion<T>& prevRot;
+  const Eigen::Quaternion<T>& nextRot;
+  const Eigen::Vector3<T>& diff;
+  T pwgt;
+  T rwgt;
+  RotationErrorType rotationErrorType;
+  const Eigen::Matrix3<T>& rotDiff;
+  const Eigen::Matrix<T, 3, 4>& dLogDq;
+};
+
+/// Computes gradient contributions from a single state (prev or next).
+template <typename T>
+void computeStateGradient(
+    StateType stateType,
+    const GradientComputationParams<T>& params,
+    const SkeletonStateT<T>& state,
+    const SkeletonStateT<T>& prevState,
+    const Skeleton& skeleton,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const ParameterTransform& parameterTransform,
+    Eigen::Ref<Eigen::VectorX<T>> gradientSegment) {
+  const bool isPrev = (stateType == StateType::Prev);
+  const T posSign = isPrev ? T(-2) : T(2);
+
+  size_t ancestorJointIndex = params.jointIndex;
+  while (ancestorJointIndex != kInvalidIndex) {
+    const size_t paramIndex = ancestorJointIndex * kParametersPerJoint;
+    const Eigen::Vector3<T> posd = state.jointState[params.jointIndex].translation() -
+        state.jointState[ancestorJointIndex].translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (activeJointParams[paramIndex + d]) {
+        const auto& jointState = state.jointState[ancestorJointIndex];
+        T val;
+        if (isPrev) {
+          val = posSign *
+              params.diff.dot(
+                  params.targetTransform.rotate(jointState.getTranslationDerivative(d))) *
+              params.pwgt;
+        } else {
+          val = posSign * params.diff.dot(jointState.getTranslationDerivative(d)) * params.pwgt;
+        }
+        gradient_jointParams_to_modelParams<T>(
+            val, paramIndex + d, parameterTransform, gradientSegment);
+      }
+
+      if (activeJointParams[paramIndex + 3 + d]) {
+        const Eigen::Vector3<T> axis = state.jointState[ancestorJointIndex].rotationAxis.col(d);
+        const auto& jointState = state.jointState[ancestorJointIndex];
+
+        T positionErrorGradient;
+        if (isPrev) {
+          positionErrorGradient = posSign *
+              params.diff.dot(
+                  params.targetTransform.rotate(jointState.getRotationDerivative(d, posd)));
+        } else {
+          positionErrorGradient =
+              posSign * params.diff.dot(jointState.getRotationDerivative(d, posd)) * params.pwgt;
+        }
+
+        T rotationErrorGradient = T(0);
+        switch (params.rotationErrorType) {
+          case RotationErrorType::QuaternionLogMap:
+            if (isPrev) {
+              rotationErrorGradient = computeLogMapRotationGradientPrev(
+                  prevState.jointState[params.jointIndex].rotation(),
+                  params.nextRot,
+                  params.targetTransform.rotation,
+                  axis,
+                  params.dLogDq);
+            } else {
+              rotationErrorGradient = computeLogMapRotationGradientNext(
+                  params.prevRot, params.nextRot, axis, params.dLogDq);
+            }
+            break;
+          case RotationErrorType::RotationMatrixDifference:
+            if (isPrev) {
+              rotationErrorGradient = computeMatrixDiffRotationGradientPrev(
+                  prevState.jointState[params.jointIndex].rotation(),
+                  params.targetTransform.rotation,
+                  axis,
+                  params.rotDiff);
+            } else {
+              rotationErrorGradient = computeMatrixDiffRotationGradientNext(
+                  state.jointState[params.jointIndex].rotation(), axis, params.rotDiff);
+            }
+            break;
+        }
+
+        const T val = isPrev
+            ? (params.pwgt * positionErrorGradient + params.rwgt * rotationErrorGradient)
+            : (positionErrorGradient + params.rwgt * rotationErrorGradient);
+        gradient_jointParams_to_modelParams<T>(
+            val, paramIndex + 3 + d, parameterTransform, gradientSegment);
+      }
+    }
+
+    if (activeJointParams[paramIndex + 6]) {
+      const auto& jointState = state.jointState[ancestorJointIndex];
+      T val;
+      if (isPrev) {
+        val = posSign *
+            params.diff.dot(params.targetTransform.rotate(jointState.getScaleDerivative(posd))) *
+            params.pwgt;
+      } else {
+        val = posSign * params.diff.dot(jointState.getScaleDerivative(posd)) * params.pwgt;
+      }
+      gradient_jointParams_to_modelParams<T>(
+          val, paramIndex + 6, parameterTransform, gradientSegment);
+    }
+
+    ancestorJointIndex = skeleton.joints[ancestorJointIndex].parent;
+  }
+}
+
+/// Parameters needed for per-state Jacobian computation.
+template <typename T>
+struct JacobianComputationParams {
+  size_t jointIndex;
+  const TransformT<T>& targetTransform;
+  const Eigen::Quaternion<T>& prevRot;
+  const Eigen::Quaternion<T>& nextRot;
+  T wgt;
+  T awgt;
+  size_t rotationResidualSize;
+  size_t blockSize;
+  RotationErrorType rotationErrorType;
+  const Eigen::Matrix<T, 3, 4>& dLogDq;
+};
+
+/// Computes Jacobian contributions from a single state (prev or next).
+template <typename T>
+void computeStateJacobian(
+    StateType stateType,
+    const JacobianComputationParams<T>& params,
+    const SkeletonStateT<T>& state,
+    const SkeletonStateT<T>& prevState,
+    const Skeleton& skeleton,
+    const Eigen::VectorX<bool>& activeJointParams,
+    const ParameterTransform& parameterTransform,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobianBlock) {
+  const bool isPrev = (stateType == StateType::Prev);
+
+  size_t ancestorJointIndex = params.jointIndex;
+  while (ancestorJointIndex != kInvalidIndex) {
+    const auto& jointState = state.jointState[ancestorJointIndex];
+    const size_t paramIndex = ancestorJointIndex * kParametersPerJoint;
+    const Eigen::Vector3<T> posd =
+        state.jointState[params.jointIndex].translation() - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (activeJointParams[paramIndex + d]) {
+        Eigen::Vector3<T> jc;
+        if (isPrev) {
+          jc =
+              -(params.targetTransform.rotate(jointState.getTranslationDerivative(d))) * params.wgt;
+        } else {
+          jc = jointState.getTranslationDerivative(d) * params.wgt;
+        }
+        jacobian_jointParams_to_modelParams<T>(
+            jc, paramIndex + d, parameterTransform, jacobianBlock.template topRows<3>());
+      }
+
+      if (activeJointParams[paramIndex + 3 + d]) {
+        const Eigen::Vector3<T> axis = state.jointState[ancestorJointIndex].rotationAxis.col(d);
+
+        Eigen::Vector3<T> jc;
+        if (isPrev) {
+          jc = -(params.targetTransform.rotate(jointState.getRotationDerivative(d, posd))) *
+              params.wgt;
+        } else {
+          jc = jointState.getRotationDerivative(d, posd) * params.wgt;
+        }
+        jacobian_jointParams_to_modelParams<T>(
+            jc, paramIndex + d + 3, parameterTransform, jacobianBlock.template topRows<3>());
+
+        switch (params.rotationErrorType) {
+          case RotationErrorType::QuaternionLogMap: {
+            Eigen::Matrix<T, 3, 1> rotJac;
+            if (isPrev) {
+              rotJac = computeLogMapRotationJacobianPrev(
+                  prevState.jointState[params.jointIndex].rotation(),
+                  params.nextRot,
+                  params.targetTransform.rotation,
+                  axis,
+                  params.awgt,
+                  params.dLogDq);
+            } else {
+              rotJac = computeLogMapRotationJacobianNext(
+                  params.prevRot, params.nextRot, axis, params.awgt, params.dLogDq);
+            }
+            jacobian_jointParams_to_modelParams<T>(
+                rotJac,
+                paramIndex + d + 3,
+                parameterTransform,
+                jacobianBlock.middleRows(3, params.rotationResidualSize));
+            break;
+          }
+          case RotationErrorType::RotationMatrixDifference: {
+            Eigen::Matrix<T, 9, 1> rotJac;
+            if (isPrev) {
+              rotJac = computeMatrixDiffRotationJacobianPrev(
+                  prevState.jointState[params.jointIndex].rotation(),
+                  params.targetTransform.rotation,
+                  axis,
+                  params.awgt);
+            } else {
+              rotJac = computeMatrixDiffRotationJacobianNext(
+                  state.jointState[params.jointIndex].rotation(), axis, params.awgt);
+            }
+            jacobian_jointParams_to_modelParams<T>(
+                rotJac,
+                paramIndex + d + 3,
+                parameterTransform,
+                jacobianBlock.middleRows(3, params.rotationResidualSize));
+            break;
+          }
+        }
+      }
+    }
+
+    if (activeJointParams[paramIndex + 6]) {
+      Eigen::Vector3<T> jc;
+      if (isPrev) {
+        jc = -(params.targetTransform.rotate(jointState.getScaleDerivative(posd))) * params.wgt;
+      } else {
+        jc = jointState.getScaleDerivative(posd) * params.wgt;
+      }
+      jacobian_jointParams_to_modelParams<T>(
+          jc, paramIndex + 6, parameterTransform, jacobianBlock.template topRows<3>());
+    }
+
+    ancestorJointIndex = skeleton.joints[ancestorJointIndex].parent;
+  }
+}
+
 } // namespace
 
 template <typename T>
@@ -393,129 +638,37 @@ double StateSequenceErrorFunctionT<T>::getGradient(
         nextState.jointState[i].translation() - transformedPrev.translation;
     const T pwgt = kPositionWeight * posWgt_ * this->weight_ * targetPositionWeights_[i];
     error += diff.squaredNorm() * pwgt;
-    // Gradient for prevState
-    {
-      size_t ancestorJointIndex = i;
-      while (ancestorJointIndex != kInvalidIndex) {
-        MT_CHECK(ancestorJointIndex < this->skeleton_.joints.size());
+    const GradientComputationParams<T> gradParams{
+        i,
+        targetTransform,
+        prevRot,
+        nextRot,
+        diff,
+        pwgt,
+        rwgt,
+        rotationErrorType_,
+        rotDiff,
+        dLogDq};
 
-        const size_t paramIndex = ancestorJointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd = prevState.jointState[i].translation() -
-            prevState.jointState[ancestorJointIndex].translation();
+    computeStateGradient<T>(
+        StateType::Prev,
+        gradParams,
+        prevState,
+        prevState,
+        this->skeleton_,
+        this->activeJointParams_,
+        this->parameterTransform_,
+        gradient.segment(0, nParam));
 
-        for (size_t d = 0; d < 3; d++) {
-          // position gradient
-          if (this->activeJointParams_[paramIndex + d]) {
-            const T val = -T(2) *
-                diff.dot(targetTransform.rotate(
-                    prevState.jointState[ancestorJointIndex].getTranslationDerivative(d))) *
-                pwgt;
-            gradient_jointParams_to_modelParams<T>(
-                val, paramIndex + d, this->parameterTransform_, gradient.segment(0, nParam));
-          }
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector3<T> axis =
-                prevState.jointState[ancestorJointIndex].rotationAxis.col(d);
-
-            // (1) Changes in position error due to rotation of ancestor joint
-            const T positionErrorGradient = -T(2) *
-                diff.dot(targetTransform.rotate(
-                    prevState.jointState[ancestorJointIndex].getRotationDerivative(d, posd)));
-
-            // (2) Changes in rotation error due to rotation of ancestor joint
-            T rotationErrorGradient = 0;
-            switch (rotationErrorType_) {
-              case RotationErrorType::QuaternionLogMap:
-                rotationErrorGradient = computeLogMapRotationGradientPrev(
-                    prevState.jointState[i].rotation(),
-                    nextRot,
-                    targetTransform.rotation,
-                    axis,
-                    dLogDq);
-                break;
-              case RotationErrorType::RotationMatrixDifference:
-                rotationErrorGradient = computeMatrixDiffRotationGradientPrev(
-                    prevState.jointState[i].rotation(), targetTransform.rotation, axis, rotDiff);
-                break;
-            }
-
-            const T val = pwgt * positionErrorGradient + rwgt * rotationErrorGradient;
-            gradient_jointParams_to_modelParams<T>(
-                val, paramIndex + 3 + d, this->parameterTransform_, gradient.segment(0, nParam));
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const T val = -T(2) *
-              diff.dot(targetTransform.rotate(
-                  prevState.jointState[ancestorJointIndex].getScaleDerivative(posd))) *
-              pwgt;
-          gradient_jointParams_to_modelParams<T>(
-              val, paramIndex + 6, this->parameterTransform_, gradient.segment(0, nParam));
-        }
-
-        ancestorJointIndex = this->skeleton_.joints[ancestorJointIndex].parent;
-      }
-    }
-
-    // Gradient for nextState
-    {
-      size_t ancestorJointIndex = i;
-      while (ancestorJointIndex != kInvalidIndex) {
-        MT_CHECK(ancestorJointIndex < this->skeleton_.joints.size());
-
-        const size_t paramIndex = ancestorJointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd = nextState.jointState[i].translation() -
-            nextState.jointState[ancestorJointIndex].translation();
-
-        for (size_t d = 0; d < 3; d++) {
-          // position gradient
-          if (this->activeJointParams_[paramIndex + d]) {
-            const T val = T(2) *
-                diff.dot(nextState.jointState[ancestorJointIndex].getTranslationDerivative(d)) *
-                pwgt;
-            gradient_jointParams_to_modelParams<T>(
-                val, paramIndex + d, this->parameterTransform_, gradient.segment(nParam, nParam));
-          }
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector3<T> axis =
-                nextState.jointState[ancestorJointIndex].rotationAxis.col(d);
-
-            // (1) Changes in position error due to rotation of ancestor joint
-            const T positionErrorGradient = T(2) *
-                diff.dot(nextState.jointState[ancestorJointIndex].getRotationDerivative(d, posd)) *
-                pwgt;
-
-            // (2) Changes in rotation error due to rotation of ancestor joint
-            T rotationErrorGradient;
-            switch (rotationErrorType_) {
-              case RotationErrorType::QuaternionLogMap:
-                rotationErrorGradient =
-                    computeLogMapRotationGradientNext(prevRot, nextRot, axis, dLogDq);
-                break;
-              case RotationErrorType::RotationMatrixDifference:
-                rotationErrorGradient = computeMatrixDiffRotationGradientNext(
-                    nextState.jointState[i].rotation(), axis, rotDiff);
-                break;
-            }
-
-            const T val = positionErrorGradient + rwgt * rotationErrorGradient;
-            gradient_jointParams_to_modelParams<T>(
-                val,
-                paramIndex + 3 + d,
-                this->parameterTransform_,
-                gradient.segment(nParam, nParam));
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const T val = T(2) *
-              diff.dot(nextState.jointState[ancestorJointIndex].getScaleDerivative(posd)) * pwgt;
-          gradient_jointParams_to_modelParams<T>(
-              val, paramIndex + 6, this->parameterTransform_, gradient.segment(nParam, nParam));
-        }
-
-        ancestorJointIndex = this->skeleton_.joints[ancestorJointIndex].parent;
-      }
-    }
+    computeStateGradient<T>(
+        StateType::Next,
+        gradParams,
+        nextState,
+        prevState,
+        this->skeleton_,
+        this->activeJointParams_,
+        this->parameterTransform_,
+        gradient.segment(nParam, nParam));
   }
 
   // return error
@@ -620,161 +773,37 @@ double StateSequenceErrorFunctionT<T>::getJacobian(
       }
     }
 
-    // Jacobian for prevState
-    {
-      size_t ancestorJointIndex = i;
-      while (ancestorJointIndex != kInvalidIndex) {
-        MT_CHECK(ancestorJointIndex < this->skeleton_.joints.size());
+    const JacobianComputationParams<T> jacParams{
+        i,
+        targetTransform,
+        prevRot,
+        nextRot,
+        wgt,
+        awgt,
+        rotationResidualSize,
+        blockSize,
+        rotationErrorType_,
+        dLogDq};
 
-        const auto& jointState = prevState.jointState[ancestorJointIndex];
-        const size_t paramIndex = ancestorJointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd =
-            prevState.jointState[i].translation() - jointState.translation();
+    computeStateJacobian<T>(
+        StateType::Prev,
+        jacParams,
+        prevState,
+        prevState,
+        this->skeleton_,
+        this->activeJointParams_,
+        this->parameterTransform_,
+        jacobian_full.block(offset, 0, blockSize, nParam));
 
-        for (size_t d = 0; d < 3; d++) {
-          if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector3<T> jc =
-                -(targetTransform.rotate(jointState.getTranslationDerivative(d))) * wgt;
-            jacobian_jointParams_to_modelParams<T>(
-                jc,
-                paramIndex + d,
-                this->parameterTransform_,
-                jacobian_full.block(offset, 0, blockSize, nParam).template topRows<3>());
-          }
-
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector3<T> axis =
-                prevState.jointState[ancestorJointIndex].rotationAxis.col(d);
-
-            // (1) Translation part: Changes in position error due to rotation of ancestor joint
-            const Eigen::Vector3<T> jc =
-                -(targetTransform.rotate(jointState.getRotationDerivative(d, posd))) * wgt;
-            jacobian_jointParams_to_modelParams<T>(
-                jc,
-                paramIndex + d + 3,
-                this->parameterTransform_,
-                jacobian_full.block(offset, 0, blockSize, nParam).template topRows<3>());
-
-            // (2) Rotation part: Changes in rotation error due to rotation of ancestor joint
-            switch (rotationErrorType_) {
-              case RotationErrorType::QuaternionLogMap: {
-                const Eigen::Matrix<T, 3, 1> rotJac = computeLogMapRotationJacobianPrev(
-                    prevState.jointState[i].rotation(),
-                    nextRot,
-                    targetTransform.rotation,
-                    axis,
-                    awgt,
-                    dLogDq);
-                jacobian_jointParams_to_modelParams<T>(
-                    rotJac,
-                    paramIndex + d + 3,
-                    this->parameterTransform_,
-                    jacobian_full.block(offset, 0, blockSize, nParam)
-                        .middleRows(3, rotationResidualSize));
-                break;
-              }
-              case RotationErrorType::RotationMatrixDifference: {
-                const Eigen::Matrix<T, 9, 1> rotJac = computeMatrixDiffRotationJacobianPrev(
-                    prevState.jointState[i].rotation(), targetTransform.rotation, axis, awgt);
-                jacobian_jointParams_to_modelParams<T>(
-                    rotJac,
-                    paramIndex + d + 3,
-                    this->parameterTransform_,
-                    jacobian_full.block(offset, 0, blockSize, nParam)
-                        .middleRows(3, rotationResidualSize));
-                break;
-              }
-            }
-          }
-        }
-
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector3<T> jc =
-              -(targetTransform.rotate(jointState.getScaleDerivative(posd))) * wgt;
-          jacobian_jointParams_to_modelParams<T>(
-              jc,
-              paramIndex + 6,
-              this->parameterTransform_,
-              jacobian_full.block(offset, 0, blockSize, nParam).template topRows<3>());
-        }
-
-        ancestorJointIndex = this->skeleton_.joints[ancestorJointIndex].parent;
-      }
-    }
-
-    // Jacobian for nextState
-    {
-      size_t ancestorJointIndex = i;
-      while (ancestorJointIndex != kInvalidIndex) {
-        MT_CHECK(ancestorJointIndex < this->skeleton_.joints.size());
-
-        const auto& jointState = nextState.jointState[ancestorJointIndex];
-        const size_t paramIndex = ancestorJointIndex * kParametersPerJoint;
-        const Eigen::Vector3<T> posd =
-            nextState.jointState[i].translation() - jointState.translation();
-
-        for (size_t d = 0; d < 3; d++) {
-          if (this->activeJointParams_[paramIndex + d]) {
-            const Eigen::Vector3<T> jc = jointState.getTranslationDerivative(d) * wgt;
-            jacobian_jointParams_to_modelParams<T>(
-                jc,
-                paramIndex + d,
-                this->parameterTransform_,
-                jacobian_full.block(offset, nParam, blockSize, nParam).template topRows<3>());
-          }
-
-          if (this->activeJointParams_[paramIndex + 3 + d]) {
-            const Eigen::Vector3<T> axis =
-                nextState.jointState[ancestorJointIndex].rotationAxis.col(d);
-
-            // (1) Translation part: Changes in position error due to rotation of ancestor joint
-            const Eigen::Vector3<T> jc = jointState.getRotationDerivative(d, posd) * wgt;
-            jacobian_jointParams_to_modelParams<T>(
-                jc,
-                paramIndex + d + 3,
-                this->parameterTransform_,
-                jacobian_full.block(offset, nParam, blockSize, nParam).template topRows<3>());
-
-            // (2) Rotation part: Changes in rotation error due to rotation of ancestor joint
-            switch (rotationErrorType_) {
-              case RotationErrorType::QuaternionLogMap: {
-                const Eigen::Matrix<T, 3, 1> rotJac =
-                    computeLogMapRotationJacobianNext(prevRot, nextRot, axis, awgt, dLogDq);
-                jacobian_jointParams_to_modelParams<T>(
-                    rotJac,
-                    paramIndex + d + 3,
-                    this->parameterTransform_,
-                    jacobian_full.block(offset, nParam, blockSize, nParam)
-                        .middleRows(3, rotationResidualSize));
-                break;
-              }
-              case RotationErrorType::RotationMatrixDifference: {
-                const Eigen::Matrix<T, 9, 1> rotJac = computeMatrixDiffRotationJacobianNext(
-                    nextState.jointState[i].rotation(), axis, awgt);
-                jacobian_jointParams_to_modelParams<T>(
-                    rotJac,
-                    paramIndex + d + 3,
-                    this->parameterTransform_,
-                    jacobian_full.block(offset, nParam, blockSize, nParam)
-                        .middleRows(3, rotationResidualSize));
-                break;
-              }
-            }
-          }
-        }
-
-        if (this->activeJointParams_[paramIndex + 6]) {
-          const Eigen::Vector3<T> jc = jointState.getScaleDerivative(posd) * wgt;
-          jacobian_jointParams_to_modelParams<T>(
-              jc,
-              paramIndex + 6,
-              this->parameterTransform_,
-              jacobian_full.block(offset, nParam, blockSize, nParam).template topRows<3>());
-        }
-
-        ancestorJointIndex = this->skeleton_.joints[ancestorJointIndex].parent;
-      }
-    }
+    computeStateJacobian<T>(
+        StateType::Next,
+        jacParams,
+        nextState,
+        prevState,
+        this->skeleton_,
+        this->activeJointParams_,
+        this->parameterTransform_,
+        jacobian_full.block(offset, nParam, blockSize, nParam));
 
     offset += blockSize;
   }
