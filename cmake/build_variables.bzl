@@ -758,6 +758,20 @@ hello_world_sources = [
 
 convert_model_sources = [
     "examples/convert_model/convert_model.cpp",
+    "examples/convert_model/convert_model_helpers.cpp",
+]
+
+convert_model_headers = [
+    "examples/convert_model/convert_model_helpers.h",
+]
+
+convert_model_test_sources = [
+    "examples/convert_model/convert_model_test.cpp",
+    "examples/convert_model/convert_model_helpers.cpp",
+]
+
+convert_model_integration_test_sources = [
+    "examples/convert_model/convert_model_integration_test.cpp",
 ]
 
 print_fps_sources = [
@@ -829,4 +843,8 @@ rasterizer_test_sources = [
 
 forward_kinematics_sources = [
     "tutorials/forward_kinematics/forward_kinematics.cpp",
+]
+
+generate_test_data_sources = [
+    "examples/convert_model/generate_test_data.cpp",
 ]

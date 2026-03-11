@@ -1,0 +1,37 @@
+{
+	"locators": [
+		{
+			"lockX": 0,
+			"lockY": 0,
+			"lockZ": 0,
+			"name": "l0",
+			"offsetX": 0.6145391464233398,
+			"offsetY": 0.9970368146896362,
+			"offsetZ": -0.766986072063446,
+			"parentName": "root",
+			"weight": 1.0
+		},
+		{
+			"lockX": 0,
+			"lockY": 0,
+			"lockZ": 0,
+			"name": "l1",
+			"offsetX": -0.7545942068099976,
+			"offsetY": 0.4085705280303955,
+			"offsetZ": 0.36734163761138916,
+			"parentName": "joint1",
+			"weight": 1.0
+		},
+		{
+			"lockX": 0,
+			"lockY": 0,
+			"lockZ": 0,
+			"name": "l2",
+			"offsetX": 0.04707765579223633,
+			"offsetY": -0.6653380990028381,
+			"offsetZ": -0.6845999956130981,
+			"parentName": "joint2",
+			"weight": 1.0
+		}
+	]
+}
