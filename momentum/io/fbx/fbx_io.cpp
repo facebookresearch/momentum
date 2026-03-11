@@ -558,6 +558,8 @@ void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character
         .Set(FbxString(character.metadata.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
         .Set(FbxString(character.name.c_str()));
+    ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "RigName")
+        .Set(FbxString(character.name.c_str()));
   }
 }
 
