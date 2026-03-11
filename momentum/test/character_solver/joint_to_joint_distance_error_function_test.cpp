@@ -102,3 +102,50 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointDistanceError_GradientsAndJa
     EXPECT_NEAR(error, 0.0, Eps<T>(1e-10f, 1e-15));
   }
 }
+
+// Verify that the Jacobian is correctly computed even when the function value is zero.
+// A zero function value (f = 0) does not imply a zero derivative (df/dq = 0).
+TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointDistanceError_JacobianWithZeroFunctionValue) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // Use non-zero parameters to create a non-trivial joint configuration
+  ModelParametersT<T> parameters = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  parameters(0) = T(0.5);
+  parameters(1) = T(-0.3);
+
+  SkeletonStateT<T> state(transform.apply(parameters), skeleton);
+
+  // Create a joint-to-joint distance constraint where the target distance matches the actual
+  // distance, so f = 0
+  JointToJointDistanceErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
+
+  const Vector3<T> offset1 = Vector3<T>::UnitY();
+  const Vector3<T> offset2 = Vector3<T>::UnitX();
+  const Vector3<T> worldPos1 = state.jointState[1].transform * offset1;
+  const Vector3<T> worldPos2 = state.jointState[2].transform * offset2;
+  const T actualDistance = (worldPos1 - worldPos2).norm();
+
+  const T kTestWeight = 1.0;
+  errorFunction.addConstraint(1, offset1, 2, offset2, actualDistance, kTestWeight);
+
+  // Compute Jacobian
+  const size_t jacobianSize = errorFunction.getJacobianSize();
+  Eigen::MatrixX<T> jacobian =
+      Eigen::MatrixX<T>::Zero(jacobianSize, transform.numAllModelParameters());
+  Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
+  MeshStateT<T> meshState{};
+  int usedRows = 0;
+  const double error =
+      errorFunction.getJacobian(parameters, state, meshState, jacobian, residual, usedRows);
+
+  // The error and residual should be zero since f = 0
+  EXPECT_NEAR(error, 0.0, 1e-10);
+  EXPECT_NEAR(residual.norm(), 0.0, Eps<T>(1e-6f, 1e-10));
+
+  // The Jacobian matrix should be non-zero: even though f = 0, df/dq != 0
+  EXPECT_GT(jacobian.norm(), 0.0);
+}

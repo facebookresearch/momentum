@@ -134,3 +134,54 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointPositionError_GradientsAndJa
     EXPECT_NEAR(error, 0.0, Eps<T>(1e-6f, 1e-12));
   }
 }
+
+// Verify that the Jacobian is correctly computed even when the function value is zero.
+// A zero function value (f = 0) does not imply a zero derivative (df/dq = 0).
+TYPED_TEST(Momentum_ErrorFunctionsTest, JointToJointPositionError_JacobianWithZeroFunctionValue) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // Use non-zero parameters to create a non-trivial joint configuration
+  ModelParametersT<T> parameters = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  parameters(0) = T(0.5);
+  parameters(1) = T(-0.3);
+
+  SkeletonStateT<T> state(transform.apply(parameters), skeleton);
+
+  // Create a joint-to-joint position constraint where the target matches the current
+  // relative position, so f = 0
+  JointToJointPositionErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
+
+  const auto& srcJointState = state.jointState[1];
+  const auto& refJointState = state.jointState[2];
+  const Vector3<T> sourceOffset = Vector3<T>::UnitY();
+  const Vector3<T> referenceOffset = Vector3<T>::UnitX();
+
+  const Vector3<T> srcWorldPos = srcJointState.transform * sourceOffset;
+  const Vector3<T> refWorldPos = refJointState.transform * referenceOffset;
+  const Vector3<T> diff = srcWorldPos - refWorldPos;
+  const Vector3<T> relativePos = refJointState.transform.toRotationMatrix().transpose() * diff;
+
+  const T kTestWeight = 1.0;
+  errorFunction.addConstraint(1, sourceOffset, 2, referenceOffset, relativePos, kTestWeight);
+
+  // Compute Jacobian
+  const size_t jacobianSize = errorFunction.getJacobianSize();
+  Eigen::MatrixX<T> jacobian =
+      Eigen::MatrixX<T>::Zero(jacobianSize, transform.numAllModelParameters());
+  Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
+  MeshStateT<T> meshState{};
+  int usedRows = 0;
+  const double error =
+      errorFunction.getJacobian(parameters, state, meshState, jacobian, residual, usedRows);
+
+  // The error and residual should be zero since f = 0
+  EXPECT_NEAR(error, 0.0, 1e-10);
+  EXPECT_NEAR(residual.norm(), 0.0, Eps<T>(1e-6f, 1e-10));
+
+  // The Jacobian matrix should be non-zero: even though f = 0, df/dq != 0
+  EXPECT_GT(jacobian.norm(), 0.0);
+}

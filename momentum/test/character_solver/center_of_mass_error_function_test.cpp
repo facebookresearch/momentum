@@ -160,3 +160,57 @@ TYPED_TEST(CenterOfMassErrorFunctionTest, MultipleConstraints) {
       false,
       false);
 }
+
+// Verify that the Jacobian is correctly computed even when the function value is zero.
+// A zero function value (f = 0) does not imply a zero derivative (df/dq = 0).
+TYPED_TEST(CenterOfMassErrorFunctionTest, JacobianWithZeroFunctionValue) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  const auto& skeleton = character.skeleton;
+  const auto& parameterTransform = character.parameterTransform;
+  const ParameterTransformT<T> transform = parameterTransform.cast<T>();
+
+  // Use non-zero parameters to create a non-trivial joint configuration
+  ModelParametersT<T> parameters = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  parameters(0) = T(0.5);
+  parameters(1) = T(-0.3);
+
+  SkeletonStateT<T> state(transform.apply(parameters), skeleton);
+
+  CenterOfMassErrorFunctionT<T> errorFunction(skeleton, parameterTransform);
+
+  // Compute actual CoM and use it as target, so f = 0
+  const size_t numJoints = std::min<size_t>(4, skeleton.joints.size());
+  CenterOfMassConstraintT<T> constraint;
+  Eigen::Vector3<T> actualCoM = Eigen::Vector3<T>::Zero();
+  T totalMass = T(0);
+  for (size_t j = 0; j < numJoints; ++j) {
+    constraint.jointIndices.push_back(j);
+    const T mass = T(1) + T(j);
+    constraint.masses.push_back(mass);
+    actualCoM += mass * state.jointState[j].translation();
+    totalMass += mass;
+  }
+  actualCoM /= totalMass;
+  constraint.target = actualCoM;
+  constraint.weight = T(1);
+  errorFunction.addConstraint(constraint);
+
+  // Compute Jacobian
+  const size_t jacobianSize = errorFunction.getJacobianSize();
+  Eigen::MatrixX<T> jacobian =
+      Eigen::MatrixX<T>::Zero(jacobianSize, transform.numAllModelParameters());
+  Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
+  MeshStateT<T> meshState{};
+  int usedRows = 0;
+  const double error =
+      errorFunction.getJacobian(parameters, state, meshState, jacobian, residual, usedRows);
+
+  // The error and residual should be zero since f = 0
+  EXPECT_NEAR(error, 0.0, Eps<T>(1e-5f, 1e-10));
+  EXPECT_NEAR(residual.norm(), 0.0, Eps<T>(1e-3f, 1e-5));
+
+  // The Jacobian matrix should be non-zero: even though f = 0, df/dq != 0
+  EXPECT_GT(jacobian.norm(), 0.0);
+}
