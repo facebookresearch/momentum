@@ -148,8 +148,14 @@ void testGradientAndJacobian(
   // check the gradients are similar
   {
     SCOPED_TRACE("Checking Numerical Gradient");
-    if ((numGradient + anaGradient).norm() != 0.0) {
-      const T gradientMismatch = (numGradient - anaGradient).norm() /
+    const T diffNorm = (numGradient - anaGradient).norm();
+    // Skip the relative check when both gradients are near zero (absolute difference below eps).
+    // In this regime, the relative comparison breaks down: e.g., when the analytical gradient is
+    // exactly zero and the numerical gradient has only floating-point noise (~1e-10), the relative
+    // ratio can be close to 1.0 even though the actual error is negligible.
+    if ((numGradient + anaGradient).norm() != 0.0 &&
+        diffNorm > Momentum_ErrorFunctionsTest<T>::getEps()) {
+      const T gradientMismatch = diffNorm /
           ((numGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps());
 
       if (gradientMismatch > numThreshold) {
@@ -161,7 +167,7 @@ void testGradientAndJacobian(
             numThreshold,
             numGradient.norm(),
             anaGradient.norm(),
-            (numGradient - anaGradient).norm());
+            diffNorm);
 
         // Dump mismatched gradient components:
         for (int iParam = 0; iParam < numGradient.size(); ++iParam) {
@@ -184,9 +190,11 @@ void testGradientAndJacobian(
 
   // check the gradients by comparing against the jacobian gradient
   {
-    SCOPED_TRACE("Checking Numerical Gradient");
-    if ((jacGradient + anaGradient).norm() != 0.0) {
-      const T gradientMismatch = (jacGradient - anaGradient).norm() /
+    SCOPED_TRACE("Checking Jacobian Gradient");
+    const T jacDiffNorm = (jacGradient - anaGradient).norm();
+    if ((jacGradient + anaGradient).norm() != 0.0 &&
+        jacDiffNorm > Momentum_ErrorFunctionsTest<T>::getEps()) {
+      const T gradientMismatch = jacDiffNorm /
           ((jacGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps());
 
       if (gradientMismatch > jacThreshold) {
@@ -198,7 +206,7 @@ void testGradientAndJacobian(
             jacThreshold,
             jacGradient.norm(),
             anaGradient.norm(),
-            (jacGradient - anaGradient).norm());
+            jacDiffNorm);
       }
 
       EXPECT_LE(gradientMismatch, jacThreshold);
