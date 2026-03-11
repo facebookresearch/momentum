@@ -1,0 +1,16 @@
+Momentum Model Definition V1.0
+
+# Auto-generated test character model
+
+[ParameterTransform]
+root.tx = 1 * root_tx
+root.ty = 1 * root_ty
+root.tz = 1 * root_tz
+root.rx = 1 * root_rx
+root.ry = 1 * root_ry
+root.rz = 1 * root_rz
+root.sc = 1 * scale_global
+joint1.rx = 1 * joint1_rx
+joint1.rz = 0.5 * shared_rz
+joint2.rx = 1 * joint2_rx
+joint2.rz = 0.5 * shared_rz
