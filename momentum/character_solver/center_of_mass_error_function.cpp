@@ -45,6 +45,11 @@ void CenterOfMassErrorFunctionT<T>::addConstraint(const ConstraintType& constrai
   MT_CHECK(!constraint.jointIndices.empty(), "Constraint must have at least one joint");
   MT_CHECK(constraint.totalMass() > T(0), "Total mass must be positive");
 
+  // Validate joint indices are within bounds
+  for (const auto jointIdx : constraint.jointIndices) {
+    MT_CHECK(jointIdx < this->skeleton_.joints.size(), "Invalid joint index: {}", jointIdx);
+  }
+
   constraints_.push_back(constraint);
 }
 
