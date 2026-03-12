@@ -71,4 +71,40 @@ class OrientationErrorFunctionT : public JointErrorFunctionT<T, OrientationDataT
       std::array<Eigen::Matrix<T, 9, 3>, 3>& dfdv) const final;
 };
 
+/// The OrientationRotDiffErrorFunction minimizes the F-norm of
+/// (R_target^T * R_current - I), the rotation difference relative to identity.
+///
+/// Compared to OrientationErrorFunctionT which uses element-wise subtraction
+/// (R_current - R_target), this formulation computes the error in the tangent space of the
+/// rotation group, which is invariant to the choice of coordinate frame.
+template <typename T>
+class OrientationRotDiffErrorFunctionT
+    : public JointErrorFunctionT<T, OrientationDataT<T>, 9, 3, 0> {
+ public:
+  explicit OrientationRotDiffErrorFunctionT(
+      const Skeleton& skel,
+      const ParameterTransform& pt,
+      const T& lossAlpha = GeneralizedLossT<T>::kL2,
+      const T& lossC = T(1))
+      : JointErrorFunctionT<T, OrientationDataT<T>, 9, 3, 0>(skel, pt, lossAlpha, lossC) {}
+
+  explicit OrientationRotDiffErrorFunctionT(
+      const Character& character,
+      const T& lossAlpha = GeneralizedLossT<T>::kL2,
+      const T& lossC = T(1))
+      : OrientationRotDiffErrorFunctionT(
+            character.skeleton,
+            character.parameterTransform,
+            lossAlpha,
+            lossC) {}
+
+ protected:
+  void evalFunction(
+      size_t constrIndex,
+      const JointStateT<T>& state,
+      Vector<T, 9>& f,
+      std::array<Vector3<T>, 3>& v,
+      std::array<Eigen::Matrix<T, 9, 3>, 3>& dfdv) const final;
+};
+
 } // namespace momentum

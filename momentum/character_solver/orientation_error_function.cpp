@@ -39,7 +39,35 @@ void OrientationErrorFunctionT<T>::evalFunction(
   }
 }
 
+template <typename T>
+void OrientationRotDiffErrorFunctionT<T>::evalFunction(
+    const size_t constrIndex,
+    const JointStateT<T>& state,
+    Vector<T, 9>& f,
+    std::array<Vector3<T>, 3>& v,
+    std::array<Eigen::Matrix<T, 9, 3>, 3>& dfdv) const {
+  MT_PROFILE_FUNCTION();
+
+  const OrientationDataT<T>& constr = this->constraints_[constrIndex];
+  const Matrix3<T> vec = state.rotation() * constr.offset.toRotationMatrix();
+  const Matrix3<T> invTarget = constr.target.toRotationMatrix().transpose();
+  Matrix3<T> val = invTarget * vec - Matrix3<T>::Identity();
+  f = Eigen::Map<Vector<T, 9>>(val.data(), val.size());
+
+  v[0] = vec.col(0);
+  v[1] = vec.col(1);
+  v[2] = vec.col(2);
+
+  for (size_t iVec = 0; iVec < 3; ++iVec) {
+    dfdv[iVec].setZero();
+    dfdv[iVec].template middleRows<3>(iVec * 3) = invTarget;
+  }
+}
+
 template class OrientationErrorFunctionT<float>;
 template class OrientationErrorFunctionT<double>;
+
+template class OrientationRotDiffErrorFunctionT<float>;
+template class OrientationRotDiffErrorFunctionT<double>;
 
 } // namespace momentum
