@@ -9,7 +9,9 @@
 
 #include "convert_model_helpers.h"
 
+#include <momentum/character/character_utility.h>
 #include <momentum/character/inverse_parameter_transform.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/common/log.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
@@ -95,6 +97,49 @@ MatrixXf convertToModelParams(
   return poses;
 }
 
+MatrixXf convertMotionWithJointMapping(
+    const MatrixXf& motion,
+    const Skeleton& sourceSkeleton,
+    const Character& targetCharacter) {
+  const size_t nFrames = motion.cols();
+  const size_t nJoints = targetCharacter.skeleton.joints.size();
+  MatrixXf poses;
+  poses.setZero(targetCharacter.parameterTransform.numAllModelParameters(), nFrames);
+  InverseParameterTransform inversePt(targetCharacter.parameterTransform);
+  SkeletonState sourceState;
+  TransformList transforms(nJoints);
+
+  // Build name mapping: indexMap[target_index] = source_index
+  const auto jointNames = targetCharacter.skeleton.getJointNames();
+  std::vector<size_t> indexMap(nJoints, kInvalidIndex);
+  for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+    indexMap[iJoint] = sourceSkeleton.getJointIdByName(jointNames[iJoint]);
+  }
+
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    sourceState.set(motion.col(iFrame), sourceSkeleton);
+
+    for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
+      if (indexMap[jJoint] == kInvalidIndex) {
+        // No correspondence in source; use rest pose
+        const Joint& joint = targetCharacter.skeleton.joints[jJoint];
+        const Transform local(joint.translationOffset, joint.preRotation);
+        const size_t parentIndex = targetCharacter.skeleton.joints[jJoint].parent;
+        if (parentIndex == kInvalidIndex) {
+          transforms[jJoint] = local;
+        } else {
+          transforms[jJoint] = transforms[parentIndex] * local;
+        }
+      } else {
+        transforms[jJoint] = sourceState.jointState[indexMap[jJoint]].transform;
+      }
+    }
+    const auto jointParams = skeletonStateToJointParameters(transforms, targetCharacter.skeleton);
+    poses.col(iFrame) = inversePt.apply(jointParams).pose.v;
+  }
+  return poses;
+}
+
 MotionData loadFbxMotion(
     const filesystem::path& motionPath,
     Character& character,
@@ -112,20 +157,14 @@ MotionData loadFbxMotion(
     initializeCharacterFromFbx(character, c, options);
   }
 
-  if (c.skeleton.joints.size() != character.skeleton.joints.size()) {
-    MT_LOGE("The motion is not on a compatible character");
-    return result;
-  }
-
   if (motionIndex < 0) {
     return result;
   }
 
-  if (character.parameterTransform.numAllModelParameters() == motions.at(motionIndex).rows()) {
-    result.poses = std::move(motions.at(motionIndex));
-  } else {
-    result.poses = convertToModelParams(motions.at(motionIndex), character.parameterTransform);
-  }
+  // To account for differences in joint order and rest pose between the source
+  // and target skeletons, map global joint transforms by name then convert back
+  // to joint parameters based on the target skeleton's bind pose.
+  result.poses = convertMotionWithJointMapping(motions.at(motionIndex), c.skeleton, character);
   result.fps = framerate;
   result.offsets = character.parameterTransform.zero();
   return result;

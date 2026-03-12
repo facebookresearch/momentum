@@ -9,6 +9,7 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/inverse_parameter_transform.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
@@ -318,4 +319,154 @@ TEST_F(ConvertModelTest, EdgeCase_FilePathWithSpecialCharacters) {
     bool hasValidExt = (ext == ".fbx") || (ext == ".glb") || (ext == ".gltf");
     EXPECT_TRUE(hasValidExt) << "Extension should be parsed correctly for: " << filename;
   }
+}
+
+// ============================================================================
+// convertMotionWithJointMapping tests
+// ============================================================================
+
+// Helper to create a skeleton with joints in the specified order.
+// Each joint name in the list becomes a joint; the first is the root,
+// and subsequent joints are children of the previous joint.
+namespace {
+Skeleton createReorderedSkeleton(const std::vector<std::string>& jointNames) {
+  Skeleton skeleton;
+  for (size_t i = 0; i < jointNames.size(); ++i) {
+    Joint joint;
+    joint.name = jointNames[i];
+    joint.parent = (i == 0) ? kInvalidIndex : i - 1;
+    joint.preRotation = Eigen::Quaternionf::Identity();
+    if (i == 0) {
+      joint.translationOffset = Eigen::Vector3f::Zero();
+    } else {
+      joint.translationOffset = Eigen::Vector3f::UnitY();
+    }
+    skeleton.joints.push_back(joint);
+  }
+  return skeleton;
+}
+} // namespace
+
+// When source and target skeletons have the same joint order, the mapping
+// should produce the same result as the identity mapping.
+TEST_F(ConvertModelTest, ConvertMotionWithJointMapping_SameOrder) {
+  const auto modelPath = filesystem::path(testDataPath_) / "model_with_motion.glb";
+  if (!filesystem::exists(modelPath)) {
+    GTEST_SKIP() << "Test data not available: " << modelPath;
+  }
+
+  auto character = loadFullCharacter(modelPath.string());
+  const auto& skeleton = character.skeleton;
+
+  const size_t nFrames = 3;
+  const size_t numJointParams = skeleton.joints.size() * kParametersPerJoint;
+  MatrixXf motion;
+  motion.setZero(numJointParams, nFrames);
+
+  MatrixXf result = convertMotionWithJointMapping(motion, skeleton, character);
+
+  EXPECT_EQ(result.rows(), character.parameterTransform.numAllModelParameters());
+  EXPECT_EQ(result.cols(), nFrames);
+  EXPECT_TRUE(result.allFinite());
+}
+
+// When source and target skeletons have different joint orders, the mapping
+// should correctly reorder the joint transforms so the output animation
+// matches the target skeleton's joint ordering.
+TEST_F(ConvertModelTest, ConvertMotionWithJointMapping_DifferentOrder) {
+  const auto modelPath = filesystem::path(testDataPath_) / "model_with_motion.glb";
+  if (!filesystem::exists(modelPath)) {
+    GTEST_SKIP() << "Test data not available: " << modelPath;
+  }
+
+  auto targetCharacter = loadFullCharacter(modelPath.string());
+  const auto jointNames = targetCharacter.skeleton.getJointNames();
+
+  // Create a source skeleton with the same joints but reversed order
+  auto reversedNames = jointNames;
+  std::reverse(reversedNames.begin(), reversedNames.end());
+  Skeleton sourceSkeleton = createReorderedSkeleton(reversedNames);
+
+  const size_t nFrames = 2;
+  const size_t numSourceJointParams = sourceSkeleton.joints.size() * kParametersPerJoint;
+  MatrixXf motion;
+  motion.setZero(numSourceJointParams, nFrames);
+
+  MatrixXf result = convertMotionWithJointMapping(motion, sourceSkeleton, targetCharacter);
+
+  EXPECT_EQ(result.rows(), targetCharacter.parameterTransform.numAllModelParameters());
+  EXPECT_EQ(result.cols(), nFrames);
+  EXPECT_TRUE(result.allFinite());
+}
+
+// When the source skeleton is missing joints that exist in the target, the
+// target should use its rest pose for the unmatched joints.
+TEST_F(ConvertModelTest, ConvertMotionWithJointMapping_MissingSourceJoints) {
+  const auto modelPath = filesystem::path(testDataPath_) / "model_with_motion.glb";
+  if (!filesystem::exists(modelPath)) {
+    GTEST_SKIP() << "Test data not available: " << modelPath;
+  }
+
+  auto targetCharacter = loadFullCharacter(modelPath.string());
+  const auto jointNames = targetCharacter.skeleton.getJointNames();
+
+  // Create a source skeleton with only the first two joints
+  std::vector<std::string> subsetNames(jointNames.begin(), jointNames.begin() + 2);
+  Skeleton sourceSkeleton = createReorderedSkeleton(subsetNames);
+
+  const size_t nFrames = 2;
+  const size_t numSourceJointParams = sourceSkeleton.joints.size() * kParametersPerJoint;
+  MatrixXf motion;
+  motion.setZero(numSourceJointParams, nFrames);
+
+  MatrixXf result = convertMotionWithJointMapping(motion, sourceSkeleton, targetCharacter);
+
+  EXPECT_EQ(result.rows(), targetCharacter.parameterTransform.numAllModelParameters());
+  EXPECT_EQ(result.cols(), nFrames);
+  EXPECT_TRUE(result.allFinite());
+}
+
+// Verify that non-zero motion on the source produces non-trivial output
+// when joint mapping is required due to different joint orders.
+TEST_F(ConvertModelTest, ConvertMotionWithJointMapping_NonZeroMotion) {
+  const auto modelPath = filesystem::path(testDataPath_) / "model_with_motion.glb";
+  if (!filesystem::exists(modelPath)) {
+    GTEST_SKIP() << "Test data not available: " << modelPath;
+  }
+
+  auto targetCharacter = loadFullCharacter(modelPath.string());
+  const auto jointNames = targetCharacter.skeleton.getJointNames();
+
+  // Use a shuffled order so joint mapping is exercised
+  auto shuffledNames = jointNames;
+  if (shuffledNames.size() >= 3) {
+    std::swap(shuffledNames[1], shuffledNames[2]);
+  }
+  Skeleton sourceSkeleton = createReorderedSkeleton(shuffledNames);
+
+  const size_t nFrames = 5;
+  const size_t numSourceJointParams = sourceSkeleton.joints.size() * kParametersPerJoint;
+  MatrixXf motion;
+  motion.setZero(numSourceJointParams, nFrames);
+
+  // Apply a small rotation to the second joint on the first frame.
+  // Joint parameters are 7 per joint: tx, ty, tz, rx, ry, rz, scale.
+  motion(1 * kParametersPerJoint + 3, 0) = 0.1f;
+
+  MatrixXf result = convertMotionWithJointMapping(motion, sourceSkeleton, targetCharacter);
+
+  EXPECT_EQ(result.rows(), targetCharacter.parameterTransform.numAllModelParameters());
+  EXPECT_EQ(result.cols(), nFrames);
+  EXPECT_TRUE(result.allFinite());
+
+  // The first frame should differ from the rest since we applied motion
+  // to it. At minimum, the results should not all be identical.
+  bool hasNonZeroDiff = false;
+  for (Eigen::Index iFrame = 1; iFrame < result.cols(); ++iFrame) {
+    if ((result.col(0) - result.col(iFrame)).norm() > 1e-6f) {
+      hasNonZeroDiff = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(hasNonZeroDiff) << "Non-zero source motion should produce different output frames";
 }

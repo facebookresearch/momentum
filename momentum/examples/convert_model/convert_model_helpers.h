@@ -67,4 +67,14 @@ void initializeCharacterFromFbx(
 /// inverse parameter transform. May lose information.
 MatrixXf convertToModelParams(const MatrixXf& motion, const ParameterTransform& parameterTransform);
 
+/// Converts joint-parameter motion from a source skeleton to model parameters
+/// on a target character by mapping global joint transforms based on joint names,
+/// then converting back to joint parameters based on the target skeleton's bind
+/// pose. This handles cases where the source and target skeletons have different
+/// joint orders or rest/bind poses.
+MatrixXf convertMotionWithJointMapping(
+    const MatrixXf& motion,
+    const Skeleton& sourceSkeleton,
+    const Character& targetCharacter);
+
 } // namespace momentum
