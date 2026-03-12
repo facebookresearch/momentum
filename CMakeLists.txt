@@ -904,6 +904,14 @@ if(MOMENTUM_BUILD_TESTING)
       rasterizer
       axel
   )
+
+  mt_test(
+    NAME glove_utils_test
+    SOURCES_VARS glove_utils_test_sources
+    LINK_LIBRARIES
+      character_test_helpers
+      marker_tracker
+  )
 endif()
 
 #===============================================================================

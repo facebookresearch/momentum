@@ -707,13 +707,19 @@ io_test_helper_sources_windows = [
 ]
 
 marker_tracker_public_headers = [
+    "marker_tracking/glove_utils.h",
     "marker_tracking/tracker_utils.h",
     "marker_tracking/marker_tracker.h",
 ]
 
 marker_tracker_sources = [
+    "marker_tracking/glove_utils.cpp",
     "marker_tracking/marker_tracker.cpp",
     "marker_tracking/tracker_utils.cpp",
+]
+
+glove_utils_test_sources = [
+    "test/marker_tracking/glove_utils_test.cpp",
 ]
 
 app_utils_public_headers = [
