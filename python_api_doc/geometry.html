@@ -313,6 +313,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Locator.weight"><code class="docutils literal notranslate"><span class="pre">Locator.weight</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.LogLevel"><code class="docutils literal notranslate"><span class="pre">LogLevel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.Debug"><code class="docutils literal notranslate"><span class="pre">LogLevel.Debug</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.Disabled"><code class="docutils literal notranslate"><span class="pre">LogLevel.Disabled</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.Error"><code class="docutils literal notranslate"><span class="pre">LogLevel.Error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.Info"><code class="docutils literal notranslate"><span class="pre">LogLevel.Info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.Trace"><code class="docutils literal notranslate"><span class="pre">LogLevel.Trace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.Warning"><code class="docutils literal notranslate"><span class="pre">LogLevel.Warning</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.__init__"><code class="docutils literal notranslate"><span class="pre">LogLevel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.name"><code class="docutils literal notranslate"><span class="pre">LogLevel.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.LogLevel.value"><code class="docutils literal notranslate"><span class="pre">LogLevel.value</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Marker"><code class="docutils literal notranslate"><span class="pre">Marker</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.__init__"><code class="docutils literal notranslate"><span class="pre">Marker.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.name"><code class="docutils literal notranslate"><span class="pre">Marker.name</span></code></a></li>
@@ -470,6 +482,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.create_test_mppca"><code class="docutils literal notranslate"><span class="pre">create_test_mppca()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.find_closest_points"><code class="docutils literal notranslate"><span class="pre">find_closest_points()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.find_closest_points_on_mesh"><code class="docutils literal notranslate"><span class="pre">find_closest_points_on_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.get_log_level"><code class="docutils literal notranslate"><span class="pre">get_log_level()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.is_fbxsdk_available"><code class="docutils literal notranslate"><span class="pre">is_fbxsdk_available()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.is_usd_available"><code class="docutils literal notranslate"><span class="pre">is_usd_available()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_local_skeleton_state()</span></code></a></li>
@@ -485,11 +498,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_local_skeleton_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_positions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.redirect_logs_to_python"><code class="docutils literal notranslate"><span class="pre">redirect_logs_to_python()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_mesh_by_faces"><code class="docutils literal notranslate"><span class="pre">reduce_mesh_by_faces()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_mesh_by_vertices"><code class="docutils literal notranslate"><span class="pre">reduce_mesh_by_vertices()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_to_selected_model_parameters"><code class="docutils literal notranslate"><span class="pre">reduce_to_selected_model_parameters()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.replace_rest_mesh"><code class="docutils literal notranslate"><span class="pre">replace_rest_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.replace_skeleton_hierarchy"><code class="docutils literal notranslate"><span class="pre">replace_skeleton_hierarchy()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.set_log_level"><code class="docutils literal notranslate"><span class="pre">set_log_level()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">skeleton_state_to_joint_parameters()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.split_mesh_by_texture_region"><code class="docutils literal notranslate"><span class="pre">split_mesh_by_texture_region()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.strip_joints"><code class="docutils literal notranslate"><span class="pre">strip_joints()</span></code></a></li>
@@ -2593,6 +2608,67 @@ Output shape: […, numModelParams]</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">LogLevel</span></span><a class="headerlink" href="#pymomentum.geometry.LogLevel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Log level for the momentum library.</p>
+<p>Members:</p>
+<blockquote>
+<div><p>Disabled</p>
+<p>Error</p>
+<p>Warning</p>
+<p>Info</p>
+<p>Debug</p>
+<p>Trace</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.Debug">
+<span class="sig-name descname"><span class="pre">Debug</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LogLevel.Debug:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LogLevel.Debug" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.Disabled">
+<span class="sig-name descname"><span class="pre">Disabled</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LogLevel.Disabled:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LogLevel.Disabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.Error">
+<span class="sig-name descname"><span class="pre">Error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LogLevel.Error:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LogLevel.Error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.Info">
+<span class="sig-name descname"><span class="pre">Info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LogLevel.Info:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LogLevel.Info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.Trace">
+<span class="sig-name descname"><span class="pre">Trace</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LogLevel.Trace:</span> <span class="pre">5&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LogLevel.Trace" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.Warning">
+<span class="sig-name descname"><span class="pre">Warning</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LogLevel.Warning:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.geometry.LogLevel.Warning" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.LogLevel" title="pymomentum.geometry.LogLevel"><span class="pre">pymomentum.geometry.LogLevel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.LogLevel.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.geometry.LogLevel.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.LogLevel.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.geometry.LogLevel.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.geometry.Marker">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><a class="headerlink" href="#pymomentum.geometry.Marker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
@@ -3884,6 +3960,17 @@ The fourth is […, nSrcPoints, 3] and contains the barycentric coordinates of t
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.get_log_level">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">get_log_level</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.LogLevel" title="pymomentum.geometry.LogLevel"><span class="pre">pymomentum.geometry.LogLevel</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.get_log_level" title="Link to this definition"></a></dt>
+<dd><p>Returns the current log level for the momentum library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The current <a class="reference internal" href="#pymomentum.geometry.LogLevel" title="pymomentum.geometry.LogLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogLevel</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.is_fbxsdk_available">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">is_fbxsdk_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.is_fbxsdk_available" title="Link to this definition"></a></dt>
 <dd><p>When FBXSDK is available, you can save fbx files as output.</p>
@@ -4190,6 +4277,20 @@ Shape: […, numJoints, 8]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.redirect_logs_to_python">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">redirect_logs_to_python</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.redirect_logs_to_python" title="Link to this definition"></a></dt>
+<dd><p>Redirects C++ log messages from the momentum library to Python’s stdout via <code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code>.</p>
+<p>This allows C++ log output (from <code class="xref py py-func docutils literal notranslate"><span class="pre">MT_LOG()</span></code> macros) to appear alongside Python output,
+which is useful when running momentum from a Python script or Jupyter notebook.</p>
+<p>The redirection is performed at most once; subsequent calls have no effect and return <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the redirection was successfully set up (or was already active).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.reduce_mesh_by_faces">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">reduce_mesh_by_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.reduce_mesh_by_faces" title="Link to this definition"></a></dt>
 <dd><p>Overloaded function.</p>
@@ -4322,6 +4423,34 @@ This is used e.g. to swap one character’s hand skeleton with another.</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A new skeleton that is identical to tgt_skeleton except that everything under target_root
 has been replaced by the part of source_character rooted at source_root.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.set_log_level">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">set_log_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.set_log_level" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>set_log_level(level: pymomentum.geometry.LogLevel) -&gt; None</p></li>
+</ol>
+<p>Sets the log level for the momentum library.</p>
+<p>All log messages with a level less verbose than the specified level will be suppressed.
+For example, setting the level to <a class="reference internal" href="#pymomentum.geometry.LogLevel.Warning" title="pymomentum.geometry.LogLevel.Warning"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LogLevel.Warning</span></code></a> will suppress <a class="reference internal" href="#pymomentum.geometry.LogLevel.Info" title="pymomentum.geometry.LogLevel.Info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LogLevel.Info</span></code></a>,
+<a class="reference internal" href="#pymomentum.geometry.LogLevel.Debug" title="pymomentum.geometry.LogLevel.Debug"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LogLevel.Debug</span></code></a>, and <a class="reference internal" href="#pymomentum.geometry.LogLevel.Trace" title="pymomentum.geometry.LogLevel.Trace"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LogLevel.Trace</span></code></a> messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>level</strong> – The desired log level.</p>
+</dd>
+</dl>
+<ol class="arabic simple" start="2">
+<li><p>set_log_level(level: str) -&gt; None</p></li>
+</ol>
+<p>Sets the log level for the momentum library using a string name.</p>
+<p>Valid values: “Disabled”, “Error”, “Warning”, “Info”, “Debug”, “Trace” (case-insensitive).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>level</strong> – The desired log level as a string.</p>
 </dd>
 </dl>
 </dd></dl>
