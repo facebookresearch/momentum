@@ -100,7 +100,7 @@ bool BoundingBox<ScalarType>::intersects(
     tmax = tzmax;
   }
 
-  if (tmin < 0.0 && tmax < 0.0) {
+  if (tmin < ScalarType{0} && tmax < ScalarType{0}) {
     return false;
   }
   return true;
@@ -114,7 +114,7 @@ bool BoundingBox<ScalarType>::intersectsBranchless(
   const Eigen::Vector3<ScalarType>& bmin = aabb.min();
   const Eigen::Vector3<ScalarType>& bmax = aabb.max();
 
-  ScalarType tmin = 0.0;
+  ScalarType tmin = ScalarType{0};
   ScalarType tmax = std::numeric_limits<ScalarType>::max();
   for (int32_t i = 0; i < 3; ++i) {
     const ScalarType t1 = (bmin[i] - origin[i]) * dirInv[i];
