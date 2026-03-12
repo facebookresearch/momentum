@@ -10,10 +10,12 @@
 #include <momentum/character/character.h>
 #include <momentum/character_solver/distance_error_function.h>
 #include <momentum/character_solver/joint_to_joint_distance_error_function.h>
+#include <momentum/character_solver/joint_to_joint_orientation_error_function.h>
 #include <momentum/character_solver/joint_to_joint_position_error_function.h>
 #include <momentum/character_solver/normal_error_function.h>
 #include <momentum/character_solver/plane_error_function.h>
 #include <momentum/character_solver/vertex_vertex_distance_error_function.h>
+#include <pymomentum/python_utility/eigen_quaternion.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
 #include <fmt/format.h>
@@ -1059,6 +1061,186 @@ source joints respectively.)")
           "Returns the number of constraints.");
 }
 
+void addJointToJointOrientationErrorFunction(py::module_& m) {
+  py::class_<mm::JointToJointOrientationDataT<float>>(m, "JointToJointOrientationData")
+      .def(
+          "__repr__",
+          [](const mm::JointToJointOrientationDataT<float>& self) {
+            return fmt::format(
+                "JointToJointOrientationData(source_joint={}, reference_joint={}, target=[{:.3f}, {:.3f}, {:.3f}, {:.3f}], weight={})",
+                self.sourceJoint,
+                self.referenceJoint,
+                self.target.x(),
+                self.target.y(),
+                self.target.z(),
+                self.target.w(),
+                self.weight);
+          })
+      .def_readonly(
+          "source_joint",
+          &mm::JointToJointOrientationDataT<float>::sourceJoint,
+          "The index of the source joint.")
+      .def_readonly(
+          "reference_joint",
+          &mm::JointToJointOrientationDataT<float>::referenceJoint,
+          "The index of the reference joint.")
+      .def_readonly(
+          "target",
+          &mm::JointToJointOrientationDataT<float>::target,
+          "The target relative orientation as a quaternion ``[x, y, z, w]``.")
+      .def_readonly(
+          "weight",
+          &mm::JointToJointOrientationDataT<float>::weight,
+          "The weight of the constraint.")
+      .def_readonly(
+          "name", &mm::JointToJointOrientationDataT<float>::name, "The name of the constraint.");
+
+  py::class_<
+      mm::JointToJointOrientationErrorFunctionT<float>,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::JointToJointOrientationErrorFunctionT<float>>>(
+      m,
+      "JointToJointOrientationErrorFunction",
+      R"(Error function that penalizes deviation from a target orientation expressed
+relative to a reference joint's coordinate frame.
+
+This is useful for constraints where you want to control the relative orientation
+between two body parts, such as keeping a hand at a specific orientation relative
+to the body, or maintaining a specific rotational relationship between two joints.
+
+The error is computed as the Frobenius norm of the difference between the actual
+and target relative rotation matrices:
+
+.. math::
+
+    \text{error} = \|R_{ref}^T R_{src} - R_{target}\|_F^2
+
+where :math:`R_{ref}` and :math:`R_{src}` are the global rotations of the
+reference and source joints respectively, and :math:`R_{target}` is the target
+relative rotation.)")
+      .def(
+          "__repr__",
+          [](const mm::JointToJointOrientationErrorFunctionT<float>& self) {
+            return fmt::format(
+                "JointToJointOrientationErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.numConstraints());
+          })
+      .def(
+          py::init<>(
+              [](const mm::Character& character, float weight)
+                  -> std::shared_ptr<mm::JointToJointOrientationErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
+                auto result =
+                    std::make_shared<mm::JointToJointOrientationErrorFunctionT<float>>(character);
+                result->setWeight(weight);
+                return result;
+              }),
+          R"(Initialize a JointToJointOrientationErrorFunction.
+
+:param character: The character to use.
+:param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::JointToJointOrientationErrorFunctionT<float>& self,
+             int sourceJoint,
+             int referenceJoint,
+             const Eigen::Quaternionf& target,
+             float weight,
+             const std::string& name) {
+            validateJointIndex(sourceJoint, "source_joint", self.getSkeleton());
+            validateJointIndex(referenceJoint, "reference_joint", self.getSkeleton());
+            validateWeight(weight, "weight");
+            self.addConstraint(sourceJoint, referenceJoint, target, weight, name);
+          },
+          R"(Adds a joint-to-joint orientation constraint to the error function.
+
+:param source_joint: The index of the source joint (the joint whose orientation we want to constrain).
+:param reference_joint: The index of the reference joint (the joint whose coordinate frame we use).
+:param target: The target relative orientation as a quaternion ``[x, y, z, w]``.
+:param weight: The weight of the constraint.
+:param name: The name of the constraint (for debugging).)",
+          py::arg("source_joint"),
+          py::arg("reference_joint"),
+          py::arg("target"),
+          py::arg("weight") = 1.0f,
+          py::arg("name") = std::string{})
+      .def(
+          "add_constraints",
+          [](mm::JointToJointOrientationErrorFunctionT<float>& self,
+             const py::array_t<int>& sourceJoint,
+             const py::array_t<int>& referenceJoint,
+             const py::array_t<float>& target,
+             const std::optional<py::array_t<float>>& weight,
+             const std::optional<std::vector<std::string>>& name) {
+            ArrayShapeValidator validator;
+            const int nConsIdx = -1;
+            validator.validate(sourceJoint, "source_joint", {nConsIdx}, {"n_cons"});
+            validateJointIndex(sourceJoint, "source_joint", self.getSkeleton());
+            validator.validate(referenceJoint, "reference_joint", {nConsIdx}, {"n_cons"});
+            validateJointIndex(referenceJoint, "reference_joint", self.getSkeleton());
+            validator.validate(target, "target", {nConsIdx, 4}, {"n_cons", "xyzw"});
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+            validateWeights(weight, "weight");
+
+            if (name.has_value() && name->size() != sourceJoint.shape(0)) {
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      sourceJoint.shape(0),
+                      name->size()));
+            }
+
+            auto sourceJointAcc = sourceJoint.unchecked<1>();
+            auto referenceJointAcc = referenceJoint.unchecked<1>();
+            auto targetAcc = target.unchecked<2>();
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
+
+            py::gil_scoped_release release;
+
+            for (py::ssize_t i = 0; i < sourceJoint.shape(0); ++i) {
+              self.addConstraint(
+                  sourceJointAcc(i),
+                  referenceJointAcc(i),
+                  Eigen::Quaternionf(
+                      targetAcc(i, 3), targetAcc(i, 0), targetAcc(i, 1), targetAcc(i, 2)),
+                  weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                  name.has_value() ? name->at(i) : std::string{});
+            }
+          },
+          R"(Adds multiple joint-to-joint orientation constraints to the error function.
+
+:param source_joint: A numpy array of indices for the source joints.
+:param reference_joint: A numpy array of indices for the reference joints.
+:param target: A numpy array of shape ``(n, 4)`` for target orientations as quaternions ``[x, y, z, w]``.
+:param weight: A numpy array of weights for the constraints.
+:param name: An optional list of names for the constraints (for debugging).)",
+          py::arg("source_joint"),
+          py::arg("reference_joint"),
+          py::arg("target"),
+          py::arg("weight") = std::nullopt,
+          py::arg("name") = std::nullopt)
+      .def(
+          "clear_constraints",
+          &mm::JointToJointOrientationErrorFunctionT<float>::clearConstraints,
+          "Clears all joint-to-joint orientation constraints from the error function.")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::JointToJointOrientationErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of joint-to-joint orientation constraints.")
+      .def(
+          "num_constraints",
+          &mm::JointToJointOrientationErrorFunctionT<float>::numConstraints,
+          "Returns the number of constraints.");
+}
+
 } // namespace
 
 void addDistanceErrorFunctions(py::module_& m) {
@@ -1068,6 +1250,7 @@ void addDistanceErrorFunctions(py::module_& m) {
   addVertexVertexDistanceErrorFunction(m);
   addJointToJointDistanceErrorFunction(m);
   addJointToJointPositionErrorFunction(m);
+  addJointToJointOrientationErrorFunction(m);
 }
 
 } // namespace pymomentum
