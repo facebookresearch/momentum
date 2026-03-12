@@ -108,6 +108,25 @@ using FixedAxisDatad_const_u = ::std::unique_ptr<const FixedAxisDatad>;
 using FixedAxisDatad_const_w = ::std::weak_ptr<const FixedAxisDatad>;
 
 template <typename T>
+struct JointToJointOrientationDataT;
+using JointToJointOrientationData = JointToJointOrientationDataT<float>;
+using JointToJointOrientationDatad = JointToJointOrientationDataT<double>;
+
+using JointToJointOrientationData_p = ::std::shared_ptr<JointToJointOrientationData>;
+using JointToJointOrientationData_u = ::std::unique_ptr<JointToJointOrientationData>;
+using JointToJointOrientationData_w = ::std::weak_ptr<JointToJointOrientationData>;
+using JointToJointOrientationData_const_p = ::std::shared_ptr<const JointToJointOrientationData>;
+using JointToJointOrientationData_const_u = ::std::unique_ptr<const JointToJointOrientationData>;
+using JointToJointOrientationData_const_w = ::std::weak_ptr<const JointToJointOrientationData>;
+
+using JointToJointOrientationDatad_p = ::std::shared_ptr<JointToJointOrientationDatad>;
+using JointToJointOrientationDatad_u = ::std::unique_ptr<JointToJointOrientationDatad>;
+using JointToJointOrientationDatad_w = ::std::weak_ptr<JointToJointOrientationDatad>;
+using JointToJointOrientationDatad_const_p = ::std::shared_ptr<const JointToJointOrientationDatad>;
+using JointToJointOrientationDatad_const_u = ::std::unique_ptr<const JointToJointOrientationDatad>;
+using JointToJointOrientationDatad_const_w = ::std::weak_ptr<const JointToJointOrientationDatad>;
+
+template <typename T>
 struct NormalDataT;
 using NormalData = NormalDataT<float>;
 using NormalDatad = NormalDataT<double>;
@@ -631,6 +650,37 @@ using JointToJointPositionErrorFunctiond_const_u =
     ::std::unique_ptr<const JointToJointPositionErrorFunctiond>;
 using JointToJointPositionErrorFunctiond_const_w =
     ::std::weak_ptr<const JointToJointPositionErrorFunctiond>;
+
+template <typename T>
+class JointToJointOrientationErrorFunctionT;
+using JointToJointOrientationErrorFunction = JointToJointOrientationErrorFunctionT<float>;
+using JointToJointOrientationErrorFunctiond = JointToJointOrientationErrorFunctionT<double>;
+
+using JointToJointOrientationErrorFunction_p =
+    ::std::shared_ptr<JointToJointOrientationErrorFunction>;
+using JointToJointOrientationErrorFunction_u =
+    ::std::unique_ptr<JointToJointOrientationErrorFunction>;
+using JointToJointOrientationErrorFunction_w =
+    ::std::weak_ptr<JointToJointOrientationErrorFunction>;
+using JointToJointOrientationErrorFunction_const_p =
+    ::std::shared_ptr<const JointToJointOrientationErrorFunction>;
+using JointToJointOrientationErrorFunction_const_u =
+    ::std::unique_ptr<const JointToJointOrientationErrorFunction>;
+using JointToJointOrientationErrorFunction_const_w =
+    ::std::weak_ptr<const JointToJointOrientationErrorFunction>;
+
+using JointToJointOrientationErrorFunctiond_p =
+    ::std::shared_ptr<JointToJointOrientationErrorFunctiond>;
+using JointToJointOrientationErrorFunctiond_u =
+    ::std::unique_ptr<JointToJointOrientationErrorFunctiond>;
+using JointToJointOrientationErrorFunctiond_w =
+    ::std::weak_ptr<JointToJointOrientationErrorFunctiond>;
+using JointToJointOrientationErrorFunctiond_const_p =
+    ::std::shared_ptr<const JointToJointOrientationErrorFunctiond>;
+using JointToJointOrientationErrorFunctiond_const_u =
+    ::std::unique_ptr<const JointToJointOrientationErrorFunctiond>;
+using JointToJointOrientationErrorFunctiond_const_w =
+    ::std::weak_ptr<const JointToJointOrientationErrorFunctiond>;
 
 template <typename T>
 class LimitErrorFunctionT;

@@ -2429,6 +2429,134 @@ class TestSolver(unittest.TestCase):
         self.assertIn("source_joint=3", constraint_repr)
         self.assertIn("reference_joint=0", constraint_repr)
 
+    def test_joint_to_joint_orientation_constraint(self) -> None:
+        """Test JointToJointOrientationErrorFunction to ensure a source joint matches a target orientation in reference frame."""
+
+        # Create a test character
+        character = pym_geometry.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        # Ensure repeatability in the rng:
+        torch.manual_seed(42)
+
+        # Choose two joints to constrain
+        source_joint = character.skeleton.size - 1  # Last joint
+        reference_joint = 0  # Root joint
+
+        # Target orientation: identity quaternion (aligned with reference)
+        target_quat = np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32)
+        weight = 1.0
+
+        # Create JointToJointOrientationErrorFunction
+        joint_orientation_error = pym_solver2.JointToJointOrientationErrorFunction(
+            character
+        )
+
+        # Test basic properties
+        self.assertEqual(joint_orientation_error.num_constraints(), 0)
+        self.assertEqual(len(joint_orientation_error.constraints), 0)
+
+        # Add a single constraint
+        joint_orientation_error.add_constraint(
+            source_joint=source_joint,
+            reference_joint=reference_joint,
+            target=target_quat,
+            weight=weight,
+        )
+
+        # Verify constraint was added
+        self.assertEqual(joint_orientation_error.num_constraints(), 1)
+        self.assertEqual(len(joint_orientation_error.constraints), 1)
+
+        constraint = joint_orientation_error.constraints[0]
+        self.assertEqual(constraint.source_joint, source_joint)
+        self.assertEqual(constraint.reference_joint, reference_joint)
+        self.assertAlmostEqual(constraint.weight, weight)
+
+        # Create solver function with the joint orientation error
+        solver_function = pym_solver2.SkeletonSolverFunction(
+            character, [joint_orientation_error]
+        )
+
+        # Set solver options
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 100
+        solver_options.regularization = 1e-5
+
+        # Create and run the solver with non-zero initial params
+        model_params_init = np.zeros(n_params, dtype=np.float32)
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+        model_params_final = solver.solve(model_params_init)
+
+        # Convert final model parameters to skeleton state
+        skel_state_final = torch.from_numpy(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final
+            )
+        )
+
+        # Get the orientations of source and reference joints
+        src_quat = skel_state_final[source_joint, 3:7]
+        ref_quat = skel_state_final[reference_joint, 3:7]
+
+        # Compute relative orientation: ref_inv * src
+        ref_quat_inv = pym_quaternion.inverse(ref_quat)
+        relative_quat = pym_quaternion.multiply(ref_quat_inv, src_quat)
+
+        # The relative orientation should be close to the target
+        # Account for quaternion double cover (q and -q represent same rotation)
+        target_tensor = torch.from_numpy(target_quat)
+        dot = torch.abs(torch.dot(relative_quat, target_tensor))
+        self.assertTrue(
+            dot > 0.98,
+            msg=f"Relative orientation {relative_quat.numpy()} does not match target {target_quat}, dot={dot.item():.4f}",
+        )
+
+        # Test multiple constraints using add_constraints
+        joint_orientation_error.clear_constraints()
+        self.assertEqual(joint_orientation_error.num_constraints(), 0)
+
+        # Add multiple constraints
+        source_joints = np.array([3, 2], dtype=np.int32)
+        reference_joints = np.array([0, 1], dtype=np.int32)
+        target_quats = np.array(
+            [[0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0, 1.0]], dtype=np.float32
+        )
+        weights = np.array([1.0, 2.0], dtype=np.float32)
+
+        joint_orientation_error.add_constraints(
+            source_joint=source_joints,
+            reference_joint=reference_joints,
+            target=target_quats,
+            weight=weights,
+        )
+
+        # Verify multiple constraints were added
+        self.assertEqual(joint_orientation_error.num_constraints(), 2)
+        constraints = joint_orientation_error.constraints
+
+        # Check first constraint
+        self.assertEqual(constraints[0].source_joint, 3)
+        self.assertEqual(constraints[0].reference_joint, 0)
+        self.assertAlmostEqual(constraints[0].weight, 1.0)
+
+        # Check second constraint
+        self.assertEqual(constraints[1].source_joint, 2)
+        self.assertEqual(constraints[1].reference_joint, 1)
+        self.assertAlmostEqual(constraints[1].weight, 2.0)
+
+        # Test string representation
+        repr_str = repr(joint_orientation_error)
+        self.assertIn("JointToJointOrientationErrorFunction", repr_str)
+        self.assertIn("num_constraints=2", repr_str)
+
+        # Test constraint string representation
+        constraint_repr = repr(constraints[0])
+        self.assertIn("JointToJointOrientationData", constraint_repr)
+        self.assertIn("source_joint=3", constraint_repr)
+        self.assertIn("reference_joint=0", constraint_repr)
+
     def test_height_error_solver_convergence(self) -> None:
         """Test HeightErrorFunction can solve for the correct height using pose+scale parameters."""
 
