@@ -1,0 +1,133 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#pragma once
+
+#include <momentum/character/character.h>
+#include <momentum/character/types.h>
+#include <momentum/math/types.h>
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
+#include <array>
+#include <string>
+#include <vector>
+
+namespace momentum {
+
+/// Single glove sensor observation for one finger joint in one frame.
+///
+/// Represents a measurement from a data glove sensor, providing position
+/// and orientation of a finger joint in the glove's local coordinate frame.
+struct GloveSensorObservation {
+  /// Skeleton joint name (e.g. "b_l_thumb0").
+  std::string jointName;
+
+  /// Position in glove-local frame.
+  Vector3f position = Vector3f::Zero();
+
+  /// Orientation in glove-local frame.
+  Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
+
+  /// Whether this observation is valid (false if sensor data is missing/occluded).
+  bool valid = true;
+};
+
+/// Per-frame collection of glove sensor observations.
+using GloveFrameData = std::vector<GloveSensorObservation>;
+
+/// Configuration for glove constraints.
+///
+/// Controls how glove data is integrated into the solver, including
+/// constraint weights and which wrist joints to attach glove bones to.
+struct GloveConfig {
+  /// Weight for position constraints between glove and finger joints.
+  float positionWeight = 1e-4f;
+
+  /// Weight for orientation constraints between glove and finger joints.
+  float orientationWeight = 1e-4f;
+
+  /// Names of the left and right wrist joints in the skeleton.
+  std::array<std::string, 2> wristJointNames = {"l_wrist", "r_wrist"};
+};
+
+/// Calibrated glove-to-wrist offset for one hand.
+///
+/// Stores the solved translation and rotation offset between the glove's
+/// coordinate frame and the wrist joint's coordinate frame.
+struct GloveOffset {
+  /// Translation offset from wrist to glove origin.
+  Vector3f translation = Vector3f::Zero();
+
+  /// Rotation offset as Euler angles (X, Y, Z) in radians.
+  Vector3f rotationEulerXYZ = Vector3f::Zero();
+};
+
+/// Add glove joints to the skeleton with given offsets but no model parameters.
+///
+/// For each wrist joint specified in the config, adds a child joint with the
+/// given translationOffset and preRotation (defaulting to zero/identity).
+/// Does NOT add model parameters or register a parameter set.
+///
+/// @param[in] character Source character to extend (taken by value for move semantics).
+/// @param[in] cfg Glove configuration specifying wrist joint names.
+/// @param[in] offsets Per-hand translation and rotation offsets to bake into the joints.
+/// @param[in] prefix Name prefix for the added glove joints.
+/// @return The modified character with glove bones added to the skeleton.
+Character addGloveBones(
+    Character character,
+    const GloveConfig& cfg,
+    const std::array<GloveOffset, 2>& offsets = {},
+    const std::string& prefix = "glove_");
+
+/// Add 6-DOF model parameters for existing glove bones.
+///
+/// Takes a character that already has glove bones (from addGloveBones()) and
+/// adds TX/TY/TZ/RX/RY/RZ model parameters for each glove bone. Registers
+/// a "gloves" parameter set containing all glove DOFs.
+///
+/// @param[in] character Character with glove bones already in the skeleton (taken by value for move
+/// semantics).
+/// @param[in] cfg Glove configuration specifying wrist joint names.
+/// @param[in] prefix Name prefix used when adding glove joints.
+/// @return The modified character with glove model parameters added.
+Character addGloveCalibrationParameters(
+    Character character,
+    const GloveConfig& cfg,
+    const std::string& prefix = "glove_");
+
+/// Add glove bones with 6-DOF model parameters (convenience wrapper).
+///
+/// Calls addGloveBones() then addGloveCalibrationParameters(). Equivalent to
+/// the original createGloveCharacter() behavior.
+///
+/// @param[in] src Source character to extend.
+/// @param[in] cfg Glove configuration specifying wrist joint names.
+/// @param[in] prefix Name prefix for the added glove joints.
+/// @return A new character with glove bones and model parameters added.
+Character createGloveCharacter(
+    const Character& src,
+    const GloveConfig& cfg,
+    const std::string& prefix = "glove_");
+
+/// Extract calibrated glove offsets from solved parameters.
+///
+/// Reads the translation and rotation DOFs from the glove bones in a
+/// character that was created by createGloveCharacter(), returning the
+/// solved offsets for each hand.
+///
+/// @param[in] gloveChar Character with glove bones (from createGloveCharacter()).
+/// @param[in] params Solved character parameters containing glove offsets.
+/// @param[in] cfg Glove configuration used when creating the character.
+/// @return Array of two GloveOffset values, one per hand (left=0, right=1).
+std::array<GloveOffset, 2> extractGloveOffsetsFromCharacter(
+    const Character& gloveChar,
+    const CharacterParameters& params,
+    const GloveConfig& cfg);
+
+} // namespace momentum
