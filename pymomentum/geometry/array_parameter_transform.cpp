@@ -15,6 +15,7 @@
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/joint.h>
 #include <momentum/character/parameter_transform.h>
+#include <momentum/common/log.h>
 
 #include <dispenso/parallel_for.h>
 #include <fmt/format.h>
@@ -689,12 +690,14 @@ py::array mapModelParametersNamesArray(
       }
     }
     if (!missingParams.empty()) {
-      // Convert to Python list for printing
-      py::list pyMissingParams;
-      for (const auto& name : missingParams) {
-        pyMissingParams.append(name);
+      std::string missingParamsList;
+      for (size_t i = 0; i < missingParams.size(); ++i) {
+        if (i > 0) {
+          missingParamsList += ", ";
+        }
+        missingParamsList += missingParams[i];
       }
-      py::print("WARNING: missing parameters found during map_model_parameters: ", pyMissingParams);
+      MT_LOGW("Missing parameters found during map_model_parameters: [{}]", missingParamsList);
     }
   }
 

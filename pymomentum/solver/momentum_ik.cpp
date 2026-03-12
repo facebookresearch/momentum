@@ -11,6 +11,7 @@
 
 #include "momentum/character/types.h"
 #include "momentum/character_solver/transform_pose.h"
+#include "momentum/common/log.h"
 #include "momentum/math/types.h"
 #include "pymomentum/python_utility/python_utility.h"
 #include "pymomentum/tensor_momentum/tensor_momentum_utility.h"
@@ -506,8 +507,7 @@ at::Tensor transformPoseImp(
   }
 
   if (hasScale) {
-    py::print(
-        "Warning: scaling detected in transform passed to transform pose but will have no effect.");
+    MT_LOGW("Scaling detected in transform passed to transform pose but will have no effect.");
   }
 
   const std::vector<momentum::ModelParametersT<T>> resultVec =

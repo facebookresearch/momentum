@@ -16,6 +16,7 @@
 #include "pymomentum/geometry/gltf_builder_pybind.h"
 #include "pymomentum/geometry/limit_pybind.h"
 #include "pymomentum/geometry/locators_pybind.h"
+#include "pymomentum/geometry/logging_pybind.h"
 #include "pymomentum/geometry/mesh_pybind.h"
 #include "pymomentum/geometry/momentum_geometry.h"
 #include "pymomentum/geometry/momentum_io.h"
@@ -1442,4 +1443,7 @@ included or excluded whole.
 
   // Register GltfBuilder bindings
   registerGltfBuilderBindings(m);
+
+  // Register logging bindings
+  registerLoggingBindings(m);
 }

@@ -20,6 +20,7 @@
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/skeleton_solver_function.h>
 #include <momentum/character_solver/trust_region_qr.h>
+#include <momentum/common/log.h>
 #include <momentum/diff_ik/fully_differentiable_body_ik.h>
 #include <momentum/solver/gauss_newton_solver.h>
 #include <momentum/solver/subset_gauss_newton_solver.h>
@@ -317,16 +318,16 @@ std::tuple<at::Tensor, torch::autograd::variable_list> d_solveTensorIKProblem(
   const T maxValue = *std::max_element(std::begin(gradient_rmse), std::end(gradient_rmse));
   if (nExceeded > 0) {
     if (nGradientPrintouts < MAX_GRADIENT_PRINTOUTS) {
-      // I'd like to use py::print here, but for some reason Pytorch
-      // insta-crashes if I do that, I guess because we're inside the autograd
-      // evaluation.
-      std::cerr << "WARNING: in backward pass of solve_ik(), " << nExceeded << "/" << nBatch
-                << " gradients exceeded the threshold " << gradientRMSEThreshold
-                << " (max: " << maxValue << ").\n";
+      MT_LOGW(
+          "In backward pass of solve_ik(), {}/{} gradients exceeded the threshold {} (max: {}).",
+          nExceeded,
+          nBatch,
+          gradientRMSEThreshold,
+          maxValue);
       ++nGradientPrintouts;
       if (nGradientPrintouts >= MAX_GRADIENT_PRINTOUTS) {
-        std::cerr
-            << "Suppressing further warnings about gradient thresholds.  Use get_gradient_statistics() for more details.\n";
+        MT_LOGW(
+            "Suppressing further warnings about gradient thresholds.  Use get_gradient_statistics() for more details.");
       }
     }
   }
