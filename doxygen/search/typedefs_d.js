@@ -57,5 +57,19 @@ var searchData=
   ['orientationerrorfunctiond_5fp_54',['OrientationErrorFunctiond_p',['../namespacemomentum.html#a9784c34161fbd1a7e02bb9d0bd768beb',1,'momentum']]],
   ['orientationerrorfunctiond_5fu_55',['OrientationErrorFunctiond_u',['../namespacemomentum.html#a2c89bb208a200689695527de86eac10d',1,'momentum']]],
   ['orientationerrorfunctiond_5fw_56',['OrientationErrorFunctiond_w',['../namespacemomentum.html#a00e688673cbf2ab4c1d1b7aae44c49e9',1,'momentum']]],
-  ['other_57',['other',['../structmomentum_1_1AlignedAllocator_1_1rebind.html#a9d26668aa11881c6bf5825206ecf7bdd',1,'momentum::AlignedAllocator::rebind']]]
+  ['orientationrotdifferrorfunction_57',['OrientationRotDiffErrorFunction',['../namespacemomentum.html#abf00d9f2d92a614014d58f6c5c0ae57c',1,'momentum']]],
+  ['orientationrotdifferrorfunction_5fconst_5fp_58',['OrientationRotDiffErrorFunction_const_p',['../namespacemomentum.html#ac803ad99e40515c930e57325cb3d98a2',1,'momentum']]],
+  ['orientationrotdifferrorfunction_5fconst_5fu_59',['OrientationRotDiffErrorFunction_const_u',['../namespacemomentum.html#a3847598b988a0fa73c85f8756579ea35',1,'momentum']]],
+  ['orientationrotdifferrorfunction_5fconst_5fw_60',['OrientationRotDiffErrorFunction_const_w',['../namespacemomentum.html#a127d71f28e77c9317b48e7d7ea924fd0',1,'momentum']]],
+  ['orientationrotdifferrorfunction_5fp_61',['OrientationRotDiffErrorFunction_p',['../namespacemomentum.html#afa9f6832a664c13792ee6a305bc0f9af',1,'momentum']]],
+  ['orientationrotdifferrorfunction_5fu_62',['OrientationRotDiffErrorFunction_u',['../namespacemomentum.html#a023b2a85ba2dab0fee4681b0109c63b1',1,'momentum']]],
+  ['orientationrotdifferrorfunction_5fw_63',['OrientationRotDiffErrorFunction_w',['../namespacemomentum.html#a2f015b33c0cc289c57eccb52ef2ef1ec',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_64',['OrientationRotDiffErrorFunctiond',['../namespacemomentum.html#abd356a19ece0a041a064367cd9c96b22',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_5fconst_5fp_65',['OrientationRotDiffErrorFunctiond_const_p',['../namespacemomentum.html#a50145826ea8727e7952b20cbacc14aaf',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_5fconst_5fu_66',['OrientationRotDiffErrorFunctiond_const_u',['../namespacemomentum.html#a8ec573c82aff50eeb4dfa77ed2ee9ef9',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_5fconst_5fw_67',['OrientationRotDiffErrorFunctiond_const_w',['../namespacemomentum.html#a7068ba57322c72224910298e71f8ece4',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_5fp_68',['OrientationRotDiffErrorFunctiond_p',['../namespacemomentum.html#a39878b28ecf1b71c3099293d1d1f7138',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_5fu_69',['OrientationRotDiffErrorFunctiond_u',['../namespacemomentum.html#a8b699ed5c486cf3e3de29bbce72b6bd3',1,'momentum']]],
+  ['orientationrotdifferrorfunctiond_5fw_70',['OrientationRotDiffErrorFunctiond_w',['../namespacemomentum.html#a49b72010614e2a56906546bd8b12a4c7',1,'momentum']]],
+  ['other_71',['other',['../structmomentum_1_1AlignedAllocator_1_1rebind.html#a9d26668aa11881c6bf5825206ecf7bdd',1,'momentum::AlignedAllocator::rebind']]]
 ];

@@ -617,23 +617,23 @@ $(document).ready(function(){initNavTree('sequence__solver__function_8cpp_source
 <div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>    <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>  }</div>
 <div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span> </div>
-<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>  <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockSize</a> = 0;</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>  <span class="keywordtype">size_t</span> <a class="code hl_variable" href="state__sequence__error__function_8cpp.html#aa219775c20ca1c090756a777840c0c58">blockSize</a> = 0;</div>
 <div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span> </div>
 <div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span>  <span class="comment">// Add per-frame error functions for this frame</span></div>
 <div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a> : perFrameErrorFunctions_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockIndex</a>]) {</div>
 <div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getWeight() &gt; 0.0f) {</div>
-<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockSize</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobianSize();</div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>      <a class="code hl_variable" href="state__sequence__error__function_8cpp.html#aa219775c20ca1c090756a777840c0c58">blockSize</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobianSize();</div>
 <div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span>    }</div>
 <div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span>  }</div>
 <div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span> </div>
 <div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span>  <span class="comment">// Add sequence error functions starting at this frame</span></div>
 <div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a> : sequenceErrorFunctions_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockIndex</a>]) {</div>
 <div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getWeight() &gt; 0.0f) {</div>
-<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockSize</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobianSize();</div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>      <a class="code hl_variable" href="state__sequence__error__function_8cpp.html#aa219775c20ca1c090756a777840c0c58">blockSize</a> += <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errf</a>-&gt;getJacobianSize();</div>
 <div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>    }</div>
 <div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span>  }</div>
 <div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span> </div>
-<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blockSize</a>;</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="state__sequence__error__function_8cpp.html#aa219775c20ca1c090756a777840c0c58">blockSize</a>;</div>
 <div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>}</div>
 </div>
 <div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span> </div>
@@ -875,6 +875,7 @@ $(document).ready(function(){initNavTree('sequence__solver__function_8cpp_source
 <div class="ttc" id="askeleton_8h_html"><div class="ttname"><a href="skeleton_8h.html">skeleton.h</a></div></div>
 <div class="ttc" id="askeleton__error__function_8h_html"><div class="ttname"><a href="skeleton__error__function_8h.html">skeleton_error_function.h</a></div></div>
 <div class="ttc" id="askeleton__state_8h_html"><div class="ttname"><a href="skeleton__state_8h.html">skeleton_state.h</a></div></div>
+<div class="ttc" id="astate__sequence__error__function_8cpp_html_aa219775c20ca1c090756a777840c0c58"><div class="ttname"><a href="state__sequence__error__function_8cpp.html#aa219775c20ca1c090756a777840c0c58">blockSize</a></div><div class="ttdeci">size_t blockSize</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00348">state_sequence_error_function.cpp:348</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1EigenStrongType_html_a6ed977a6d5b5b82755258b548982b529"><div class="ttname"><a href="structmomentum_1_1EigenStrongType.html#a6ed977a6d5b5b82755258b548982b529">momentum::EigenStrongType::size</a></div><div class="ttdeci">EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE auto size() const</div><div class="ttdef"><b>Definition</b> <a href="character_2types_8h_source.html#l00091">types.h:91</a></div></div>
 <div class="ttc" id="astructmomentum_1_1EigenStrongType_html_aad2cbbbf50d3d7c8201e6deb8a932f20"><div class="ttname"><a href="structmomentum_1_1EigenStrongType.html#aad2cbbbf50d3d7c8201e6deb8a932f20">momentum::EigenStrongType&lt; ModelParametersT, ::Eigen::VectorX&lt; T &gt; &gt;::Zero</a></div><div class="ttdeci">static EIGEN_DEVICE_FUNC ModelParametersT&lt; Scalar &gt; Zero(::Eigen::Index size)</div><div class="ttdef"><b>Definition</b> <a href="character_2types_8h_source.html#l00096">types.h:96</a></div></div>
@@ -887,7 +888,7 @@ $(document).ready(function(){initNavTree('sequence__solver__function_8cpp_source
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="sequence__solver__function_8cpp.html">sequence_solver_function.cpp</a></li>
-    <li class="footer">Generated on Wed Mar 11 2026 00:11:12 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 12 2026 10:38:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

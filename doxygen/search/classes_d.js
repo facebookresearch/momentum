@@ -6,5 +6,6 @@ var searchData=
   ['orientationconstraintstatet_3',['OrientationConstraintStateT',['../structmomentum_1_1OrientationConstraintStateT.html',1,'momentum']]],
   ['orientationconstraintt_4',['OrientationConstraintT',['../structmomentum_1_1OrientationConstraintT.html',1,'momentum']]],
   ['orientationdatat_5',['OrientationDataT',['../structmomentum_1_1OrientationDataT.html',1,'momentum']]],
-  ['orientationerrorfunctiont_6',['OrientationErrorFunctionT',['../classmomentum_1_1OrientationErrorFunctionT.html',1,'momentum']]]
+  ['orientationerrorfunctiont_6',['OrientationErrorFunctionT',['../classmomentum_1_1OrientationErrorFunctionT.html',1,'momentum']]],
+  ['orientationrotdifferrorfunctiont_7',['OrientationRotDiffErrorFunctionT',['../classmomentum_1_1OrientationRotDiffErrorFunctionT.html',1,'momentum']]]
 ];

@@ -110,6 +110,7 @@ var annotated_dup =
       [ "OrientationConstraintT", "structmomentum_1_1OrientationConstraintT.html", "structmomentum_1_1OrientationConstraintT" ],
       [ "OrientationDataT", "structmomentum_1_1OrientationDataT.html", "structmomentum_1_1OrientationDataT" ],
       [ "OrientationErrorFunctionT", "classmomentum_1_1OrientationErrorFunctionT.html", "classmomentum_1_1OrientationErrorFunctionT" ],
+      [ "OrientationRotDiffErrorFunctionT", "classmomentum_1_1OrientationRotDiffErrorFunctionT.html", "classmomentum_1_1OrientationRotDiffErrorFunctionT" ],
       [ "ParameterLimit", "structmomentum_1_1ParameterLimit.html", "structmomentum_1_1ParameterLimit" ],
       [ "ParameterTransformT", "structmomentum_1_1ParameterTransformT.html", "structmomentum_1_1ParameterTransformT" ],
       [ "PerFrameStateT", "structmomentum_1_1PerFrameStateT.html", "structmomentum_1_1PerFrameStateT" ],

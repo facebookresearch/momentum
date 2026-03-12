@@ -161,7 +161,8 @@ var hierarchy =
         [ "momentum::NormalErrorFunctionT< T >", "classmomentum_1_1NormalErrorFunctionT.html", null ]
       ] ],
       [ "momentum::JointErrorFunctionT< T, OrientationDataT< T >, 9, 3, 0 >", "classmomentum_1_1JointErrorFunctionT.html", [
-        [ "momentum::OrientationErrorFunctionT< T >", "classmomentum_1_1OrientationErrorFunctionT.html", null ]
+        [ "momentum::OrientationErrorFunctionT< T >", "classmomentum_1_1OrientationErrorFunctionT.html", null ],
+        [ "momentum::OrientationRotDiffErrorFunctionT< T >", "classmomentum_1_1OrientationRotDiffErrorFunctionT.html", null ]
       ] ],
       [ "momentum::JointErrorFunctionT< T, PlaneDataT< T >, 1 >", "classmomentum_1_1JointErrorFunctionT.html", [
         [ "momentum::PlaneErrorFunctionT< T >", "classmomentum_1_1PlaneErrorFunctionT.html", null ]

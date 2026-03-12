@@ -18,7 +18,7 @@ var dir_4bbc02503dcde960b17f3ec8b41511e6 =
     [ "sequence_solver.h", "sequence__solver_8h.html", "sequence__solver_8h" ],
     [ "sequence_solver_function.cpp", "sequence__solver__function_8cpp.html", null ],
     [ "sequence_solver_function.h", "sequence__solver__function_8h.html", "sequence__solver__function_8h" ],
-    [ "state_sequence_error_function.cpp", "state__sequence__error__function_8cpp.html", null ],
+    [ "state_sequence_error_function.cpp", "state__sequence__error__function_8cpp.html", "state__sequence__error__function_8cpp" ],
     [ "state_sequence_error_function.h", "state__sequence__error__function_8h.html", "state__sequence__error__function_8h" ],
     [ "velocity_magnitude_sequence_error_function.cpp", "velocity__magnitude__sequence__error__function_8cpp.html", null ],
     [ "velocity_magnitude_sequence_error_function.h", "velocity__magnitude__sequence__error__function_8h.html", "velocity__magnitude__sequence__error__function_8h" ],

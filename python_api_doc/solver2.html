@@ -281,6 +281,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.OrientationErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">OrientationErrorFunction.constraints</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction"><code class="docutils literal notranslate"><span class="pre">OrientationRotDiffErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">OrientationRotDiffErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">OrientationRotDiffErrorFunction.add_constraint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">OrientationRotDiffErrorFunction.add_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">OrientationRotDiffErrorFunction.clear_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">OrientationRotDiffErrorFunction.constraints</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.PlaneData"><code class="docutils literal notranslate"><span class="pre">PlaneData</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.PlaneData.__init__"><code class="docutils literal notranslate"><span class="pre">PlaneData.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.PlaneData.d"><code class="docutils literal notranslate"><span class="pre">PlaneData.d</span></code></a></li>
@@ -2347,6 +2355,100 @@ rotation matrix to a target rotation.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.solver2.OrientationErrorFunction.constraints">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.OrientationErrorFunction.constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of orientation constraints.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.OrientationRotDiffErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">OrientationRotDiffErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.OrientationRotDiffErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
+<p>A skeleton error function that minimizes the F-norm of (R_target^T * R_current - I),
+the rotation difference relative to identity. Compared to <a class="reference internal" href="#pymomentum.solver2.OrientationErrorFunction" title="pymomentum.solver2.OrientationErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrientationErrorFunction</span></code></a> which
+uses element-wise subtraction (R_current - R_target), this formulation computes the error in the
+tangent space of the rotation group, which is invariant to the choice of coordinate frame.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.OrientationRotDiffErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction" title="pymomentum.solver2.OrientationRotDiffErrorFunction"><span class="pre">pymomentum.solver2.OrientationRotDiffErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize an OrientationRotDiffErrorFunction.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param character<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The character to use.</p>
+</dd>
+<dt class="field-even">param alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>P-norm to use; 2 is Euclidean distance, 1 is L1 norm, 0 is Cauchy norm.</p>
+</dd>
+<dt class="field-odd">param c<span class="colon">:</span></dt>
+<dd class="field-odd"><p>c parameter in the generalized loss function, this is roughly equivalent to normalizing by the standard deviation in a Gaussian distribution.</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>The weight applied to the error function.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.OrientationRotDiffErrorFunction.add_constraint">
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction" title="pymomentum.solver2.OrientationRotDiffErrorFunction"><span class="pre">pymomentum.solver2.OrientationRotDiffErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.add_constraint" title="Link to this definition"></a></dt>
+<dd><p>Adds an orientation constraint to the error function.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param target<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The target rotation in global space as a quaternion (x, y, z, w).</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the parent joint.</p>
+</dd>
+<dt class="field-odd">param offset<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The rotation offset in the parent space as a quaternion (x, y, z, w).</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>The weight of the constraint.</p>
+</dd>
+<dt class="field-odd">param name<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The name of the constraint (for debugging).</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.OrientationRotDiffErrorFunction.add_constraints">
+<span class="sig-name descname"><span class="pre">add_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction" title="pymomentum.solver2.OrientationRotDiffErrorFunction"><span class="pre">pymomentum.solver2.OrientationRotDiffErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.add_constraints" title="Link to this definition"></a></dt>
+<dd><p>Adds multiple orientation constraints to the error function.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param target<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of shape (n, 4) for the (x, y, z, w) quaternion target rotations in global space.</p>
+</dd>
+<dt class="field-even">param parent<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of size n for the indices of the parent joints.</p>
+</dd>
+<dt class="field-odd">param offset<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array of shape (n, 4) for the (x, y, z, w) quaternion rotation offsets in the parent space.</p>
+</dd>
+<dt class="field-even">param weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of size n for the weights of the constraints.</p>
+</dd>
+<dt class="field-odd">param name<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An optional list of names for the constraints (for debugging).</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.OrientationRotDiffErrorFunction.clear_constraints">
+<span class="sig-name descname"><span class="pre">clear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.OrientationRotDiffErrorFunction" title="pymomentum.solver2.OrientationRotDiffErrorFunction"><span class="pre">pymomentum.solver2.OrientationRotDiffErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.clear_constraints" title="Link to this definition"></a></dt>
+<dd><p>Clears all constraints.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.OrientationRotDiffErrorFunction.constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.OrientationRotDiffErrorFunction.constraints" title="Link to this definition"></a></dt>
 <dd><p>Returns the list of orientation constraints.</p>
 </dd></dl>
 

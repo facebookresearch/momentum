@@ -133,7 +133,7 @@ $(document).ready(function(){initNavTree('skeleton__derivative_8h_source.html','
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> FuncDim&gt;</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1SkeletonDerivativeT.html#a20342b4d3b1dc9c1fdf9492f097b2cf9">accumulateJointGradient</a>(</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>      <span class="keywordtype">size_t</span> jointIndex,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>      <span class="keywordtype">size_t</span> <a class="code hl_variable" href="state__sequence__error__function_8cpp.html#a854dddca27d23e617c4b3bb741b1c88c">jointIndex</a>,</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>      std::span&lt;<span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">worldVecs</a>,</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      std::span&lt;<span class="keyword">const</span> Eigen::Matrix&lt;T, FuncDim, 3&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdvs</a>,</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>      std::span&lt;const uint8_t&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">isPoints</a>,</div>
@@ -143,7 +143,7 @@ $(document).ready(function(){initNavTree('skeleton__derivative_8h_source.html','
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> FuncDim&gt;</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1SkeletonDerivativeT.html#a9e0d6af92de4e2300b8149c7b3025161">accumulateJointJacobian</a>(</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>      <span class="keywordtype">size_t</span> jointIndex,</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>      <span class="keywordtype">size_t</span> <a class="code hl_variable" href="state__sequence__error__function_8cpp.html#a854dddca27d23e617c4b3bb741b1c88c">jointIndex</a>,</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>      std::span&lt;<span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">worldVecs</a>,</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      std::span&lt;<span class="keyword">const</span> Eigen::Matrix&lt;T, FuncDim, 3&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dfdvs</a>,</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      std::span&lt;const uint8_t&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">isPoints</a>,</div>
@@ -345,6 +345,7 @@ $(document).ready(function(){initNavTree('skeleton__derivative_8h_source.html','
 <div class="ttc" id="aparameter__transform_8h_html"><div class="ttname"><a href="parameter__transform_8h.html">parameter_transform.h</a></div></div>
 <div class="ttc" id="askeleton_8h_html"><div class="ttname"><a href="skeleton_8h.html">skeleton.h</a></div></div>
 <div class="ttc" id="askeleton__state_8h_html"><div class="ttname"><a href="skeleton__state_8h.html">skeleton_state.h</a></div></div>
+<div class="ttc" id="astate__sequence__error__function_8cpp_html_a854dddca27d23e617c4b3bb741b1c88c"><div class="ttname"><a href="state__sequence__error__function_8cpp.html#a854dddca27d23e617c4b3bb741b1c88c">jointIndex</a></div><div class="ttdeci">size_t jointIndex</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00221">state_sequence_error_function.cpp:221</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
@@ -354,7 +355,7 @@ $(document).ready(function(){initNavTree('skeleton__derivative_8h_source.html','
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skeleton__derivative_8h.html">skeleton_derivative.h</a></li>
-    <li class="footer">Generated on Wed Mar 11 2026 00:11:12 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 12 2026 10:38:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
