@@ -54,6 +54,7 @@ structs = [
 template_structs = [
     "AimData",
     "FixedAxisData",
+    "JointToJointOrientationData",
     "NormalData",
     "OrientationData",
     "PointTriangleVertexConstraint",
@@ -87,6 +88,7 @@ template_classes = [
     "HeightErrorFunction",
     "JointToJointDistanceErrorFunction",
     "JointToJointPositionErrorFunction",
+    "JointToJointOrientationErrorFunction",
     "LimitErrorFunction",
     "ModelParametersErrorFunction",
     "NormalErrorFunction",
