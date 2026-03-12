@@ -12,12 +12,11 @@
 #include <axel/SimdKdTree.h>
 #include <axel/TriBvh.h>
 #include <dispenso/parallel_for.h> // @manual
+#include <momentum/common/log.h>
 #include <pybind11/pybind11.h>
 
 #include <cfloat>
 #include <cstdint>
-
-namespace py = pybind11;
 
 namespace pymomentum {
 
@@ -258,12 +257,12 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor> findClosestPointsWith
       nullptr);
 
   if (!isNormalized(normals_source)) {
-    py::print(
+    MT_LOGW(
         "Inside find_closest_points, the tensor of source normals does not appear to be normalized.  This likely indicates a bug.");
   }
 
   if (!isNormalized(normals_target)) {
-    py::print(
+    MT_LOGW(
         "Inside find_closest_points, the tensor of target normals does not appear to be normalized.  This likely indicates a bug.");
   }
 

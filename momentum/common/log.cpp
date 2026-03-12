@@ -10,10 +10,6 @@
 
 #include <algorithm>
 
-#if !defined(MOMENTUM_WITH_XR_LOGGER)
-#include <iostream>
-#endif
-
 namespace momentum {
 
 namespace {
@@ -37,6 +33,46 @@ namespace {
     default:
       MT_THROW("Unknown log level");
   }
+}
+
+#elif defined(MOMENTUM_WITH_SPDLOG)
+
+[[nodiscard]] spdlog::level::level_enum toSpdlogLevel(LogLevel level) {
+  switch (level) {
+    case LogLevel::Disabled:
+      return spdlog::level::off;
+    case LogLevel::Error:
+      return spdlog::level::err;
+    case LogLevel::Warning:
+      return spdlog::level::warn;
+    case LogLevel::Info:
+      return spdlog::level::info;
+    case LogLevel::Debug:
+      return spdlog::level::debug;
+    case LogLevel::Trace:
+      return spdlog::level::trace;
+    default:
+      MT_THROW("Unknown log level");
+  }
+}
+
+// Store the log level in our own static variable in addition to forwarding
+// to spdlog. When spdlog is used in header-only mode and the common library
+// is a shared library, spdlog's static globals may not be shared across
+// shared-library boundaries. Using our own storage guarantees round-trip
+// correctness for setLogLevel/getLogLevel.
+LogLevel& spdlogLogLevel() {
+  static LogLevel level = LogLevel::Info;
+  return level;
+}
+
+#else
+
+// Fallback: store the log level in a static variable when no logging backend
+// is available.
+LogLevel& fallbackLogLevel() {
+  static LogLevel level = LogLevel::Info;
+  return level;
 }
 
 #endif
@@ -80,9 +116,11 @@ std::map<std::string, LogLevel> logLevelMap() {
 void setLogLevel(LogLevel level) {
 #if defined(MOMENTUM_WITH_XR_LOGGER)
   arvr::logging::getChannel(DEFAULT_LOG_CHANNEL).setLevel(toArvrLogLevel(level));
+#elif defined(MOMENTUM_WITH_SPDLOG)
+  spdlogLogLevel() = level;
+  spdlog::set_level(toSpdlogLevel(level));
 #else
-  (void)level;
-  MT_LOGW("Setting log level is not supported.\n");
+  fallbackLogLevel() = level;
 #endif
 }
 
@@ -113,11 +151,10 @@ LogLevel getLogLevel() {
       // Default to Info level for unknown levels
       return LogLevel::Info;
   }
+#elif defined(MOMENTUM_WITH_SPDLOG)
+  return spdlogLogLevel();
 #else
-  // Emit a warning similar to setLogLevel()
-  MT_LOGW("Getting log level is not fully supported. Returning default (Info).\n");
-  // Default to Info level when not using XR logger
-  return LogLevel::Info;
+  return fallbackLogLevel();
 #endif
 }
 

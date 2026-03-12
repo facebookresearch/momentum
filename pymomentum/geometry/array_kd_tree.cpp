@@ -15,6 +15,7 @@
 #include <axel/TriBvh.h>
 #include <dispenso/parallel_for.h>
 #include <momentum/common/exception.h>
+#include <momentum/common/log.h>
 
 #include <cfloat>
 #include <cstdint>
@@ -427,12 +428,12 @@ std::tuple<py::array, py::array, py::array, py::array> findClosestPointsWithNorm
 
   // Check normalization
   if (!isNormalized(srcNormalsArr)) {
-    py::print(
+    MT_LOGW(
         "Inside find_closest_points, the tensor of source normals does not appear to be normalized.  This likely indicates a bug.");
   }
 
   if (!isNormalized(tgtNormalsArr)) {
-    py::print(
+    MT_LOGW(
         "Inside find_closest_points, the tensor of target normals does not appear to be normalized.  This likely indicates a bug.");
   }
 
