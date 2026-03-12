@@ -84,6 +84,7 @@ double SolverT<T>::solve(Eigen::VectorX<T>& params) {
   lastError_ = std::numeric_limits<decltype(lastError_)>::max();
 
   initializeSolver();
+  solverFunction_->initialize();
 
   iteration_ = 0;
   for (; iteration_ < maxIterations_; iteration_++) {

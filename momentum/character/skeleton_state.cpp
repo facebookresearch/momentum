@@ -84,6 +84,18 @@ void SkeletonStateT<T>::set(
 }
 
 template <typename T>
+void SkeletonStateT<T>::set(
+    const JointParametersT<T>& parameters,
+    const Skeleton& referenceSkeleton,
+    const JointSet& needXform,
+    const JointSet& needDeriv) {
+  MT_PROFILE_FUNCTION();
+  this->jointParameters = parameters;
+  this->jointState.resize(referenceSkeleton.joints.size());
+  set(referenceSkeleton, needXform, needDeriv);
+}
+
+template <typename T>
 void SkeletonStateT<T>::set(const Skeleton& referenceSkeleton, bool computeDeriv) {
   MT_PROFILE_FUNCTION();
   // get input joints
@@ -120,6 +132,60 @@ void SkeletonStateT<T>::set(const Skeleton& referenceSkeleton, bool computeDeriv
           jointParameters.v.template middleRows<7>(parameterOffset),
           &jointState[joint.parent],
           computeDeriv);
+    }
+  }
+
+  // ensure arrays are valid
+  MT_CHECK(jointState.size() == numJoints, "{} is not {}", jointState.size(), numJoints);
+}
+
+template <typename T>
+void SkeletonStateT<T>::set(
+    const Skeleton& referenceSkeleton,
+    const JointSet& needXform,
+    const JointSet& needDeriv) {
+  MT_PROFILE_FUNCTION();
+  // get input joints
+  const JointListT<T>& joints = ::momentum::cast<T>(referenceSkeleton.joints);
+
+  // initialize array size variables
+  const size_t numJoints = joints.size();
+
+  // ensure that all variables are valid
+  MT_CHECK(
+      jointParameters.size() == gsl::narrow<Eigen::Index>(numJoints * kParametersPerJoint),
+      "Unexpected joint parameter size. Expected '{}' (# of joints '{}' X kParametersPerJoint '{}') but got '{}'.",
+      numJoints * kParametersPerJoint,
+      numJoints,
+      kParametersPerJoint,
+      jointParameters.size());
+
+  // go over all joint elements and calculate Transformation
+  for (size_t jointID = 0; jointID < numJoints; jointID++) {
+    if (!needXform.test(jointID)) {
+      continue;
+    }
+
+    const Eigen::Index parameterOffset = jointID * kParametersPerJoint;
+
+    // some reference for quick access
+    const JointT<T>& joint = joints[jointID];
+
+    // set joint-state based on parameters
+    // IMPORTANT: this all assumes that parent joints always appear before their children in the
+    // joint list, so their joint state will already be calculated when processing the children
+    if (joint.parent == kInvalidIndex) {
+      jointState[jointID].set(
+          joint,
+          jointParameters.v.template middleRows<7>(parameterOffset),
+          nullptr,
+          needDeriv.test(jointID));
+    } else {
+      jointState[jointID].set(
+          joint,
+          jointParameters.v.template middleRows<7>(parameterOffset),
+          &jointState[joint.parent],
+          needDeriv.test(jointID));
     }
   }
 

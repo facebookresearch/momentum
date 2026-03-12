@@ -10,6 +10,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/fwd.h>
 #include <momentum/character/parameter_transform.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/solver/solver_function.h>
@@ -50,6 +51,7 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
 
   void updateParameters(Eigen::VectorX<T>& parameters, const Eigen::VectorX<T>& delta) final;
   void setEnabledParameters(const ParameterSet& ps) final;
+  void initialize() override;
 
   void addErrorFunction(std::shared_ptr<SkeletonErrorFunctionT<T>> solvable);
   void clearErrorFunctions();
@@ -86,7 +88,35 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
   bool needsMeshState_;
   VectorX<bool> activeJointParams_;
 
+  /// True when all skeleton joints need both transforms and derivatives.
+  /// Enables a fast path that bypasses per-joint bitset checks.
+  /// Defaults to true so that before initialize() is called, the baseline code path is used.
+  bool allJointsActive_{true};
+
   std::vector<std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions_;
+
+  /// Updates the skeleton state; inlined so the compiler can eliminate the branch
+  /// in the common case where allJointsActive_ is true.
+  void updateSkeletonState(const Eigen::VectorX<T>& parameters, bool computeDeriv) {
+    if (allJointsActive_) {
+      // Fast path: identical to baseline — no per-joint bitset checks.
+      state_->set(parameterTransform_.apply(parameters), character_.skeleton, computeDeriv);
+    } else {
+      updateSkeletonStateSelective(parameters, computeDeriv);
+    }
+  }
+
+  /// Slow path for selective joint computation; outlined to keep the fast path lean.
+  void updateSkeletonStateSelective(const Eigen::VectorX<T>& parameters, bool computeDeriv);
+
+  /// Joints that need transforms in any solver computation; computed once at initialization
+  JointSet activeJointXform_;
+
+  /// Joints that need derivatives in any solver computation; computed once at initialization
+  JointSet activeJointDeriv_;
+
+  JointSet solverActiveJoints_;
+  ParameterSet enabledParameters_;
 };
 
 } // namespace momentum

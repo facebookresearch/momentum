@@ -159,6 +159,13 @@ class SolverFunctionT {
   /// @param parameterSet Bitset where each bit indicates if the corresponding parameter is enabled
   virtual void setEnabledParameters(const ParameterSet& parameterSet);
 
+  /// Pre-computes values before a solve loop begins
+  ///
+  /// Called once before the solver iteration loop. Can be used for performance optimizations
+  /// such as computing which joints need transforms or derivatives.
+  /// Default implementation does nothing.
+  virtual void initialize() {}
+
   /// Returns the total number of parameters in the optimization problem
   [[nodiscard]] size_t getNumParameters() const;
 

@@ -401,6 +401,9 @@ using ColorArray = Matrix3Xb;
 constexpr size_t kMaxModelParams = 2048; // at most 2048 parameters per frame
 using ParameterSet = std::bitset<kMaxModelParams>;
 
+constexpr size_t kMaxJoints = 1024; // at most 1024 joints in the system
+using JointSet = std::bitset<kMaxJoints>;
+
 /// @brief A utility struct that facilitates the deduction of a `std::span` type from a given type.
 ///
 /// This utility is particularly useful when a function accepts a `std::span<Vector3<T>>` as an
