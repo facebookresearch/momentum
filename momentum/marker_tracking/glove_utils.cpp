@@ -19,6 +19,7 @@
 #include <Eigen/Geometry>
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace momentum {
@@ -165,6 +166,114 @@ std::array<GloveOffset, 2> extractGloveOffsetsFromCharacter(
   }
 
   return result;
+}
+
+std::vector<std::vector<JointToJointPositionDataT<float>>> createGlovePositionConstraintData(
+    std::span<const GloveFrameData> gloveData,
+    const Character& character,
+    const GloveConfig& cfg,
+    size_t handIndex) {
+  if (gloveData.empty() || handIndex >= 2) {
+    return {};
+  }
+
+  std::vector<std::vector<JointToJointPositionDataT<float>>> results(gloveData.size());
+
+  // Find the glove bone for this hand; fall back to the wrist joint itself
+  const std::string gloveBoneName = "glove_" + cfg.wristJointNames[handIndex];
+  size_t referenceIdx = character.skeleton.getJointIdByName(gloveBoneName);
+  if (referenceIdx == kInvalidIndex) {
+    referenceIdx = character.skeleton.getJointIdByName(cfg.wristJointNames[handIndex]);
+    if (referenceIdx == kInvalidIndex) {
+      return results;
+    }
+  }
+
+  // Build name-to-index map for the skeleton
+  std::unordered_map<std::string, size_t> jointLookup;
+  jointLookup.reserve(character.skeleton.joints.size());
+  for (size_t i = 0; i < character.skeleton.joints.size(); ++i) {
+    jointLookup[character.skeleton.joints[i].name] = i;
+  }
+
+  for (size_t iFrame = 0; iFrame < results.size(); ++iFrame) {
+    results[iFrame].reserve(gloveData[iFrame].size());
+    for (const auto& obs : gloveData[iFrame]) {
+      if (!obs.valid) {
+        continue;
+      }
+
+      auto it = jointLookup.find(obs.jointName);
+      if (it == jointLookup.end()) {
+        continue;
+      }
+
+      JointToJointPositionDataT<float> constraint;
+      constraint.sourceJoint = it->second;
+      constraint.sourceOffset = Vector3f::Zero();
+      constraint.referenceJoint = referenceIdx;
+      constraint.referenceOffset = Vector3f::Zero();
+      constraint.target = obs.position;
+      constraint.weight = cfg.positionWeight;
+      constraint.name = obs.jointName;
+      results[iFrame].push_back(std::move(constraint));
+    }
+  }
+
+  return results;
+}
+
+std::vector<std::vector<JointToJointOrientationDataT<float>>> createGloveOrientationConstraintData(
+    std::span<const GloveFrameData> gloveData,
+    const Character& character,
+    const GloveConfig& cfg,
+    size_t handIndex) {
+  if (gloveData.empty() || handIndex >= 2) {
+    return {};
+  }
+
+  std::vector<std::vector<JointToJointOrientationDataT<float>>> results(gloveData.size());
+
+  // Find the glove bone for this hand; fall back to the wrist joint itself
+  const std::string gloveBoneName = "glove_" + cfg.wristJointNames[handIndex];
+  size_t referenceIdx = character.skeleton.getJointIdByName(gloveBoneName);
+  if (referenceIdx == kInvalidIndex) {
+    referenceIdx = character.skeleton.getJointIdByName(cfg.wristJointNames[handIndex]);
+    if (referenceIdx == kInvalidIndex) {
+      return results;
+    }
+  }
+
+  // Build name-to-index map for the skeleton
+  std::unordered_map<std::string, size_t> jointLookup;
+  jointLookup.reserve(character.skeleton.joints.size());
+  for (size_t i = 0; i < character.skeleton.joints.size(); ++i) {
+    jointLookup[character.skeleton.joints[i].name] = i;
+  }
+
+  for (size_t iFrame = 0; iFrame < results.size(); ++iFrame) {
+    results[iFrame].reserve(gloveData[iFrame].size());
+    for (const auto& obs : gloveData[iFrame]) {
+      if (!obs.valid) {
+        continue;
+      }
+
+      auto it = jointLookup.find(obs.jointName);
+      if (it == jointLookup.end()) {
+        continue;
+      }
+
+      JointToJointOrientationDataT<float> constraint;
+      constraint.sourceJoint = it->second;
+      constraint.referenceJoint = referenceIdx;
+      constraint.target = obs.orientation;
+      constraint.weight = cfg.orientationWeight;
+      constraint.name = obs.jointName;
+      results[iFrame].push_back(std::move(constraint));
+    }
+  }
+
+  return results;
 }
 
 } // namespace momentum
