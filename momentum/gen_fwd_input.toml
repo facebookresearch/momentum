@@ -174,3 +174,11 @@ template_classes = [
     "FullyDifferentiableStateErrorFunction",
     "UnionErrorFunction",
 ]
+
+[[fwd]]
+subdirectory = "marker_tracking"
+structs = [
+    "GloveConfig",
+    "GloveOffset",
+    "GloveSensorObservation",
+]
