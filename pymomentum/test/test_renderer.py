@@ -5,6 +5,7 @@
 
 # pyre-strict
 
+import sys
 import unittest
 
 import numpy as np
@@ -387,3 +388,265 @@ class TestRendering(unittest.TestCase):
         cop_old = camera_old.center_of_projection
         cop_new = camera_new.center_of_projection
         np.testing.assert_allclose(cop_old, cop_new, rtol=1e-4, atol=1e-4)
+
+    def _get_rendered_mask(self, z_buffer: torch.Tensor) -> torch.Tensor:
+        """Return a boolean mask of pixels that were actually rendered.
+
+        The z-buffer is initialized to far_clip (FLT_MAX by default).
+        Rendered pixels have depth values significantly smaller than FLT_MAX.
+        """
+        far_clip = torch.tensor(3.4028234663852886e38, dtype=z_buffer.dtype)
+        return z_buffer < far_clip
+
+    def _rasterize_quad(
+        self,
+        camera: pym_camera.Camera,
+        texture_coordinates: torch.Tensor | None = None,
+        texture_triangles: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Rasterize a large front-facing quad and return (z_buffer, rgb_buffer).
+
+        The quad spans [-5, -5, 5] to [5, 5, 5] to fill the viewport.
+        Back-face culling is disabled so winding order does not matter.
+        """
+        positions = torch.tensor(
+            [[-5, -5, 5], [5, -5, 5], [5, 5, 5], [-5, 5, 5]], dtype=torch.float32
+        )
+        normals = torch.tensor(
+            [[0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]], dtype=torch.float32
+        )
+        triangles = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.int32)
+
+        z_buffer = pym_renderer.create_z_buffer(camera)
+        rgb_buffer = pym_renderer.create_rgb_buffer(camera)
+        pym_renderer.rasterize_mesh(
+            positions,
+            normals,
+            triangles,
+            camera,
+            z_buffer,
+            rgb_buffer,
+            texture_coordinates=texture_coordinates,
+            texture_triangles=texture_triangles,
+            back_face_culling=False,
+        )
+        return z_buffer, rgb_buffer
+
+    def test_rasterize_mesh_texcoords_match_vertices(self) -> None:
+        """Test rasterize_mesh when texture coordinate count matches vertex count.
+
+        Verifies that providing texture coordinates (same count as vertices)
+        does not alter the rendered geometry: the z-buffer should match a
+        render without texture coordinates, depth values should be correct,
+        and the rgb_buffer should contain visible (lit) pixels.
+        """
+        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
+        # deep inlining) that overflow the default 1 MB Windows thread stack.
+        if sys.platform == "win32":
+            return
+
+        camera = pym_camera.Camera(
+            pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
+        )
+
+        # 4 texture coordinates — same count as 4 quad vertices.
+        tex_coords = torch.tensor([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=torch.float32)
+
+        # Render WITHOUT texture coordinates as a baseline.
+        z_no_tex, rgb_no_tex = self._rasterize_quad(camera)
+
+        # Render WITH texture coordinates.
+        z_tex, rgb_tex = self._rasterize_quad(camera, texture_coordinates=tex_coords)
+
+        # 1. Verify geometry was rendered (pixels with depth < far_clip).
+        rendered_mask = self._get_rendered_mask(z_tex)
+        num_rendered = rendered_mask.sum().item()
+        self.assertGreater(num_rendered, 0, "No pixels were rendered")
+
+        # 2. Verify depth values are correct: the quad is at z=5, so all
+        #    rendered pixels should have depth close to 5.
+        rendered_depths = z_tex[rendered_mask]
+        self.assertTrue(
+            torch.all(rendered_depths > 4.0).item(),
+            f"Min depth {rendered_depths.min().item()} is too small (expected > 4.0)",
+        )
+        self.assertTrue(
+            torch.all(rendered_depths < 6.0).item(),
+            f"Max depth {rendered_depths.max().item()} is too large (expected < 6.0)",
+        )
+
+        # 3. Verify texture coordinates don't change the geometry: depth
+        #    buffers should be identical with and without texture coordinates.
+        torch.testing.assert_close(z_tex, z_no_tex)
+
+        # 4. Verify the rgb_buffer has visible (non-zero) rendered pixels,
+        #    confirming that lighting was applied to the rendered geometry.
+        rendered_rgb = rgb_tex[rendered_mask]
+        self.assertTrue(
+            torch.any(rendered_rgb > 0).item(),
+            "No visible pixels in rgb_buffer after rendering",
+        )
+
+    def test_rasterize_mesh_texcoords_fewer_than_vertices(self) -> None:
+        """Test rasterize_mesh when there are fewer texture coordinates than vertices.
+
+        Verifies that separate texture_triangles with fewer texture
+        coordinates than vertices produces correct geometry: the z-buffer
+        depth values should match the expected geometry depth, the rendered
+        pixel count should match a baseline render without texture
+        coordinates, and the geometry is unaffected by the texture mapping.
+        """
+        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
+        # deep inlining) that overflow the default 1 MB Windows thread stack.
+        if sys.platform == "win32":
+            return
+
+        camera = pym_camera.Camera(
+            pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
+        )
+
+        # 3 texture coordinates — fewer than 4 quad vertices. Use
+        # texture_triangles to index into these coordinates independently.
+        tex_coords = torch.tensor([[0, 0], [1, 0], [0.5, 1]], dtype=torch.float32)
+        tex_triangles = torch.tensor([[0, 1, 2], [0, 2, 1]], dtype=torch.int32)
+
+        # Render WITHOUT texture coordinates as a baseline.
+        z_no_tex, rgb_no_tex = self._rasterize_quad(camera)
+
+        # Render WITH fewer texture coordinates and separate texture_triangles.
+        z_tex, rgb_tex = self._rasterize_quad(
+            camera,
+            texture_coordinates=tex_coords,
+            texture_triangles=tex_triangles,
+        )
+
+        # 1. Verify geometry was rendered.
+        rendered_mask = self._get_rendered_mask(z_tex)
+        num_rendered = rendered_mask.sum().item()
+        self.assertGreater(num_rendered, 0, "No pixels were rendered")
+
+        # 2. Verify depth values are correct (quad at z=5).
+        rendered_depths = z_tex[rendered_mask]
+        self.assertTrue(
+            torch.all(rendered_depths > 4.0).item(),
+            f"Min depth {rendered_depths.min().item()} is too small (expected > 4.0)",
+        )
+        self.assertTrue(
+            torch.all(rendered_depths < 6.0).item(),
+            f"Max depth {rendered_depths.max().item()} is too large (expected < 6.0)",
+        )
+
+        # 3. Verify texture coordinates don't change the geometry: the depth
+        #    buffers should be identical regardless of texture coordinates.
+        torch.testing.assert_close(z_tex, z_no_tex)
+
+        # 4. Verify the same number of pixels were rendered in both cases,
+        #    confirming that the separate texture_triangles don't affect
+        #    which pixels are covered.
+        baseline_count = self._get_rendered_mask(z_no_tex).sum().item()
+        self.assertEqual(baseline_count, num_rendered)
+
+        # 5. Verify the rgb_buffer has visible (lit) pixels.
+        rendered_rgb = rgb_tex[rendered_mask]
+        self.assertTrue(
+            torch.any(rendered_rgb > 0).item(),
+            "No visible pixels in rgb_buffer after rendering",
+        )
+
+    def test_rasterize_mesh_texcoords_more_than_vertices(self) -> None:
+        """Test rasterize_mesh when there are more texture coordinates than vertices.
+
+        Simulates a UV seam scenario where the number of texture coordinates
+        exceeds the number of vertices. Verifies that:
+        - The extra texture coordinates are accepted without error.
+        - Different texture_triangles referencing different subsets of the
+          extra texture coordinates both render correctly.
+        - The z-buffer depth values are correct.
+        - The geometry (z-buffer) is unaffected by the choice of texture
+          triangle indices.
+        """
+        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
+        # deep inlining) that overflow the default 1 MB Windows thread stack.
+        if sys.platform == "win32":
+            return
+
+        camera = pym_camera.Camera(
+            pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
+        )
+
+        # A large triangle with 3 vertices that fills the viewport.
+        positions = torch.tensor(
+            [[-5, -5, 5], [5, -5, 5], [0, 5, 5]], dtype=torch.float32
+        )
+        normals = torch.tensor(
+            [[0, 0, -1], [0, 0, -1], [0, 0, -1]], dtype=torch.float32
+        )
+        triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+
+        # 6 texture coordinates — more than 3 vertices. This is common in real
+        # meshes where UV seams require duplicated texture coordinates.
+        tex_coords = torch.tensor(
+            [[0, 0], [1, 0], [0.5, 1], [0.5, 0], [1, 0.5], [0, 0.5]],
+            dtype=torch.float32,
+        )
+
+        def rasterize_triangle(
+            tex_tri: torch.Tensor,
+        ) -> tuple[torch.Tensor, torch.Tensor]:
+            z_buf = pym_renderer.create_z_buffer(camera)
+            rgb_buf = pym_renderer.create_rgb_buffer(camera)
+            pym_renderer.rasterize_mesh(
+                positions,
+                normals,
+                triangles,
+                camera,
+                z_buf,
+                rgb_buf,
+                texture_coordinates=tex_coords,
+                texture_triangles=tex_tri,
+                back_face_culling=False,
+            )
+            return z_buf, rgb_buf
+
+        # Render with texture_triangles referencing the first three tex coords.
+        tex_triangles_a = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+        z_buffer_a, rgb_buffer_a = rasterize_triangle(tex_triangles_a)
+
+        # Render with texture_triangles referencing the last three tex coords
+        # (indices 3, 4, 5) — exercises the extra texture coordinates.
+        tex_triangles_b = torch.tensor([[3, 4, 5]], dtype=torch.int32)
+        z_buffer_b, rgb_buffer_b = rasterize_triangle(tex_triangles_b)
+
+        # 1. Verify geometry was rendered in both cases.
+        rendered_mask_a = self._get_rendered_mask(z_buffer_a)
+        rendered_mask_b = self._get_rendered_mask(z_buffer_b)
+        self.assertGreater(
+            rendered_mask_a.sum().item(), 0, "No pixels rendered with tex_triangles_a"
+        )
+        self.assertGreater(
+            rendered_mask_b.sum().item(), 0, "No pixels rendered with tex_triangles_b"
+        )
+
+        # 2. Verify depth values are correct (triangle at z=5).
+        depths_a = z_buffer_a[rendered_mask_a]
+        self.assertTrue(
+            torch.all(depths_a > 4.0).item(),
+            f"Min depth {depths_a.min().item()} is too small (expected > 4.0)",
+        )
+        self.assertTrue(
+            torch.all(depths_a < 6.0).item(),
+            f"Max depth {depths_a.max().item()} is too large (expected < 6.0)",
+        )
+
+        # 3. Verify geometry is identical regardless of which texture
+        #    coordinates are referenced — the z-buffers and rendered pixel
+        #    masks should match exactly.
+        torch.testing.assert_close(z_buffer_a, z_buffer_b)
+        self.assertTrue(torch.equal(rendered_mask_a, rendered_mask_b))
+
+        # 4. Verify the rgb_buffer has visible (lit) pixels.
+        rendered_rgb_a = rgb_buffer_a[rendered_mask_a]
+        self.assertTrue(
+            torch.any(rendered_rgb_a > 0).item(),
+            "No visible pixels in rgb_buffer after rendering",
+        )
