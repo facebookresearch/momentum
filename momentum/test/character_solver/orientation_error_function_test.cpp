@@ -103,3 +103,37 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_JacobianWithZeroFunct
   // Also verify consistency with numerical derivatives using the standard helper
   TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(5e-2f, 5e-6));
 }
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationRotDiffErrorL2_GradientsAndJacobians) {
+  using T = typename TestFixture::Type;
+
+  // create skeleton and reference values
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // create constraints
+  OrientationRotDiffErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
+  const T kTestWeightValue = 4.5;
+
+  {
+    SCOPED_TRACE("OrientationRotDiff Constraint Test");
+    std::vector<OrientationDataT<T>> cl{
+        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 2, kTestWeightValue),
+        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 1, kTestWeightValue)};
+    errorFunction.setConstraints(std::move(cl));
+
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        ModelParametersT<T>::Zero(transform.numAllModelParameters()),
+        character,
+        Eps<T>(0.03f, 5e-6));
+    for (size_t i = 0; i < 10; i++) {
+      ModelParametersT<T> parameters =
+          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
+      TEST_GRADIENT_AND_JACOBIAN(
+          T, &errorFunction, parameters, character, Eps<T>(0.05f, 5e-6), Eps<T>(1e-6f, 1e-7));
+    }
+  }
+}

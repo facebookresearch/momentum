@@ -1101,6 +1101,149 @@ rotation matrix to a target rotation.)")
           py::arg("name") = std::nullopt);
 
   py::class_<
+      mm::OrientationRotDiffErrorFunctionT<float>,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::OrientationRotDiffErrorFunctionT<float>>>(
+      m,
+      "OrientationRotDiffErrorFunction",
+      R"(A skeleton error function that minimizes the F-norm of (R_target^T * R_current - I),
+the rotation difference relative to identity. Compared to :class:`OrientationErrorFunction` which
+uses element-wise subtraction (R_current - R_target), this formulation computes the error in the
+tangent space of the rotation group, which is invariant to the choice of coordinate frame.)")
+      .def(
+          "__repr__",
+          [](const mm::OrientationRotDiffErrorFunctionT<float>& self) {
+            return fmt::format(
+                "OrientationRotDiffErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.getNumConstraints());
+          })
+      .def(
+          py::init<>(
+              [](const mm::Character& character, float lossAlpha, float lossC, float weight)
+                  -> std::shared_ptr<mm::OrientationRotDiffErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
+                auto result = std::make_shared<mm::OrientationRotDiffErrorFunctionT<float>>(
+                    character, lossAlpha, lossC);
+                result->setWeight(weight);
+                return result;
+              }),
+          R"(Initialize an OrientationRotDiffErrorFunction.
+
+              :param character: The character to use.
+              :param alpha: P-norm to use; 2 is Euclidean distance, 1 is L1 norm, 0 is Cauchy norm.
+              :param c: c parameter in the generalized loss function, this is roughly equivalent to normalizing by the standard deviation in a Gaussian distribution.
+              :param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("alpha") = 2.0f,
+          py::arg("c") = 1.0f,
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::OrientationRotDiffErrorFunctionT<float>& self,
+             const Eigen::Vector4f& target,
+             int parent,
+             const std::optional<Eigen::Vector4f>& offset,
+             float weight,
+             const std::string& name) {
+            validateJointIndex(parent, "parent", self.getSkeleton());
+            validateWeight(weight, "weight");
+            self.addConstraint(
+                mm::OrientationDataT<float>(
+                    offset.has_value() ? toQuaternion(*offset) : Eigen::Quaternionf::Identity(),
+                    toQuaternion(target),
+                    parent,
+                    weight,
+                    name));
+          },
+          R"(Adds an orientation constraint to the error function.
+
+      :param target: The target rotation in global space as a quaternion (x, y, z, w).
+      :param parent: The index of the parent joint.
+      :param offset: The rotation offset in the parent space as a quaternion (x, y, z, w).
+      :param weight: The weight of the constraint.
+      :param name: The name of the constraint (for debugging).)",
+          py::arg("target"),
+          py::arg("parent"),
+          py::arg("offset") = std::nullopt,
+          py::arg("weight") = 1.0f,
+          py::arg("name") = std::string{})
+      .def(
+          "clear_constraints",
+          [](mm::OrientationRotDiffErrorFunctionT<float>& self) { self.clearConstraints(); },
+          R"(Clears all constraints.)")
+      .def_property_readonly(
+          "constraints",
+          [](const mm::OrientationRotDiffErrorFunctionT<float>& self) {
+            return self.getConstraints();
+          },
+          "Returns the list of orientation constraints.")
+      .def(
+          "add_constraints",
+          [](mm::OrientationRotDiffErrorFunctionT<float>& self,
+             const py::array_t<float>& target,
+             const py::array_t<int>& parent,
+             const std::optional<py::array_t<float>>& offset,
+             const std::optional<py::array_t<float>>& weight,
+             const std::optional<std::vector<std::string>>& name) {
+            ArrayShapeValidator validator;
+            const int nConsIdx = -1;
+            validator.validate(offset, "offset", {nConsIdx, 4}, {"n_cons", "xyzw"});
+            validator.validate(target, "target", {nConsIdx, 4}, {"n_cons", "xyzw"});
+            validator.validate(parent, "parent", {nConsIdx}, {"n_cons"});
+            validateJointIndex(parent, "parent", self.getSkeleton());
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+
+            if (name.has_value() && name->size() != parent.shape(0)) {
+              throw std::runtime_error(
+                  fmt::format(
+                      "Invalid names; expected {} names but got {}",
+                      parent.shape(0),
+                      name->size()));
+            }
+
+            auto offsetAcc =
+                offset.has_value() ? std::make_optional(offset->unchecked<2>()) : std::nullopt;
+            auto targetAcc = target.unchecked<2>();
+            auto parentAcc = parent.unchecked<1>();
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
+
+            py::gil_scoped_release release;
+
+            for (py::ssize_t i = 0; i < parent.shape(0); ++i) {
+              validateJointIndex(parentAcc(i), "parent", self.getSkeleton());
+              self.addConstraint(
+                  mm::OrientationDataT<float>(
+                      offsetAcc.has_value() ? Eigen::Quaternionf(
+                                                  (*offsetAcc)(i, 3),
+                                                  (*offsetAcc)(i, 0),
+                                                  (*offsetAcc)(i, 1),
+                                                  (*offsetAcc)(i, 2))
+                                            : Eigen::Quaternionf::Identity(),
+                      Eigen::Quaternionf(
+                          targetAcc(i, 3), targetAcc(i, 0), targetAcc(i, 1), targetAcc(i, 2)),
+                      parentAcc(i),
+                      weightAcc.has_value() ? (*weightAcc)(i) : 1.0f,
+                      name.has_value() ? name->at(i) : std::string{}));
+            }
+          },
+          R"(Adds multiple orientation constraints to the error function.
+
+      :param target: A numpy array of shape (n, 4) for the (x, y, z, w) quaternion target rotations in global space.
+      :param parent: A numpy array of size n for the indices of the parent joints.
+      :param offset: A numpy array of shape (n, 4) for the (x, y, z, w) quaternion rotation offsets in the parent space.
+      :param weight: A numpy array of size n for the weights of the constraints.
+      :param name: An optional list of names for the constraints (for debugging).)",
+          py::arg("target"),
+          py::arg("parent"),
+          py::arg("offset") = std::nullopt,
+          py::arg("weight") = std::nullopt,
+          py::arg("name") = std::nullopt);
+
+  py::class_<
       mm::CollisionErrorFunction,
       mm::SkeletonErrorFunction,
       std::shared_ptr<mm::CollisionErrorFunction>>(m, "CollisionErrorFunction")

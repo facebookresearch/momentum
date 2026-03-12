@@ -711,6 +711,31 @@ using OrientationErrorFunctiond_const_u = ::std::unique_ptr<const OrientationErr
 using OrientationErrorFunctiond_const_w = ::std::weak_ptr<const OrientationErrorFunctiond>;
 
 template <typename T>
+class OrientationRotDiffErrorFunctionT;
+using OrientationRotDiffErrorFunction = OrientationRotDiffErrorFunctionT<float>;
+using OrientationRotDiffErrorFunctiond = OrientationRotDiffErrorFunctionT<double>;
+
+using OrientationRotDiffErrorFunction_p = ::std::shared_ptr<OrientationRotDiffErrorFunction>;
+using OrientationRotDiffErrorFunction_u = ::std::unique_ptr<OrientationRotDiffErrorFunction>;
+using OrientationRotDiffErrorFunction_w = ::std::weak_ptr<OrientationRotDiffErrorFunction>;
+using OrientationRotDiffErrorFunction_const_p =
+    ::std::shared_ptr<const OrientationRotDiffErrorFunction>;
+using OrientationRotDiffErrorFunction_const_u =
+    ::std::unique_ptr<const OrientationRotDiffErrorFunction>;
+using OrientationRotDiffErrorFunction_const_w =
+    ::std::weak_ptr<const OrientationRotDiffErrorFunction>;
+
+using OrientationRotDiffErrorFunctiond_p = ::std::shared_ptr<OrientationRotDiffErrorFunctiond>;
+using OrientationRotDiffErrorFunctiond_u = ::std::unique_ptr<OrientationRotDiffErrorFunctiond>;
+using OrientationRotDiffErrorFunctiond_w = ::std::weak_ptr<OrientationRotDiffErrorFunctiond>;
+using OrientationRotDiffErrorFunctiond_const_p =
+    ::std::shared_ptr<const OrientationRotDiffErrorFunctiond>;
+using OrientationRotDiffErrorFunctiond_const_u =
+    ::std::unique_ptr<const OrientationRotDiffErrorFunctiond>;
+using OrientationRotDiffErrorFunctiond_const_w =
+    ::std::weak_ptr<const OrientationRotDiffErrorFunctiond>;
+
+template <typename T>
 class PlaneErrorFunctionT;
 using PlaneErrorFunction = PlaneErrorFunctionT<float>;
 using PlaneErrorFunctiond = PlaneErrorFunctionT<double>;
