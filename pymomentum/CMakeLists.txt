@@ -193,7 +193,7 @@ mt_python_binding(
     array_utility
     character
     character_test_helpers
-    io
+    io_character
     io_fbx
     io_file_save_options
     io_gltf

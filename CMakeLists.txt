@@ -559,20 +559,30 @@ mt_library(
 )
 
 mt_library(
-  NAME io
+  NAME io_character
   HEADERS_VARS io_public_headers
   SOURCES_VARS io_sources
   PUBLIC_LINK_LIBRARIES
-    coordinate_system
-    io_bvh
-    io_common
+    character
     io_fbx
+    io_file_save_options
     io_gltf
-    io_legacy_json
-    io_motion
-    io_marker
-    io_shape
     io_skeleton
+  PRIVATE_LINK_LIBRARIES
+    io_shape
+    fmt::fmt
+)
+
+mt_library(
+  NAME io
+  PUBLIC_LINK_LIBRARIES
+    io_bvh
+    io_character
+    io_common
+    io_legacy_json
+    io_marker
+    io_motion
+    io_shape
     ${io_usd_library}
 )
 
@@ -943,14 +953,16 @@ if(MOMENTUM_BUILD_EXAMPLES)
     NAME hello_world
     SOURCES_VARS hello_world_sources
     LINK_LIBRARIES
-      momentum
+      math
   )
 
   mt_executable(
     NAME convert_model
     SOURCES_VARS convert_model_sources
     LINK_LIBRARIES
-      momentum io CLI11::CLI11
+      io_character
+      io_marker
+      CLI11::CLI11
   )
 
   mt_executable(
@@ -997,7 +1009,9 @@ if(MOMENTUM_BUILD_EXAMPLES)
     NAME animate_shapes
     SOURCES_VARS animate_shapes_sources
     LINK_LIBRARIES
-      momentum io CLI11::CLI11
+      io_character
+      io_shape
+      CLI11::CLI11
   )
 
   mt_executable(
@@ -1014,7 +1028,9 @@ if(MOMENTUM_BUILD_EXAMPLES)
     SOURCES_VARS refine_motion_sources
     LINK_LIBRARIES
       app_utils
-      io
+      io_gltf
+      io_marker
+      io_skeleton
       marker_tracker
   )
 
