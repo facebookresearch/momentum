@@ -602,6 +602,18 @@ io_legacy_json_test_sources = [
     "test/io/io_legacy_json_test.cpp",
 ]
 
+io_bvh_public_headers = [
+    "io/bvh/bvh_io.h",
+]
+
+io_bvh_sources = [
+    "io/bvh/bvh_io.cpp",
+]
+
+io_bvh_test_sources = [
+    "test/io/io_bvh_test.cpp",
+]
+
 io_motion_public_headers = [
     "io/motion/mmo_io.h",
 ]
