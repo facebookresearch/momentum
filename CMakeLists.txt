@@ -528,6 +528,15 @@ mt_library(
 )
 
 mt_library(
+  NAME io_bvh
+  HEADERS_VARS io_bvh_public_headers
+  SOURCES_VARS io_bvh_sources
+  PUBLIC_LINK_LIBRARIES
+    character
+    io_common
+)
+
+mt_library(
   NAME io_motion
   HEADERS_VARS io_motion_public_headers
   SOURCES_VARS io_motion_sources
@@ -555,6 +564,7 @@ mt_library(
   SOURCES_VARS io_sources
   PUBLIC_LINK_LIBRARIES
     coordinate_system
+    io_bvh
     io_common
     io_fbx
     io_gltf
@@ -853,6 +863,16 @@ if(MOMENTUM_BUILD_TESTING)
       io_skeleton
       io_test_helper
       character_test_helpers_gtest
+  )
+
+  mt_test(
+    NAME io_bvh_test
+    SOURCES_VARS io_bvh_test_sources
+    LINK_LIBRARIES
+      io_bvh
+      io_test_helper
+    ENV
+      "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
   )
 
   mt_test(
