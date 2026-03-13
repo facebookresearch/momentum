@@ -272,8 +272,6 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf from file '{}'. Error: {}", gltfFilename.string(), err.what());
   }
-
-  return {};
 }
 
 std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename) {

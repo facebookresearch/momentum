@@ -189,8 +189,6 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromModel(
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to parse motion data  : {}", err.what());
   }
-
-  return {};
 }
 
 std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionCommon(
@@ -218,8 +216,6 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionC
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
-
-  return {};
 }
 
 std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacterCommon(
