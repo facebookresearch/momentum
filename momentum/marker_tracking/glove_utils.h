@@ -9,12 +9,15 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/types.h>
+#include <momentum/character_solver/joint_to_joint_orientation_error_function.h>
+#include <momentum/character_solver/joint_to_joint_position_error_function.h>
 #include <momentum/math/types.h>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
 #include <array>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -129,5 +132,39 @@ std::array<GloveOffset, 2> extractGloveOffsetsFromCharacter(
     const Character& gloveChar,
     const CharacterParameters& params,
     const GloveConfig& cfg);
+
+/// Convert per-frame glove observations to JointToJoint position constraints.
+///
+/// For each frame and each valid observation, creates a constraint between the
+/// finger joint (source) and the glove bone (reference), with the observation's
+/// position as the target in the glove bone's coordinate frame.
+///
+/// @param[in] gloveData Per-frame glove sensor observations.
+/// @param[in] character Character with glove bones (from createGloveCharacter()).
+/// @param[in] cfg Glove configuration.
+/// @param[in] handIndex Hand index (0=left, 1=right).
+/// @return Vector of per-frame constraint vectors.
+std::vector<std::vector<JointToJointPositionDataT<float>>> createGlovePositionConstraintData(
+    std::span<const GloveFrameData> gloveData,
+    const Character& character,
+    const GloveConfig& cfg,
+    size_t handIndex);
+
+/// Convert per-frame glove observations to JointToJoint orientation constraints.
+///
+/// For each frame and each valid observation, creates a constraint between the
+/// finger joint (source) and the glove bone (reference), with the observation's
+/// orientation as the target relative orientation.
+///
+/// @param[in] gloveData Per-frame glove sensor observations.
+/// @param[in] character Character with glove bones (from createGloveCharacter()).
+/// @param[in] cfg Glove configuration.
+/// @param[in] handIndex Hand index (0=left, 1=right).
+/// @return Vector of per-frame constraint vectors.
+std::vector<std::vector<JointToJointOrientationDataT<float>>> createGloveOrientationConstraintData(
+    std::span<const GloveFrameData> gloveData,
+    const Character& character,
+    const GloveConfig& cfg,
+    size_t handIndex);
 
 } // namespace momentum

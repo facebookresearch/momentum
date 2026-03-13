@@ -128,3 +128,68 @@ TEST(GloveUtilsTest, ParameterRoundTrip) {
   EXPECT_TRUE(offsets[1].translation.isApprox(Vector3f(4.0f, 5.0f, 6.0f)));
   EXPECT_TRUE(offsets[1].rotationEulerXYZ.isApprox(Vector3f(0.4f, 0.5f, 0.6f)));
 }
+
+// Verify that createGlovePositionConstraintData and
+// createGloveOrientationConstraintData correctly convert glove observations
+// into per-frame constraint data with the right joint indices, targets, and
+// weights, and that invalid/unknown observations are filtered out.
+TEST(GloveUtilsTest, CreateConstraintDataFromObservations) {
+  const auto srcCharacter = createCharacterWithWrists();
+  const GloveConfig cfg;
+  const auto gloveChar = createGloveCharacter(srcCharacter, cfg);
+
+  // Use existing joint names from the test character for finger joints.
+  // Joints are: root, joint1, joint2, l_wrist, joint4, r_wrist, joint6, joint7,
+  //             glove_l_wrist, glove_r_wrist
+  const std::string fingerJoint = "joint1";
+  const size_t fingerJointIdx = gloveChar.skeleton.getJointIdByName(fingerJoint);
+  ASSERT_NE(fingerJointIdx, kInvalidIndex);
+
+  const size_t gloveBoneIdx = gloveChar.skeleton.getJointIdByName("glove_l_wrist");
+  ASSERT_NE(gloveBoneIdx, kInvalidIndex);
+
+  // Build 2 frames of glove data: frame 0 has a valid and an invalid obs,
+  // frame 1 has a valid obs and one with an unknown joint name.
+  std::vector<GloveFrameData> gloveData(2);
+
+  GloveSensorObservation validObs;
+  validObs.jointName = fingerJoint;
+  validObs.position = Vector3f(1.0f, 2.0f, 3.0f);
+  validObs.orientation = Eigen::Quaternionf(Eigen::AngleAxisf(0.5f, Vector3f::UnitZ()));
+  validObs.valid = true;
+
+  GloveSensorObservation invalidObs;
+  invalidObs.jointName = fingerJoint;
+  invalidObs.valid = false;
+
+  GloveSensorObservation unknownObs;
+  unknownObs.jointName = "nonexistent_joint";
+  unknownObs.valid = true;
+
+  gloveData[0] = {validObs, invalidObs};
+  gloveData[1] = {validObs, unknownObs};
+
+  // Position constraints
+  const auto posData = createGlovePositionConstraintData(gloveData, gloveChar, cfg, 0);
+  ASSERT_EQ(posData.size(), 2u);
+  // Frame 0: only the valid obs should produce a constraint
+  ASSERT_EQ(posData[0].size(), 1u);
+  EXPECT_EQ(posData[0][0].sourceJoint, fingerJointIdx);
+  EXPECT_EQ(posData[0][0].referenceJoint, gloveBoneIdx);
+  EXPECT_TRUE(posData[0][0].target.isApprox(Vector3f(1.0f, 2.0f, 3.0f)));
+  EXPECT_FLOAT_EQ(posData[0][0].weight, cfg.positionWeight);
+
+  // Frame 1: valid obs produces a constraint, unknown joint is skipped
+  ASSERT_EQ(posData[1].size(), 1u);
+  EXPECT_EQ(posData[1][0].sourceJoint, fingerJointIdx);
+
+  // Orientation constraints
+  const auto oriData = createGloveOrientationConstraintData(gloveData, gloveChar, cfg, 0);
+  ASSERT_EQ(oriData.size(), 2u);
+  ASSERT_EQ(oriData[0].size(), 1u);
+  EXPECT_EQ(oriData[0][0].sourceJoint, fingerJointIdx);
+  EXPECT_EQ(oriData[0][0].referenceJoint, gloveBoneIdx);
+  EXPECT_TRUE(oriData[0][0].target.isApprox(validObs.orientation));
+  EXPECT_FLOAT_EQ(oriData[0][0].weight, cfg.orientationWeight);
+  ASSERT_EQ(oriData[1].size(), 1u);
+}
