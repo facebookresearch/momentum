@@ -10,6 +10,7 @@ import unittest
 import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.solver as pym_solver
 import torch
@@ -84,7 +85,7 @@ class TestBlendShapeBase(unittest.TestCase):
         torch.manual_seed(0)
         np.random.seed(0)
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
 
         bs_bytes = blend_shape.to_bytes()
@@ -97,7 +98,7 @@ class TestBlendShapeBase(unittest.TestCase):
     def test_blend_shape_character(self) -> None:
         np.random.seed(0)
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
 
         # Build a set of shape vectors and instantiate as blend shape base
         blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
@@ -124,7 +125,7 @@ class TestBlendShapeBase(unittest.TestCase):
         self.assertTrue(np.sum(c3.parameter_transform.face_expression_parameters) == 0)
 
     def test_solve_face_expression_parameters(self) -> None:
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         blend_shape = pym_geometry.BlendShapeBase.from_tensors(_build_shape_vectors(c))
         c = c.with_face_expression_blend_shape(blend_shape)
         pt = c.parameter_transform
@@ -215,7 +216,7 @@ class TestBlendShape(unittest.TestCase):
     def test_blend_shape_character(self) -> None:
         np.random.seed(0)  # ensure repeatability
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
 
         # Build a blend shape basis:
         blend_shape = _build_blend_shape_basis(c)
@@ -240,7 +241,7 @@ class TestBlendShape(unittest.TestCase):
     def test_save_and_load(self) -> None:
         np.random.seed(0)  # ensure repeatability
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
 
         # Build a blend shape basis:
         blend_shape = _build_blend_shape_basis(c)
@@ -256,7 +257,7 @@ class TestBlendShape(unittest.TestCase):
     def test_skinning_compare_momentum(self) -> None:
         """Compare the pymomentum skinning against the native momentum skinning."""
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         torch.manual_seed(0)  # ensure repeatability
         n_model_params = c.parameter_transform.size
 
@@ -289,7 +290,7 @@ class TestBlendShape(unittest.TestCase):
     # differentiable operations with PyTorch autograd.
 
     def test_solve_blend_shape(self) -> None:
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         blend_shape = _build_blend_shape_basis(c)
         c = c.with_blend_shape(blend_shape)
         pt = c.parameter_transform
@@ -359,7 +360,7 @@ class TestBlendShape(unittest.TestCase):
         np.random.seed(0)  # ensure repeatability
 
         # Create test character with blend shapes
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         blend_shape = _build_blend_shape_basis(c)
         c_with_blend = c.with_blend_shape(blend_shape)
 

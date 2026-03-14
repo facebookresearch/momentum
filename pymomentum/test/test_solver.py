@@ -11,6 +11,7 @@ from multiprocessing.dummy import Pool
 import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.solver as pym_solver
 import torch
@@ -21,7 +22,7 @@ AUTOGRAD_ENABLED: bool = pym_solver.AUTOGRAD_ENABLED
 
 
 def solve_one_ik_problem(index: int) -> torch.Tensor:
-    character = pym_geometry.create_test_character()
+    character = pym_test_utils.create_test_character()
 
     n_joints = character.skeleton.size
     n_params = character.parameter_transform.size
@@ -83,7 +84,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -251,7 +252,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -282,7 +283,7 @@ class TestSolver(unittest.TestCase):
         self.assertTrue(result.allclose(model_params_init, atol=1e-8))
 
     def test_gradient(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -376,7 +377,7 @@ class TestSolver(unittest.TestCase):
             )
 
     def test_residual(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -490,7 +491,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -572,7 +573,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -642,7 +643,7 @@ class TestSolver(unittest.TestCase):
         self.assertEqual(n_solve_iter, 6)
 
     def test_transform_pose(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         np.random.seed(0)  # ensure repeatability
 
         nBatch = 5
@@ -689,7 +690,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_params = character.parameter_transform.size
 
