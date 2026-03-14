@@ -11,6 +11,7 @@ import unittest
 
 import numpy as np
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 from pymomentum.marker_tracking import (
     calibrate_markers,
     CalibrationConfig,
@@ -117,7 +118,7 @@ class TestMarkerTracker(unittest.TestCase):
         )
 
     def test_motion_matrix(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         tracking_config = TrackingConfig()
         calibration_config = CalibrationConfig()
         refine_config = RefineConfig()
@@ -165,7 +166,7 @@ class TestMarkerTracker(unittest.TestCase):
 
     def test_calibrate_markers(self) -> None:
         """Test that calibrate_markers returns valid identity parameters."""
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         calibration_config = CalibrationConfig(calib_frames=10)
         identity = np.zeros(0, dtype=np.float32)
 

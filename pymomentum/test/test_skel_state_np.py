@@ -9,6 +9,7 @@ import unittest
 
 import numpy as np
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.quaternion_np as pym_quaternion
 import pymomentum.skel_state_np as pym_skel_state
 
@@ -44,7 +45,7 @@ def init_sim3_like_skel_state(
 
 class TestSkelStateNumpy(unittest.TestCase):
     def test_skel_state_to_transforms(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         modelParams = 0.2 * np.ones(
             (nBatch, character.parameter_transform.size),

@@ -18,6 +18,7 @@ import unittest
 import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.skel_state as pym_skel_state
 import torch
 
@@ -29,7 +30,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.apply_parameter_transform matches diff_geometry.apply_parameter_transform."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
 
         # Create model parameters with numpy
@@ -60,7 +61,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that ParameterTransform.inverse().apply matches diff_geometry.apply_inverse_parameter_transform."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
 
@@ -91,7 +92,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.model_parameters_to_skeleton_state matches diff_geometry.model_parameters_to_skeleton_state."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
 
         # Create model parameters with numpy
@@ -122,7 +123,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.model_parameters_to_local_skeleton_state matches diff_geometry.model_parameters_to_local_skeleton_state."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
 
         # Create model parameters with numpy
@@ -159,7 +160,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.joint_parameters_to_skeleton_state matches diff_geometry.joint_parameters_to_skeleton_state."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
 
@@ -189,7 +190,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.joint_parameters_to_local_skeleton_state matches diff_geometry.joint_parameters_to_local_skeleton_state."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
 
@@ -225,7 +226,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.skeleton_state_to_joint_parameters matches diff_geometry.skeleton_state_to_joint_parameters."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
 
         # Create model parameters and convert to skeleton state
@@ -261,7 +262,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         """Verify that geometry.local_skeleton_state_to_joint_parameters matches diff_geometry.local_skeleton_state_to_joint_parameters."""
         np.random.seed(42)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
 
         # Create model parameters and convert to local skeleton state
@@ -361,7 +362,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         np.random.seed(42)
 
         # Create a test character with blend shape
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         n_pts = c.mesh.n_vertices
         n_blend = 4
         nBatch = 2
@@ -395,7 +396,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         np.random.seed(42)
 
         # Create a test character with blend shapes
-        character = pym_geometry.create_test_character(with_blendshapes=True)
+        character = pym_test_utils.create_test_character(with_blendshapes=True)
         nBatch = 2
 
         # Create model parameters with numpy
@@ -427,7 +428,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         np.random.seed(42)
 
         # Create a test character with blend shapes
-        character = pym_geometry.create_test_character(with_blendshapes=True)
+        character = pym_test_utils.create_test_character(with_blendshapes=True)
         nBatch = 2
 
         # Create model parameters with numpy
@@ -459,7 +460,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         np.random.seed(42)
 
         # Create a test character with mesh
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
 
         # Debugging checks for skin weights and skeleton consistency
@@ -558,7 +559,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         )
 
         # Test with batch dimension
-        character = pym_geometry.create_test_character(num_joints=5)
+        character = pym_test_utils.create_test_character(num_joints=5)
         vertex_positions_np = character.mesh.vertices.astype(np.float32)
         triangles_np = character.mesh.faces
 
@@ -584,7 +585,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
 
     def test_map_model_parameters_matches(self) -> None:
         """Verify that diff_geometry.map_model_parameters matches geometry.map_model_parameters."""
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         active = np.zeros(c.parameter_transform.size, dtype=bool)
         active[0] = True
         active[3] = True
@@ -623,8 +624,8 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
 
     def test_map_model_parameters_with_names_matches(self) -> None:
         """Verify that diff_geometry.map_model_parameters (with names) matches geometry version."""
-        c = pym_geometry.create_test_character()
-        c2 = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
+        c2 = pym_test_utils.create_test_character()
 
         np.random.seed(0)
         nBatch = 5
@@ -654,8 +655,8 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
 
     def test_map_joint_parameters_matches(self) -> None:
         """Verify that diff_geometry.map_joint_parameters matches geometry.map_joint_parameters."""
-        c = pym_geometry.create_test_character()
-        c2 = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
+        c2 = pym_test_utils.create_test_character()
 
         np.random.seed(0)
         nBatch = 5
@@ -690,7 +691,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         torch.manual_seed(0)
         np.random.seed(0)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
         nConstraints = 4 * nJoints
@@ -736,7 +737,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         torch.manual_seed(0)
         np.random.seed(0)
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
         nConstraints = 4 * nJoints
@@ -785,7 +786,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
         np.random.seed(42)
 
         # Create a test character with mesh
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         nJoints = character.skeleton.size
         nBatch = 2
@@ -858,7 +859,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
     def test_apply_model_param_limits_matches(self) -> None:
         """Verify that Character.apply_model_param_limits matches diff_geometry.apply_model_param_limits."""
         # The test character has only one parameter limit: min-max type [-0.1, 0.1] for root (joint index 0).
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         n_model_params = character.parameter_transform.size
         np.random.seed(0)
         n_batch = 2
@@ -1063,7 +1064,7 @@ class TestGeometryDiffGeometryConsistency(unittest.TestCase):
 
     def test_skin_skinned_locators_matches(self) -> None:
         """Verify that Character.skin_skinned_locators matches diff_geometry.skin_skinned_locators."""
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         # Skip test if character has no skinned locators
         if not character.skinned_locators:

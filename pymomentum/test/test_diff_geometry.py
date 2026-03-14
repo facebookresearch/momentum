@@ -18,6 +18,7 @@ import unittest
 import numpy as np
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import torch
@@ -61,7 +62,7 @@ class TestDiffGeometry(unittest.TestCase):
     """Tests for differentiable geometry operations in diff_geometry module."""
 
     def test_diffParamTransform(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         torch.manual_seed(0)  # ensure repeatability
 
         nBatch = 5
@@ -88,7 +89,7 @@ class TestDiffGeometry(unittest.TestCase):
             )
 
     def test_diffInverseParamTransform(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         invTransform = character.parameter_transform.inverse()
 
         nBatch = 2
@@ -122,7 +123,7 @@ class TestDiffGeometry(unittest.TestCase):
     def test_diffmodel_parameters_to_positions(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
         modelParams = torch.zeros(
@@ -154,7 +155,7 @@ class TestDiffGeometry(unittest.TestCase):
 
         # Generate a list of characters with different sizes:
         characters = [
-            pym_geometry.create_test_character().scaled(i + 1) for i in range(nBatch)
+            pym_test_utils.create_test_character().scaled(i + 1) for i in range(nBatch)
         ]
 
         # Apply some random parameters and verify that uniform_random_to_model_parameters of the
@@ -185,7 +186,7 @@ class TestDiffGeometry(unittest.TestCase):
     def test_model_parameters_to_positions_inputs(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
         modelParams = torch.zeros(nBatch, character.parameter_transform.size)
@@ -216,7 +217,7 @@ class TestDiffGeometry(unittest.TestCase):
     def test_diffjoint_parameters_to_positions(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
 
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         nJoints = character.skeleton.size
         modelParams = 0.2 * torch.ones(
@@ -259,7 +260,7 @@ class TestDiffGeometry(unittest.TestCase):
             )
 
     def test_diffmodel_parameters_to_skeleton_state(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         modelParams = 0.2 * torch.ones(
             nBatch,
@@ -278,7 +279,7 @@ class TestDiffGeometry(unittest.TestCase):
             )
 
     def test_diffmodel_parameters_to_local_skeleton_state(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         modelParams = 0.2 * torch.ones(
             nBatch,
@@ -329,7 +330,7 @@ class TestDiffGeometry(unittest.TestCase):
             )
 
     def test_local_skeleton_state_to_joint_parameters(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         n_batch = 2
         model_params = 0.2 * torch.ones(
             n_batch,
@@ -383,7 +384,7 @@ class TestDiffGeometry(unittest.TestCase):
         )
 
     def test_skeleton_state_to_joint_parameters(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         n_batch = 2
         model_params = 0.2 * torch.ones(
             n_batch,
@@ -438,7 +439,7 @@ class TestDiffGeometry(unittest.TestCase):
 
     def test_typePromotion(self) -> None:
         # Verify that float/double promotion is working.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         modelParams = 0.2 * torch.ones(
             nBatch,
@@ -460,7 +461,7 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertEqual(mp_double.dtype, torch.float64)
 
     def test_diffjoint_parameters_to_skeleton_state(self) -> None:
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
         nBatch = 2
         modelParams = 0.2 * torch.ones(
             nBatch,
@@ -483,7 +484,7 @@ class TestDiffGeometry(unittest.TestCase):
 
     def test_map_model_parameters(self) -> None:
         # map onto a "reduced" character and back:
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         active = torch.zeros(c.parameter_transform.size, dtype=torch.bool)
         active[0] = True
         active[3] = True
@@ -506,8 +507,8 @@ class TestDiffGeometry(unittest.TestCase):
 
     def test_map_joint_parameters(self) -> None:
         # just check that it's idempotent for now:
-        c = pym_geometry.create_test_character()
-        c2 = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
+        c2 = pym_test_utils.create_test_character()
 
         torch.manual_seed(0)  # ensure repeatability
         nBatch = 5
@@ -524,7 +525,7 @@ class TestDiffGeometry(unittest.TestCase):
 
     def test_apply_limits(self) -> None:
         # The test character has only one parameter limit: min-max type [-0.1, 0.1] for root (joint index 0).
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         n_model_params = c.parameter_transform.size
         torch.manual_seed(0)  # ensure repeatability
         n_batch = 2
@@ -581,7 +582,7 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue(torch.allclose(vertex_normals_batch[1], expected_multi))
 
     def test_scale_character_skinning(self) -> None:
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         c_scaled = c.scaled(10.0)
         self.assertEqual(c.mesh.vertices.shape, c_scaled.mesh.vertices.shape)
         self.assertTrue(np.allclose(10.0 * c.mesh.vertices, c_scaled.mesh.vertices))
@@ -606,7 +607,7 @@ class TestDiffGeometry(unittest.TestCase):
         self.assertTrue((10.0 * posed_mesh).allclose(posed_mesh_scaled))
 
     def test_transform_character_skinning(self) -> None:
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         xf = pym_skel_state.from_quaternion(
             pym_quaternion.euler_xyz_to_quaternion(
                 torch.FloatTensor([[0, math.pi / 4.0, math.pi]])
@@ -658,7 +659,7 @@ class TestDiffGeometry(unittest.TestCase):
         torch.manual_seed(42)  # ensure repeatability
 
         # Create a test character that has mesh and skin weights
-        c = pym_geometry.create_test_character(num_joints=5)
+        c = pym_test_utils.create_test_character(num_joints=5)
         self.assertIsNotNone(c.mesh)
         self.assertIsNotNone(c.skin_weights)
 
@@ -808,7 +809,7 @@ class TestDiffGeometry(unittest.TestCase):
 
         torch.set_printoptions(profile="full")
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
         torch.manual_seed(0)  # ensure repeatability
         n_model_params = c.parameter_transform.size
 
@@ -1047,7 +1048,7 @@ class TestDiffGeometry(unittest.TestCase):
         np.random.seed(0)
         torch.manual_seed(0)
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
 
         # Build a blend shape basis
         n_pts = c.mesh.n_vertices if c.mesh else 10
@@ -1072,7 +1073,7 @@ class TestDiffGeometry(unittest.TestCase):
         np.random.seed(0)
         torch.manual_seed(0)
 
-        c = pym_geometry.create_test_character()
+        c = pym_test_utils.create_test_character()
 
         # Build a face expression blend shape basis
         n_pts = c.mesh.n_vertices if c.mesh else 10

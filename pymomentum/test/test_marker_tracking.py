@@ -9,6 +9,7 @@ import unittest
 
 import numpy as np
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.marker_tracking as pym_marker_tracking
 import pymomentum.skel_state as pym_skel_state
 import torch
@@ -18,7 +19,7 @@ class TestMarkerTracking(unittest.TestCase):
     def test_convert_locators_to_skinned_locators(self) -> None:
         """Test that locators get converted to skinned locators with appropriate bone weights."""
         # Create a test character with mesh and skin weights
-        character = pym_geometry.create_test_character(4)
+        character = pym_test_utils.create_test_character(4)
 
         # Get a mesh vertex position to place our locator
         mesh_vertex_idx = (
@@ -121,7 +122,7 @@ class TestMarkerTracking(unittest.TestCase):
     def test_convert_skinned_locators_to_locators(self) -> None:
         """Test that skinned locators get converted back to regular locators correctly."""
         # Create a test character with mesh and skin weights
-        character = pym_geometry.create_test_character(4)
+        character = pym_test_utils.create_test_character(4)
 
         # Hand-create a skinned locator with multiple bone influences
         # We'll create one at the origin in rest pose with known skin weights
@@ -223,7 +224,7 @@ class TestMarkerTracking(unittest.TestCase):
         torch.manual_seed(42)  # Ensure repeatability
 
         # Create a test character with mesh and skin weights
-        character = pym_geometry.create_test_character(num_joints=5)
+        character = pym_test_utils.create_test_character(num_joints=5)
         self.assertIsNotNone(character.mesh)
         self.assertIsNotNone(character.skin_weights)
 
@@ -405,7 +406,7 @@ class TestMarkerTracking(unittest.TestCase):
         np.random.seed(0)
 
         # Create a test character
-        character = pym_geometry.create_test_character(4)
+        character = pym_test_utils.create_test_character(4)
 
         # Add some test locators that will become markers
         test_locators = [
@@ -538,7 +539,7 @@ class TestMarkerTracking(unittest.TestCase):
 
     def test_convert_locators_to_skinned_locators_max_distance(self) -> None:
         """Test that max_distance parameter affects the conversion."""
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         # Create a locator positioned far from the mesh
         far_position = np.array(
@@ -587,7 +588,7 @@ class TestMarkerTracking(unittest.TestCase):
         torch.manual_seed(42)
 
         # Create a test character with mesh and skin weights
-        character = pym_geometry.create_test_character(num_joints=5)
+        character = pym_test_utils.create_test_character(num_joints=5)
         self.assertIsNotNone(character.mesh)
         self.assertIsNotNone(character.skin_weights)
 
