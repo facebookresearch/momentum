@@ -9,6 +9,8 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/types.h>
+#include <momentum/character_sequence_solver/fwd.h>
+#include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/joint_to_joint_orientation_error_function.h>
 #include <momentum/character_solver/joint_to_joint_position_error_function.h>
 #include <momentum/math/types.h>
@@ -17,6 +19,8 @@
 #include <Eigen/Geometry>
 
 #include <array>
+#include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <vector>
@@ -166,5 +170,76 @@ std::vector<std::vector<JointToJointOrientationDataT<float>>> createGloveOrienta
     const Character& character,
     const GloveConfig& cfg,
     size_t handIndex);
+
+/// Add glove error functions to a SequenceSolverFunction for one frame.
+///
+/// Creates JointToJointPosition/OrientationErrorFunction instances, populates
+/// them from pre-built constraint data for the given frame, and adds them to
+/// the solver at the specified solver frame index. Called from the per-frame
+/// loop in trackSequence().
+///
+/// @param[in,out] solverFunc Sequence solver to add error functions to.
+/// @param[in] solverFrame Frame index within the solver.
+/// @param[in] character Character with glove bones.
+/// @param[in] posData Pre-built per-frame position constraint data.
+/// @param[in] oriData Pre-built per-frame orientation constraint data.
+/// @param[in] iFrame Index into the constraint data arrays (source frame).
+/// @param[in] posWeight Position constraint weight.
+/// @param[in] oriWeight Orientation constraint weight.
+void addGloveConstraintsToSequenceSolver(
+    SequenceSolverFunctionT<float>& solverFunc,
+    size_t solverFrame,
+    const Character& character,
+    const std::vector<std::vector<JointToJointPositionDataT<float>>>& posData,
+    const std::vector<std::vector<JointToJointOrientationDataT<float>>>& oriData,
+    size_t iFrame,
+    float posWeight,
+    float oriWeight);
+
+/// Holds per-frame glove error functions for the single-frame solver.
+///
+/// Used by trackPosesForFrames() to register error functions once and then
+/// swap constraint data per frame via updateGloveConstraintsForFrame().
+struct GloveErrorFunctions {
+  /// Position error function registered with the solver.
+  std::shared_ptr<JointToJointPositionErrorFunctionT<float>> posFunc;
+
+  /// Orientation error function registered with the solver.
+  std::shared_ptr<JointToJointOrientationErrorFunctionT<float>> oriFunc;
+
+  /// Pre-built per-frame position constraint data.
+  std::vector<std::vector<JointToJointPositionDataT<float>>> posData;
+
+  /// Pre-built per-frame orientation constraint data.
+  std::vector<std::vector<JointToJointOrientationDataT<float>>> oriData;
+};
+
+/// Create and register glove error functions for the per-frame solver.
+///
+/// Creates error function instances, adds them to the SkeletonSolverFunction,
+/// and builds the per-frame constraint data. Returns nullopt if the glove data
+/// is empty or the glove bone is not found.
+///
+/// @param[in,out] solverFunc Skeleton solver to register error functions with.
+/// @param[in] character Character with glove bones.
+/// @param[in] gloveData Per-frame glove sensor observations.
+/// @param[in] cfg Glove configuration.
+/// @param[in] handIndex Hand index (0=left, 1=right).
+/// @return GloveErrorFunctions if successfully set up, nullopt otherwise.
+std::optional<GloveErrorFunctions> setupGloveErrorFunctions(
+    SkeletonSolverFunctionT<float>& solverFunc,
+    const Character& character,
+    std::span<const GloveFrameData> gloveData,
+    const GloveConfig& cfg,
+    size_t handIndex);
+
+/// Swap per-frame glove constraint data on already-registered error functions.
+///
+/// Clears existing constraints and loads the constraint data for the specified
+/// frame index. Called in the per-frame loop of trackPosesForFrames().
+///
+/// @param[in,out] funcs Error functions to update.
+/// @param[in] iFrame Frame index into the constraint data arrays.
+void updateGloveConstraintsForFrame(GloveErrorFunctions& funcs, size_t iFrame);
 
 } // namespace momentum

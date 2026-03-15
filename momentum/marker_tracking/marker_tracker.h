@@ -9,6 +9,7 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
+#include <momentum/marker_tracking/glove_utils.h>
 
 namespace momentum {
 
@@ -102,7 +103,10 @@ Eigen::MatrixXf trackSequence(
     size_t frameStride = 1,
     bool enforceFloorInFirstFrame = false,
     const std::string& firstFramePoseConstraintSet = "",
-    float targetHeightCm = 0.0f);
+    float targetHeightCm = 0.0f,
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Use multiple frames to solve for global parameters such as body proportions and/or marker
 /// offsets together with the motion.
@@ -131,7 +135,10 @@ Eigen::MatrixXf trackSequence(
     float regularizer = 0.0,
     bool enforceFloorInFirstFrame = false,
     const std::string& firstFramePoseConstraintSet = "",
-    float targetHeightCm = 0.0f);
+    float targetHeightCm = 0.0f,
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Track poses per-frame given a calibrated character.
 ///
@@ -149,7 +156,10 @@ Eigen::MatrixXf trackPosesPerframe(
     const momentum::Character& character,
     const momentum::ModelParameters& globalParams,
     const TrackingConfig& config,
-    size_t frameStride = 1);
+    size_t frameStride = 1,
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Track poses for given frames.
 ///
@@ -169,7 +179,10 @@ Eigen::MatrixXf trackPosesForFrames(
     const Eigen::MatrixXf& initialMotion,
     const TrackingConfig& config,
     const std::vector<size_t>& frameIndices,
-    bool isContinuous = false);
+    bool isContinuous = false,
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Calibrate body proportions and locator offsets of a character from input marker data.
 ///
