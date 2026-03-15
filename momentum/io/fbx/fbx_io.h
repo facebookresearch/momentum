@@ -62,6 +62,11 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     bool stripNamespaces = true);
 
 /// Save a character with animation to an FBX file.
+///
+/// Blend shape and face expression weights are automatically extracted from the model parameters
+/// (poses) when the character has blend shapes or face expression blend shapes configured in its
+/// parameter transform. No separate weight arguments are needed.
+///
 /// @param filename Path to the output FBX file
 /// @param character The character to save
 /// @param poses Model parameters for each frame (empty for bind pose only)
@@ -79,6 +84,13 @@ void saveFbx(
     const FileSaveOptions& options = FileSaveOptions());
 
 /// Save a character with animation using joint parameters directly.
+///
+/// Blend shape and face expression weights are automatically extracted from the model parameters
+/// when the character has blend shapes or face expression blend shapes configured in its
+/// parameter transform. Since joint parameters do not contain blend shape weights, this function
+/// does not save blend shape animation. Use saveFbx() with model parameters to include blend shape
+/// animation.
+///
 /// @param filename Path to the output FBX file
 /// @param character The character to save
 /// @param jointParams Joint parameters for each frame (empty for bind pose only)
@@ -94,6 +106,10 @@ void saveFbxWithJointParams(
     const FileSaveOptions& options = FileSaveOptions());
 
 /// Save a character with animation using skeleton states directly.
+///
+/// Since skeleton states do not contain blend shape weights, this function does not save blend
+/// shape animation. Use saveFbx() with model parameters to include blend shape animation.
+///
 /// @param filename Path to the output FBX file
 /// @param character The character to save
 /// @param skeletonStates SkeletonState for each frame (empty for bind pose only)
@@ -116,6 +132,16 @@ void saveFbxModel(
     const filesystem::path& filename,
     const Character& character,
     const FileSaveOptions& options = FileSaveOptions());
+
+/// Load per-frame blend shape animation weights from an FBX file.
+///
+/// Reads the DeformPercent animation curves on FbxBlendShapeChannel objects in the FBX scene.
+/// Returns a matrix of shape (numShapes x numFrames) with values in [0, 1] range.
+/// Returns an empty matrix if no blend shape animation is found.
+///
+/// @param filename Path to the FBX file containing blend shape animation.
+/// @return A matrix of blend shape weights (numShapes x numFrames), values in [0, 1].
+MatrixXf loadFbxBlendShapeWeights(const filesystem::path& filename);
 
 /// Loads a MarkerSequence from an FBX file.
 ///
