@@ -18,6 +18,7 @@
 #include <rerun.hpp>
 
 #include <string>
+#include <vector>
 
 using namespace rerun;
 using namespace momentum;
@@ -39,8 +40,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option("-l,--loglevel", opt->logLevel, "Set the log level")
       ->transform(CLI::CheckedTransformer(logLevelMap(), CLI::ignore_case))
       ->default_val(opt->logLevel);
-  app.add_flag("--log-joints", opt->logJoints, "Log joint parameters (very slow)")
-      ->default_val(opt->logJoints);
+  app.add_flag("--log-joints", opt->logJoints, "Log joint parameters")->default_val(opt->logJoints);
   app.add_flag("--permissive", opt->permissive, "Allow nonstandard file")
       ->default_val(opt->permissive);
   return opt;
@@ -96,31 +96,53 @@ int main(int argc, char* argv[]) {
       }
 
       const size_t nFrames = motion.cols();
+
+      // Pre-compute time columns for batch scalar logging
+      std::vector<int64_t> frameIndices(nFrames);
+      std::vector<double> logTimes(nFrames);
+      for (size_t i = 0; i < nFrames; ++i) {
+        frameIndices[i] = static_cast<int64_t>(i);
+        logTimes[i] = static_cast<double>(i) / fps;
+      }
+
+      // Prepare matrix for collecting joint parameters during the frame loop
+      Eigen::MatrixXf allJointParams;
+
       for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
         // log timeline
         rec.set_time_sequence("frame_index", iFrame);
         momentum::setTimeSeconds(rec, "log_time", (float)iFrame / fps);
 
         // log character info
-        if (iFrame < nFrames) {
-          charParams.offsets = motion.col(iFrame);
-          charState.set(
-              charParams,
-              character,
-              true /*updateMesh*/,
-              true /*updateCollision*/,
-              false /*updateLimits*/);
-          logCharacter(rec, "world/character/" + motionIndex, character, charState);
-          // XXX 2D plots in rerun are not scalable at the moment
-          if (options->logJoints) {
-            logJointParams(
-                rec,
-                "world_params/" + motionIndex,
-                "joint_params/" + motionIndex,
-                jointNames,
-                charState.skeletonState.jointParameters.v);
+        charParams.offsets = motion.col(iFrame);
+        charState.set(
+            charParams,
+            character,
+            true /*updateMesh*/,
+            true /*updateCollision*/,
+            false /*updateLimits*/);
+        logCharacter(rec, "world/character/" + motionIndex, character, charState);
+
+        // Collect joint params for batch logging after the loop
+        if (options->logJoints) {
+          const auto& jp = charState.skeletonState.jointParameters.v;
+          if (allJointParams.cols() == 0) {
+            allJointParams.resize(jp.size(), nFrames);
           }
+          allJointParams.col(iFrame) = jp;
         }
+      }
+
+      // Batch log joint parameters using send_columns (after the frame loop)
+      if (options->logJoints && nFrames > 0) {
+        logJointParamsColumns(
+            rec,
+            "world_params/" + motionIndex,
+            "joint_params/" + motionIndex,
+            jointNames,
+            allJointParams,
+            frameIndices,
+            logTimes);
       }
     }
   } catch (const std::exception& e) {
