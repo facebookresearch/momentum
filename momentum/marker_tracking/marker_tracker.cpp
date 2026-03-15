@@ -972,12 +972,25 @@ void calibrateModel(
     const CalibrationConfig& config,
     Character& character,
     ModelParameters& identity,
-    const std::array<float, 3>& regularizerWeights) {
+    const std::array<float, 3>& regularizerWeights,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   MT_CHECK(
       identity.v.size() == character.parameterTransform.numAllModelParameters(),
       "Input identity parameters {} do not match character parameters {}",
       identity.v.size(),
       character.parameterTransform.numAllModelParameters());
+  MT_CHECK(
+      leftGloveData.empty() || leftGloveData.size() == markerData.size(),
+      "Left glove data has {} frames but marker data has {} frames",
+      leftGloveData.size(),
+      markerData.size());
+  MT_CHECK(
+      rightGloveData.empty() || rightGloveData.size() == markerData.size(),
+      "Right glove data has {} frames but marker data has {} frames",
+      rightGloveData.size(),
+      markerData.size());
 
   const size_t numFrames = markerData.size();
   // uniformly sample frames for calibration
@@ -991,6 +1004,11 @@ void calibrateModel(
     solvingCharacter = addSkinnedLocatorParametersToTransform(solvingCharacter);
   }
 
+  // Add glove bones to the solving character if glove data is provided
+  if (gloveConfig && (!leftGloveData.empty() || !rightGloveData.empty())) {
+    solvingCharacter = createGloveCharacter(solvingCharacter, *gloveConfig);
+  }
+
   // Extended quantities are for the solvingCharacter, which includes locators as bones
   // w/o Extended quantities are for character with fixed locators
   const ParameterTransform& transformExtended = solvingCharacter.parameterTransform;
@@ -998,6 +1016,7 @@ void calibrateModel(
 
   ParameterSet locatorSet = transformExtended.getParameterSet("locators", true) |
       transformExtended.getParameterSet("skinnedLocators", true);
+  ParameterSet gloveSet = transformExtended.getParameterSet("gloves", true);
   ParameterSet calibBodySetExtended;
   ParameterSet calibBodySet;
   if (config.globalScaleOnly) {
@@ -1124,7 +1143,7 @@ void calibrateModel(
       motion = trackSequence(
           markerData,
           solvingCharacter,
-          locatorSet | calibBodySetExtended,
+          locatorSet | calibBodySetExtended | gloveSet,
           motion,
           trackingConfig,
           frameIndices,
@@ -1132,12 +1151,15 @@ void calibrateModel(
               1), // note: ideally use a small regularization to prevent too large a change
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet,
-          config.targetHeightCm); // still solving a subset
+          config.targetHeightCm,
+          leftGloveData,
+          rightGloveData,
+          gloveConfig); // still solving a subset
     } else {
       motion = trackSequence(
           markerData,
           solvingCharacter,
-          locatorSet | calibBodySetExtended,
+          locatorSet | calibBodySetExtended | gloveSet,
           motion,
           trackingConfig,
           regularizerWeights.at(
@@ -1145,7 +1167,10 @@ void calibrateModel(
           frameStride,
           config.enforceFloorInFirstFrame,
           config.firstFramePoseConstraintSet,
-          config.targetHeightCm); // still solving a subset
+          config.targetHeightCm,
+          leftGloveData,
+          rightGloveData,
+          gloveConfig); // still solving a subset
     }
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
@@ -1183,7 +1208,7 @@ void calibrateModel(
     motion = trackSequence(
         markerData,
         solvingCharacter,
-        locatorSet,
+        locatorSet | gloveSet,
         motion,
         trackingConfig,
         frameIndices,
@@ -1191,12 +1216,15 @@ void calibrateModel(
             2), // note: ideally use a higher regularizer weight to prevent too large a change
         config.enforceFloorInFirstFrame,
         config.firstFramePoseConstraintSet,
-        config.targetHeightCm);
+        config.targetHeightCm,
+        leftGloveData,
+        rightGloveData,
+        gloveConfig);
   } else {
     motion = trackSequence(
         markerData,
         solvingCharacter,
-        locatorSet,
+        locatorSet | gloveSet,
         motion,
         trackingConfig,
         regularizerWeights.at(
@@ -1204,7 +1232,10 @@ void calibrateModel(
         frameStride,
         config.enforceFloorInFirstFrame,
         config.firstFramePoseConstraintSet,
-        config.targetHeightCm);
+        config.targetHeightCm,
+        leftGloveData,
+        rightGloveData,
+        gloveConfig);
   }
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
