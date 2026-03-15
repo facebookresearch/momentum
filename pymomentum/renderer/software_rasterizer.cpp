@@ -27,13 +27,79 @@
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
 
+#include <exception>
+#include <functional>
 #include <optional>
 #include <stdexcept>
 #include <utility>
 
+#ifdef _WIN32
+#include <process.h>
+#include <windows.h>
+#endif
+
 namespace py = pybind11;
 
 namespace pymomentum {
+
+#ifdef _WIN32
+// On Windows, the SIMD rasterizer's deep call chain (rasterizeSpheres ->
+// rasterizeMesh -> rasterizeMeshImp -> rasterizeOneTriangle ->
+// shade/interpolateRGBTextureMap) with large AVX2 stack frames can overflow
+// the default 1 MB thread stack.  Python's threading.stack_size() is unreliable
+// for setting thread stack sizes on Windows (CPython's _beginthreadex call does
+// not set STACK_SIZE_PARAM_IS_A_RESERVATION, so the size is treated as the
+// initial commit size which may not be honored).
+//
+// This helper runs a function on a dedicated Windows thread with a 16 MB stack
+// RESERVATION, guaranteeing the virtual address space is available.  The
+// __declspec(noinline) annotations on the SIMD functions (rasterizeOneTriangle,
+// rasterizeMeshImp, shade, interpolateRGBTextureMap) ensure proper __chkstk
+// stack probing so the reserved pages are committed on demand.
+//
+// On non-Windows platforms, this is not compiled.
+namespace {
+
+constexpr size_t kWindowsStackSize = 16 * 1024 * 1024; // 16 MB
+
+struct ThreadData {
+  std::function<void()> func;
+  std::exception_ptr exception;
+};
+
+unsigned __stdcall threadProc(void* arg) {
+  auto* data = static_cast<ThreadData*>(arg);
+  try {
+    data->func();
+  } catch (...) {
+    data->exception = std::current_exception();
+  }
+  return 0;
+}
+
+void runWithLargeStack(std::function<void()> func) {
+  ThreadData data{std::move(func), nullptr};
+  // Use _beginthreadex with STACK_SIZE_PARAM_IS_A_RESERVATION (0x10000)
+  // to guarantee the stack virtual address space is reserved.
+  auto handle = reinterpret_cast<HANDLE>(_beginthreadex(
+      nullptr,
+      static_cast<unsigned>(kWindowsStackSize),
+      threadProc,
+      &data,
+      STACK_SIZE_PARAM_IS_A_RESERVATION,
+      nullptr));
+  if (handle == nullptr) {
+    throw std::runtime_error("Failed to create thread with large stack");
+  }
+  WaitForSingleObject(handle, INFINITE);
+  CloseHandle(handle);
+  if (data.exception) {
+    std::rethrow_exception(data.exception);
+  }
+}
+
+} // namespace
+#endif // _WIN32
 
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
@@ -146,27 +212,36 @@ void rasterizeMesh(
   Eigen::VectorXf emptyNormals;
   Eigen::VectorXi emptyTextureTriangles;
   Eigen::VectorXf emptyPerVertexDiffuseColor;
-  momentum::rasterizer::rasterizeMesh(
-      toEigenMap<float>(positions),
-      normals.has_value() ? toEigenMap<float>(*normals) : emptyNormals,
-      toEigenMap<int>(triangles),
-      textureCoordinates.has_value() ? toEigenMap<float>(*textureCoordinates) : emptyTextureCoords,
-      textureTriangles.has_value() ? toEigenMap<int32_t>(*textureTriangles) : emptyTextureTriangles,
-      perVertexDiffuseColor.has_value() ? toEigenMap<float>(*perVertexDiffuseColor)
-                                        : emptyPerVertexDiffuseColor,
-      camera,
-      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
-      nearClip,
-      material.value_or(momentum::rasterizer::PhongMaterial{}),
-      make_mdspan<float, 2>(zBuffer),
-      make_mdspan<float, 3>(rgbBuffer),
-      make_mdspan<float, 3>(surfaceNormalsBuffer),
-      make_mdspan<int, 2>(vertexIndexBuffer),
-      make_mdspan<int, 2>(triangleIndexBuffer),
-      lights_eye,
-      backfaceCulling,
-      depthOffset,
-      imageOffset.value_or(Eigen::Vector2f::Zero()));
+  auto doRasterize = [&]() {
+    momentum::rasterizer::rasterizeMesh(
+        toEigenMap<float>(positions),
+        normals.has_value() ? toEigenMap<float>(*normals) : emptyNormals,
+        toEigenMap<int>(triangles),
+        textureCoordinates.has_value() ? toEigenMap<float>(*textureCoordinates)
+                                       : emptyTextureCoords,
+        textureTriangles.has_value() ? toEigenMap<int32_t>(*textureTriangles)
+                                     : emptyTextureTriangles,
+        perVertexDiffuseColor.has_value() ? toEigenMap<float>(*perVertexDiffuseColor)
+                                          : emptyPerVertexDiffuseColor,
+        camera,
+        modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+        nearClip,
+        material.value_or(momentum::rasterizer::PhongMaterial{}),
+        make_mdspan<float, 2>(zBuffer),
+        make_mdspan<float, 3>(rgbBuffer),
+        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        make_mdspan<int, 2>(vertexIndexBuffer),
+        make_mdspan<int, 2>(triangleIndexBuffer),
+        lights_eye,
+        backfaceCulling,
+        depthOffset,
+        imageOffset.value_or(Eigen::Vector2f::Zero()));
+  };
+#ifdef _WIN32
+  runWithLargeStack(doRasterize);
+#else
+  doRasterize();
+#endif
 }
 
 void rasterizeWireframe(
@@ -273,34 +348,40 @@ void rasterizeSpheres(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
+  auto doRasterize = [&]() {
+    for (int i = 0; i < nSpheres; ++i) {
+      const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
+      auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
+      if (color) {
+        materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
+      }
 
-  for (int i = 0; i < nSpheres; ++i) {
-    const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
-    auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-    if (color) {
-      materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
+      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+      transform.translate(toEigenMap<float>(center).segment<3>(3 * i));
+      transform.scale(radiusVal);
+
+      momentum::rasterizer::rasterizeMesh(
+          sphereMesh,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          materialCur,
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          make_mdspan<float, 3>(surfaceNormalsBuffer),
+          {},
+          {},
+          lights_eye,
+          backfaceCulling,
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
     }
-
-    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translate(toEigenMap<float>(center).segment<3>(3 * i));
-    transform.scale(radiusVal);
-
-    momentum::rasterizer::rasterizeMesh(
-        sphereMesh,
-        camera,
-        modelMatrix * transform.matrix(),
-        nearClip,
-        materialCur,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
-        {},
-        {},
-        lights_eye,
-        backfaceCulling,
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  };
+#ifdef _WIN32
+  runWithLargeStack(doRasterize);
+#else
+  doRasterize();
+#endif
 }
 
 void rasterizeCylinders(
@@ -373,40 +454,46 @@ void rasterizeCylinders(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
+  auto doRasterize = [&]() {
+    for (int i = 0; i < nCylinders; ++i) {
+      const Eigen::Vector3f startPos = toEigenMap<float>(start_position).segment<3>(3 * i);
+      const Eigen::Vector3f endPos = toEigenMap<float>(end_position).segment<3>(3 * i);
+      const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
+      auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
+      if (color) {
+        materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
+      }
 
-  for (int i = 0; i < nCylinders; ++i) {
-    const Eigen::Vector3f startPos = toEigenMap<float>(start_position).segment<3>(3 * i);
-    const Eigen::Vector3f endPos = toEigenMap<float>(end_position).segment<3>(3 * i);
-    const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
-    auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-    if (color) {
-      materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
+      const float length = (endPos - startPos).norm();
+      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+      transform.translate(startPos);
+      transform.rotate(
+          Eigen::Quaternionf::FromTwoVectors(
+              Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
+      transform.scale(Eigen::Vector3f(length, radiusVal, radiusVal));
+
+      momentum::rasterizer::rasterizeMesh(
+          cylinderMesh,
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          materialCur,
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          make_mdspan<float, 3>(surfaceNormalsBuffer),
+          {},
+          {},
+          lights_eye,
+          backfaceCulling,
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
     }
-
-    const float length = (endPos - startPos).norm();
-    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translate(startPos);
-    transform.rotate(
-        Eigen::Quaternionf::FromTwoVectors(
-            Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
-    transform.scale(Eigen::Vector3f(length, radiusVal, radiusVal));
-
-    momentum::rasterizer::rasterizeMesh(
-        cylinderMesh,
-        camera,
-        modelMatrix * transform.matrix(),
-        nearClip,
-        materialCur,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
-        {},
-        {},
-        lights_eye,
-        backfaceCulling,
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+  };
+#ifdef _WIN32
+  runWithLargeStack(doRasterize);
+#else
+  doRasterize();
+#endif
 }
 
 void rasterizeCapsules(
@@ -470,37 +557,43 @@ void rasterizeCapsules(
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
+  auto doRasterize = [&]() {
+    for (int i = 0; i < nCapsules; ++i) {
+      const Eigen::Matrix4f transform =
+          toEigenMap<float>(transformation).segment<16>(16 * i).reshaped(4, 4).transpose();
 
-  for (int i = 0; i < nCapsules; ++i) {
-    const Eigen::Matrix4f transform =
-        toEigenMap<float>(transformation).segment<16>(16 * i).reshaped(4, 4).transpose();
+      const Eigen::Vector2f radiusVal = toEigenMap<float>(radius).segment<2>(2 * i);
+      const float lengthVal = toEigenMap<float>(length)(i);
 
-    const Eigen::Vector2f radiusVal = toEigenMap<float>(radius).segment<2>(2 * i);
-    const float lengthVal = toEigenMap<float>(length)(i);
+      auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
 
-    auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-
-    momentum::rasterizer::rasterizeMesh(
-        momentum::rasterizer::makeCapsule(
-            cylinderRadiusSubdivisions,
-            cylinderLengthSubdivisions,
-            radiusVal[0],
-            radiusVal[1],
-            lengthVal),
-        camera,
-        modelMatrix * transform.matrix(),
-        nearClip,
-        materialCur,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
-        {},
-        {},
-        lights_eye,
-        backfaceCulling,
-        depthOffset,
-        imageOffset.value_or(Eigen::Vector2f::Zero()));
-  }
+      momentum::rasterizer::rasterizeMesh(
+          momentum::rasterizer::makeCapsule(
+              cylinderRadiusSubdivisions,
+              cylinderLengthSubdivisions,
+              radiusVal[0],
+              radiusVal[1],
+              lengthVal),
+          camera,
+          modelMatrix * transform.matrix(),
+          nearClip,
+          materialCur,
+          make_mdspan<float, 2>(zBuffer),
+          make_mdspan<float, 3>(rgbBuffer),
+          make_mdspan<float, 3>(surfaceNormalsBuffer),
+          {},
+          {},
+          lights_eye,
+          backfaceCulling,
+          depthOffset,
+          imageOffset.value_or(Eigen::Vector2f::Zero()));
+    }
+  };
+#ifdef _WIN32
+  runWithLargeStack(doRasterize);
+#else
+  doRasterize();
+#endif
 }
 
 namespace {
