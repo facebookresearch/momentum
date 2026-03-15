@@ -11,6 +11,10 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/types.h"
+#include "momentum/character_sequence_solver/sequence_solver_function.h"
+#include "momentum/character_solver/orientation_error_function.h"
+#include "momentum/character_solver/position_error_function.h"
+#include "momentum/character_solver/skeleton_solver_function.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
 #include "momentum/math/utility.h"
@@ -214,7 +218,7 @@ std::vector<std::vector<JointToJointPositionDataT<float>>> createGlovePositionCo
       constraint.referenceJoint = referenceIdx;
       constraint.referenceOffset = Vector3f::Zero();
       constraint.target = obs.position;
-      constraint.weight = cfg.positionWeight;
+      constraint.weight = 1.0f;
       constraint.name = obs.jointName;
       results[iFrame].push_back(std::move(constraint));
     }
@@ -267,13 +271,102 @@ std::vector<std::vector<JointToJointOrientationDataT<float>>> createGloveOrienta
       constraint.sourceJoint = it->second;
       constraint.referenceJoint = referenceIdx;
       constraint.target = obs.orientation;
-      constraint.weight = cfg.orientationWeight;
+      constraint.weight = 1.0f;
       constraint.name = obs.jointName;
       results[iFrame].push_back(std::move(constraint));
     }
   }
 
   return results;
+}
+
+void addGloveConstraintsToSequenceSolver(
+    SequenceSolverFunctionT<float>& solverFunc,
+    size_t solverFrame,
+    const Character& character,
+    const std::vector<std::vector<JointToJointPositionDataT<float>>>& posData,
+    const std::vector<std::vector<JointToJointOrientationDataT<float>>>& oriData,
+    size_t iFrame,
+    float posWeight,
+    float oriWeight) {
+  // Add position constraints for this frame
+  if (iFrame < posData.size() && !posData[iFrame].empty()) {
+    auto posFunc = std::make_shared<JointToJointPositionErrorFunctionT<float>>(character);
+    for (const auto& c : posData[iFrame]) {
+      posFunc->addConstraint(c);
+    }
+    posFunc->setWeight(PositionErrorFunction::kLegacyWeight * posWeight);
+    solverFunc.addErrorFunction(solverFrame, posFunc);
+  }
+
+  // Add orientation constraints for this frame
+  if (iFrame < oriData.size() && !oriData[iFrame].empty()) {
+    auto oriFunc = std::make_shared<JointToJointOrientationErrorFunctionT<float>>(character);
+    for (const auto& c : oriData[iFrame]) {
+      oriFunc->addConstraint(c);
+    }
+    oriFunc->setWeight(OrientationErrorFunction::kLegacyWeight * oriWeight);
+    solverFunc.addErrorFunction(solverFrame, oriFunc);
+  }
+}
+
+std::optional<GloveErrorFunctions> setupGloveErrorFunctions(
+    SkeletonSolverFunctionT<float>& solverFunc,
+    const Character& character,
+    std::span<const GloveFrameData> gloveData,
+    const GloveConfig& cfg,
+    size_t handIndex) {
+  if (gloveData.empty()) {
+    return std::nullopt;
+  }
+
+  // Verify a reference joint exists (glove bone preferred, wrist as fallback)
+  if (handIndex >= 2) {
+    return std::nullopt;
+  }
+  const std::string gloveBoneName = "glove_" + cfg.wristJointNames[handIndex];
+  size_t referenceIdx = character.skeleton.getJointIdByName(gloveBoneName);
+  if (referenceIdx == kInvalidIndex) {
+    referenceIdx = character.skeleton.getJointIdByName(cfg.wristJointNames[handIndex]);
+    if (referenceIdx == kInvalidIndex) {
+      return std::nullopt;
+    }
+  }
+
+  GloveErrorFunctions funcs;
+
+  // Build constraint data
+  funcs.posData = createGlovePositionConstraintData(gloveData, character, cfg, handIndex);
+  funcs.oriData = createGloveOrientationConstraintData(gloveData, character, cfg, handIndex);
+
+  // Create and register error functions
+  funcs.posFunc = std::make_shared<JointToJointPositionErrorFunctionT<float>>(character);
+  funcs.posFunc->setWeight(PositionErrorFunction::kLegacyWeight * cfg.positionWeight);
+  solverFunc.addErrorFunction(funcs.posFunc);
+
+  funcs.oriFunc = std::make_shared<JointToJointOrientationErrorFunctionT<float>>(character);
+  funcs.oriFunc->setWeight(OrientationErrorFunction::kLegacyWeight * cfg.orientationWeight);
+  solverFunc.addErrorFunction(funcs.oriFunc);
+
+  return funcs;
+}
+
+void updateGloveConstraintsForFrame(GloveErrorFunctions& funcs, size_t iFrame) {
+  // Update position constraints
+  funcs.posFunc->clearConstraints();
+  if (iFrame < funcs.posData.size()) {
+    for (const auto& c : funcs.posData[iFrame]) {
+      funcs.posFunc->addConstraint(c);
+    }
+  }
+
+  // Update orientation constraints
+  funcs.oriFunc->clearConstraints();
+  if (iFrame < funcs.oriData.size()) {
+    for (const auto& c : funcs.oriData[iFrame]) {
+      funcs.oriFunc->addConstraint(c);
+    }
+  }
 }
 
 } // namespace momentum
