@@ -296,6 +296,29 @@ void createAnimationCurves(
   }
 }
 
+// Get or create the animation stack and base layer for the scene.
+// Returns a pair of (animStack, animBaseLayer).
+std::pair<::fbxsdk::FbxAnimStack*, ::fbxsdk::FbxAnimLayer*> getOrCreateAnimStackAndLayer(
+    ::fbxsdk::FbxScene* scene,
+    const char* stackName) {
+  ::fbxsdk::FbxAnimStack* animStack = nullptr;
+  if (scene->GetSrcObjectCount<::fbxsdk::FbxAnimStack>() > 0) {
+    animStack = scene->GetSrcObject<::fbxsdk::FbxAnimStack>(0);
+  } else {
+    animStack = ::fbxsdk::FbxAnimStack::Create(scene, stackName);
+  }
+
+  ::fbxsdk::FbxAnimLayer* animBaseLayer = nullptr;
+  if (animStack->GetMemberCount<::fbxsdk::FbxAnimLayer>() > 0) {
+    animBaseLayer = animStack->GetMember<::fbxsdk::FbxAnimLayer>(0);
+  } else {
+    animBaseLayer = ::fbxsdk::FbxAnimLayer::Create(scene, "Layer0");
+    animStack->AddMember(animBaseLayer);
+  }
+
+  return {animStack, animBaseLayer};
+}
+
 // Post-process function to prepend namespace to all nodes in the scene
 void prependNamespaceToAllNodes(::fbxsdk::FbxNode* node, const std::string& namespacePrefix) {
   if (namespacePrefix.empty() || node == nullptr) {
@@ -397,24 +420,8 @@ std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
 
   // Create animation stack if we have motion data
   if (!timestamps.empty() && !timestamps[0].empty()) {
-    // Get or create animation stack
-    ::fbxsdk::FbxAnimStack* animStack = nullptr;
-    if (scene->GetSrcObjectCount<::fbxsdk::FbxAnimStack>() > 0) {
-      // Use existing animation stack (created for skeleton animation)
-      animStack = scene->GetSrcObject<::fbxsdk::FbxAnimStack>(0);
-    } else {
-      // Create new animation stack
-      animStack = ::fbxsdk::FbxAnimStack::Create(scene, "Marker Animation Stack");
-    }
-
-    // Get or create base layer
-    ::fbxsdk::FbxAnimLayer* animBaseLayer = nullptr;
-    if (animStack->GetMemberCount<::fbxsdk::FbxAnimLayer>() > 0) {
-      animBaseLayer = animStack->GetMember<::fbxsdk::FbxAnimLayer>(0);
-    } else {
-      animBaseLayer = ::fbxsdk::FbxAnimLayer::Create(scene, "Layer0");
-      animStack->AddMember(animBaseLayer);
-    }
+    // Get or create animation stack and layer
+    auto [animStack, animBaseLayer] = getOrCreateAnimStackAndLayer(scene, "Marker Animation Stack");
 
     // Create animation curves for each marker
     for (size_t j = 0; j < markerNames.size(); ++j) {
@@ -511,44 +518,137 @@ void saveSkinWeightsToFbx(
   mesh->AddDeformer(fbxskin);
 }
 
-void saveBlendShapesToFbx(
-    const Character& character,
-    ::fbxsdk::FbxScene* scene,
-    ::fbxsdk::FbxMesh* mesh) {
-  // create blendshape deformer
-  ::fbxsdk::FbxBlendShape* blendShape = ::fbxsdk::FbxBlendShape::Create(scene, "blendshape");
-  blendShape->SetGeometry(mesh);
-
-  // add blendshape channels
-  const auto& shapes = character.blendShape->getShapeVectors();
-  const auto& names = character.blendShape->getShapeNames();
-  const auto& base = character.blendShape->getBaseShape();
-  const int numVertices = character.mesh.get()->vertices.size();
-
-  for (int j = 0; j < numVertices; j++) {
-    FbxVector4 point(base[j].x(), base[j].y(), base[j].z());
-    mesh->SetControlPointAt(point, j);
+// Extract blend shape weights from model parameters.
+// Returns a (numBlendShapes x numFrames) matrix with values in [0, 1].
+MatrixXf extractBlendShapeWeights(const Character& character, const MatrixXf& poses) {
+  const auto& pt = character.parameterTransform;
+  if (poses.cols() == 0 || pt.blendShapeParameters.size() == 0 || !character.blendShape ||
+      character.blendShape->shapeSize() == 0) {
+    return {};
   }
 
-  for (size_t i = 0; i < character.blendShape->shapeSize(); i++) {
-    ::fbxsdk::FbxBlendShapeChannel* blendShapeChannelPtr =
-        ::fbxsdk::FbxBlendShapeChannel::Create(scene, ("channel_" + std::to_string(i)).c_str());
-    blendShape->AddBlendShapeChannel(blendShapeChannelPtr);
+  const Eigen::Index numShapes = pt.blendShapeParameters.size();
+  MatrixXf weights(numShapes, poses.cols());
+  for (Eigen::Index i = 0; i < numShapes; i++) {
+    const auto paramIdx = pt.blendShapeParameters(i);
+    if (paramIdx >= 0 && paramIdx < poses.rows()) {
+      weights.row(i) = poses.row(paramIdx);
+    } else {
+      weights.row(i).setZero();
+    }
+  }
+  return weights;
+}
 
-    // add blendshape targets
+// Extract face expression weights from model parameters.
+// Returns a (numFaceExpressions x numFrames) matrix with values in [0, 1].
+MatrixXf extractFaceExpressionWeights(const Character& character, const MatrixXf& poses) {
+  const auto& pt = character.parameterTransform;
+  if (poses.cols() == 0 || pt.faceExpressionParameters.size() == 0 ||
+      !character.faceExpressionBlendShape || character.faceExpressionBlendShape->shapeSize() == 0) {
+    return {};
+  }
+
+  const Eigen::Index numExprs = pt.faceExpressionParameters.size();
+  MatrixXf weights(numExprs, poses.cols());
+  for (Eigen::Index i = 0; i < numExprs; i++) {
+    const auto paramIdx = pt.faceExpressionParameters(i);
+    if (paramIdx >= 0 && paramIdx < poses.rows()) {
+      weights.row(i) = poses.row(paramIdx);
+    } else {
+      weights.row(i).setZero();
+    }
+  }
+  return weights;
+}
+
+// Save blend shape geometry to FBX and return channel pointers for animation.
+std::vector<::fbxsdk::FbxBlendShapeChannel*> saveBlendShapeGeometryToFbx(
+    const BlendShapeBase& blendShape,
+    ::fbxsdk::FbxScene* scene,
+    ::fbxsdk::FbxMesh* mesh,
+    const std::string& deformerName,
+    const std::string& channelPrefix) {
+  std::vector<::fbxsdk::FbxBlendShapeChannel*> channels;
+
+  // create blendshape deformer
+  ::fbxsdk::FbxBlendShape* fbxBlendShape =
+      ::fbxsdk::FbxBlendShape::Create(scene, deformerName.c_str());
+  fbxBlendShape->SetGeometry(mesh);
+
+  const auto& shapes = blendShape.getShapeVectors();
+  const auto& names = blendShape.getShapeNames();
+  const int numVertices = mesh->GetControlPointsCount();
+
+  for (Eigen::Index i = 0; i < blendShape.shapeSize(); i++) {
+    ::fbxsdk::FbxBlendShapeChannel* channelPtr =
+        ::fbxsdk::FbxBlendShapeChannel::Create(scene, (channelPrefix + std::to_string(i)).c_str());
+    fbxBlendShape->AddBlendShapeChannel(channelPtr);
+    channels.push_back(channelPtr);
+
+    // add blendshape target
     ::fbxsdk::FbxShape* shape = ::fbxsdk::FbxShape::Create(scene, names[i].c_str());
     shape->SetControlPointCount(numVertices);
     for (int j = 0; j < numVertices; j++) {
-      const Eigen::Vector3f delta = shapes.block<3, 1>(j * 3, i);
-      const Eigen::Vector3f p = delta + base[j];
-      shape->SetControlPointAt(FbxVector4(p.x(), p.y(), p.z()), j);
+      const auto basePoint = mesh->GetControlPointAt(j);
+      if (j * 3 + 2 < shapes.rows()) {
+        const Eigen::Vector3f delta = shapes.block<3, 1>(j * 3, i);
+        shape->SetControlPointAt(
+            FbxVector4(
+                basePoint[0] + delta.x(), basePoint[1] + delta.y(), basePoint[2] + delta.z()),
+            j);
+      } else {
+        shape->SetControlPointAt(basePoint, j);
+      }
       shape->AddControlPointIndex(j);
     }
-    blendShapeChannelPtr->AddTargetShape(shape, 100.0);
+    channelPtr->AddTargetShape(shape, 100.0);
   }
 
-  // add blendshape to mesh
-  mesh->AddDeformer(blendShape);
+  mesh->AddDeformer(fbxBlendShape);
+  return channels;
+}
+
+// Create animation curves for blend shape channel weights.
+// weights: (numChannels x numFrames) matrix where values are in [0, 1] range
+void createBlendShapeAnimationCurves(
+    ::fbxsdk::FbxScene* scene,
+    const std::vector<::fbxsdk::FbxBlendShapeChannel*>& channels,
+    const MatrixXf& weights,
+    const double framerate) {
+  if (channels.empty() || weights.cols() == 0) {
+    return;
+  }
+
+  setFrameRate(scene, framerate);
+
+  // Get or create animation stack and layer
+  auto [animStack, animBaseLayer] =
+      getOrCreateAnimStackAndLayer(scene, "BlendShape Animation Stack");
+
+  const Eigen::Index numChannels =
+      std::min(static_cast<Eigen::Index>(channels.size()), weights.rows());
+
+  for (Eigen::Index i = 0; i < numChannels; i++) {
+    // Animate the DeformPercent property on each channel
+    ::fbxsdk::FbxAnimCurve* curve = channels[i]->DeformPercent.GetCurve(animBaseLayer, true);
+    if (curve == nullptr) {
+      continue;
+    }
+
+    curve->KeyModifyBegin();
+    for (Eigen::Index f = 0; f < weights.cols(); f++) {
+      ::fbxsdk::FbxTime time;
+      time.SetSecondDouble(static_cast<double>(f) / framerate);
+
+      // FBX DeformPercent is in [0, 100] range, momentum weights are in [0, 1]
+      const float value = weights(i, f) * 100.0f;
+
+      const auto keyIndex = curve->KeyAdd(time);
+      curve->KeySet(keyIndex, time, value);
+    }
+    curve->KeyModifyEnd();
+  }
 }
 
 void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character) {
@@ -613,6 +713,140 @@ void writeTextureUVIndicesToFbxMesh(
   }
 }
 
+// Result of creating skeleton nodes in the FBX scene.
+struct SkeletonNodeResult {
+  std::vector<::fbxsdk::FbxNode*> nodes;
+  std::unordered_map<size_t, fbxsdk::FbxNode*> jointToNodeMap;
+  ::fbxsdk::FbxNode* rootNode = nullptr;
+};
+
+// Create skeleton nodes for all joints in the character and set up parenting.
+SkeletonNodeResult createSkeletonNodes(const Character& character, ::fbxsdk::FbxScene* scene) {
+  SkeletonNodeResult result;
+
+  for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
+    const auto& joint = character.skeleton.joints[i];
+
+    ::fbxsdk::FbxNode* skeletonNode = ::fbxsdk::FbxNode::Create(scene, joint.name.c_str());
+    ::fbxsdk::FbxSkeleton* skeletonAttribute =
+        ::fbxsdk::FbxSkeleton::Create(scene, joint.name.c_str());
+
+    if (joint.parent == kInvalidIndex) {
+      result.rootNode = skeletonNode;
+      skeletonAttribute->SetSkeletonType(::fbxsdk::FbxSkeleton::eRoot);
+    } else {
+      skeletonAttribute->SetSkeletonType(::fbxsdk::FbxSkeleton::eLimbNode);
+    }
+    skeletonNode->SetNodeAttribute(skeletonAttribute);
+    result.jointToNodeMap[i] = skeletonNode;
+
+    skeletonNode->LclTranslation.Set(FbxDouble3(
+        joint.translationOffset[0], joint.translationOffset[1], joint.translationOffset[2]));
+
+    const auto angles = rotationMatrixToEulerZYX(joint.preRotation.toRotationMatrix());
+    skeletonNode->SetPivotState(FbxNode::eSourcePivot, FbxNode::ePivotActive);
+    skeletonNode->SetRotationActive(true);
+    skeletonNode->SetPreRotation(
+        ::fbxsdk::FbxNode::eSourcePivot,
+        FbxDouble3(toDeg(angles[2]), toDeg(angles[1]), toDeg(angles[0])));
+
+    result.nodes.emplace_back(skeletonNode);
+  }
+
+  // Second pass: handle the parenting, in case the parents are not in order
+  for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
+    const auto& joint = character.skeleton.joints[i];
+    auto* skeletonNode = result.jointToNodeMap[i];
+    if (joint.parent != kInvalidIndex) {
+      result.nodes[joint.parent]->AddChild(skeletonNode);
+    }
+  }
+
+  return result;
+}
+
+// Result of creating a mesh node with blend shapes in the FBX scene.
+struct MeshBlendShapeResult {
+  std::vector<::fbxsdk::FbxBlendShapeChannel*> blendShapeChannels;
+  std::vector<::fbxsdk::FbxBlendShapeChannel*> faceExprChannels;
+};
+
+// Create the mesh node with vertices, normals, UVs, skinning, and blend shapes.
+MeshBlendShapeResult createMeshNode(
+    const Character& character,
+    ::fbxsdk::FbxScene* scene,
+    ::fbxsdk::FbxNode* root,
+    const std::unordered_map<size_t, fbxsdk::FbxNode*>& jointToNodeMap,
+    Permissive permissive,
+    const filesystem::path& filename) {
+  MeshBlendShapeResult result;
+  const auto numVertices = static_cast<int>(character.mesh.get()->vertices.size());
+  ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(scene, "body_mesh");
+  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, "mesh");
+  lMesh->SetControlPointCount(numVertices);
+  lMesh->InitNormals(numVertices);
+  for (int i = 0; i < numVertices; i++) {
+    FbxVector4 point(
+        character.mesh.get()->vertices[i].x(),
+        character.mesh.get()->vertices[i].y(),
+        character.mesh.get()->vertices[i].z());
+    FbxVector4 normal(
+        character.mesh.get()->normals[i].x(),
+        character.mesh.get()->normals[i].y(),
+        character.mesh.get()->normals[i].z());
+    lMesh->SetControlPointAt(point, normal, i);
+  }
+  writePolygonsToFbxMesh(*character.mesh, lMesh);
+  lMesh->BuildMeshEdgeArray();
+  meshNode->SetNodeAttribute(lMesh);
+
+  // Add texture coordinates
+  if (!character.mesh->texcoords.empty()) {
+    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
+    lMesh->InitTextureUV(0, uvType);
+    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
+    for (const auto& texcoords : character.mesh->texcoords) {
+      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
+    }
+    writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
+  }
+
+  // Add skinning
+  MT_THROW_IF(
+      permissive == Permissive::No && !character.skinWeights,
+      " Failed to save the character '{}' to {}. The character has no skinning weights and permissive mode is not enabled. Only mesh-only characters are allowed in permissive mode.",
+      character.name,
+      filename.string());
+
+  if (character.skinWeights != nullptr) {
+    saveSkinWeightsToFbx(character, scene, lMesh, jointToNodeMap);
+  }
+
+  // Add blend shapes
+  if (character.blendShape && character.blendShape->shapeSize() > 0) {
+    const auto& base = character.blendShape->getBaseShape();
+    for (int j = 0; j < numVertices; j++) {
+      FbxVector4 point(base[j].x(), base[j].y(), base[j].z());
+      lMesh->SetControlPointAt(point, j);
+    }
+    result.blendShapeChannels =
+        saveBlendShapeGeometryToFbx(*character.blendShape, scene, lMesh, "blendshape", "channel_");
+  }
+
+  // Add face expression blend shapes
+  if (character.faceExpressionBlendShape && character.faceExpressionBlendShape->shapeSize() > 0) {
+    result.faceExprChannels = saveBlendShapeGeometryToFbx(
+        *character.faceExpressionBlendShape,
+        scene,
+        lMesh,
+        "face_expression_blendshape",
+        "face_expr_channel_");
+  }
+
+  root->AddChild(meshNode);
+  return result;
+}
+
 void saveFbxCommon(
     const filesystem::path& filename,
     const Character& character,
@@ -623,7 +857,8 @@ void saveFbxCommon(
     const FbxCoordSystemInfo& coordSystemInfo,
     Permissive permissive,
     std::span<const std::vector<Marker>> markerSequence,
-    std::string_view fbxNamespace) {
+    std::string_view fbxNamespace,
+    const MatrixXf& poses) {
   // ---------------------------------------------
   // initialize FBX SDK and prepare for export
   // ---------------------------------------------
@@ -667,151 +902,22 @@ void saveFbxCommon(
   ::fbxsdk::FbxAxisSystem axis = toFbx(coordSystemInfo);
   axis.ConvertScene(scene);
 
-  // ---------------------------------------------
-  // create the skeleton nodes
-  // ---------------------------------------------
-  std::vector<::fbxsdk::FbxNode*> skeletonNodes;
-  std::unordered_map<size_t, fbxsdk::FbxNode*> jointToNodeMap;
+  // Create skeleton hierarchy
+  auto skeletonResult = createSkeletonNodes(character, scene);
+  addMetaData(skeletonResult.rootNode, character);
+  createLocatorNodes(character, scene, skeletonResult.nodes);
+  createCollisionGeometryNodes(character, scene, skeletonResult.nodes);
 
-  ::fbxsdk::FbxNode* skeletonRootNode = nullptr;
-
-  for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
-    const auto& joint = character.skeleton.joints[i];
-
-    // create the node
-    ::fbxsdk::FbxNode* skeletonNode = ::fbxsdk::FbxNode::Create(scene, joint.name.c_str());
-    // create node attribute
-    ::fbxsdk::FbxSkeleton* skeletonAttribute =
-        ::fbxsdk::FbxSkeleton::Create(scene, joint.name.c_str());
-
-    if (joint.parent == kInvalidIndex) {
-      skeletonRootNode = skeletonNode;
-      skeletonAttribute->SetSkeletonType(::fbxsdk::FbxSkeleton::eRoot);
-    } else {
-      skeletonAttribute->SetSkeletonType(::fbxsdk::FbxSkeleton::eLimbNode);
-    }
-    skeletonNode->SetNodeAttribute(skeletonAttribute);
-    jointToNodeMap[i] = skeletonNode;
-
-    // set translation offset
-    skeletonNode->LclTranslation.Set(FbxDouble3(
-        joint.translationOffset[0], joint.translationOffset[1], joint.translationOffset[2]));
-
-    // set pre-rotation
-    const auto angles = rotationMatrixToEulerZYX(joint.preRotation.toRotationMatrix());
-    skeletonNode->SetPivotState(FbxNode::eSourcePivot, FbxNode::ePivotActive);
-    skeletonNode->SetRotationActive(true);
-    skeletonNode->SetPreRotation(
-        ::fbxsdk::FbxNode::eSourcePivot,
-        FbxDouble3(toDeg(angles[2]), toDeg(angles[1]), toDeg(angles[0])));
-
-    // add to list
-    skeletonNodes.emplace_back(skeletonNode);
-  }
-
-  // Second pass: handle the parenting, in case the parents are not in order
-  for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
-    const auto& joint = character.skeleton.joints[i];
-
-    // set parent if it has one
-    auto* skeletonNode = jointToNodeMap[i];
-    if (joint.parent != kInvalidIndex) {
-      skeletonNodes[joint.parent]->AddChild(skeletonNode);
-    }
-  }
-
-  // add metadata
-  addMetaData(skeletonRootNode, character);
-
-  // ---------------------------------------------
-  // create the locator nodes
-  // ---------------------------------------------
-  createLocatorNodes(character, scene, skeletonNodes);
-
-  // ---------------------------------------------
-  // create the collision geometry nodes
-  // ---------------------------------------------
-  createCollisionGeometryNodes(character, scene, skeletonNodes);
-
-  // ---------------------------------------------
-  // create the mesh nodes
-  // ---------------------------------------------
+  // Create mesh with blend shapes
+  MeshBlendShapeResult meshResult;
   if (saveMesh && character.mesh != nullptr) {
-    // Add the mesh
-    const int numVertices = character.mesh.get()->vertices.size();
-    ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(scene, "body_mesh");
-    ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, "mesh");
-    lMesh->SetControlPointCount(numVertices);
-    lMesh->InitNormals(numVertices);
-    for (int i = 0; i < numVertices; i++) {
-      FbxVector4 point(
-          character.mesh.get()->vertices[i].x(),
-          character.mesh.get()->vertices[i].y(),
-          character.mesh.get()->vertices[i].z());
-      FbxVector4 normal(
-          character.mesh.get()->normals[i].x(),
-          character.mesh.get()->normals[i].y(),
-          character.mesh.get()->normals[i].z());
-      lMesh->SetControlPointAt(point, normal, i);
-    }
-    // Add polygons to lMesh
-    writePolygonsToFbxMesh(*character.mesh, lMesh);
-    lMesh->BuildMeshEdgeArray();
-    meshNode->SetNodeAttribute(lMesh);
-
-    // ---------------------------------------------
-    // add texture coordinates
-    // ---------------------------------------------
-    if (!character.mesh->texcoords.empty()) {
-      const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-
-      // Initialize UV set and indices first. Both functions must be called before adding UVs
-      // and UV indices.
-      lMesh->InitTextureUV(0, uvType);
-      lMesh->InitTextureUVIndices(
-          ::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-
-      // Add UVs
-      for (const auto& texcoords : character.mesh->texcoords) {
-        // flip y back to fbx convention - refer to reading code
-        lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-      }
-
-      // Set UV indices for each face.
-      writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
-    }
-
-    // ---------------------------------------------
-    // create the skinning
-    // ---------------------------------------------
-    // Add the mesh skinning
-    // Momentum skinning is saved in two matrices: index and weight (size numvertices x
-    // not-ordered-joints). The index contains the joint index and the weight is the normalized
-    // weight the vertex for that joint.
-
-    MT_THROW_IF(
-        permissive == Permissive::No && !character.skinWeights,
-        " Failed to save the character '{}' to {}. The character has no skinning weights and permissive mode is not enabled. Only mesh-only characters are allowed in permissive mode.",
-        character.name,
-        filename.string());
-
-    if (character.skinWeights != nullptr) {
-      saveSkinWeightsToFbx(character, scene, lMesh, jointToNodeMap);
-    }
-
-    // if we have blendshapes, add them to the mesh
-    if (character.blendShape && character.blendShape->shapeSize() > 0) {
-      saveBlendShapesToFbx(character, scene, lMesh);
-    }
-    // Add the mesh under the root
-    root->AddChild(meshNode);
+    meshResult =
+        createMeshNode(character, scene, root, skeletonResult.jointToNodeMap, permissive, filename);
   }
 
-  // ---------------------------------------------
-  // add the skeleton to the root
-  // ---------------------------------------------
-  if (!skeletonNodes.empty()) {
-    root->AddChild(skeletonRootNode);
+  // Add skeleton to scene root
+  if (!skeletonResult.nodes.empty()) {
+    root->AddChild(skeletonResult.rootNode);
   }
 
   // ---------------------------------------------
@@ -820,7 +926,12 @@ void saveFbxCommon(
   if (jointValues.cols() != 0) {
     if (jointValues.rows() == character.parameterTransform.numJointParameters()) {
       createAnimationCurves(
-          character, scene, skeletonNodes, jointValues, framerate, skipActiveJointParamCheck);
+          character,
+          scene,
+          skeletonResult.nodes,
+          jointValues,
+          framerate,
+          skipActiveJointParamCheck);
     } else {
       MT_LOGE(
           "Rows of joint values {} do not match joint parameter dimension {} so not saving any motion.",
@@ -834,6 +945,23 @@ void saveFbxCommon(
   // ---------------------------------------------
   if (!markerSequence.empty()) {
     createMarkerNodes(scene, markerSequence, framerate);
+  }
+
+  // ---------------------------------------------
+  // create blend shape animation curves
+  // Auto-detect blend shapes from model parameters
+  // ---------------------------------------------
+  if (saveMesh) {
+    const MatrixXf blendShapeWeights = extractBlendShapeWeights(character, poses);
+    if (blendShapeWeights.cols() > 0 && !meshResult.blendShapeChannels.empty()) {
+      createBlendShapeAnimationCurves(
+          scene, meshResult.blendShapeChannels, blendShapeWeights, framerate);
+    }
+    const MatrixXf faceExpressionWeights = extractFaceExpressionWeights(character, poses);
+    if (faceExpressionWeights.cols() > 0 && !meshResult.faceExprChannels.empty()) {
+      createBlendShapeAnimationCurves(
+          scene, meshResult.faceExprChannels, faceExpressionWeights, framerate);
+    }
   }
 
   // ---------------------------------------------
@@ -950,7 +1078,8 @@ void saveFbx(
       options.coordSystemInfo,
       options.permissive,
       markerSequence,
-      options.fbxNamespace);
+      options.fbxNamespace,
+      poses);
 }
 
 void saveFbxWithJointParams(
@@ -970,7 +1099,8 @@ void saveFbxWithJointParams(
       options.coordSystemInfo,
       options.permissive,
       markerSequence,
-      options.fbxNamespace);
+      options.fbxNamespace,
+      MatrixXf());
 }
 
 void saveFbxWithSkeletonStates(
@@ -997,7 +1127,8 @@ void saveFbxWithSkeletonStates(
       options.coordSystemInfo,
       options.permissive,
       markerSequence,
-      options.fbxNamespace);
+      options.fbxNamespace,
+      MatrixXf());
 }
 
 void saveFbxModel(
@@ -1005,6 +1136,98 @@ void saveFbxModel(
     const Character& character,
     const FileSaveOptions& options) {
   saveFbx(filename, character, MatrixXf(), VectorXf(), 120.0, {}, options);
+}
+
+MatrixXf loadFbxBlendShapeWeights(const filesystem::path& filename) {
+  // Initialize FBX SDK
+  auto* manager = ::fbxsdk::FbxManager::Create();
+  auto* ios = ::fbxsdk::FbxIOSettings::Create(manager, IOSROOT);
+  manager->SetIOSettings(ios);
+
+  // RAII-like cleanup for FBX SDK objects
+  ::fbxsdk::FbxScene* scene = nullptr;
+  const auto cleanup = [&]() {
+    if (scene != nullptr) {
+      scene->Destroy();
+    }
+    manager->Destroy();
+  };
+
+  auto* importer = ::fbxsdk::FbxImporter::Create(manager, "");
+  const std::string sFilename = filename.string();
+  if (!importer->Initialize(sFilename.c_str(), -1, manager->GetIOSettings())) {
+    cleanup();
+    return {};
+  }
+
+  scene = ::fbxsdk::FbxScene::Create(manager, "scene");
+  importer->Import(scene);
+  importer->Destroy();
+
+  // Find the animation stack
+  if (scene->GetSrcObjectCount<::fbxsdk::FbxAnimStack>() == 0) {
+    cleanup();
+    return {};
+  }
+  auto* animStack = scene->GetSrcObject<::fbxsdk::FbxAnimStack>(0);
+  if (animStack->GetMemberCount<::fbxsdk::FbxAnimLayer>() == 0) {
+    cleanup();
+    return {};
+  }
+  auto* animLayer = animStack->GetMember<::fbxsdk::FbxAnimLayer>(0);
+
+  // Collect all blend shape channels from all meshes
+  std::vector<::fbxsdk::FbxBlendShapeChannel*> allChannels;
+  for (int iMesh = 0; iMesh < scene->GetSrcObjectCount<::fbxsdk::FbxMesh>(); ++iMesh) {
+    auto* mesh = scene->GetSrcObject<::fbxsdk::FbxMesh>(iMesh);
+    for (int iDeformer = 0; iDeformer < mesh->GetDeformerCount(::fbxsdk::FbxDeformer::eBlendShape);
+         ++iDeformer) {
+      auto* blendShape = static_cast<::fbxsdk::FbxBlendShape*>(
+          mesh->GetDeformer(iDeformer, ::fbxsdk::FbxDeformer::eBlendShape));
+      for (int iChannel = 0; iChannel < blendShape->GetBlendShapeChannelCount(); ++iChannel) {
+        allChannels.push_back(blendShape->GetBlendShapeChannel(iChannel));
+      }
+    }
+  }
+
+  if (allChannels.empty()) {
+    cleanup();
+    return {};
+  }
+
+  // Determine the number of frames from the first animated channel
+  Eigen::Index numFrames = 0;
+  for (auto* channel : allChannels) {
+    auto* curve = channel->DeformPercent.GetCurve(animLayer);
+    if (curve != nullptr) {
+      numFrames = std::max(numFrames, static_cast<Eigen::Index>(curve->KeyGetCount()));
+    }
+  }
+
+  if (numFrames == 0) {
+    cleanup();
+    return {};
+  }
+
+  // Read weights from animation curves
+  const auto numChannels = static_cast<Eigen::Index>(allChannels.size());
+  MatrixXf weights = MatrixXf::Zero(numChannels, numFrames);
+
+  for (Eigen::Index i = 0; i < numChannels; i++) {
+    auto* curve = allChannels[i]->DeformPercent.GetCurve(animLayer);
+    if (curve == nullptr) {
+      continue;
+    }
+
+    const int keyCount = curve->KeyGetCount();
+    for (int k = 0; k < keyCount && k < numFrames; k++) {
+      // FBX DeformPercent is in [0, 100], convert to [0, 1]
+      weights(i, k) = curve->KeyGetValue(k) / 100.0f;
+    }
+  }
+
+  cleanup();
+  return weights;
 }
 
 #else // !MOMENTUM_WITH_FBX_SDK
@@ -1049,6 +1272,10 @@ void saveFbxModel(
     const FileSaveOptions& /* options */) {
   MT_THROW(
       "FBX saving is not supported in OpenFBX-only mode. FBX loading is available via OpenFBX, but saving requires the full Autodesk FBX SDK.");
+}
+
+MatrixXf loadFbxBlendShapeWeights(const filesystem::path& /* filename */) {
+  MT_THROW("Loading blend shape weights requires the full Autodesk FBX SDK.");
 }
 
 #endif // MOMENTUM_WITH_FBX_SDK
