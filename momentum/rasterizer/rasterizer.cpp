@@ -150,6 +150,12 @@ inline Vector3fP sampleRGBTextureMap(
   return drjit::gather<Vector3fP>(textureMap.data_handle(), offset, mask);
 }
 
+// On Windows/MSVC, prevent inlining of interpolateRGBTextureMap into
+// rasterizeOneTriangle. This function creates SIMD locals (Vector2fP, IntP,
+// Vector3fP) that add to the caller's stack frame when inlined.
+#ifdef _MSC_VER
+__declspec(noinline)
+#endif
 Vector3fP interpolateRGBTextureMap(
     Vector2fP textureCoord,
     const ConstSpan<float, 3>& textureMap,
@@ -181,7 +187,15 @@ Vector3fP interpolateRGBTextureMap(
       sampleRGBTextureMap(pixelCoord_high_x, pixelCoord_high_y, textureMap, mask);
 }
 
-inline Vector3fP shade(
+// On Windows/MSVC, prevent inlining of shade into rasterizeOneTriangle.
+// When inlined, shade's SIMD temporaries (Vector3fP, FloatP) merge into
+// rasterizeOneTriangle's already-large stack frame — especially problematic
+// because shade is called in a loop over lights, and MSVC may keep separate
+// copies of temporaries for each unrolled iteration.
+#ifdef _MSC_VER
+__declspec(noinline)
+#endif
+Vector3fP shade(
     const Light& l,
     const PhongMaterial& material,
     const Vector3fP& diffuseColor,
@@ -221,7 +235,17 @@ inline Vector3fP shade(
   return result;
 }
 
-inline void rasterizeOneTriangle(
+// On Windows/MSVC, prevent inlining of rasterizeOneTriangle into
+// rasterizeMeshImp. When inlined, the combined SIMD locals (drjit packet
+// types: Matrix3fP, Matrix3dP, Vector3fP, etc.) create a single stack frame
+// that exceeds the default 1 MB Windows thread stack. On other platforms,
+// the inline keyword is intentionally omitted — it was only a compiler hint,
+// and the compiler's cost model already decides whether to inline this large
+// function.
+#ifdef _MSC_VER
+__declspec(noinline)
+#endif
+void rasterizeOneTriangle(
     const int32_t triangleIndex,
     const Eigen::Vector3i& triangle,
     const SimdCamera& camera,
@@ -777,7 +801,15 @@ void validateTriangleIndices(
 }
 
 // Support both signed and unsigned triangles for backward compatibility:
+// On Windows/MSVC, prevent inlining of rasterizeMeshImp into its callers.
+// This function has large SIMD locals (Matrix3fP, Matrix3dP, Vector3fP, IntP)
+// that, when combined with rasterizeOneTriangle's locals via aggressive
+// inlining, exceed the default 1 MB Windows thread stack — particularly in
+// deeper call chains like rasterizeSpheres -> rasterizeMesh -> rasterizeMeshImp.
 template <typename TriangleT>
+#ifdef _MSC_VER
+__declspec(noinline)
+#endif
 void rasterizeMeshImp(
     const Eigen::Ref<const Eigen::VectorXf>& positions_world,
     const Eigen::Ref<const Eigen::VectorXf>& normals_world,

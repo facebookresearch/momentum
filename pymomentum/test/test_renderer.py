@@ -5,6 +5,7 @@
 
 # pyre-strict
 
+import struct
 import sys
 import unittest
 
@@ -19,6 +20,13 @@ from numpy.typing import NDArray
 class TestRendering(unittest.TestCase):
     def test_lighting(self) -> None:
         """Test that directional lighting works."""
+
+        # On 32-bit Windows, the SIMD rasterizer's AVX2 stack frames overflow
+        # the limited virtual address space (~2 GB) even with the
+        # runWithLargeStack workaround. 64-bit Windows has sufficient address
+        # space for the 16 MB stack reservation.
+        if sys.platform == "win32" and struct.calcsize("P") == 4:
+            return
 
         image_width, image_height = 30, 30
         camera = pym_camera.Camera(
@@ -419,6 +427,7 @@ class TestRendering(unittest.TestCase):
 
         z_buffer = pym_renderer.create_z_buffer(camera)
         rgb_buffer = pym_renderer.create_rgb_buffer(camera)
+
         pym_renderer.rasterize_mesh(
             positions,
             normals,
@@ -440,11 +449,6 @@ class TestRendering(unittest.TestCase):
         render without texture coordinates, depth values should be correct,
         and the rgb_buffer should contain visible (lit) pixels.
         """
-        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
-        # deep inlining) that overflow the default 1 MB Windows thread stack.
-        if sys.platform == "win32":
-            return
-
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
         )
@@ -496,11 +500,6 @@ class TestRendering(unittest.TestCase):
         pixel count should match a baseline render without texture
         coordinates, and the geometry is unaffected by the texture mapping.
         """
-        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
-        # deep inlining) that overflow the default 1 MB Windows thread stack.
-        if sys.platform == "win32":
-            return
-
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
         )
@@ -565,11 +564,6 @@ class TestRendering(unittest.TestCase):
         - The geometry (z-buffer) is unaffected by the choice of texture
           triangle indices.
         """
-        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
-        # deep inlining) that overflow the default 1 MB Windows thread stack.
-        if sys.platform == "win32":
-            return
-
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
         )
@@ -595,6 +589,7 @@ class TestRendering(unittest.TestCase):
         ) -> tuple[torch.Tensor, torch.Tensor]:
             z_buf = pym_renderer.create_z_buffer(camera)
             rgb_buf = pym_renderer.create_rgb_buffer(camera)
+
             pym_renderer.rasterize_mesh(
                 positions,
                 normals,
