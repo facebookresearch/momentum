@@ -12,9 +12,8 @@
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 
-#include <axel/Bvh.h>
+#include <axel/BoundingBox.h>
 
-#include <unordered_set>
 #include <vector>
 
 namespace momentum {
@@ -55,38 +54,61 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
  protected:
   void updateCollisionPairs();
 
-  // Update collisionState_ and bvh_ given the new skeleton state.
+  /// Update collisionState_ and aabbs_ given the new skeleton state.
   void computeBroadPhase(const SkeletonStateT<T>& state);
 
-  using PairId = std::pair<size_t, size_t>;
+  /// AABB broadphase pre-check followed by narrow-phase capsule overlap test.
+  /// Returns true if the pair collides, filling distance, cp, and overlap.
+  [[nodiscard]] bool checkCollision(
+      const CollisionGeometryStateT<T>& colState,
+      size_t indexA,
+      size_t indexB,
+      T& distance,
+      Vector2<T>& cp,
+      T& overlap) const;
 
-  struct PairHash {
-    std::size_t operator()(const std::pair<size_t, size_t>& p) const {
-      // Use the smaller value as the high-order bits and the larger value as the low-order bits
-      return (static_cast<uint64_t>(std::min(p.first, p.second)) << (sizeof(size_t) * 8 / 2)) |
-          std::max(p.first, p.second);
-    }
-  };
+  /// Accumulate gradient contributions along a joint chain from startJoint up to (but not
+  /// including) stopJoint. The sign of weight controls the push direction.
+  void accumulateGradientAlongChain(
+      const SkeletonStateT<T>& state,
+      const Vector3<T>& position,
+      const Vector3<T>& direction,
+      T weight,
+      size_t startJoint,
+      size_t stopJoint,
+      Ref<VectorX<T>> gradient) const;
 
-  struct PairEqual {
-    bool operator()(const PairId& a, const PairId& b) const {
-      return (a.first == b.first && a.second == b.second) ||
-          (a.first == b.second && a.second == b.first);
-    }
+  /// Accumulate Jacobian contributions along a joint chain from startJoint up to (but not
+  /// including) stopJoint. The sign of factor controls the push direction.
+  void accumulateJacobianAlongChain(
+      const SkeletonStateT<T>& state,
+      const Vector3<T>& position,
+      const Vector3<T>& direction,
+      T factor,
+      size_t startJoint,
+      size_t stopJoint,
+      Ref<MatrixX<T>> jacobian,
+      int row) const;
+
+  /// Pre-computed valid collision pair with common ancestor.
+  struct CollisionPairInfo {
+    size_t indexA;
+    size_t indexB;
+    size_t commonAncestor;
   };
 
   const CollisionGeometry collisionGeometry_;
 
-  std::unordered_set<PairId, PairHash, PairEqual> excludingPairIds_;
+  /// Pre-filtered list of valid collision pairs (excludes rest-pose overlaps and adjacent joints).
+  std::vector<CollisionPairInfo> validPairs_;
 
-  size_t jacobianSize_ = 0;
+  /// Per-capsule AABBs, updated each frame for broadphase culling.
+  std::vector<axel::BoundingBox<T>> aabbs_;
 
   CollisionGeometryStateT<T> collisionState_;
 
   // weights for the error functions
   static constexpr T kCollisionWeight = 5e-3f;
-
-  axel::Bvh<T> bvh_;
 };
 
 } // namespace momentum

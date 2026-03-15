@@ -12,6 +12,10 @@
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 
+#include <axel/BoundingBox.h>
+
+#include <vector>
+
 namespace momentum {
 
 /// NOTE: This is a resurrected version of the `CollisionErrorFunction` (previously updated by
@@ -58,13 +62,53 @@ class CollisionErrorFunctionStatelessT : public SkeletonErrorFunctionT<T> {
  protected:
   void updateCollisionPairs();
 
+  /// Update collisionState and aabbs_ given the new skeleton state.
+  void computeBroadPhase(const SkeletonStateT<T>& state);
+
+  /// AABB broadphase pre-check followed by narrow-phase capsule overlap test.
+  [[nodiscard]] bool checkCollision(
+      const CollisionGeometryStateT<T>& colState,
+      size_t indexA,
+      size_t indexB,
+      T& distance,
+      Vector2<T>& cp,
+      T& overlap) const;
+
+  /// Accumulate gradient contributions along a joint chain.
+  void accumulateGradientAlongChain(
+      const SkeletonStateT<T>& state,
+      const Vector3<T>& position,
+      const Vector3<T>& direction,
+      T weight,
+      size_t startJoint,
+      size_t stopJoint,
+      Ref<VectorX<T>> gradient) const;
+
+  /// Accumulate Jacobian contributions along a joint chain.
+  void accumulateJacobianAlongChain(
+      const SkeletonStateT<T>& state,
+      const Vector3<T>& position,
+      const Vector3<T>& direction,
+      T factor,
+      size_t startJoint,
+      size_t stopJoint,
+      Ref<MatrixX<T>> jacobian,
+      int row) const;
+
+  /// Pre-computed valid collision pair with common ancestor.
+  struct CollisionPairInfo {
+    size_t indexA;
+    size_t indexB;
+    size_t commonAncestor;
+  };
+
   const CollisionGeometry collisionGeometry;
 
-  // [0] and [1] index the collision geometry, [2] indexes the joint after
-  // which we can stop comparing as it's parent to both
-  std::vector<Vector3i> collisionPairs;
+  /// Pre-filtered list of valid collision pairs.
+  std::vector<CollisionPairInfo> validPairs_;
 
-  VectorX<bool> collisionActive;
+  /// Per-capsule AABBs, updated each frame for broadphase culling.
+  std::vector<axel::BoundingBox<T>> aabbs_;
 
   CollisionGeometryStateT<T> collisionState;
 

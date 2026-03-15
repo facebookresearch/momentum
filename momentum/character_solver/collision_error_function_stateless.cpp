@@ -39,21 +39,30 @@ CollisionErrorFunctionStatelessT<T>::CollisionErrorFunctionStatelessT(const Char
 
 template <typename T>
 void CollisionErrorFunctionStatelessT<T>::updateCollisionPairs() {
-  // clear collisions
-  collisionPairs.clear();
+  validPairs_.clear();
 
-  // create zero state
   const SkeletonStateT<T> state(
       this->parameterTransform_.zero().template cast<T>(), this->skeleton_);
   collisionState.update(state, collisionGeometry);
 
-  // go over all possible pairs
-  for (size_t i = 0; i < collisionGeometry.size(); ++i) {
-    for (size_t j = i + 1; j < collisionGeometry.size(); ++j) {
-      // check if pair naturally intersects
-      T distance;
-      Vector2<T> cp;
-      T overlap;
+  const auto n = collisionGeometry.size();
+
+  aabbs_.resize(n);
+  for (size_t i = 0; i < n; ++i) {
+    aabbs_[i].id = gsl::narrow_cast<axel::Index>(i);
+    updateAabb(
+        aabbs_[i], collisionState.origin[i], collisionState.direction[i], collisionState.radius[i]);
+  }
+
+  if (n == 0) {
+    return;
+  }
+
+  T distance;
+  Vector2<T> cp;
+  T overlap;
+  for (size_t i = 0; i < n; ++i) {
+    for (size_t j = i + 1; j < n; ++j) {
       if (overlaps(
               collisionState.origin[i],
               collisionState.direction[i],
@@ -69,16 +78,9 @@ void CollisionErrorFunctionStatelessT<T>::updateCollisionPairs() {
         continue;
       }
 
-      // no, it doesn't. check
-
-      // walk down the this->skeleton_ hierarchy for the collision pair until we find a common
-      // ancestor
       size_t p0 = collisionGeometry[i].parent;
       size_t p1 = collisionGeometry[j].parent;
       size_t count = 0;
-
-      // Find the common ancestor. We can always just walk up the higher joint index because the
-      // parent always has to have a lower index than the child joint.
       while (p0 != p1) {
         if (p0 > p1) {
           p0 = this->skeleton_.joints[p0].parent;
@@ -88,30 +90,162 @@ void CollisionErrorFunctionStatelessT<T>::updateCollisionPairs() {
         count++;
       }
 
-      const Vector3i collisionPair(
-          gsl::narrow_cast<int>(i), gsl::narrow_cast<int>(j), gsl::narrow_cast<int>(p0));
-
-      // Store collision pairs excluding those with the same parent or adjacent joints
       if (count > 1) {
-        collisionPairs.push_back(collisionPair);
+        validPairs_.push_back({i, j, p0});
       }
     }
   }
+}
 
-  collisionActive.setConstant(collisionPairs.size(), false);
+template <typename T>
+void CollisionErrorFunctionStatelessT<T>::computeBroadPhase(const SkeletonStateT<T>& state) {
+  {
+    MT_PROFILE_EVENT("Collision: updateState");
+    collisionState.update(state, collisionGeometry);
+  }
+
+  for (size_t i = 0; i < aabbs_.size(); ++i) {
+    updateAabb(
+        aabbs_[i], collisionState.origin[i], collisionState.direction[i], collisionState.radius[i]);
+  }
+}
+
+template <typename T>
+bool CollisionErrorFunctionStatelessT<T>::checkCollision(
+    const CollisionGeometryStateT<T>& colState,
+    size_t indexA,
+    size_t indexB,
+    T& distance,
+    Vector2<T>& cp,
+    T& overlap) const {
+  if (!aabbs_[indexA].intersects(aabbs_[indexB])) {
+    return false;
+  }
+  return overlaps(
+      colState.origin[indexA],
+      colState.direction[indexA],
+      colState.radius[indexA],
+      colState.delta[indexA],
+      colState.origin[indexB],
+      colState.direction[indexB],
+      colState.radius[indexB],
+      colState.delta[indexB],
+      distance,
+      cp,
+      overlap);
+}
+
+template <typename T>
+void CollisionErrorFunctionStatelessT<T>::accumulateGradientAlongChain(
+    const SkeletonStateT<T>& state,
+    const Vector3<T>& position,
+    const Vector3<T>& direction,
+    T weight,
+    size_t startJoint,
+    size_t stopJoint,
+    Ref<VectorX<T>> gradient) const {
+  size_t jointIndex = startJoint;
+  while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Vector3<T> posd = position - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (this->activeJointParams_[paramIndex + d]) {
+        const T val = direction.dot(jointState.getTranslationDerivative(d)) * weight;
+        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
+             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
+             ++index) {
+          gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
+              val * this->parameterTransform_.transform.valuePtr()[index];
+        }
+      }
+      if (this->activeJointParams_[paramIndex + 3 + d]) {
+        const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * weight;
+        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
+             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
+             ++index) {
+          gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
+              val * this->parameterTransform_.transform.valuePtr()[index];
+        }
+      }
+    }
+    if (this->activeJointParams_[paramIndex + 6]) {
+      const T val = direction.dot(jointState.getScaleDerivative(posd)) * weight;
+      for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
+           index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
+           ++index) {
+        gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
+            val * this->parameterTransform_.transform.valuePtr()[index];
+      }
+    }
+
+    jointIndex = this->skeleton_.joints[jointIndex].parent;
+  }
+}
+
+template <typename T>
+void CollisionErrorFunctionStatelessT<T>::accumulateJacobianAlongChain(
+    const SkeletonStateT<T>& state,
+    const Vector3<T>& position,
+    const Vector3<T>& direction,
+    T factor,
+    size_t startJoint,
+    size_t stopJoint,
+    Ref<MatrixX<T>> jacobian,
+    int row) const {
+  size_t jointIndex = startJoint;
+  while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Vector3<T> posd = position - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (this->activeJointParams_[paramIndex + d]) {
+        const T val = direction.dot(jointState.getTranslationDerivative(d)) * factor;
+        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
+             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
+             ++index) {
+          jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
+              val * this->parameterTransform_.transform.valuePtr()[index];
+        }
+      }
+      if (this->activeJointParams_[paramIndex + 3 + d]) {
+        const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * factor;
+        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
+             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
+             ++index) {
+          jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
+              val * this->parameterTransform_.transform.valuePtr()[index];
+        }
+      }
+    }
+    if (this->activeJointParams_[paramIndex + 6]) {
+      const T val = direction.dot(jointState.getScaleDerivative(posd)) * factor;
+      for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
+           index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
+           ++index) {
+        jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
+            val * this->parameterTransform_.transform.valuePtr()[index];
+      }
+    }
+
+    jointIndex = this->skeleton_.joints[jointIndex].parent;
+  }
 }
 
 template <typename T>
 std::vector<Vector2i> CollisionErrorFunctionStatelessT<T>::getCollisionPairs() const {
-  std::vector<Vector2i> result;
-
-  for (size_t i = 0; i < collisionPairs.size(); i++) {
-    if (collisionActive[i]) {
-      result.emplace_back(collisionPairs[i].template head<2>());
+  std::vector<Vector2i> collidingPairs;
+  for (const auto& pair : validPairs_) {
+    T distance;
+    Vector2<T> cp;
+    T overlap;
+    if (checkCollision(collisionState, pair.indexA, pair.indexB, distance, cp, overlap)) {
+      collidingPairs.emplace_back(pair.indexA, pair.indexB);
     }
   }
-
-  return result;
+  return collidingPairs;
 }
 
 template <typename T>
@@ -123,43 +257,23 @@ double CollisionErrorFunctionStatelessT<T>::getError(
     return 0.0;
   }
 
-  // check all is valid
   MT_CHECK(
       state.jointParameters.size() ==
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
 
-  // update collision state
-  collisionState.update(state, collisionGeometry);
-  collisionActive.setConstant(false);
+  computeBroadPhase(state);
 
-  // loop over all pairs of collision objects and check
-  double error = 0.0;
-
-  for (size_t i = 0; i < collisionPairs.size(); i++) {
-    const auto& pr = collisionPairs[i];
+  double error = 0;
+  for (const auto& pair : validPairs_) {
     T distance;
     Vector2<T> cp;
     T overlap;
-    if (!overlaps(
-            collisionState.origin[pr[0]],
-            collisionState.direction[pr[0]],
-            collisionState.radius[pr[0]],
-            collisionState.delta[pr[0]],
-            collisionState.origin[pr[1]],
-            collisionState.direction[pr[1]],
-            collisionState.radius[pr[1]],
-            collisionState.delta[pr[1]],
-            distance,
-            cp,
-            overlap)) {
+    if (!checkCollision(collisionState, pair.indexA, pair.indexB, distance, cp, overlap)) {
       continue;
     }
-
-    collisionActive[i] = true;
     error += sqr(overlap) * kCollisionWeight * this->weight_;
   }
 
-  // return error
   return error;
 }
 
@@ -173,145 +287,48 @@ double CollisionErrorFunctionStatelessT<T>::getGradient(
     return 0.0;
   }
 
-  // check all is valid
   MT_CHECK(
       state.jointParameters.size() ==
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
 
-  // update collision state
-  collisionState.update(state, collisionGeometry);
-  collisionActive.setConstant(false);
+  computeBroadPhase(state);
 
   double error = 0;
-  for (size_t i = 0; i < collisionPairs.size(); ++i) {
-    const auto& pr = collisionPairs[i];
+  for (const auto& pair : validPairs_) {
     T distance;
     Vector2<T> cp;
     T overlap;
-    if (!overlaps(
-            collisionState.origin[pr[0]],
-            collisionState.direction[pr[0]],
-            collisionState.radius[pr[0]],
-            collisionState.delta[pr[0]],
-            collisionState.origin[pr[1]],
-            collisionState.direction[pr[1]],
-            collisionState.radius[pr[1]],
-            collisionState.delta[pr[1]],
-            distance,
-            cp,
-            overlap)) {
+    if (!checkCollision(collisionState, pair.indexA, pair.indexB, distance, cp, overlap)) {
       continue;
     }
 
-    collisionActive[i] = true;
     error += sqr(overlap) * kCollisionWeight * this->weight_;
 
-    // calculate collision resolve direction. this is what we need to push joint parent i in.
-    // the direction for joint parent j is the inverse
     const Vector3<T> position_i =
-        (collisionState.origin[pr[0]] + collisionState.direction[pr[0]] * cp[0]);
+        collisionState.origin[pair.indexA] + collisionState.direction[pair.indexA] * cp[0];
     const Vector3<T> position_j =
-        (collisionState.origin[pr[1]] + collisionState.direction[pr[1]] * cp[1]);
+        collisionState.origin[pair.indexB] + collisionState.direction[pair.indexB] * cp[1];
     const Vector3<T> direction = position_i - position_j;
-    const T overlapFraction = overlap / distance;
+    const T wgt = -T(2) * kCollisionWeight * this->weight_ * (overlap / distance);
 
-    // calculate weight
-    const T wgt = -T(2) * kCollisionWeight * this->weight_ * overlapFraction;
-
-    // -----------------------------------
-    //  process first joint
-    // -----------------------------------
-    size_t jointIndex = collisionGeometry[pr[0]].parent;
-    while (jointIndex != kInvalidIndex && jointIndex != gsl::narrow_cast<size_t>(pr[2])) {
-      const auto& jointState = state.jointState[jointIndex];
-      const size_t paramIndex = jointIndex * kParametersPerJoint;
-      const Vector3<T> posd = position_i - jointState.translation();
-
-      // calculate derivatives based on active joints
-      for (size_t d = 0; d < 3; d++) {
-        if (this->activeJointParams_[paramIndex + d]) {
-          const T val = direction.dot(jointState.getTranslationDerivative(d)) * wgt;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-               ++index) {
-            gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 3 + d]) {
-          const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * wgt;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-               ++index) {
-            gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-      }
-      if (this->activeJointParams_[paramIndex + 6]) {
-        const T val = direction.dot(jointState.getScaleDerivative(posd)) * wgt;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-             ++index) {
-          gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
-      }
-
-      // go to the next joint
-      jointIndex = this->skeleton_.joints[jointIndex].parent;
-    }
-
-    // -----------------------------------
-    //  process second joint
-    // -----------------------------------
-    jointIndex = collisionGeometry[pr[1]].parent;
-    while (jointIndex != kInvalidIndex && jointIndex != gsl::narrow_cast<size_t>(pr[2])) {
-      const auto& jointState = state.jointState[jointIndex];
-      const size_t paramIndex = jointIndex * kParametersPerJoint;
-      const Vector3<T> posd = position_j - jointState.translation();
-
-      // calculate derivatives based on active joints
-      for (size_t d = 0; d < 3; d++) {
-        if (this->activeJointParams_[paramIndex + d]) {
-          const T val = direction.dot(jointState.getTranslationDerivative(d)) * -wgt;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-               ++index) {
-            gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 3 + d]) {
-          const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * -wgt;
-          const auto maxIndex =
-              this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-               index < maxIndex;
-               ++index) {
-            gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-      }
-      if (this->activeJointParams_[paramIndex + 6]) {
-        const T val = direction.dot(jointState.getScaleDerivative(posd)) * -wgt;
-        const auto maxIndex =
-            this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-             index < maxIndex;
-             ++index) {
-          gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
-      }
-
-      // go to the next joint
-      jointIndex = this->skeleton_.joints[jointIndex].parent;
-    }
+    accumulateGradientAlongChain(
+        state,
+        position_i,
+        direction,
+        wgt,
+        collisionGeometry[pair.indexA].parent,
+        pair.commonAncestor,
+        gradient);
+    accumulateGradientAlongChain(
+        state,
+        position_j,
+        direction,
+        -wgt,
+        collisionGeometry[pair.indexB].parent,
+        pair.commonAncestor,
+        gradient);
   }
 
-  // return error
   return error;
 }
 
@@ -325,178 +342,77 @@ double CollisionErrorFunctionStatelessT<T>::getJacobian(
     int& usedRows) {
   MT_PROFILE_FUNCTION();
   MT_CHECK(
-      jacobian.rows() >= gsl::narrow<Eigen::Index>(collisionPairs.size()),
+      jacobian.rows() >= gsl::narrow<Eigen::Index>(getJacobianSize()),
       "Jacobian rows mismatch: Actual {}, Expected {}",
       jacobian.rows(),
-      gsl::narrow<Eigen::Index>(collisionPairs.size()));
-
+      gsl::narrow<Eigen::Index>(getJacobianSize()));
   MT_CHECK(
-      residual.rows() >= gsl::narrow<Eigen::Index>(collisionPairs.size()),
+      residual.rows() >= gsl::narrow<Eigen::Index>(getJacobianSize()),
       "Residual rows mismatch: Actual {}, Expected {}",
       residual.rows(),
-      gsl::narrow<Eigen::Index>(collisionPairs.size()));
+      gsl::narrow<Eigen::Index>(getJacobianSize()));
 
   if (state.jointState.empty()) {
     return 0.0;
   }
 
-  // check all is valid
   MT_CHECK(
       state.jointParameters.size() ==
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
 
-  // update collision state
-  {
-    MT_PROFILE_EVENT("Collision: updateState");
-
-    collisionState.update(state, collisionGeometry);
-    collisionActive.setConstant(false);
-  }
+  computeBroadPhase(state);
 
   const T wgt = std::sqrt(kCollisionWeight * this->weight_);
-
   int pos = 0;
   double error = 0;
 
-  // loop over all pairs of collision objects and check
-  for (size_t i = 0; i < collisionPairs.size(); ++i) {
-    const auto& pr = collisionPairs[i];
+  for (const auto& pair : validPairs_) {
     T distance;
     Vector2<T> cp;
     T overlap;
-    if (!overlaps(
-            collisionState.origin[pr[0]],
-            collisionState.direction[pr[0]],
-            collisionState.radius[pr[0]],
-            collisionState.delta[pr[0]],
-            collisionState.origin[pr[1]],
-            collisionState.direction[pr[1]],
-            collisionState.radius[pr[1]],
-            collisionState.delta[pr[1]],
-            distance,
-            cp,
-            overlap)) {
+    if (!checkCollision(collisionState, pair.indexA, pair.indexB, distance, cp, overlap)) {
       continue;
     }
 
-    collisionActive[i] = true;
     error += sqr(overlap) * kCollisionWeight * this->weight_;
 
-    // calculate collision resolve direction. this is what we need to push joint parent i in.
-    // the direction for joint parent j is the inverse
     const Vector3<T> position_i =
-        (collisionState.origin[pr[0]] + collisionState.direction[pr[0]] * cp[0]);
+        collisionState.origin[pair.indexA] + collisionState.direction[pair.indexA] * cp[0];
     const Vector3<T> position_j =
-        (collisionState.origin[pr[1]] + collisionState.direction[pr[1]] * cp[1]);
+        collisionState.origin[pair.indexB] + collisionState.direction[pair.indexB] * cp[1];
     const Vector3<T> direction = position_i - position_j;
-    const T inverseDistance = T(1) / distance;
-
-    // calculate constant factor
-    const T fac = T(2) * inverseDistance * wgt;
-
-    // get position in jacobian
+    const T fac = T(2) / distance * wgt;
     const int row = pos++;
 
-    // -----------------------------------
-    //  process first joint
-    // -----------------------------------
-    size_t jointIndex = collisionGeometry[pr[0]].parent;
-    while (jointIndex != kInvalidIndex && jointIndex != gsl::narrow_cast<size_t>(pr[2])) {
-      const auto& jointState = state.jointState[jointIndex];
-      const size_t paramIndex = jointIndex * kParametersPerJoint;
-      const Vector3<T> posd = position_i - jointState.translation();
-
-      // calculate derivatives based on active joints
-      for (size_t d = 0; d < 3; d++) {
-        if (this->activeJointParams_[paramIndex + d]) {
-          const T val = direction.dot(jointState.getTranslationDerivative(d)) * -fac;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-               ++index) {
-            jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 3 + d]) {
-          const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * -fac;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-               ++index) {
-            jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-      }
-      if (this->activeJointParams_[paramIndex + 6]) {
-        const T val = direction.dot(jointState.getScaleDerivative(posd)) * -fac;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-             ++index) {
-          jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
-      }
-
-      // go to the next joint
-      jointIndex = this->skeleton_.joints[jointIndex].parent;
-    }
-
-    // -----------------------------------
-    //  process second joint
-    // -----------------------------------
-    jointIndex = collisionGeometry[pr[1]].parent;
-    while (jointIndex != kInvalidIndex && jointIndex != gsl::narrow_cast<size_t>(pr[2])) {
-      const auto& jointState = state.jointState[jointIndex];
-      const size_t paramIndex = jointIndex * kParametersPerJoint;
-      const Vector3<T> posd = position_j - jointState.translation();
-
-      // calculate derivatives based on active joints
-      for (size_t d = 0; d < 3; d++) {
-        if (this->activeJointParams_[paramIndex + d]) {
-          const T val = direction.dot(jointState.getTranslationDerivative(d)) * fac;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-               ++index) {
-            jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-        if (this->activeJointParams_[paramIndex + 3 + d]) {
-          const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * fac;
-          for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-               index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-               ++index) {
-            jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-                val * this->parameterTransform_.transform.valuePtr()[index];
-          }
-        }
-      }
-      if (this->activeJointParams_[paramIndex + 6]) {
-        const T val = direction.dot(jointState.getScaleDerivative(posd)) * fac;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-             ++index) {
-          jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
-      }
-
-      // go to the next joint
-      jointIndex = this->skeleton_.joints[jointIndex].parent;
-    }
+    accumulateJacobianAlongChain(
+        state,
+        position_i,
+        direction,
+        -fac,
+        collisionGeometry[pair.indexA].parent,
+        pair.commonAncestor,
+        jacobian,
+        row);
+    accumulateJacobianAlongChain(
+        state,
+        position_j,
+        direction,
+        fac,
+        collisionGeometry[pair.indexB].parent,
+        pair.commonAncestor,
+        jacobian,
+        row);
 
     residual(row) = overlap * wgt;
   }
 
   usedRows = pos;
-
-  // return error
   return error;
 }
 
 template <typename T>
 size_t CollisionErrorFunctionStatelessT<T>::getJacobianSize() const {
-  return collisionPairs.size();
+  return validPairs_.size();
 }
 
 template class CollisionErrorFunctionStatelessT<float>;
