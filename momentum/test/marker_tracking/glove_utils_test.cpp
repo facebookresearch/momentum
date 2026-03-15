@@ -7,6 +7,7 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/types.h>
+#include <momentum/character_solver/skeleton_solver_function.h>
 #include <momentum/marker_tracking/glove_utils.h>
 #include <momentum/math/utility.h>
 #include <momentum/test/character/character_helpers.h>
@@ -177,7 +178,7 @@ TEST(GloveUtilsTest, CreateConstraintDataFromObservations) {
   EXPECT_EQ(posData[0][0].sourceJoint, fingerJointIdx);
   EXPECT_EQ(posData[0][0].referenceJoint, gloveBoneIdx);
   EXPECT_TRUE(posData[0][0].target.isApprox(Vector3f(1.0f, 2.0f, 3.0f)));
-  EXPECT_FLOAT_EQ(posData[0][0].weight, cfg.positionWeight);
+  EXPECT_FLOAT_EQ(posData[0][0].weight, 1.0f);
 
   // Frame 1: valid obs produces a constraint, unknown joint is skipped
   ASSERT_EQ(posData[1].size(), 1u);
@@ -190,6 +191,172 @@ TEST(GloveUtilsTest, CreateConstraintDataFromObservations) {
   EXPECT_EQ(oriData[0][0].sourceJoint, fingerJointIdx);
   EXPECT_EQ(oriData[0][0].referenceJoint, gloveBoneIdx);
   EXPECT_TRUE(oriData[0][0].target.isApprox(validObs.orientation));
-  EXPECT_FLOAT_EQ(oriData[0][0].weight, cfg.orientationWeight);
+  EXPECT_FLOAT_EQ(oriData[0][0].weight, 1.0f);
   ASSERT_EQ(oriData[1].size(), 1u);
+}
+
+// Verify that setupGloveErrorFunctions registers error functions with a
+// SkeletonSolverFunction, and that updateGloveConstraintsForFrame correctly
+// swaps per-frame constraint data so the solver sees different constraints
+// for different frames.
+TEST(GloveUtilsTest, SetupAndUpdatePerFrameErrorFunctions) {
+  const auto srcCharacter = createCharacterWithWrists();
+  const GloveConfig cfg;
+  const auto gloveChar = createGloveCharacter(srcCharacter, cfg);
+
+  // Build 2 frames of glove data with different observations per frame
+  std::vector<GloveFrameData> gloveData(2);
+
+  GloveSensorObservation obs0;
+  obs0.jointName = "joint1";
+  obs0.position = Vector3f(1.0f, 0.0f, 0.0f);
+  obs0.valid = true;
+
+  GloveSensorObservation obs1a;
+  obs1a.jointName = "joint1";
+  obs1a.position = Vector3f(2.0f, 0.0f, 0.0f);
+  obs1a.valid = true;
+
+  GloveSensorObservation obs1b;
+  obs1b.jointName = "joint2";
+  obs1b.position = Vector3f(3.0f, 0.0f, 0.0f);
+  obs1b.valid = true;
+
+  gloveData[0] = {obs0};
+  gloveData[1] = {obs1a, obs1b};
+
+  // Create a solver function and set up glove error functions
+  SkeletonSolverFunctionT<float> solverFunc(gloveChar, gloveChar.parameterTransform);
+
+  auto funcs = setupGloveErrorFunctions(solverFunc, gloveChar, gloveData, cfg, 0);
+  ASSERT_TRUE(funcs.has_value());
+
+  // Swap to frame 0: should have 1 position constraint
+  updateGloveConstraintsForFrame(*funcs, 0);
+  EXPECT_EQ(funcs->posFunc->getNumConstraints(), 1u);
+  EXPECT_EQ(funcs->oriFunc->numConstraints(), 1u);
+
+  // Swap to frame 1: should have 2 position constraints
+  updateGloveConstraintsForFrame(*funcs, 1);
+  EXPECT_EQ(funcs->posFunc->getNumConstraints(), 2u);
+  EXPECT_EQ(funcs->oriFunc->numConstraints(), 2u);
+
+  // Swap back to frame 0: constraints should revert
+  updateGloveConstraintsForFrame(*funcs, 0);
+  EXPECT_EQ(funcs->posFunc->getNumConstraints(), 1u);
+
+  // Empty glove data returns nullopt
+  std::vector<GloveFrameData> emptyData;
+  auto emptyFuncs = setupGloveErrorFunctions(solverFunc, gloveChar, emptyData, cfg, 0);
+  EXPECT_FALSE(emptyFuncs.has_value());
+}
+
+// Verify that addGloveBones adds skeleton joints without model parameters,
+// and addGloveCalibrationParameters adds model parameters for existing bones.
+TEST(GloveUtilsTest, AddGloveBonesAndCalibrationParametersSeparately) {
+  const auto srcCharacter = createCharacterWithWrists();
+  const GloveConfig cfg;
+
+  // addGloveBones should add joints but no model parameters
+  const auto bonesOnly = addGloveBones(srcCharacter, cfg);
+  EXPECT_EQ(bonesOnly.skeleton.joints.size(), srcCharacter.skeleton.joints.size() + 2);
+  EXPECT_NE(bonesOnly.skeleton.getJointIdByName("glove_l_wrist"), kInvalidIndex);
+  EXPECT_NE(bonesOnly.skeleton.getJointIdByName("glove_r_wrist"), kInvalidIndex);
+  EXPECT_EQ(
+      bonesOnly.parameterTransform.numAllModelParameters(),
+      srcCharacter.parameterTransform.numAllModelParameters());
+
+  // addGloveCalibrationParameters should add model parameters for the existing bones
+  const auto full = addGloveCalibrationParameters(bonesOnly, cfg);
+  EXPECT_EQ(full.skeleton.joints.size(), bonesOnly.skeleton.joints.size());
+  EXPECT_EQ(
+      full.parameterTransform.numAllModelParameters(),
+      bonesOnly.parameterTransform.numAllModelParameters() + 12);
+  EXPECT_EQ(full.parameterTransform.getParameterSet("gloves", true).count(), 12u);
+
+  // The composition should produce the same result as createGloveCharacter
+  const auto wrapper = createGloveCharacter(srcCharacter, cfg);
+  EXPECT_EQ(full.skeleton.joints.size(), wrapper.skeleton.joints.size());
+  EXPECT_EQ(
+      full.parameterTransform.numAllModelParameters(),
+      wrapper.parameterTransform.numAllModelParameters());
+}
+
+// Verify that addGloveBones with non-zero offsets bakes the offset into the
+// joint's translationOffset and preRotation, and that calling it twice
+// does not duplicate the bones.
+TEST(GloveUtilsTest, AddGloveBonesWithOffsets) {
+  const auto srcCharacter = createCharacterWithWrists();
+  const GloveConfig cfg;
+
+  std::array<GloveOffset, 2> offsets;
+  offsets[0].translation = Vector3f(1.0f, 2.0f, 3.0f);
+  offsets[0].rotationEulerXYZ = Vector3f(0.1f, 0.2f, 0.3f);
+  offsets[1].translation = Vector3f(4.0f, 5.0f, 6.0f);
+  offsets[1].rotationEulerXYZ = Vector3f(0.4f, 0.5f, 0.6f);
+
+  const auto result = addGloveBones(srcCharacter, cfg, offsets);
+  ASSERT_EQ(result.skeleton.joints.size(), srcCharacter.skeleton.joints.size() + 2);
+
+  const size_t leftIdx = result.skeleton.getJointIdByName("glove_l_wrist");
+  ASSERT_NE(leftIdx, kInvalidIndex);
+  EXPECT_TRUE(
+      result.skeleton.joints[leftIdx].translationOffset.isApprox(Vector3f(1.0f, 2.0f, 3.0f)));
+  const auto expectedLeftRot =
+      eulerToQuaternion<float>(Vector3f(0.1f, 0.2f, 0.3f), 0, 1, 2, EulerConvention::Intrinsic);
+  EXPECT_TRUE(result.skeleton.joints[leftIdx].preRotation.isApprox(expectedLeftRot));
+
+  const size_t rightIdx = result.skeleton.getJointIdByName("glove_r_wrist");
+  ASSERT_NE(rightIdx, kInvalidIndex);
+  EXPECT_TRUE(
+      result.skeleton.joints[rightIdx].translationOffset.isApprox(Vector3f(4.0f, 5.0f, 6.0f)));
+  const auto expectedRightRot =
+      eulerToQuaternion<float>(Vector3f(0.4f, 0.5f, 0.6f), 0, 1, 2, EulerConvention::Intrinsic);
+  EXPECT_TRUE(result.skeleton.joints[rightIdx].preRotation.isApprox(expectedRightRot));
+
+  // Calling addGloveBones again should not add duplicate joints
+  const auto again = addGloveBones(result, cfg, offsets);
+  EXPECT_EQ(again.skeleton.joints.size(), result.skeleton.joints.size());
+}
+
+// Verify that constraint creation falls back to the wrist joint when the
+// glove bone does not exist in the character.
+TEST(GloveUtilsTest, ConstraintFallbackToWrist) {
+  const auto srcCharacter = createCharacterWithWrists();
+  const GloveConfig cfg;
+
+  // No glove bones — constraint creation should fall back to wrist
+  const size_t wristIdx = srcCharacter.skeleton.getJointIdByName("l_wrist");
+  ASSERT_NE(wristIdx, kInvalidIndex);
+
+  std::vector<GloveFrameData> gloveData(1);
+  GloveSensorObservation obs;
+  obs.jointName = "joint1";
+  obs.position = Vector3f(1.0f, 2.0f, 3.0f);
+  obs.valid = true;
+  gloveData[0] = {obs};
+
+  const auto posData = createGlovePositionConstraintData(gloveData, srcCharacter, cfg, 0);
+  ASSERT_EQ(posData.size(), 1u);
+  ASSERT_EQ(posData[0].size(), 1u);
+  EXPECT_EQ(posData[0][0].referenceJoint, wristIdx);
+
+  const auto oriData = createGloveOrientationConstraintData(gloveData, srcCharacter, cfg, 0);
+  ASSERT_EQ(oriData.size(), 1u);
+  ASSERT_EQ(oriData[0].size(), 1u);
+  EXPECT_EQ(oriData[0][0].referenceJoint, wristIdx);
+
+  // Right hand should also fall back to wrist
+  const size_t rWristIdx = srcCharacter.skeleton.getJointIdByName("r_wrist");
+  ASSERT_NE(rWristIdx, kInvalidIndex);
+
+  const auto rPosData = createGlovePositionConstraintData(gloveData, srcCharacter, cfg, 1);
+  ASSERT_EQ(rPosData.size(), 1u);
+  ASSERT_EQ(rPosData[0].size(), 1u);
+  EXPECT_EQ(rPosData[0][0].referenceJoint, rWristIdx);
+
+  const auto rOriData = createGloveOrientationConstraintData(gloveData, srcCharacter, cfg, 1);
+  ASSERT_EQ(rOriData.size(), 1u);
+  ASSERT_EQ(rOriData[0].size(), 1u);
+  EXPECT_EQ(rOriData[0][0].referenceJoint, rWristIdx);
 }
