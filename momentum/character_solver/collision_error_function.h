@@ -52,6 +52,8 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   [[nodiscard]] std::vector<Vector2i> getCollisionPairs() const;
 
+  [[nodiscard]] JointSet getAffectedJoints() const final;
+
  protected:
   void updateCollisionPairs();
 

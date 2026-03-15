@@ -145,6 +145,35 @@ void CollisionErrorFunctionT<T>::computeBroadPhase(const SkeletonStateT<T>& stat
 }
 
 template <typename T>
+JointSet CollisionErrorFunctionT<T>::getAffectedJoints() const {
+  JointSet activeJoints;
+
+  // For each collision geom, count how many other geoms it can't collide with.
+  // If a geom cannot collide with all other n-1 geoms, it's inactive.
+  // On the other hand, any active geom has a chance of being included in the error function.
+  const size_t numGeoms = collisionGeometry_.size();
+  if (numGeoms == 0) {
+    return activeJoints;
+  }
+
+  Eigen::VectorXi excludeCount = Eigen::VectorXi::Zero(numGeoms);
+  for (const auto& pair : excludingPairIds_) {
+    excludeCount[pair.first]++;
+    excludeCount[pair.second]++;
+  }
+
+  for (size_t iGeom = 0; iGeom < numGeoms; ++iGeom) {
+    if (static_cast<size_t>(excludeCount[iGeom]) + 1 < numGeoms) {
+      const auto parent = collisionGeometry_[iGeom].parent;
+      if (parent != kInvalidIndex) {
+        activeJoints.set(parent);
+      }
+    }
+  }
+  return activeJoints;
+}
+
+template <typename T>
 std::vector<Vector2i> CollisionErrorFunctionT<T>::getCollisionPairs() const {
   std::vector<Vector2i> collidingPairs;
 
