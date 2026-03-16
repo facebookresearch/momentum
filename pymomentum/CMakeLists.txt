@@ -192,7 +192,6 @@ mt_python_binding(
   LINK_LIBRARIES
     array_utility
     character
-    character_test_helpers
     io_character
     io_fbx
     io_file_save_options
@@ -213,6 +212,15 @@ mt_python_binding(
   COMPILE_OPTIONS
     ${TORCH_CXX_FLAGS}
     $<$<BOOL:${MOMENTUM_BUILD_IO_USD}>:-DMOMENTUM_WITH_USD>
+)
+
+mt_python_binding(
+  NAME geometry_test_utils
+  PYMOMENTUM_SOURCES_VARS geometry_test_utils_sources
+  LINK_LIBRARIES
+    character
+    character_test_helpers
+    math
 )
 
 mt_python_binding(

@@ -11,10 +11,10 @@ import numpy as np
 import torch
 from pymomentum.geometry import (
     Character,
-    create_test_character,
     ParameterTransform,
     uniform_random_to_model_parameters,
 )
+from pymomentum.geometry_test_utils import create_test_character
 
 
 class TestParameterTransform(unittest.TestCase):

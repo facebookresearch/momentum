@@ -10,6 +10,7 @@ import unittest
 import numpy as np
 import numpy.typing as npt
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.solver2 as pym_solver2
@@ -26,7 +27,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -100,7 +101,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -115,7 +116,7 @@ class TestSolver(unittest.TestCase):
         )
 
         # make sure if we try to combine error functions from different characters, it fails:
-        character2 = pym_geometry.create_test_character(num_joints=4)
+        character2 = pym_test_utils.create_test_character(num_joints=4)
         self.assertRaises(
             RuntimeError,
             solver_function.add_error_function,
@@ -125,7 +126,7 @@ class TestSolver(unittest.TestCase):
     def test_get_gradient_and_jacobian(self) -> None:
         """Test that get_gradient and get_jacobian do something reasonable for error functions."""
 
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
@@ -194,7 +195,7 @@ class TestSolver(unittest.TestCase):
         """Test ModelParametersError to ensure solved model parameters match the target."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -241,7 +242,7 @@ class TestSolver(unittest.TestCase):
         that the result matches the target on every frame."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
         n_frames = 5
@@ -290,7 +291,7 @@ class TestSolver(unittest.TestCase):
         that the result matches the target on the first frame and is smooth across frames."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
         n_frames = 5
@@ -356,7 +357,7 @@ class TestSolver(unittest.TestCase):
         """Test StateErrorFunction to ensure it can match a given target skeleton state."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -415,7 +416,7 @@ class TestSolver(unittest.TestCase):
         """Test set_active_parameters() to ensure only active parameters change."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -480,7 +481,7 @@ class TestSolver(unittest.TestCase):
         torch.manual_seed(0)
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         # Create a PointTriangleVertexErrorFunction
         ptv_error_function = pym_solver2.PointTriangleVertexErrorFunction(character)
@@ -558,7 +559,7 @@ class TestSolver(unittest.TestCase):
         """Test PosePriorErrorFunction to ensure it can converge to multiple modes."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -614,7 +615,7 @@ class TestSolver(unittest.TestCase):
         """Test AimDirErrorFunction to ensure a local ray aims at a global target."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -686,7 +687,7 @@ class TestSolver(unittest.TestCase):
         """Test FixedAxisErrorFunction to ensure a local axis aligns with a global axis."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -757,7 +758,7 @@ class TestSolver(unittest.TestCase):
         """Test NormalErrorFunction to ensure a point-to-plane distance is minimized."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -830,7 +831,7 @@ class TestSolver(unittest.TestCase):
         """Test DistanceErrorFunction to ensure a point maintains a target distance from an origin."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -916,7 +917,7 @@ class TestSolver(unittest.TestCase):
         """Test OrientationErrorFunction to ensure a joint's orientation matches a target."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -995,7 +996,7 @@ class TestSolver(unittest.TestCase):
         """Test PlaneErrorFunction to ensure a point stays on or above a plane."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -1105,7 +1106,7 @@ class TestSolver(unittest.TestCase):
         """Test ProjectionErrorFunction to ensure a 3D point projects to a target 2D point."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -1201,7 +1202,7 @@ class TestSolver(unittest.TestCase):
         import pymomentum.camera as pym_camera
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
         n_params = character.parameter_transform.size
 
         # Set up a pinhole camera with known intrinsics
@@ -1309,7 +1310,7 @@ class TestSolver(unittest.TestCase):
         """Test VertexProjectionErrorFunction to ensure a 3D vertex projects to a target 2D point."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -1403,7 +1404,7 @@ class TestSolver(unittest.TestCase):
         """Test VertexSequenceErrorFunction to ensure vertex velocities match target velocities."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
         n_frames = 2  # VertexSequenceErrorFunction works with 2 frames
@@ -1577,7 +1578,7 @@ class TestSolver(unittest.TestCase):
         """Test AccelerationSequenceErrorFunction to ensure joint accelerations match targets."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
         n_frames = 3  # AccelerationSequenceErrorFunction requires 3 frames
@@ -1779,7 +1780,7 @@ class TestSolver(unittest.TestCase):
         """Test JerkSequenceErrorFunction to ensure joint jerks match targets."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
         n_frames = 4  # JerkSequenceErrorFunction requires 4 frames
@@ -1904,7 +1905,7 @@ class TestSolver(unittest.TestCase):
         """Test VertexVertexDistanceErrorFunction to ensure vertices are pulled to target distance."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -2046,7 +2047,7 @@ class TestSolver(unittest.TestCase):
         """Test JointToJointDistanceErrorFunction to ensure joints are pulled to target distance."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -2209,7 +2210,7 @@ class TestSolver(unittest.TestCase):
         """Test that error functions throw ValueError when negative weights are passed."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         # Test scalar weight validation in constructor
         with self.assertRaises(ValueError) as context:
@@ -2274,7 +2275,7 @@ class TestSolver(unittest.TestCase):
         """Test JointToJointPositionErrorFunction to ensure a source point matches a target position in reference frame."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -2433,7 +2434,7 @@ class TestSolver(unittest.TestCase):
         """Test JointToJointOrientationErrorFunction to ensure a source joint matches a target orientation in reference frame."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -2561,7 +2562,7 @@ class TestSolver(unittest.TestCase):
         """Test HeightErrorFunction can solve for the correct height using pose+scale parameters."""
 
         # Create test character with mesh
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
 
@@ -2650,7 +2651,7 @@ class TestSolver(unittest.TestCase):
         """Test VelocityMagnitudeSequenceErrorFunction to ensure joint velocity magnitudes match targets."""
 
         # Create a test character
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         n_params = character.parameter_transform.size
         n_joints = character.skeleton.size
@@ -2813,7 +2814,7 @@ class TestSolver(unittest.TestCase):
     def test_sequence_error_function_get_error(self) -> None:
         """Test SequenceErrorFunction.get_error() for sequence error functions."""
 
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
         n_params = character.parameter_transform.size
 
         # Test with ModelParametersSequenceErrorFunction (2-frame window)
@@ -2866,7 +2867,7 @@ class TestSolver(unittest.TestCase):
         """Test adding camera intrinsics parameters for multiple cameras."""
         import pymomentum.camera as pym_camera
 
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
         orig_n_params = character.parameter_transform.size
 
         # Create two cameras
@@ -2916,7 +2917,7 @@ class TestSolver(unittest.TestCase):
         """Test round-tripping intrinsics values through model parameters."""
         import pymomentum.camera as pym_camera
 
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         cam = pym_camera.PinholeIntrinsicsModel(
             image_width=640,
@@ -2954,7 +2955,7 @@ class TestSolver(unittest.TestCase):
         """Test extract/set camera intrinsics with batched (2D) model parameters."""
         import pymomentum.camera as pym_camera
 
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         cam = pym_camera.PinholeIntrinsicsModel(
             image_width=640,
@@ -3010,7 +3011,7 @@ class TestSolver(unittest.TestCase):
         2. Setting .weight updates both facade and impl
         3. The weight actually affects error computation
         """
-        character = pym_geometry.create_test_character(num_joints=4)
+        character = pym_test_utils.create_test_character(num_joints=4)
 
         # Test each constraint type
         for constraint_type in [

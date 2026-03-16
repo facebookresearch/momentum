@@ -281,6 +281,10 @@ axel_sources = [
 
 camera_public_headers = []
 
+geometry_test_utils_sources = [
+    "geometry_test_utils/geometry_test_utils_pybind.cpp",
+]
+
 camera_sources = [
     "camera/camera_pybind.cpp",
 ]

@@ -10,6 +10,7 @@ import unittest
 from typing import Optional
 
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 
 
 def load_tests(
@@ -48,7 +49,7 @@ class TestUsd(unittest.TestCase):
         """Test saving and reloading a USD character."""
 
         # Create a test character
-        char = pym_geometry.create_test_character()
+        char = pym_test_utils.create_test_character()
 
         # Save to temporary file
         with tempfile.NamedTemporaryFile(suffix=".usda", delete=False) as f:
@@ -95,7 +96,7 @@ class TestUsd(unittest.TestCase):
     def test_load_usd_from_bytes(self) -> None:
         """Test loading a USD character from bytes after saving."""
         # Create a test character and save it
-        char = pym_geometry.create_test_character()
+        char = pym_test_utils.create_test_character()
 
         with tempfile.NamedTemporaryFile(suffix=".usda", delete=False) as f:
             temp_path = f.name

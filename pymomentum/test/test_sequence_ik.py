@@ -9,6 +9,7 @@ import unittest
 
 import pymomentum.diff_geometry as pym_diff_geometry
 import pymomentum.geometry as pym_geometry
+import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.solver as pym_solver
 import torch
 from pymomentum.solver import ErrorFunctionType
@@ -22,7 +23,7 @@ class TestSolver(unittest.TestCase):
 
         # The mesh is a made by a few vertices on the line segment from (1,0,0) to (1,1,0)
         # and a few dummy faces.
-        character = pym_geometry.create_test_character()
+        character = pym_test_utils.create_test_character()
 
         n_joints = character.skeleton.size
         n_params = character.parameter_transform.size
