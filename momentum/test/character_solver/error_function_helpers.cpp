@@ -21,6 +21,151 @@ namespace momentum {
 
 using ::testing::DoubleNear;
 
+namespace {
+
+// Step size for central finite-difference computations.
+constexpr double kFiniteDiffStepSize = 1e-5;
+
+// Check that two error values match within a relative tolerance, falling back
+// to an absolute comparison when both values are near zero.
+template <typename T>
+void checkRelativeError(
+    const T& value1,
+    const T& value2,
+    const T& relThreshold,
+    const T& absThreshold) {
+  if ((value1 + value2) != 0.0) {
+    EXPECT_LE(std::abs(value1 - value2) / (value1 + value2), relThreshold);
+  } else {
+    EXPECT_NEAR(value1, value2, absThreshold);
+  }
+}
+
+// Compute the numerical gradient via central finite differences.
+template <typename T>
+Eigen::VectorX<T> computeNumericalGradient(
+    SkeletonErrorFunctionT<T>* errorFunction,
+    const ModelParametersT<T>& referenceParameters,
+    const Character& character,
+    const ParameterTransformT<T>& transform,
+    SkeletonStateT<T>& state,
+    MeshStateT<T>& meshState) {
+  constexpr T stepSize = kFiniteDiffStepSize;
+  Eigen::VectorX<T> gradient = Eigen::VectorX<T>::Zero(transform.numAllModelParameters());
+  for (auto p = 0; p < transform.numAllModelParameters(); p++) {
+    ModelParametersT<T> parameters = referenceParameters;
+    parameters(p) = referenceParameters(p) - stepSize;
+    state.set(transform.apply(parameters), character.skeleton);
+    if (errorFunction->needsMesh()) {
+      meshState.update(parameters, state, character);
+    }
+    const T h_1 = errorFunction->getError(parameters, state, meshState);
+    parameters(p) = referenceParameters(p) + stepSize;
+    state.set(transform.apply(parameters), character.skeleton);
+    if (errorFunction->needsMesh()) {
+      meshState.update(parameters, state, character);
+    }
+    const T h1 = errorFunction->getError(parameters, state, meshState);
+    gradient(p) = (h1 - h_1) / (2.0 * stepSize);
+  }
+  return gradient;
+}
+
+// Check the numerical Jacobian against the analytical Jacobian via forward finite differences.
+template <typename T>
+void checkNumericalJacobian(
+    SkeletonErrorFunctionT<T>* errorFunction,
+    const ModelParametersT<T>& referenceParameters,
+    const Character& character,
+    const ParameterTransformT<T>& transform,
+    SkeletonStateT<T>& state,
+    MeshStateT<T>& meshState,
+    const Eigen::MatrixX<T>& jacobian,
+    const Eigen::VectorX<T>& residual,
+    const T& threshold) {
+  constexpr T stepSize = kFiniteDiffStepSize;
+  const auto paddedJacobianSize = residual.size();
+  Eigen::MatrixX<T> numJacobian(paddedJacobianSize, transform.numAllModelParameters());
+  for (auto k = 0; k < transform.numAllModelParameters(); ++k) {
+    ModelParametersT<T> parameters = referenceParameters.template cast<T>();
+    parameters(k) = referenceParameters(k) + stepSize;
+    state.set(transform.apply(parameters), character.skeleton);
+    if (errorFunction->needsMesh()) {
+      meshState.update(parameters, state, character);
+    }
+
+    Eigen::MatrixX<T> jacobianPlus =
+        Eigen::MatrixX<T>::Zero(paddedJacobianSize, transform.numAllModelParameters());
+    Eigen::MatrixX<T> residualPlus = Eigen::VectorX<T>::Zero(paddedJacobianSize);
+    int usedRows = 0;
+    errorFunction->getJacobian(parameters, state, meshState, jacobianPlus, residualPlus, usedRows);
+    numJacobian.col(k) = (residualPlus - residual) / stepSize;
+  }
+
+  EXPECT_LE(
+      (numJacobian - jacobian).norm() /
+          ((numJacobian + jacobian).norm() + Momentum_ErrorFunctionsTest<T>::getEps()),
+      threshold);
+}
+
+// Check that two gradient vectors match within a relative threshold.
+// When character is provided, logs per-component mismatches for debugging.
+template <typename T>
+void checkGradientMatch(
+    const Eigen::VectorX<T>& gradient1,
+    const Eigen::VectorX<T>& gradient2,
+    const T& threshold,
+    const char* gradient1Name,
+    const char* gradient2Name,
+    const Character* character = nullptr) {
+  const T diffNorm = (gradient1 - gradient2).norm();
+  const T sumNorm = (gradient1 + gradient2).norm();
+
+  // Skip the relative check when both gradients are near zero (absolute difference below eps).
+  // In this regime, the relative comparison breaks down: e.g., when the analytical gradient is
+  // exactly zero and the numerical gradient has only floating-point noise (~1e-10), the relative
+  // ratio can be close to 1.0 even though the actual error is negligible.
+  if (sumNorm == 0.0 || diffNorm <= Momentum_ErrorFunctionsTest<T>::getEps()) {
+    return;
+  }
+
+  const T mismatch = diffNorm / (sumNorm + Momentum_ErrorFunctionsTest<T>::getEps());
+
+  if (mismatch > threshold) {
+    MT_LOGI(
+        "{} gradient mismatch detected: {} > {} (threshold)\n"
+        "{} gradient norm: {}, {} gradient norm: {}\n"
+        "Difference norm: {}",
+        gradient1Name,
+        mismatch,
+        threshold,
+        gradient1Name,
+        gradient1.norm(),
+        gradient2Name,
+        gradient2.norm(),
+        diffNorm);
+
+    if (character != nullptr) {
+      for (int iParam = 0; iParam < gradient1.size(); ++iParam) {
+        const auto diff = std::abs(gradient1(iParam) - gradient2(iParam));
+        if (diff > 1e-3) {
+          MT_LOGI(
+              "Mismatched gradient component: {} ({})",
+              iParam,
+              character->parameterTransform.name.at(iParam));
+          MT_LOGI("  {}: {}", gradient1Name, gradient1(iParam));
+          MT_LOGI("  {}: {}", gradient2Name, gradient2(iParam));
+          MT_LOGI("  diff: {}", diff);
+        }
+      }
+    }
+  }
+
+  EXPECT_LE(mismatch, threshold);
+}
+
+} // namespace
+
 template <typename T>
 void testGradientAndJacobian(
     const char* file,
@@ -75,142 +220,46 @@ void testGradientAndJacobian(
   const Eigen::VectorX<T> jacGradient = 2.0 * jacobian.transpose() * residual;
   const T jacError = residual.dot(residual);
 
+  // Check error values are consistent across getError, getGradient, and getJacobian
   {
     SCOPED_TRACE("Checking Error Value");
-    if ((gradientError + functionError) != 0.0) {
-      EXPECT_LE(std::abs(gradientError - functionError) / (gradientError + functionError), 2e-6);
-    } else {
-      EXPECT_NEAR(gradientError, functionError, 1e-7);
-    }
-
-    if ((jacobianError + functionError) != 0.0) {
-      EXPECT_LE(std::abs(jacobianError - functionError) / (jacobianError + functionError), 2e-6);
-    } else {
-      EXPECT_NEAR(jacobianError, functionError, 1e-7);
-    }
-
+    checkRelativeError(gradientError, functionError, T(2e-6), T(1e-7));
+    checkRelativeError(jacobianError, functionError, T(2e-6), T(1e-7));
     if (checkJacError) {
-      if ((jacError + functionError) != 0.0) {
-        EXPECT_LE(std::abs(jacError - functionError) / (jacError + functionError), 5e-4);
-      } else {
-        EXPECT_NEAR(jacError, functionError, 1e-4);
-      }
+      checkRelativeError(jacError, functionError, T(5e-4), T(1e-4));
     }
   }
 
-  // calculate numerical gradient
-  constexpr T kStepSize = 1e-5;
-  Eigen::VectorX<T> numGradient = Eigen::VectorX<T>::Zero(transform.numAllModelParameters());
-  for (auto p = 0; p < transform.numAllModelParameters(); p++) {
-    // perform higher-order finite differences for accuracy
-    ModelParametersT<T> parameters = referenceParameters;
-    parameters(p) = referenceParameters(p) - kStepSize;
-    state.set(transform.apply(parameters), character.skeleton);
-    if (errorFunction->needsMesh()) {
-      meshState.update(parameters, state, character);
-    }
-    const T h_1 = errorFunction->getError(parameters, state, meshState);
-    parameters(p) = referenceParameters(p) + kStepSize;
-    state.set(transform.apply(parameters), character.skeleton);
-    if (errorFunction->needsMesh()) {
-      meshState.update(parameters, state, character);
-    }
-    const T h1 = errorFunction->getError(parameters, state, meshState);
-    numGradient(p) = (h1 - h_1) / (2.0 * kStepSize);
-  }
+  // Compute numerical gradient via central finite differences
+  const Eigen::VectorX<T> numGradient = computeNumericalGradient(
+      errorFunction, referenceParameters, character, transform, state, meshState);
 
+  // Check numerical Jacobian via forward finite differences
   if (checkJacobian) {
     SCOPED_TRACE("Checking Numerical Jacobian");
-    Eigen::MatrixX<T> numJacobian(paddedJacobianSize, transform.numAllModelParameters());
-    for (auto k = 0; k < transform.numAllModelParameters(); ++k) {
-      ModelParametersT<T> parameters = referenceParameters.template cast<T>();
-      parameters(k) = referenceParameters(k) + kStepSize;
-      state.set(transform.apply(parameters), character.skeleton);
-      if (errorFunction->needsMesh()) {
-        meshState.update(parameters, state, character);
-      }
-
-      Eigen::MatrixX<T> jacobianPlus =
-          Eigen::MatrixX<T>::Zero(paddedJacobianSize, transform.numAllModelParameters());
-      Eigen::MatrixX<T> residualPlus = Eigen::VectorX<T>::Zero(paddedJacobianSize);
-      int usedRows = 0;
-      errorFunction->getJacobian(
-          parameters, state, meshState, jacobianPlus, residualPlus, usedRows);
-      numJacobian.col(k) = (residualPlus - residual) / kStepSize;
-    }
-
-    EXPECT_LE(
-        (numJacobian - jacobian).norm() /
-            ((numJacobian + jacobian).norm() + Momentum_ErrorFunctionsTest<T>::getEps()),
+    checkNumericalJacobian(
+        errorFunction,
+        referenceParameters,
+        character,
+        transform,
+        state,
+        meshState,
+        jacobian,
+        residual,
         numThreshold);
   }
 
-  // check the gradients are similar
+  // Check numerical gradient vs analytical gradient
   {
     SCOPED_TRACE("Checking Numerical Gradient");
-    const T diffNorm = (numGradient - anaGradient).norm();
-    // Skip the relative check when both gradients are near zero (absolute difference below eps).
-    // In this regime, the relative comparison breaks down: e.g., when the analytical gradient is
-    // exactly zero and the numerical gradient has only floating-point noise (~1e-10), the relative
-    // ratio can be close to 1.0 even though the actual error is negligible.
-    if ((numGradient + anaGradient).norm() != 0.0 &&
-        diffNorm > Momentum_ErrorFunctionsTest<T>::getEps()) {
-      const T gradientMismatch = diffNorm /
-          ((numGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps());
-
-      if (gradientMismatch > numThreshold) {
-        MT_LOGI(
-            "Numerical gradient mismatch detected: {} > {} (threshold)\n"
-            "Numerical gradient norm: {}, Analytical gradient norm: {}\n"
-            "Difference norm: {}",
-            gradientMismatch,
-            numThreshold,
-            numGradient.norm(),
-            anaGradient.norm(),
-            diffNorm);
-
-        // Dump mismatched gradient components:
-        for (int iParam = 0; iParam < numGradient.size(); ++iParam) {
-          const auto diff = std::abs(numGradient(iParam) - anaGradient(iParam));
-          if (diff > 1e-3) {
-            MT_LOGI(
-                "Mismatched gradient component: {} ({})",
-                iParam,
-                character.parameterTransform.name.at(iParam));
-            MT_LOGI("  numGradient: {}", numGradient(iParam));
-            MT_LOGI("  anaGradient: {}", anaGradient(iParam));
-            MT_LOGI("  diff: {}", diff);
-          }
-        }
-      }
-
-      EXPECT_LE(gradientMismatch, numThreshold);
-    }
+    checkGradientMatch(
+        numGradient, anaGradient, numThreshold, "Numerical", "Analytical", &character);
   }
 
-  // check the gradients by comparing against the jacobian gradient
+  // Check jacobian gradient vs analytical gradient
   {
     SCOPED_TRACE("Checking Jacobian Gradient");
-    const T jacDiffNorm = (jacGradient - anaGradient).norm();
-    if ((jacGradient + anaGradient).norm() != 0.0 &&
-        jacDiffNorm > Momentum_ErrorFunctionsTest<T>::getEps()) {
-      const T gradientMismatch = jacDiffNorm /
-          ((jacGradient + anaGradient).norm() + Momentum_ErrorFunctionsTest<T>::getEps());
-
-      if (gradientMismatch > jacThreshold) {
-        MT_LOGI(
-            "Jacobian gradient mismatch detected: {} > {} (threshold)\n"
-            "Jacobian gradient norm: {}, Analytical gradient norm: {}\n"
-            "Difference norm: {}",
-            gradientMismatch,
-            jacThreshold,
-            jacGradient.norm(),
-            anaGradient.norm(),
-            jacDiffNorm);
-      }
-
-      EXPECT_LE(gradientMismatch, jacThreshold);
-    }
+    checkGradientMatch(jacGradient, anaGradient, jacThreshold, "Jacobian", "Analytical");
   }
 
   // check the global weight value:
