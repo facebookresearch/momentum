@@ -103,9 +103,7 @@ SimdCollisionErrorFunctionT<T>::SimdCollisionErrorFunctionT(const Character& cha
 
 template <typename T>
 void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
-  // clear collisions
-  excludingPairIds_.clear();
-  jacobianSize_ = 0;
+  validPairs_.clear();
 
   // Get the size of collisionGeometry_
   const auto n = collisionGeometry_.size();
@@ -117,33 +115,36 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
   // Update the collision state based on the zero state and collision geometry
   collisionState_.update(state, collisionGeometry_);
 
-  // Build BVH
-  std::vector<axel::BoundingBox<T>> aabbs(n);
+  // Build initial AABBs
+  aabbs_.resize(n);
   for (size_t i = 0; i < n; ++i) {
-    auto& aabb = aabbs[i];
-    aabb.id = i;
+    aabbs_[i].id = gsl::narrow_cast<axel::Index>(i);
     updateAabb(
-        aabb, collisionState_.origin[i], collisionState_.direction[i], collisionState_.radius[i]);
+        aabbs_[i],
+        collisionState_.origin[i],
+        collisionState_.direction[i],
+        collisionState_.radius[i]);
   }
-  bvh_.setBoundingBoxes(aabbs);
 
   // Exit early as there are no geometry objects to process
   if (n == 0) {
     return;
   }
 
+  // Initialize common ancestor lookup table
+  commonAncestors_.assign(n * n, kInvalidIndex);
+
+  // Initialize per-capsule collision pair lists
+  collisionPairs_.resize(n);
+
   // Iterate over all possible pairs of geometry objects
-  const auto numPotentialPairs = n * (n - 1) / 2;
-  excludingPairIds_.reserve(numPotentialPairs);
   T distance = NAN;
   Vector2<T> cp;
   T overlap = NAN;
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = i + 1; j < n; ++j) {
-      const std::pair<size_t, size_t> pairId = std::make_pair(i, j);
-
       // Check if the pair intersects in the initial pose
-      if (!overlaps(
+      if (overlaps(
               collisionState_.origin[i],
               collisionState_.direction[i],
               collisionState_.radius[i],
@@ -155,39 +156,33 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
               distance,
               cp,
               overlap)) {
-        // no, it doesn't. check
-
-        // walk down the this->skeleton_ hierarchy for the collision pair until we find a common
-        // ancestor
-        size_t p0 = collisionGeometry_[i].parent;
-        size_t p1 = collisionGeometry_[j].parent;
-        size_t count = 0;
-
-        // Find the common ancestor. We can always just walk up the higher joint index because the
-        // parent always has to have a lower index than the child joint.
-        while (p0 != p1) {
-          if (p0 > p1) {
-            p0 = this->skeleton_.joints[p0].parent;
-          } else {
-            p1 = this->skeleton_.joints[p1].parent;
-          }
-          count++;
-        }
-
-        // Store collision pairs excluding those with the same parent or adjacent joints
-        if (count <= 1) {
-          excludingPairIds_.insert(pairId);
-        } else {
-          jacobianSize_++;
-        }
-
         continue;
       }
 
-      excludingPairIds_.insert(pairId);
+      // walk down the skeleton hierarchy for the collision pair until we find a common ancestor
+      size_t p0 = collisionGeometry_[i].parent;
+      size_t p1 = collisionGeometry_[j].parent;
+      size_t count = 0;
+
+      // Find the common ancestor. We can always just walk up the higher joint index because the
+      // parent always has to have a lower index than the child joint.
+      while (p0 != p1) {
+        if (p0 > p1) {
+          p0 = this->skeleton_.joints[p0].parent;
+        } else {
+          p1 = this->skeleton_.joints[p1].parent;
+        }
+        count++;
+      }
+
+      // Store collision pairs excluding those with the same parent or adjacent joints
+      if (count > 1) {
+        validPairs_.push_back({i, j, p0});
+        commonAncestors_[i * n + j] = p0;
+        commonAncestors_[j * n + i] = p0;
+      }
     }
   }
-  // TODO: Consider using BVH for faster intersection checks
 }
 
 template <typename T>
@@ -199,37 +194,23 @@ void SimdCollisionErrorFunctionT<T>::computeBroadPhase(const SkeletonStateT<T>& 
   }
 
   // Update the AABBs for each geometry object
-  for (auto& aabb : bvh_.getPrimitives()) {
-    const auto& index = aabb.id;
+  for (size_t i = 0; i < aabbs_.size(); ++i) {
     updateAabb(
-        aabb,
-        collisionState_.origin[index],
-        collisionState_.direction[index],
-        collisionState_.radius[index]);
+        aabbs_[i],
+        collisionState_.origin[i],
+        collisionState_.direction[i],
+        collisionState_.radius[i]);
   }
 
-  // Update BVH
-  bvh_.setBoundingBoxes(bvh_.getPrimitives());
-
-  // Update overlapping collision pairs
-  collisionPairs_.clear();
-  collisionPairs_.resize(collisionGeometry_.size());
-  bvh_.traverseOverlappingPairs([&](auto indexA, auto indexB) -> bool {
-    // Ensure indexA is always less than indexB
-    if (indexA > indexB) {
-      std::swap(indexA, indexB);
+  // Build per-capsule collision pair lists via AABB broadphase filtering
+  for (auto& pairs : collisionPairs_) {
+    pairs.clear();
+  }
+  for (const auto& pair : validPairs_) {
+    if (aabbs_[pair.indexA].intersects(aabbs_[pair.indexB])) {
+      collisionPairs_[pair.indexA].push_back(static_cast<int>(pair.indexB));
     }
-
-    // Skip excluded pairs
-    const std::pair<size_t, size_t> pairId = std::make_pair(indexA, indexB);
-    if (excludingPairIds_.find(pairId) != excludingPairIds_.end()) {
-      return true; // continue traversing
-    }
-
-    collisionPairs_[indexA].push_back(indexB);
-
-    return true; // continue traversal
-  });
+  }
 }
 
 template <typename T>
@@ -248,7 +229,7 @@ double SimdCollisionErrorFunctionT<T>::getError(
 
   computeBroadPhase(state);
 
-  DoubleP error = drjit::zeros<DoubleP>();
+  auto error = drjit::zeros<DoubleP>();
 
   // For each joint, consider all the other joints:
   for (size_t iCol = 0; iCol < collisionPairs_.size(); ++iCol) {
@@ -295,7 +276,8 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
 
   computeBroadPhase(state);
 
-  DoubleP error = drjit::zeros<DoubleP>();
+  const auto numCapsules = collisionGeometry_.size();
+  auto error = drjit::zeros<DoubleP>();
 
   // For each joint, consider all the other joints:
   for (size_t iCol = 0; iCol < collisionPairs_.size(); ++iCol) {
@@ -345,7 +327,7 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
         }
 
         const size_t jJoint = collisionGeometry_[jCol[k]].parent;
-        const auto commonAncestor = this->skeleton_.commonAncestor(iJoint, jJoint);
+        const auto commonAncestor = commonAncestors_[iCol * numCapsules + jCol[k]];
 
         const Eigen::Vector3<T> direction_k = extractSingleElement(direction, k);
         const Eigen::Vector3<T> position_ik = extractSingleElement(position_i, k);
@@ -487,9 +469,10 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
     int& usedRows) {
   computeBroadPhase(state);
 
+  const auto numCapsules = collisionGeometry_.size();
   const T wgt = std::sqrt(kCollisionWeight * this->weight_);
 
-  DoubleP error = drjit::zeros<DoubleP>();
+  auto error = drjit::zeros<DoubleP>();
 
   // For each joint, consider all the other joints:
   int row = 0;
@@ -542,7 +525,7 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
         }
 
         const size_t jJoint = collisionGeometry_[jCol[k]].parent;
-        const auto commonAncestor = this->skeleton_.commonAncestor(iJoint, jJoint);
+        const auto commonAncestor = commonAncestors_[iCol * numCapsules + jCol[k]];
 
         const Eigen::Vector3<T> direction_k = extractSingleElement(direction, k);
         const T fac_k = fac[k];
@@ -672,7 +655,7 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
 
 template <typename T>
 size_t SimdCollisionErrorFunctionT<T>::getJacobianSize() const {
-  return jacobianSize_;
+  return validPairs_.size();
 }
 
 template class SimdCollisionErrorFunctionT<float>;

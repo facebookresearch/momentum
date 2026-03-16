@@ -18,6 +18,7 @@
 #include "momentum/character/skeleton_state.h"
 
 #include "momentum/math/constants.h"
+#include "momentum/math/random.h"
 
 #include "momentum/common/log.h"
 
@@ -79,6 +80,48 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SimdCollisionErrorFunctionIsSame) {
   }
 
   MT_LOGI("done.");
+}
+
+// Verify that AABB broadphase does not miss any true collisions. Base and stateless share
+// identical narrow-phase code, so any error difference proves the AABB filter is wrong.
+// Complements SimdCollisionErrorFunctionIsSame (which uses structured poses) with random poses
+// and a larger character (20 joints vs 6).
+TYPED_TEST(Momentum_ErrorFunctionsTest, CollisionBroadphaseAccuracy) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter(20);
+  CollisionErrorFunctionT<T> errf_base(character);
+  CollisionErrorFunctionStatelessT<T> errf_stateless(character);
+
+  constexpr size_t kNumRandomPoses = 200;
+  size_t nonZeroErrorCount = 0;
+
+  for (size_t iPose = 0; iPose < kNumRandomPoses; ++iPose) {
+    auto mp = ModelParametersT<T>::Zero(character.parameterTransform.numAllModelParameters());
+    mp.v = uniform<VectorX<T>>(mp.v.size(), T(-0.5), T(0.5));
+
+    const SkeletonStateT<T> skelState(
+        character.parameterTransform.cast<T>().apply(mp), character.skeleton);
+
+    const double err_base = errf_base.getError(mp, skelState, MeshStateT<T>());
+    const double err_stateless = errf_stateless.getError(mp, skelState, MeshStateT<T>());
+
+    // Bit-for-bit match: same valid-pair list + same AABB filter + same narrow-phase
+    // must produce identical results. Any difference means broadphase is inconsistent.
+    ASSERT_DOUBLE_EQ(err_base, err_stateless)
+        << "Base vs Stateless error mismatch at pose " << iPose;
+
+    // Collision pair lists must agree in count
+    ASSERT_EQ(errf_base.getCollisionPairs().size(), errf_stateless.getCollisionPairs().size())
+        << "Collision pair count mismatch at pose " << iPose;
+
+    if (err_base > 0.0) {
+      nonZeroErrorCount++;
+    }
+  }
+
+  EXPECT_GT(nonZeroErrorCount, 0u)
+      << "No collisions in " << kNumRandomPoses << " random poses; test is ineffective";
 }
 
 // Verify that the SIMD version of the collision error function is at least as fast as the
