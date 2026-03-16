@@ -288,6 +288,102 @@ void logJointParamNames(
   }
 }
 
+void logModelParamsColumns(
+    const rerun::RecordingStream& rec,
+    const std::string& worldPrefix,
+    const std::string& posePrefix,
+    std::span<const std::string> names,
+    const Eigen::MatrixXf& allParams,
+    std::span<const int64_t> frameIndices,
+    std::span<const double> times) {
+  const auto nFrames = static_cast<size_t>(allParams.cols());
+  if (nFrames == 0) {
+    return;
+  }
+
+  // Build time columns (reused for all parameters)
+  auto frameIndexColumn = makeSequenceTimeColumn(
+      "frame_index",
+      rerun::Collection<int64_t>::borrow(frameIndices.data(), frameIndices.size()),
+      rerun::SortingStatus::Sorted);
+  auto timeColumn = makeDurationSecondsTimeColumn(
+      "log_time",
+      rerun::Collection<double>::borrow(times.data(), times.size()),
+      rerun::SortingStatus::Sorted);
+  const std::vector<rerun::TimeColumn> timeColumns = {
+      std::move(frameIndexColumn), std::move(timeColumn)};
+
+  const size_t nParams = std::min(static_cast<size_t>(allParams.rows()), names.size());
+  for (size_t iParam = 0; iParam < nParams; ++iParam) {
+    // Build scalar values for this parameter across all frames
+    std::vector<double> scalarValues(nFrames);
+    for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+      scalarValues[iFrame] = static_cast<double>(allParams(iParam, iFrame));
+    }
+
+    auto scalarColumns = makeScalarColumns(std::move(scalarValues));
+
+    if (names[iParam].find("root") != std::string::npos) {
+      rec.send_columns(
+          fmt::format("{}/{}", worldPrefix, names[iParam]), timeColumns, scalarColumns);
+    } else {
+      rec.send_columns(fmt::format("{}/{}", posePrefix, names[iParam]), timeColumns, scalarColumns);
+    }
+  }
+}
+
+void logJointParamsColumns(
+    const rerun::RecordingStream& rec,
+    const std::string& worldPrefix,
+    const std::string& posePrefix,
+    std::span<const std::string> names,
+    const Eigen::MatrixXf& allJointParams,
+    std::span<const int64_t> frameIndices,
+    std::span<const double> times) {
+  const auto nFrames = static_cast<size_t>(allJointParams.cols());
+  if (nFrames == 0) {
+    return;
+  }
+
+  // Build time columns (reused for all parameters)
+  auto frameIndexColumn = makeSequenceTimeColumn(
+      "frame_index",
+      rerun::Collection<int64_t>::borrow(frameIndices.data(), frameIndices.size()),
+      rerun::SortingStatus::Sorted);
+  auto timeColumn = makeDurationSecondsTimeColumn(
+      "log_time",
+      rerun::Collection<double>::borrow(times.data(), times.size()),
+      rerun::SortingStatus::Sorted);
+  const std::vector<rerun::TimeColumn> timeColumns = {
+      std::move(frameIndexColumn), std::move(timeColumn)};
+
+  // Bounds check: ensure we don't read beyond allJointParams rows
+  const size_t nJoints =
+      std::min(names.size(), static_cast<size_t>(allJointParams.rows()) / kParametersPerJoint);
+  for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+    for (size_t jParam = 0; jParam < kParametersPerJoint; ++jParam) {
+      const std::string channelName = names[iJoint] + "_" + kJointParameterNames[jParam];
+      const size_t paramIdx = iJoint * kParametersPerJoint + jParam;
+
+      // Build scalar values for this joint parameter across all frames
+      std::vector<double> scalarValues(nFrames);
+      for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+        scalarValues[iFrame] = static_cast<double>(allJointParams(paramIdx, iFrame));
+      }
+
+      auto scalarColumns = makeScalarColumns(std::move(scalarValues));
+
+      if (names[iJoint].find("world") != std::string::npos ||
+          names[iJoint].find("root") != std::string::npos) {
+        rec.send_columns(
+            fmt::format("{}/{}", worldPrefix, channelName), timeColumns, scalarColumns);
+      } else {
+        rec.send_columns(fmt::format("{}/{}", posePrefix, channelName), timeColumns, scalarColumns);
+      }
+    }
+  }
+}
+
 void logBvh(
     const rerun::RecordingStream& rec,
     const std::string& streamName,

@@ -9,6 +9,7 @@
 
 #include <rerun.hpp>
 
+#include <cstdint>
 #include <string>
 
 // Rerun SDK version compatibility layer
@@ -99,6 +100,40 @@ inline void logAxes3D(
 #endif
   // In 0.24+, axis visualization on transforms is not supported
   // To visualize axes, users should use Arrows3D archetype manually
+}
+
+// Helper function to create a sequence TimeColumn
+// Used by send_columns-based batch logging functions
+inline rerun::TimeColumn makeSequenceTimeColumn(
+    std::string timelineName,
+    rerun::Collection<int64_t> values,
+    rerun::SortingStatus sortingStatus = rerun::SortingStatus::Unknown) {
+  return rerun::TimeColumn::from_sequence(
+      std::move(timelineName), std::move(values), sortingStatus);
+}
+
+// Helper function to create a duration seconds TimeColumn
+// In rerun 0.26+, from_seconds was deprecated in favor of from_duration_secs
+inline rerun::TimeColumn makeDurationSecondsTimeColumn(
+    std::string timelineName,
+    rerun::Collection<double> values,
+    rerun::SortingStatus sortingStatus = rerun::SortingStatus::Unknown) {
+#if defined(RERUN_VERSION_GE) && RERUN_VERSION_GE(0, 26, 0)
+  return rerun::TimeColumn::from_duration_secs(
+      std::move(timelineName), std::move(values), sortingStatus);
+#else
+  return rerun::TimeColumn::from_seconds(std::move(timelineName), std::move(values), sortingStatus);
+#endif
+}
+
+// Helper function to create scalar ComponentColumns for send_columns
+// In rerun 0.24+, Scalar was renamed to Scalars
+inline rerun::Collection<rerun::ComponentColumn> makeScalarColumns(std::vector<double> values) {
+#if defined(RERUN_VERSION_GE) && RERUN_VERSION_GE(0, 24, 0)
+  return rerun::Scalars(std::move(values)).columns();
+#else
+  return rerun::Scalar().with_many_scalar(std::move(values)).columns();
+#endif
 }
 
 } // namespace momentum
