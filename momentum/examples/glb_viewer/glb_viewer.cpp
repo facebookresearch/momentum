@@ -18,6 +18,7 @@
 #include <rerun.hpp>
 
 #include <string>
+#include <vector>
 
 using namespace rerun;
 using namespace momentum;
@@ -55,10 +56,8 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option("-l,--loglevel", opt->logLevel, "Set the log level")
       ->transform(CLI::CheckedTransformer(logLevelMap(), CLI::ignore_case))
       ->default_val(opt->logLevel);
-  app.add_flag("--log-params", opt->logParams, "Log model parameters (slow)")
-      ->default_val(opt->logParams);
-  app.add_flag("--log-joints", opt->logJoints, "Log joint parameters (very slow)")
-      ->default_val(opt->logJoints);
+  app.add_flag("--log-params", opt->logParams, "Log model parameters")->default_val(opt->logParams);
+  app.add_flag("--log-joints", opt->logJoints, "Log joint parameters")->default_val(opt->logJoints);
   return opt;
 }
 
@@ -167,6 +166,39 @@ int main(int argc, char* argv[]) {
     CharacterParameters charParams;
     charParams.offsets = offsets;
 
+    // Pre-compute frame selection for batch scalar logging
+    std::vector<int64_t> selectedFrameIndices;
+    std::vector<double> selectedLogTimes;
+    std::vector<Eigen::Index> selectedFrameCols;
+
+    for (size_t iFrame = firstFrame; iFrame < lastFrame; iFrame += options->stride) {
+      if (iFrame < nFrames) {
+        selectedFrameIndices.push_back(static_cast<int64_t>(iFrame));
+        selectedLogTimes.push_back(static_cast<double>(iFrame) / fps);
+        selectedFrameCols.push_back(static_cast<Eigen::Index>(iFrame));
+      }
+    }
+
+    // Batch log model parameters using send_columns (before the frame loop)
+    if (options->logParams && !selectedFrameCols.empty()) {
+      Eigen::MatrixXf selectedParams(motion.rows(), selectedFrameCols.size());
+      for (size_t i = 0; i < selectedFrameCols.size(); ++i) {
+        selectedParams.col(i) = motion.col(selectedFrameCols[i]);
+      }
+      logModelParamsColumns(
+          rec,
+          "world_params",
+          "model_params",
+          modelParamNames,
+          selectedParams,
+          selectedFrameIndices,
+          selectedLogTimes);
+    }
+
+    // Prepare matrix for collecting joint parameters during the frame loop
+    Eigen::MatrixXf allJointParams;
+    size_t jointParamFrameIdx = 0;
+
     for (size_t iFrame = firstFrame; iFrame < lastFrame; iFrame += options->stride) {
       // log timeline
       rec.set_time_sequence("frame_index", iFrame);
@@ -182,17 +214,14 @@ int main(int argc, char* argv[]) {
             true /*updateCollision*/,
             false /*applyLimits*/);
         logCharacter(rec, "world/character", character, charState);
-        // XXX 2D plots in rerun are not scalable at the moment
-        if (options->logParams) {
-          logModelParams(rec, "world_params", "model_params", modelParamNames, motion.col(iFrame));
-        }
+
+        // Collect joint params for batch logging after the loop
         if (options->logJoints) {
-          logJointParams(
-              rec,
-              "world_params",
-              "joint_params",
-              jointNames,
-              charState.skeletonState.jointParameters.v);
+          const auto& jp = charState.skeletonState.jointParameters.v;
+          if (allJointParams.cols() == 0) {
+            allJointParams.resize(jp.size(), selectedFrameCols.size());
+          }
+          allJointParams.col(jointParamFrameIdx++) = jp;
         }
       }
 
@@ -207,6 +236,18 @@ int main(int argc, char* argv[]) {
             markers.frames.at(iFrame),
             3.0f);
       }
+    }
+
+    // Batch log joint parameters using send_columns (after the frame loop)
+    if (options->logJoints && jointParamFrameIdx > 0) {
+      logJointParamsColumns(
+          rec,
+          "world_params",
+          "joint_params",
+          jointNames,
+          allJointParams.leftCols(jointParamFrameIdx),
+          std::span<const int64_t>(selectedFrameIndices.data(), jointParamFrameIdx),
+          std::span<const double>(selectedLogTimes.data(), jointParamFrameIdx));
     }
   } catch (const std::exception& e) {
     MT_LOGE("Exception thrown. Error: {}", e.what());

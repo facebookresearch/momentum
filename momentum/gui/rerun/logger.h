@@ -15,6 +15,7 @@
 
 #include <rerun.hpp>
 
+#include <cstdint>
 #include <map>
 #include <string>
 
@@ -98,5 +99,48 @@ void logJointParamNames(
     const std::string& worldPrefix,
     const std::string& posePrefix,
     std::span<const std::string> names);
+
+/// Log model parameters for all frames at once using send_columns.
+///
+/// This is significantly faster than calling logModelParams per frame because it batches
+/// all time points into a single send_columns call per parameter.
+///
+/// @param rec The recording stream.
+/// @param worldPrefix The stream prefix for world (root) parameters.
+/// @param posePrefix The stream prefix for pose parameters.
+/// @param names The parameter names.
+/// @param allParams Matrix where each column is a frame's parameter vector (nParams x nFrames).
+/// @param frameIndices The frame index for each column.
+/// @param times The time in seconds for each column.
+void logModelParamsColumns(
+    const rerun::RecordingStream& rec,
+    const std::string& worldPrefix,
+    const std::string& posePrefix,
+    std::span<const std::string> names,
+    const Eigen::MatrixXf& allParams,
+    std::span<const int64_t> frameIndices,
+    std::span<const double> times);
+
+/// Log joint parameters for all frames at once using send_columns.
+///
+/// This is significantly faster than calling logJointParams per frame because it batches
+/// all time points into a single send_columns call per parameter channel.
+///
+/// @param rec The recording stream.
+/// @param worldPrefix The stream prefix for world/root joint parameters.
+/// @param posePrefix The stream prefix for pose joint parameters.
+/// @param names The joint names.
+/// @param allJointParams Matrix where each column is a frame's joint parameter vector
+///                       (nJoints * kParametersPerJoint x nFrames).
+/// @param frameIndices The frame index for each column.
+/// @param times The time in seconds for each column.
+void logJointParamsColumns(
+    const rerun::RecordingStream& rec,
+    const std::string& worldPrefix,
+    const std::string& posePrefix,
+    std::span<const std::string> names,
+    const Eigen::MatrixXf& allJointParams,
+    std::span<const int64_t> frameIndices,
+    std::span<const double> times);
 
 } // namespace momentum
