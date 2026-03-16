@@ -56,6 +56,18 @@ class SkeletonErrorFunctionT {
     enabledParameters_ = ps;
   }
 
+  /// Returns the set of joints that are directly used in this error function
+  ///
+  /// Override this to provide an accurate list of affected joints (e.g., constrained joints
+  /// in a position error function). The solver uses this information to optimize which
+  /// joint transforms and derivatives need to be computed.
+  /// By default, returns all joints set (conservative).
+  [[nodiscard]] virtual JointSet getAffectedJoints() const {
+    JointSet allJoints;
+    allJoints.set();
+    return allJoints;
+  }
+
   virtual double getError(
       const ModelParametersT<T>& /* params */,
       const SkeletonStateT<T>& /* state */,

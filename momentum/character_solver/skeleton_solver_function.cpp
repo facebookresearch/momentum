@@ -32,6 +32,7 @@ SkeletonSolverFunctionT<T>::SkeletonSolverFunctionT(
   state_ = std::make_unique<SkeletonStateT<T>>(parameterTransform_.zero(), character_.skeleton);
   activeJointParams_ = parameterTransform_.activeJointParams;
   meshState_ = std::make_unique<MeshStateT<T>>();
+  enabledParameters_.set();
 
   for (auto& errf : errorFunctions) {
     addErrorFunction(std::move(errf));
@@ -52,8 +53,9 @@ void SkeletonSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
   }
   // set the enabled joints based on the parameter set
   activeJointParams_ = parameterTransform_.computeActiveJointParams(ps);
+  enabledParameters_ = ps;
 
-  // give data to helper functions
+  // give data to helper functions (propagate immediately, not deferred to initialize())
   for (auto&& solvable : errorFunctions_) {
     solvable->setActiveJoints(activeJointParams_);
     solvable->setEnabledParameters(ps);
@@ -61,9 +63,92 @@ void SkeletonSolverFunctionT<T>::setEnabledParameters(const ParameterSet& ps) {
 }
 
 template <typename T>
+void SkeletonSolverFunctionT<T>::initialize() {
+  // Gather affected joints from all error functions
+  const size_t numJoints = character_.skeleton.joints.size();
+  JointSet affectedJoints;
+  for (const auto& func : errorFunctions_) {
+    affectedJoints |= func->getAffectedJoints();
+  }
+
+  // Check if all joints are affected — if so, skip all the expensive bitset work
+  bool allAffected = true;
+  for (size_t i = 0; i < numJoints; ++i) {
+    if (!affectedJoints.test(i)) {
+      allAffected = false;
+      break;
+    }
+  }
+
+  if (allAffected) {
+    allJointsActive_ = true;
+    return;
+  }
+
+  // Compute active joints from active joint parameters (at the joint level, not parameter level)
+  solverActiveJoints_.reset();
+  for (size_t iJoint = 0; iJoint < numJoints; ++iJoint) {
+    for (size_t jParam = 0; jParam < kParametersPerJoint; ++jParam) {
+      if (activeJointParams_[iJoint * kParametersPerJoint + jParam]) {
+        solverActiveJoints_.set(iJoint);
+        break;
+      }
+    }
+  }
+
+  // We need joint derivatives for all *active* ancestors of an affected joint.
+  // We need joint transformations for all ancestors of an affected joint, active or not.
+  activeJointDeriv_.reset();
+  activeJointXform_.reset();
+  for (size_t iJoint = 0; iJoint < numJoints; ++iJoint) {
+    if (!affectedJoints.test(iJoint)) {
+      continue;
+    }
+
+    // The order of joints ensures parents come before their children. So when an activeJointXform
+    // is set, we can be sure that its ancestors have been set.
+    size_t jointIndex = iJoint;
+    while (jointIndex != kInvalidIndex && !activeJointXform_.test(jointIndex)) {
+      activeJointXform_.set(jointIndex);
+      if (solverActiveJoints_.test(jointIndex)) {
+        activeJointDeriv_.set(jointIndex);
+      }
+      jointIndex = character_.skeleton.joints[jointIndex].parent;
+    }
+  }
+
+  // Check if all joints ended up active anyway
+  allJointsActive_ = true;
+  for (size_t i = 0; i < numJoints; ++i) {
+    if (!activeJointXform_.test(i) || !activeJointDeriv_.test(i)) {
+      allJointsActive_ = false;
+      break;
+    }
+  }
+}
+
+template <typename T>
+void SkeletonSolverFunctionT<T>::updateSkeletonStateSelective(
+    const Eigen::VectorX<T>& parameters,
+    bool computeDeriv) {
+  // Selective path: only compute transforms/derivatives for active joints
+  if (computeDeriv) {
+    state_->set(
+        parameterTransform_.apply(parameters),
+        character_.skeleton,
+        activeJointXform_,
+        activeJointDeriv_);
+  } else {
+    static const JointSet emptySet;
+    state_->set(
+        parameterTransform_.apply(parameters), character_.skeleton, activeJointXform_, emptySet);
+  }
+}
+
+template <typename T>
 double SkeletonSolverFunctionT<T>::getError(const Eigen::VectorX<T>& parameters) {
-  // update the state according to the transformed parameters
-  state_->set(parameterTransform_.apply(parameters), character_.skeleton, false);
+  // update the state according to the transformed parameters (no derivatives needed for error-only)
+  updateSkeletonState(parameters, false);
 
   // Update mesh state if needed
   if (needsMeshState()) {
@@ -87,7 +172,7 @@ double SkeletonSolverFunctionT<T>::getGradient(
     const Eigen::VectorX<T>& parameters,
     Eigen::VectorX<T>& gradient) {
   // update the state according to the transformed parameters
-  state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+  updateSkeletonState(parameters, true);
 
   // Update mesh state if needed
   if (needsMeshState()) {
@@ -121,7 +206,7 @@ double SkeletonSolverFunctionT<T>::getSolverDerivatives(
   // update the state according to the transformed parameters
   {
     MT_PROFILE_EVENT("UpdateState");
-    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+    updateSkeletonState(parameters, true);
   }
 
   // Update mesh state if needed
@@ -204,7 +289,7 @@ void SkeletonSolverFunctionT<T>::initializeJacobianComputation(
   // Update the state according to the transformed parameters
   {
     MT_PROFILE_EVENT("Initialize - update state");
-    state_->set(parameterTransform_.apply(parameters), character_.skeleton);
+    updateSkeletonState(parameters, true);
   }
 
   // Update mesh state if needed

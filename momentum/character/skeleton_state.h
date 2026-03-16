@@ -99,6 +99,21 @@ struct SkeletonStateT {
       const Skeleton& referenceSkeleton,
       bool computeDeriv = true);
 
+  /// Updates the skeleton state with per-joint control over transforms and derivatives
+  ///
+  /// This overload allows selective computation of transforms and derivatives on a per-joint
+  /// basis, which can significantly reduce computation when only a subset of joints is needed.
+  ///
+  /// @param jointParameters New joint parameters for all joints
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param needXform Bitset indicating which joints need their transforms computed
+  /// @param needDeriv Bitset indicating which joints need derivative information computed
+  void set(
+      const JointParametersT<T>& jointParameters,
+      const Skeleton& referenceSkeleton,
+      const JointSet& needXform,
+      const JointSet& needDeriv);
+
   /// Updates the skeleton state from another skeleton state with a different scalar type
   ///
   /// @tparam T2 Source scalar type
@@ -137,6 +152,13 @@ struct SkeletonStateT {
   /// @param referenceSkeleton The skeleton structure defining joint hierarchy
   /// @param computeDeriv Whether to compute derivative information for the joints
   void set(const Skeleton& referenceSkeleton, bool computeDeriv);
+
+  /// Updates the joint states with per-joint control over transforms and derivatives
+  ///
+  /// @param referenceSkeleton The skeleton structure defining joint hierarchy
+  /// @param needXform Bitset indicating which joints need their transforms computed
+  /// @param needDeriv Bitset indicating which joints need derivative information computed
+  void set(const Skeleton& referenceSkeleton, const JointSet& needXform, const JointSet& needDeriv);
 
   /// Copies joint states from another skeleton state with a different scalar type
   ///
