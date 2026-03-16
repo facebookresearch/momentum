@@ -898,6 +898,10 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to an fbx file.
 
+Blend shape and face expression weights are automatically extracted from the model parameters
+(motion) when the character has blend shapes or face expression blend shapes configured in its
+parameter transform. No separate weight arguments are needed.
+
 :param path: An .fbx export filename.
 :param character: A Character to be saved to the output file.
 :param fps: Frequency in frames per second
@@ -918,6 +922,9 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
           &saveFBXCharacterToFileWithJointParams,
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to an fbx file with joint params.
+
+Since joint parameters do not contain blend shape weights, this function does not save blend
+shape animation. Use save_fbx() with model parameters to include blend shape animation.
 
 :param path: An .fbx export filename.
 :param character: A Character to be saved to the output file.
