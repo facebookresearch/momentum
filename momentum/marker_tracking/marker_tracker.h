@@ -202,7 +202,10 @@ void calibrateModel(
     const CalibrationConfig& config,
     momentum::Character& character,
     momentum::ModelParameters& identity,
-    const std::array<float, 3>& regularizerWeights = {0.0f, 0.0f, 0.0f});
+    const std::array<float, 3>& regularizerWeights = {0.0f, 0.0f, 0.0f},
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Calibrate locator offsets of a character from input identity and marker data.
 ///
