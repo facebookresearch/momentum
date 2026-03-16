@@ -19,7 +19,6 @@
 #include "momentum/math/random.h"
 #include "momentum/math/types.h"
 #include "momentum/solver/gauss_newton_solver.h"
-#include "momentum/solver/subset_gauss_newton_solver.h"
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/solver/solver_test_helpers.h"
 
@@ -59,10 +58,6 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
   SolverOptions solverOptions;
   solverOptions.minIterations = 2;
   solverOptions.maxIterations = 10;
-
-  auto subsetGaussNewtonSolverOptions = SubsetGaussNewtonSolverOptions(solverOptions);
-  subsetGaussNewtonSolverOptions.doLineSearch = true;
-  subsetGaussNewtonSolverOptions.regularization = 0.05;
 
   auto gaussNewtonSolverOptions = GaussNewtonSolverOptions(solverOptions);
   gaussNewtonSolverOptions.doLineSearch = true;
@@ -104,8 +99,6 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
     solverFunction.addErrorFunction(positionErrorFunction);
     solverFunction.addErrorFunction(orientErrorFunction);
 
-    SubsetGaussNewtonSolverT<T> solver_sub(subsetGaussNewtonSolverOptions, &solverFunction);
-    const T err_sub = test::checkAndTimeSolver<T>(solverFunction, solver_sub, parametersInit);
     GaussNewtonSolverOptions options(test::defaultSolverOptions());
     options.useBlockJtJ = true;
     GaussNewtonSolverT<T> solver_gn(gaussNewtonSolverOptions, &solverFunction);
@@ -115,7 +108,6 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
 
     // QR solver should do at least as well as Gauss-Newton.
     EXPECT_LE(err_qr, (T(1.001) * err_gn + T(0.001)));
-    EXPECT_LE(err_sub, (T(1.001) * err_gn + T(0.001)));
   }
 }
 
