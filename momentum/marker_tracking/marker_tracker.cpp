@@ -29,6 +29,7 @@
 #include "momentum/character_solver/skinned_locator_triangle_error_function.h"
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
+#include "momentum/marker_tracking/glove_utils.h"
 #include "momentum/marker_tracking/tracker_utils.h"
 #include "momentum/math/fmt_eigen.h"
 #include "momentum/math/mesh.h"
@@ -198,7 +199,10 @@ Eigen::MatrixXf trackSequence(
     const size_t frameStride,
     bool enforceFloorInFirstFrame,
     const std::string& firstFramePoseConstraintSet,
-    float targetHeightCm) {
+    float targetHeightCm,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   // sanity checks
   const size_t numFrames = markerData.size();
   std::vector<size_t> frames;
@@ -216,7 +220,140 @@ Eigen::MatrixXf trackSequence(
       regularizer,
       enforceFloorInFirstFrame,
       firstFramePoseConstraintSet,
-      targetHeightCm);
+      targetHeightCm,
+      leftGloveData,
+      rightGloveData,
+      gloveConfig);
+}
+
+/// Add a blend shape regularizer that penalizes deviations from zero for all
+/// blend shape parameters.  Only added for the first solver frame.
+void addBlendShapeRegularizer(
+    SequenceSolverFunctionT<float>& solverFunc,
+    size_t solverFrame,
+    size_t solvedFrames,
+    const Character& character) {
+  const ParameterTransform& pt = character.parameterTransform;
+  if (!pt.getBlendShapeParameters().any() || solverFrame != 0) {
+    return;
+  }
+  auto blendShapeConstrFunc = std::make_shared<ModelParametersErrorFunction>(character);
+  blendShapeConstrFunc->setWeight(solvedFrames * 0.1f);
+  Eigen::VectorXf weights = Eigen::VectorXf::Zero(pt.numAllModelParameters());
+  for (Eigen::Index i = 0; i < pt.blendShapeParameters.size(); ++i) {
+    if (pt.blendShapeParameters[i] >= 0) {
+      weights[pt.blendShapeParameters[i]] = 1.0f;
+    }
+  }
+  blendShapeConstrFunc->setTargetParameters(
+      ModelParameters::Zero(pt.numAllModelParameters()), weights);
+  solverFunc.addErrorFunction(solverFrame, blendShapeConstrFunc);
+}
+
+/// Add per-frame marker, floor, and glove constraints for one frame of the
+/// sequence solver.  Extracted from trackSequence to reduce cyclomatic complexity.
+void addSequenceFrameConstraints(
+    SequenceSolverFunctionT<float>& solverFunc,
+    size_t solverFrame,
+    size_t iFrame,
+    size_t solvedFrames,
+    const Character& character,
+    const TrackingConfig& config,
+    const std::vector<std::vector<PositionData>>& constrData,
+    const std::vector<std::vector<SkinnedLocatorConstraint>>& skinnedConstData,
+    const std::vector<SkinnedLocatorTriangleConstraintT<float>>& skinnedLocatorMeshContraints,
+    const std::vector<PlaneDataT<float>>& floorConstraints,
+    bool enforceFloorInFirstFrame,
+    const std::string& firstFramePoseConstraintSet,
+    float targetHeightCm,
+    const std::optional<GloveConfig>& gloveConfig,
+    const std::vector<std::vector<JointToJointPositionDataT<float>>>& leftGlovePosData,
+    const std::vector<std::vector<JointToJointOrientationDataT<float>>>& leftGloveOriData,
+    const std::vector<std::vector<JointToJointPositionDataT<float>>>& rightGlovePosData,
+    const std::vector<std::vector<JointToJointOrientationDataT<float>>>& rightGloveOriData) {
+  auto posConstrWeight = PositionErrorFunction::kLegacyWeight;
+  if (solverFrame == 0 && (enforceFloorInFirstFrame || !firstFramePoseConstraintSet.empty())) {
+    posConstrWeight *= solvedFrames;
+  }
+
+  // prepare positional constraints
+  if (!constrData.at(iFrame).empty()) {
+    auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
+    posConstrFunc->setConstraints(constrData.at(iFrame));
+    posConstrFunc->setWeight(posConstrWeight);
+    solverFunc.addErrorFunction(solverFrame, posConstrFunc);
+  }
+
+  if (!skinnedConstData.at(iFrame).empty()) {
+    auto skinnedConstrFunc = std::make_shared<SkinnedLocatorErrorFunction>(character);
+    skinnedConstrFunc->setConstraints(skinnedConstData.at(iFrame));
+    skinnedConstrFunc->setWeight(posConstrWeight);
+    solverFunc.addErrorFunction(solverFrame, skinnedConstrFunc);
+  }
+
+  if (!skinnedLocatorMeshContraints.empty() && solverFrame == 0) {
+    auto skinnedTriangleConstrFunc =
+        std::make_shared<SkinnedLocatorTriangleErrorFunctionT<float>>(character);
+    skinnedTriangleConstrFunc->setConstraints(skinnedLocatorMeshContraints);
+    skinnedTriangleConstrFunc->setWeight(solvedFrames * posConstrWeight);
+    solverFunc.addErrorFunction(solverFrame, skinnedTriangleConstrFunc);
+  }
+
+  addBlendShapeRegularizer(solverFunc, solverFrame, solvedFrames, character);
+
+  if (targetHeightCm > 0.0f && solverFrame == 0) {
+    auto heightConstrFunc = std::make_shared<HeightErrorFunctionT<float>>(
+        character, targetHeightCm, Eigen::Vector3f::UnitY(), 10);
+    heightConstrFunc->setWeight(solvedFrames * 1.0f);
+    solverFunc.addErrorFunction(solverFrame, heightConstrFunc);
+  }
+
+  // prepare floor constraints
+  if (!floorConstraints.empty()) {
+    bool halfPlane = true;
+    float weightMultiplier = 1.0f;
+    if (enforceFloorInFirstFrame && solverFrame == 0) {
+      halfPlane = false;
+      weightMultiplier = solvedFrames;
+    }
+    auto halfPlaneConstrFunc =
+        std::make_shared<PlaneErrorFunction>(character, /*half plane*/ halfPlane);
+    halfPlaneConstrFunc->setConstraints(floorConstraints);
+    halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight * weightMultiplier);
+    solverFunc.addErrorFunction(solverFrame, halfPlaneConstrFunc);
+  }
+
+  if (!firstFramePoseConstraintSet.empty() && solverFrame == 0) {
+    if (character.parameterTransform.poseConstraints.count(firstFramePoseConstraintSet) > 0) {
+      const auto poseLimits = getPoseConstraintParameterLimits(
+          firstFramePoseConstraintSet, character.parameterTransform);
+      auto limitConstrFunc = std::make_shared<LimitErrorFunction>(character, poseLimits);
+      limitConstrFunc->setWeight(solvedFrames);
+      solverFunc.addErrorFunction(solverFrame, limitConstrFunc);
+    }
+  }
+
+  // add glove constraints for this frame
+  if (gloveConfig) {
+    addGloveConstraintsToSequenceSolver(
+        solverFunc,
+        solverFrame,
+        character,
+        leftGlovePosData,
+        leftGloveOriData,
+        iFrame,
+        gloveConfig->positionWeight,
+        gloveConfig->orientationWeight);
+    addGloveConstraintsToSequenceSolver(
+        solverFunc,
+        solverFrame,
+        character,
+        rightGlovePosData,
+        rightGloveOriData,
+        iFrame,
+        gloveConfig->positionWeight,
+        gloveConfig->orientationWeight);
+  }
 }
 
 /// Track motion across multiple frames simultaneously for specific frame indices.
@@ -246,7 +383,10 @@ Eigen::MatrixXf trackSequence(
     float regularizer,
     bool enforceFloorInFirstFrame,
     const std::string& firstFramePoseConstraintSet,
-    float targetHeightCm) {
+    float targetHeightCm,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
@@ -260,6 +400,16 @@ Eigen::MatrixXf trackSequence(
       "Input motion parameters {} do not match character model parameters {}",
       initialMotion.rows(),
       character.parameterTransform.numAllModelParameters());
+  MT_CHECK(
+      leftGloveData.empty() || leftGloveData.size() == numFrames,
+      "Left glove data has {} frames but marker data has {} frames",
+      leftGloveData.size(),
+      numFrames);
+  MT_CHECK(
+      rightGloveData.empty() || rightGloveData.size() == numFrames,
+      "Right glove data has {} frames but marker data has {} frames",
+      rightGloveData.size(),
+      numFrames);
 
   const ParameterTransform& pt = character.parameterTransform;
   const size_t numMarkers = markerData[0].size();
@@ -274,6 +424,13 @@ Eigen::MatrixXf trackSequence(
       pt.getParameterSet("locators", true) | pt.getParameterSet("skinnedLocators", true);
   poseParams &= ~locatorSet;
   universalParams |= locatorSet;
+
+  // Include glove DOFs as universal (not time-varying) parameters
+  if (gloveConfig) {
+    const auto gloveSet = pt.getParameterSet("gloves", true);
+    poseParams &= ~gloveSet;
+    universalParams |= gloveSet;
+  }
 
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> skinnedLocatorMeshContraints;
   if ((globalParams & pt.getBlendShapeParameters()).any() && !character.skinnedLocators.empty()) {
@@ -299,91 +456,43 @@ Eigen::MatrixXf trackSequence(
   const auto constrData = createConstraintData(markerData, character.locators);
   const auto skinnedConstData = createSkinnedConstraintData(markerData, character.skinnedLocators);
 
+  // glove constraint data (one per hand × position/orientation)
+  std::vector<std::vector<JointToJointPositionDataT<float>>> leftGlovePosData, rightGlovePosData;
+  std::vector<std::vector<JointToJointOrientationDataT<float>>> leftGloveOriData, rightGloveOriData;
+  if (gloveConfig) {
+    leftGlovePosData = createGlovePositionConstraintData(leftGloveData, character, *gloveConfig, 0);
+    leftGloveOriData =
+        createGloveOrientationConstraintData(leftGloveData, character, *gloveConfig, 0);
+    rightGlovePosData =
+        createGlovePositionConstraintData(rightGloveData, character, *gloveConfig, 1);
+    rightGloveOriData =
+        createGloveOrientationConstraintData(rightGloveData, character, *gloveConfig, 1);
+  }
+
   // add per-frame constraint data to the solver
   for (size_t solverFrame = 0; solverFrame < solvedFrames; ++solverFrame) {
     const size_t& iFrame = sortedFrames[solverFrame];
     if ((constrData.at(iFrame).size() + skinnedConstData.at(iFrame).size()) >
         numMarkers * config.minVisPercent) {
-      auto posConstrWeight = PositionErrorFunction::kLegacyWeight;
-      if (solverFrame == 0 && (enforceFloorInFirstFrame || !firstFramePoseConstraintSet.empty())) {
-        posConstrWeight *= solvedFrames;
-      }
-
-      // prepare positional constraints
-      if (!constrData.at(iFrame).empty()) {
-        auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
-        posConstrFunc->setConstraints(constrData.at(iFrame));
-        posConstrFunc->setWeight(posConstrWeight);
-        solverFunc.addErrorFunction(solverFrame, posConstrFunc);
-      }
-
-      if (!skinnedConstData.at(iFrame).empty()) {
-        auto skinnedConstrFunc = std::make_shared<SkinnedLocatorErrorFunction>(character);
-        skinnedConstrFunc->setConstraints(skinnedConstData.at(iFrame));
-        skinnedConstrFunc->setWeight(posConstrWeight);
-        solverFunc.addErrorFunction(solverFrame, skinnedConstrFunc);
-      }
-
-      if (!skinnedLocatorMeshContraints.empty() && solverFrame == 0) {
-        // Need to create a function to keep the skinned constraints close to
-        // the mesh.
-        auto skinnedTriangleConstrFunc =
-            std::make_shared<SkinnedLocatorTriangleErrorFunctionT<float>>(character);
-        skinnedTriangleConstrFunc->setConstraints(skinnedLocatorMeshContraints);
-        skinnedTriangleConstrFunc->setWeight(solvedFrames * posConstrWeight);
-        solverFunc.addErrorFunction(solverFrame, skinnedTriangleConstrFunc);
-      }
-
-      if (pt.getBlendShapeParameters().any() && solverFrame == 0) {
-        // regularize the blend shape parameters
-        auto blendShapeConstrFunc = std::make_shared<ModelParametersErrorFunction>(character);
-        blendShapeConstrFunc->setWeight(solvedFrames * 0.1f);
-        Eigen::VectorXf weights = Eigen::VectorXf::Zero(pt.numAllModelParameters());
-        for (Eigen::Index i = 0; i < pt.blendShapeParameters.size(); ++i) {
-          if (pt.blendShapeParameters[i] >= 0) {
-            weights[pt.blendShapeParameters[i]] = 1.0f;
-          }
-        }
-        blendShapeConstrFunc->setTargetParameters(
-            ModelParameters::Zero(pt.numAllModelParameters()), weights);
-        solverFunc.addErrorFunction(solverFrame, blendShapeConstrFunc);
-      }
-
-      // add height constraint if specified
-      if (targetHeightCm > 0.0f && solverFrame == 0) {
-        auto heightConstrFunc = std::make_shared<HeightErrorFunctionT<float>>(
-            character, targetHeightCm, Eigen::Vector3f::UnitY(), 10);
-        heightConstrFunc->setWeight(solvedFrames * 1.0f);
-        solverFunc.addErrorFunction(solverFrame, heightConstrFunc);
-      }
-
-      // prepare floor constraints
-      if (!floorConstraints.empty()) {
-        bool halfPlane = true;
-        float weightMultiplier = 1.0f;
-        if (enforceFloorInFirstFrame && solverFrame == 0) {
-          halfPlane = false;
-          weightMultiplier = solvedFrames;
-        }
-        auto halfPlaneConstrFunc =
-            std::make_shared<PlaneErrorFunction>(character, /*half plane*/ halfPlane);
-        halfPlaneConstrFunc->setConstraints(floorConstraints);
-        halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight * weightMultiplier);
-        solverFunc.addErrorFunction(solverFrame, halfPlaneConstrFunc);
-      }
-
-      // add pose constraint set if defined
-      if (!firstFramePoseConstraintSet.empty() && solverFrame == 0) {
-        // check if the constraint set is defined
-        if (character.parameterTransform.poseConstraints.count(firstFramePoseConstraintSet) > 0) {
-          // add parameter limits
-          const auto poseLimits = getPoseConstraintParameterLimits(
-              firstFramePoseConstraintSet, character.parameterTransform);
-          auto limitConstrFunc = std::make_shared<LimitErrorFunction>(character, poseLimits);
-          limitConstrFunc->setWeight(solvedFrames);
-          solverFunc.addErrorFunction(solverFrame, limitConstrFunc);
-        }
-      }
+      addSequenceFrameConstraints(
+          solverFunc,
+          solverFrame,
+          iFrame,
+          solvedFrames,
+          character,
+          config,
+          constrData,
+          skinnedConstData,
+          skinnedLocatorMeshContraints,
+          floorConstraints,
+          enforceFloorInFirstFrame,
+          firstFramePoseConstraintSet,
+          targetHeightCm,
+          gloveConfig,
+          leftGlovePosData,
+          leftGloveOriData,
+          rightGlovePosData,
+          rightGloveOriData);
     }
     // Set per-frame initial value
     solverFunc.setFrameParameters(solverFrame, initialMotion.col(iFrame));
@@ -456,6 +565,19 @@ Eigen::MatrixXf trackSequence(
   return outMotion;
 }
 
+/// Update glove constraints for both hands for a given frame.
+void updateGloveConstraintsForBothHands(
+    std::optional<GloveErrorFunctions>& left,
+    std::optional<GloveErrorFunctions>& right,
+    size_t iFrame) {
+  if (left) {
+    updateGloveConstraintsForFrame(*left, iFrame);
+  }
+  if (right) {
+    updateGloveConstraintsForFrame(*right, iFrame);
+  }
+}
+
 /// Check if the global transform is zero by checking if any rigid parameters are non-zero.
 ///
 /// This is used to determine whether initialization is needed for pose tracking.
@@ -491,7 +613,10 @@ Eigen::MatrixXf trackPosesPerframe(
     const Character& character,
     const ModelParameters& globalParams,
     const TrackingConfig& config,
-    const size_t frameStride) {
+    const size_t frameStride,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
 
@@ -511,7 +636,55 @@ Eigen::MatrixXf trackPosesPerframe(
   bool isContinuous = (frameStride < 5);
 
   return trackPosesForFrames(
-      markerData, character, initialMotion, config, frameIndices, isContinuous);
+      markerData,
+      character,
+      initialMotion,
+      config,
+      frameIndices,
+      isContinuous,
+      leftGloveData,
+      rightGloveData,
+      gloveConfig);
+}
+
+/// Solve for rigid parameters only as initialization for a frame.
+///
+/// When starting tracking (or re-starting for non-continuous mode), we first solve
+/// for only the rigid body parameters to get a rough global pose before solving
+/// for the full set of pose parameters.
+///
+/// @return false (to clear the needsInit flag)
+bool solveRigidInitialization(
+    GaussNewtonSolverQR& solver,
+    GaussNewtonSolverQROptions& solverOptions,
+    Eigen::VectorXf& dof,
+    const ParameterTransform& pt,
+    const ParameterSet& poseParams,
+    const std::shared_ptr<ModelParametersErrorFunction>& smoothConstrFunc,
+    const TrackingConfig& config,
+    bool isContinuous,
+    size_t iFrame) {
+  MT_LOGI_IF(config.debug && isContinuous, "Solving for an initial rigid pose at frame {}", iFrame);
+
+  // Set up different config for initialization
+  solverOptions.maxIterations = 50; // make sure it converges
+  solver.setOptions(solverOptions);
+  solver.setEnabledParameters(pt.getRigidParameters());
+  if (smoothConstrFunc) {
+    smoothConstrFunc->setWeight(0.0); // turn off smoothing - it doesn't affect rigid dofs
+  }
+
+  solver.solve(dof);
+
+  // Recover solver config
+  solverOptions.maxIterations = config.maxIter;
+  solver.setOptions(solverOptions);
+  solver.setEnabledParameters(poseParams);
+  if (smoothConstrFunc) {
+    smoothConstrFunc->setWeight(config.smoothing);
+  }
+
+  return false;
 }
 
 /// Track poses independently for specific frame indices with fixed character identity.
@@ -534,7 +707,10 @@ Eigen::MatrixXf trackPosesForFrames(
     const MatrixXf& initialMotion,
     const TrackingConfig& config,
     const std::vector<size_t>& frameIndices,
-    bool isContinuous) {
+    bool isContinuous,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
   MT_CHECK(
@@ -542,6 +718,16 @@ Eigen::MatrixXf trackPosesForFrames(
       "Input motion parameters {} do not match character model parameters {}",
       initialMotion.rows(),
       character.parameterTransform.numAllModelParameters());
+  MT_CHECK(
+      leftGloveData.empty() || leftGloveData.size() == numFrames,
+      "Left glove data has {} frames but marker data has {} frames",
+      leftGloveData.size(),
+      numFrames);
+  MT_CHECK(
+      rightGloveData.empty() || rightGloveData.size() == numFrames,
+      "Right glove data has {} frames but marker data has {} frames",
+      rightGloveData.size(),
+      numFrames);
 
   const ParameterTransform& pt = character.parameterTransform;
   const size_t numMarkers = markerData[0].size();
@@ -554,6 +740,11 @@ Eigen::MatrixXf trackPosesForFrames(
   const auto& locatorSet = pt.parameterSets.find("locators");
   if (locatorSet != pt.parameterSets.end()) {
     poseParams &= ~locatorSet->second;
+  }
+
+  // Exclude glove DOFs from per-frame pose solving
+  if (gloveConfig) {
+    poseParams &= ~pt.getParameterSet("gloves", true);
   }
 
   // set up the solver
@@ -617,6 +808,15 @@ Eigen::MatrixXf trackPosesForFrames(
     solverFunc.addErrorFunction(collisionErrorFunction);
   }
 
+  // set up glove error functions (registered once, constraints swapped per frame)
+  std::optional<GloveErrorFunctions> leftGloveFuncs, rightGloveFuncs;
+  if (gloveConfig) {
+    leftGloveFuncs =
+        setupGloveErrorFunctions(solverFunc, character, leftGloveData, *gloveConfig, 0);
+    rightGloveFuncs =
+        setupGloveErrorFunctions(solverFunc, character, rightGloveData, *gloveConfig, 1);
+  }
+
   // initialize parameters to contain identity information
   // the identity fields will be used but untouched during optimization
   // globalParams could also be repurposed to pass in initial pose value
@@ -650,32 +850,21 @@ Eigen::MatrixXf trackPosesForFrames(
         skinnedLocatorPosConstrFunc->clearConstraints();
         skinnedLocatorPosConstrFunc->setConstraints(skinnedConstrData.at(iFrame));
 
-        // initialization
-        if (needsInit) { // solve only for the rigid parameters as preprocessing
-          MT_LOGI_IF(
-              config.debug && isContinuous,
-              "Solving for an initial rigid pose at frame {}",
+        // update glove constraints for this frame
+        updateGloveConstraintsForBothHands(leftGloveFuncs, rightGloveFuncs, iFrame);
+
+        // initialization: solve only for the rigid parameters as preprocessing
+        if (needsInit) {
+          needsInit = solveRigidInitialization(
+              solver,
+              solverOptions,
+              dof,
+              pt,
+              poseParams,
+              smoothConstrFunc,
+              config,
+              isContinuous,
               iFrame);
-
-          // Set up different config for initialization
-          solverOptions.maxIterations = 50; // make sure it converges
-          solver.setOptions(solverOptions);
-          solver.setEnabledParameters(pt.getRigidParameters());
-          if (smoothConstrFunc) {
-            smoothConstrFunc->setWeight(0.0); // turn off smoothing - it doesn't affect rigid dofs
-          }
-
-          solver.solve(dof);
-
-          // Recover solver config
-          solverOptions.maxIterations = config.maxIter;
-          solver.setOptions(solverOptions);
-          solver.setEnabledParameters(poseParams);
-          if (smoothConstrFunc) {
-            smoothConstrFunc->setWeight(config.smoothing);
-          }
-
-          needsInit = false;
         }
 
         // set smoothness target as the last pose for continuous tracking
