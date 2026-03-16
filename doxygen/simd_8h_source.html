@@ -204,9 +204,9 @@ $(document).ready(function(){initNavTree('simd_8h_source.html',''); initResizabl
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> Alignment&gt;</div>
 <div class="foldopen" id="foldopen00108" data-start="{" data-end="}">
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">  108</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">checkAlignment</a>(<span class="keyword">const</span> Eigen::Ref&lt;Eigen::MatrixXf&gt;&amp; mat, <span class="keywordtype">size_t</span> offset = 0) {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">  108</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">checkAlignment</a>(<span class="keyword">const</span> Eigen::Ref&lt;Eigen::MatrixXf&gt;&amp; mat, <span class="keywordtype">size_t</span> <a class="code hl_variable" href="bvh__io_8cpp.html#a8682ffa8d7135ad161ce7397b54cc16c">offset</a> = 0) {</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <a class="code hl_define" href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a>(</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uintptr_t</a>(mat.data() + offset)) % <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Alignment</a> != 0,</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uintptr_t</a>(mat.data() + <a class="code hl_variable" href="bvh__io_8cpp.html#a8682ffa8d7135ad161ce7397b54cc16c">offset</a>)) % <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Alignment</a> != 0,</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>      <span class="stringliteral">&quot;Matrix ({}x{}, ptr: {}) is not aligned ({}) correctly.&quot;</span>,</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      mat.rows(),</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>      mat.cols(),</div>
@@ -309,6 +309,7 @@ $(document).ready(function(){initNavTree('simd_8h_source.html',''); initResizabl
 </div>
 <div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>} <span class="comment">// namespace momentum</span></div>
+<div class="ttc" id="abvh__io_8cpp_html_a8682ffa8d7135ad161ce7397b54cc16c"><div class="ttname"><a href="bvh__io_8cpp.html#a8682ffa8d7135ad161ce7397b54cc16c">offset</a></div><div class="ttdeci">Vector3f offset</div><div class="ttdef"><b>Definition</b> <a href="bvh__io_8cpp_source.html#l00039">bvh_io.cpp:39</a></div></div>
 <div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div></div>
 <div class="ttc" id="aexception_8h_html_a9b406adb60f122613db3463c42c4d6ec"><div class="ttname"><a href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a></div><div class="ttdeci">#define MT_THROW_IF(Condition,...)</div><div class="ttdoc">Conditionally throws a std::runtime_error with a formatted message if the condition is true.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00050">exception.h:50</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
@@ -357,7 +358,7 @@ $(document).ready(function(){initNavTree('simd_8h_source.html',''); initResizabl
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_438dd2bc29fc0ff4a3e7d65d3220f2b7.html">simd</a></li><li class="navelem"><a class="el" href="simd_8h.html">simd.h</a></li>
-    <li class="footer">Generated on Thu Mar 12 2026 17:32:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Mar 16 2026 19:13:02 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

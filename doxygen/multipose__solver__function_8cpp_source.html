@@ -122,18 +122,18 @@ $(document).ready(function(){initNavTree('multipose__solver__function_8cpp_sourc
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1SkeletonT.html">Skeleton</a>* <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>,</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ParameterTransformT&lt;T&gt;</a>* <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>,</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    std::span&lt;const int&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">universal</a>,</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> frames)</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_variable" href="bvh__io_8cpp.html#ae5916e95e33da91fa89efafc6c02d6a6">frames</a>)</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    : skeleton_(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>), parameterTransform_(<a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>) {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">universal</a>.size() == <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(parameterTransform_-&gt;numAllModelParameters()));</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  states_.resize(frames);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  states_.resize(<a class="code hl_variable" href="bvh__io_8cpp.html#ae5916e95e33da91fa89efafc6c02d6a6">frames</a>);</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">s</a> : states_) {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">s</a>.set(parameterTransform_-&gt;zero(), *skeleton_);</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  }</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  meshStates_.resize(frames);</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  errorFunctions_.resize(frames);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  meshStates_.resize(<a class="code hl_variable" href="bvh__io_8cpp.html#ae5916e95e33da91fa89efafc6c02d6a6">frames</a>);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  errorFunctions_.resize(<a class="code hl_variable" href="bvh__io_8cpp.html#ae5916e95e33da91fa89efafc6c02d6a6">frames</a>);</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  frameParameters_.resize(</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>      frames, <a class="code hl_struct" href="structmomentum_1_1ModelParametersT.html">ModelParametersT&lt;T&gt;::Zero</a>(parameterTransform_-&gt;numAllModelParameters()));</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>      <a class="code hl_variable" href="bvh__io_8cpp.html#ae5916e95e33da91fa89efafc6c02d6a6">frames</a>, <a class="code hl_struct" href="structmomentum_1_1ModelParametersT.html">ModelParametersT&lt;T&gt;::Zero</a>(parameterTransform_-&gt;numAllModelParameters()));</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  activeJointParams_ = parameterTransform_-&gt;activeJointParams;</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="comment">// calculate needed offsets and indices</span></div>
@@ -508,6 +508,7 @@ $(document).ready(function(){initNavTree('multipose__solver__function_8cpp_sourc
 <div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MultiposeSolverFunctionT&lt;double&gt;</a>;</div>
 <div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
 <div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>} <span class="comment">// namespace momentum</span></div>
+<div class="ttc" id="abvh__io_8cpp_html_ae5916e95e33da91fa89efafc6c02d6a6"><div class="ttname"><a href="bvh__io_8cpp.html#ae5916e95e33da91fa89efafc6c02d6a6">frames</a></div><div class="ttdeci">std::vector&lt; VectorXf &gt; frames</div><div class="ttdef"><b>Definition</b> <a href="bvh__io_8cpp_source.html#l00134">bvh_io.cpp:134</a></div></div>
 <div class="ttc" id="achecks_8h_html"><div class="ttname"><a href="checks_8h.html">checks.h</a></div></div>
 <div class="ttc" id="achecks_8h_html_ad864080ec7d619a1d96851a0de141aab"><div class="ttname"><a href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a></div><div class="ttdeci">#define MT_CHECK(condition,...)</div><div class="ttdef"><b>Definition</b> <a href="checks_8h_source.html#l00023">checks.h:23</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1MultiposeSolverFunctionT_html"><div class="ttname"><a href="classmomentum_1_1MultiposeSolverFunctionT.html">momentum::MultiposeSolverFunctionT</a></div><div class="ttdef"><b>Definition</b> <a href="multipose__solver__function_8h_source.html#l00020">multipose_solver_function.h:20</a></div></div>
@@ -554,7 +555,7 @@ $(document).ready(function(){initNavTree('multipose__solver__function_8cpp_sourc
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="multipose__solver__function_8cpp.html">multipose_solver_function.cpp</a></li>
-    <li class="footer">Generated on Thu Mar 12 2026 17:32:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Mar 16 2026 19:13:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

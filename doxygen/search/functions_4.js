@@ -18,12 +18,13 @@ var searchData=
   ['extractfaceexpressionblendweights_15',['extractFaceExpressionBlendWeights',['../namespacemomentum.html#a7aecfd1e567351599deb7a6a42495ef2',1,'momentum']]],
   ['extractfaceexpressionblendweights_3c_20double_20_3e_16',['extractFaceExpressionBlendWeights&lt; double &gt;',['../namespacemomentum.html#a65bcaa2601fc49542c44d8c420225a47',1,'momentum']]],
   ['extractfaceexpressionblendweights_3c_20float_20_3e_17',['extractFaceExpressionBlendWeights&lt; float &gt;',['../namespacemomentum.html#a249b5563f2bfb10c72d28fb9c8cb8a4c',1,'momentum']]],
-  ['extractidandlocatorsfromparams_18',['extractIdAndLocatorsFromParams',['../namespacemomentum.html#a571c151c67aa408a90ae54b4996e284b',1,'momentum']]],
-  ['extractlocatorsfromcharacter_19',['extractLocatorsFromCharacter',['../namespacemomentum.html#a1f635ed7abd17811b7970615e0dc6cf8',1,'momentum']]],
-  ['extractmarkersfrommotion_20',['extractMarkersFromMotion',['../namespacemomentum.html#aee30644797806d49da39dcf46fc5d69b',1,'momentum']]],
-  ['extractparameters_21',['extractParameters',['../namespacemomentum.html#aab70645310a06eab39456dcb9b084e98',1,'momentum']]],
-  ['extractskinnedlocatorsfromcharacter_22',['extractSkinnedLocatorsFromCharacter',['../namespacemomentum.html#a6e2946f9870ec29b4d47807fa01372ca',1,'momentum']]],
-  ['extractsubsetmat_23',['extractSubsetMat',['../namespacemomentum.html#a249fe09d48f002f87f3e9259cac511b0',1,'momentum']]],
-  ['extractsubsetvec_24',['extractSubsetVec',['../namespacemomentum.html#a9ab9cb2b8b63fcc2b2b97108f1ac05c7',1,'momentum']]],
-  ['extrapolatemodelparameters_25',['extrapolatemodelparameters',['../namespacemomentum.html#afdd873ca61d784d99656e0081f1022ed',1,'momentum::extrapolateModelParameters(const ModelParameters &amp;previous, const ModelParameters &amp;current, float factor=kDefaultExtrapolateFactor, float maxDelta=kDefaultExtrapolateMaxDelta)'],['../namespacemomentum.html#ad1c40f1a4b724cbb22d44c2519265305',1,'momentum::extrapolateModelParameters(const ModelParameters &amp;previous, const ModelParameters &amp;current, const ParameterSet &amp;activeParams, float factor=kDefaultExtrapolateFactor, float maxDelta=kDefaultExtrapolateMaxDelta)']]]
+  ['extractgloveoffsetsfromcharacter_18',['extractGloveOffsetsFromCharacter',['../namespacemomentum.html#ab6609828de3a9512b6b922c09cc8f8de',1,'momentum']]],
+  ['extractidandlocatorsfromparams_19',['extractIdAndLocatorsFromParams',['../namespacemomentum.html#a571c151c67aa408a90ae54b4996e284b',1,'momentum']]],
+  ['extractlocatorsfromcharacter_20',['extractLocatorsFromCharacter',['../namespacemomentum.html#a1f635ed7abd17811b7970615e0dc6cf8',1,'momentum']]],
+  ['extractmarkersfrommotion_21',['extractMarkersFromMotion',['../namespacemomentum.html#aee30644797806d49da39dcf46fc5d69b',1,'momentum']]],
+  ['extractparameters_22',['extractParameters',['../namespacemomentum.html#aab70645310a06eab39456dcb9b084e98',1,'momentum']]],
+  ['extractskinnedlocatorsfromcharacter_23',['extractSkinnedLocatorsFromCharacter',['../namespacemomentum.html#a6e2946f9870ec29b4d47807fa01372ca',1,'momentum']]],
+  ['extractsubsetmat_24',['extractSubsetMat',['../namespacemomentum.html#a249fe09d48f002f87f3e9259cac511b0',1,'momentum']]],
+  ['extractsubsetvec_25',['extractSubsetVec',['../namespacemomentum.html#a9ab9cb2b8b63fcc2b2b97108f1ac05c7',1,'momentum']]],
+  ['extrapolatemodelparameters_26',['extrapolatemodelparameters',['../namespacemomentum.html#afdd873ca61d784d99656e0081f1022ed',1,'momentum::extrapolateModelParameters(const ModelParameters &amp;previous, const ModelParameters &amp;current, float factor=kDefaultExtrapolateFactor, float maxDelta=kDefaultExtrapolateMaxDelta)'],['../namespacemomentum.html#ad1c40f1a4b724cbb22d44c2519265305',1,'momentum::extrapolateModelParameters(const ModelParameters &amp;previous, const ModelParameters &amp;current, const ParameterSet &amp;activeParams, float factor=kDefaultExtrapolateFactor, float maxDelta=kDefaultExtrapolateMaxDelta)']]]
 ];

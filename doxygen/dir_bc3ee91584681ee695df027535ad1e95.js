@@ -28,6 +28,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "joint_error_function.h", "joint__error__function_8h.html", "joint__error__function_8h" ],
     [ "joint_to_joint_distance_error_function.cpp", "joint__to__joint__distance__error__function_8cpp.html", null ],
     [ "joint_to_joint_distance_error_function.h", "joint__to__joint__distance__error__function_8h.html", "joint__to__joint__distance__error__function_8h" ],
+    [ "joint_to_joint_orientation_error_function.cpp", "joint__to__joint__orientation__error__function_8cpp.html", null ],
+    [ "joint_to_joint_orientation_error_function.h", "joint__to__joint__orientation__error__function_8h.html", "joint__to__joint__orientation__error__function_8h" ],
     [ "joint_to_joint_position_error_function.cpp", "joint__to__joint__position__error__function_8cpp.html", null ],
     [ "joint_to_joint_position_error_function.h", "joint__to__joint__position__error__function_8h.html", "joint__to__joint__position__error__function_8h" ],
     [ "limit_error_function.cpp", "limit__error__function_8cpp.html", null ],

@@ -138,11 +138,11 @@ $(document).ready(function(){initNavTree('fully__differentiable__motion__error__
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a7ccf20ee96b7a297f773aaf525a8a7d1">   35</a></span>Eigen::Index <a class="code hl_function" href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a7ccf20ee96b7a297f773aaf525a8a7d1">FullyDifferentiableMotionErrorFunctionT&lt;T&gt;::getInputSize</a>(</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">const</span> std::string&amp; name)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordflow">if</span> (name == kTargetParameters || name == kTargetWeights) {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a> == kTargetParameters || <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a> == kTargetWeights) {</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">return</span> this-&gt;parameterTransform_.numAllModelParameters();</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Unknown input to FullyDifferentiableMotionErrorFunctionT: {}&quot;</span>, name);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Unknown input to FullyDifferentiableMotionErrorFunctionT: {}&quot;</span>, <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  }</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
 </div>
@@ -150,16 +150,16 @@ $(document).ready(function(){initNavTree('fully__differentiable__motion__error__
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a3ec9dd8a2d7d00966ba874ea1cc71f86">   45</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a3ec9dd8a2d7d00966ba874ea1cc71f86">FullyDifferentiableMotionErrorFunctionT&lt;T&gt;::getInputImp</a>(</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">const</span> std::string&amp; name,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>,</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; value)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordflow">if</span> (name == kTargetParameters) {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a> == kTargetParameters) {</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetParameters</a> = this-&gt;getTargetParameters();</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetParameters</a>.size() != <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_.numAllModelParameters()) {</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>      value = Eigen::VectorX&lt;T&gt;::Zero(this-&gt;parameterTransform_.numAllModelParameters());</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>      value = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetParameters</a>.v;</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (name == kTargetWeights) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a> == kTargetWeights) {</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetWeights</a> = this-&gt;getTargetWeights();</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetWeights</a>.size() != <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">this</a>-&gt;parameterTransform_.numAllModelParameters()) {</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>      value = Eigen::VectorX&lt;T&gt;::Zero(this-&gt;parameterTransform_.numAllModelParameters());</div>
@@ -167,7 +167,7 @@ $(document).ready(function(){initNavTree('fully__differentiable__motion__error__
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>      value = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetWeights</a>;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Unknown input to FullyDifferentiableMotionErrorFunctionT: {}&quot;</span>, name);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Unknown input to FullyDifferentiableMotionErrorFunctionT: {}&quot;</span>, <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>);</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  }</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>}</div>
 </div>
@@ -175,14 +175,14 @@ $(document).ready(function(){initNavTree('fully__differentiable__motion__error__
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00068" data-start="{" data-end="}">
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#ad9034dcad1216428683ca79065a88bc7">   68</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#ad9034dcad1216428683ca79065a88bc7">FullyDifferentiableMotionErrorFunctionT&lt;T&gt;::setInputImp</a>(</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keyword">const</span> std::string&amp; name,</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>,</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    Eigen::Ref&lt;<span class="keyword">const</span> Eigen::VectorX&lt;T&gt;&gt; value) {</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keywordflow">if</span> (name == kTargetParameters) {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a> == kTargetParameters) {</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    this-&gt;setTargetParameters(value, this-&gt;getTargetWeights());</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (name == kTargetWeights) {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a> == kTargetWeights) {</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    this-&gt;setTargetParameters(this-&gt;getTargetParameters(), value);</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Unknown input to FullyDifferentiableMotionErrorFunctionT: {}&quot;</span>, name);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Unknown input to FullyDifferentiableMotionErrorFunctionT: {}&quot;</span>, <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>);</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  }</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
 </div>
@@ -226,6 +226,7 @@ $(document).ready(function(){initNavTree('fully__differentiable__motion__error__
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">FullyDifferentiableMotionErrorFunctionT&lt;double&gt;</a>;</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>} <span class="comment">// namespace momentum</span></div>
+<div class="ttc" id="abvh__io_8cpp_html_a9b45b3e13bd9167aab02e17e08916231"><div class="ttname"><a href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a></div><div class="ttdeci">std::string name</div><div class="ttdef"><b>Definition</b> <a href="bvh__io_8cpp_source.html#l00037">bvh_io.cpp:37</a></div></div>
 <div class="ttc" id="aceres__utility_8h_html"><div class="ttname"><a href="ceres__utility_8h.html">ceres_utility.h</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1FullyDifferentiableMotionErrorFunctionT_html_a171d01d2c6017f3adad95b6e2d3a13ae"><div class="ttname"><a href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a171d01d2c6017f3adad95b6e2d3a13ae">momentum::FullyDifferentiableMotionErrorFunctionT::inputs</a></div><div class="ttdeci">std::vector&lt; std::string &gt; inputs() const final</div><div class="ttdef"><b>Definition</b> <a href="fully__differentiable__motion__error__function_8cpp_source.html#l00030">fully_differentiable_motion_error_function.cpp:30</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1FullyDifferentiableMotionErrorFunctionT_html_a3ec9dd8a2d7d00966ba874ea1cc71f86"><div class="ttname"><a href="classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a3ec9dd8a2d7d00966ba874ea1cc71f86">momentum::FullyDifferentiableMotionErrorFunctionT::getInputImp</a></div><div class="ttdeci">void getInputImp(const std::string &amp;name, Eigen::Ref&lt; Eigen::VectorX&lt; T &gt; &gt; value) const final</div><div class="ttdef"><b>Definition</b> <a href="fully__differentiable__motion__error__function_8cpp_source.html#l00045">fully_differentiable_motion_error_function.cpp:45</a></div></div>
@@ -250,7 +251,7 @@ $(document).ready(function(){initNavTree('fully__differentiable__motion__error__
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b3db77866d5b1957f38c851a81267fa1.html">diff_ik</a></li><li class="navelem"><a class="el" href="fully__differentiable__motion__error__function_8cpp.html">fully_differentiable_motion_error_function.cpp</a></li>
-    <li class="footer">Generated on Thu Mar 12 2026 17:32:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Mar 16 2026 19:13:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

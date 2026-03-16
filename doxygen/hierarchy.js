@@ -27,6 +27,9 @@ var hierarchy =
     [ "rerun::CollectionAdapter< TElement, std::vector< Eigen::Vector3< T > > >", "structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html", null ],
     [ "rerun::CollectionAdapter< TElement, std::vector< Eigen::Vector4< T > > >", "structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector4_3_01T_01_4_01_4_01_4.html", null ],
     [ "momentum::CollisionGeometryStateT< T >", "structmomentum_1_1CollisionGeometryStateT.html", null ],
+    [ "momentum::CollisionErrorFunctionStatelessT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html", null ],
+    [ "momentum::CollisionErrorFunctionT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html", null ],
+    [ "momentum::SimdCollisionErrorFunctionT< T >::CollisionPairInfo", "structmomentum_1_1SimdCollisionErrorFunctionT_1_1CollisionPairInfo.html", null ],
     [ "momentum::ColumnIndexedMatrix< MatrixType >", "classmomentum_1_1ColumnIndexedMatrix.html", null ],
     [ "momentum::ConstraintData", "structmomentum_1_1ConstraintData.html", [
       [ "momentum::AimDataT< T >", "structmomentum_1_1AimDataT.html", null ],
@@ -73,6 +76,10 @@ var hierarchy =
     [ "momentum::GeneralizedLossT< T >", "classmomentum_1_1GeneralizedLossT.html", [
       [ "momentum::SimdGeneralizedLossT< T >", "classmomentum_1_1SimdGeneralizedLossT.html", null ]
     ] ],
+    [ "momentum::GloveConfig", "structmomentum_1_1GloveConfig.html", null ],
+    [ "momentum::GloveErrorFunctions", "structmomentum_1_1GloveErrorFunctions.html", null ],
+    [ "momentum::GloveOffset", "structmomentum_1_1GloveOffset.html", null ],
+    [ "momentum::GloveSensorObservation", "structmomentum_1_1GloveSensorObservation.html", null ],
     [ "momentum::GltfBuilder", "classmomentum_1_1GltfBuilder.html", null ],
     [ "momentum::GltfBuilder::Impl", "structmomentum_1_1GltfBuilder_1_1Impl.html", null ],
     [ "momentum::InverseParameterTransformT< T >", "structmomentum_1_1InverseParameterTransformT.html", null ],
@@ -83,6 +90,7 @@ var hierarchy =
     [ "momentum::JointStateT< T >", "structmomentum_1_1JointStateT.html", null ],
     [ "momentum::JointT< T >", "structmomentum_1_1JointT.html", null ],
     [ "momentum::JointToJointDistanceConstraintT< T >", "structmomentum_1_1JointToJointDistanceConstraintT.html", null ],
+    [ "momentum::JointToJointOrientationDataT< T >", "structmomentum_1_1JointToJointOrientationDataT.html", null ],
     [ "momentum::JointToJointPositionDataT< T >", "structmomentum_1_1JointToJointPositionDataT.html", null ],
     [ "momentum::LimitData", "unionmomentum_1_1LimitData.html", null ],
     [ "momentum::LimitEllipsoid", "structmomentum_1_1LimitEllipsoid.html", null ],
@@ -106,10 +114,6 @@ var hierarchy =
     [ "momentum::OnlineHouseholderQR< T >", "classmomentum_1_1OnlineHouseholderQR.html", null ],
     [ "momentum::OrientationConstraintStateT< T >", "structmomentum_1_1OrientationConstraintStateT.html", null ],
     [ "momentum::OrientationConstraintT< T >", "structmomentum_1_1OrientationConstraintT.html", null ],
-    [ "momentum::CollisionErrorFunctionT< T >::PairEqual", "structmomentum_1_1CollisionErrorFunctionT_1_1PairEqual.html", null ],
-    [ "momentum::SimdCollisionErrorFunctionT< T >::PairEqual", "structmomentum_1_1SimdCollisionErrorFunctionT_1_1PairEqual.html", null ],
-    [ "momentum::CollisionErrorFunctionT< T >::PairHash", "structmomentum_1_1CollisionErrorFunctionT_1_1PairHash.html", null ],
-    [ "momentum::SimdCollisionErrorFunctionT< T >::PairHash", "structmomentum_1_1SimdCollisionErrorFunctionT_1_1PairHash.html", null ],
     [ "momentum::ParameterLimit", "structmomentum_1_1ParameterLimit.html", null ],
     [ "momentum::ParameterTransformT< T >", "structmomentum_1_1ParameterTransformT.html", null ],
     [ "momentum::ParameterTransformT< float >", "structmomentum_1_1ParameterTransformT.html", null ],
@@ -194,6 +198,7 @@ var hierarchy =
       [ "momentum::HeightErrorFunctionT< T >", "classmomentum_1_1HeightErrorFunctionT.html", null ],
       [ "momentum::JointErrorFunctionT< T, Data, FuncDim, NumVec, NumPos >", "classmomentum_1_1JointErrorFunctionT.html", null ],
       [ "momentum::JointToJointDistanceErrorFunctionT< T >", "classmomentum_1_1JointToJointDistanceErrorFunctionT.html", null ],
+      [ "momentum::JointToJointOrientationErrorFunctionT< T >", "classmomentum_1_1JointToJointOrientationErrorFunctionT.html", null ],
       [ "momentum::JointToJointPositionErrorFunctionT< T >", "classmomentum_1_1JointToJointPositionErrorFunctionT.html", null ],
       [ "momentum::LimitErrorFunctionT< T >", "classmomentum_1_1LimitErrorFunctionT.html", null ],
       [ "momentum::ModelParametersErrorFunctionT< T >", "classmomentum_1_1ModelParametersErrorFunctionT.html", [

@@ -16,6 +16,7 @@
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -213,6 +214,24 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceErrorFunction.add_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceErrorFunction.clear_constraints()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointDistanceErrorFunction.constraints</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData.__init__"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData.name"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData.reference_joint"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData.reference_joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData.source_joint"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData.source_joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData.target"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData.target</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationData.weight"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationData.weight</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.add_constraint"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction.add_constraint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.add_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction.add_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.clear_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction.clear_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction.constraints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.num_constraints"><code class="docutils literal notranslate"><span class="pre">JointToJointOrientationErrorFunction.num_constraints()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.JointToJointPositionData"><code class="docutils literal notranslate"><span class="pre">JointToJointPositionData</span></code></a><ul>
@@ -1854,6 +1873,131 @@ such as maintaining a fixed distance between hands or ensuring two joints stay a
 <dt class="sig sig-object py" id="pymomentum.solver2.JointToJointDistanceErrorFunction.constraints">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointDistanceErrorFunction.constraints" title="Link to this definition"></a></dt>
 <dd><p>Returns the list of joint-to-joint distance constraints.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">JointToJointOrientationData</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData.name" title="Link to this definition"></a></dt>
+<dd><p>The name of the constraint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData.reference_joint">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reference_joint</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData.reference_joint" title="Link to this definition"></a></dt>
+<dd><p>The index of the reference joint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData.source_joint">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_joint</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData.source_joint" title="Link to this definition"></a></dt>
+<dd><p>The index of the source joint.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData.target">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData.target" title="Link to this definition"></a></dt>
+<dd><p>The target relative orientation as a quaternion <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">w]</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationData.weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationData.weight" title="Link to this definition"></a></dt>
+<dd><p>The weight of the constraint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">JointToJointOrientationErrorFunction</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.solver2.SkeletonErrorFunction" title="pymomentum.solver2.SkeletonErrorFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SkeletonErrorFunction</span></code></a></p>
+<p>Error function that penalizes deviation from a target orientation expressed
+relative to a reference joint’s coordinate frame.</p>
+<p>This is useful for constraints where you want to control the relative orientation
+between two body parts, such as keeping a hand at a specific orientation relative
+to the body, or maintaining a specific rotational relationship between two joints.</p>
+<p>The error is computed as the Frobenius norm of the difference between the actual
+and target relative rotation matrices:</p>
+<div class="math notranslate nohighlight">
+\[\text{error} = \|R_{ref}^T R_{src} - R_{target}\|_F^2\]</div>
+<p>where <span class="math notranslate nohighlight">\(R_{ref}\)</span> and <span class="math notranslate nohighlight">\(R_{src}\)</span> are the global rotations of the
+reference and source joints respectively, and <span class="math notranslate nohighlight">\(R_{target}\)</span> is the target
+relative rotation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction" title="pymomentum.solver2.JointToJointOrientationErrorFunction"><span class="pre">pymomentum.solver2.JointToJointOrientationErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a JointToJointOrientationErrorFunction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to use.</p></li>
+<li><p><strong>weight</strong> – The weight applied to the error function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction.add_constraint">
+<span class="sig-name descname"><span class="pre">add_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction" title="pymomentum.solver2.JointToJointOrientationErrorFunction"><span class="pre">pymomentum.solver2.JointToJointOrientationErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.add_constraint" title="Link to this definition"></a></dt>
+<dd><p>Adds a joint-to-joint orientation constraint to the error function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_joint</strong> – The index of the source joint (the joint whose orientation we want to constrain).</p></li>
+<li><p><strong>reference_joint</strong> – The index of the reference joint (the joint whose coordinate frame we use).</p></li>
+<li><p><strong>target</strong> – The target relative orientation as a quaternion <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">w]</span></code>.</p></li>
+<li><p><strong>weight</strong> – The weight of the constraint.</p></li>
+<li><p><strong>name</strong> – The name of the constraint (for debugging).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction.add_constraints">
+<span class="sig-name descname"><span class="pre">add_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction" title="pymomentum.solver2.JointToJointOrientationErrorFunction"><span class="pre">pymomentum.solver2.JointToJointOrientationErrorFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.add_constraints" title="Link to this definition"></a></dt>
+<dd><p>Adds multiple joint-to-joint orientation constraints to the error function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_joint</strong> – A numpy array of indices for the source joints.</p></li>
+<li><p><strong>reference_joint</strong> – A numpy array of indices for the reference joints.</p></li>
+<li><p><strong>target</strong> – A numpy array of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> for target orientations as quaternions <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">w]</span></code>.</p></li>
+<li><p><strong>weight</strong> – A numpy array of weights for the constraints.</p></li>
+<li><p><strong>name</strong> – An optional list of names for the constraints (for debugging).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction.clear_constraints">
+<span class="sig-name descname"><span class="pre">clear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction" title="pymomentum.solver2.JointToJointOrientationErrorFunction"><span class="pre">pymomentum.solver2.JointToJointOrientationErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.clear_constraints" title="Link to this definition"></a></dt>
+<dd><p>Clears all joint-to-joint orientation constraints from the error function.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction.constraints">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constraints</span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of joint-to-joint orientation constraints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.JointToJointOrientationErrorFunction.num_constraints">
+<span class="sig-name descname"><span class="pre">num_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.JointToJointOrientationErrorFunction" title="pymomentum.solver2.JointToJointOrientationErrorFunction"><span class="pre">pymomentum.solver2.JointToJointOrientationErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymomentum.solver2.JointToJointOrientationErrorFunction.num_constraints" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of constraints.</p>
 </dd></dl>
 
 </dd></dl>

@@ -1,5 +1,6 @@
 var fbx__io_8cpp =
 [
+    [ "loadFbxBlendShapeWeights", "fbx__io_8cpp.html#adf25016db200a7aeafddd3fbe47bd519", null ],
     [ "loadFbxCharacter", "fbx__io_8cpp.html#a89d491703972937b6d9340c3b7761cc3", null ],
     [ "loadFbxCharacter", "fbx__io_8cpp.html#abbe1ad912ce6566dfcf6e4457040b667", null ],
     [ "loadFbxCharacterWithMotion", "fbx__io_8cpp.html#a8fad9e2a2e742a38d5acbacbb9b3e3a6", null ],

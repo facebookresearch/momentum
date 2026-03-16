@@ -9,8 +9,10 @@ var searchData=
   ['joint_5fstate_2eh_6',['joint_state.h',['../joint__state_8h.html',1,'']]],
   ['joint_5fto_5fjoint_5fdistance_5ferror_5ffunction_2ecpp_7',['joint_to_joint_distance_error_function.cpp',['../joint__to__joint__distance__error__function_8cpp.html',1,'']]],
   ['joint_5fto_5fjoint_5fdistance_5ferror_5ffunction_2eh_8',['joint_to_joint_distance_error_function.h',['../joint__to__joint__distance__error__function_8h.html',1,'']]],
-  ['joint_5fto_5fjoint_5fposition_5ferror_5ffunction_2ecpp_9',['joint_to_joint_position_error_function.cpp',['../joint__to__joint__position__error__function_8cpp.html',1,'']]],
-  ['joint_5fto_5fjoint_5fposition_5ferror_5ffunction_2eh_10',['joint_to_joint_position_error_function.h',['../joint__to__joint__position__error__function_8h.html',1,'']]],
-  ['json_5futils_2ecpp_11',['json_utils.cpp',['../json__utils_8cpp.html',1,'']]],
-  ['json_5futils_2eh_12',['json_utils.h',['../json__utils_8h.html',1,'']]]
+  ['joint_5fto_5fjoint_5forientation_5ferror_5ffunction_2ecpp_9',['joint_to_joint_orientation_error_function.cpp',['../joint__to__joint__orientation__error__function_8cpp.html',1,'']]],
+  ['joint_5fto_5fjoint_5forientation_5ferror_5ffunction_2eh_10',['joint_to_joint_orientation_error_function.h',['../joint__to__joint__orientation__error__function_8h.html',1,'']]],
+  ['joint_5fto_5fjoint_5fposition_5ferror_5ffunction_2ecpp_11',['joint_to_joint_position_error_function.cpp',['../joint__to__joint__position__error__function_8cpp.html',1,'']]],
+  ['joint_5fto_5fjoint_5fposition_5ferror_5ffunction_2eh_12',['joint_to_joint_position_error_function.h',['../joint__to__joint__position__error__function_8h.html',1,'']]],
+  ['json_5futils_2ecpp_13',['json_utils.cpp',['../json__utils_8cpp.html',1,'']]],
+  ['json_5futils_2eh_14',['json_utils.h',['../json__utils_8h.html',1,'']]]
 ];

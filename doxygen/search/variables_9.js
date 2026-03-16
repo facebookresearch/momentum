@@ -1,15 +1,17 @@
 var searchData=
 [
   ['index_0',['index',['../structmomentum_1_1SkinWeights.html#a4203cd8ddc42da97d1e7aa66cae60da8',1,'momentum::SkinWeights']]],
-  ['indices_1',['indices',['../structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d',1,'momentum::PolygonData']]],
-  ['inputfile_2',['inputFile',['../structmomentum_1_1IOOptions.html#a66d112bb76865792e3e15598a9c56517',1,'momentum::IOOptions']]],
-  ['intrinsicsmodel_5f_3',['intrinsicsModel_',['../classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c',1,'momentum::CameraProjectionErrorFunctionT']]],
-  ['invc2_5f_4',['invC2_',['../classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002',1,'momentum::GeneralizedLossT']]],
-  ['inversebindpose_5',['inverseBindPose',['../structmomentum_1_1CharacterT.html#a091594fb949f1e0c84a1beb07e8de2d4',1,'momentum::CharacterT']]],
-  ['inversetransform_6',['inverseTransform',['../structmomentum_1_1InverseParameterTransformT.html#a0d5904f7a0a7714c18958c7478d21d8a',1,'momentum::InverseParameterTransformT']]],
-  ['invmap_5f_7',['invMap_',['../classmomentum_1_1PosePriorErrorFunctionT.html#adbc15a29693b3c74e7154b509ab8745e',1,'momentum::PosePriorErrorFunctionT']]],
-  ['is_5fbase_5fof_5fmatrix_5fv_8',['is_base_of_matrix_v',['../namespacemomentum_1_1detail.html#a9763013f6c3661770f83e7a1ed7e523e',1,'momentum::detail']]],
-  ['is_5fcompatible_5fto_5funiform_5fint_5fdistribution_5fv_9',['is_compatible_to_uniform_int_distribution_v',['../namespacemomentum_1_1detail.html#a00c056f5c0aaa3a107413897bfcfc8d8',1,'momentum::detail']]],
-  ['iteration_5f_10',['iteration_',['../classmomentum_1_1SolverT.html#a76a50c26a8b442d695aa703244025be2',1,'momentum::SolverT']]],
-  ['iterationhistory_5f_11',['iterationHistory_',['../classmomentum_1_1SolverT.html#a59dfc4a6ab25eafda8624ad6bb053467',1,'momentum::SolverT']]]
+  ['indexa_1',['indexa',['../structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html#ad333ed7154dcfdce09af6e1e6ba2db72',1,'momentum::CollisionErrorFunctionT::CollisionPairInfo::indexA'],['../structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html#a7caf4d04fef78b213ddc7e93261240e4',1,'momentum::CollisionErrorFunctionStatelessT::CollisionPairInfo::indexA'],['../structmomentum_1_1SimdCollisionErrorFunctionT_1_1CollisionPairInfo.html#ab48d2cdf868b8f5240b2ef53cc38a317',1,'momentum::SimdCollisionErrorFunctionT::CollisionPairInfo::indexA']]],
+  ['indexb_2',['indexb',['../structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html#ae5e05ebed34a4caceef8ad62b2ce27bb',1,'momentum::CollisionErrorFunctionT::CollisionPairInfo::indexB'],['../structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html#a1f250242eb8870855c233b9859ef2737',1,'momentum::CollisionErrorFunctionStatelessT::CollisionPairInfo::indexB'],['../structmomentum_1_1SimdCollisionErrorFunctionT_1_1CollisionPairInfo.html#aba8e0f4ef15b5af2997a8d9a8b7661fc',1,'momentum::SimdCollisionErrorFunctionT::CollisionPairInfo::indexB']]],
+  ['indices_3',['indices',['../structmomentum_1_1PolygonData.html#a64328858ee62e50164904312d208298d',1,'momentum::PolygonData']]],
+  ['inputfile_4',['inputFile',['../structmomentum_1_1IOOptions.html#a66d112bb76865792e3e15598a9c56517',1,'momentum::IOOptions']]],
+  ['intrinsicsmodel_5f_5',['intrinsicsModel_',['../classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c',1,'momentum::CameraProjectionErrorFunctionT']]],
+  ['invc2_5f_6',['invC2_',['../classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002',1,'momentum::GeneralizedLossT']]],
+  ['inversebindpose_7',['inverseBindPose',['../structmomentum_1_1CharacterT.html#a091594fb949f1e0c84a1beb07e8de2d4',1,'momentum::CharacterT']]],
+  ['inversetransform_8',['inverseTransform',['../structmomentum_1_1InverseParameterTransformT.html#a0d5904f7a0a7714c18958c7478d21d8a',1,'momentum::InverseParameterTransformT']]],
+  ['invmap_5f_9',['invMap_',['../classmomentum_1_1PosePriorErrorFunctionT.html#adbc15a29693b3c74e7154b509ab8745e',1,'momentum::PosePriorErrorFunctionT']]],
+  ['is_5fbase_5fof_5fmatrix_5fv_10',['is_base_of_matrix_v',['../namespacemomentum_1_1detail.html#a9763013f6c3661770f83e7a1ed7e523e',1,'momentum::detail']]],
+  ['is_5fcompatible_5fto_5funiform_5fint_5fdistribution_5fv_11',['is_compatible_to_uniform_int_distribution_v',['../namespacemomentum_1_1detail.html#a00c056f5c0aaa3a107413897bfcfc8d8',1,'momentum::detail']]],
+  ['iteration_5f_12',['iteration_',['../classmomentum_1_1SolverT.html#a76a50c26a8b442d695aa703244025be2',1,'momentum::SolverT']]],
+  ['iterationhistory_5f_13',['iterationHistory_',['../classmomentum_1_1SolverT.html#a59dfc4a6ab25eafda8624ad6bb053467',1,'momentum::SolverT']]]
 ];

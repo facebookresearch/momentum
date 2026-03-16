@@ -15,6 +15,8 @@ var searchData=
   ['jointt_12',['JointT',['../structmomentum_1_1JointT.html',1,'momentum']]],
   ['jointtojointdistanceconstraintt_13',['JointToJointDistanceConstraintT',['../structmomentum_1_1JointToJointDistanceConstraintT.html',1,'momentum']]],
   ['jointtojointdistanceerrorfunctiont_14',['JointToJointDistanceErrorFunctionT',['../classmomentum_1_1JointToJointDistanceErrorFunctionT.html',1,'momentum']]],
-  ['jointtojointpositiondatat_15',['JointToJointPositionDataT',['../structmomentum_1_1JointToJointPositionDataT.html',1,'momentum']]],
-  ['jointtojointpositionerrorfunctiont_16',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]]
+  ['jointtojointorientationdatat_15',['JointToJointOrientationDataT',['../structmomentum_1_1JointToJointOrientationDataT.html',1,'momentum']]],
+  ['jointtojointorientationerrorfunctiont_16',['JointToJointOrientationErrorFunctionT',['../classmomentum_1_1JointToJointOrientationErrorFunctionT.html',1,'momentum']]],
+  ['jointtojointpositiondatat_17',['JointToJointPositionDataT',['../structmomentum_1_1JointToJointPositionDataT.html',1,'momentum']]],
+  ['jointtojointpositionerrorfunctiont_18',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]]
 ];

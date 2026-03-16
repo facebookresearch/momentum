@@ -214,8 +214,8 @@ $(document).ready(function(){initNavTree('vertex__normal__error__function_8cpp_s
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SkeletonStateT&lt;T&gt;</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>,</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">MeshStateT&lt;T&gt;</a>&amp; meshState,</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) {</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a> = this-&gt;constraints_.size();</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a> == 0) {</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> numConstraints = this-&gt;constraints_.size();</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordflow">if</span> (numConstraints == 0) {</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keywordflow">return</span> 0.0;</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  }</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
@@ -251,7 +251,7 @@ $(document).ready(function(){initNavTree('vertex__normal__error__function_8cpp_s
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="keywordflow">return</span> {0.0, <a class="code hl_typedef" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX&lt;T&gt;::Zero</a>(this-&gt;parameterTransform_.numAllModelParameters())};</div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>      },</div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>(0),</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a>,</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>      numConstraints,</div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>      [&amp;](std::tuple&lt;double, VectorX&lt;T&gt;&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorGradLocal</a>, <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>) {</div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="keywordtype">double</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorLocal</a> = std::get&lt;0&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorGradLocal</a>);</div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradLocal</a> = std::get&lt;1&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorGradLocal</a>);</div>
@@ -361,9 +361,9 @@ $(document).ready(function(){initNavTree('vertex__normal__error__function_8cpp_s
 <div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; jacobian,</div>
 <div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    Eigen::Ref&lt;Eigen::VectorX&lt;T&gt;&gt; residual,</div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    <span class="keywordtype">int</span>&amp; usedRows) {</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a> = this-&gt;constraints_.size();</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  <span class="keyword">const</span> <span class="keywordtype">size_t</span> numConstraints = this-&gt;constraints_.size();</div>
 <div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  usedRows = 0;</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a> == 0) {</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>  <span class="keywordflow">if</span> (numConstraints == 0) {</div>
 <div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="keywordflow">return</span> 0.0;</div>
 <div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>  }</div>
 <div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
@@ -396,7 +396,7 @@ $(document).ready(function(){initNavTree('vertex__normal__error__function_8cpp_s
 <div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>,</div>
 <div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>      [&amp;]() -&gt; <span class="keywordtype">double</span> { <span class="keywordflow">return</span> 0.0; },</div>
 <div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>(0),</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a>,</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>      numConstraints,</div>
 <div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>      [&amp;](<span class="keywordtype">double</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorLocal</a>, <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>) {</div>
 <div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constrWeight</a> = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a><span class="keyword">&gt;</span>(this-&gt;constraints_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>].weight);</div>
 <div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constrWeight</a> == <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0)) {</div>
@@ -487,7 +487,7 @@ $(document).ready(function(){initNavTree('vertex__normal__error__function_8cpp_s
 <div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>      },</div>
 <div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">dispensoOptions</a>);</div>
 <div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>  usedRows = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numConstraints</a>);</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>  usedRows = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(numConstraints);</div>
 <div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>  <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.empty()) {</div>
 <div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    <span class="keywordflow">return</span> std::accumulate(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.begin() + 1, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>.end(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorThread</a>[0]);</div>
@@ -531,7 +531,7 @@ $(document).ready(function(){initNavTree('vertex__normal__error__function_8cpp_s
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="vertex__normal__error__function_8cpp.html">vertex_normal_error_function.cpp</a></li>
-    <li class="footer">Generated on Thu Mar 12 2026 17:32:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Mar 16 2026 19:13:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

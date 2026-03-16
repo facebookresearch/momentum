@@ -9,6 +9,5 @@ var searchData=
   ['error_5f_6',['error_',['../classmomentum_1_1SolverT.html#ab397937a801ffe831f859e46bccf3d96',1,'momentum::SolverT']]],
   ['errorfunction_7',['errorFunction',['../structmomentum_1_1ErrorFunctionDerivativesT.html#ad2ade2f8352e3d7417c89df87ebdfc5c',1,'momentum::ErrorFunctionDerivativesT']]],
   ['errorhistory_5f_8',['errorHistory_',['../classmomentum_1_1SolverT.html#ae338a7a9b3a246815c01b719620b9e89',1,'momentum::SolverT']]],
-  ['excludingpairids_5f_9',['excludingpairids_',['../classmomentum_1_1CollisionErrorFunctionT.html#a5afa2b98c35f6e95b2d267e59778686f',1,'momentum::CollisionErrorFunctionT::excludingPairIds_'],['../classmomentum_1_1SimdCollisionErrorFunctionT.html#a54a6aa8997b5e34922e447d53e3c1fbb',1,'momentum::SimdCollisionErrorFunctionT::excludingPairIds_']]],
-  ['extensions_10',['extensions',['../structmomentum_1_1FileSaveOptions.html#a24f196acc9011a4562184b523745914f',1,'momentum::FileSaveOptions']]]
+  ['extensions_9',['extensions',['../structmomentum_1_1FileSaveOptions.html#a24f196acc9011a4562184b523745914f',1,'momentum::FileSaveOptions']]]
 ];

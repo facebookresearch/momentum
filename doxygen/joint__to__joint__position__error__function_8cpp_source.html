@@ -140,7 +140,7 @@ $(document).ready(function(){initNavTree('joint__to__joint__position__error__fun
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3&lt;T&gt;</a>&amp; referenceOffset,</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3&lt;T&gt;</a>&amp; target,</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> weight,</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">const</span> std::string&amp; name) {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>) {</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sourceJoint &lt; this-&gt;</a>skeleton_.joints.size(), <span class="stringliteral">&quot;Invalid sourceJoint index: {}&quot;</span>, sourceJoint);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
@@ -155,7 +155,7 @@ $(document).ready(function(){initNavTree('joint__to__joint__position__error__fun
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.referenceOffset = referenceOffset;</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.target = target;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.weight = weight;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.name = name;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.name = <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>;</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  constraints_.push_back(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>);</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
 </div>
@@ -620,6 +620,7 @@ $(document).ready(function(){initNavTree('joint__to__joint__position__error__fun
 <div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">JointToJointPositionErrorFunctionT&lt;double&gt;</a>;</div>
 <div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span> </div>
 <div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>} <span class="comment">// namespace momentum</span></div>
+<div class="ttc" id="abvh__io_8cpp_html_a9b45b3e13bd9167aab02e17e08916231"><div class="ttname"><a href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a></div><div class="ttdeci">std::string name</div><div class="ttdef"><b>Definition</b> <a href="bvh__io_8cpp_source.html#l00037">bvh_io.cpp:37</a></div></div>
 <div class="ttc" id="acharacter_8h_html"><div class="ttname"><a href="character_8h.html">character.h</a></div></div>
 <div class="ttc" id="achecks_8h_html"><div class="ttname"><a href="checks_8h.html">checks.h</a></div></div>
 <div class="ttc" id="achecks_8h_html_ad864080ec7d619a1d96851a0de141aab"><div class="ttname"><a href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a></div><div class="ttdeci">#define MT_CHECK(condition,...)</div><div class="ttdef"><b>Definition</b> <a href="checks_8h_source.html#l00023">checks.h:23</a></div></div>
@@ -657,7 +658,7 @@ $(document).ready(function(){initNavTree('joint__to__joint__position__error__fun
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="joint__to__joint__position__error__function_8cpp.html">joint_to_joint_position_error_function.cpp</a></li>
-    <li class="footer">Generated on Thu Mar 12 2026 17:32:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Mar 16 2026 19:13:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
