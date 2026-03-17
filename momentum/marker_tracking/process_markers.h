@@ -38,7 +38,10 @@ void calibrateMarkers(
     std::span<const std::vector<momentum::Marker>> markerData,
     const CalibrationConfig& calibrationConfig,
     size_t firstFrame = 0,
-    size_t maxFrames = 0);
+    size_t maxFrames = 0,
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Processes marker data for a character model.
 ///
@@ -66,7 +69,10 @@ Eigen::MatrixXf processMarkers(
     const CalibrationConfig& calibrationConfig,
     bool calibrate = true,
     size_t firstFrame = 0,
-    size_t maxFrames = 0);
+    size_t maxFrames = 0,
+    std::span<const GloveFrameData> leftGloveData = {},
+    std::span<const GloveFrameData> rightGloveData = {},
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
 
 /// Runs marker tracking on an input marker file (e.g. c3d) and writes the output motion (e.g. glb)
 /// to outputFile

@@ -172,6 +172,38 @@ std::array<GloveOffset, 2> extractGloveOffsetsFromCharacter(
   return result;
 }
 
+void bakeGloveOffsetsFromParams(
+    Character& character,
+    const ModelParameters& solvedParams,
+    const Character& solvingCharacter,
+    const std::optional<GloveConfig>& cfg) {
+  if (!cfg) {
+    return;
+  }
+  // Extract offsets from the solving character's calibration parameters
+  CharacterParameters params;
+  params.pose = solvedParams;
+  params.offsets =
+      JointParameters::Zero(solvingCharacter.skeleton.joints.size() * kParametersPerJoint);
+  const auto offsets = extractGloveOffsetsFromCharacter(solvingCharacter, params, *cfg);
+
+  for (size_t hand = 0; hand < 2; ++hand) {
+    MT_LOGI(
+        "Baking glove offset for '{}': translation=({:.4f}, {:.4f}, {:.4f}), "
+        "rotation_xyz=({:.4f}, {:.4f}, {:.4f})",
+        cfg->wristJointNames[hand],
+        offsets[hand].translation.x(),
+        offsets[hand].translation.y(),
+        offsets[hand].translation.z(),
+        offsets[hand].rotationEulerXYZ.x(),
+        offsets[hand].rotationEulerXYZ.y(),
+        offsets[hand].rotationEulerXYZ.z());
+  }
+
+  // Add glove bones with the solved offsets baked into the joint
+  character = addGloveBones(character, *cfg, offsets);
+}
+
 std::vector<std::vector<JointToJointPositionDataT<float>>> createGlovePositionConstraintData(
     std::span<const GloveFrameData> gloveData,
     const Character& character,

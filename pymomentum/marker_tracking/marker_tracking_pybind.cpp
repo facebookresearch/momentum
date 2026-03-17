@@ -6,10 +6,13 @@
  */
 
 #include <momentum/character/marker.h>
+#include <momentum/marker_tracking/glove_utils.h>
 #include <momentum/marker_tracking/marker_tracker.h>
 #include <momentum/marker_tracking/process_markers.h>
 #include <momentum/marker_tracking/tracker_utils.h>
 #include <momentum/math/mesh.h>
+
+#include <pymomentum/python_utility/eigen_quaternion.h>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -221,7 +224,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::TrackingConfig& self) {
             return fmt::format(
-                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={})",
+                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, marker_weight={}, smoothing_weights={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -229,18 +232,21 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.debug),
                 self.smoothing,
                 self.collisionErrorWeight,
+                self.markerWeight,
                 vectorToString(self.smoothingWeights));
           })
       .def(
-          py::init<float, float, size_t, float, bool, float, float, Eigen::VectorXf>(),
+          py::init<float, float, size_t, float, bool, float, float, float, Eigen::VectorXf>(),
           R"(Create a TrackingConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
           :param loss_alpha: Parameter to control the loss function
           :param max_iter: Maximum number of iterations
+          :param regularization: Regularization parameter (lambda) for solver
           :param debug: Whether to output debugging info
           :param smoothing: Smoothing weight; 0 to disable
           :param collision_error_weight: Collision error weight; 0 to disable
+          :param marker_weight: Multiplier for marker position constraint weight; 0 to disable markers
           :param smoothing_weights: Smoothing weights per model parameter
           )",
           py::arg("min_vis_percent") = 0.0,
@@ -250,6 +256,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("debug") = false,
           py::arg("smoothing") = 0.0,
           py::arg("collision_error_weight") = 0.0,
+          py::arg("marker_weight") = 1.0f,
           py::arg("smoothing_weights") = Eigen::VectorXf())
       .def_readwrite(
           "smoothing", &momentum::TrackingConfig::smoothing, "Smoothing weight; 0 to disable")
@@ -257,6 +264,10 @@ PYBIND11_MODULE(marker_tracking, m) {
           "collision_error_weight",
           &momentum::TrackingConfig::collisionErrorWeight,
           "Collision error weight; 0 to disable")
+      .def_readwrite(
+          "marker_weight",
+          &momentum::TrackingConfig::markerWeight,
+          "Multiplier for marker position constraint weight; 0 to disable markers")
       .def_readwrite(
           "smoothing_weights",
           &momentum::TrackingConfig::smoothingWeights,
@@ -271,7 +282,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::RefineConfig& self) {
             return fmt::format(
-                "RefineConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, smoothing_weights={}, regularizer={}, calib_id={}, calib_locators={})",
+                "RefineConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, marker_weight={}, smoothing_weights={}, regularizer={}, calib_id={}, calib_locators={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -279,6 +290,7 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.debug),
                 self.smoothing,
                 self.collisionErrorWeight,
+                self.markerWeight,
                 vectorToString(self.smoothingWeights),
                 self.regularizer,
                 boolToString(self.calibId),
@@ -293,6 +305,7 @@ PYBIND11_MODULE(marker_tracking, m) {
               bool,
               float,
               float,
+              float,
               Eigen::VectorXf,
               float,
               bool,
@@ -305,6 +318,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           :param debug: Whether to output debugging info
           :param smoothing: Smoothing weight; 0 to disable
           :param collision_error_weight: Collision error weight; 0 to disable
+          :param marker_weight: Multiplier for marker position constraint weight; 0 to disable markers
           :param smoothing_weights: Smoothing weights per model parameter
           :param regularizer: Regularize the time-invariant parameters to prevent large changes
           :param calib_id: Calibrate identity parameters
@@ -317,6 +331,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("debug") = false,
           py::arg("smoothing") = 0.0,
           py::arg("collision_error_weight") = 0.0,
+          py::arg("marker_weight") = 1.0f,
           py::arg("smoothing_weights") = Eigen::VectorXf(),
           py::arg("regularizer") = 0.0,
           py::arg("calib_id") = false,
@@ -372,6 +387,93 @@ PYBIND11_MODULE(marker_tracking, m) {
           "locators",
           &momentum::ModelOptions::locators,
           "Path to locator mapping file e.g. character.locators");
+
+  // Bindings for glove types defined in marker_tracking/glove_utils.h
+  auto gloveConfig = py::class_<momentum::GloveConfig>(
+      m,
+      "GloveConfig",
+      R"(Configuration for glove constraints in marker tracking.
+
+Controls how data glove observations are integrated into the marker tracking
+solver, including constraint weights and which wrist joints to attach glove
+bones to.)");
+
+  gloveConfig.def(py::init<>())
+      .def(
+          "__repr__",
+          [](const momentum::GloveConfig& self) {
+            return fmt::format(
+                R"(GloveConfig(position_weight={}, orientation_weight={}, wrist_joint_names=["{}", "{}"]))",
+                self.positionWeight,
+                self.orientationWeight,
+                self.wristJointNames[0],
+                self.wristJointNames[1]);
+          })
+      .def_readwrite(
+          "position_weight",
+          &momentum::GloveConfig::positionWeight,
+          "Weight for position constraints between glove and finger joints.")
+      .def_readwrite(
+          "orientation_weight",
+          &momentum::GloveConfig::orientationWeight,
+          "Weight for orientation constraints between glove and finger joints.")
+      .def_readwrite(
+          "wrist_joint_names",
+          &momentum::GloveConfig::wristJointNames,
+          "Names of the left and right wrist joints in the skeleton.");
+
+  auto gloveSensorObservation = py::class_<momentum::GloveSensorObservation>(
+      m,
+      "GloveSensorObservation",
+      R"(Single glove sensor observation for one finger joint in one frame.
+
+Represents a measurement from a data glove sensor, providing position
+and orientation of a finger joint in the glove's local coordinate frame.)");
+
+  gloveSensorObservation.def(py::init<>())
+      .def(
+          py::init([](const std::string& jointName,
+                      const Eigen::Vector3f& position,
+                      const Eigen::Quaternionf& orientation,
+                      bool valid) {
+            momentum::GloveSensorObservation obs;
+            obs.jointName = jointName;
+            obs.position = position;
+            obs.orientation = orientation;
+            obs.valid = valid;
+            return obs;
+          }),
+          R"(Create a GloveSensorObservation with specified parameters.
+
+:param joint_name: Skeleton joint name (e.g. "b_l_thumb0").
+:param position: Position in glove-local frame as a 3D vector.
+:param orientation: Orientation in glove-local frame as a quaternion [x, y, z, w].
+:param valid: Whether this observation is valid (False if sensor data is missing/occluded).
+)",
+          py::arg("joint_name"),
+          py::arg("position") = Eigen::Vector3f::Zero(),
+          py::arg("orientation") = Eigen::Quaternionf::Identity(),
+          py::arg("valid") = true)
+      .def_readwrite(
+          "joint_name",
+          &momentum::GloveSensorObservation::jointName,
+          "Skeleton joint name (e.g. \"b_l_thumb0\").")
+      .def_readwrite(
+          "position",
+          &momentum::GloveSensorObservation::position,
+          "Position in glove-local frame as a 3D vector.")
+      .def_property(
+          "orientation",
+          [](const momentum::GloveSensorObservation& self) { return self.orientation; },
+          [](momentum::GloveSensorObservation& self, const Eigen::Quaternionf& q) {
+            self.orientation = q;
+          },
+          "Orientation in glove-local frame as a quaternion [x, y, z, w].")
+      .def_readwrite(
+          "valid",
+          &momentum::GloveSensorObservation::valid,
+          "Whether this observation is valid (False if sensor data is missing/occluded).");
+
   m.def(
       "process_marker_file",
       &momentum::processMarkerFile,
@@ -390,8 +492,11 @@ PYBIND11_MODULE(marker_tracking, m) {
          const Eigen::VectorXf& identity,
          const std::vector<std::vector<momentum::Marker>>& markerData,
          const momentum::CalibrationConfig& calibrationConfig,
-         size_t firstFrame = 0,
-         size_t maxFrames = 0) {
+         size_t firstFrame,
+         size_t maxFrames,
+         const std::vector<momentum::GloveFrameData>& leftGloveData,
+         const std::vector<momentum::GloveFrameData>& rightGloveData,
+         const std::optional<momentum::GloveConfig>& gloveConfig) {
         momentum::ModelParameters params(identity);
 
         if (params.size() == 0) { // If no identity is passed in, use default
@@ -399,7 +504,15 @@ PYBIND11_MODULE(marker_tracking, m) {
         }
 
         momentum::calibrateMarkers(
-            character, params, markerData, calibrationConfig, firstFrame, maxFrames);
+            character,
+            params,
+            markerData,
+            calibrationConfig,
+            firstFrame,
+            maxFrames,
+            leftGloveData,
+            rightGloveData,
+            gloveConfig);
 
         // Return the identity parameters (scaling params only)
         // Use .v to get the underlying Eigen::VectorXf from ModelParameters
@@ -416,40 +529,33 @@ The calibration modifies the character in-place (updating locators if configured
 the calibrated identity parameters. These can then be used with :func:`process_markers` or
 :func:`track_poses` for tracking other sequences.
 
-Example workflow::
-
-    # Calibrate on ROM sequence (fast - only processes calib_frames)
-    identity = calibrate_markers(
-        character=character,
-        identity=np.zeros(0),
-        marker_data=rom_markers,
-        calibration_config=calib_config,
-    )
-
-    # Track actual sequence (no redundant calibration)
-    motion = process_markers(
-        character=character,
-        identity=identity,
-        marker_data=sequence_markers,
-        tracking_config=tracking_config,
-        calibration_config=calib_config,
-        calibrate=False,
-    )
+When glove data is provided via ``left_glove_data`` / ``right_glove_data`` and a
+:class:`GloveConfig`, the solver adds glove-to-finger constraints during calibration.
+This improves locator calibration by providing additional constraint information from the
+data glove sensors.
 
 :param character: Character to be calibrated. Will be modified in-place if locator
     calibration is enabled.
-:param identity: Identity parameters, pass in empty array for default identity
-:param marker_data: A list of marker data for each frame (from ROM/calibration sequence)
+:param identity: Identity parameters, pass in empty array for default identity.
+:param marker_data: A list of marker data for each frame (from ROM/calibration sequence).
 :param calibration_config: Calibration config specifying number of frames, iterations, etc.
-:param first_frame: First frame to be used for calibration
-:param max_frames: Max number of frames to be used for calibration (0 for all)
-:return: Calibrated identity parameters (scaling parameters))",
+:param first_frame: First frame to be used for calibration.
+:param max_frames: Max number of frames to be used for calibration (0 for all).
+:param left_glove_data: Per-frame glove sensor observations for the left hand.
+    Each element is a list of :class:`GloveSensorObservation` for that frame.
+:param right_glove_data: Per-frame glove sensor observations for the right hand.
+:param glove_config: Optional :class:`GloveConfig` controlling constraint weights and
+    wrist joint names. Must be provided if glove data is non-empty.
+:return: Calibrated identity parameters (scaling parameters).)",
       py::arg("character"),
       py::arg("identity"),
       py::arg("marker_data"),
       py::arg("calibration_config"),
       py::arg("first_frame") = 0,
-      py::arg("max_frames") = 0);
+      py::arg("max_frames") = 0,
+      py::arg("left_glove_data") = std::vector<momentum::GloveFrameData>{},
+      py::arg("right_glove_data") = std::vector<momentum::GloveFrameData>{},
+      py::arg("glove_config") = std::nullopt);
 
   m.def(
       "process_markers",
@@ -458,9 +564,12 @@ Example workflow::
          const std::vector<std::vector<momentum::Marker>>& markerData,
          const momentum::TrackingConfig& trackingConfig,
          const momentum::CalibrationConfig& calibrationConfig,
-         bool calibrate = true,
-         size_t firstFrame = 0,
-         size_t maxFrames = 0) {
+         bool calibrate,
+         size_t firstFrame,
+         size_t maxFrames,
+         const std::vector<momentum::GloveFrameData>& leftGloveData,
+         const std::vector<momentum::GloveFrameData>& rightGloveData,
+         const std::optional<momentum::GloveConfig>& gloveConfig) {
         momentum::ModelParameters params(identity);
 
         if (params.size() == 0) { // If no identity is passed in, use default
@@ -475,23 +584,38 @@ Example workflow::
             calibrationConfig,
             calibrate,
             firstFrame,
-            maxFrames);
+            maxFrames,
+            leftGloveData,
+            rightGloveData,
+            gloveConfig);
 
         // python and cpp have the motion matrix transposed from each other:
         // python (#frames, #params) vs. cpp (#params, #frames)
         return motion.transpose().eval();
       },
-      R"(process markers given character and identity.
+      R"(Process markers given character and identity.
 
-:parameter character: Character to be used for tracking
-:parameter identity: Identity parameters, pass in empty array for default identity
-:parameter marker_data: A list of marker data for each frame
-:parameter tracking_config: Tracking config to be used for tracking
-:parameter calibration_config: Calibration config to be used for calibration
-:parameter calibrate: Whether to calibrate the model
-:parameter first_frame: First frame to be processed
-:parameter max_frames: Max number of frames to be processed
-:return: Transform parameters for each frame)",
+Calibrates the character model (if enabled) and tracks per-frame poses from marker data.
+
+When glove data is provided via ``left_glove_data`` / ``right_glove_data`` and a
+:class:`GloveConfig`, the solver adds glove-to-finger constraints during both
+calibration and per-frame tracking. This produces more accurate results for
+characters wearing data gloves alongside optical markers.
+
+:param character: Character to be used for tracking.
+:param identity: Identity parameters, pass in empty array for default identity.
+:param marker_data: A list of marker data for each frame.
+:param tracking_config: Tracking config to be used for tracking.
+:param calibration_config: Calibration config to be used for calibration.
+:param calibrate: Whether to calibrate the model.
+:param first_frame: First frame to be processed.
+:param max_frames: Max number of frames to be processed.
+:param left_glove_data: Per-frame glove sensor observations for the left hand.
+    Each element is a list of :class:`GloveSensorObservation` for that frame.
+:param right_glove_data: Per-frame glove sensor observations for the right hand.
+:param glove_config: Optional :class:`GloveConfig` controlling constraint weights and
+    wrist joint names. Must be provided if glove data is non-empty.
+:return: Transform parameters for each frame.)",
       py::arg("character"),
       py::arg("identity"),
       py::arg("marker_data"),
@@ -499,7 +623,10 @@ Example workflow::
       py::arg("calibration_config"),
       py::arg("calibrate") = true,
       py::arg("first_frame") = 0,
-      py::arg("max_frames") = 0);
+      py::arg("max_frames") = 0,
+      py::arg("left_glove_data") = std::vector<momentum::GloveFrameData>{},
+      py::arg("right_glove_data") = std::vector<momentum::GloveFrameData>{},
+      py::arg("glove_config") = std::nullopt);
 
   m.def(
       "save_motion",
