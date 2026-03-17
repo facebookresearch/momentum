@@ -5,11 +5,13 @@ var logger_8cpp =
     [ "logCollisionGeometry", "logger_8cpp.html#aa6c689587c0cb74df685faa78a8fd69a", null ],
     [ "logJointParamNames", "logger_8cpp.html#a58864f67ebc1f8ca33e4f53571660b56", null ],
     [ "logJointParams", "logger_8cpp.html#aba3c3591f6061acbda0ef9cfa232690f", null ],
+    [ "logJointParamsColumns", "logger_8cpp.html#abd67d48d58703aa556641e55636fbca6", null ],
     [ "logJoints", "logger_8cpp.html#a50891faf75ecdc715dd02f3a2027be53", null ],
     [ "logLocators", "logger_8cpp.html#af81b17864797f4a8fbc5d06e8414a835", null ],
     [ "logMarkerLocatorCorrespondence", "logger_8cpp.html#a84b56c9b649a0e490de1af4f7ec7a940", null ],
     [ "logMarkers", "logger_8cpp.html#a26f8598e5f15f29549a370722b37d0f9", null ],
     [ "logMesh", "logger_8cpp.html#a7596a23543cd8d93653461ac6611c1f8", null ],
     [ "logModelParamNames", "logger_8cpp.html#ab098fe02e9c8f2822c15c296a365399a", null ],
-    [ "logModelParams", "logger_8cpp.html#a048719b66fe441b806d39e4e220bbc41", null ]
+    [ "logModelParams", "logger_8cpp.html#a048719b66fe441b806d39e4e220bbc41", null ],
+    [ "logModelParamsColumns", "logger_8cpp.html#a78b5deb644ef6239223144e34937bd6b", null ]
 ];

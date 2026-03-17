@@ -122,6 +122,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:aa0fe508eb35366f7bf7cfcabde44e1e4" id="r_aa0fe508eb35366f7bf7cfcabde44e1e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TrackingConfig.html#aa0fe508eb35366f7bf7cfcabde44e1e4">collisionErrorWeight</a> = 0.0</td></tr>
 <tr class="memdesc:aa0fe508eb35366f7bf7cfcabde44e1e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The weight for the collision error function.  <br /></td></tr>
 <tr class="separator:aa0fe508eb35366f7bf7cfcabde44e1e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bfd2fbc825cc786e133060ac665e86a" id="r_a2bfd2fbc825cc786e133060ac665e86a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TrackingConfig.html#a2bfd2fbc825cc786e133060ac665e86a">markerWeight</a> = 1.0f</td></tr>
+<tr class="memdesc:a2bfd2fbc825cc786e133060ac665e86a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiplier for the marker position constraint weight.  <br /></td></tr>
+<tr class="separator:a2bfd2fbc825cc786e133060ac665e86a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac41e892cf77448f4611ddc0a895cd811" id="r_ac41e892cf77448f4611ddc0a895cd811"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXf&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TrackingConfig.html#ac41e892cf77448f4611ddc0a895cd811">smoothingWeights</a> {}</td></tr>
 <tr class="memdesc:ac41e892cf77448f4611ddc0a895cd811"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smoothing weights per model parameter.  <br /></td></tr>
 <tr class="separator:ac41e892cf77448f4611ddc0a895cd811"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,7 +148,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration for pose tracking given a calibrated body and locators. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00055">55</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00056">56</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="aa0fe508eb35366f7bf7cfcabde44e1e4" name="aa0fe508eb35366f7bf7cfcabde44e1e4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa0fe508eb35366f7bf7cfcabde44e1e4">&#9670;&#160;</a></span>collisionErrorWeight</h2>
@@ -161,7 +164,26 @@ Public Attributes</h2></td></tr>
 
 <p>The weight for the collision error function. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00059">59</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00060">60</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+
+</div>
+</div>
+<a id="a2bfd2fbc825cc786e133060ac665e86a" name="a2bfd2fbc825cc786e133060ac665e86a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bfd2fbc825cc786e133060ac665e86a">&#9670;&#160;</a></span>markerWeight</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::TrackingConfig::markerWeight = 1.0f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Multiplier for the marker position constraint weight. </p>
+<p>Set to 0 to disable marker constraints (useful for debugging other error terms like glove constraints in isolation). </p>
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00063">63</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -179,7 +201,7 @@ Public Attributes</h2></td></tr>
 
 <p>The weight for the smoothness error function. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00057">57</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00058">58</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -198,7 +220,7 @@ Public Attributes</h2></td></tr>
 <p>Smoothing weights per model parameter. </p>
 <p>The size of this vector should be equal to number of model parameters and this overrides the value specific in smoothing </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00062">62</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00066">66</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -211,7 +233,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1TrackingConfig.html">TrackingConfig</a></li>
-    <li class="footer">Generated on Mon Mar 16 2026 20:16:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Mar 17 2026 21:54:37 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

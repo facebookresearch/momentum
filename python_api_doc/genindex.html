@@ -201,6 +201,10 @@
 </li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.CalibrationConfig.__init__">(pymomentum.marker_tracking.CalibrationConfig method)</a>
 </li>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig.__init__">(pymomentum.marker_tracking.GloveConfig method)</a>
+</li>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.__init__">(pymomentum.marker_tracking.GloveSensorObservation method)</a>
+</li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.ModelOptions.__init__">(pymomentum.marker_tracking.ModelOptions method)</a>
 </li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.RefineConfig.__init__">(pymomentum.marker_tracking.RefineConfig method)</a>
@@ -1108,10 +1112,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.get_parent">get_parent() (pymomentum.geometry.Skeleton method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.SequenceSolverFunction.get_sequence_error_functions">get_sequence_error_functions() (pymomentum.solver2.SequenceSolverFunction method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.get_solve_ik_statistics">get_solve_ik_statistics() (in module pymomentum.solver)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.FixedAxisData.global_axis">global_axis (pymomentum.solver2.FixedAxisData property)</a>
@@ -1135,6 +1139,10 @@
       <li><a href="torch.html#pymomentum.torch.character.Skeleton.global_trs_to_local_trs">global_trs_to_local_trs() (pymomentum.torch.character.Skeleton method)</a>
 </li>
       <li><a href="backend.html#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT">GlobalSkelStateFromLocalSkelStateJIT (class in pymomentum.backend.skel_state_backend)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig">GloveConfig (class in pymomentum.marker_tracking)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation">GloveSensorObservation (class in pymomentum.marker_tracking)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.FileSaveOptions.gltf_file_format">gltf_file_format (pymomentum.geometry.FileSaveOptions property)</a>
 </li>
@@ -1241,6 +1249,8 @@
       <li><a href="geometry.html#pymomentum.geometry.LimitMinMaxJoint.joint_index">joint_index (pymomentum.geometry.LimitMinMaxJoint property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.joint_index">joint_index() (pymomentum.geometry.Skeleton method)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.joint_name">joint_name (pymomentum.marker_tracking.GloveSensorObservation property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.joint_names">joint_names (pymomentum.geometry.Skeleton property)</a>
 </li>
@@ -1478,6 +1488,8 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Marker">Marker (class in pymomentum.geometry)</a>
 </li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig.marker_weight">marker_weight (pymomentum.marker_tracking.TrackingConfig property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerMesh">MarkerMesh (class in pymomentum.geometry)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerSequence">MarkerSequence (class in pymomentum.geometry)</a>
@@ -1554,10 +1566,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_blend_shape_coefficients">model_parameters_to_blend_shape_coefficients() (in module pymomentum.geometry)</a>
 </li>
-      <li><a href="torch.html#pymomentum.torch.character.Character.model_parameters_to_blendshape_coefficients">model_parameters_to_blendshape_coefficients() (pymomentum.torch.character.Character method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="torch.html#pymomentum.torch.character.Character.model_parameters_to_blendshape_coefficients">model_parameters_to_blendshape_coefficients() (pymomentum.torch.character.Character method)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_face_expression_coefficients">model_parameters_to_face_expression_coefficients() (in module pymomentum.geometry)</a>
 </li>
       <li><a href="torch.html#pymomentum.torch.character.Character.model_parameters_to_joint_parameters">model_parameters_to_joint_parameters() (pymomentum.torch.character.Character method)</a>
@@ -1821,7 +1833,11 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.offsets">offsets (pymomentum.geometry.Skeleton property)</a>
 </li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.orientation">orientation (pymomentum.marker_tracking.GloveSensorObservation property)</a>
+</li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Orientation">Orientation (pymomentum.solver.ErrorFunctionType attribute)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig.orientation_weight">orientation_weight (pymomentum.marker_tracking.GloveConfig property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.OrientationData">OrientationData (class in pymomentum.solver2)</a>
 </li>
@@ -1940,6 +1956,8 @@
       <li><a href="geometry.html#pymomentum.geometry.SkinnedLocator.position">position (pymomentum.geometry.SkinnedLocator property)</a>
 
       <ul>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.position">(pymomentum.marker_tracking.GloveSensorObservation property)</a>
+</li>
         <li><a href="renderer.html#pymomentum.renderer.Light.position">(pymomentum.renderer.Light property)</a>
 </li>
       </ul></li>
@@ -1951,6 +1969,8 @@
         <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.Position">(pymomentum.solver2.VertexConstraintType attribute)</a>
 </li>
       </ul></li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig.position_weight">position_weight (pymomentum.marker_tracking.GloveConfig property)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.PositionData">PositionData (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.PositionErrorFunction">PositionErrorFunction (class in pymomentum.solver2)</a>
@@ -2680,6 +2700,8 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.valid">valid (pymomentum.marker_tracking.GloveSensorObservation property)</a>
+</li>
       <li><a href="axel.html#pymomentum.axel.HoleFillingMethod.value">value (pymomentum.axel.HoleFillingMethod property)</a>
 
       <ul>
@@ -2845,6 +2867,8 @@
       <li><a href="geometry.html#pymomentum.geometry.Mesh.with_updated_normals">with_updated_normals() (pymomentum.geometry.Mesh method)</a>
 </li>
       <li><a href="axel.html#pymomentum.axel.SignedDistanceField.world_to_grid">world_to_grid() (pymomentum.axel.SignedDistanceField method)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig.wrist_joint_names">wrist_joint_names (pymomentum.marker_tracking.GloveConfig property)</a>
 </li>
   </ul></td>
 </tr></table>

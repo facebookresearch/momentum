@@ -97,6 +97,7 @@ $(document).ready(function(){initNavTree('rerun__compat_8h.html',''); initResiza
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;rerun.hpp&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 </div>
 <p><a href="rerun__compat_8h_source.html">Go to the source code of this file.</a></p>
@@ -122,6 +123,12 @@ Functions</h2></td></tr>
 <tr class="separator:ab8ef65432a07d48d30b436f68bbce068"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26e00894e9a98177da96727e593a11ef" id="r_a26e00894e9a98177da96727e593a11ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a26e00894e9a98177da96727e593a11ef">momentum::logAxes3D</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> rerun::RecordingStream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rec</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">path</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">axisLength</a>)</td></tr>
 <tr class="separator:a26e00894e9a98177da96727e593a11ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2235b9bcf477ad6b66d374d6df94fddf" id="r_a2235b9bcf477ad6b66d374d6df94fddf"><td class="memItemLeft" align="right" valign="top">rerun::TimeColumn&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a2235b9bcf477ad6b66d374d6df94fddf">momentum::makeSequenceTimeColumn</a> (std::string <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">timelineName</a>, rerun::Collection&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int64_t</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">values</a>, rerun::SortingStatus <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sortingStatus</a>=rerun::SortingStatus::Unknown)</td></tr>
+<tr class="separator:a2235b9bcf477ad6b66d374d6df94fddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bec8e38aaa7a5aa3b47842dbe395376" id="r_a3bec8e38aaa7a5aa3b47842dbe395376"><td class="memItemLeft" align="right" valign="top">rerun::TimeColumn&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a3bec8e38aaa7a5aa3b47842dbe395376">momentum::makeDurationSecondsTimeColumn</a> (std::string <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">timelineName</a>, rerun::Collection&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">values</a>, rerun::SortingStatus <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sortingStatus</a>=rerun::SortingStatus::Unknown)</td></tr>
+<tr class="separator:a3bec8e38aaa7a5aa3b47842dbe395376"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0ee05757397f93ec255e5b6bbf4ab29" id="r_ab0ee05757397f93ec255e5b6bbf4ab29"><td class="memItemLeft" align="right" valign="top">rerun::Collection&lt; rerun::ComponentColumn &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ab0ee05757397f93ec255e5b6bbf4ab29">momentum::makeScalarColumns</a> (std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">values</a>)</td></tr>
+<tr class="separator:ab0ee05757397f93ec255e5b6bbf4ab29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -129,7 +136,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a class="el" href="dir_48d37d9357baadef9a0e1c1d75190b6d.html">rerun</a></li><li class="navelem"><a class="el" href="rerun__compat_8h.html">rerun_compat.h</a></li>
-    <li class="footer">Generated on Mon Mar 16 2026 20:16:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Mar 17 2026 21:54:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
