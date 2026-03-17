@@ -193,6 +193,21 @@ TEST(GloveUtilsTest, CreateConstraintDataFromObservations) {
   EXPECT_TRUE(oriData[0][0].target.isApprox(validObs.orientation));
   EXPECT_FLOAT_EQ(oriData[0][0].weight, 1.0f);
   ASSERT_EQ(oriData[1].size(), 1u);
+
+  // Right hand (hand_idx=1): should use glove_r_wrist as reference joint
+  const size_t rGloveBoneIdx = gloveChar.skeleton.getJointIdByName("glove_r_wrist");
+  ASSERT_NE(rGloveBoneIdx, kInvalidIndex);
+
+  const auto rPosData = createGlovePositionConstraintData(gloveData, gloveChar, cfg, 1);
+  ASSERT_EQ(rPosData.size(), 2u);
+  ASSERT_EQ(rPosData[0].size(), 1u);
+  EXPECT_EQ(rPosData[0][0].sourceJoint, fingerJointIdx);
+  EXPECT_EQ(rPosData[0][0].referenceJoint, rGloveBoneIdx);
+
+  const auto rOriData = createGloveOrientationConstraintData(gloveData, gloveChar, cfg, 1);
+  ASSERT_EQ(rOriData.size(), 2u);
+  ASSERT_EQ(rOriData[0].size(), 1u);
+  EXPECT_EQ(rOriData[0][0].referenceJoint, rGloveBoneIdx);
 }
 
 // Verify that setupGloveErrorFunctions registers error functions with a
