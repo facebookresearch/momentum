@@ -201,12 +201,20 @@ add_subdirectory(axel)
 #===============================================================================
 
 mt_library(
+  NAME progress_bar
+  HEADERS_VARS progress_bar_public_headers
+  SOURCES_VARS progress_bar_sources
+  PUBLIC_LINK_LIBRARIES
+    indicators::indicators
+)
+
+mt_library(
   NAME common
   HEADERS_VARS common_public_headers
   SOURCES_VARS common_sources
   PUBLIC_LINK_LIBRARIES
     fmt::fmt-header-only
-    indicators::indicators
+    progress_bar
     spdlog::spdlog_header_only
   PUBLIC_COMPILE_DEFINITIONS
     MOMENTUM_WITH_SPDLOG=1
@@ -749,6 +757,12 @@ if(MOMENTUM_BUILD_TESTING)
     NAME common_test
     SOURCES_VARS common_test_sources
     LINK_LIBRARIES common
+  )
+
+  mt_test(
+    NAME progress_bar_test
+    SOURCES_VARS progress_bar_test_sources
+    LINK_LIBRARIES progress_bar
   )
 
   mt_test(
