@@ -137,6 +137,24 @@ std::array<GloveOffset, 2> extractGloveOffsetsFromCharacter(
     const CharacterParameters& params,
     const GloveConfig& cfg);
 
+/// Bake solved glove offsets from calibration parameters into the skeleton.
+///
+/// Reads the solved TX/TY/TZ/RX/RY/RZ from the glove bones in
+/// solvingCharacter's parameter transform, converts them to joint
+/// translationOffset and preRotation, and adds (or updates) glove bones
+/// in the target character. After this call the character has glove bones
+/// with the calibrated offset baked in, but no glove model parameters.
+///
+/// @param[in,out] character Character to add/update glove bones on.
+/// @param[in] solvedParams Model parameters from the calibration solve.
+/// @param[in] solvingCharacter Character with glove calibration parameters.
+/// @param[in] cfg Glove configuration specifying wrist joint names (no-op if nullopt).
+void bakeGloveOffsetsFromParams(
+    Character& character,
+    const ModelParameters& solvedParams,
+    const Character& solvingCharacter,
+    const std::optional<GloveConfig>& cfg);
+
 /// Convert per-frame glove observations to JointToJoint position constraints.
 ///
 /// For each frame and each valid observation, creates a constraint between the

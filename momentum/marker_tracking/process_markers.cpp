@@ -20,13 +20,40 @@
 
 namespace momentum {
 
+namespace {
+
+/// Validate that glove data frame count matches marker data and return the
+/// subspan corresponding to [firstFrame, lastFrame).
+std::span<const GloveFrameData> validateAndSliceGloveData(
+    std::span<const GloveFrameData> gloveData,
+    size_t markerFrames,
+    size_t firstFrame,
+    size_t lastFrame,
+    const char* label) {
+  if (gloveData.empty()) {
+    return {};
+  }
+  MT_THROW_IF(
+      gloveData.size() != markerFrames,
+      "{} glove data has {} frames but marker data has {} frames",
+      label,
+      gloveData.size(),
+      markerFrames);
+  return gloveData.subspan(firstFrame, lastFrame - firstFrame);
+}
+
+} // namespace
+
 void calibrateMarkers(
     momentum::Character& character,
     momentum::ModelParameters& identity,
     std::span<const std::vector<momentum::Marker>> markerData,
     const CalibrationConfig& calibrationConfig,
     size_t firstFrame,
-    size_t maxFrames) {
+    size_t maxFrames,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   MT_THROW_IF(
       firstFrame > markerData.size(),
       "First frame {} can't exceed total frames {}",
@@ -36,6 +63,11 @@ void calibrateMarkers(
       maxFrames > 0 ? std::min(firstFrame + maxFrames, markerData.size()) : markerData.size();
   const std::span<const std::vector<momentum::Marker>> inputData(
       markerData.data() + firstFrame, lastFrame - firstFrame);
+
+  const auto leftGloveSlice =
+      validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
+  const auto rightGloveSlice =
+      validateAndSliceGloveData(rightGloveData, markerData.size(), firstFrame, lastFrame, "Right");
 
   MT_CHECK(
       !(calibrationConfig.globalScaleOnly & calibrationConfig.locatorsOnly),
@@ -47,7 +79,15 @@ void calibrateMarkers(
   } else {
     // The output locators will be written to character. The output identity will be saved in the
     // identity variable.
-    calibrateModel(inputData, calibrationConfig, character, identity);
+    calibrateModel(
+        inputData,
+        calibrationConfig,
+        character,
+        identity,
+        {0.0f, 0.0f, 0.0f},
+        leftGloveSlice,
+        rightGloveSlice,
+        gloveConfig);
   }
 }
 
@@ -59,7 +99,10 @@ Eigen::MatrixXf processMarkers(
     const CalibrationConfig& calibrationConfig,
     bool calibrate,
     size_t firstFrame,
-    size_t maxFrames) {
+    size_t maxFrames,
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData,
+    const std::optional<GloveConfig>& gloveConfig) {
   MT_THROW_IF(
       firstFrame > markerData.size(),
       "First frame {} can't exceed total frames {}",
@@ -69,6 +112,12 @@ Eigen::MatrixXf processMarkers(
       maxFrames > 0 ? std::min(firstFrame + maxFrames, markerData.size()) : markerData.size();
   const std::span<const std::vector<momentum::Marker>> inputData(
       markerData.data() + firstFrame, lastFrame - firstFrame);
+
+  const auto leftGloveSlice =
+      validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
+  const auto rightGloveSlice =
+      validateAndSliceGloveData(rightGloveData, markerData.size(), firstFrame, lastFrame, "Right");
+
   // calibrate model and locators
   if (calibrate) {
     MT_CHECK(
@@ -81,12 +130,31 @@ Eigen::MatrixXf processMarkers(
     } else {
       // The output locators will be written to character. The output identity will be saved in the
       // identity variable.
-      calibrateModel(inputData, calibrationConfig, character, identity);
+      calibrateModel(
+          inputData,
+          calibrationConfig,
+          character,
+          identity,
+          {0.0f, 0.0f, 0.0f},
+          leftGloveSlice,
+          rightGloveSlice,
+          gloveConfig);
     }
   }
 
   // track motion; identity parameters will be repeated for every frame in finalMotion.
-  Eigen::MatrixXf finalMotion = trackPosesPerframe(inputData, character, identity, trackingConfig);
+  // If glove data is provided and the character has glove bones (from calibration),
+  // the solver will attach constraints to them. If no glove bones exist yet,
+  // constraints fall back to the wrist joints directly.
+  Eigen::MatrixXf finalMotion = trackPosesPerframe(
+      inputData,
+      character,
+      identity,
+      trackingConfig,
+      1,
+      leftGloveSlice,
+      rightGloveSlice,
+      gloveConfig);
 
   if (trackingConfig.debug) {
     auto errors = getLocatorError(inputData, finalMotion, character);

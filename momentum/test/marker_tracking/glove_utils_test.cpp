@@ -319,6 +319,65 @@ TEST(GloveUtilsTest, AddGloveBonesWithOffsets) {
   EXPECT_EQ(again.skeleton.joints.size(), result.skeleton.joints.size());
 }
 
+// Verify that bakeGloveOffsetsFromParams extracts solved offsets from a
+// solvingCharacter and bakes them into the target character's skeleton.
+TEST(GloveUtilsTest, BakeGloveOffsetsFromParams) {
+  const auto srcCharacter = createCharacterWithWrists();
+  const GloveConfig cfg;
+
+  // Create a solving character with glove bones and calibration parameters
+  const auto solvingChar = createGloveCharacter(srcCharacter, cfg);
+
+  // Build model parameters with known glove offsets
+  const auto numParams = solvingChar.parameterTransform.numAllModelParameters();
+  ModelParameters solvedParams = ModelParameters::Zero(numParams);
+
+  const auto gloveSet = solvingChar.parameterTransform.getParameterSet("gloves", true);
+  std::vector<size_t> gloveParamIndices;
+  for (size_t i = 0; i < gloveSet.size(); ++i) {
+    if (gloveSet.test(i)) {
+      gloveParamIndices.push_back(i);
+    }
+  }
+  ASSERT_EQ(gloveParamIndices.size(), 12u);
+
+  // Left hand: tx=1, ty=2, tz=3, rx=0.1, ry=0.2, rz=0.3
+  solvedParams.v(gloveParamIndices[0]) = 1.0f;
+  solvedParams.v(gloveParamIndices[1]) = 2.0f;
+  solvedParams.v(gloveParamIndices[2]) = 3.0f;
+  solvedParams.v(gloveParamIndices[3]) = 0.1f;
+  solvedParams.v(gloveParamIndices[4]) = 0.2f;
+  solvedParams.v(gloveParamIndices[5]) = 0.3f;
+
+  // Right hand: tx=4, ty=5, tz=6, rx=0.4, ry=0.5, rz=0.6
+  solvedParams.v(gloveParamIndices[6]) = 4.0f;
+  solvedParams.v(gloveParamIndices[7]) = 5.0f;
+  solvedParams.v(gloveParamIndices[8]) = 6.0f;
+  solvedParams.v(gloveParamIndices[9]) = 0.4f;
+  solvedParams.v(gloveParamIndices[10]) = 0.5f;
+  solvedParams.v(gloveParamIndices[11]) = 0.6f;
+
+  // Bake into the original character (no glove bones yet)
+  Character bakedChar = srcCharacter;
+  bakeGloveOffsetsFromParams(bakedChar, solvedParams, solvingChar, cfg);
+
+  // Should have glove bones with baked offsets but no extra model parameters
+  ASSERT_EQ(bakedChar.skeleton.joints.size(), srcCharacter.skeleton.joints.size() + 2);
+  EXPECT_EQ(
+      bakedChar.parameterTransform.numAllModelParameters(),
+      srcCharacter.parameterTransform.numAllModelParameters());
+
+  const size_t leftIdx = bakedChar.skeleton.getJointIdByName("glove_l_wrist");
+  ASSERT_NE(leftIdx, kInvalidIndex);
+  EXPECT_TRUE(
+      bakedChar.skeleton.joints[leftIdx].translationOffset.isApprox(Vector3f(1.0f, 2.0f, 3.0f)));
+
+  const size_t rightIdx = bakedChar.skeleton.getJointIdByName("glove_r_wrist");
+  ASSERT_NE(rightIdx, kInvalidIndex);
+  EXPECT_TRUE(
+      bakedChar.skeleton.joints[rightIdx].translationOffset.isApprox(Vector3f(4.0f, 5.0f, 6.0f)));
+}
+
 // Verify that constraint creation falls back to the wrist joint when the
 // glove bone does not exist in the character.
 TEST(GloveUtilsTest, ConstraintFallbackToWrist) {
