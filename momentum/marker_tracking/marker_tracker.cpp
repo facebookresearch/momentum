@@ -432,6 +432,11 @@ Eigen::MatrixXf trackSequence(
     universalParams |= gloveSet;
   }
 
+  // Apply caller-specified parameter mask to pose parameters
+  if (config.activeParams) {
+    poseParams &= *config.activeParams;
+  }
+
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> skinnedLocatorMeshContraints;
   if ((globalParams & pt.getBlendShapeParameters()).any() && !character.skinnedLocators.empty()) {
     skinnedLocatorMeshContraints = createSkinnedLocatorMeshConstraints(character, 1.0f);
@@ -747,6 +752,11 @@ Eigen::MatrixXf trackPosesForFrames(
     poseParams &= ~pt.getParameterSet("gloves", true);
   }
 
+  // Apply caller-specified parameter mask
+  if (config.activeParams) {
+    poseParams &= *config.activeParams;
+  }
+
   // set up the solver
   auto solverFunc = SkeletonSolverFunction(character, pt);
   GaussNewtonSolverQROptions solverOptions;
@@ -1051,7 +1061,10 @@ void calibrateModel(
   TrackingConfig trackingConfig{
       {config.minVisPercent, config.lossAlpha, config.maxIter, config.regularization, config.debug},
       0.0,
-      0.0};
+      0.0,
+      1.0f,
+      {},
+      std::nullopt};
 
   // only keep one motion; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
@@ -1300,7 +1313,10 @@ void calibrateLocators(
   TrackingConfig trackingConfig{
       {config.minVisPercent, config.lossAlpha, config.maxIter, config.regularization, config.debug},
       0.0,
-      0.0};
+      0.0,
+      1.0f,
+      {},
+      std::nullopt};
 
   // only keep one motion for both character and solvingCharacter; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
