@@ -271,7 +271,7 @@ void addSequenceFrameConstraints(
     const std::vector<std::vector<JointToJointOrientationDataT<float>>>& leftGloveOriData,
     const std::vector<std::vector<JointToJointPositionDataT<float>>>& rightGlovePosData,
     const std::vector<std::vector<JointToJointOrientationDataT<float>>>& rightGloveOriData) {
-  auto posConstrWeight = PositionErrorFunction::kLegacyWeight;
+  auto posConstrWeight = PositionErrorFunction::kLegacyWeight * config.markerWeight;
   if (solverFrame == 0 && (enforceFloorInFirstFrame || !firstFramePoseConstraintSet.empty())) {
     posConstrWeight *= solvedFrames;
   }
@@ -766,11 +766,12 @@ Eigen::MatrixXf trackPosesForFrames(
 
   // positional constraint function for markers
   auto posConstrFunc = std::make_shared<PositionErrorFunction>(character, config.lossAlpha);
-  posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
+  posConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight * config.markerWeight);
   solverFunc.addErrorFunction(posConstrFunc);
 
   auto skinnedLocatorPosConstrFunc = std::make_shared<SkinnedLocatorErrorFunction>(character);
-  skinnedLocatorPosConstrFunc->setWeight(PositionErrorFunction::kLegacyWeight);
+  skinnedLocatorPosConstrFunc->setWeight(
+      PositionErrorFunction::kLegacyWeight * config.markerWeight);
   solverFunc.addErrorFunction(skinnedLocatorPosConstrFunc);
 
   // floor penetration constraint data; we assume the world is y-up and floor is y=0 for mocap data.
@@ -1247,6 +1248,11 @@ void calibrateModel(
   }
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
+
+  // Bake solved glove offsets into the character skeleton, following the same
+  // pattern as locator extraction above. No-op if gloveConfig is nullopt.
+  bakeGloveOffsetsFromParams(
+      character, ModelParameters(motion.col(0)), solvingCharacter, gloveConfig);
 
   // TODO: A hack to return the solved first frame as initialization for tracking later.
   identity.v = motion.col(0).head(transform.numAllModelParameters());
