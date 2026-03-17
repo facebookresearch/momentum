@@ -10,16 +10,16 @@
 #include <momentum/common/aligned.h>
 #include <momentum/common/checks.h>
 #include <momentum/math/resizeable_matrix.h>
+#include <momentum/math/span_compat.h>
 
 #include <Eigen/Core>
-#include <span>
 
 #include <deque>
 #include <vector>
 
 namespace momentum {
 
-void validateColumnIndices(std::span<const Eigen::Index> colIndices, Eigen::Index maxEntry);
+void validateColumnIndices(momentum::span<const Eigen::Index> colIndices, Eigen::Index maxEntry);
 
 // Remaps the matrix such that A_new.col(i) = A_orig.col(colIndices[i]).
 // This can be used to perform QR on a subset of the matrix columns.
@@ -30,7 +30,9 @@ class ColumnIndexedMatrix {
 
   explicit ColumnIndexedMatrix(Eigen::Ref<MatrixType> mat) : mat_(mat), useColumnIndices_(false) {}
 
-  explicit ColumnIndexedMatrix(Eigen::Ref<MatrixType> mat, std::span<const Eigen::Index> colIndices)
+  explicit ColumnIndexedMatrix(
+      Eigen::Ref<MatrixType> mat,
+      momentum::span<const Eigen::Index> colIndices)
       : mat_(mat), columnIndices_(colIndices), useColumnIndices_(true) {
     validateColumnIndices(colIndices, mat.cols());
   }
@@ -55,7 +57,7 @@ class ColumnIndexedMatrix {
     }
   }
 
-  [[nodiscard]] std::span<const Eigen::Index> columnIndices() const {
+  [[nodiscard]] momentum::span<const Eigen::Index> columnIndices() const {
     return columnIndices_;
   }
 
@@ -73,7 +75,7 @@ class ColumnIndexedMatrix {
 
  private:
   Eigen::Ref<MatrixType> mat_;
-  std::span<const Eigen::Index> columnIndices_;
+  momentum::span<const Eigen::Index> columnIndices_;
   bool useColumnIndices_;
 };
 
