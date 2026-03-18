@@ -3,7 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import pymomentum.geometry as pym_geometry
 import pymomentum.skel_state as pym_skel_state
@@ -24,10 +24,15 @@ class ParameterLimits(torch.nn.Module):
         dtype: torch.dtype = torch.float32,
     ) -> None:
         super().__init__()
+        data = self._collect_limit_data(parameter_limits, dtype)
+        self._register_buffers(data, dtype)
 
-        kLimitWeight: float = 10.0  # https://www.internalfb.com/code/fbsource/arvr/libraries/momentum/character_solver/limit_error_function.h?lines=48
-        kPositionWeight: float = 1e-4  # https://www.internalfb.com/code/fbsource/arvr/libraries/momentum/character_solver/limit_error_function.cpp?lines=21
-
+    def _collect_limit_data(
+        self,
+        parameter_limits: list[pym_geometry.ParameterLimit],
+        dtype: torch.dtype,
+    ) -> dict[str, Any]:
+        """Categorize parameter limits by type into organized data structures."""
         minmax_min: list[float] = []
         minmax_max: list[float] = []
         minmax_weight: list[float] = []
@@ -67,22 +72,13 @@ class ParameterLimits(torch.nn.Module):
         ellipsoid_ellipsoid_inv: list[torch.Tensor] = []
         ellipsoid_weight: list[float] = []
 
-        self.has_minmax: bool = False
-        self.has_minmaxjoint: bool = False
-        self.has_linear: bool = False
-        self.has_linear_joint: bool = False
-        self.has_halfplane: bool = False
-        self.has_ellipsoid: bool = False
-
         for limit in parameter_limits:
             if limit.type == pym_geometry.LimitType.MinMax:
-                self.has_minmax = True
                 minmax_min.append(limit.data.minmax.min)
                 minmax_max.append(limit.data.minmax.max)
                 minmax_parameter_index.append(limit.data.minmax.model_parameter_index)
                 minmax_weight.append(limit.weight)
             elif limit.type == pym_geometry.LimitType.MinMaxJoint:
-                self.has_minmaxjoint = True
                 minmaxjoint_index.append(
                     limit.data.minmax_joint.joint_index
                     * pym_geometry.PARAMETERS_PER_JOINT
@@ -95,7 +91,6 @@ class ParameterLimits(torch.nn.Module):
                 # It appears these limits are not used in error_function.cpp
                 pass
             elif limit.type == pym_geometry.LimitType.Linear:
-                self.has_linear = True
                 linear_refidx.append(limit.data.linear.reference_model_parameter_index)
                 linear_targetidx.append(limit.data.linear.target_model_parameter_index)
                 linear_scale.append(limit.data.linear.scale)
@@ -104,7 +99,6 @@ class ParameterLimits(torch.nn.Module):
                 linear_range_min.append(limit.data.linear.range_min)
                 linear_range_max.append(limit.data.linear.range_max)
             elif limit.type == pym_geometry.LimitType.LinearJoint:
-                self.has_linear_joint = True
                 linear_joint_refidx.append(
                     limit.data.linear_joint.reference_joint_index
                     * pym_geometry.PARAMETERS_PER_JOINT
@@ -121,14 +115,12 @@ class ParameterLimits(torch.nn.Module):
                 linear_joint_range_min.append(limit.data.linear_joint.range_min)
                 linear_joint_range_max.append(limit.data.linear_joint.range_max)
             elif limit.type == pym_geometry.LimitType.HalfPlane:
-                self.has_halfplane = True
                 halfplane_param1_idx.append(limit.data.halfplane.param1_index)
                 halfplane_param2_idx.append(limit.data.halfplane.param2_index)
                 halfplane_normal.append(limit.data.halfplane.normal.tolist())
                 halfplane_offset.append(limit.data.halfplane.offset)
                 halfplane_weight.append(limit.weight)
             elif limit.type == pym_geometry.LimitType.Ellipsoid:
-                self.has_ellipsoid = True
                 ellipsoid_parent.append(limit.data.ellipsoid.parent)
                 ellipsoid_ellipsoid_parent.append(limit.data.ellipsoid.ellipsoid_parent)
                 ellipsoid_offset.append(
@@ -141,74 +133,135 @@ class ParameterLimits(torch.nn.Module):
                     torch.tensor(limit.data.ellipsoid.ellipsoid_inv, dtype=dtype)
                 )
                 ellipsoid_weight.append(limit.weight)
-                pass
+
+        self.has_minmax: bool = len(minmax_min) > 0
+        self.has_minmaxjoint: bool = len(minmaxjoint_min) > 0
+        self.has_linear: bool = len(linear_refidx) > 0
+        self.has_linear_joint: bool = len(linear_joint_refidx) > 0
+        self.has_halfplane: bool = len(halfplane_param1_idx) > 0
+        self.has_ellipsoid: bool = len(ellipsoid_parent) > 0
+
+        return {
+            "minmax_min": minmax_min,
+            "minmax_max": minmax_max,
+            "minmax_weight": minmax_weight,
+            "minmax_parameter_index": minmax_parameter_index,
+            "minmaxjoint_index": minmaxjoint_index,
+            "minmaxjoint_min": minmaxjoint_min,
+            "minmaxjoint_max": minmaxjoint_max,
+            "minmaxjoint_weight": minmaxjoint_weight,
+            "linear_refidx": linear_refidx,
+            "linear_targetidx": linear_targetidx,
+            "linear_scale": linear_scale,
+            "linear_offset": linear_offset,
+            "linear_weight": linear_weight,
+            "linear_range_min": linear_range_min,
+            "linear_range_max": linear_range_max,
+            "linear_joint_refidx": linear_joint_refidx,
+            "linear_joint_targetidx": linear_joint_targetidx,
+            "linear_joint_scale": linear_joint_scale,
+            "linear_joint_offset": linear_joint_offset,
+            "linear_joint_weight": linear_joint_weight,
+            "linear_joint_range_min": linear_joint_range_min,
+            "linear_joint_range_max": linear_joint_range_max,
+            "halfplane_param1_idx": halfplane_param1_idx,
+            "halfplane_param2_idx": halfplane_param2_idx,
+            "halfplane_normal": halfplane_normal,
+            "halfplane_offset": halfplane_offset,
+            "halfplane_weight": halfplane_weight,
+            "ellipsoid_parent": ellipsoid_parent,
+            "ellipsoid_ellipsoid_parent": ellipsoid_ellipsoid_parent,
+            "ellipsoid_offset": ellipsoid_offset,
+            "ellipsoid_ellipsoid": ellipsoid_ellipsoid,
+            "ellipsoid_ellipsoid_inv": ellipsoid_ellipsoid_inv,
+            "ellipsoid_weight": ellipsoid_weight,
+        }
+
+    def _register_buffers(
+        self,
+        data: dict[str, Any],
+        dtype: torch.dtype,
+    ) -> None:
+        """Register collected limit data as torch buffers."""
+        kLimitWeight: float = 10.0  # https://www.internalfb.com/code/fbsource/arvr/libraries/momentum/character_solver/limit_error_function.h?lines=48
+        kPositionWeight: float = 1e-4  # https://www.internalfb.com/code/fbsource/arvr/libraries/momentum/character_solver/limit_error_function.cpp?lines=21
 
         if self.has_minmax:
-            self.register_buffer("minmax_min", torch.tensor(minmax_min, dtype=dtype))
-            self.register_buffer("minmax_max", torch.tensor(minmax_max, dtype=dtype))
+            self.register_buffer(
+                "minmax_min", torch.tensor(data["minmax_min"], dtype=dtype)
+            )
+            self.register_buffer(
+                "minmax_max", torch.tensor(data["minmax_max"], dtype=dtype)
+            )
             self.register_buffer(
                 "minmax_weight",
-                (kLimitWeight * torch.tensor(minmax_weight, dtype=dtype))
+                (kLimitWeight * torch.tensor(data["minmax_weight"], dtype=dtype))
                 .sqrt()
                 .detach(),
             )
             self.register_buffer(
                 "minmax_parameter_index",
-                torch.tensor(minmax_parameter_index, dtype=torch.int32),
+                torch.tensor(data["minmax_parameter_index"], dtype=torch.int32),
             )
 
         if self.has_minmaxjoint:
             self.register_buffer(
                 "minmaxjoint_index",
-                torch.tensor(minmaxjoint_index, dtype=torch.int32),
+                torch.tensor(data["minmaxjoint_index"], dtype=torch.int32),
             )
             self.register_buffer(
                 "minmaxjoint_min",
-                torch.tensor(minmaxjoint_min, dtype=dtype),
+                torch.tensor(data["minmaxjoint_min"], dtype=dtype),
             )
             self.register_buffer(
                 "minmaxjoint_max",
-                torch.tensor(minmaxjoint_max, dtype=dtype),
+                torch.tensor(data["minmaxjoint_max"], dtype=dtype),
             )
             self.register_buffer(
                 "minmaxjoint_weight",
-                (kLimitWeight * torch.tensor(minmaxjoint_weight, dtype=dtype))
+                (kLimitWeight * torch.tensor(data["minmaxjoint_weight"], dtype=dtype))
                 .sqrt()
                 .detach(),
             )
 
         if self.has_linear:
             self.register_buffer(
-                "linear_refidx", torch.tensor(linear_refidx, dtype=torch.int32)
+                "linear_refidx", torch.tensor(data["linear_refidx"], dtype=torch.int32)
             )
             self.register_buffer(
                 "linear_targetidx",
-                torch.tensor(linear_targetidx, dtype=torch.int32),
+                torch.tensor(data["linear_targetidx"], dtype=torch.int32),
             )
             self.register_buffer(
-                "linear_scale", torch.tensor(linear_scale, dtype=dtype)
+                "linear_scale", torch.tensor(data["linear_scale"], dtype=dtype)
             )
             self.register_buffer(
                 "linear_offset",
-                torch.tensor(linear_offset, dtype=dtype),
+                torch.tensor(data["linear_offset"], dtype=dtype),
             )
             self.register_buffer(
                 "linear_weight",
-                (kLimitWeight * torch.tensor(linear_weight, dtype=dtype))
+                (kLimitWeight * torch.tensor(data["linear_weight"], dtype=dtype))
                 .sqrt()
                 .detach(),
             )
             self.register_buffer(
                 "linear_range_min",
                 torch.tensor(
-                    [-float("inf") if x is None else x for x in linear_range_min],
+                    [
+                        -float("inf") if x is None else x
+                        for x in data["linear_range_min"]
+                    ],
                     dtype=dtype,
                 ),
             )
             self.register_buffer(
                 "linear_range_max",
                 torch.tensor(
-                    [float("inf") if x is None else x for x in linear_range_max],
+                    [
+                        float("inf") if x is None else x
+                        for x in data["linear_range_max"]
+                    ],
                     dtype=dtype,
                 ),
             )
@@ -216,36 +269,43 @@ class ParameterLimits(torch.nn.Module):
         if self.has_linear_joint:
             self.register_buffer(
                 "linear_joint_refidx",
-                torch.tensor(linear_joint_refidx, dtype=torch.int32),
+                torch.tensor(data["linear_joint_refidx"], dtype=torch.int32),
             )
             self.register_buffer(
                 "linear_joint_targetidx",
-                torch.tensor(linear_joint_targetidx, dtype=torch.int32),
+                torch.tensor(data["linear_joint_targetidx"], dtype=torch.int32),
             )
             self.register_buffer(
-                "linear_joint_scale", torch.tensor(linear_joint_scale, dtype=dtype)
+                "linear_joint_scale",
+                torch.tensor(data["linear_joint_scale"], dtype=dtype),
             )
             self.register_buffer(
                 "linear_joint_offset",
-                torch.tensor(linear_joint_offset, dtype=dtype),
+                torch.tensor(data["linear_joint_offset"], dtype=dtype),
             )
             self.register_buffer(
                 "linear_joint_weight",
-                (kLimitWeight * torch.tensor(linear_joint_weight, dtype=dtype))
+                (kLimitWeight * torch.tensor(data["linear_joint_weight"], dtype=dtype))
                 .sqrt()
                 .detach(),
             )
             self.register_buffer(
                 "linear_joint_range_min",
                 torch.tensor(
-                    [-float("inf") if x is None else x for x in linear_joint_range_min],
+                    [
+                        -float("inf") if x is None else x
+                        for x in data["linear_joint_range_min"]
+                    ],
                     dtype=dtype,
                 ),
             )
             self.register_buffer(
                 "linear_joint_range_max",
                 torch.tensor(
-                    [float("inf") if x is None else x for x in linear_joint_range_max],
+                    [
+                        float("inf") if x is None else x
+                        for x in data["linear_joint_range_max"]
+                    ],
                     dtype=dtype,
                 ),
             )
@@ -253,49 +313,51 @@ class ParameterLimits(torch.nn.Module):
         if self.has_halfplane:
             self.register_buffer(
                 "halfplane_param1_idx",
-                torch.tensor(halfplane_param1_idx, dtype=torch.int32),
+                torch.tensor(data["halfplane_param1_idx"], dtype=torch.int32),
             )
             self.register_buffer(
                 "halfplane_param2_idx",
-                torch.tensor(halfplane_param2_idx, dtype=torch.int32),
+                torch.tensor(data["halfplane_param2_idx"], dtype=torch.int32),
             )
             self.register_buffer(
                 "halfplane_normal",
-                torch.tensor(halfplane_normal, dtype=dtype),
+                torch.tensor(data["halfplane_normal"], dtype=dtype),
             )
             self.register_buffer(
-                "halfplane_offset", torch.tensor(halfplane_offset, dtype=dtype)
+                "halfplane_offset", torch.tensor(data["halfplane_offset"], dtype=dtype)
             )
             self.register_buffer(
                 "halfplane_weight",
-                (kLimitWeight * torch.tensor(halfplane_weight, dtype=dtype))
+                (kLimitWeight * torch.tensor(data["halfplane_weight"], dtype=dtype))
                 .sqrt()
                 .detach(),
             )
 
         if self.has_ellipsoid:
             self.register_buffer(
-                "ellipsoid_parent", torch.tensor(ellipsoid_parent, dtype=torch.int32)
+                "ellipsoid_parent",
+                torch.tensor(data["ellipsoid_parent"], dtype=torch.int32),
             )
             self.register_buffer(
                 "ellipsoid_ellipsoid_parent",
-                torch.tensor(ellipsoid_ellipsoid_parent, dtype=torch.int32),
+                torch.tensor(data["ellipsoid_ellipsoid_parent"], dtype=torch.int32),
             )
             self.register_buffer(
-                "ellipsoid_offset", torch.stack(ellipsoid_offset, dim=0)
+                "ellipsoid_offset", torch.stack(data["ellipsoid_offset"], dim=0)
             )
             self.register_buffer(
-                "ellipsoid_ellipsoid", torch.stack(ellipsoid_ellipsoid, dim=0)
+                "ellipsoid_ellipsoid", torch.stack(data["ellipsoid_ellipsoid"], dim=0)
             )
             self.register_buffer(
-                "ellipsoid_ellipsoid_inv", torch.stack(ellipsoid_ellipsoid_inv, dim=0)
+                "ellipsoid_ellipsoid_inv",
+                torch.stack(data["ellipsoid_ellipsoid_inv"], dim=0),
             )
             self.register_buffer(
                 "ellipsoid_weight",
                 (
                     kLimitWeight
                     * kPositionWeight
-                    * torch.tensor(ellipsoid_weight, dtype=dtype)
+                    * torch.tensor(data["ellipsoid_weight"], dtype=dtype)
                 )
                 .sqrt()
                 .detach(),
