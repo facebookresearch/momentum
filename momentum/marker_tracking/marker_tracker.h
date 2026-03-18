@@ -64,6 +64,11 @@ struct TrackingConfig : public BaseConfig {
   /// Smoothing weights per model parameter. The size of this vector should be equal to number of
   /// model parameters and this overrides the value specific in smoothing
   Eigen::VectorXf smoothingWeights{};
+  /// Optional mask to restrict which parameters are optimized during tracking. When set, this is
+  /// ANDed with the internally-computed pose parameters (which already exclude identity/locator
+  /// parameters). Use the character's ParameterTransform to construct a meaningful set, e.g. to
+  /// exclude finger DOFs from the solve.
+  std::optional<ParameterSet> activeParams;
 };
 
 /// Configuration for refining an already tracked motion, eg. add smoothing and/or collision
