@@ -15,6 +15,7 @@
 #include <pymomentum/python_utility/eigen_quaternion.h>
 
 #include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -224,7 +225,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::TrackingConfig& self) {
             return fmt::format(
-                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, marker_weight={}, smoothing_weights={})",
+                "TrackingConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, smoothing={}, collision_error_weight={}, marker_weight={}, smoothing_weights={}, active_params={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -233,7 +234,8 @@ PYBIND11_MODULE(marker_tracking, m) {
                 self.smoothing,
                 self.collisionErrorWeight,
                 self.markerWeight,
-                vectorToString(self.smoothingWeights));
+                vectorToString(self.smoothingWeights),
+                self.activeParams ? "set" : "None");
           })
       .def(
           py::init<float, float, size_t, float, bool, float, float, float, Eigen::VectorXf>(),
@@ -272,7 +274,48 @@ PYBIND11_MODULE(marker_tracking, m) {
           "smoothing_weights",
           &momentum::TrackingConfig::smoothingWeights,
           R"(Smoothing weights per model parameter. The size of this vector should be
-            equal to number of model parameters and this overrides the value specific in smoothing)");
+            equal to number of model parameters and this overrides the value specific in smoothing)")
+      .def_property(
+          "active_params",
+          [](const momentum::TrackingConfig& self) -> py::object {
+            if (!self.activeParams) {
+              return py::none();
+            }
+            const auto& ps = *self.activeParams;
+            auto result = py::array_t<bool>(momentum::kMaxModelParams);
+            auto buf = result.mutable_unchecked<1>();
+            for (size_t i = 0; i < momentum::kMaxModelParams; ++i) {
+              buf(static_cast<py::ssize_t>(i)) = ps.test(i);
+            }
+            return result;
+          },
+          [](momentum::TrackingConfig& self, const py::object& value) {
+            if (value.is_none()) {
+              self.activeParams = std::nullopt;
+              return;
+            }
+            auto arr = value.cast<py::array_t<bool>>();
+            momentum::ParameterSet ps;
+            auto buf = arr.unchecked<1>();
+            for (py::ssize_t i = 0; i < buf.shape(0); ++i) {
+              if (buf(i)) {
+                ps.set(static_cast<size_t>(i));
+              }
+            }
+            self.activeParams = ps;
+          },
+          R"(Optional boolean numpy array to restrict which parameters are optimized during tracking.
+
+When set, this is ANDed with the internally-computed pose parameters (which already exclude
+identity and locator parameters). Use the character's :class:`~pymomentum.geometry.ParameterTransform`
+to construct a meaningful set, e.g. to exclude finger DOFs::
+
+    pt = character.parameter_transform
+    active = pt.pose_parameters.copy()
+    active &= ~pt.parameter_sets.get("fingers", np.zeros_like(active))
+    tracking_config.active_params = active
+
+Set to None (default) to use the solver's default parameter set.)");
 
   auto refineConfig = py::class_<momentum::RefineConfig, momentum::TrackingConfig>(
       m, "RefineConfig", "Config for refining a tracked motion.");
@@ -297,19 +340,33 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.calibLocators));
           })
       .def(
-          py::init<
-              float,
-              float,
-              size_t,
-              float,
-              bool,
-              float,
-              float,
-              float,
-              Eigen::VectorXf,
-              float,
-              bool,
-              bool>(),
+          py::init([](float minVisPercent,
+                      float lossAlpha,
+                      size_t maxIter,
+                      float regularization,
+                      bool debug,
+                      float smoothing,
+                      float collisionErrorWeight,
+                      float markerWeight,
+                      Eigen::VectorXf smoothingWeights,
+                      float regularizer,
+                      bool calibId,
+                      bool calibLocators) {
+            momentum::RefineConfig cfg;
+            cfg.minVisPercent = minVisPercent;
+            cfg.lossAlpha = lossAlpha;
+            cfg.maxIter = maxIter;
+            cfg.regularization = regularization;
+            cfg.debug = debug;
+            cfg.smoothing = smoothing;
+            cfg.collisionErrorWeight = collisionErrorWeight;
+            cfg.markerWeight = markerWeight;
+            cfg.smoothingWeights = std::move(smoothingWeights);
+            cfg.regularizer = regularizer;
+            cfg.calibId = calibId;
+            cfg.calibLocators = calibLocators;
+            return cfg;
+          }),
           R"(Create a RefineConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
