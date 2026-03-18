@@ -26,7 +26,7 @@ struct spanstreambuf : std::streambuf {
   spanstreambuf(std::span<const std::byte> buffer = {});
 
   /// Destructor.
-  virtual ~spanstreambuf() override;
+  ~spanstreambuf() override;
 
  protected:
   /// Write a sequence of characters to the output buffer.
@@ -45,7 +45,7 @@ struct ispanstream : std::istream {
   explicit ispanstream(std::span<const std::byte> buffer);
 
   /// Destructor.
-  virtual ~ispanstream();
+  ~ispanstream() override;
 
  private:
   /// Internal spanstreambuf instance.
