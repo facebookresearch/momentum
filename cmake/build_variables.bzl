@@ -850,6 +850,7 @@ rasterizer_public_headers = [
     "rasterizer/fwd.h",
     "rasterizer/image.h",
     "rasterizer/rasterizer.h",
+    "rasterizer/rasterizer_internal.h",
     "rasterizer/tensor.h",
     "rasterizer/text_rasterizer.h",
     "rasterizer/utility.h",
@@ -858,6 +859,8 @@ rasterizer_public_headers = [
 rasterizer_sources = [
     "rasterizer/geometry.cpp",
     "rasterizer/rasterizer.cpp",
+    "rasterizer/rasterizer_2d.cpp",
+    "rasterizer/rasterizer_triangles.cpp",
     "rasterizer/image.cpp",
     "rasterizer/text_rasterizer.cpp",
 ]

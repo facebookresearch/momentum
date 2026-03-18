@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <drjit/fwd.h>
 #include <mdspan/mdspan.hpp>
 #include <momentum/camera/camera.h>
 #include <momentum/common/aligned.h>
