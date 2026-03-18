@@ -9,6 +9,8 @@
 
 #include <fmt/format.h>
 
+#include <cstdio>
+#include <cstdlib>
 #include <stdexcept>
 
 /// Throws an exception of a specified type with a formatted message.
@@ -54,6 +56,8 @@ namespace momentum::detail {
 
 using DefaultException = std::runtime_error;
 
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
+
 // Helper function template to throw with formatted message
 template <typename Exception = DefaultException, typename... Args>
 [[noreturn]] void throwImpl(fmt::format_string<Args...> format, Args&&... args) {
@@ -66,5 +70,25 @@ template <typename Exception>
 [[noreturn]] void throwImpl() {
   throw Exception{};
 }
+
+#else
+
+// Fallback for platforms without exception support
+// Log the error message to stderr and abort.
+template <typename Exception = DefaultException, typename... Args>
+[[noreturn]] void throwImpl(fmt::format_string<Args...> format, Args&&... args) {
+  std::fprintf(
+      stderr, "FATAL ERROR: %s\n", fmt::format(format, std::forward<Args>(args)...).c_str());
+  std::abort();
+}
+
+// Overload for exceptions without a message.
+template <typename Exception>
+[[noreturn]] void throwImpl() {
+  std::fputs("FATAL ERROR (no message)\n", stderr);
+  std::abort();
+}
+
+#endif
 
 } // namespace momentum::detail

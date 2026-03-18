@@ -16,13 +16,11 @@ common_public_headers = [
     "common/log.h",
     "common/memory.h",
     "common/profile.h",
-    "common/progress_bar.h",
     "common/string.h",
 ]
 
 common_sources = [
     "common/log.cpp",
-    "common/progress_bar.cpp",
     "common/string.cpp",
 ]
 
@@ -30,8 +28,19 @@ common_test_sources = [
     "test/common/aligned_allocator_test.cpp",
     "test/common/exception_test.cpp",
     "test/common/log_test.cpp",
-    "test/common/progress_bar_test.cpp",
     "test/common/string_test.cpp",
+]
+
+progress_bar_public_headers = [
+    "common/progress_bar.h",
+]
+
+progress_bar_sources = [
+    "common/progress_bar.cpp",
+]
+
+progress_bar_test_sources = [
+    "test/common/progress_bar_test.cpp",
 ]
 
 simd_public_headers = [
