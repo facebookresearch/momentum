@@ -220,7 +220,7 @@ variable_list JointParametersToSkeletonStateFunction<T>::forward(
   const int nJointParams = nJoints * momentum::kParametersPerJoint;
 
   TensorChecker checker("jointParametersToSkeletonState");
-  bool squeeze;
+  bool squeeze = false;
   const auto input_device =
       jointParameters[0].device(); // Save the input device, reused for the returned grad
 
@@ -293,7 +293,7 @@ variable_list JointParametersToSkeletonStateFunction<T>::backward(
   const auto input_device =
       grad_outputs[0].device(); // Save the input device, reused for the returned grad
 
-  bool squeeze_jointParams;
+  bool squeeze_jointParams = false;
   jointParameters = checker.validateAndFixTensor(
       jointParameters,
       "jointParameters",
@@ -362,7 +362,7 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::forward(
   const int nJointParams = nJoints * momentum::kParametersPerJoint;
 
   TensorChecker checker("jointParametersToLocalSkeletonState");
-  bool squeeze;
+  bool squeeze = false;
   const auto input_device = jointParameters.device();
 
   jointParameters = flattenJointParameters(
@@ -434,7 +434,7 @@ variable_list JointParametersToLocalSkeletonStateFunction<T>::backward(
   const auto input_device =
       grad_outputs[0].device(); // Save the input device, reused for the returned grad
 
-  bool squeeze_jointParams;
+  bool squeeze_jointParams = false;
   jointParameters = checker.validateAndFixTensor(
       jointParameters,
       "jointParameters",
