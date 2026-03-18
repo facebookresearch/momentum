@@ -54,10 +54,14 @@ using GloveFrameData = std::vector<GloveSensorObservation>;
 /// constraint weights and which wrist joints to attach glove bones to.
 struct GloveConfig {
   /// Weight for position constraints between glove and finger joints.
-  float positionWeight = 1e-4f;
+  /// Scaled internally by PositionErrorFunction::kLegacyWeight for consistency
+  /// with marker constraint weighting.
+  float positionWeight = 1.0f;
 
   /// Weight for orientation constraints between glove and finger joints.
-  float orientationWeight = 1e-4f;
+  /// Scaled internally by OrientationErrorFunction::kLegacyWeight for consistency
+  /// with marker constraint weighting.
+  float orientationWeight = 1.0f;
 
   /// Names of the left and right wrist joints in the skeleton.
   std::array<std::string, 2> wristJointNames = {"l_wrist", "r_wrist"};
