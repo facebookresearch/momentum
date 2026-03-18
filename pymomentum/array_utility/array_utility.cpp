@@ -162,12 +162,10 @@ LeadingDimensions LeadingDimensions::broadcastWith(const LeadingDimensions& othe
   LeadingDimensions result;
   result.dims.resize(dims.size());
   for (size_t i = 0; i < dims.size(); ++i) {
-    if (dims[i] == other.dims[i]) {
+    if (dims[i] == other.dims[i] || other.dims[i] == 1) {
       result.dims[i] = dims[i];
     } else if (dims[i] == 1) {
       result.dims[i] = other.dims[i];
-    } else if (other.dims[i] == 1) {
-      result.dims[i] = dims[i];
     } else {
       MT_THROW("Cannot broadcast dimension {}: {} vs {}", i, dims[i], other.dims[i]);
     }
