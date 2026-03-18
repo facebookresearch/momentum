@@ -104,10 +104,10 @@ $(document).ready(function(){initNavTree('structmomentum_1_1GloveConfig.html',''
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:abcd934c94b72f3c4bbfb27d47c4cc6cf" id="r_abcd934c94b72f3c4bbfb27d47c4cc6cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GloveConfig.html#abcd934c94b72f3c4bbfb27d47c4cc6cf">positionWeight</a> = 1<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-4<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
+<tr class="memitem:abcd934c94b72f3c4bbfb27d47c4cc6cf" id="r_abcd934c94b72f3c4bbfb27d47c4cc6cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GloveConfig.html#abcd934c94b72f3c4bbfb27d47c4cc6cf">positionWeight</a> = 1.0f</td></tr>
 <tr class="memdesc:abcd934c94b72f3c4bbfb27d47c4cc6cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight for position constraints between glove and finger joints.  <br /></td></tr>
 <tr class="separator:abcd934c94b72f3c4bbfb27d47c4cc6cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb6a6c9483f50dd8a6508137142a6dbf" id="r_afb6a6c9483f50dd8a6508137142a6dbf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GloveConfig.html#afb6a6c9483f50dd8a6508137142a6dbf">orientationWeight</a> = 1<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-4<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
+<tr class="memitem:afb6a6c9483f50dd8a6508137142a6dbf" id="r_afb6a6c9483f50dd8a6508137142a6dbf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GloveConfig.html#afb6a6c9483f50dd8a6508137142a6dbf">orientationWeight</a> = 1.0f</td></tr>
 <tr class="memdesc:afb6a6c9483f50dd8a6508137142a6dbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight for orientation constraints between glove and finger joints.  <br /></td></tr>
 <tr class="separator:afb6a6c9483f50dd8a6508137142a6dbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f19cf83ac18e6e609e2713e81fa8928" id="r_a4f19cf83ac18e6e609e2713e81fa8928"><td class="memItemLeft" align="right" valign="top">std::array&lt; std::string, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1GloveConfig.html#a4f19cf83ac18e6e609e2713e81fa8928">wristJointNames</a> = {&quot;l_wrist&quot;, &quot;r_wrist&quot;}</td></tr>
@@ -127,14 +127,15 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::GloveConfig::orientationWeight = 1<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-4<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::GloveConfig::orientationWeight = 1.0f</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Weight for orientation constraints between glove and finger joints. </p>
+<p>Scaled internally by <a class="el" href="classmomentum_1_1OrientationErrorFunctionT.html#aaa9956792eba696a78dfe9ac0117f443" title="Default constant weight in MarkerErrorFunction.">OrientationErrorFunction::kLegacyWeight</a> for consistency with marker constraint weighting. </p>
 
-<p class="definition">Definition at line <a class="el" href="glove__utils_8h_source.html#l00060">60</a> of file <a class="el" href="glove__utils_8h_source.html">glove_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="glove__utils_8h_source.html#l00064">64</a> of file <a class="el" href="glove__utils_8h_source.html">glove_utils.h</a>.</p>
 
 </div>
 </div>
@@ -145,14 +146,15 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::GloveConfig::positionWeight = 1<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-4<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::GloveConfig::positionWeight = 1.0f</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Weight for position constraints between glove and finger joints. </p>
+<p>Scaled internally by <a class="el" href="classmomentum_1_1PositionErrorFunctionT.html#a7bf47a2420c3afaf117a96d4a062d47b" title="Default constant weight in MarkerErrorFunction.">PositionErrorFunction::kLegacyWeight</a> for consistency with marker constraint weighting. </p>
 
-<p class="definition">Definition at line <a class="el" href="glove__utils_8h_source.html#l00057">57</a> of file <a class="el" href="glove__utils_8h_source.html">glove_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="glove__utils_8h_source.html#l00059">59</a> of file <a class="el" href="glove__utils_8h_source.html">glove_utils.h</a>.</p>
 
 </div>
 </div>
@@ -170,7 +172,7 @@ Public Attributes</h2></td></tr>
 
 <p>Names of the left and right wrist joints in the skeleton. </p>
 
-<p class="definition">Definition at line <a class="el" href="glove__utils_8h_source.html#l00063">63</a> of file <a class="el" href="glove__utils_8h_source.html">glove_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="glove__utils_8h_source.html#l00067">67</a> of file <a class="el" href="glove__utils_8h_source.html">glove_utils.h</a>.</p>
 
 </div>
 </div>
@@ -183,7 +185,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1GloveConfig.html">GloveConfig</a></li>
-    <li class="footer">Generated on Tue Mar 17 2026 21:54:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Mar 18 2026 08:38:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

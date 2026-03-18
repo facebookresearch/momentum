@@ -21,7 +21,7 @@ var math_2utility_8cpp =
     [ "pseudoInverse", "math_2utility_8cpp.html#a6c8f2c62ee40e8d0f4aee53b99d9f77a", null ],
     [ "pseudoInverse", "math_2utility_8cpp.html#ad80ff22d5966772a5d1c0fcb53a5f519", null ],
     [ "pseudoInverse", "math_2utility_8cpp.html#a89af1d557b5855d4622172ec72c7cd86", null ],
-    [ "quaternionAverage", "math_2utility_8cpp.html#a2f3e439a391ab3b8526d40b0ba8d1856", null ],
+    [ "quaternionAverage", "math_2utility_8cpp.html#a015e834e3b94c8f3a08e4caf54af3cbb", null ],
     [ "quaternionExpMap", "math_2utility_8cpp.html#a08c50763c051ddb78a3a5de0c6517ecf", null ],
     [ "quaternionExpMap", "math_2utility_8cpp.html#ac43fa4553582a083e7d0059f46c448b6", null ],
     [ "quaternionExpMap", "math_2utility_8cpp.html#ada650be06011841d213d513be7bc92ab", null ],

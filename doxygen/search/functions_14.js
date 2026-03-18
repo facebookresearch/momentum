@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['validatecolumnindices_0',['validateColumnIndices',['../namespacemomentum.html#a90f78fa7289eef455c8a6345cfce7899',1,'momentum']]],
+  ['validatecolumnindices_0',['validateColumnIndices',['../namespacemomentum.html#a6f9b6abee7ae0f0f84b5126c24cfc55d',1,'momentum']]],
   ['value_1',['value',['../classmomentum_1_1SimdGeneralizedLossT.html#a657f29f85153da2898f894f2c0437a3c',1,'momentum::SimdGeneralizedLossT::value()'],['../classmomentum_1_1GeneralizedLossT.html#a28df165318ba09277880704efd016929',1,'momentum::GeneralizedLossT::value()']]],
   ['vec_2',['vec',['../classmomentum_1_1ResizeableMatrix.html#a01eb4ee04d7ec36a4979242ac6272126',1,'momentum::ResizeableMatrix::vec() const'],['../classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21',1,'momentum::ResizeableMatrix::vec()']]],
   ['velocitymagnitudesequenceerrorfunctiont_3',['velocitymagnitudesequenceerrorfunctiont',['../classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html#a1a2723e17dbb8d20678e14a67fe381c2',1,'momentum::VelocityMagnitudeSequenceErrorFunctionT::VelocityMagnitudeSequenceErrorFunctionT(const Skeleton &amp;skel, const ParameterTransform &amp;pt)'],['../classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html#a4e3e8723a7fdbc31f61b810ff91336cd',1,'momentum::VelocityMagnitudeSequenceErrorFunctionT::VelocityMagnitudeSequenceErrorFunctionT(const Character &amp;character)']]],

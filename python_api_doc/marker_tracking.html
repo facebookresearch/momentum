@@ -105,6 +105,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig"><code class="docutils literal notranslate"><span class="pre">TrackingConfig</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.__init__"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.active_params"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.active_params</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.collision_error_weight"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.collision_error_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.marker_weight"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.marker_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.smoothing"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.smoothing</span></code></a></li>
@@ -576,6 +577,22 @@ and orientation of a finger joint in the glove’s local coordinate frame.</p>
 </dd>
 </dl>
 </div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.active_params">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">active_params</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.active_params" title="Link to this definition"></a></dt>
+<dd><p>Optional boolean numpy array to restrict which parameters are optimized during tracking.</p>
+<p>When set, this is ANDed with the internally-computed pose parameters (which already exclude
+identity and locator parameters). Use the character’s <a class="reference internal" href="geometry.html#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterTransform</span></code></a>
+to construct a meaningful set, e.g. to exclude finger DOFs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pt</span> <span class="o">=</span> <span class="n">character</span><span class="o">.</span><span class="n">parameter_transform</span>
+<span class="n">active</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">pose_parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">active</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">pt</span><span class="o">.</span><span class="n">parameter_sets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fingers&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">active</span><span class="p">))</span>
+<span class="n">tracking_config</span><span class="o">.</span><span class="n">active_params</span> <span class="o">=</span> <span class="n">active</span>
+</pre></div>
+</div>
+<p>Set to None (default) to use the solver’s default parameter set.</p>
 </dd></dl>
 
 <dl class="py property">

@@ -1,7 +1,7 @@
 var searchData=
 [
   ['quaternion_0',['Quaternion',['../namespacemomentum.html#a63b4216b68d65d96a66c87d7bbea92dd',1,'momentum']]],
-  ['quaternionaverage_1',['quaternionAverage',['../namespacemomentum.html#a2f3e439a391ab3b8526d40b0ba8d1856',1,'momentum']]],
+  ['quaternionaverage_1',['quaternionAverage',['../namespacemomentum.html#a015e834e3b94c8f3a08e4caf54af3cbb',1,'momentum']]],
   ['quaterniond_2',['Quaterniond',['../namespacemomentum.html#ac7bd28eaff50731e7ec27b1faa22f7a2',1,'momentum']]],
   ['quaternionexpmap_3',['quaternionexpmap',['../namespacemomentum.html#a08c50763c051ddb78a3a5de0c6517ecf',1,'momentum::quaternionExpMap(const Vector3&lt; double &gt; &amp;v)'],['../namespacemomentum.html#ac43fa4553582a083e7d0059f46c448b6',1,'momentum::quaternionExpMap(const Vector3&lt; float &gt; &amp;v)'],['../namespacemomentum.html#ada650be06011841d213d513be7bc92ab',1,'momentum::quaternionExpMap(const Vector3&lt; T &gt; &amp;v)']]],
   ['quaternionf_4',['Quaternionf',['../namespacemomentum.html#a0665c7e57c805965d6ca082c7ad7a1ee',1,'momentum']]],

@@ -2,7 +2,7 @@ var searchData=
 [
   ['v_0',['v',['../structmomentum_1_1EigenStrongType.html#a3193bee8349ce6cbebb2ef7b72ed18b4',1,'momentum::EigenStrongType']]],
   ['valid_1',['valid',['../tracker__utils_8cpp.html#a28e3c179a86f337095088b3ca02a2b2a',1,'valid:&#160;tracker_utils.cpp'],['../structmomentum_1_1GloveSensorObservation.html#a1707717303301a5a19691d2b536af8c4',1,'momentum::GloveSensorObservation::valid']]],
-  ['validatecolumnindices_2',['validateColumnIndices',['../namespacemomentum.html#a90f78fa7289eef455c8a6345cfce7899',1,'momentum']]],
+  ['validatecolumnindices_2',['validateColumnIndices',['../namespacemomentum.html#a6f9b6abee7ae0f0f84b5126c24cfc55d',1,'momentum']]],
   ['validpairs_5f_3',['validpairs_',['../classmomentum_1_1SimdCollisionErrorFunctionT.html#a7a762523d545eaa0d011e9e567fdbf08',1,'momentum::SimdCollisionErrorFunctionT::validPairs_'],['../classmomentum_1_1CollisionErrorFunctionStatelessT.html#a16cf5b1030fbcc298f796286b010b292',1,'momentum::CollisionErrorFunctionStatelessT::validPairs_'],['../classmomentum_1_1CollisionErrorFunctionT.html#ab461fe22eaae82c782c256de874d997f',1,'momentum::CollisionErrorFunctionT::validPairs_']]],
   ['value_4',['value',['../classmomentum_1_1SimdGeneralizedLossT.html#a657f29f85153da2898f894f2c0437a3c',1,'momentum::SimdGeneralizedLossT::value()'],['../classmomentum_1_1GeneralizedLossT.html#a28df165318ba09277880704efd016929',1,'momentum::GeneralizedLossT::value()']]],
   ['value_5ftype_5',['value_type',['../classmomentum_1_1AlignedAllocator.html#ae1501f6ef686a19fd7b7c0ec932dd2a3',1,'momentum::AlignedAllocator']]],

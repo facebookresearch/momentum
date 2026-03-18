@@ -51,5 +51,5 @@ var searchData=
   ['trustregionqrd_5fp_48',['TrustRegionQRd_p',['../namespacemomentum.html#ac8e50fd47f40e1c96579e5bdf973178e',1,'momentum']]],
   ['trustregionqrd_5fu_49',['TrustRegionQRd_u',['../namespacemomentum.html#aa21a4a8b654b70eaddd666de1b7b682a',1,'momentum']]],
   ['trustregionqrd_5fw_50',['TrustRegionQRd_w',['../namespacemomentum.html#a2e70a67e3f7d91fc93592f101d83fd3e',1,'momentum']]],
-  ['type_51',['type',['../structmomentum_1_1DeduceSpanType.html#a55526ce2f828cd93971d418331af2bfa',1,'momentum::DeduceSpanType']]]
+  ['type_51',['type',['../structmomentum_1_1DeduceSpanType.html#a9166b8a97eac7b03e3a4eff31b5df1e0',1,'momentum::DeduceSpanType']]]
 ];
