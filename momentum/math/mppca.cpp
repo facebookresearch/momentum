@@ -16,7 +16,7 @@ template <typename T>
 void MppcaT<T>::set(
     const VectorX<T>& inPi,
     const MatrixX<T>& mmu,
-    std::span<const MatrixX<T>> W,
+    momentum::span<const MatrixX<T>> W,
     const VectorX<T>& sigma2) {
   using CovarianceMatrix = LowRankCovarianceMatrixT<T>;
 
@@ -47,7 +47,7 @@ void MppcaT<T>::set(
 
     // Rpre is the constant part of R that does not depend on the parameters, so we can precalculate
     // it
-    Rpre(c) = std::log(inPi(c)) - 0.5 * C_logDeterminant - half_d_log_2pi;
+    Rpre(c) = std::log(inPi(c)) - T(0.5) * C_logDeterminant - half_d_log_2pi;
   }
   mu = mmu;
 
@@ -55,7 +55,7 @@ void MppcaT<T>::set(
 }
 
 template <typename T, typename T2>
-std::vector<Eigen::MatrixX<T2>> castMatrices(std::span<const Eigen::MatrixX<T>> m_in) {
+std::vector<Eigen::MatrixX<T2>> castMatrices(momentum::span<const Eigen::MatrixX<T>> m_in) {
   std::vector<Eigen::MatrixX<T2>> result;
   result.reserve(m_in.size());
   for (const auto& m : m_in) {

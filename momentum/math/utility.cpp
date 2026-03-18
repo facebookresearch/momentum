@@ -394,7 +394,7 @@ Vector3<T> quaternionToEuler(const Quaternion<T>& q) {
   return res;
 }
 
-Quaternionf quaternionAverage(std::span<const Quaternionf> q, std::span<const float> w) {
+Quaternionf quaternionAverage(momentum::span<const Quaternionf> q, momentum::span<const float> w) {
   Matrix4f Q = Matrix4f::Zero();
 
   // calculate the matrix
