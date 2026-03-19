@@ -78,6 +78,12 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
     return constraints_;
   }
 
+  /// Returns a mutable reference to the constraint at the given index,
+  /// for in-place target/weight updates.
+  ProjectionConstraintDataT<T>& getConstraint(size_t index) {
+    return constraints_.at(index);
+  }
+
  protected:
   std::vector<ProjectionConstraintDataT<T>> constraints_;
 

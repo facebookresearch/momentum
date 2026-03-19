@@ -184,6 +184,14 @@ class JointErrorFunctionT : public SkeletonErrorFunctionT<T> {
     constraints_.clear();
   }
 
+  /// Mutable access to a constraint by index, for in-place updates
+  ///
+  /// @param[in] index: index of the constraint
+  /// @return mutable reference to the constraint data
+  Data& getConstraint(size_t index) {
+    return constraints_.at(index);
+  }
+
  protected:
   /// List of constraints
   std::vector<Data> constraints_;
