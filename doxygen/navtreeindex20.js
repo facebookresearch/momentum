@@ -1,5 +1,9 @@
 var NAVTREEINDEX20 =
 {
+"math_2utility_8cpp.html#aaaf02af7364b926be6125a164b8b61fd":[3,0,8,26,11],
+"math_2utility_8cpp.html#aab05802084e5fe05a49543acd068b3ac":[3,0,8,26,0],
+"math_2utility_8cpp.html#aac9d70ee334b3b89ed65cac5f8d6f4cc":[3,0,8,26,41],
+"math_2utility_8cpp.html#aae3e15d9a6380800f648c9a6fe801cac":[3,0,8,26,28],
 "math_2utility_8cpp.html#ab52f16b16e668cd950e9c61c0f5a9425":[3,0,8,26,26],
 "math_2utility_8cpp.html#abafb4226ec531cbd0f2e27090af738fd":[3,0,8,26,12],
 "math_2utility_8cpp.html#ac43fa4553582a083e7d0059f46c448b6":[3,0,8,26,23],
@@ -117,8 +121,8 @@ var NAVTREEINDEX20 =
 "namespaceEigen.html#a3a36bf856cd11dc59ff31922df489a2c":[1,0,0,0],
 "namespacefx.html":[1,0,1],
 "namespacefx_1_1gltf.html":[1,0,1,0],
-"namespacemembers.html":[1,1,0],
 "namespacemembers.html":[1,1,0,0],
+"namespacemembers.html":[1,1,0],
 "namespacemembers_b.html":[1,1,0,1],
 "namespacemembers_c.html":[1,1,0,2],
 "namespacemembers_d.html":[1,1,0,3],
@@ -126,8 +130,8 @@ var NAVTREEINDEX20 =
 "namespacemembers_enum.html":[1,1,4],
 "namespacemembers_eval.html":[1,1,5],
 "namespacemembers_f.html":[1,1,0,5],
-"namespacemembers_func.html":[1,1,1],
 "namespacemembers_func.html":[1,1,1,0],
+"namespacemembers_func.html":[1,1,1],
 "namespacemembers_func_b.html":[1,1,1,1],
 "namespacemembers_func_c.html":[1,1,1,2],
 "namespacemembers_func_d.html":[1,1,1,3],
@@ -163,8 +167,8 @@ var NAVTREEINDEX20 =
 "namespacemembers_r.html":[1,1,0,17],
 "namespacemembers_s.html":[1,1,0,18],
 "namespacemembers_t.html":[1,1,0,19],
-"namespacemembers_type.html":[1,1,3],
 "namespacemembers_type.html":[1,1,3,0],
+"namespacemembers_type.html":[1,1,3],
 "namespacemembers_type_b.html":[1,1,3,1],
 "namespacemembers_type_c.html":[1,1,3,2],
 "namespacemembers_type_d.html":[1,1,3,3],
@@ -245,9 +249,5 @@ var NAVTREEINDEX20 =
 "namespacemomentum.html#a04fe5403d69331b5505053a546c160ea":[1,0,2,1680],
 "namespacemomentum.html#a05003fc866b1ab8f67086a3db1ff148c":[1,0,2,684],
 "namespacemomentum.html#a0500f200d2c78c34ea3b8b94d8729715":[1,0,2,2203],
-"namespacemomentum.html#a0504345ba3f066afe18fdc1174e8412f":[1,0,2,1194],
-"namespacemomentum.html#a05169ddb3b7013e31793b9b1540c265a":[1,0,2,718],
-"namespacemomentum.html#a05798594e0a8db062d8077a7a79579e2":[1,0,2,2483],
-"namespacemomentum.html#a0583d9715789d97c93762bad98056fa5":[1,0,2,762],
-"namespacemomentum.html#a059f039604d57c38c76ba42f42c86097":[1,0,2,580]
+"namespacemomentum.html#a0504345ba3f066afe18fdc1174e8412f":[1,0,2,1194]
 };

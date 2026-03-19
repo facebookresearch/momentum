@@ -9,6 +9,7 @@ var classmomentum_1_1JointErrorFunctionT =
     [ "addConstraints", "classmomentum_1_1JointErrorFunctionT.html#a75ab3a35a289061ae870507b2115afc9", null ],
     [ "clearConstraints", "classmomentum_1_1JointErrorFunctionT.html#af0bcd24e3cde648c25bf79f5e402a573", null ],
     [ "evalFunction", "classmomentum_1_1JointErrorFunctionT.html#a2ab1cecebe58f0af5f174d8821ecd9e8", null ],
+    [ "getConstraint", "classmomentum_1_1JointErrorFunctionT.html#a99344cbbd5e099c6ba1fc8a3d2609bf9", null ],
     [ "getConstraints", "classmomentum_1_1JointErrorFunctionT.html#a97178885fd1828515d0451f705eb8de5", null ],
     [ "getError", "classmomentum_1_1JointErrorFunctionT.html#ad9ed2eef99ae22646d12063fdd70c6a7", null ],
     [ "getGradient", "classmomentum_1_1JointErrorFunctionT.html#a66ca3858c19aa0a225a81ef2f8176fa6", null ],

@@ -4,6 +4,7 @@ var classmomentum_1_1ProjectionErrorFunctionT =
     [ "addConstraint", "classmomentum_1_1ProjectionErrorFunctionT.html#ae68eb695175cc6a3251eed1e0e06fdad", null ],
     [ "clearConstraints", "classmomentum_1_1ProjectionErrorFunctionT.html#a3993c04fa49feae867745389cf71dc92", null ],
     [ "empty", "classmomentum_1_1ProjectionErrorFunctionT.html#a977e7e5e40de1d83401cd68e78a0a604", null ],
+    [ "getConstraint", "classmomentum_1_1ProjectionErrorFunctionT.html#a8131dcfe414808f114152dc97886e108", null ],
     [ "getConstraints", "classmomentum_1_1ProjectionErrorFunctionT.html#aea8fc178846395b150e996130ab9c653", null ],
     [ "getError", "classmomentum_1_1ProjectionErrorFunctionT.html#a7b053c9f3cfb4a385eec4db533315191", null ],
     [ "getGradient", "classmomentum_1_1ProjectionErrorFunctionT.html#ac9d556d832fe3a1b3012844ff71ac267", null ],
