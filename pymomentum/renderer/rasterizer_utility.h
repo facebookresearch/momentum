@@ -19,8 +19,7 @@
 #include <optional>
 #include <tuple>
 
-namespace pymomentum {
-namespace rasterizer_detail {
+namespace pymomentum::rasterizer_detail {
 
 namespace py = pybind11;
 
@@ -223,5 +222,4 @@ inline std::vector<momentum::rasterizer::Light> convertLightsToEyeSpace(
   return result;
 }
 
-} // namespace rasterizer_detail
-} // namespace pymomentum
+} // namespace pymomentum::rasterizer_detail
