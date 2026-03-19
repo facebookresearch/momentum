@@ -195,13 +195,13 @@ class TestFBX(unittest.TestCase):
         if not pym_geometry.is_fbxsdk_available():
             return
 
-        # Test saving with joint parameters
+        # Test saving with skeleton states
         with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
-            pym_geometry.Character.save_fbx_with_skeleton_states(
+            pym_geometry.Character.save_with_skel_states(
                 path=temp_file.name,
                 character=self.character,
                 fps=60,
-                skeleton_states=self.skeleton_state.numpy(),
+                skel_states=self.skeleton_state.numpy(),
             )
             self._verify_fbx(temp_file.name)
 
