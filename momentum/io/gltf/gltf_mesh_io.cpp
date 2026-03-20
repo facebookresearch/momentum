@@ -9,9 +9,9 @@
 
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
+#include "momentum/io/common/json_utils.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
-#include "momentum/io/gltf/utils/json_utils.h"
 
 namespace momentum {
 

@@ -10,8 +10,8 @@
 #include "momentum/character/joint.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
+#include "momentum/io/common/json_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
-#include "momentum/io/gltf/utils/json_utils.h"
 
 #include <algorithm>
 #include <limits>

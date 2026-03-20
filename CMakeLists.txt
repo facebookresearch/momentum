@@ -474,6 +474,18 @@ if(MOMENTUM_ENABLE_FBX_SAVING)
 endif()
 
 mt_library(
+  NAME io_json_utils
+  HEADERS_VARS io_json_utils_public_headers
+  SOURCES_VARS io_json_utils_sources
+  PUBLIC_LINK_LIBRARIES
+    character
+    nlohmann_json::nlohmann_json
+  PRIVATE_LINK_LIBRARIES
+    common
+    math
+)
+
+mt_library(
   NAME io_gltf
   HEADERS_VARS
     io_gltf_public_headers
@@ -485,6 +497,7 @@ mt_library(
     coordinate_system
     io_common
     io_file_save_options
+    io_json_utils
     io_skeleton
     fx-gltf::fx-gltf
   PRIVATE_LINK_LIBRARIES
