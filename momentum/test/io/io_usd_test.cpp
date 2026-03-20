@@ -239,3 +239,44 @@ TEST_F(UsdIoTest, LoadFromBuffer) {
   EXPECT_GT(character.mesh->vertices.size(), 0);
   EXPECT_GT(character.mesh->faces.size(), 0);
 }
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_Normals) {
+  // The test character mesh has normals computed via updateNormals()
+  ASSERT_TRUE(testCharacter.mesh);
+  ASSERT_FALSE(testCharacter.mesh->normals.empty());
+
+  auto tempFile = temporaryFile("momentum_usd_normals", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(loadedCharacter.mesh);
+  ASSERT_EQ(loadedCharacter.mesh->normals.size(), testCharacter.mesh->normals.size());
+
+  for (size_t i = 0; i < testCharacter.mesh->normals.size(); ++i) {
+    EXPECT_TRUE(loadedCharacter.mesh->normals[i].isApprox(testCharacter.mesh->normals[i], 1e-4f))
+        << "Normal mismatch at vertex " << i;
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_VertexColors) {
+  // The test character mesh has colors
+  ASSERT_TRUE(testCharacter.mesh);
+  ASSERT_FALSE(testCharacter.mesh->colors.empty());
+
+  auto tempFile = temporaryFile("momentum_usd_colors", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(loadedCharacter.mesh);
+  ASSERT_EQ(loadedCharacter.mesh->colors.size(), testCharacter.mesh->colors.size());
+
+  for (size_t i = 0; i < testCharacter.mesh->colors.size(); ++i) {
+    // Allow +-1 tolerance due to float->byte->float->byte roundtrip
+    for (int c = 0; c < 3; ++c) {
+      EXPECT_NEAR(loadedCharacter.mesh->colors[i][c], testCharacter.mesh->colors[i][c], 1)
+          << "Color mismatch at vertex " << i << ", channel " << c;
+    }
+  }
+}
