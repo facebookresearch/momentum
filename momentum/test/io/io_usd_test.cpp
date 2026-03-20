@@ -122,6 +122,29 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip) {
     const auto& loaded = loadedCharacter.skeleton.joints[i];
 
     EXPECT_EQ(loaded.name, original.name) << "Joint name mismatch at index " << i;
+
+    EXPECT_TRUE(loaded.preRotation.toRotationMatrix().isApprox(
+        original.preRotation.toRotationMatrix(), 1e-4f))
+        << "preRotation mismatch at joint " << i << " (" << original.name << ")";
+
+    EXPECT_TRUE(loaded.translationOffset.isApprox(original.translationOffset, 1e-4f))
+        << "translationOffset mismatch at joint " << i << " (" << original.name << ")";
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_JointTopology) {
+  auto tempFile = temporaryFile("momentum_usd_topology", ".usda");
+
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_EQ(loadedCharacter.skeleton.joints.size(), testCharacter.skeleton.joints.size());
+
+  for (size_t i = 0; i < testCharacter.skeleton.joints.size(); ++i) {
+    EXPECT_EQ(loadedCharacter.skeleton.joints[i].parent, testCharacter.skeleton.joints[i].parent)
+        << "Parent index mismatch at joint " << i << " (" << testCharacter.skeleton.joints[i].name
+        << ")";
   }
 }
 
@@ -150,6 +173,40 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkinWeights) {
             << "Weight mismatch at vertex " << v << ", influence " << j;
       }
     }
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_NonTrivialPreRotation) {
+  // Create a character with non-identity preRotations to verify the bug fix
+  auto character = createTestCharacter();
+
+  // Set non-trivial preRotations on joints
+  character.skeleton.joints[0].preRotation =
+      Eigen::Quaternionf(Eigen::AngleAxisf(0.3f, Eigen::Vector3f::UnitX()));
+  character.skeleton.joints[1].preRotation =
+      Eigen::Quaternionf(Eigen::AngleAxisf(-0.5f, Eigen::Vector3f::UnitZ()));
+  character.skeleton.joints[2].preRotation =
+      Eigen::Quaternionf(Eigen::AngleAxisf(0.7f, Eigen::Vector3f(1.0f, 1.0f, 0.0f).normalized()));
+
+  auto tempFile = temporaryFile("momentum_usd_prerot", ".usda");
+  saveUsd(tempFile.path(), character);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_EQ(loadedCharacter.skeleton.joints.size(), character.skeleton.joints.size());
+
+  for (size_t i = 0; i < character.skeleton.joints.size(); ++i) {
+    const auto& original = character.skeleton.joints[i];
+    const auto& loaded = loadedCharacter.skeleton.joints[i];
+
+    EXPECT_TRUE(loaded.preRotation.toRotationMatrix().isApprox(
+        original.preRotation.toRotationMatrix(), 1e-4f))
+        << "preRotation mismatch at joint " << i << " (" << original.name << ")";
+
+    EXPECT_TRUE(loaded.translationOffset.isApprox(original.translationOffset, 1e-4f))
+        << "translationOffset mismatch at joint " << i << " (" << original.name << ")";
+
+    EXPECT_EQ(loaded.parent, original.parent) << "Parent index mismatch at joint " << i;
   }
 }
 
