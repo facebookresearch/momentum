@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <momentum/character/collision_geometry.h>
+#include <momentum/character/locator.h>
 #include <momentum/character/skeleton.h>
 
 #include <pxr/usd/usd/stage.h>
@@ -17,21 +19,31 @@ PXR_NAMESPACE_USING_DIRECTIVE
 namespace momentum {
 
 /// Load a skeleton from a USD stage.
-///
-/// Reads joint names, parent topology, and rest/bind transforms from the first
-/// UsdSkelSkeleton prim found on the stage.
-///
-/// @param[in] stage The USD stage to read from.
-/// @return The loaded Skeleton.
 Skeleton loadSkeletonFromUsd(const UsdStageRefPtr& stage);
 
 /// Save a skeleton to a USD stage.
-///
-/// Writes joint names, parent topology, local rest transforms, and world-space
-/// bind transforms to the given UsdSkelSkeleton prim.
-///
-/// @param[in] skeleton The Skeleton to save.
-/// @param[in] skelPrim The UsdSkelSkeleton prim to write to.
 void saveSkeletonToUsd(const Skeleton& skeleton, UsdSkelSkeleton& skelPrim);
+
+/// Save collision geometry as child prims under the skeleton.
+void saveCollisionGeometryToUsd(
+    const CollisionGeometry& collision,
+    const Skeleton& skeleton,
+    const UsdStageRefPtr& stage,
+    const SdfPath& skelRootPath);
+
+/// Load collision geometry from child prims.
+CollisionGeometry loadCollisionGeometryFromUsd(
+    const UsdStageRefPtr& stage,
+    const Skeleton& skeleton);
+
+/// Save locators as child prims under the skeleton.
+void saveLocatorsToUsd(
+    const LocatorList& locators,
+    const Skeleton& skeleton,
+    const UsdStageRefPtr& stage,
+    const SdfPath& skelRootPath);
+
+/// Load locators from child prims.
+LocatorList loadLocatorsFromUsd(const UsdStageRefPtr& stage, const Skeleton& skeleton);
 
 } // namespace momentum

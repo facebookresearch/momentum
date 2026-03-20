@@ -9,6 +9,8 @@
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
+#include "momentum/character/collision_geometry.h"
+#include "momentum/character/locator.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/math/mesh.h"
@@ -402,6 +404,74 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkeletonStates) {
       EXPECT_NEAR(origTransform.scale, loadedTransform.scale, 0.01f)
           << "Scale mismatch at frame " << f << ", joint " << j;
     }
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_CollisionGeometry) {
+  ASSERT_TRUE(testCharacter.collision);
+  ASSERT_GT(testCharacter.collision->size(), 0);
+
+  auto tempFile = temporaryFile("momentum_usd_collision", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(loadedCharacter.collision);
+  ASSERT_EQ(loadedCharacter.collision->size(), testCharacter.collision->size());
+
+  for (size_t i = 0; i < testCharacter.collision->size(); ++i) {
+    const auto& orig = (*testCharacter.collision)[i];
+    const auto& loaded = (*loadedCharacter.collision)[i];
+
+    EXPECT_EQ(loaded.parent, orig.parent) << "Capsule parent mismatch at index " << i;
+    EXPECT_NEAR(loaded.length, orig.length, 1e-5f) << "Capsule length mismatch at index " << i;
+    EXPECT_TRUE(loaded.radius.isApprox(orig.radius, 1e-5f))
+        << "Capsule radius mismatch at index " << i;
+    EXPECT_TRUE(loaded.transformation.translation.isApprox(orig.transformation.translation, 1e-4f))
+        << "Capsule translation mismatch at index " << i;
+    EXPECT_TRUE(loaded.transformation.rotation.toRotationMatrix().isApprox(
+        orig.transformation.rotation.toRotationMatrix(), 1e-4f))
+        << "Capsule rotation mismatch at index " << i;
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_Locators) {
+  ASSERT_GT(testCharacter.locators.size(), 0);
+
+  // Set non-default values on the first locator so the roundtrip is non-trivial
+  auto& loc0 = testCharacter.locators[0];
+  loc0.locked = Eigen::Vector3i(1, 0, 1);
+  loc0.weight = 0.75f;
+  loc0.limitOrigin = Eigen::Vector3f(0.1f, 0.2f, 0.3f);
+  loc0.limitWeight = Eigen::Vector3f(0.5f, 0.6f, 0.7f);
+  loc0.attachedToSkin = true;
+  loc0.skinOffset = 0.05f;
+
+  auto tempFile = temporaryFile("momentum_usd_locators", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_EQ(loadedCharacter.locators.size(), testCharacter.locators.size());
+
+  for (size_t i = 0; i < testCharacter.locators.size(); ++i) {
+    const auto& orig = testCharacter.locators[i];
+    const auto& loaded = loadedCharacter.locators[i];
+
+    EXPECT_EQ(loaded.name, orig.name) << "Locator name mismatch at index " << i;
+    EXPECT_EQ(loaded.parent, orig.parent) << "Locator parent mismatch at index " << i;
+    EXPECT_TRUE(loaded.offset.isApprox(orig.offset, 1e-4f))
+        << "Locator offset mismatch at index " << i;
+    EXPECT_FLOAT_EQ(loaded.weight, orig.weight) << "Locator weight mismatch at index " << i;
+    EXPECT_EQ(loaded.locked, orig.locked) << "Locator locked mismatch at index " << i;
+    EXPECT_TRUE(loaded.limitOrigin.isApprox(orig.limitOrigin, 1e-4f))
+        << "Locator limitOrigin mismatch at index " << i;
+    EXPECT_TRUE(loaded.limitWeight.isApprox(orig.limitWeight, 1e-4f))
+        << "Locator limitWeight mismatch at index " << i;
+    EXPECT_EQ(loaded.attachedToSkin, orig.attachedToSkin)
+        << "Locator attachedToSkin mismatch at index " << i;
+    EXPECT_FLOAT_EQ(loaded.skinOffset, orig.skinOffset)
+        << "Locator skinOffset mismatch at index " << i;
   }
 }
 
