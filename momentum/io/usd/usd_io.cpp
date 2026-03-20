@@ -15,14 +15,19 @@
 #include "momentum/character/types.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
+#include "momentum/io/common/json_utils.h"
 #include "momentum/io/usd/usd_animation_io.h"
 #include "momentum/io/usd/usd_mesh_io.h"
 #include "momentum/io/usd/usd_skeleton_io.h"
 #include "momentum/math/mesh.h"
 
+#include <nlohmann/json.hpp>
+
 #include <pxr/base/tf/diagnosticMgr.h>
 #include <pxr/base/tf/errorMark.h>
 #include <pxr/pxr.h>
+#include <pxr/usd/sdf/valueTypeName.h>
+#include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
 #include <pxr/usd/usdSkel/root.h>
 
@@ -164,6 +169,118 @@ void initializeUsdWithSuppressedWarnings() {
   g_usdInitialized = true;
 }
 
+void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPrim) {
+  // Save character name
+  if (!character.name.empty()) {
+    auto nameAttr =
+        skelRootPrim.CreateAttribute(TfToken("momentum:characterName"), SdfValueTypeNames->String);
+    nameAttr.Set(std::string(character.name));
+  }
+
+  // Save parameter transform as JSON
+  if (!character.parameterTransform.name.empty()) {
+    nlohmann::json ptJson;
+    parameterTransformToJson(character, ptJson);
+    auto ptAttr = skelRootPrim.CreateAttribute(
+        TfToken("momentum:parameterTransform"), SdfValueTypeNames->String);
+    ptAttr.Set(ptJson.dump());
+  }
+
+  // Save parameter limits as JSON
+  if (!character.parameterLimits.empty()) {
+    nlohmann::json limJson;
+    parameterLimitsToJson(character, limJson);
+    auto limAttr = skelRootPrim.CreateAttribute(
+        TfToken("momentum:parameterLimits"), SdfValueTypeNames->String);
+    limAttr.Set(limJson.dump());
+  }
+
+  // Save parameter sets as JSON
+  if (!character.parameterTransform.parameterSets.empty()) {
+    nlohmann::json setsJson;
+    parameterSetsToJson(character, setsJson);
+    auto setsAttr =
+        skelRootPrim.CreateAttribute(TfToken("momentum:parameterSets"), SdfValueTypeNames->String);
+    setsAttr.Set(setsJson.dump());
+  }
+
+  // Save pose constraints as JSON
+  if (!character.parameterTransform.poseConstraints.empty()) {
+    nlohmann::json pcJson;
+    poseConstraintsToJson(character, pcJson);
+    auto pcAttr = skelRootPrim.CreateAttribute(
+        TfToken("momentum:poseConstraints"), SdfValueTypeNames->String);
+    pcAttr.Set(pcJson.dump());
+  }
+}
+
+void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
+  // Load character name
+  auto nameAttr = skelRootPrim.GetAttribute(TfToken("momentum:characterName"));
+  if (nameAttr) {
+    std::string name;
+    if (nameAttr.Get(&name)) {
+      character.name = name;
+    }
+  }
+
+  // Load parameter transform from JSON
+  auto ptAttr = skelRootPrim.GetAttribute(TfToken("momentum:parameterTransform"));
+  if (ptAttr) {
+    std::string ptStr;
+    if (ptAttr.Get(&ptStr)) {
+      try {
+        auto ptJson = nlohmann::json::parse(ptStr);
+        character.parameterTransform = parameterTransformFromJson(character, ptJson);
+      } catch (const nlohmann::json::parse_error& e) {
+        MT_LOGW("Failed to parse momentum:parameterTransform: {}", e.what());
+      }
+    }
+  }
+
+  // Load parameter limits from JSON
+  auto limAttr = skelRootPrim.GetAttribute(TfToken("momentum:parameterLimits"));
+  if (limAttr) {
+    std::string limStr;
+    if (limAttr.Get(&limStr)) {
+      try {
+        auto limJson = nlohmann::json::parse(limStr);
+        character.parameterLimits = parameterLimitsFromJson(character, limJson);
+      } catch (const nlohmann::json::parse_error& e) {
+        MT_LOGW("Failed to parse momentum:parameterLimits: {}", e.what());
+      }
+    }
+  }
+
+  // Load parameter sets from JSON
+  auto setsAttr = skelRootPrim.GetAttribute(TfToken("momentum:parameterSets"));
+  if (setsAttr) {
+    std::string setsStr;
+    if (setsAttr.Get(&setsStr)) {
+      try {
+        auto setsJson = nlohmann::json::parse(setsStr);
+        character.parameterTransform.parameterSets = parameterSetsFromJson(character, setsJson);
+      } catch (const nlohmann::json::parse_error& e) {
+        MT_LOGW("Failed to parse momentum:parameterSets: {}", e.what());
+      }
+    }
+  }
+
+  // Load pose constraints from JSON
+  auto pcAttr = skelRootPrim.GetAttribute(TfToken("momentum:poseConstraints"));
+  if (pcAttr) {
+    std::string pcStr;
+    if (pcAttr.Get(&pcStr)) {
+      try {
+        auto pcJson = nlohmann::json::parse(pcStr);
+        character.parameterTransform.poseConstraints = poseConstraintsFromJson(character, pcJson);
+      } catch (const nlohmann::json::parse_error& e) {
+        MT_LOGW("Failed to parse momentum:poseConstraints: {}", e.what());
+      }
+    }
+  }
+}
+
 Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
   Character character;
 
@@ -205,6 +322,14 @@ Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
     character.parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
     character.parameterTransform.activeJointParams = VectorX<bool>::Constant(numJointParams, true);
+  }
+
+  // Load momentum-specific metadata from SkelRoot prim
+  for (const auto& prim : stage->Traverse()) {
+    if (prim.IsA<UsdSkelRoot>()) {
+      loadMomentumMetadata(character, prim);
+      break;
+    }
   }
 
   return character;
@@ -286,6 +411,8 @@ void saveUsd(const filesystem::path& filename, const Character& character) {
     saveBlendShapesToUsd(*character.blendShape, mesh);
   }
 
+  saveMomentumMetadata(character, skelRoot.GetPrim());
+
   stage->GetRootLayer()->Save();
 }
 
@@ -363,6 +490,8 @@ void saveUsdCharacter(
   if (!skeletonStates.empty()) {
     saveSkeletonStatesToUsd(stage, skeleton, character.skeleton, skeletonStates, fps);
   }
+
+  saveMomentumMetadata(character, skelRoot.GetPrim());
 
   stage->GetRootLayer()->Save();
 }

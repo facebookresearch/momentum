@@ -321,6 +321,45 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_BlendShapes) {
   EXPECT_TRUE(loadedVectors.isApprox(origVectors, 1e-4f)) << "Shape vectors mismatch";
 }
 
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_MomentumMetadata) {
+  auto tempFile = temporaryFile("momentum_usd_metadata", ".usda");
+
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  // Verify character name
+  EXPECT_EQ(loadedCharacter.name, testCharacter.name);
+
+  // Verify parameter transform names
+  ASSERT_EQ(
+      loadedCharacter.parameterTransform.name.size(), testCharacter.parameterTransform.name.size());
+
+  for (size_t i = 0; i < testCharacter.parameterTransform.name.size(); ++i) {
+    EXPECT_EQ(loadedCharacter.parameterTransform.name[i], testCharacter.parameterTransform.name[i])
+        << "Parameter name mismatch at index " << i;
+  }
+
+  // Verify transform matrix dimensions
+  EXPECT_EQ(
+      loadedCharacter.parameterTransform.transform.rows(),
+      testCharacter.parameterTransform.transform.rows());
+  EXPECT_EQ(
+      loadedCharacter.parameterTransform.transform.cols(),
+      testCharacter.parameterTransform.transform.cols());
+
+  // Verify parameter limits
+  ASSERT_EQ(loadedCharacter.parameterLimits.size(), testCharacter.parameterLimits.size());
+
+  for (size_t i = 0; i < testCharacter.parameterLimits.size(); ++i) {
+    EXPECT_EQ(loadedCharacter.parameterLimits[i].type, testCharacter.parameterLimits[i].type)
+        << "Parameter limit type mismatch at index " << i;
+    EXPECT_FLOAT_EQ(
+        loadedCharacter.parameterLimits[i].weight, testCharacter.parameterLimits[i].weight)
+        << "Parameter limit weight mismatch at index " << i;
+  }
+}
+
 TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkeletonStates) {
   const auto& skeleton = testCharacter.skeleton;
   const auto numJoints = skeleton.joints.size();
