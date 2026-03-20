@@ -15,6 +15,7 @@
 #include "momentum/character/types.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
+#include "momentum/io/usd/usd_animation_io.h"
 #include "momentum/io/usd/usd_mesh_io.h"
 #include "momentum/io/usd/usd_skeleton_io.h"
 #include "momentum/math/mesh.h"
@@ -209,6 +210,20 @@ Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
   return character;
 }
 
+/// RAII guard that removes a temporary file on destruction.
+struct TempFileGuard {
+  filesystem::path path;
+  explicit TempFileGuard(filesystem::path p) : path(std::move(p)) {}
+  ~TempFileGuard() {
+    std::error_code ec;
+    filesystem::remove(path, ec);
+  }
+  TempFileGuard(const TempFileGuard&) = delete;
+  TempFileGuard& operator=(const TempFileGuard&) = delete;
+  TempFileGuard(TempFileGuard&&) = delete;
+  TempFileGuard& operator=(TempFileGuard&&) = delete;
+};
+
 } // namespace
 
 Character loadUsdCharacter(const filesystem::path& inputPath) {
@@ -231,14 +246,7 @@ Character loadUsdCharacter(std::span<const std::byte> inputSpan) {
       ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
        "_" + std::to_string(std::time(nullptr)) + ".usd");
 
-  // Use RAII for automatic cleanup
-  struct TempFileGuard {
-    filesystem::path path;
-    ~TempFileGuard() {
-      std::error_code ec;
-      filesystem::remove(path, ec); // Don't throw on cleanup
-    }
-  } tempGuard{tempPath};
+  TempFileGuard tempGuard(tempPath);
 
   {
     std::ofstream tempFile(tempPath, std::ios::binary);
@@ -276,6 +284,84 @@ void saveUsd(const filesystem::path& filename, const Character& character) {
 
   if (character.blendShape) {
     saveBlendShapesToUsd(*character.blendShape, mesh);
+  }
+
+  stage->GetRootLayer()->Save();
+}
+
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadUsdCharacterWithSkeletonStates(const filesystem::path& inputPath) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto stage = UsdStage::Open(inputPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage: {}", inputPath.string());
+
+  auto character = loadUsdCharacterFromStage(stage);
+  auto [states, frameTimes] = loadSkeletonStatesFromUsd(stage, character.skeleton);
+
+  return {std::move(character), std::move(states), std::move(frameTimes)};
+}
+
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadUsdCharacterWithSkeletonStates(std::span<const std::byte> inputSpan) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto tempDir = filesystem::temp_directory_path();
+  auto tempPath = tempDir /
+      ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
+       "_" + std::to_string(std::time(nullptr)) + ".usd");
+
+  TempFileGuard tempGuard(tempPath);
+
+  {
+    std::ofstream tempFile(tempPath, std::ios::binary);
+    MT_THROW_IF(!tempFile.is_open(), "Failed to create temporary file: {}", tempPath.string());
+    tempFile.write(reinterpret_cast<const char*>(inputSpan.data()), inputSpan.size());
+  }
+
+  auto stage = UsdStage::Open(tempPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage from buffer");
+
+  auto character = loadUsdCharacterFromStage(stage);
+  auto [states, frameTimes] = loadSkeletonStatesFromUsd(stage, character.skeleton);
+
+  return {std::move(character), std::move(states), std::move(frameTimes)};
+}
+
+void saveUsdCharacter(
+    const filesystem::path& filename,
+    const Character& character,
+    float fps,
+    std::span<const SkeletonState> skeletonStates) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto stage = UsdStage::CreateNew(filename.string());
+  MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
+
+  auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
+  auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
+
+  saveSkeletonToUsd(character.skeleton, skeleton);
+
+  auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
+
+  if (character.mesh) {
+    saveMeshToUsd(*character.mesh, mesh);
+  }
+
+  if (character.skinWeights) {
+    saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
+  }
+
+  if (character.blendShape) {
+    saveBlendShapesToUsd(*character.blendShape, mesh);
+  }
+
+  if (!skeletonStates.empty()) {
+    saveSkeletonStatesToUsd(stage, skeleton, character.skeleton, skeletonStates, fps);
   }
 
   stage->GetRootLayer()->Save();
