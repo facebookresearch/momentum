@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/io/gltf/utils/json_utils.h"
+#include "momentum/io/common/json_utils.h"
 
 #include "momentum/character/character.h"
 #include "momentum/common/log.h"
@@ -98,8 +98,8 @@ void parameterTransformToJson(const Character& character, nlohmann::json& j) {
     }
   }
   // write blendshape parameters
-  const auto blendShapeParameters = character.parameterTransform.blendShapeParameters;
-  const auto faceExpressionParameters = character.parameterTransform.faceExpressionParameters;
+  const auto& blendShapeParameters = character.parameterTransform.blendShapeParameters;
+  const auto& faceExpressionParameters = character.parameterTransform.faceExpressionParameters;
   auto bs = nlohmann::json::array();
   for (int i = 0; i < blendShapeParameters.size(); i++) {
     bs.push_back(blendShapeParameters[i]);
@@ -159,7 +159,7 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
             jointParameterName);
 
         // enable the attribute in the skeleton if we have a parameter controlling it
-        pt.activeJointParams[jointIndex * kParametersPerJoint + attributeIndex] = 1;
+        pt.activeJointParams[jointIndex * kParametersPerJoint + attributeIndex] = true;
 
         // split the parameter names
         for (const auto& parameter : jointParameter.value().items()) {
@@ -449,6 +449,7 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j) {
       case Ellipsoid:
         ellipsoidToJson(character, lim, li);
         break;
+      case LimitTypeCount:
       default:
         MT_LOGE(
             "Unknown parameter limit type '{}' from character name '{}'",
