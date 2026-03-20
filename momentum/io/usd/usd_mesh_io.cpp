@@ -13,8 +13,10 @@
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec4f.h>
 #include <pxr/base/vt/array.h>
+#include <pxr/usd/sdf/valueTypeName.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usdGeom/primvarsAPI.h>
+#include <pxr/usd/usdGeom/tokens.h>
 #include <pxr/usd/usdSkel/bindingAPI.h>
 
 #include <algorithm>
@@ -36,6 +38,16 @@ std::vector<Vector3f> loadVerticesFromMeshPrim(const UsdGeomMesh& meshPrim) {
     }
   }
   return vertices;
+}
+
+Vector3b convertColorToBytes(float r, float g, float b) {
+  // Detect 0-1 float range vs 0-255 byte range
+  const bool isNormalized = (r <= 1.0f && g <= 1.0f && b <= 1.0f);
+  const float scale = isNormalized ? 255.0f : 1.0f;
+  return {
+      static_cast<uint8_t>(std::clamp(r * scale, 0.0f, 255.0f)),
+      static_cast<uint8_t>(std::clamp(g * scale, 0.0f, 255.0f)),
+      static_cast<uint8_t>(std::clamp(b * scale, 0.0f, 255.0f))};
 }
 
 std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t numVertices) {
@@ -61,7 +73,7 @@ std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t
       if (rawColors.size() == numVertices) {
         colors.reserve(rawColors.size());
         for (const auto& color : rawColors) {
-          colors.emplace_back(color[0], color[1], color[2]);
+          colors.push_back(convertColorToBytes(color[0], color[1], color[2]));
         }
         break;
       }
@@ -70,7 +82,7 @@ std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t
       if (rawColors.size() == numVertices) {
         colors.reserve(rawColors.size());
         for (const auto& color : rawColors) {
-          colors.emplace_back(color[0], color[1], color[2]);
+          colors.push_back(convertColorToBytes(color[0], color[1], color[2]));
         }
         break;
       }
@@ -78,6 +90,18 @@ std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t
   }
 
   return colors;
+}
+
+std::vector<Vector3f> loadNormalsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t numVertices) {
+  std::vector<Vector3f> normals;
+  VtArray<GfVec3f> rawNormals;
+  if (meshPrim.GetNormalsAttr().Get(&rawNormals) && rawNormals.size() == numVertices) {
+    normals.reserve(rawNormals.size());
+    for (const auto& normal : rawNormals) {
+      normals.emplace_back(normal[0], normal[1], normal[2]);
+    }
+  }
+  return normals;
 }
 
 std::vector<Vector3i> loadFacesFromMeshPrim(const UsdGeomMesh& meshPrim, size_t numPoints) {
@@ -147,6 +171,7 @@ Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
     UsdGeomMesh meshPrim(prim);
     mesh.vertices = loadVerticesFromMeshPrim(meshPrim);
     mesh.colors = loadColorsFromMeshPrim(meshPrim, mesh.vertices.size());
+    mesh.normals = loadNormalsFromMeshPrim(meshPrim, mesh.vertices.size());
     mesh.faces = loadFacesFromMeshPrim(meshPrim, mesh.vertices.size());
     break; // Use first mesh found
   }
@@ -233,6 +258,31 @@ void saveMeshToUsd(const Mesh& mesh, UsdGeomMesh& meshPrim) {
 
   meshPrim.GetFaceVertexCountsAttr().Set(faceVertexCounts);
   meshPrim.GetFaceVertexIndicesAttr().Set(faceVertexIndices);
+
+  // Write normals
+  if (!mesh.normals.empty()) {
+    VtArray<GfVec3f> normals;
+    normals.reserve(mesh.normals.size());
+    for (const auto& normal : mesh.normals) {
+      normals.push_back(GfVec3f(normal.x(), normal.y(), normal.z()));
+    }
+    meshPrim.GetNormalsAttr().Set(normals);
+    meshPrim.SetNormalsInterpolation(UsdGeomTokens->vertex);
+  }
+
+  // Write vertex colors
+  if (!mesh.colors.empty()) {
+    UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
+    auto colorPrimvar = primvarsAPI.CreatePrimvar(
+        TfToken("displayColor"), SdfValueTypeNames->Color3fArray, UsdGeomTokens->vertex);
+
+    VtArray<GfVec3f> colors;
+    colors.reserve(mesh.colors.size());
+    for (const auto& color : mesh.colors) {
+      colors.push_back(GfVec3f(color.x() / 255.0f, color.y() / 255.0f, color.z() / 255.0f));
+    }
+    colorPrimvar.Set(colors);
+  }
 }
 
 void saveSkinWeightsToUsd(
