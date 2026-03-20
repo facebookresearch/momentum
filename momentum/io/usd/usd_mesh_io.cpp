@@ -16,9 +16,114 @@
 #include <pxr/usd/usdGeom/primvarsAPI.h>
 #include <pxr/usd/usdSkel/bindingAPI.h>
 
+#include <algorithm>
+
 PXR_NAMESPACE_USING_DIRECTIVE
 
 namespace momentum {
+
+namespace {
+
+std::vector<Vector3f> loadVerticesFromMeshPrim(const UsdGeomMesh& meshPrim) {
+  std::vector<Vector3f> vertices;
+  VtArray<GfVec3f> points;
+  if (meshPrim.GetPointsAttr().Get(&points)) {
+    vertices.reserve(points.size());
+    for (const auto& point : points) {
+      vertices.emplace_back(point[0], point[1], point[2]);
+    }
+  }
+  return vertices;
+}
+
+std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t numVertices) {
+  std::vector<Vector3b> colors;
+  UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
+
+  const std::vector<std::string> colorPrimvarNames = {
+      "displayColor", "Cd", "color", "vertexColor", "diffuseColor"};
+
+  for (const auto& colorName : colorPrimvarNames) {
+    UsdGeomPrimvar colorPrimvar = primvarsAPI.GetPrimvar(TfToken(colorName));
+    if (!colorPrimvar || !colorPrimvar.HasValue()) {
+      continue;
+    }
+
+    VtValue colorValue;
+    if (!colorPrimvar.Get(&colorValue)) {
+      continue;
+    }
+
+    if (colorValue.IsHolding<VtArray<GfVec3f>>()) {
+      VtArray<GfVec3f> rawColors = colorValue.Get<VtArray<GfVec3f>>();
+      if (rawColors.size() == numVertices) {
+        colors.reserve(rawColors.size());
+        for (const auto& color : rawColors) {
+          colors.emplace_back(color[0], color[1], color[2]);
+        }
+        break;
+      }
+    } else if (colorValue.IsHolding<VtArray<GfVec4f>>()) {
+      VtArray<GfVec4f> rawColors = colorValue.Get<VtArray<GfVec4f>>();
+      if (rawColors.size() == numVertices) {
+        colors.reserve(rawColors.size());
+        for (const auto& color : rawColors) {
+          colors.emplace_back(color[0], color[1], color[2]);
+        }
+        break;
+      }
+    }
+  }
+
+  return colors;
+}
+
+std::vector<Vector3i> loadFacesFromMeshPrim(const UsdGeomMesh& meshPrim) {
+  std::vector<Vector3i> faces;
+  VtArray<int> faceVertexCounts;
+  VtArray<int> faceVertexIndices;
+
+  if (!meshPrim.GetFaceVertexCountsAttr().Get(&faceVertexCounts) ||
+      !meshPrim.GetFaceVertexIndicesAttr().Get(&faceVertexIndices)) {
+    return faces;
+  }
+
+  const bool allTriangles = std::all_of(
+      faceVertexCounts.cbegin(), faceVertexCounts.cend(), [](int count) { return count == 3; });
+
+  if (allTriangles && faceVertexIndices.size() == faceVertexCounts.size() * 3) {
+    faces.reserve(faceVertexCounts.size());
+    const int* indices = faceVertexIndices.cdata();
+    for (size_t i = 0; i < faceVertexCounts.size(); ++i) {
+      faces.emplace_back(indices[i * 3], indices[i * 3 + 1], indices[i * 3 + 2]);
+    }
+    return faces;
+  }
+
+  size_t indexOffset = 0;
+  for (int faceVertexCount : faceVertexCounts) {
+    if (faceVertexCount == 3) {
+      faces.emplace_back(
+          faceVertexIndices[indexOffset],
+          faceVertexIndices[indexOffset + 1],
+          faceVertexIndices[indexOffset + 2]);
+    } else if (faceVertexCount == 4) {
+      faces.emplace_back(
+          faceVertexIndices[indexOffset],
+          faceVertexIndices[indexOffset + 1],
+          faceVertexIndices[indexOffset + 2]);
+      faces.emplace_back(
+          faceVertexIndices[indexOffset],
+          faceVertexIndices[indexOffset + 2],
+          faceVertexIndices[indexOffset + 3]);
+    }
+    indexOffset += faceVertexCount;
+  }
+
+  return faces;
+}
+
+} // namespace
 
 Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
   Mesh mesh;
@@ -29,93 +134,9 @@ Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
     }
 
     UsdGeomMesh meshPrim(prim);
-
-    // Get vertices
-    VtArray<GfVec3f> points;
-    if (meshPrim.GetPointsAttr().Get(&points)) {
-      mesh.vertices.reserve(points.size());
-      for (const auto& point : points) {
-        mesh.vertices.emplace_back(point[0], point[1], point[2]);
-      }
-    }
-
-    // Try to load vertex colors from primvars
-    UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
-
-    std::vector<std::string> colorPrimvarNames = {
-        "displayColor", "Cd", "color", "vertexColor", "diffuseColor"};
-
-    for (const auto& colorName : colorPrimvarNames) {
-      UsdGeomPrimvar colorPrimvar = primvarsAPI.GetPrimvar(TfToken(colorName));
-      if (colorPrimvar && colorPrimvar.HasValue()) {
-        VtValue colorValue;
-        if (colorPrimvar.Get(&colorValue)) {
-          if (colorValue.IsHolding<VtArray<GfVec3f>>()) {
-            VtArray<GfVec3f> colors = colorValue.Get<VtArray<GfVec3f>>();
-            if (colors.size() == points.size()) {
-              mesh.colors.reserve(colors.size());
-              for (const auto& color : colors) {
-                mesh.colors.emplace_back(color[0], color[1], color[2]);
-              }
-              break;
-            }
-          } else if (colorValue.IsHolding<VtArray<GfVec4f>>()) {
-            VtArray<GfVec4f> colors = colorValue.Get<VtArray<GfVec4f>>();
-            if (colors.size() == points.size()) {
-              mesh.colors.reserve(colors.size());
-              for (const auto& color : colors) {
-                mesh.colors.emplace_back(color[0], color[1], color[2]);
-              }
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    // Get face vertex counts and indices
-    VtArray<int> faceVertexCounts;
-    VtArray<int> faceVertexIndices;
-
-    if (meshPrim.GetFaceVertexCountsAttr().Get(&faceVertexCounts) &&
-        meshPrim.GetFaceVertexIndicesAttr().Get(&faceVertexIndices)) {
-      bool allTriangles = true;
-      for (int count : faceVertexCounts) {
-        if (count != 3) {
-          allTriangles = false;
-          break;
-        }
-      }
-
-      if (allTriangles && faceVertexIndices.size() == faceVertexCounts.size() * 3) {
-        mesh.faces.reserve(faceVertexCounts.size());
-        const int* indices = faceVertexIndices.cdata();
-        for (size_t i = 0; i < faceVertexCounts.size(); ++i) {
-          mesh.faces.emplace_back(indices[i * 3], indices[i * 3 + 1], indices[i * 3 + 2]);
-        }
-      } else {
-        size_t indexOffset = 0;
-        for (int faceVertexCount : faceVertexCounts) {
-          if (faceVertexCount == 3) {
-            mesh.faces.emplace_back(
-                faceVertexIndices[indexOffset],
-                faceVertexIndices[indexOffset + 1],
-                faceVertexIndices[indexOffset + 2]);
-          } else if (faceVertexCount == 4) {
-            mesh.faces.emplace_back(
-                faceVertexIndices[indexOffset],
-                faceVertexIndices[indexOffset + 1],
-                faceVertexIndices[indexOffset + 2]);
-            mesh.faces.emplace_back(
-                faceVertexIndices[indexOffset],
-                faceVertexIndices[indexOffset + 2],
-                faceVertexIndices[indexOffset + 3]);
-          }
-          indexOffset += faceVertexCount;
-        }
-      }
-    }
-
+    mesh.vertices = loadVerticesFromMeshPrim(meshPrim);
+    mesh.colors = loadColorsFromMeshPrim(meshPrim, mesh.vertices.size());
+    mesh.faces = loadFacesFromMeshPrim(meshPrim);
     break; // Use first mesh found
   }
 
