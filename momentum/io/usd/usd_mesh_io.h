@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character/blend_shape.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/math/mesh.h>
 
@@ -57,5 +58,23 @@ void saveSkinWeightsToUsd(
     const SkinWeights& skinWeights,
     UsdGeomMesh& meshPrim,
     const UsdSkelSkeleton& skelPrim);
+
+/// Save blend shapes to a USD stage.
+///
+/// Creates UsdSkelBlendShape prims under the mesh and binds them via
+/// UsdSkelBindingAPI.
+///
+/// @param[in] blendShape The BlendShape to save.
+/// @param[in] meshPrim The UsdGeomMesh prim to attach blend shapes to.
+void saveBlendShapesToUsd(const BlendShape& blendShape, UsdGeomMesh& meshPrim);
+
+/// Load blend shapes from a USD stage.
+///
+/// Reads UsdSkelBlendShape prims bound to the first mesh found.
+///
+/// @param[in] stage The USD stage to read from.
+/// @param[in] numVertices The expected number of vertices.
+/// @return The loaded BlendShape, or nullptr if none found.
+std::shared_ptr<BlendShape> loadBlendShapesFromUsd(const UsdStageRefPtr& stage, size_t numVertices);
 
 } // namespace momentum

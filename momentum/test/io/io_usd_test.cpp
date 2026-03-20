@@ -7,6 +7,7 @@
 
 #include "momentum/io/usd/usd_io.h"
 
+#include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
@@ -279,4 +280,30 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_VertexColors) {
           << "Color mismatch at vertex " << i << ", channel " << c;
     }
   }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_BlendShapes) {
+  auto character = withTestBlendShapes(testCharacter);
+
+  ASSERT_TRUE(character.blendShape);
+  const auto numShapes = character.blendShape->shapeSize();
+  ASSERT_GT(numShapes, 0);
+
+  auto tempFile = temporaryFile("momentum_usd_blendshapes", ".usda");
+  saveUsd(tempFile.path(), character);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(loadedCharacter.blendShape);
+  EXPECT_EQ(loadedCharacter.blendShape->shapeSize(), numShapes);
+  EXPECT_EQ(loadedCharacter.blendShape->modelSize(), character.blendShape->modelSize());
+
+  // Compare shape vectors
+  const auto& origVectors = character.blendShape->getShapeVectors();
+  const auto& loadedVectors = loadedCharacter.blendShape->getShapeVectors();
+
+  ASSERT_EQ(loadedVectors.rows(), origVectors.rows());
+  ASSERT_EQ(loadedVectors.cols(), origVectors.cols());
+
+  EXPECT_TRUE(loadedVectors.isApprox(origVectors, 1e-4f)) << "Shape vectors mismatch";
 }
