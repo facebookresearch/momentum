@@ -358,6 +358,24 @@ struct TempFileGuard {
   TempFileGuard& operator=(TempFileGuard&&) = delete;
 };
 
+std::tuple<Character, MotionParameters, IdentityParameters, float>
+loadUsdCharacterWithMotionFromStage(const UsdStageRefPtr& stage) {
+  auto character = loadUsdCharacterFromStage(stage);
+
+  MotionParameters motion;
+  IdentityParameters identity;
+  float fps = 120.0f;
+
+  for (const auto& prim : stage->Traverse()) {
+    if (prim.IsA<UsdSkelRoot>()) {
+      std::tie(motion, identity, fps) = loadMotionFromUsd(prim);
+      break;
+    }
+  }
+
+  return {std::move(character), std::move(motion), std::move(identity), fps};
+}
+
 } // namespace
 
 Character loadUsdCharacter(const filesystem::path& inputPath) {
@@ -521,6 +539,106 @@ void saveUsdCharacter(
   saveMomentumMetadata(character, skelRoot.GetPrim());
 
   stage->GetRootLayer()->Save();
+}
+
+void saveUsdCharacterWithMotion(
+    const filesystem::path& filename,
+    const Character& character,
+    float fps,
+    const MotionParameters& motion,
+    const IdentityParameters& offsets) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto stage = UsdStage::CreateNew(filename.string());
+  MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
+
+  auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
+  auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
+
+  saveSkeletonToUsd(character.skeleton, skeleton);
+
+  auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
+
+  if (character.mesh) {
+    saveMeshToUsd(*character.mesh, mesh);
+  }
+
+  if (character.skinWeights) {
+    saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
+  }
+
+  if (character.blendShape) {
+    saveBlendShapesToUsd(*character.blendShape, mesh);
+  }
+
+  if (character.collision) {
+    saveCollisionGeometryToUsd(
+        *character.collision, character.skeleton, stage, SdfPath("/SkelRoot"));
+  }
+
+  if (!character.locators.empty()) {
+    saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
+  }
+
+  // Save motion data as custom attributes
+  const auto& [paramNames, poses] = motion;
+  if (!paramNames.empty() && poses.cols() > 0) {
+    saveMotionToUsd(skelRoot.GetPrim(), fps, motion, offsets);
+
+    // Also bake as skeleton states for interop with standard USD viewers
+    const auto numFrames = poses.cols();
+    std::vector<SkeletonState> skeletonStates;
+    skeletonStates.reserve(numFrames);
+
+    for (Eigen::Index f = 0; f < numFrames; ++f) {
+      // Apply the model parameters through the parameter transform
+      JointParameters jointParams =
+          character.parameterTransform.apply(ModelParameters(poses.col(f)));
+      skeletonStates.emplace_back(jointParams, character.skeleton, false);
+    }
+
+    saveSkeletonStatesToUsd(stage, skeleton, character.skeleton, skeletonStates, fps);
+  }
+
+  saveMomentumMetadata(character, skelRoot.GetPrim());
+
+  stage->GetRootLayer()->Save();
+}
+
+std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharacterWithMotion(
+    const filesystem::path& inputPath) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto stage = UsdStage::Open(inputPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage: {}", inputPath.string());
+
+  return loadUsdCharacterWithMotionFromStage(stage);
+}
+
+std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharacterWithMotion(
+    std::span<const std::byte> inputSpan) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto tempDir = filesystem::temp_directory_path();
+  auto tempPath = tempDir /
+      ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
+       "_" + std::to_string(std::time(nullptr)) + ".usd");
+
+  TempFileGuard tempGuard(tempPath);
+
+  {
+    std::ofstream tempFile(tempPath, std::ios::binary);
+    MT_THROW_IF(!tempFile.is_open(), "Failed to create temporary file: {}", tempPath.string());
+    tempFile.write(reinterpret_cast<const char*>(inputSpan.data()), inputSpan.size());
+  }
+
+  auto stage = UsdStage::Open(tempPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage from buffer");
+
+  return loadUsdCharacterWithMotionFromStage(stage);
 }
 
 } // namespace momentum
