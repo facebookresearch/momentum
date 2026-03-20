@@ -570,3 +570,66 @@ TEST_F(UsdIoTest, LoadSkeletonStates_NonIntegerTimeCodes) {
         << "Translation delta mismatch at frame " << f;
   }
 }
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_ModelParameterMotion) {
+  const auto numModelParams = testCharacter.parameterTransform.numAllModelParameters();
+  const int numFrames = 5;
+  const float fps = 60.0f;
+
+  // Create motion data with non-zero values in every entry to catch index/sign bugs
+  MatrixXf poses(numModelParams, numFrames);
+  for (int f = 0; f < numFrames; ++f) {
+    for (Eigen::Index p = 0; p < numModelParams; ++p) {
+      poses(p, f) = static_cast<float>(p + 1) * 0.1f + static_cast<float>(f) * 0.01f;
+    }
+  }
+
+  std::vector<std::string> paramNames = testCharacter.parameterTransform.name;
+  MotionParameters motion = {paramNames, poses};
+
+  // Create identity offsets with distinct non-zero values per entry
+  std::vector<std::string> jointNames;
+  for (const auto& joint : testCharacter.skeleton.joints) {
+    jointNames.push_back(joint.name);
+  }
+  const auto numOffsets = testCharacter.skeleton.joints.size() * kParametersPerJoint;
+  JointParameters offsetValues(numOffsets);
+  for (Eigen::Index i = 0; i < static_cast<Eigen::Index>(numOffsets); ++i) {
+    offsetValues[i] = static_cast<float>(i + 1) * 0.01f;
+  }
+  IdentityParameters offsets = {jointNames, offsetValues};
+
+  auto tempFile = temporaryFile("momentum_usd_motion", ".usda");
+  saveUsdCharacterWithMotion(tempFile.path(), testCharacter, fps, motion, offsets);
+
+  auto [loadedCharacter, loadedMotion, loadedIdentity, loadedFps] =
+      loadUsdCharacterWithMotion(tempFile.path());
+
+  EXPECT_FLOAT_EQ(loadedFps, fps);
+
+  // Verify motion parameter names
+  const auto& [loadedParamNames, loadedPoses] = loadedMotion;
+  ASSERT_EQ(loadedParamNames.size(), paramNames.size());
+  for (size_t i = 0; i < paramNames.size(); ++i) {
+    EXPECT_EQ(loadedParamNames[i], paramNames[i]) << "Parameter name mismatch at index " << i;
+  }
+
+  // Verify poses matrix
+  ASSERT_EQ(loadedPoses.rows(), poses.rows());
+  ASSERT_EQ(loadedPoses.cols(), poses.cols());
+  EXPECT_TRUE(loadedPoses.isApprox(poses, 1e-5f)) << "Poses matrix mismatch";
+
+  // Verify identity joint names
+  const auto& [loadedJointNames, loadedOffsetValues] = loadedIdentity;
+  ASSERT_EQ(loadedJointNames.size(), jointNames.size());
+  for (size_t i = 0; i < jointNames.size(); ++i) {
+    EXPECT_EQ(loadedJointNames[i], jointNames[i]) << "Joint name mismatch at index " << i;
+  }
+
+  // Verify identity offset values
+  ASSERT_EQ(loadedOffsetValues.size(), offsetValues.size());
+  for (Eigen::Index i = 0; i < offsetValues.size(); ++i) {
+    EXPECT_NEAR(loadedOffsetValues[i], offsetValues[i], 1e-5f)
+        << "Identity offset mismatch at index " << i;
+  }
+}

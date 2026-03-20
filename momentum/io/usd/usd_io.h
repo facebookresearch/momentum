@@ -9,10 +9,12 @@
 
 #include <momentum/character/fwd.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character/types.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/math/types.h>
 
 #include <span>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -61,5 +63,33 @@ void saveUsdCharacter(
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates);
+
+/// Load a USD character with model-parameter motion from a local file path.
+///
+/// @param[in] inputPath The path to the USD character file.
+/// @return A tuple of (Character, motion parameters, identity parameters, fps).
+std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharacterWithMotion(
+    const filesystem::path& inputPath);
+
+/// Load a USD character with model-parameter motion from a buffer.
+///
+/// @param[in] inputSpan The buffer containing the USD character data.
+/// @return A tuple of (Character, motion parameters, identity parameters, fps).
+std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharacterWithMotion(
+    std::span<const std::byte> inputSpan);
+
+/// Save a character with model-parameter motion to a USD file.
+///
+/// @param[in] filename The path to save the USD file.
+/// @param[in] character The Character object to save.
+/// @param[in] fps Frames per second for the animation.
+/// @param[in] motion The motion data (parameter names, poses matrix).
+/// @param[in] offsets The identity parameters (joint names, offset values).
+void saveUsdCharacterWithMotion(
+    const filesystem::path& filename,
+    const Character& character,
+    float fps = 120.0f,
+    const MotionParameters& motion = {},
+    const IdentityParameters& offsets = {});
 
 } // namespace momentum

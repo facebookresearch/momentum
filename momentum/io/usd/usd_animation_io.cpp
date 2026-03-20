@@ -8,6 +8,7 @@
 #include "momentum/io/usd/usd_animation_io.h"
 
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/math/utility.h"
 
 #include <pxr/base/gf/half.h>
@@ -15,6 +16,7 @@
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec3h.h>
 #include <pxr/base/vt/array.h>
+#include <pxr/usd/sdf/valueTypeName.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usdSkel/animation.h>
 #include <pxr/usd/usdSkel/bindingAPI.h>
@@ -186,6 +188,128 @@ std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesFro
   }
 
   return {std::move(states), std::move(frameTimes)};
+}
+
+void saveMotionToUsd(
+    const UsdPrim& prim,
+    float fps,
+    const MotionParameters& motion,
+    const IdentityParameters& offsets) {
+  const auto& [paramNames, poses] = motion;
+  const auto& [jointNames, offsetValues] = offsets;
+
+  if (paramNames.empty() || poses.cols() == 0) {
+    return;
+  }
+
+  prim.CreateAttribute(TfToken("momentum:motion:fps"), SdfValueTypeNames->Float).Set(fps);
+
+  // Save parameter names as string array
+  VtArray<std::string> paramNamesArray(paramNames.begin(), paramNames.end());
+  prim.CreateAttribute(TfToken("momentum:motion:parameterNames"), SdfValueTypeNames->StringArray)
+      .Set(paramNamesArray);
+
+  // Save poses matrix as flat float array (column-major: numParams * numFrames)
+  const Eigen::Index numParams = poses.rows();
+  const Eigen::Index numFrames = poses.cols();
+  VtArray<float> posesArray(numParams * numFrames);
+  for (Eigen::Index f = 0; f < numFrames; ++f) {
+    for (Eigen::Index p = 0; p < numParams; ++p) {
+      posesArray[f * numParams + p] = poses(p, f);
+    }
+  }
+  prim.CreateAttribute(TfToken("momentum:motion:poses"), SdfValueTypeNames->FloatArray)
+      .Set(posesArray);
+  prim.CreateAttribute(TfToken("momentum:motion:numFrames"), SdfValueTypeNames->Int)
+      .Set(static_cast<int>(numFrames));
+  prim.CreateAttribute(TfToken("momentum:motion:numParams"), SdfValueTypeNames->Int)
+      .Set(static_cast<int>(numParams));
+
+  // Save identity offsets
+  if (!jointNames.empty() && offsetValues.size() > 0) {
+    VtArray<std::string> jointNamesArray(jointNames.begin(), jointNames.end());
+    prim.CreateAttribute(TfToken("momentum:motion:jointNames"), SdfValueTypeNames->StringArray)
+        .Set(jointNamesArray);
+
+    VtArray<float> offsetsArray(offsetValues.size());
+    for (Eigen::Index i = 0; i < offsetValues.size(); ++i) {
+      offsetsArray[i] = offsetValues[i];
+    }
+    prim.CreateAttribute(TfToken("momentum:motion:offsets"), SdfValueTypeNames->FloatArray)
+        .Set(offsetsArray);
+  }
+}
+
+std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const UsdPrim& prim) {
+  MotionParameters motion;
+  IdentityParameters identity;
+  float fps = 120.0f;
+
+  auto fpsAttr = prim.GetAttribute(TfToken("momentum:motion:fps"));
+  if (!fpsAttr) {
+    return {motion, identity, fps};
+  }
+  fpsAttr.Get(&fps);
+
+  int numFrames = 0;
+  int numParams = 0;
+  prim.GetAttribute(TfToken("momentum:motion:numFrames")).Get(&numFrames);
+  prim.GetAttribute(TfToken("momentum:motion:numParams")).Get(&numParams);
+
+  if (numFrames <= 0 || numParams <= 0) {
+    return {motion, identity, fps};
+  }
+
+  // Load parameter names
+  VtArray<std::string> paramNamesArray;
+  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:parameterNames")); attr) {
+    attr.Get(&paramNamesArray);
+  }
+  auto& [paramNames, poses] = motion;
+  paramNames.assign(paramNamesArray.begin(), paramNamesArray.end());
+
+  // Load poses matrix
+  VtArray<float> posesArray;
+  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:poses")); attr) {
+    attr.Get(&posesArray);
+  }
+
+  const auto expectedSize = static_cast<size_t>(numParams) * static_cast<size_t>(numFrames);
+  if (posesArray.size() == expectedSize) {
+    poses.resize(numParams, numFrames);
+    for (int f = 0; f < numFrames; ++f) {
+      for (int p = 0; p < numParams; ++p) {
+        poses(p, f) = posesArray[f * numParams + p];
+      }
+    }
+  } else {
+    MT_LOGW(
+        "Poses array size ({}) does not match numParams * numFrames ({} * {})",
+        posesArray.size(),
+        numParams,
+        numFrames);
+  }
+
+  // Load identity offsets
+  auto& [jointNames, offsetValues] = identity;
+
+  VtArray<std::string> jointNamesArray;
+  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:jointNames")); attr) {
+    attr.Get(&jointNamesArray);
+  }
+  jointNames.assign(jointNamesArray.begin(), jointNamesArray.end());
+
+  VtArray<float> offsetsArray;
+  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:offsets")); attr) {
+    attr.Get(&offsetsArray);
+    Eigen::VectorXf offsetVec(offsetsArray.size());
+    for (size_t i = 0; i < offsetsArray.size(); ++i) {
+      offsetVec[i] = offsetsArray[i];
+    }
+    offsetValues = JointParameters(offsetVec);
+  }
+
+  return {std::move(motion), std::move(identity), fps};
 }
 
 } // namespace momentum
