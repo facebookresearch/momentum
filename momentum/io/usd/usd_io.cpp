@@ -9,6 +9,7 @@
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
+#include "momentum/character/collision_geometry.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
@@ -324,6 +325,14 @@ Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
     character.parameterTransform.activeJointParams = VectorX<bool>::Constant(numJointParams, true);
   }
 
+  // Load collision geometry and locators
+  auto collision = loadCollisionGeometryFromUsd(stage, character.skeleton);
+  if (!collision.empty()) {
+    character.collision = std::make_unique<CollisionGeometry>(std::move(collision));
+  }
+
+  character.locators = loadLocatorsFromUsd(stage, character.skeleton);
+
   // Load momentum-specific metadata from SkelRoot prim
   for (const auto& prim : stage->Traverse()) {
     if (prim.IsA<UsdSkelRoot>()) {
@@ -411,6 +420,15 @@ void saveUsd(const filesystem::path& filename, const Character& character) {
     saveBlendShapesToUsd(*character.blendShape, mesh);
   }
 
+  if (character.collision) {
+    saveCollisionGeometryToUsd(
+        *character.collision, character.skeleton, stage, SdfPath("/SkelRoot"));
+  }
+
+  if (!character.locators.empty()) {
+    saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
+  }
+
   saveMomentumMetadata(character, skelRoot.GetPrim());
 
   stage->GetRootLayer()->Save();
@@ -489,6 +507,15 @@ void saveUsdCharacter(
 
   if (!skeletonStates.empty()) {
     saveSkeletonStatesToUsd(stage, skeleton, character.skeleton, skeletonStates, fps);
+  }
+
+  if (character.collision) {
+    saveCollisionGeometryToUsd(
+        *character.collision, character.skeleton, stage, SdfPath("/SkelRoot"));
+  }
+
+  if (!character.locators.empty()) {
+    saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
   }
 
   saveMomentumMetadata(character, skelRoot.GetPrim());
