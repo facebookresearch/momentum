@@ -113,12 +113,43 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip) {
 
   const auto loadedCharacter = loadUsdCharacter(tempFile.path());
 
-  EXPECT_EQ(loadedCharacter.skeleton.joints.size(), testCharacter.skeleton.joints.size());
-  EXPECT_EQ(loadedCharacter.mesh->vertices.size(), testCharacter.mesh->vertices.size());
-  EXPECT_EQ(loadedCharacter.mesh->faces.size(), testCharacter.mesh->faces.size());
+  ASSERT_EQ(loadedCharacter.skeleton.joints.size(), testCharacter.skeleton.joints.size());
+  ASSERT_EQ(loadedCharacter.mesh->vertices.size(), testCharacter.mesh->vertices.size());
+  ASSERT_EQ(loadedCharacter.mesh->faces.size(), testCharacter.mesh->faces.size());
 
   for (size_t i = 0; i < testCharacter.skeleton.joints.size(); ++i) {
-    EXPECT_EQ(loadedCharacter.skeleton.joints[i].name, testCharacter.skeleton.joints[i].name);
+    const auto& original = testCharacter.skeleton.joints[i];
+    const auto& loaded = loadedCharacter.skeleton.joints[i];
+
+    EXPECT_EQ(loaded.name, original.name) << "Joint name mismatch at index " << i;
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkinWeights) {
+  auto tempFile = temporaryFile("momentum_usd_skinweights", ".usda");
+
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(testCharacter.skinWeights);
+  ASSERT_TRUE(loadedCharacter.skinWeights);
+
+  const auto& origSkin = *testCharacter.skinWeights;
+  const auto& loadedSkin = *loadedCharacter.skinWeights;
+
+  ASSERT_EQ(loadedSkin.index.rows(), origSkin.index.rows());
+
+  // Compare that nonzero weights survive roundtrip
+  for (Eigen::Index v = 0; v < origSkin.index.rows(); ++v) {
+    for (Eigen::Index j = 0; j < origSkin.weight.cols(); ++j) {
+      if (origSkin.weight(v, j) > 0.0f) {
+        EXPECT_EQ(loadedSkin.index(v, j), origSkin.index(v, j))
+            << "Joint index mismatch at vertex " << v << ", influence " << j;
+        EXPECT_NEAR(loadedSkin.weight(v, j), origSkin.weight(v, j), 1e-5f)
+            << "Weight mismatch at vertex " << v << ", influence " << j;
+      }
+    }
   }
 }
 
