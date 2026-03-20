@@ -18,6 +18,7 @@
 #include <pxr/usd/usdGeom/primvarsAPI.h>
 #include <pxr/usd/usdGeom/tokens.h>
 #include <pxr/usd/usdSkel/bindingAPI.h>
+#include <pxr/usd/usdSkel/blendShape.h>
 
 #include <algorithm>
 #include <string>
@@ -321,6 +322,122 @@ void saveSkinWeightsToUsd(
 
   bindingAPI.GetJointIndicesAttr().Set(jointIndices);
   bindingAPI.GetJointWeightsAttr().Set(jointWeights);
+}
+
+void saveBlendShapesToUsd(const BlendShape& blendShape, UsdGeomMesh& meshPrim) {
+  const auto numShapes = blendShape.shapeSize();
+  const auto numVertices = blendShape.modelSize();
+  if (numShapes == 0 || numVertices == 0) {
+    return;
+  }
+
+  const auto& shapeVectors = blendShape.getShapeVectors();
+  const auto& shapeNames = blendShape.getShapeNames();
+
+  SdfPathVector blendShapePaths;
+  blendShapePaths.reserve(numShapes);
+  VtArray<TfToken> blendShapeTokens;
+  blendShapeTokens.reserve(numShapes);
+
+  auto stage = meshPrim.GetPrim().GetStage();
+  const auto meshPath = meshPrim.GetPath();
+
+  VtArray<GfVec3f> offsets;
+  offsets.reserve(numVertices);
+
+  for (Eigen::Index s = 0; s < numShapes; ++s) {
+    const std::string name =
+        (s < static_cast<Eigen::Index>(shapeNames.size()) && !shapeNames[s].empty())
+        ? shapeNames[s]
+        : "shape_" + std::to_string(s);
+
+    auto shapePath = meshPath.AppendChild(TfToken(name));
+    auto shapePrim = UsdSkelBlendShape::Define(stage, shapePath);
+
+    // Extract per-vertex offsets from the shape vector column
+    offsets.clear();
+    for (size_t v = 0; v < numVertices; ++v) {
+      offsets.push_back(GfVec3f(
+          shapeVectors(3 * v + 0, s), shapeVectors(3 * v + 1, s), shapeVectors(3 * v + 2, s)));
+    }
+    shapePrim.GetOffsetsAttr().Set(offsets);
+
+    blendShapePaths.push_back(shapePath);
+    blendShapeTokens.push_back(TfToken(name));
+  }
+
+  // Bind blend shapes to the mesh
+  UsdSkelBindingAPI bindingAPI = UsdSkelBindingAPI::Apply(meshPrim.GetPrim());
+  bindingAPI.GetBlendShapesAttr().Set(blendShapeTokens);
+  bindingAPI.GetBlendShapeTargetsRel().SetTargets(blendShapePaths);
+}
+
+std::shared_ptr<BlendShape> loadBlendShapesFromUsd(
+    const UsdStageRefPtr& stage,
+    size_t numVertices) {
+  for (const auto& prim : stage->Traverse()) {
+    if (!prim.IsA<UsdGeomMesh>()) {
+      continue;
+    }
+
+    UsdSkelBindingAPI bindingAPI(prim);
+    VtArray<TfToken> blendShapeTokens;
+    if (!bindingAPI.GetBlendShapesAttr().Get(&blendShapeTokens) || blendShapeTokens.empty()) {
+      continue;
+    }
+
+    SdfPathVector blendShapePaths;
+    if (!bindingAPI.GetBlendShapeTargetsRel().GetTargets(&blendShapePaths) ||
+        blendShapePaths.empty()) {
+      continue;
+    }
+
+    const auto numShapes = static_cast<Eigen::Index>(blendShapePaths.size());
+
+    // Collect shape names and offsets
+    std::vector<std::string> shapeNames;
+    shapeNames.reserve(numShapes);
+    MatrixXf shapeVectors = MatrixXf::Zero(3 * numVertices, numShapes);
+
+    VtArray<GfVec3f> offsets;
+    for (Eigen::Index s = 0; s < numShapes; ++s) {
+      shapeNames.push_back(blendShapePaths[s].GetName());
+
+      auto shapePrim = UsdSkelBlendShape::Get(stage, blendShapePaths[s]);
+      if (!shapePrim) {
+        continue;
+      }
+
+      offsets.clear();
+      if (shapePrim.GetOffsetsAttr().Get(&offsets)) {
+        const size_t count = std::min(offsets.size(), numVertices);
+        for (size_t v = 0; v < count; ++v) {
+          shapeVectors(3 * v + 0, s) = offsets[v][0];
+          shapeVectors(3 * v + 1, s) = offsets[v][1];
+          shapeVectors(3 * v + 2, s) = offsets[v][2];
+        }
+      }
+    }
+
+    // Build base shape from mesh vertices
+    UsdGeomMesh meshPrim(prim);
+    VtArray<GfVec3f> points;
+    if (!meshPrim.GetPointsAttr().Get(&points) || points.size() != numVertices) {
+      continue;
+    }
+    std::vector<Vector3f> baseShape;
+    baseShape.reserve(points.size());
+    for (const auto& p : points) {
+      baseShape.emplace_back(p[0], p[1], p[2]);
+    }
+
+    auto result = std::make_shared<BlendShape>(baseShape, numShapes, shapeNames);
+    result->setShapeVectors(shapeVectors, shapeNames);
+
+    return result;
+  }
+
+  return nullptr;
 }
 
 } // namespace momentum

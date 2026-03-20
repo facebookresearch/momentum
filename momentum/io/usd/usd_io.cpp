@@ -7,6 +7,7 @@
 
 #include "momentum/io/usd/usd_io.h"
 
+#include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
@@ -173,6 +174,11 @@ Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
   if (!character.mesh->vertices.empty()) {
     auto skinWeights = loadSkinWeightsFromUsd(stage, character.mesh->vertices.size());
     character.skinWeights = std::make_unique<SkinWeights>(std::move(skinWeights));
+
+    auto blendShapes = loadBlendShapesFromUsd(stage, character.mesh->vertices.size());
+    if (blendShapes) {
+      character.blendShape = std::move(blendShapes);
+    }
   }
 
   if (!character.skeleton.joints.empty()) {
@@ -266,6 +272,10 @@ void saveUsd(const filesystem::path& filename, const Character& character) {
 
   if (character.skinWeights) {
     saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
+  }
+
+  if (character.blendShape) {
+    saveBlendShapesToUsd(*character.blendShape, mesh);
   }
 
   stage->GetRootLayer()->Save();
