@@ -15,6 +15,17 @@
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/io/io_helpers.h"
 
+#include <pxr/base/gf/half.h>
+#include <pxr/base/gf/quatf.h>
+#include <pxr/base/gf/vec3f.h>
+#include <pxr/base/gf/vec3h.h>
+#include <pxr/base/vt/array.h>
+#include <pxr/usd/usd/primRange.h>
+#include <pxr/usd/usd/stage.h>
+#include <pxr/usd/usdSkel/animation.h>
+#include <pxr/usd/usdSkel/bindingAPI.h>
+#include <pxr/usd/usdSkel/skeleton.h>
+
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -22,6 +33,8 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+
+PXR_NAMESPACE_USING_DIRECTIVE
 
 using namespace momentum;
 
@@ -306,4 +319,145 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_BlendShapes) {
   ASSERT_EQ(loadedVectors.cols(), origVectors.cols());
 
   EXPECT_TRUE(loadedVectors.isApprox(origVectors, 1e-4f)) << "Shape vectors mismatch";
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkeletonStates) {
+  const auto& skeleton = testCharacter.skeleton;
+  const auto numJoints = skeleton.joints.size();
+  const float fps = 30.0f;
+
+  // Create a few skeleton states with varying joint parameters
+  std::vector<SkeletonState> states;
+  for (int frame = 0; frame < 5; ++frame) {
+    JointParameters params = JointParameters::Zero(numJoints * kParametersPerJoint);
+    // Vary the root translation and joint1 rotation per frame
+    params[0] = static_cast<float>(frame) * 0.1f; // root_tx
+    params[1] = static_cast<float>(frame) * 0.05f; // root_ty
+    params[kParametersPerJoint + 3] = static_cast<float>(frame) * 0.2f; // joint1_rx
+    states.emplace_back(params, skeleton, false);
+  }
+
+  auto tempFile = temporaryFile("momentum_usd_skelstates", ".usda");
+  saveUsdCharacter(tempFile.path(), testCharacter, fps, states);
+
+  auto [loadedCharacter, loadedStates, frameTimes] =
+      loadUsdCharacterWithSkeletonStates(tempFile.path());
+
+  ASSERT_EQ(loadedStates.size(), states.size());
+  ASSERT_EQ(frameTimes.size(), states.size());
+
+  // Compare global transforms (more reliable than comparing euler angles)
+  for (size_t f = 0; f < states.size(); ++f) {
+    ASSERT_EQ(loadedStates[f].jointState.size(), numJoints);
+
+    for (size_t j = 0; j < numJoints; ++j) {
+      const auto& origTransform = states[f].jointState[j].transform;
+      const auto& loadedTransform = loadedStates[f].jointState[j].transform;
+
+      EXPECT_TRUE(origTransform.translation.isApprox(loadedTransform.translation, 0.01f))
+          << "Translation mismatch at frame " << f << ", joint " << j;
+
+      EXPECT_TRUE(origTransform.rotation.isApprox(loadedTransform.rotation, 0.01f))
+          << "Rotation mismatch at frame " << f << ", joint " << j;
+
+      EXPECT_NEAR(origTransform.scale, loadedTransform.scale, 0.01f)
+          << "Scale mismatch at frame " << f << ", joint " << j;
+    }
+  }
+}
+
+TEST_F(UsdIoTest, LoadSkeletonStates_NonIntegerTimeCodes) {
+  const auto& skeleton = testCharacter.skeleton;
+  const auto numJoints = skeleton.joints.size();
+
+  // First, save a character to get a valid USD stage with a skeleton prim
+  auto tempFile = temporaryFile("momentum_usd_fractional_time", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  // Re-open the stage and manually add a UsdSkelAnimation with non-integer
+  // time samples to simulate a USD file authored by an external tool
+  auto stage = UsdStage::Open(tempFile.path().string());
+  ASSERT_TRUE(stage);
+
+  // Find the skeleton prim
+  UsdSkelSkeleton skelPrim;
+  for (const auto& prim : stage->Traverse()) {
+    if (prim.IsA<UsdSkelSkeleton>()) {
+      skelPrim = UsdSkelSkeleton(prim);
+      break;
+    }
+  }
+  ASSERT_TRUE(skelPrim);
+
+  // Create animation prim with non-integer time samples
+  auto animPath = skelPrim.GetPath().AppendChild(TfToken("Animation"));
+  auto animPrim = UsdSkelAnimation::Define(stage, animPath);
+
+  VtArray<TfToken> jointTokens;
+  for (const auto& joint : skeleton.joints) {
+    jointTokens.push_back(TfToken(joint.name));
+  }
+  animPrim.GetJointsAttr().Set(jointTokens);
+
+  // Bind animation to skeleton
+  UsdSkelBindingAPI bindingAPI = UsdSkelBindingAPI::Apply(skelPrim.GetPrim());
+  bindingAPI.GetAnimationSourceRel().SetTargets({animPath});
+
+  // Write time samples at non-integer time codes: 0.0, 0.5, 1.0, 1.5, 2.0
+  const std::vector<double> timeCodes = {0.0, 0.5, 1.0, 1.5, 2.0};
+  const double tps = 2.0; // 2 time codes per second
+  stage->SetStartTimeCode(0.0);
+  stage->SetEndTimeCode(2.0);
+  stage->SetTimeCodesPerSecond(tps);
+
+  for (const double tc : timeCodes) {
+    VtArray<GfVec3f> translations;
+    VtArray<GfQuatf> rotations;
+    VtArray<GfVec3h> scales;
+
+    for (size_t j = 0; j < numJoints; ++j) {
+      const auto& joint = skeleton.joints[j];
+      // Vary translation by time code so we can verify frame identity
+      translations.push_back(GfVec3f(
+          joint.translationOffset.x() + static_cast<float>(tc) * 0.1f,
+          joint.translationOffset.y(),
+          joint.translationOffset.z()));
+      rotations.push_back(GfQuatf(
+          joint.preRotation.w(),
+          joint.preRotation.x(),
+          joint.preRotation.y(),
+          joint.preRotation.z()));
+      scales.push_back(GfVec3h(GfHalf(1.0f), GfHalf(1.0f), GfHalf(1.0f)));
+    }
+
+    animPrim.GetTranslationsAttr().Set(translations, UsdTimeCode(tc));
+    animPrim.GetRotationsAttr().Set(rotations, UsdTimeCode(tc));
+    animPrim.GetScalesAttr().Set(scales, UsdTimeCode(tc));
+  }
+
+  stage->Save();
+
+  // Now load via the public API and verify all 5 frames are read
+  auto [loadedCharacter, states, frameTimes] = loadUsdCharacterWithSkeletonStates(tempFile.path());
+
+  // Verify we have expected number of frames
+  ASSERT_EQ(states.size(), timeCodes.size())
+      << "Expected " << timeCodes.size() << " frames for non-integer time codes";
+  ASSERT_EQ(frameTimes.size(), timeCodes.size());
+
+  // Verify frame times are correct (timeCode / timeCodesPerSecond)
+  for (size_t f = 0; f < timeCodes.size(); ++f) {
+    const auto expectedTime = static_cast<float>(timeCodes[f] / tps);
+    EXPECT_NEAR(frameTimes[f], expectedTime, 1e-5f) << "Frame time mismatch at index " << f;
+  }
+
+  // Verify per-frame translation varies as expected
+  const auto& loadedSkeleton = loadedCharacter.skeleton;
+  for (size_t f = 0; f < timeCodes.size(); ++f) {
+    const float expectedDelta = static_cast<float>(timeCodes[f]) * 0.1f;
+    const auto& rootTranslation = states[f].jointState[0].localTransform.translation;
+    EXPECT_NEAR(
+        rootTranslation.x() - loadedSkeleton.joints[0].translationOffset.x(), expectedDelta, 0.01f)
+        << "Translation delta mismatch at frame " << f;
+  }
 }
