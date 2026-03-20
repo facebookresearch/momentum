@@ -580,8 +580,15 @@ io_usd_public_headers = [
     "io/usd/usd_io.h",
 ]
 
+io_usd_private_headers = [
+    "io/usd/usd_mesh_io.h",
+    "io/usd/usd_skeleton_io.h",
+]
+
 io_usd_sources = [
     "io/usd/usd_io.cpp",
+    "io/usd/usd_mesh_io.cpp",
+    "io/usd/usd_skeleton_io.cpp",
 ]
 
 io_usd_test_sources = [

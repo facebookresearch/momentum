@@ -14,24 +14,15 @@
 #include "momentum/character/types.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
+#include "momentum/io/usd/usd_mesh_io.h"
+#include "momentum/io/usd/usd_skeleton_io.h"
 #include "momentum/math/mesh.h"
 
-#include <pxr/base/gf/matrix4d.h>
-#include <pxr/base/gf/vec3f.h>
 #include <pxr/base/tf/diagnosticMgr.h>
 #include <pxr/base/tf/errorMark.h>
-#include <pxr/base/vt/array.h>
 #include <pxr/pxr.h>
-#include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
-#include <pxr/usd/usdGeom/mesh.h>
-#include <pxr/usd/usdGeom/primvarsAPI.h>
-#include <pxr/usd/usdSkel/bindingAPI.h>
-#include <pxr/usd/usdSkel/cache.h>
 #include <pxr/usd/usdSkel/root.h>
-#include <pxr/usd/usdSkel/skeleton.h>
-#include <pxr/usd/usdSkel/skeletonQuery.h>
-#include <pxr/usd/usdSkel/skinningQuery.h>
 
 #include <tbb/global_control.h>
 
@@ -171,258 +162,6 @@ void initializeUsdWithSuppressedWarnings() {
   g_usdInitialized = true;
 }
 
-Eigen::Matrix4f toEigenMatrix4f(const GfMatrix4d& gfMatrix) {
-  return Eigen::Map<const Eigen::Matrix4d>(gfMatrix.GetArray()).cast<float>();
-}
-
-GfMatrix4d toGfMatrix4d(const Eigen::Matrix4f& eigenMatrix) {
-  GfMatrix4d gfMatrix{};
-  Eigen::Map<Eigen::Matrix4d>(gfMatrix.GetArray()) = eigenMatrix.cast<double>();
-  return gfMatrix;
-}
-
-/// Load skeleton from USD stage
-Skeleton loadSkeletonFromUsd(const UsdStageRefPtr& stage) {
-  Skeleton skeleton;
-
-  // Use USD Skeleton Cache for proper hierarchy handling
-  UsdSkelCache skelCache;
-
-  // Find skeleton prims
-  for (const auto& prim : stage->Traverse()) {
-    if (prim.IsA<UsdSkelSkeleton>()) {
-      UsdSkelSkeleton skelPrim(prim);
-
-      // Create skeleton query for proper data access
-      UsdSkelSkeletonQuery skelQuery = skelCache.GetSkelQuery(skelPrim);
-      if (!skelQuery) {
-        continue;
-      }
-
-      // Get joint names and topology
-      VtArray<TfToken> jointNames = skelQuery.GetJointOrder();
-      if (jointNames.empty()) {
-        continue;
-      }
-
-      skeleton.joints.reserve(jointNames.size());
-
-      // Build joint hierarchy using USD's topology
-      VtArray<int> topology = skelQuery.GetTopology().GetParentIndices();
-
-      for (size_t i = 0; i < jointNames.size(); ++i) {
-        Joint joint;
-        joint.name = jointNames[i].GetString();
-
-        // Set parent from topology
-        if (i < topology.size() && topology[i] >= 0) {
-          joint.parent = topology[i];
-        } else {
-          joint.parent = kInvalidIndex;
-        }
-
-        joint.preRotation = Eigen::Quaternionf::Identity();
-        joint.translationOffset = Eigen::Vector3f::Zero();
-
-        skeleton.joints.push_back(joint);
-      }
-
-      // Get bind transforms (rest pose)
-      VtArray<GfMatrix4d> bindTransforms;
-      if (skelQuery.GetJointWorldBindTransforms(&bindTransforms)) {
-        MT_CHECK(bindTransforms.size() == skeleton.joints.size());
-
-        for (size_t i = 0; i < bindTransforms.size(); ++i) {
-          auto matrix = toEigenMatrix4f(bindTransforms[i]);
-
-          // Extract translation
-          skeleton.joints[i].translationOffset = matrix.block<3, 1>(0, 3);
-
-          // Extract rotation (simplified - could be improved)
-          Eigen::Matrix3f rotMatrix = matrix.block<3, 3>(0, 0);
-          Eigen::Quaternionf quat(rotMatrix);
-          skeleton.joints[i].preRotation = quat.normalized();
-        }
-      }
-
-      break; // Use first skeleton found
-    }
-  }
-
-  return skeleton;
-}
-
-/// Load mesh from USD stage
-Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
-  Mesh mesh;
-
-  // Find mesh prims
-  for (const auto& prim : stage->Traverse()) {
-    if (prim.IsA<UsdGeomMesh>()) {
-      UsdGeomMesh meshPrim(prim);
-
-      // Get vertices
-      VtArray<GfVec3f> points;
-      if (meshPrim.GetPointsAttr().Get(&points)) {
-        mesh.vertices.reserve(points.size());
-        for (const auto& point : points) {
-          mesh.vertices.emplace_back(point[0], point[1], point[2]);
-        }
-      }
-
-      // Try to load vertex colors from primvars
-      UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
-
-      // Common color primvar names to check
-      std::vector<std::string> colorPrimvarNames = {
-          "displayColor", "Cd", "color", "vertexColor", "diffuseColor"};
-
-      for (const auto& colorName : colorPrimvarNames) {
-        UsdGeomPrimvar colorPrimvar = primvarsAPI.GetPrimvar(TfToken(colorName));
-        if (colorPrimvar && colorPrimvar.HasValue()) {
-          VtValue colorValue;
-          if (colorPrimvar.Get(&colorValue)) {
-            // Handle different color formats
-            if (colorValue.IsHolding<VtArray<GfVec3f>>()) {
-              VtArray<GfVec3f> colors = colorValue.Get<VtArray<GfVec3f>>();
-              if (colors.size() == points.size()) {
-                mesh.colors.reserve(colors.size());
-                for (const auto& color : colors) {
-                  mesh.colors.emplace_back(color[0], color[1], color[2]);
-                }
-                break; // Found valid colors, stop searching
-              }
-            } else if (colorValue.IsHolding<VtArray<GfVec4f>>()) {
-              VtArray<GfVec4f> colors = colorValue.Get<VtArray<GfVec4f>>();
-              if (colors.size() == points.size()) {
-                mesh.colors.reserve(colors.size());
-                for (const auto& color : colors) {
-                  mesh.colors.emplace_back(color[0], color[1], color[2]); // Ignore alpha
-                }
-                break; // Found valid colors, stop searching
-              }
-            }
-          }
-        }
-      }
-
-      // Get face vertex counts and indices
-      VtArray<int> faceVertexCounts;
-      VtArray<int> faceVertexIndices;
-
-      if (meshPrim.GetFaceVertexCountsAttr().Get(&faceVertexCounts) &&
-          meshPrim.GetFaceVertexIndicesAttr().Get(&faceVertexIndices)) {
-        // Check if all faces are triangles (most common case)
-        bool allTriangles = true;
-        for (int count : faceVertexCounts) {
-          if (count != 3) {
-            allTriangles = false;
-            break;
-          }
-        }
-
-        if (allTriangles && faceVertexIndices.size() == faceVertexCounts.size() * 3) {
-          // Fast path for triangulated meshes
-          mesh.faces.reserve(faceVertexCounts.size());
-          const int* indices = faceVertexIndices.cdata();
-          for (size_t i = 0; i < faceVertexCounts.size(); ++i) {
-            mesh.faces.emplace_back(indices[i * 3], indices[i * 3 + 1], indices[i * 3 + 2]);
-          }
-        } else {
-          // Handle mixed polygons (triangles and quads)
-          size_t indexOffset = 0;
-          for (int faceVertexCount : faceVertexCounts) {
-            if (faceVertexCount == 3) {
-              // Triangle
-              mesh.faces.emplace_back(
-                  faceVertexIndices[indexOffset],
-                  faceVertexIndices[indexOffset + 1],
-                  faceVertexIndices[indexOffset + 2]);
-            } else if (faceVertexCount == 4) {
-              // Quad - split into two triangles
-              mesh.faces.emplace_back(
-                  faceVertexIndices[indexOffset],
-                  faceVertexIndices[indexOffset + 1],
-                  faceVertexIndices[indexOffset + 2]);
-              mesh.faces.emplace_back(
-                  faceVertexIndices[indexOffset],
-                  faceVertexIndices[indexOffset + 2],
-                  faceVertexIndices[indexOffset + 3]);
-            }
-            // Skip faces with more than 4 vertices for now
-            indexOffset += faceVertexCount;
-          }
-        }
-      }
-
-      break; // Use first mesh found
-    }
-  }
-
-  return mesh;
-}
-
-/// Load skin weights from USD stage
-SkinWeights loadSkinWeightsFromUsd(const UsdStageRefPtr& stage, size_t numVertices) {
-  SkinWeights skinWeights;
-
-  // Initialize matrices with proper dimensions
-  skinWeights.index.resize(numVertices, kMaxSkinJoints);
-  skinWeights.weight.resize(numVertices, kMaxSkinJoints);
-
-  // Initialize with zeros
-  skinWeights.index.setZero();
-  skinWeights.weight.setZero();
-
-  // Find skinned mesh prims
-  for (const auto& prim : stage->Traverse()) {
-    if (prim.IsA<UsdGeomMesh>()) {
-      UsdGeomMesh meshPrim(prim);
-
-      // Check if mesh has skinning
-      UsdSkelBindingAPI bindingAPI(meshPrim.GetPrim());
-      if (bindingAPI) {
-        // Get joint indices and weights
-        VtArray<int> jointIndices;
-        VtArray<float> jointWeights;
-
-        if (bindingAPI.GetJointIndicesAttr().Get(&jointIndices) &&
-            bindingAPI.GetJointWeightsAttr().Get(&jointWeights)) {
-          // Determine influences per vertex from data size
-          if (!jointIndices.empty() && !jointWeights.empty() &&
-              jointIndices.size() == jointWeights.size()) {
-            const int influencesPerVertex = jointIndices.size() / numVertices;
-
-            if (influencesPerVertex > 0 &&
-                jointIndices.size() == numVertices * influencesPerVertex) {
-              for (size_t v = 0; v < numVertices; ++v) {
-                int validInfluences = 0;
-                for (int i = 0;
-                     i < influencesPerVertex && validInfluences < static_cast<int>(kMaxSkinJoints);
-                     ++i) {
-                  size_t idx = v * influencesPerVertex + i;
-                  int jointIndex = jointIndices[idx];
-                  float weight = jointWeights[idx];
-
-                  if (weight > 0.0f && jointIndex >= 0) {
-                    skinWeights.index(v, validInfluences) = static_cast<uint32_t>(jointIndex);
-                    skinWeights.weight(v, validInfluences) = weight;
-                    validInfluences++;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      break; // Use first skinned mesh found
-    }
-  }
-
-  return skinWeights;
-}
-
 Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
   Character character;
 
@@ -517,81 +256,16 @@ void saveUsd(const filesystem::path& filename, const Character& character) {
   auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
   auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
 
-  VtArray<TfToken> jointNames;
-  jointNames.reserve(character.skeleton.joints.size());
-  for (const auto& joint : character.skeleton.joints) {
-    jointNames.push_back(TfToken(joint.name));
-  }
-  skeleton.GetJointsAttr().Set(jointNames);
-
-  VtArray<GfMatrix4d> bindTransforms;
-  bindTransforms.reserve(character.skeleton.joints.size());
-  for (const auto& joint : character.skeleton.joints) {
-    Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
-    transform.block<3, 1>(0, 3) = joint.translationOffset;
-    bindTransforms.push_back(toGfMatrix4d(transform));
-  }
-  skeleton.GetBindTransformsAttr().Set(bindTransforms);
+  saveSkeletonToUsd(character.skeleton, skeleton);
 
   auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
 
-  VtArray<GfVec3f> points;
   if (character.mesh) {
-    points.reserve(character.mesh->vertices.size());
-    for (const auto& vertex : character.mesh->vertices) {
-      points.push_back(GfVec3f(vertex.x(), vertex.y(), vertex.z()));
-    }
-  }
-  mesh.GetPointsAttr().Set(points);
-
-  VtArray<int> faceVertexCounts;
-  VtArray<int> faceVertexIndices;
-
-  if (character.mesh) {
-    faceVertexCounts.reserve(character.mesh->faces.size());
-    faceVertexIndices.reserve(character.mesh->faces.size() * 3);
-
-    for (const auto& face : character.mesh->faces) {
-      faceVertexCounts.push_back(3);
-      faceVertexIndices.push_back(face.x());
-      faceVertexIndices.push_back(face.y());
-      faceVertexIndices.push_back(face.z());
-    }
+    saveMeshToUsd(*character.mesh, mesh);
   }
 
-  mesh.GetFaceVertexCountsAttr().Set(faceVertexCounts);
-  mesh.GetFaceVertexIndicesAttr().Set(faceVertexIndices);
-
-  if (character.skinWeights && character.skinWeights->index.rows() > 0) {
-    UsdSkelBindingAPI bindingAPI = UsdSkelBindingAPI::Apply(mesh.GetPrim());
-
-    bindingAPI.GetSkeletonRel().SetTargets({skeleton.GetPath()});
-
-    VtArray<int> jointIndices;
-    VtArray<float> jointWeights;
-
-    const int maxInfluences = 4;
-    const int numVertices = character.skinWeights->index.rows();
-    const int numJointsPerVertex =
-        std::min(maxInfluences, static_cast<int>(character.skinWeights->index.cols()));
-
-    jointIndices.reserve(numVertices * maxInfluences);
-    jointWeights.reserve(numVertices * maxInfluences);
-
-    for (int v = 0; v < numVertices; ++v) {
-      for (int i = 0; i < numJointsPerVertex; ++i) {
-        jointIndices.push_back(character.skinWeights->index(v, i));
-        jointWeights.push_back(character.skinWeights->weight(v, i));
-      }
-
-      for (int i = numJointsPerVertex; i < maxInfluences; ++i) {
-        jointIndices.push_back(0);
-        jointWeights.push_back(0.0f);
-      }
-    }
-
-    bindingAPI.GetJointIndicesAttr().Set(jointIndices);
-    bindingAPI.GetJointWeightsAttr().Set(jointWeights);
+  if (character.skinWeights) {
+    saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
   }
 
   stage->GetRootLayer()->Save();

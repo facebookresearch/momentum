@@ -507,6 +507,7 @@ if(MOMENTUM_BUILD_IO_USD)
   mt_library(
     NAME io_usd
     HEADERS_VARS io_usd_public_headers
+    PRIVATE_HEADERS_VARS io_usd_private_headers
     SOURCES_VARS io_usd_sources
     PUBLIC_LINK_LIBRARIES
       character
