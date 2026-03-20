@@ -49,8 +49,9 @@ T fromJson(const nlohmann::json& j) {
       const auto numRows = j.at(0).size();
       result.resize(numRows, numCols);
 
+      std::vector<typename T::Scalar> coef;
       for (int col_i = 0; col_i < numCols; ++col_i) {
-        std::vector<typename T::Scalar> coef = j[col_i];
+        coef = j[col_i];
         std::copy(coef.begin(), coef.end(), result.col(col_i).begin());
       }
     }
@@ -91,7 +92,6 @@ void parameterLimitsToJson(const Character& character, nlohmann::json& j);
 void parameterSetsToJson(const Character& character, nlohmann::json& j);
 void poseConstraintsToJson(const Character& character, nlohmann::json& j);
 void parameterTransformToJson(const Character& character, nlohmann::json& j);
-void mppcaToJson(const Character& character, nlohmann::json& j);
 
 // from json conversion functions
 ParameterLimits parameterLimitsFromJson(const Character& character, const nlohmann::json& j);
