@@ -8,6 +8,7 @@
 #include "momentum/io/usd/usd_mesh_io.h"
 
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec4f.h>
@@ -17,6 +18,7 @@
 #include <pxr/usd/usdSkel/bindingAPI.h>
 
 #include <algorithm>
+#include <string>
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -78,7 +80,7 @@ std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t
   return colors;
 }
 
-std::vector<Vector3i> loadFacesFromMeshPrim(const UsdGeomMesh& meshPrim) {
+std::vector<Vector3i> loadFacesFromMeshPrim(const UsdGeomMesh& meshPrim, size_t numPoints) {
   std::vector<Vector3i> faces;
   VtArray<int> faceVertexCounts;
   VtArray<int> faceVertexIndices;
@@ -87,6 +89,15 @@ std::vector<Vector3i> loadFacesFromMeshPrim(const UsdGeomMesh& meshPrim) {
       !meshPrim.GetFaceVertexIndicesAttr().Get(&faceVertexIndices)) {
     return faces;
   }
+
+  // Validate that faceVertexCounts and faceVertexIndices are consistent
+  // (e.g., sum of counts == indices length) before accessing indices.
+  std::string validationReason;
+  MT_THROW_IF(
+      !UsdGeomMesh::ValidateTopology(
+          faceVertexIndices, faceVertexCounts, numPoints, &validationReason),
+      "Invalid mesh topology: {}",
+      validationReason);
 
   const bool allTriangles = std::all_of(
       faceVertexCounts.cbegin(), faceVertexCounts.cend(), [](int count) { return count == 3; });
@@ -136,7 +147,7 @@ Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
     UsdGeomMesh meshPrim(prim);
     mesh.vertices = loadVerticesFromMeshPrim(meshPrim);
     mesh.colors = loadColorsFromMeshPrim(meshPrim, mesh.vertices.size());
-    mesh.faces = loadFacesFromMeshPrim(meshPrim);
+    mesh.faces = loadFacesFromMeshPrim(meshPrim, mesh.vertices.size());
     break; // Use first mesh found
   }
 
