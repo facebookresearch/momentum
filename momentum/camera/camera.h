@@ -28,8 +28,6 @@ namespace momentum {
 template <typename T>
 class IntrinsicsModelT {
  public:
-  /// Constructor for intrinsics model.
-  ///
   /// @param imageWidth Width of the image in pixels
   /// @param imageHeight Height of the image in pixels
   IntrinsicsModelT(int32_t imageWidth, int32_t imageHeight)
@@ -50,6 +48,9 @@ class IntrinsicsModelT {
   ///
   /// @param point 3D points in camera coordinate space
   /// @return Pair of projected 2D points and validity mask
+  ///
+  /// The returned 3D vector has the projected pixel coordinates (u, v) in the first two
+  /// components and preserves the input depth z in the third component.
   [[nodiscard]] virtual std::pair<Vector3P<T>, typename Packet<T>::MaskType> project(
       const Vector3P<T>& point) const = 0;
 
@@ -57,6 +58,9 @@ class IntrinsicsModelT {
   ///
   /// @param point 3D point in camera coordinate space
   /// @return Pair of projected 2D point and validity flag
+  ///
+  /// The returned 3D vector has the projected pixel coordinates (u, v) in the first two
+  /// components and preserves the input depth z in the third component.
   [[nodiscard]] virtual std::pair<Eigen::Vector3<T>, bool> project(
       const Eigen::Vector3<T>& point) const = 0;
 
@@ -65,10 +69,11 @@ class IntrinsicsModelT {
   /// @param point 3D point in camera coordinate space
   /// @return Tuple of (projected point, Jacobian matrix, valid flag)
   ///
-  /// The Jacobian is a 3x3 matrix where:
-  /// - Row 0: [du/dx, du/dy, du/dz]
-  /// - Row 1: [dv/dx, dv/dy, dv/dz]
-  /// - Row 2: [0, 0, 1] (for homogeneous coordinates)
+  /// The Jacobian is a 3x3 matrix where each row corresponds to derivatives of the
+  /// output components [u, v, z] with respect to input [x, y, z]:
+  /// - Row 0: [du/dx, du/dy, du/dz] - pixel x derivatives
+  /// - Row 1: [dv/dx, dv/dy, dv/dz] - pixel y derivatives
+  /// - Row 2: [0, 0, 1] - depth pass-through (dz/dz = 1)
   [[nodiscard]] virtual std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, 3>, bool> projectJacobian(
       const Eigen::Vector3<T>& point) const = 0;
 
@@ -141,9 +146,11 @@ class IntrinsicsModelT {
 
   /// Get all intrinsic parameters as a vector.
   ///
-  /// Parameter order is model-specific but consistent with setIntrinsicParameters().
-  ///
   /// @return Vector of intrinsic parameters
+  ///
+  /// Parameter ordering is model-specific (e.g., PinholeIntrinsicsModel returns [fx, fy, cx, cy],
+  /// OpenCVIntrinsicsModel returns [fx, fy, cx, cy, k1-k6, p1-p4]). The ordering is guaranteed
+  /// to match setIntrinsicParameters() and getParameterNames().
   [[nodiscard]] virtual Eigen::VectorX<T> getIntrinsicParameters() const = 0;
 
   /// Set all intrinsic parameters from a vector.
@@ -180,10 +187,12 @@ class IntrinsicsModelT {
   /// @param point 3D point in camera coordinate space
   /// @return Tuple of (projected point, Jacobian matrix [3 x numParams], valid flag)
   ///
-  /// The Jacobian is a 3xN matrix where N is the number of intrinsic parameters:
-  /// - Row 0: [du/d(param_i)] for each parameter
-  /// - Row 1: [dv/d(param_i)] for each parameter
-  /// - Row 2: [0, ...] (depth is unchanged by intrinsics)
+  /// The Jacobian is a 3xN matrix where N = numIntrinsicParameters(). Each column
+  /// corresponds to a parameter from getParameterNames(), and rows are derivatives of
+  /// output [u, v, z] with respect to that parameter:
+  /// - Row 0: [du/d(param_i)] - sensitivity of pixel x to each parameter
+  /// - Row 1: [dv/d(param_i)] - sensitivity of pixel y to each parameter
+  /// - Row 2: [0, ...] - depth unchanged by intrinsics
   [[nodiscard]] virtual std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, Eigen::Dynamic>, bool>
   projectIntrinsicsJacobian(const Eigen::Vector3<T>& point) const = 0;
 
@@ -197,16 +206,28 @@ class IntrinsicsModelT {
 ///
 /// This class encapsulates both the camera's intrinsic parameters (focal length,
 /// principal point, image dimensions) and extrinsic parameters (position and orientation).
+///
+/// Coordinate space conventions:
+/// - World space: arbitrary global coordinate system
+/// - Camera/eye space: origin at camera center, +Z forward (optical axis), +X right, +Y down
+/// - Image space: (u, v) pixel coordinates, (0, 0) at top-left corner
 template <typename T>
 class CameraT {
  public:
   /// Default constructor creates a camera with identity transform.
+  ///
+  /// Creates a VGA resolution (640x480) pinhole camera with a 50mm equivalent field of view
+  /// (focal length = 640 * 5.0/3.6 ≈ 888.9 pixels, which corresponds to ~40° horizontal FOV).
   CameraT();
 
   /// Constructor with intrinsics model and optional transform.
   ///
   /// @param intrinsicsModel Shared pointer to the camera's intrinsics model
   /// @param eyeFromWorld Transform from world space to camera/eye space (defaults to identity)
+  ///
+  /// The eyeFromWorld transform represents the camera pose: a point p_world in world space is
+  /// transformed to camera space as p_eye = eyeFromWorld * p_world. The inverse transform
+  /// worldFromEye() gives the camera's position and orientation in world space.
   explicit CameraT(
       std::shared_ptr<const IntrinsicsModelT<T>> intrinsicsModel,
       const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld =
@@ -274,6 +295,10 @@ class CameraT {
   /// @param target The target point to look at in world space
   /// @param up The up vector in world space (default is Y-up)
   /// @return A new camera with the updated transform
+  ///
+  /// The camera's +Z axis will point from position toward target. The up vector is used to
+  /// determine the camera's +X (right) direction via cross product. Due to image coordinate
+  /// convention (y-down), the up vector is negated internally to create the right-handed frame.
   [[nodiscard]] CameraT<T> lookAt(
       const Eigen::Vector3<T>& position,
       const Eigen::Vector3<T>& target = Eigen::Vector3<T>::Zero(),
@@ -387,8 +412,10 @@ class CameraT {
 
 /// OpenCV distortion parameters for camera lens distortion correction.
 ///
-/// These parameters follow the OpenCV camera calibration model and include
-/// both radial and tangential distortion coefficients.
+/// Distortion model: standard plumb bob with rational polynomial (k1-k6 radial,
+/// p1-p2 tangential, p3-p4 thin prism).
+///
+/// Reference: https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html
 template <typename T>
 struct OpenCVDistortionParametersT {
   T k1 = T(0); ///< First radial distortion coefficient
@@ -418,16 +445,18 @@ struct OpenCVFisheyeDistortionParametersT {
 
 /// OpenCVFisheyeIntrinsicsModel implements the OpenCV fisheye (equidistant) camera model.
 ///
+/// Reference: https://docs.opencv.org/4.x/db/d58/group__calib3d__fisheye.html
+///
 /// This model uses equidistant projection with the following formula:
 /// 1. Normalize: a = x/z, b = y/z
 /// 2. Compute angle: r = sqrt(a² + b²), θ = atan(r)
 /// 3. Apply distortion: θ_d = θ(1 + k1·θ² + k2·θ⁴ + k3·θ⁶ + k4·θ⁸)
-/// 4. Scale: x' = (θ_d/r)·a, y' = (θ_d/r)·b (handle r→0 singularity)
+/// 4. Scale: x' = (θ_d/r)·a, y' = (θ_d/r)·b (handle r→0 singularity at optical axis)
 /// 5. Apply intrinsics: u = fx·x' + cx, v = fy·y' + cy
 template <typename T>
 class OpenCVFisheyeIntrinsicsModelT : public IntrinsicsModelT<T> {
  public:
-  /// Constructor with optional distortion parameters.
+  /// OpenCV fisheye model with optional distortion.
   ///
   /// @param imageWidth Width of the image in pixels
   /// @param imageHeight Height of the image in pixels
@@ -511,11 +540,13 @@ class OpenCVFisheyeIntrinsicsModelT : public IntrinsicsModelT<T> {
 
   /// Get the maximum valid angle for projection in radians.
   ///
-  /// Points with angle from optical axis greater than this are marked invalid.
-  /// The default value is computed from the image bounds to reject points
-  /// that project outside the calibrated region.
+  /// Points with angle from optical axis greater than this are marked invalid during projection.
   ///
-  /// @return Maximum valid angle in radians (θ where tan(θ) = r)
+  /// @return Maximum valid angle in radians
+  ///
+  /// @post Default value is computed automatically from image bounds via Newton iteration to find
+  /// the θ such that the distorted projection reaches the farthest image corner. This ensures
+  /// points projecting outside the calibrated region are rejected.
   [[nodiscard]] T maxValidAngle() const;
 
   /// Set the maximum valid angle for projection in radians.
@@ -554,19 +585,19 @@ class OpenCVFisheyeIntrinsicsModelT : public IntrinsicsModelT<T> {
   T maxRSquared_; ///< Maximum valid r² = tan²(θ_max) for FOV validation
 };
 
-/// PinholeIntrinsicsModel implements a basic pinhole camera model.
+/// PinholeIntrinsicsModel implements a basic pinhole camera model without distortion.
 ///
-/// This model uses the following projection formula:
-/// x = fx * X/Z + cx
-/// y = fy * Y/Z + cy
+/// Projection formula:
+///   u = fx * X/Z + cx
+///   v = fy * Y/Z + cy
 ///
 /// Where:
 /// - (X, Y, Z) is the 3D point in camera coordinates
-/// - (x, y) is the projected 2D point in image coordinates
-/// - (fx, fy) are the focal lengths
-/// - (cx, cy) is the principal point
+/// - (u, v) is the projected 2D point in pixel coordinates
+/// - (fx, fy) are the focal lengths in pixels
+/// - (cx, cy) is the principal point in pixels
 ///
-/// Unlike the OpenCVIntrinsicsModel, this model does not include any distortion.
+/// This is the simplest camera model with no lens distortion.
 template <typename T>
 class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
  public:
@@ -651,21 +682,20 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
   T cy_;
 };
 
-/// OpenCVIntrinsicsModel implements the standard OpenCV camera model.
+/// OpenCVIntrinsicsModel implements the standard OpenCV camera model with lens distortion.
 ///
-/// This model uses the following projection formula:
-/// x = fx * X/Z + cx
-/// y = fy * Y/Z + cy
+/// Projection applies OpenCV's plumb bob distortion model (see OpenCVDistortionParametersT)
+/// before the pinhole projection:
+///   u = fx * X'/Z' + cx
+///   v = fy * Y'/Z' + cy
 ///
-/// Where:
-/// - (X, Y, Z) is the 3D point in camera coordinates
-/// - (x, y) is the projected 2D point in image coordinates
-/// - (fx, fy) are the focal lengths
-/// - (cx, cy) is the principal point
+/// Where (X', Y', Z') are distorted camera coordinates and (u, v) are pixel coordinates.
+///
+/// Reference: https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html
 template <typename T>
 class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
  public:
-  /// Constructor with optional distortion parameters.
+  /// OpenCV camera model with optional distortion.
   ///
   /// @param imageWidth Width of the image in pixels
   /// @param imageHeight Height of the image in pixels
